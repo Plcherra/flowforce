@@ -4,21 +4,21 @@
 Read this index and open only the feature file marked active.
 `PROJECT-STATUS.md` is the current status of the app.
 
-The 6 AM daily run opens the one row marked active. That row is System and Admin: [docs/features/system-admin.md](features/system-admin.md).
+The 6 AM daily run opens the one row marked active. That row is Theme rework: [docs/features/theme.md](features/theme.md), phases 23–24.
 
-When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. The handoff is Theme, then Languages, then Time Off. Do not skip a row.
+When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. After the theme rework, the handoff is System and Admin phase 8, then Tasks phases 25–30. Do not skip a row.
 
 ## Order
 
 | # | Feature | Status | File |
 | --- | --- | --- | --- |
-| 1 | Theme | done | [docs/features/theme.md](features/theme.md) |
-| 2 | Languages | done | [docs/features/languages.md](features/languages.md) |
-| 3 | Time Off, then remaining Tasks | done | [docs/features/time-off.md](features/time-off.md), then [docs/features/tasks.md](features/tasks.md) |
-| 4 | System and Admin | active | [docs/features/system-admin.md](features/system-admin.md) |
+| 1 | Production deploy | done | Commits `8687e0dc` and `791acae7` on `main`. Vercel production for `791acae7` completed. |
+| 2 | Theme rework | active | [docs/features/theme.md](features/theme.md) phases 23–24 |
+| 3 | System and Admin phase 8 | queued | [docs/features/system-admin.md](features/system-admin.md) |
+| 4 | Tasks 25–30 | queued | [docs/features/tasks.md](features/tasks.md) |
 | 5 | Operations | queued | [docs/features/forms-communication.md](features/forms-communication.md) |
 | 6 | Team | queued | Feature file not written yet |
-| 7 | Reports | queued | Feature file not written yet |
+| 7 | Reports | queued | Feature file not written yet. Pedro's proposed name for this section is Insights. |
 | 8 | Inventory | queued | [docs/features/inventory.md](features/inventory.md) |
 | 9 | Company onboarding | queued | Feature file not written yet |
 
@@ -26,21 +26,21 @@ Only one row is active. Do not start a later row while an earlier one is still o
 
 Shipped schedule work stays in [docs/features/schedule.md](features/schedule.md). Phases 1–25 are checked: time off policies `820802f`, repeating availability `5dca98d`, and the leadership grid `a9aa674`. Do not reopen those phases.
 
-### 1. Theme
+### 1. Production deploy
 
-Done. Every phase in `docs/features/theme.md` is checked.
+Done. The production build failed from `d51a7be6` because marketing illustrations called `useTranslation` inside a `lazy()` loader, so `/features` could not prerender. Release Gates also failed its plan count in `phase7_ai_observability.test.sql` (18 planned, 24 ran) once Docker could start, and the last run before the fix died pulling Supabase images. `8687e0dc` moves the hook into the illustration component. `791acae7` sets the plan to 24.
 
-### 2. Languages
+### 2. Theme rework
 
-Done. Every phase in `docs/features/languages.md` is checked. Time Off is done. System and Admin is the active row.
+Active. Phases 1–22 stay checked. Phases 23–24 separate the three themes: FlowForce is the white one, Light is a light blue tint or the old teal, and Dark is dark navy or near-black.
 
-### 3. Time Off, then remaining Tasks
+### 3. System and Admin phase 8
 
-Done. Time Off's 9 phases are checked. Tasks has no unchecked phase. Phases 9–12 stay skipped until their open questions are answered: "Next opening checklist or shift", "Recurring shift tasks", "AI draft tasks from form notes", and "Where the task-type level is edited". The pointer moves to System and Admin.
+Queued until the theme rework is checked. Phase 2 is answered: delete the Admin page, keep settings on the profile card, move Admin tools into the team directory, drop the duplicate reports, call the Reports section Insights, and remove the ADMIN bottom-nav group. Phases 3–7 stay checked.
 
-### 4. System and Admin
+### 4. Tasks 25–30
 
-Active. The 6 AM run starts here. Candidate phase 2 stays blocked until the owner marks keep or drop. The permission-grant phases start at phase 3. [docs/features/system-admin.md](features/system-admin.md)
+Queued until System and Admin phase 8 is checked. Phases 9–12 stay checked as skips. Pedro's answers are phases 25–30. Languages and Time Off stay done.
 
 ### 5. Operations
 

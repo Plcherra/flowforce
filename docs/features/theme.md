@@ -1,6 +1,6 @@
 # Theme
 
-Done. The roadmap marks Languages active. Every phase in this file is checked.
+Phases 1–22 are checked. Phases 23–24 are the rework Pedro asked for on 2026-10-22, because Light and FlowForce look the same. The roadmap opens this file again for those phases.
 
 ## Goal
 
@@ -423,9 +423,52 @@ Done when:
 
 Prove: `npm run typecheck`. A unit test is not required for the SQL. If the push did not run here, the phone step is the owner running that command.
 
+## Rework
+
+Pedro, 2026-10-22: FlowForce, Light, and Dark are not distinct. Light and FlowForce look identical. These decisions override Decisions 1 and 2 for surfaces only. Primary, secondary, accent, and status tokens stay as Decisions 1–3 locked them. Do not bring back a color picker.
+
+1. FlowForce is the white, clean signed-in look. Its `--background`, `--card`, and `--popover` stay the current white `:root` values.
+2. Light is visibly different from FlowForce. Tint `--background`, `--card`, and `--popover` a light blue (`210 40% 96%` for background, `210 40% 98%` for card and popover). If that tint is not obvious on a phone, use the old teal family instead (`174 40% 94%` background, `174 30% 97%` card and popover). Do not leave Light equal to FlowForce except for `--input`.
+3. Dark is a dark navy or near-black. `--background` lightness is at or below 11%. It is not a gray mid-tone and it is not the FlowForce white.
+
+### Phase 23 — Separate the three surfaces
+
+- [ ] Make Light and Dark look different from FlowForce.
+
+Rules:
+
+- Files: `app/globals.css` and `src/lib/theme/themeTokens.test.ts`.
+- Follow the Rework decisions. Do not change primary, secondary, accent, success, or warning.
+- Do not add a theme column or a color picker.
+
+Done when:
+
+- FlowForce background stays white.
+- Light background is not the FlowForce background.
+- Dark background is a dark navy or near-black, lightness at or below 11%.
+
+Prove: Extend `src/lib/theme/themeTokens.test.ts` so Light `--background` is not FlowForce `--background`, and Dark `--background` lightness is at or below 11%. Run it with the same jiti style as `scripts/test-tasks-page.mjs`.
+
+### Phase 24 — The switch still selects those surfaces
+
+- [ ] Keep FlowForce, Light, and Dark on the switch, each applying its own surface.
+
+Rules:
+
+- Files: `src/lib/theme/applyTheme.ts` and `src/lib/theme/applyTheme.test.ts`.
+- Do not add a fourth theme. FlowForce and Light still do not set the `dark` class. Dark still does.
+- Choosing Light must not leave the page on the FlowForce background.
+
+Done when:
+
+- The three names still round-trip through `localStorage` key `flowforce-theme`.
+- Light and FlowForce set different `data-theme` values.
+
+Prove: Extend `src/lib/theme/applyTheme.test.ts` for the three names and the `data-theme` each one sets. Run it with the jiti runner.
+
 ## Open questions
 
-None. Pedro answered on 2026-10-22: keep the blue he sees when signed in.
+None. Pedro answered on 2026-10-22: keep the blue he sees when signed in. The same day he split the three themes: FlowForce is the white one, Light is a blue tint or the old teal, and Dark is dark navy or near-black.
 
 ## Progress log
 
@@ -799,5 +842,15 @@ Phone steps for Pedro:
 5. If you can start a new company without disrupting the live workspace, finish setup. It should complete, and the new workspace should use the same blue.
 
 Blockers: none. The Supabase CLI had no access token, so `supabase db push` could not run. The migration was applied with the Supabase API. Remote history version `20261022112446` matches `supabase/migrations/20261022112446_drop_unused_theme_columns.sql`.
+
+Questions: none.
+
+### 2026-10-22 — Theme rework planned
+
+Shipped: phases 23 and 24 in this file. No app code. FlowForce stays the white signed-in look. Light gets a light blue tint, or the old teal if that tint is not obvious. Dark is dark navy or near-black. Primary blue stays.
+
+Proven: this file is the plan.
+
+Blockers: none. No migration.
 
 Questions: none.

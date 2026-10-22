@@ -1,16 +1,16 @@
 # System and Admin rework
 
-Active. The roadmap marks this file for the 6 AM run. Phases 3–7 are checked. The only unchecked phase is phase 2, and it stays blocked.
+Phases 1 and 3–7 are checked. Phase 2 is answered. Phase 8 is the Admin removal Pedro asked for on 2026-10-22. Do not start phase 8 until Theme phases 23–24 are checked.
 
-The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
+The first half is a review list. Phase 2 records Pedro's marks. Phase 8 is the product change, and it waits until Theme phases 23–24 are checked.
 
-The permission-grant plan is the second half. Those phases start now that this row is active in `docs/roadmap.md`.
+The permission-grant plan is the second half. Phases 3–7 are already checked. This file is queued until Theme phases 23–24 are checked.
 
 Settings the app actually renders live in `src/features/system/pages/SettingsPage.tsx`. The tabs are General, Security, Region, Notifications, AI, Integrations, and Billing. Phase 3 removed the Admin tab.
 
 ## Candidates
 
-Each row is a candidate for review. Nothing in this list is a decision to remove it. The permission-grant plan below decides the Admin tab and the Admin page. The other candidates stay unmarked.
+Each row is a candidate for review. Phase 2 marks candidate 6 for removal. Candidates 1–5 and 7–9 stay.
 
 1. Settings docs still describe `src/modules/system`. `docs/cleanup-progress.md` says that folder was moved to `src/features/system`. The stale docs are `docs/system-settings-architecture.md` and `docs/system-settings-hub.md`.
 2. Sidebar links in `src/data/navigationData.tsx` mix `/app/enhanced-scheduling` with bare paths such as `/tasks`, `/messages`, `/forms`, `/inventory`, `/settings`, and `/admin`. Canonical routes in `src/app-shell/navigation/moduleRouteInventory.json` are under `/app/...`. The bare paths work through redirects in `next.config.mjs`.
@@ -24,7 +24,7 @@ Each row is a candidate for review. Nothing in this list is a decision to remove
 
 ## Phases
 
-Candidate phase 2 stays blocked until the owner marks keep or drop. Do not change product code for the candidate list.
+Phase 2 is answered. Do not change product code until phase 8. Candidates 1–5 and 7–9 stay.
 
 ### Phase 1 — Candidate list
 
@@ -43,13 +43,23 @@ Prove: This file is the list. No product code changes in the commit that added i
 
 ### Phase 2 — Owner marks keep or drop
 
-- [ ] Blocked by Open question "Which candidates to remove". Skip this phase. Do not change product code.
+- [x] Record what Pedro wants removed.
 
-Prove: Skip. Do not add a test until the Open question "Which candidates to remove" is answered.
+Pedro, 2026-10-22:
+
+- Delete the Admin page entirely. App settings already live under the profile card in the header. Leave them there.
+- Move everything that is on Admin into the team directory. Each person sees only what their permissions allow: their own team, the whole store, vendors, invitations, and the rest of those tools.
+- Reports inside Admin duplicate the Reports section. Remove the Admin copies.
+- The Reports section needs a new name so it is not a second Reports. Proposed name: Insights. Use Insights for the section title and the bottom-nav short label.
+- Remove the ADMIN group from the bottom nav.
+
+Candidates 1–5 and 7–9 were not marked drop. They stay.
+
+Prove: This file records the marks. No product code in the commit that answered the question.
 
 ## Open questions
 
-- Which candidates to remove? The owner has not marked keep or drop on any row above.
+None. "Which candidates to remove" is answered above.
 
 ## Progress log
 
@@ -71,7 +81,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3–7 are checked.
+Phases 3–7 are checked. Phase 2 is answered. Phase 8 waits for the theme rework.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 
@@ -178,6 +188,28 @@ Done when:
 
 Prove: `src/features/roles/constants/primaryActionLabel.test.ts` returns Save changes when edit is on and Send request when edit is off. It does not return Send availability. Add the file to `scripts/test-product-roles-setup.mjs` and run it.
 
+### Phase 8 — Delete Admin and fold it into the directory
+
+- [ ] Remove the Admin page, the ADMIN bottom-nav group, and the duplicate reports.
+
+Rules:
+
+- Depends on Theme phases 23–24. Do not start this phase while those are unchecked.
+- Follow the Phase 2 marks. Do not add a permission list.
+- Delete the Admin page. Settings stay on the profile card in the header.
+- Move the remaining Admin tools into the team directory. A person sees own team, the whole store, vendors, or invitations only when the permission they already have allows it.
+- Remove report blocks that repeat the Reports section.
+- Rename that section to Insights, including the bottom-nav short label that is Admin's neighbor today.
+- Remove the ADMIN group from the bottom nav. Do not leave an Admin item or an Administration group.
+
+Done when:
+
+- There is no Admin page and no ADMIN group in the bottom nav.
+- Directory screens show only the tools the person's permissions allow.
+- The old Reports section is labeled Insights, and Admin no longer has a copy of it.
+
+Prove: Extend the navigation test so the bottom nav has no ADMIN group and no `/admin` href, and the reports group label is Insights. Run it with the existing navigation test runner.
+
 ## Permission plan progress
 
 ### 2026-10-22 — Permission grant plan
@@ -273,3 +305,13 @@ Phone steps for Pedro:
 Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration. Phases 3–7 are checked. This file stays active because phase 2 is still unchecked.
 
 Questions: Which candidates to remove? No new question.
+
+### 2026-10-22 — Phase 2 answered
+
+Shipped: Pedro's marks, in this file only. Delete the Admin page. Settings stay under the profile card in the header. Admin tools move into the team directory, and each person sees only what their permissions allow. Admin's report copies go away. The Reports section is proposed as Insights. The ADMIN group leaves the bottom nav. Phase 8 is that work, and it waits for Theme phases 23–24. Candidates 1–5 and 7–9 were not marked drop.
+
+Proven: this file is the record. No product code.
+
+Blockers: none for the decision. Phase 8 does not start during the theme rework.
+
+Questions: none.

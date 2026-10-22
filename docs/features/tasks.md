@@ -1,6 +1,6 @@
 # Tasks
 
-Queued until Time Off's 9 phases are checked. The remaining work is phases 9–12, and those stay skipped until their open questions are answered. Do not redo the checked phases. Do not open this file from a Theme or Languages run.
+Phases 1–24 are checked. Phases 9–12 were skipped; Pedro answered them on 2026-10-22, and the work is phases 25–30. Do not redo the checked phases. Do not open this file until System and Admin phase 8 is checked.
 
 This file is a manual review of the Tasks page, to decide what the final product will be from what we have now.
 
@@ -257,27 +257,27 @@ Prove: Unit test `src/features/tasks/utils/listIssues.test.ts`. Run it with `nod
 
 ### Phase 9 — Link a handover task to the next opening
 
-- [x] Blocked by Open question "Next opening checklist or shift". Skip this phase. Do not look up an opening checklist or a shift for a handover task.
+- [x] Skipped on 2026-10-21. Pedro answered this on 2026-10-22. The work is phase 28, not a redo of this skip.
 
-Prove: Skip. Do not add a test until the Open question "Next opening checklist or shift" is answered.
+Prove: The skip stands. Phase 28 is the implementation.
 
 ### Phase 10 — Recurring shift-task template
 
-- [x] Blocked by Open question "Recurring shift tasks". Skip this phase. Do not copy a task onto future shifts.
+- [x] Skipped on 2026-10-21. Pedro answered this on 2026-10-22. The work is phases 26 and 27.
 
-Prove: Skip. Do not add a test until the Open question "Recurring shift tasks" is answered.
+Prove: The skip stands. Phases 26 and 27 are the implementation.
 
 ### Phase 11 — AI draft tasks from form notes
 
-- [x] Blocked by Open question "AI draft tasks from form notes". Skip this phase. Do not call a model and do not insert a draft task from a note.
+- [x] Skipped on 2026-10-21. Pedro answered this on 2026-10-22. The work is phase 29.
 
-Prove: Skip. Do not add a test until the Open question "AI draft tasks from form notes" is answered.
+Prove: The skip stands. Phase 29 is the implementation.
 
 ### Phase 12 — Per-person Others, Self, or None
 
-- [x] Blocked by Open question "Where the task-type level is edited". Skip this phase. Do not add a second permission screen.
+- [x] Skipped on 2026-10-21. Pedro answered this on 2026-10-22. The work is phase 30. Do not add a second permission screen.
 
-Prove: Skip. Do not add a test until the Open question "Where the task-type level is edited" is answered.
+Prove: The skip stands. Phase 30 is the implementation.
 
 ## Follow-up
 
@@ -580,9 +580,119 @@ Done when:
 
 Prove: Unit test `src/features/roles/constants/permissionAccessTypes.test.ts`. Run it with `npm run test:product-roles`. Also run `npm run check:roles`.
 
+### Phase 25 — Checklists are forms for an area
+
+- [ ] Store opening, daily, and closing checklists as forms for an area.
+
+Rules:
+
+- Files: a new helper next to the forms feature, plus a unit test. Do not add a second forms model.
+- A checklist is a form. Each area has opening, daily, and closing. Cashier has cashier opening, cashier daily, and cashier closing. Supervisor has supervisor opening, supervisor daily, and supervisor closing.
+- Do not invent a checklist table when `forms` can hold the area and the slot.
+
+Done when:
+
+- Cashier and supervisor each have opening, daily, and closing form slots.
+- A form is addressed by area and slot, not by a new task type.
+
+Prove: Unit test the area-and-slot lookup. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 26 — A shift carries its three lists
+
+- [ ] Attach the role's opening, daily, and closing lists to that role's shift.
+
+Rules:
+
+- Depends on phase 25.
+- A cashier shift asks the cashier to complete the cashier opening, daily, and closing lists. A supervisor shift asks for the supervisor lists.
+- The lists are the forms from phase 25. Do not copy the form onto the shift as a second definition.
+
+Done when:
+
+- A cashier shift resolves to the three cashier lists.
+- A supervisor shift resolves to the three supervisor lists.
+
+Prove: Unit test the shift-to-lists lookup for cashier and supervisor. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 27 — Standalone tasks on a role's weekdays
+
+- [ ] Let a recurring task sit on a role's shift on chosen weekdays, and on no list.
+
+Rules:
+
+- Depends on phase 26.
+- Example: "Organize the US Foods delivery" is Monday, Wednesday, and Friday on the supervisor shift. It is not an item on opening, daily, or closing.
+- The store can rotate who does it. Front of house checks the receipt and the quality. Back of house organizes. The rotation is per store, not a global person.
+- A migration is allowed for the weekday and area assignment. The owner approves it during the phase.
+
+Done when:
+
+- The delivery task is on the supervisor shift Mon/Wed/Fri and on no checklist.
+- Front of house and back of house are two store-level assignments for that task.
+
+Prove: Unit test the weekday match and that the task has no list slot. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 28 — Closing notes show on the next opening list
+
+- [ ] Carry a closing note or exception onto the next opening person's list.
+
+Rules:
+
+- Depends on phase 26. This answers "Next opening checklist or shift".
+- A note or exception written on a closing list shows on the next opening list for that area. Examples: no coins in the drawer; cash taken with a receipt left; "catering order tomorrow 9am, X and Y already prepped, still need X and Y"; "egg salad expired, prep first".
+- The next opening person is the person on the next opening shift for that area, not a hardcoded user.
+
+Done when:
+
+- A closing note is visible on the next opening list.
+- A clean closing list adds nothing to the next opening list.
+
+Prove: Unit test one note carried forward and one clean close that carries nothing. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 29 — AI drafts the next shift's tasks from those notes
+
+- [ ] Draft tasks from the additional-information notes for the next shift.
+
+Rules:
+
+- Depends on phase 28. This answers "AI draft tasks from form notes".
+- The model reads the additional-information notes from phase 28 and drafts tasks for the next shift. It does not publish them as assigned work until a person accepts the draft.
+- Use the existing Grok path. Do not add a second provider.
+
+Done when:
+
+- A closing note produces a draft task aimed at the next shift.
+- A clean closing list produces no draft.
+
+Prove: Unit test the draft builder with a fake model response. Do not call the live model. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 30 — Task creation in the permission matrix
+
+- [ ] Put task creation in the existing matrix, with a grantable scope that can be revoked.
+
+Rules:
+
+- This answers "Where the task-type level is edited". Do not add a second permission screen. Use `src/features/roles` and the existing gates.
+- By default, level 1 can create tasks only for themselves. Level N can create tasks for level N-1.
+- The owner can grant a person the right to grant task creation, and can choose the target levels or the target users. Example: Marcus is level 4. The owner lets Marcus grant task creation. Marcus lets John, level 3, create tasks for level 3 or level 4 coworkers.
+- Both the default and a granted right can be revoked.
+- A migration is allowed for the grant scope. The owner approves it during the phase.
+
+Done when:
+
+- Level 1 defaults to self only. Level N defaults to level N-1.
+- A grant can name levels or people, and revoking it removes that extra right without changing the default for everyone else.
+
+Prove: Unit test the default scope and a grant that adds levels or users, then a revoke that removes only the grant. Run it with `npm run test:product-roles` and `npm run check:roles`.
+
 ## Open questions
 
-None. Owner answers 24, 25, and 26 record the three questions that were here.
+None. Owner answers 24, 25, and 26 record the earlier three. Pedro answered the phase 9–12 questions on 2026-10-22:
+
+- Next opening checklist or shift: a note or exception on a closing list shows on the next opening person's list. Phase 28.
+- Recurring shift tasks: the shift carries that role's opening, daily, and closing lists. A standalone task can sit on a role's shift on chosen weekdays and on no list. Phases 26 and 27.
+- AI draft tasks from form notes: the model drafts tasks from those additional-information notes for the next shift. Phase 29.
+- Where the task-type level is edited: task creation is in the existing permission matrix, with a grantable scope. Default and granted rights can both be revoked. Phase 30.
 
 ## Progress log
 
@@ -970,3 +1080,13 @@ Questions: none.
 Skipped. Time Off is done, so this run opened Tasks. Phases 9–12 are already checked as skipped, and their open questions are still unanswered. No unchecked Tasks phase remains. No product code.
 
 Questions: Phase 9 still needs "Next opening checklist or shift". Phase 10 still needs "Recurring shift tasks". Phase 11 still needs "AI draft tasks from form notes". Phase 12 still needs "Where the task-type level is edited".
+
+### 2026-10-22 — Phases 9–12 answered
+
+Shipped: phases 25–30 in this file. No product code. Checklists are forms per area: opening, daily, and closing, for cashier and for supervisor. A shift carries that role's three lists. A standalone task can sit on a role's shift on chosen weekdays and on no list, such as the US Foods delivery on Mon/Wed/Fri, rotating front of house and back of house by store. A closing note shows on the next opening person's list, and AI drafts tasks from those notes for the next shift. Task creation goes in the permission matrix: level 1 for themselves, level N for level N-1, with a grant the owner can give and that person can pass on, and both default and grant can be revoked.
+
+Proven: this file is the plan.
+
+Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
