@@ -1,6 +1,6 @@
 # Theme
 
-Active. The roadmap marks this file for the 6 AM run. When every phase here is checked, update `docs/roadmap.md`: this row becomes done, Languages becomes active, and the run opens [docs/features/languages.md](languages.md).
+Done. The roadmap marks Languages active. Every phase in this file is checked.
 
 ## Goal
 
