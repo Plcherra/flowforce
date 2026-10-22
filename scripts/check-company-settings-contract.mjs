@@ -50,27 +50,32 @@ assertIncludes(
 );
 
 for (const field of ["primary_color", "secondary_color"]) {
-  assertIncludes(
+  assertNotIncludes(
     useGeneralSettings,
     field,
-    `general settings save must propagate ${field} to companies`,
+    `general settings save must not write ${field}`,
+  );
+  assertNotIncludes(
+    normalizer,
+    field,
+    `settings normalizer must not read ${field}`,
   );
 }
 for (const field of ["primaryColor", "secondaryColor"]) {
-  assertIncludes(
+  assertNotIncludes(
     generalPanel,
     field,
-    `general settings UI must expose ${field} preview/edit controls`,
+    `general settings UI must not expose ${field}`,
   );
-  assertIncludes(
+  assertNotIncludes(
     useGeneralSettings,
     field,
-    `general settings save must persist ${field} to appearance settings`,
+    `general settings save must not persist ${field}`,
   );
-  assertIncludes(
+  assertNotIncludes(
     normalizer,
     field,
-    `settings normalizer must read ${field} from company configuration`,
+    `settings normalizer must not read ${field}`,
   );
 }
 

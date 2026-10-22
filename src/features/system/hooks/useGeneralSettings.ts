@@ -3,10 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { GeneralSettings } from "@/types/system-settings";
 import { showErrorToast, showSuccessToast } from "@/utils/errorHandler";
 import { setCompanyBrand } from "@/lib/theme/companyTheme";
-import {
-  buildGeneralAppearanceSave,
-  buildGeneralCompanyUpdate,
-} from "@/lib/theme/companySavePayload";
+import { buildGeneralCompanyUpdate } from "@/lib/theme/companySavePayload";
 import type { SystemSettingsHook } from "./useSystemSettings";
 
 type GeneralFormState = {
@@ -150,7 +147,6 @@ export function useGeneralSettings(source: SystemSettingsHook) {
           ...settings?.localization,
           timezone: company.timezone ?? settings?.localization.timezone,
         },
-        appearance: buildGeneralAppearanceSave(settings?.appearance),
       });
       setCompanyBrand({
         logoUrl: payload.logoUrl,
@@ -175,7 +171,6 @@ export function useGeneralSettings(source: SystemSettingsHook) {
     updateSettings,
     company,
     settings?.localization,
-    settings?.appearance,
     refresh,
   ]);
 

@@ -24,7 +24,6 @@ export const normalizeSystemSettingsRow = (
   integrations: normalizeIntegrations(row.integrations),
   appearance: {
     ...DEFAULT_APPEARANCE,
-    ...(row.appearance as SystemSettingsModel["appearance"]),
   },
   adminConfig: normalizeAdminConfig(row.admin_config, company),
   createdAt: row.created_at,

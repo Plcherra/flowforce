@@ -24,8 +24,6 @@ export const DEMO_COMPANY: Company = {
   website: "https://connectflow-demo.local",
   phone: "555-0000",
   logo_url: undefined,
-  primary_color: "#3b82f6",
-  secondary_color: "#1e40af",
   currency: "USD",
   template_id: null,
   template_name: null,
@@ -118,8 +116,6 @@ export interface Company {
   website?: string;
   phone?: string;
   logo_url?: string;
-  primary_color: string;
-  secondary_color: string;
   currency: string;
   template_id?: string;
   template_name?: string;

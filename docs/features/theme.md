@@ -404,7 +404,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 22 — Drop unused theme columns
 
-- [ ] Drop the color columns after nothing reads them.
+- [x] Drop the color columns after nothing reads them.
 
 Rules:
 
@@ -782,5 +782,22 @@ Phone steps for Pedro:
 5. Open position colors, a shift color, a rich-text color, and a post gradient. Those pickers should still show their own colors.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 22 Drop unused theme columns
+
+Shipped: `companies.primary_color`, `companies.secondary_color`, `company_settings.primary_color`, `company_settings.secondary_color`, and `system_settings.appearance` are dropped. The live appearance value held only the theme keys this feature stopped writing, so that column went too. `create_company_with_setup` is replaced from the 2026-10-22 body and no longer names the color columns. The company model no longer carries those fields. General settings no longer writes `appearance`. Both generated type files match the drop. The settings contract check now expects those fields to be absent. The save-payload guard and its test still name `primary_color` and `secondary_color` so a payload cannot send them. Older migrations still name the columns and were not edited.
+
+Proven: `npm run typecheck` passed. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. `node scripts/check-theme-colors.mjs` exited 0. `node scripts/check-company-settings-contract.mjs` exited 0. The company save payload test passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Settings, then General.
+2. The theme switch should still be FlowForce, Light, and Dark. There should still be no color field.
+3. Change the company name and save. Reload. The name should stick, and the blue should stay the signed-in blue.
+4. Switch to Dark, reload, then switch back to FlowForce. The choice should stay in this browser.
+5. If you can start a new company without disrupting the live workspace, finish setup. It should complete, and the new workspace should use the same blue.
+
+Blockers: none. The Supabase CLI had no access token, so `supabase db push` could not run. The migration was applied with the Supabase API. Remote history version `20261022112446` matches `supabase/migrations/20261022112446_drop_unused_theme_columns.sql`.
 
 Questions: none.

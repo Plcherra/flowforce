@@ -161,9 +161,6 @@ export function seedSystemSettings(company: Company | null) {
     },
     notifications: DEFAULT_NOTIFICATIONS,
     integrations: DEFAULT_INTEGRATIONS,
-    appearance: {
-      ...DEFAULT_APPEARANCE,
-    },
     admin_config: DEFAULT_ADMIN_CONFIG,
   };
 }

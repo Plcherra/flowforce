@@ -8,16 +8,7 @@ import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
 import { handleError } from "@/utils/errorHandler";
 import { buildCreateCompanyData } from "@/lib/theme/companySavePayload";
-import {
-  DEFAULT_ADMIN_CONFIG,
-  DEFAULT_APPEARANCE,
-  DEFAULT_GENERAL,
-  DEFAULT_INTEGRATIONS,
-  DEFAULT_LOCALIZATION,
-  DEFAULT_NOTIFICATIONS,
-  DEFAULT_SECURITY,
-  seedSystemSettings,
-} from "./systemSettingsDefaults";
+import { seedSystemSettings } from "./systemSettingsDefaults";
 import {
   normalizeSystemSettingsRow,
   type SystemSettingsRow,
@@ -34,7 +25,6 @@ const auditKeyMap: Record<string, keyof SystemSettingsModel> = {
   localization: "localization",
   notifications: "notifications",
   integrations: "integrations",
-  appearance: "appearance",
   admin_config: "adminConfig",
 };
 
@@ -234,8 +224,10 @@ export function useSystemSettings(
         throw new Error("Company context is required to update settings");
       }
 
+      const settingChanges: PartialUpdate = { ...changes };
+      delete settingChanges.appearance;
       const payload: PartialUpdate = {
-        ...changes,
+        ...settingChanges,
         updated_at: new Date().toISOString(),
       };
 
@@ -250,7 +242,7 @@ export function useSystemSettings(
         throw updateError;
       }
 
-      const auditChanges = filterAuditChanges(changes);
+      const auditChanges = filterAuditChanges(settingChanges);
       await logAuditEvent({
         action: AUDIT_ACTIONS.settingsUpdated,
         tableName: "system_settings",

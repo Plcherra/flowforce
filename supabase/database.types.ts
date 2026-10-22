@@ -616,9 +616,7 @@ export type Database = {
           owner_id: string | null
           phone: string | null
           positions: Json | null
-          primary_color: string | null
           registration_complete: boolean | null
-          secondary_color: string | null
           size: string | null
           slug: string
           stripe_customer_id: string | null
@@ -648,9 +646,7 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           positions?: Json | null
-          primary_color?: string | null
           registration_complete?: boolean | null
-          secondary_color?: string | null
           size?: string | null
           slug: string
           stripe_customer_id?: string | null
@@ -680,9 +676,7 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           positions?: Json | null
-          primary_color?: string | null
           registration_complete?: boolean | null
-          secondary_color?: string | null
           size?: string | null
           slug?: string
           stripe_customer_id?: string | null
@@ -843,8 +837,6 @@ export type Database = {
           created_at: string | null
           id: string
           logo_url: string | null
-          primary_color: string | null
-          secondary_color: string | null
           timezone: string | null
           updated_at: string | null
           working_hours: Json | null
@@ -855,8 +847,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           logo_url?: string | null
-          primary_color?: string | null
-          secondary_color?: string | null
           timezone?: string | null
           updated_at?: string | null
           working_hours?: Json | null
@@ -867,8 +857,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           logo_url?: string | null
-          primary_color?: string | null
-          secondary_color?: string | null
           timezone?: string | null
           updated_at?: string | null
           working_hours?: Json | null
@@ -5708,7 +5696,6 @@ export type Database = {
       system_settings: {
         Row: {
           admin_config: Json
-          appearance: Json
           company_id: string | null
           created_at: string
           general: Json
@@ -5721,7 +5708,6 @@ export type Database = {
         }
         Insert: {
           admin_config?: Json
-          appearance?: Json
           company_id?: string | null
           created_at?: string
           general?: Json
@@ -5734,7 +5720,6 @@ export type Database = {
         }
         Update: {
           admin_config?: Json
-          appearance?: Json
           company_id?: string | null
           created_at?: string
           general?: Json
