@@ -62,6 +62,9 @@
         "managePayments",
         "directory.view",
         "directory.manage",
+        "recognition.edit",
+        "onboarding.create",
+        "onboarding.delete",
         "inventory.view",
         "inventory.create",
         "inventory.edit",
@@ -131,6 +134,9 @@
         "ai.audit.view",
         "manageInventory",
         "directory.view",
+        "recognition.edit",
+        "onboarding.create",
+        "onboarding.delete",
         "inventory.view",
         "inventory.create",
         "inventory.edit",
@@ -335,9 +341,10 @@
           "admin.roles",
           "admin.permissions",
           "managePositions",
-          "directory.manage"
+          "directory.manage",
+          "recognition.edit"
         ],
-        "create_delete": ["manageUsers"]
+        "create_delete": ["manageUsers", "onboarding.create", "onboarding.delete"]
       }
     },
     {
@@ -362,6 +369,9 @@
       "schedule.edit",
       "viewTeamTasks",
       "directory.view",
+      "recognition.edit",
+      "onboarding.create",
+      "onboarding.delete",
       "tasks.shift.create_self",
       "tasks.shift.create_others",
       "tasks.checklist.create_self",

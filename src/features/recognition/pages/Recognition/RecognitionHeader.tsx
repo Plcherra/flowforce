@@ -9,6 +9,7 @@ interface RecognitionHeaderProps {
   totalRecognitions: number;
   onRefresh?: () => void;
   onSync?: () => void;
+  showSync?: boolean;
 }
 
 export function RecognitionHeader({
@@ -17,6 +18,7 @@ export function RecognitionHeader({
   totalRecognitions,
   onRefresh,
   onSync,
+  showSync = false,
 }: RecognitionHeaderProps) {
   const { t } = useTranslation();
   return (
@@ -39,10 +41,12 @@ export function RecognitionHeader({
           <RefreshCcw
             className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
           />{t("common.refresh")}</Button>
+        {showSync ? (
         <Button type="button" onClick={onSync} disabled={syncing}>
           <Sparkles
             className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`}
           />{t("recognition.syncAutomation")}</Button>
+        ) : null}
       </div>
     </header>
   );

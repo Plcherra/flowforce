@@ -327,6 +327,24 @@ export const PERMISSION_DEFINITIONS = [
     description: "Manage directory visibility and entries",
     category: "Directory",
   },
+  {
+    key: "recognition.edit",
+    label: "Recognition: Edit",
+    description: "Sync recognition automation",
+    category: "Directory",
+  },
+  {
+    key: "onboarding.create",
+    label: "Onboarding: Create",
+    description: "Create onboarding roles, positions, and sections",
+    category: "Directory",
+  },
+  {
+    key: "onboarding.delete",
+    label: "Onboarding: Delete",
+    description: "Delete onboarding roles, positions, and sections",
+    category: "Directory",
+  },
 
   // Inventory core
   {

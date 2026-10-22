@@ -36,6 +36,9 @@ const { runSettingsTabTests } = importTs(
 const { runPermissionGrantTests } = importTs(
   "../src/features/roles/constants/permissionGrant.test.ts",
 );
+const { runPageVersionTests } = importTs(
+  "../src/features/roles/constants/pageVersion.test.ts",
+);
 
 await runProductRolesSetupTests();
 runProductLevelTests();
@@ -46,6 +49,7 @@ runStaffInviteScheduleDefaultTests();
 runPermissionAccessTypeTests();
 runSettingsTabTests();
 runPermissionGrantTests();
+runPageVersionTests();
 console.log("productRolesSetup tests passed");
 console.log("productLevels tests passed");
 console.log("operatorBoxes tests passed");
@@ -55,3 +59,4 @@ console.log("staffInviteScheduleDefaults tests passed");
 console.log("permissionAccessTypes tests passed");
 console.log("settingsTabs tests passed");
 console.log("permissionGrant tests passed");
+console.log("pageVersion tests passed");

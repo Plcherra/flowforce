@@ -1,6 +1,6 @@
 # System and Admin rework
 
-Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 6.
+Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 7.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
@@ -71,7 +71,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3–5 are checked. Phase 6 is the next unchecked phase.
+This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3–6 are checked. Phase 7 is the next unchecked phase.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 
@@ -142,7 +142,7 @@ Prove: `src/features/roles/constants/permissionGrant.test.ts` covers the level 2
 
 ### Phase 6 — Pages render the permitted version
 
-- [ ] Render schedule, inventory, recognition, team leadership, onboarding, and certifications from permissions.
+- [x] Render schedule, inventory, recognition, team leadership, onboarding, and certifications from permissions.
 
 Rules:
 
@@ -238,5 +238,22 @@ Phone steps for Pedro:
 5. As an owner, grant the directory and the grant right to a staff person. That person can pass directory view and the grant right to someone else. A manager who can see the directory, but was not given the grant right, cannot pass it on.
 
 Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration. The grant right is the override key `directory.view.grant` on `user_permissions`. It is not a new registry key.
+
+Questions: Which candidates to remove? No new question.
+
+### 2026-10-22 — Phase 6 Pages render the permitted version
+
+Shipped: Schedule, inventory, recognition, team leadership, onboarding, and certifications take their version from permission keys. The hierarchy number is ignored. Schedule is the whole team when `viewTeamSchedules` and `schedule.view` are both on, draft only when `editSchedules` is on and create, edit, and delete are off, and create, edit, and delete follow only their own keys. Inventory uses `inventory.view`, `inventory.create`, `inventory.edit`, and `inventory.delete`. Recognition sync uses the new `recognition.edit` key. Onboarding create and delete use the new `onboarding.create` and `onboarding.delete` keys, and onboarding edit uses `managePositions`. Certifications has no create control, so it has no create key. Team leadership read is `directory.view`, create is `manageUsers`, and edit is `directory.manage`. New keys default on for level 2 and level 3, off for level 1, and on for the owner. The schedule screen uses this version instead of `isLeadershipLevel`. Recognition shows Sync automation only when `recognition.edit` is on.
+
+Proven: `src/features/roles/constants/pageVersion.test.ts` passed through `node scripts/test-product-roles-setup.mjs`. Team, draft, and create/edit/delete follow the schedule keys. One create key does not turn on edit or delete. Inventory, recognition, team leadership, onboarding, and certifications return the same version at hierarchy 1 and hierarchy 4. `npm run check:roles` passed with 74 registered permissions. `npm run check:i18n` printed 4628 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the TypeScript files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as a manager. Open Schedule. The team grid is available, and create and edit are available. Delete is not, because that key is off for a manager.
+2. Sign in as staff with no schedule grants. The team grid and draft tools stay off.
+3. As an owner, grant that staff person only `editSchedules`. Reload as that person. Draft tools are on. Create, edit, and delete stay off.
+4. Grant only `schedule.create`. Create is on. Edit and delete stay off, and draft-only mode is off.
+5. Open Recognition as staff. Sync automation is hidden. Open it as a manager. Sync automation is shown. Certifications still has refresh only.
+
+Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration.
 
 Questions: Which candidates to remove? No new question.

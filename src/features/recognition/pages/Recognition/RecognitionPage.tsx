@@ -8,6 +8,8 @@ import { RecognitionHeader } from "./RecognitionHeader";
 import { BadgeGrid, type BadgeCard } from "./BadgeGrid";
 import { RecognitionFeed } from "./RecognitionFeed";
 import { useTranslation } from "react-i18next";
+import { useCan } from "@/hooks/useCan";
+import { recognitionPageVersion } from "@/features/roles/constants/pageVersion";
 import { useRecognition } from "@/features/gamification/hooks/useRecognition";
 
 type BadgeBlueprint = {
@@ -80,6 +82,10 @@ export function RecognitionPage() {
   const { recognitions, loading, syncing, error, refresh, syncAutomation } =
     useRecognitions({ lookbackDays: 90 });
   const { earnedBadges } = useRecognition();
+  const { can } = useCan();
+  const version = recognitionPageVersion({
+    "recognition.edit": can("recognition.edit"),
+  });
   const badges = buildBadgeCards(recognitions);
 
   return (
@@ -92,6 +98,7 @@ export function RecognitionPage() {
         onSync={() => {
           void syncAutomation?.();
         }}
+        showSync={version.edit}
       />
 
       {error && (
