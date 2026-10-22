@@ -19,10 +19,16 @@ import { useUserPermissionOverrides } from "@/hooks/useUserPermissions";
 import { saveEmployeeAccess } from "@/features/employees/utils/saveEmployeeAccess";
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
 import { TaskCreateAccessSection } from "./TaskCreateAccessSection";
+import { ListIssueAccessSection } from "./ListIssueAccessSection";
 import {
   diffsForTaskCreateLevel,
   retainTaskCreateDiffs,
 } from "@/features/tasks/utils/taskCreateAccess";
+import {
+  diffsForListIssueGrant,
+  retainListIssueDiffs,
+  type ListIssueGrant,
+} from "@/features/tasks/utils/listIssueGather";
 import type { TaskCreateKind } from "@/features/roles/constants/taskCreateKeys";
 import type { TaskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import {
@@ -178,7 +184,14 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
     setDiffs({
       ...operatorVerbsToPermissionDiffs(level, classPermissions, next),
       ...retainTaskCreateDiffs(diffs),
+      ...retainListIssueDiffs(diffs),
     });
+    setHasChanges(true);
+  };
+
+  const handleListIssueChange = (grant: ListIssueGrant) => {
+    if (!canEditAccess) return;
+    setDiffs(diffsForListIssueGrant(classPermissions, diffs, grant));
     setHasChanges(true);
   };
 
@@ -288,12 +301,20 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {selectedRole ? (
-            <TaskCreateAccessSection
-              classPermissions={classPermissions}
-              diffs={diffs}
-              disabled={!canEditAccess}
-              onChange={handleTaskCreateChange}
-            />
+            <>
+              <TaskCreateAccessSection
+                classPermissions={classPermissions}
+                diffs={diffs}
+                disabled={!canEditAccess}
+                onChange={handleTaskCreateChange}
+              />
+              <ListIssueAccessSection
+                classPermissions={classPermissions}
+                diffs={diffs}
+                disabled={!canEditAccess}
+                onChange={handleListIssueChange}
+              />
+            </>
           ) : null}
           {selectedRole ? (
             <OperatorAccessGrid

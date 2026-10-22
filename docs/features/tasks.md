@@ -544,7 +544,7 @@ Prove: Unit test `src/features/tasks/utils/listIssueInsert.test.ts`. Run it with
 
 ### Phase 23 — Copilot gather
 
-- [ ] Gather the list issues for the owner, and for a person the owner grants act or read.
+- [x] Gather the list issues for the owner, and for a person the owner grants act or read.
 
 Rules:
 
@@ -927,5 +927,21 @@ Phone steps for Pedro:
 4. To try a missed list, put the form id in the shift's requirements under `list_form_ids`, schedule yourself, let the shift end, and open Tasks. The missed list should be a Checklist task for you.
 
 Blockers: none for this phase. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 23 Copilot gather
+
+Shipped: List issues gather on the Tasks page for the owner, and for a person granted Read or Act. Act can mark one done. Read cannot. No model is called. The employee card has List issues: None, Read, or Act. Those two keys are not in the class defaults, and turning an access box on or off does not reset them. A staff person can be granted one.
+
+Proven: Unit test `src/features/tasks/utils/listIssueGather.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the owner, read, act, and a person with neither. It passed. `npm run check:roles` passed. `npm run test:product-roles` passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as the owner and open Tasks. If a list issue exists, it should be listed under List issues, with Mark done.
+2. Open an employee's card, Access. List issues should offer None, Read, and Act.
+3. Set it to Read and save. Sign in as that person. They should see the list, without Mark done.
+4. Set it to Act. Mark done should be there, and tapping it should finish that task.
+
+Blockers: none for this phase.
 
 Questions: none.

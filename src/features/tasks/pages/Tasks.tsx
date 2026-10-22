@@ -35,6 +35,7 @@ import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExe
 import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
+import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -73,7 +74,7 @@ export default function Tasks() {
   });
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
   const { user } = useAuth();
-  const { tasks: tasksData, loading, error, refetchTasks } = useTasks();
+  const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
   const visibleTasks = useMemo(
     () =>
@@ -195,6 +196,12 @@ export default function Tasks() {
       </div>
 
       <ListIssueSync />
+      <ListIssueGather
+        tasks={tasks}
+        onMarkDone={(taskId) => {
+          void updateTask(taskId, { status: "completed" }).then(() => refetchTasks());
+        }}
+      />
 
       {!loading && error && (
         <Alert

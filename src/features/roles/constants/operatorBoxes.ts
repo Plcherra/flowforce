@@ -10,6 +10,7 @@ import {
   type PermissionKey,
 } from "@/lib/permissions/registry";
 import { isTaskCreatePermissionKey } from "./taskCreateKeys";
+import { isListIssuePermissionKey } from "./listIssueKeys";
 
 export const OPERATOR_VERBS = ["see", "edit", "create_delete"] as const;
 
@@ -102,7 +103,9 @@ export function grantableVerbKeys(
 ): PermissionKey[] {
   return area.verbs[verb].filter(
     (key) =>
-      !isTaskCreatePermissionKey(key) && permissionAllowedAtLevel(level, key),
+      !isTaskCreatePermissionKey(key) &&
+      !isListIssuePermissionKey(key) &&
+      permissionAllowedAtLevel(level, key),
   );
 }
 

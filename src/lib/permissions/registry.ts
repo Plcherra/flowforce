@@ -179,6 +179,18 @@ export const PERMISSION_DEFINITIONS = [
     description: "Create a custom task assigned to someone else",
     category: "Tasks",
   },
+  {
+    key: "tasks.list_issues.read",
+    label: "List issues: Read",
+    description: "Read the list issues gathered for the owner",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.list_issues.act",
+    label: "List issues: Act",
+    description: "Act on the list issues gathered for the owner",
+    category: "Tasks",
+  },
 
   // Expenses & Time Off
   {

@@ -93,6 +93,15 @@ export function runProductLevelTests() {
     assert.equal(permissionAllowedAtLevel("manager", key), true);
     assert.equal(permissionAllowedAtLevel("staff", key), true);
   }
+  for (const key of ["tasks.list_issues.read", "tasks.list_issues.act"] as const) {
+    assert.equal(permissionAllowedAtLevel("owner", key), true);
+    assert.equal(permissionAllowedAtLevel("admin", key), true);
+    assert.equal(permissionAllowedAtLevel("manager", key), true);
+    assert.equal(permissionAllowedAtLevel("staff", key), true);
+  }
+  const staffClass = cloneClassFromProductLevel("staff", "Barista");
+  assert.equal(staffClass.permissions["tasks.list_issues.read"], undefined);
+  assert.equal(staffClass.permissions["tasks.list_issues.act"], undefined);
   assert.equal(permissionAllowedAtLevel("staff", "approveTimeOff"), false);
   assert.equal(permissionAllowedAtLevel("staff", "billing.manage"), false);
 

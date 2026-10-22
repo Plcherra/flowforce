@@ -223,7 +223,7 @@
       "min_product_level": "staff",
       "owner_locked_verbs": [],
       "verbs": {
-        "see": ["viewTeamTasks"],
+        "see": ["viewTeamTasks", "tasks.list_issues.read"],
         "edit": [
           "editTasks",
           "approveFormSubmissions",
@@ -232,7 +232,8 @@
           "tasks.checklist.create_self",
           "tasks.checklist.create_others",
           "tasks.custom.create_self",
-          "tasks.custom.create_others"
+          "tasks.custom.create_others",
+          "tasks.list_issues.act"
         ],
         "create_delete": ["createForms", "manageForms"]
       }
@@ -363,7 +364,17 @@
       "tasks.checklist.create_self",
       "tasks.checklist.create_others",
       "tasks.custom.create_self",
-      "tasks.custom.create_others"
+      "tasks.custom.create_others",
+      "tasks.list_issues.read",
+      "tasks.list_issues.act"
+    ],
+    "manager": [
+      "tasks.list_issues.read",
+      "tasks.list_issues.act"
+    ],
+    "admin": [
+      "tasks.list_issues.read",
+      "tasks.list_issues.act"
     ]
   },
   "legacyAliases": {

@@ -46,6 +46,9 @@ const { runTaskPointsTotalTests } = importTs(
 const { runListIssueInsertTests } = importTs(
   "../src/features/tasks/utils/listIssueInsert.test.ts",
 );
+const { runListIssueGatherTests } = importTs(
+  "../src/features/tasks/utils/listIssueGather.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -59,4 +62,5 @@ runTaskCreateAccessTests();
 runListIssueTests();
 runTaskPointsTotalTests();
 runListIssueInsertTests();
+runListIssueGatherTests();
 console.log("tasks page tests passed");
