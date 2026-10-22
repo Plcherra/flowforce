@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,7 @@ export default function SectionCategoryGroup({
   onAddFromTemplate,
   canManageSections = false,
 }: SectionCategoryGroupProps) {
+  const { t } = useTranslation();
   const getCategoryTitle = (category: string) => {
     switch (category) {
       case "core":
@@ -119,18 +121,18 @@ export default function SectionCategoryGroup({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Section to {getCategoryTitle(category)}
+                {t("sections.addSectionTo")} {getCategoryTitle(category)}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               {onAddFromTemplate && (
                 <DropdownMenuItem onClick={() => onAddFromTemplate(category)}>
-                  Create from Template
+                  {t("sections.createFromTemplate")}
                 </DropdownMenuItem>
               )}
               {onAddSection && (
                 <DropdownMenuItem onClick={() => onAddSection(category)}>
-                  Create Custom Section
+                  {t("sections.createCustomSection")}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

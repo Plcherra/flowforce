@@ -326,7 +326,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 16 — Sections strings
 
-- [ ] Move Sections chrome into the six locales.
+- [x] Move Sections chrome into the six locales.
 
 Rules:
 
@@ -995,6 +995,22 @@ Phone steps for Pedro:
 1. Sign in at https://www.flowforce.uk and open Operations (`/app/operations`).
 2. Set your language to Français on Settings, then Region. Reload. The hub, IDEA steps (Identify, Diagnose, Execute, Assess), and empty states should be in French. An issue title someone typed stays as they wrote it.
 3. Open a compliance pack or the review queue if you can. Loading lines and buttons should follow the language. Switch to Español and check the same screens.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 16 Sections strings
+
+Shipped: Sections chrome under `src/features/sections` and `src/sections` now uses `useTranslation` and the `sections` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Calendar, Form, and Table, stay on those keys. Route paths such as `/sections/` stay the same in every language. Section names that people type stay as stored text. Default page titles that the checker read as `title` attributes now follow the viewer's language. Both directories are off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3322 keys for each locale and `hard-coded strings 1487`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/sections` and `src/sections`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk. Open a custom section if you have one, or Add section (`/app/add-section`) if you manage sections.
+2. Set your language to Deutsch on Settings, then Region. Reload. Section settings, page labels, and empty states should be in German. A section name someone typed stays as they wrote it. A path such as `/sections/` stays the same.
+3. Open the events calendar and meetings if they are in your navigation. Search boxes and empty states should follow the language. Switch to Español and check the same screens.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

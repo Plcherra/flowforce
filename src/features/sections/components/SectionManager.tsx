@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Filter } from "lucide-react";
@@ -29,6 +30,7 @@ export default function SectionManager({
   businessTemplate,
   isOnboarding = false,
 }: SectionManagerProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<
     "all" | "core" | "industry" | "custom" | "operations"
@@ -256,13 +258,13 @@ export default function SectionManager({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-lg font-semibold text-foreground">
-                Custom Sections
+                {t("onboarding.sections.customSections")}
               </h4>
               <Badge
                 variant="outline"
                 className="bg-secondary/10 text-secondary border-secondary/40"
               >
-                {customSections.length} Custom
+                {customSections.length} {t("common.custom")}
               </Badge>
             </div>
             <div className="grid gap-4">
@@ -331,10 +333,10 @@ export default function SectionManager({
         <div className="text-center py-12">
           <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">
-            No sections found
+            {t("sections.noSectionsFound")}
           </h3>
           <p className="text-muted-foreground">
-            Try adjusting your search or filter criteria
+            {t("sections.tryAdjustingYourSearchOrFilterCriteria")}
           </p>
         </div>
       )}

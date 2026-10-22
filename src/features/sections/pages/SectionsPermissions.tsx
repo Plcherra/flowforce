@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -28,6 +29,7 @@ import {
 } from "lucide-react";
 
 export default function SectionsPermissions() {
+  const { t } = useTranslation();
   const { can } = useCan();
   const { hasRole } = usePermissions();
   const navigate = useNavigate();
@@ -54,7 +56,7 @@ export default function SectionsPermissions() {
         <div className="text-center py-12">
           <Shield className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">
-            Access Denied
+            {t("common.accessDenied")}
           </h3>
           <p className="text-sm text-muted-foreground">
             You don&apos;t have permission to access sections and permissions
@@ -71,21 +73,20 @@ export default function SectionsPermissions() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              Sections & Access
+              {t("sections.sectionsAccess")}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage business templates, navigation sections, and role-based
-              access control
+              {t("sections.manageBusinessTemplatesNavigationSectionsAndRoleBasedAccessControl")}
             </p>
           </div>
           <div className="flex space-x-3">
             <Button variant="outline">
               <LayoutTemplate className="mr-2 h-4 w-4" />
-              Import Template
+              {t("sections.importTemplate")}
             </Button>
             <Button onClick={() => navigate("/app/add-section")}>
               <Plus className="mr-2 h-4 w-4" />
-              Create Custom Section
+              {t("sections.createCustomSection")}
             </Button>
           </div>
         </div>
@@ -96,9 +97,9 @@ export default function SectionsPermissions() {
 
         <Tabs defaultValue="sections" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="sections">Section Management</TabsTrigger>
-            <TabsTrigger value="roles">Role Configuration</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions Matrix</TabsTrigger>
+            <TabsTrigger value="sections">{t("sections.sectionManagement")}</TabsTrigger>
+            <TabsTrigger value="roles">{t("sections.roleConfiguration")}</TabsTrigger>
+            <TabsTrigger value="permissions">{t("sections.permissionsMatrix")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sections" className="space-y-6">
@@ -106,10 +107,10 @@ export default function SectionsPermissions() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Layers className="mr-2 h-5 w-5" />
-                  Section Management
+                  {t("sections.sectionManagement")}
                 </CardTitle>
                 <CardDescription>
-                  Configure which sections are available in your workspace
+                  {t("sections.configureWhichSectionsAreAvailableInYourWorkspace")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -121,7 +122,7 @@ export default function SectionsPermissions() {
                 <div className="mt-6 flex justify-end">
                   <Button onClick={handleSaveConfiguration}>
                     <Settings className="mr-2 h-4 w-4" />
-                    Save Configuration
+                    {t("sections.saveConfiguration")}
                   </Button>
                 </div>
               </CardContent>
@@ -133,10 +134,10 @@ export default function SectionsPermissions() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Users className="mr-2 h-5 w-5" />
-                  Role Configuration
+                  {t("sections.roleConfiguration")}
                 </CardTitle>
                 <CardDescription>
-                  Create and manage custom roles for your organization
+                  {t("sections.createAndManageCustomRolesForYourOrganization")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -154,16 +155,17 @@ export default function SectionsPermissions() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Shield className="mr-2 h-5 w-5" />
-                  Role-Based Access Control
+                  {t("sections.roleBasedAccessControl")}
                 </CardTitle>
                 <CardDescription>
-                  Configure what each role can access in the application
+                  {t("sections.configureWhatEachRoleCanAccessInTheApplication")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {["staff", "supervisor", "manager", "admin", "owner"].map(
-                    (role) => (
+                    (role) => {
+                      return (
                       <div key={role} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center space-x-3">
@@ -185,30 +187,30 @@ export default function SectionsPermissions() {
                               {role.replace("_", " ")}
                             </Badge>
                             <span className="font-medium capitalize">
-                              {role.replace("_", " ")} Permissions
+                              {role.replace("_", " ")} {t("registration.roles.permissions")}
                             </span>
                           </div>
                           <Button variant="outline" size="sm">
-                            Edit Permissions
+                            {t("sections.editPermissions")}
                           </Button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <h5 className="font-medium text-foreground mb-2">
-                              Core Features
+                              {t("sections.coreFeatures")}
                             </h5>
                             <div className="space-y-1 text-muted-foreground">
-                              <div>✓ Dashboard</div>
-                              <div>✓ Messages</div>
-                              <div>✓ Tasks</div>
-                              <div>✓ Profile</div>
+                              <div>{t("sections.dashboard")}</div>
+                              <div>{t("sections.messages")}</div>
+                              <div>{t("sections.tasks")}</div>
+                              <div>{t("sections.profile")}</div>
                             </div>
                           </div>
 
                           <div>
                             <h5 className="font-medium text-foreground mb-2">
-                              Management
+                              {t("inventory.management")}
                             </h5>
                             <div className="space-y-1 text-muted-foreground">
                               <div>
@@ -220,45 +222,46 @@ export default function SectionsPermissions() {
                                 ].includes(role)
                                   ? "✓"
                                   : "✗"}{" "}
-                                Team View
+                                {t("sections.teamView")}
                               </div>
                               <div>
                                 {["manager", "admin", "owner"].includes(role)
                                   ? "✓"
                                   : "✗"}{" "}
-                                Approve Requests
+                                {t("sections.approveRequests")}
                               </div>
                               <div>
                                 {["admin", "owner"].includes(role) ? "✓" : "✗"}{" "}
-                                User Management
+                                {t("navigation.userManagement")}
                               </div>
                             </div>
                           </div>
 
                           <div>
                             <h5 className="font-medium text-foreground mb-2">
-                              System
+                              {t("sections.system")}
                             </h5>
                             <div className="space-y-1 text-muted-foreground">
                               <div>
                                 {["manager", "admin", "owner"].includes(role)
                                   ? "✓"
                                   : "✗"}{" "}
-                                Analytics
+                                {t("common.analytics")}
                               </div>
                               <div>
                                 {["admin", "owner"].includes(role) ? "✓" : "✗"}{" "}
-                                Settings
+                                {t("common.settings")}
                               </div>
                               <div>
                                 {["admin", "owner"].includes(role) ? "✓" : "✗"}{" "}
-                                Templates
+                                {t("schedule.templates")}
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    ),
+                    );
+                    },
                   )}
                 </div>
               </CardContent>

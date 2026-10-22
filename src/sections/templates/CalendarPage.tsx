@@ -1,15 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 
 type Props = { title?: string; description?: string };
 
-export function CalendarPage({ title = "Calendar", description }: Props) {
+export function CalendarPage({ title, description }: Props) {
+  const { t } = useTranslation();
+  const pageTitle = title ?? t("common.calendar");
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
-          {title}
+          {pageTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>

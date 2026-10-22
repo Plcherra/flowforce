@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -93,6 +94,7 @@ export function CreateSectionDialog({
   onOpenChange,
   onSuccess,
 }: CreateSectionDialogProps) {
+  const { t } = useTranslation();
   const [isCreating, setIsCreating] = useState(false);
   const { createSection } = useCustomSections();
   const { toast } = useToast();
@@ -158,7 +160,7 @@ export function CreateSectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Custom Section</DialogTitle>
+          <DialogTitle>{t("sections.createCustomSection")}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -169,12 +171,13 @@ export function CreateSectionDialog({
             <FormField
               control={form.control}
               name="name"
-              render={({ field }) => (
+              render={({ field }) => {
+                return (
                 <FormItem>
-                  <FormLabel>Section Name</FormLabel>
+                  <FormLabel>{t("sections.sectionName")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="My Custom Section"
+                      placeholder={t("sections.myCustomSection")}
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
@@ -184,41 +187,45 @@ export function CreateSectionDialog({
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )}
+              );
+              }}
             />
 
             <FormField
               control={form.control}
               name="description"
-              render={({ field }) => (
+              render={({ field }) => {
+                return (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>{t("forms.descriptionOptional")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Brief description of this section"
+                      placeholder={t("sections.briefDescriptionOfThisSection")}
                       {...field}
                       rows={2}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )}
+              );
+              }}
             />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="category"
-                render={({ field }) => (
+                render={({ field }) => {
+                  return (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>{t("dashboard.category")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t("inventory.selectCategory")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -234,15 +241,17 @@ export function CreateSectionDialog({
                     </Select>
                     <FormMessage />
                   </FormItem>
-                )}
+                );
+                }}
               />
 
               <FormField
                 control={form.control}
                 name="icon"
-                render={({ field }) => (
+                render={({ field }) => {
+                  return (
                   <FormItem>
-                    <FormLabel>Icon</FormLabel>
+                    <FormLabel>{t("sections.icon")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -270,22 +279,25 @@ export function CreateSectionDialog({
                     </Select>
                     <FormMessage />
                   </FormItem>
-                )}
+                );
+                }}
               />
             </div>
 
             <FormField
               control={form.control}
               name="path"
-              render={({ field }) => (
+              render={({ field }) => {
+                return (
                 <FormItem>
-                  <FormLabel>URL Path</FormLabel>
+                  <FormLabel>{t("sections.urlPath")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="/my-section" {...field} />
+                    <Input placeholder={t("sections.mySection")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )}
+              );
+              }}
             />
 
             <div className="flex space-x-2 pt-4">
@@ -295,7 +307,7 @@ export function CreateSectionDialog({
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={isCreating} className="flex-1">
                 {isCreating ? "Creating..." : "Create Section"}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -47,6 +48,7 @@ export default function SectionCard({
   getSectionBadgeColor,
   onDelete,
 }: SectionCardProps) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const [showEditDialog, setShowEditDialog] = useState(false);
 
@@ -74,7 +76,7 @@ export default function SectionCard({
                     variant="outline"
                     className="text-xs bg-secondary/10 text-secondary border-secondary/40"
                   >
-                    Custom
+                    {t("common.custom")}
                   </Badge>
                 )}
               </div>
@@ -96,10 +98,10 @@ export default function SectionCard({
                     size="sm"
                     className="h-8 px-3 hover:bg-primary hover:text-primary-foreground"
                     onClick={() => setShowEditDialog(true)}
-                    title="Edit Section"
+                    title={t("sections.editSection")}
                   >
                     <Edit2 className="h-4 w-4 mr-1" />
-                    Edit
+                    {t("common.edit")}
                   </Button>
                 )}
                 <DropdownMenu>
@@ -112,7 +114,7 @@ export default function SectionCard({
                     {section.isCustom && (
                       <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                         <Edit2 className="h-4 w-4 mr-2" />
-                        Edit Section
+                        {t("sections.editSection")}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
@@ -121,7 +123,7 @@ export default function SectionCard({
                       }}
                     >
                       <Copy className="h-4 w-4 mr-2" />
-                      Duplicate Section
+                      {t("sections.duplicateSection")}
                     </DropdownMenuItem>
                     {onDelete && section.isCustom && (
                       <DropdownMenuItem
@@ -129,7 +131,7 @@ export default function SectionCard({
                         className="text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Section
+                        {t("sections.deleteSection")}
                       </DropdownMenuItem>
                     )}
                     {!section.isCustom && can("systemSettings") && (
@@ -139,7 +141,7 @@ export default function SectionCard({
                         }}
                       >
                         <Settings className="h-4 w-4 mr-2" />
-                        Section Settings
+                        {t("sections.sectionSettings")}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
@@ -160,7 +162,7 @@ export default function SectionCard({
         </CardDescription>
 
         <div className="text-xs text-muted-foreground">
-          <span>Path: {section.path}</span>
+          <span>{t("sections.path2")} {section.path}</span>
         </div>
       </CardContent>
 

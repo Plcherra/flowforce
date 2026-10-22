@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
   Card,
@@ -36,13 +37,14 @@ export interface SectionComponentDefinition {
 }
 
 function UpdatesFeedComponent() {
+  const { t } = useTranslation();
   const { updates, loading } = useCompanyUpdates();
   const { toggleLike } = useCompanyUpdateMutations();
   const displayed = useMemo(() => updates.slice(0, 5), [updates]);
 
   if (loading) {
     return (
-      <div className="text-sm text-muted-foreground">Loading updates...</div>
+      <div className="text-sm text-muted-foreground">{t("sections.loadingUpdates")}</div>
     );
   }
 
@@ -50,9 +52,9 @@ function UpdatesFeedComponent() {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">No updates yet</CardTitle>
+          <CardTitle className="text-base">{t("sections.noUpdatesYet")}</CardTitle>
           <CardDescription>
-            Publish your first update to keep everyone in the loop.
+            {t("sections.publishYourFirstUpdateToKeepEveryoneInTheLoop")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -61,7 +63,8 @@ function UpdatesFeedComponent() {
 
   return (
     <div className="space-y-4">
-      {displayed.map((update) => (
+      {displayed.map((update) => {
+        return (
         <Card key={update.id} className="shadow-sm">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -98,23 +101,25 @@ function UpdatesFeedComponent() {
                 👍 {update.likes ?? 0}
               </Button>
               <span className="text-xs text-muted-foreground">
-                {update.comments ?? 0} comments • {update.views ?? 0} views
+                {update.comments ?? 0} {t("sections.comments")} {update.views ?? 0} {t("sections.views")}
               </span>
             </div>
           </CardContent>
         </Card>
-      ))}
+      );
+      })}
     </div>
   );
 }
 
 function AnnouncementsBoardComponent() {
+  const { t } = useTranslation();
   const { announcements, loading } = useAnnouncements();
 
   if (loading) {
     return (
       <div className="text-sm text-muted-foreground">
-        Loading announcements...
+        {t("sections.loadingAnnouncements")}
       </div>
     );
   }
@@ -123,9 +128,9 @@ function AnnouncementsBoardComponent() {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">No announcements</CardTitle>
+          <CardTitle className="text-base">{t("sections.noAnnouncements")}</CardTitle>
           <CardDescription>
-            Publish announcements to highlight critical updates.
+            {t("sections.publishAnnouncementsToHighlightCriticalUpdates")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -173,13 +178,14 @@ function AnnouncementsBoardComponent() {
 }
 
 function EmployeeDirectoryComponent() {
+  const { t } = useTranslation();
   const { employees = [], loading } = useEmployees();
 
   const topEmployees = useMemo(() => employees.slice(0, 8), [employees]);
 
   if (loading) {
     return (
-      <div className="text-sm text-muted-foreground">Loading employees...</div>
+      <div className="text-sm text-muted-foreground">{t("schedule.loadingEmployees")}</div>
     );
   }
 
@@ -187,9 +193,9 @@ function EmployeeDirectoryComponent() {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">No employees found</CardTitle>
+          <CardTitle className="text-base">{t("sections.noEmployeesFound")}</CardTitle>
           <CardDescription>
-            Add team members to start building your directory.
+            {t("sections.addTeamMembersToStartBuildingYourDirectory")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -199,9 +205,9 @@ function EmployeeDirectoryComponent() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Team Directory</CardTitle>
+        <CardTitle className="text-lg">{t("sections.teamDirectory")}</CardTitle>
         <CardDescription>
-          Quick access to recently added teammates.
+          {t("sections.quickAccessToRecentlyAddedTeammates")}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
@@ -236,6 +242,7 @@ function EmployeeDirectoryComponent() {
 }
 
 function EventsSnapshotComponent() {
+  const { t } = useTranslation();
   const { events, loading } = useEvents();
   const upcoming = useMemo(
     () =>
@@ -248,7 +255,7 @@ function EventsSnapshotComponent() {
 
   if (loading) {
     return (
-      <div className="text-sm text-muted-foreground">Loading events...</div>
+      <div className="text-sm text-muted-foreground">{t("sections.loadingEvents")}</div>
     );
   }
 
@@ -256,9 +263,9 @@ function EventsSnapshotComponent() {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">No upcoming events</CardTitle>
+          <CardTitle className="text-base">{t("sections.noUpcomingEvents")}</CardTitle>
           <CardDescription>
-            Schedule an event to see it appear here.
+            {t("sections.scheduleAnEventToSeeItAppearHere")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -268,8 +275,8 @@ function EventsSnapshotComponent() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Upcoming Events</CardTitle>
-        <CardDescription>Next on the calendar for your team.</CardDescription>
+        <CardTitle className="text-lg">{t("sections.upcomingEvents")}</CardTitle>
+        <CardDescription>{t("sections.nextOnTheCalendarForYourTeam")}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <ScrollArea className="max-h-72">

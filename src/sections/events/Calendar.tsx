@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,13 +22,14 @@ function demoEvent() {
 }
 
 function EventsList() {
+  const { t } = useTranslation();
   const { events, createEvent } = useEvents();
 
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
         <div className="text-sm text-muted-foreground">
-          {events.length} events
+          {events.length} {t("sections.events")}
         </div>
         <button
           className="text-primary text-sm underline"
@@ -35,12 +37,12 @@ function EventsList() {
             await createEvent(demoEvent());
           }}
         >
-          Create demo event
+          {t("sections.createDemoEvent")}
         </button>
       </div>
 
       {events.length === 0 && (
-        <div className="text-sm text-muted-foreground">No upcoming events.</div>
+        <div className="text-sm text-muted-foreground">{t("sections.noUpcomingEvents2")}</div>
       )}
 
       {events.slice(0, 5).map((e) => (
@@ -61,6 +63,7 @@ function EventsList() {
 }
 
 export default function EventsCalendarPage() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
 
@@ -74,9 +77,9 @@ export default function EventsCalendarPage() {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold">Events</h1>
+                <h1 className="text-lg font-semibold">{t("common.events")}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Company events, meetings and shared calendar
+                  {t("sections.companyEventsMeetingsAndSharedCalendar")}
                 </p>
               </div>
             </div>
@@ -87,7 +90,7 @@ export default function EventsCalendarPage() {
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search events..."
+                  placeholder={t("sections.searchEvents")}
                   className="pl-10 w-56"
                 />
               </div>
@@ -105,7 +108,7 @@ export default function EventsCalendarPage() {
               <CardHeader className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4" />
-                  <h3 className="text-sm font-medium">Event Calendar</h3>
+                  <h3 className="text-sm font-medium">{t("sections.eventCalendar")}</h3>
                 </div>
               </CardHeader>
               <CardContent className="p-4">
@@ -119,7 +122,7 @@ export default function EventsCalendarPage() {
           <div className="space-y-4">
             <Card>
               <CardHeader className="px-4 py-3">
-                <h3 className="text-sm font-medium">Upcoming Events</h3>
+                <h3 className="text-sm font-medium">{t("sections.upcomingEvents")}</h3>
               </CardHeader>
               <CardContent className="p-4">
                 <EventsList />
@@ -128,17 +131,17 @@ export default function EventsCalendarPage() {
 
             <Card>
               <CardHeader className="px-4 py-3">
-                <h3 className="text-sm font-medium">Quick Actions</h3>
+                <h3 className="text-sm font-medium">{t("sections.quickActions")}</h3>
               </CardHeader>
               <CardContent className="p-4 space-y-2">
                 <Button variant="ghost" className="w-full justify-start">
-                  Create recurring event
+                  {t("sections.createRecurringEvent")}
                 </Button>
                 <Button variant="ghost" className="w-full justify-start">
-                  Import from Google Calendar
+                  {t("sections.importFromGoogleCalendar")}
                 </Button>
                 <Button variant="ghost" className="w-full justify-start">
-                  Export calendar
+                  {t("sections.exportCalendar")}
                 </Button>
               </CardContent>
             </Card>

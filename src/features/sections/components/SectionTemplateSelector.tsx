@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -57,6 +58,7 @@ export default function SectionTemplateSelector({
   onSelectTemplate,
   onCreateCustom,
 }: SectionTemplateSelectorProps) {
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const categories = Array.from(new Set(templates.map((t) => t.category)));
@@ -75,15 +77,14 @@ export default function SectionTemplateSelector({
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
-          Create Section
+          {t("sections.createSection")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Choose a Section Template</DialogTitle>
+          <DialogTitle>{t("sections.chooseASectionTemplate")}</DialogTitle>
           <DialogDescription>
-            Select a pre-built template to get started quickly, or create a
-            custom section from scratch
+            {t("sections.selectAPreBuiltTemplateToGetStartedQuicklyOrCreateACustomSectionFromScratch")}
           </DialogDescription>
         </DialogHeader>
 
@@ -95,7 +96,7 @@ export default function SectionTemplateSelector({
               size="sm"
               onClick={() => setSelectedCategory("all")}
             >
-              All
+              {t("schedule.all")}
             </Button>
             {categories.map((category) => (
               <Button
@@ -112,7 +113,8 @@ export default function SectionTemplateSelector({
 
           {/* Templates Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTemplates.map((template) => (
+            {filteredTemplates.map((template) => {
+              return (
               <Card
                 key={template.id}
                 className="cursor-pointer hover:shadow-md transition-shadow"
@@ -144,7 +146,7 @@ export default function SectionTemplateSelector({
                   {template.config?.features && (
                     <div className="mb-4">
                       <p className="text-xs font-medium text-muted-foreground mb-2">
-                        Features:
+                        {t("sections.features")}
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {template.config.features
@@ -160,7 +162,7 @@ export default function SectionTemplateSelector({
                           ))}
                         {template.config.features.length > 3 && (
                           <Badge variant="outline" className="text-xs">
-                            +{template.config.features.length - 3} more
+                            +{template.config.features.length - 3} {t("common.more")}
                           </Badge>
                         )}
                       </div>
@@ -172,23 +174,24 @@ export default function SectionTemplateSelector({
                     size="sm"
                     onClick={() => onSelectTemplate(template)}
                   >
-                    Use Template
+                    {t("sections.useTemplate")}
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+            );
+            })}
           </div>
 
           {/* Custom Section Option */}
           <Card className="border-dashed border-2">
             <CardContent className="flex flex-col items-center justify-center py-8">
               <Plus className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="font-medium mb-2">Create Custom Section</h3>
+              <h3 className="font-medium mb-2">{t("sections.createCustomSection")}</h3>
               <p className="text-sm text-muted-foreground text-center mb-4">
-                Build a section from scratch with your own configuration
+                {t("sections.buildASectionFromScratchWithYourOwnConfiguration")}
               </p>
               <Button variant="outline" onClick={onCreateCustom}>
-                Start from Scratch
+                {t("updates.startFromScratch")}
               </Button>
             </CardContent>
           </Card>

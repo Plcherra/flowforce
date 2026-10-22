@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Plus } from "lucide-react";
@@ -12,6 +13,7 @@ import { EditUpdateDialog } from "@/features/company-updates/components/EditUpda
 import type { CompanyUpdate } from "@/types/companyUpdates";
 
 export default function CompanyUpdatesSection() {
+  const { t } = useTranslation();
   const { can } = useCan();
   const [viewMode, setViewMode] = useState<"table" | "feed">("table");
   const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(
@@ -67,7 +69,7 @@ export default function CompanyUpdatesSection() {
       <div>
         <div className="min-h-screen bg-background">
           <div className="flex items-center justify-center py-12">
-            <div className="text-muted-foreground">Loading updates...</div>
+            <div className="text-muted-foreground">{t("sections.loadingUpdates")}</div>
           </div>
         </div>
       </div>
@@ -87,10 +89,10 @@ export default function CompanyUpdatesSection() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">
-                    Company Updates
+                    {t("common.companyUpdates")}
                   </h1>
                   <p className="text-muted-foreground mt-1">
-                    Stay informed with the latest company news and announcements
+                    {t("sections.stayInformedWithTheLatestCompanyNewsAndAnnouncements")}
                   </p>
                 </div>
               </div>
@@ -119,7 +121,7 @@ export default function CompanyUpdatesSection() {
                 {can("systemSettings") && (
                   <Button onClick={handleAddNew}>
                     <Plus className="h-4 w-4 mr-2" />
-                    New Update
+                    {t("sections.newUpdate")}
                   </Button>
                 )}
               </div>

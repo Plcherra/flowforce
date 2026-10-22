@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { CheckSquare, Square, Settings } from "lucide-react";
 import { useNavigate } from "@/lib/router-adapter";
@@ -14,6 +15,7 @@ export default function SectionActions({
   onDeselectAll,
   showManageLink = false,
 }: SectionActionsProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { can } = useCan();
 
@@ -21,11 +23,11 @@ export default function SectionActions({
     <div className="flex space-x-2">
       <Button variant="outline" size="sm" onClick={onSelectAll}>
         <CheckSquare className="h-4 w-4 mr-2" />
-        Select All
+        {t("onboarding.sections.selectAll")}
       </Button>
       <Button variant="outline" size="sm" onClick={onDeselectAll}>
         <Square className="h-4 w-4 mr-2" />
-        Deselect All
+        {t("onboarding.sections.deselectAll")}
       </Button>
       {showManageLink && can("systemSettings") && (
         <Button
@@ -34,7 +36,7 @@ export default function SectionActions({
           onClick={() => navigate("/sections-permissions")}
         >
           <Settings className="h-4 w-4 mr-2" />
-          Manage All Sections
+          {t("sections.manageAllSections")}
         </Button>
       )}
     </div>

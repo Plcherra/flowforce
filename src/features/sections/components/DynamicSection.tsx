@@ -1,4 +1,5 @@
-﻿import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import React, { useMemo, useState } from "react";
 import { useParams, Navigate, useNavigate } from "@/lib/router-adapter";
 import { useCustomSections } from "@/hooks/useCustomSections";
 import { LoadingSpinner } from "@/components/ui/loading-states";
@@ -275,6 +276,7 @@ function GenericSectionRenderer({
   onOpenWizard: () => void;
   onNavigateToPage: (page: SectionRecord) => void;
 }) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const navigate = useNavigate();
 
@@ -355,11 +357,11 @@ function GenericSectionRenderer({
                   onClick={() => navigate("/sections-permissions")}
                 >
                   <Settings className="h-4 w-4 mr-2" />
-                  Settings
+                  {t("common.settings")}
                 </Button>
                 <Button variant="outline" size="sm" onClick={onOpenWizard}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit Section
+                  {t("sections.editSection")}
                 </Button>
               </div>
             )}
@@ -415,7 +417,7 @@ function GenericSectionRenderer({
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Open this page to view its configured components.
+                      {t("sections.openThisPageToViewItsConfiguredComponents")}
                     </p>
                     <div className="flex justify-between items-center">
                       <Button
@@ -423,7 +425,7 @@ function GenericSectionRenderer({
                         size="sm"
                         onClick={() => onNavigateToPage(page)}
                       >
-                        View Page
+                        {t("sections.viewPage")}
                       </Button>
                       {can("systemSettings") && (
                         <Button
@@ -446,7 +448,7 @@ function GenericSectionRenderer({
               <div className="mx-auto mb-4 p-3 bg-primary/20 rounded-full w-fit">
                 <Plus className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle>No Content Yet</CardTitle>
+              <CardTitle>{t("sections.noContentYet")}</CardTitle>
               <CardDescription>
                 This section doesn&apos;t have any pages or content set up yet.
                 {can("systemSettings")
@@ -458,12 +460,11 @@ function GenericSectionRenderer({
               <CardContent className="text-center">
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Add pages, customize the layout, and configure content for
-                    this section.
+                    {t("sections.addPagesCustomizeTheLayoutAndConfigureContentForThisSection")}
                   </p>
                   <Button onClick={onOpenWizard}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Configure Section
+                    {t("sections.configureSection")}
                   </Button>
                 </div>
               </CardContent>
@@ -493,6 +494,7 @@ function SectionPageView({
   onBack: () => void;
   onOpenWizard: () => void;
 }) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const IconComponent =
     (page.icon &&
@@ -521,7 +523,7 @@ function SectionPageView({
                 className="px-2"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
+                {t("common.back")}
               </Button>
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-primary/20 border border-primary/30">
@@ -543,7 +545,7 @@ function SectionPageView({
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm" onClick={onOpenWizard}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Configure
+                  {t("sections.configure")}
                 </Button>
               </div>
             )}
@@ -563,16 +565,16 @@ function SectionPageView({
         ) : (
           <Card className="max-w-2xl">
             <CardHeader>
-              <CardTitle>This page has no components yet</CardTitle>
+              <CardTitle>{t("sections.thisPageHasNoComponentsYet")}</CardTitle>
               <CardDescription>
-                Configure the page to add interactive widgets and data sources.
+                {t("sections.configureThePageToAddInteractiveWidgetsAndDataSources")}
               </CardDescription>
             </CardHeader>
             {can("systemSettings") && (
               <CardContent>
                 <Button onClick={onOpenWizard}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Configure Page
+                  {t("sections.configurePage")}
                 </Button>
               </CardContent>
             )}

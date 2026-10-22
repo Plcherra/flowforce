@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ export function UpdatesTableView({
   onTogglePin,
   onAddNew,
 }: UpdatesTableViewProps) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("published");
@@ -124,7 +126,7 @@ export function UpdatesTableView({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search updates..."
+              placeholder={t("sections.searchUpdates")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 w-[300px]"
@@ -132,18 +134,18 @@ export function UpdatesTableView({
           </div>
           <Button variant="outline" size="sm">
             <Filter className="h-4 w-4 mr-2" />
-            Filter
+            {t("sections.filter")}
           </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
-            Export
+            {t("schedule.export")}
           </Button>
         </div>
 
         {can("systemSettings") && (
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            Add New
+            {t("sections.addNew")}
           </Button>
         )}
       </div>
@@ -168,12 +170,12 @@ export function UpdatesTableView({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead>Publish Date</TableHead>
+                  <TableHead>{t("schedule.title")}</TableHead>
+                  <TableHead>{t("schedule.type")}</TableHead>
+                  <TableHead>{t("tasks.priority")}</TableHead>
+                  <TableHead>{t("schedule.status")}</TableHead>
+                  <TableHead>{t("resources.details.author")}</TableHead>
+                  <TableHead>{t("sections.publishDate")}</TableHead>
                   <TableHead className="text-center">
                     <Heart className="h-4 w-4 mx-auto" />
                   </TableHead>
@@ -186,11 +188,12 @@ export function UpdatesTableView({
                   <TableHead className="text-center">
                     <Users className="h-4 w-4 mx-auto" />
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">{t("inventory.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUpdates.map((update) => (
+                {filteredUpdates.map((update) => {
+                  return (
                   <TableRow key={update.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -250,7 +253,7 @@ export function UpdatesTableView({
                                 onClick={() => onEdit?.(update)}
                               >
                                 <Edit className="h-4 w-4 mr-2" />
-                                Edit
+                                {t("common.edit")}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => onTogglePin?.(update.id)}
@@ -263,7 +266,7 @@ export function UpdatesTableView({
                                 onClick={() => onDelete?.(update.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
+                                {t("common.delete")}
                               </DropdownMenuItem>
                             </>
                           )}
@@ -271,14 +274,15 @@ export function UpdatesTableView({
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                );
+                })}
               </TableBody>
             </Table>
 
             {filteredUpdates.length === 0 && (
               <div className="text-center py-8">
                 <div className="text-muted-foreground">
-                  No updates found for the selected criteria.
+                  {t("sections.noUpdatesFoundForTheSelectedCriteria")}
                 </div>
               </div>
             )}

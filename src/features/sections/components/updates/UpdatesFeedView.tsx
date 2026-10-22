@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export function UpdatesFeedView({
   onView,
   loading = false,
 }: UpdatesFeedViewProps) {
+  const { t } = useTranslation();
   const {
     values: commentInputs,
     errors: commentErrors,
@@ -266,7 +268,7 @@ export function UpdatesFeedView({
                     <Heart
                       className={`h-4 w-4 mr-2 ${isLiked ? "fill-current" : ""}`}
                     />
-                    Like
+                    {t("updates.like")}
                   </Button>
                   <Button
                     variant="ghost"
@@ -274,7 +276,7 @@ export function UpdatesFeedView({
                     onClick={() => toggleComments(update.id)}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    Comment
+                    {t("updates.comment")}
                   </Button>
                 </div>
 
@@ -284,11 +286,11 @@ export function UpdatesFeedView({
                     {/* Comment Input */}
                     <div className="flex space-x-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback>You</AvatarFallback>
+                        <AvatarFallback>{t("schedule.you")}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 space-y-2">
                         <Textarea
-                          placeholder="Write a comment..."
+                          placeholder={t("updates.writeAComment")}
                           value={commentInputs[update.id] || ""}
                           onChange={(e) =>
                             handleCommentInputChange(update.id, e.target.value)
@@ -302,7 +304,7 @@ export function UpdatesFeedView({
                             onClick={() => handleComment(update.id)}
                             disabled={!commentInputs[update.id]?.trim()}
                           >
-                            Comment
+                            {t("updates.comment")}
                           </Button>
                         </div>
                         {commentErrors[update.id] && (
@@ -367,10 +369,10 @@ export function UpdatesFeedView({
             <span className="text-2xl">📢</span>
           </div>
           <h3 className="text-lg font-medium text-foreground mb-2">
-            No Updates Yet
+            {t("sections.noUpdatesYet2")}
           </h3>
           <p className="text-muted-foreground">
-            Company updates and announcements will appear here.
+            {t("sections.companyUpdatesAndAnnouncementsWillAppearHere")}
           </p>
         </div>
       )}

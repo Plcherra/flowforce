@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "@/lib/router-adapter";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ const slugify = (value: string) =>
     .replace(/-{2,}/g, "-") || "page";
 
 export default function AddSection() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isCreating, setIsCreating] = useState(false);
@@ -244,14 +246,14 @@ export default function AddSection() {
                   className="flex items-center space-x-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back</span>
+                  <span>{t("common.back")}</span>
                 </Button>
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">
-                    Add New Section
+                    {t("sections.addNewSection")}
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    Choose a template or create from scratch
+                    {t("sections.chooseATemplateOrCreateFromScratch")}
                   </p>
                 </div>
               </div>
@@ -262,7 +264,7 @@ export default function AddSection() {
                   className="flex items-center space-x-2"
                 >
                   <Settings className="h-4 w-4" />
-                  <span>Manage Sections</span>
+                  <span>{t("sections.manageSections")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -270,7 +272,7 @@ export default function AddSection() {
                   className="flex items-center space-x-2"
                 >
                   <Wand2 className="h-4 w-4" />
-                  <span>Create from Scratch</span>
+                  <span>{t("sections.createFromScratch")}</span>
                 </Button>
               </div>
             </div>
@@ -287,7 +289,8 @@ export default function AddSection() {
               ))}
             </TabsList>
 
-            {categories.map((category) => (
+            {categories.map((category) => {
+              return (
               <TabsContent
                 key={category.key}
                 value={category.key}
@@ -333,7 +336,7 @@ export default function AddSection() {
                           template.config.pages.length > 0 && (
                             <div className="mt-4">
                               <p className="text-xs font-medium text-muted-foreground mb-2">
-                                Includes:
+                                {t("sections.includes")}
                               </p>
                               <div className="flex flex-wrap gap-1">
                                 {template.config.pages
@@ -349,7 +352,7 @@ export default function AddSection() {
                                   ))}
                                 {template.config.pages.length > 3 && (
                                   <Badge variant="outline" className="text-xs">
-                                    +{template.config.pages.length - 3} more
+                                    +{template.config.pages.length - 3} {t("common.more")}
                                   </Badge>
                                 )}
                               </div>
@@ -374,19 +377,20 @@ export default function AddSection() {
                 {getTemplatesByCategory(category.key).length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">
-                      No templates available for this category yet.
+                      {t("sections.noTemplatesAvailableForThisCategoryYet")}
                     </p>
                     <Button
                       variant="outline"
                       className="mt-4"
                       onClick={() => setShowCustomDialog(true)}
                     >
-                      Create Custom Section
+                      {t("sections.createCustomSection")}
                     </Button>
                   </div>
                 )}
               </TabsContent>
-            ))}
+            );
+            })}
           </Tabs>
         </div>
 

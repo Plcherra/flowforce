@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import config from "./section.config";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,7 @@ function CalendarView({
   query: string;
   setQuery: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   const { events } = useEvents();
   const [current, setCurrent] = useState(() => startOfMonth(new Date()));
   const [view, setView] = useState<"day" | "week" | "month">("month");
@@ -103,7 +105,9 @@ function CalendarView({
   // responsive check: simple CSS breakpoint via effect only to set a mobile flag
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
+    const onResize = () => {
+      return setIsMobile(window.innerWidth < 768);
+    };
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -144,7 +148,7 @@ function CalendarView({
         <div className="grid grid-cols-[100px_1fr] gap-px bg-border rounded overflow-hidden">
           {/* Time labels column */}
           <div className="bg-muted/10 p-2" />
-          <div className="bg-muted/10 p-2">Day Agenda</div>
+          <div className="bg-muted/10 p-2">{t("sections.dayAgenda")}</div>
 
           {hours.map((h) => (
             <>
@@ -302,10 +306,10 @@ function CalendarView({
           </div>
           <div className="flex gap-2">
             <button onClick={prevMonth} className="px-2 py-1 rounded border">
-              Prev
+              {t("sections.prev")}
             </button>
             <button onClick={nextMonth} className="px-2 py-1 rounded border">
-              Next
+              {t("common.next")}
             </button>
           </div>
         </div>
@@ -325,7 +329,7 @@ function CalendarView({
             </div>
           ))}
           {list.length === 0 && (
-            <div className="text-sm text-muted-foreground">No events</div>
+            <div className="text-sm text-muted-foreground">{t("analytics.noEvents")}</div>
           )}
         </div>
       </div>
@@ -347,28 +351,28 @@ function CalendarView({
               onClick={() => setView("day")}
               className={`px-2 py-1 rounded ${view === "day" ? "bg-primary text-primary-foreground" : "border"}`}
             >
-              Day
+              {t("schedule.day")}
             </button>
             <button
               onClick={() => setView("week")}
               className={`px-2 py-1 rounded ${view === "week" ? "bg-primary text-primary-foreground" : "border"}`}
             >
-              Week
+              {t("schedule.week")}
             </button>
             <button
               onClick={() => setView("month")}
               className={`px-2 py-1 rounded ${view === "month" ? "bg-primary text-primary-foreground" : "border"}`}
             >
-              Month
+              {t("schedule.month")}
             </button>
           </div>
         </div>
         <div className="flex gap-2">
           <button onClick={prevMonth} className="px-3 py-1 rounded border">
-            Prev
+            {t("sections.prev")}
           </button>
           <button onClick={nextMonth} className="px-3 py-1 rounded border">
-            Next
+            {t("common.next")}
           </button>
         </div>
       </div>
@@ -384,7 +388,8 @@ function CalendarView({
             </div>
           ))}
 
-          {weeks.map((week, i) => (
+          {weeks.map((week, i) => {
+            return (
             <div key={i} className="contents">
               {week.map((day) => {
                 const inMonth = day.getMonth() === current.getMonth();
@@ -438,7 +443,7 @@ function CalendarView({
                       ))}
                       {dayEvents.length > 3 && (
                         <div className="text-xs text-muted-foreground">
-                          +{dayEvents.length - 3} more
+                          +{dayEvents.length - 3} {t("common.more")}
                         </div>
                       )}
                     </div>
@@ -446,7 +451,8 @@ function CalendarView({
                 );
               })}
             </div>
-          ))}
+          );
+          })}
         </div>
       ) : view === "week" ? (
         renderWeekView(current)
@@ -458,6 +464,7 @@ function CalendarView({
 }
 
 export default function EventsIndex() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const { createEvent } = useEvents();
 
@@ -493,7 +500,7 @@ export default function EventsIndex() {
             <CardContent className="pt-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <h2 className="text-lg font-medium">Meetings</h2>
+                  <h2 className="text-lg font-medium">{t("common.meetings")}</h2>
                   {/* removed unnecessary Events button */}
                 </div>
                 <div className="flex items-center gap-3">
@@ -501,7 +508,7 @@ export default function EventsIndex() {
                   <div className="relative w-full max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search events..."
+                      placeholder={t("sections.searchEvents")}
                       className="pl-10"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -509,11 +516,11 @@ export default function EventsIndex() {
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline">New meeting</Button>
+                      <Button variant="outline">{t("sections.newMeeting")}</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Create meeting</DialogTitle>
+                        <DialogTitle>{t("sections.createMeeting")}</DialogTitle>
                       </DialogHeader>
                       <EventForm onClose={() => {}} defaultType="meeting" />
                     </DialogContent>
@@ -530,7 +537,7 @@ export default function EventsIndex() {
               {/* Floating Add button */}
               <button
                 className="above-bottom-icon-nav fixed right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
-                aria-label="Add Event"
+                aria-label={t("sections.addEvent")}
                 onClick={() => {
                   handleQuickAdd();
                 }}
@@ -552,6 +559,7 @@ function EventForm({
   onClose: () => void;
   defaultType?: "event" | "meeting";
 }) {
+  const { t } = useTranslation();
   const { createEvent } = useEvents();
   const [title, setTitle] = useState("");
   const [start, setStart] = useState(new Date().toISOString().slice(0, 16));
@@ -578,11 +586,11 @@ function EventForm({
   return (
     <div className="space-y-3">
       <div>
-        <Label>Title</Label>
+        <Label>{t("schedule.title")}</Label>
         <UiInput value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div>
-        <Label>Start</Label>
+        <Label>{t("schedule.start")}</Label>
         <UiInput
           type="datetime-local"
           value={start}
@@ -590,7 +598,7 @@ function EventForm({
         />
       </div>
       <div>
-        <Label>End</Label>
+        <Label>{t("schedule.end")}</Label>
         <UiInput
           type="datetime-local"
           value={end}
@@ -598,40 +606,40 @@ function EventForm({
         />
       </div>
       <div>
-        <Label>Location</Label>
+        <Label>{t("forms.location")}</Label>
         <UiInput
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
       </div>
       <div>
-        <Label>Description</Label>
+        <Label>{t("tasks.description")}</Label>
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
       <div>
-        <Label>Type</Label>
+        <Label>{t("schedule.type")}</Label>
         <div className="flex items-center gap-2 mb-3">
           <button
             className={`px-2 py-1 rounded ${type === "event" ? "bg-primary text-primary-foreground" : "border"}`}
             onClick={() => setType("event")}
           >
-            Event
+            {t("dashboard.event")}
           </button>
           <button
             className={`px-2 py-1 rounded ${type === "meeting" ? "bg-primary text-primary-foreground" : "border"}`}
             onClick={() => setType("meeting")}
           >
-            Meeting
+            {t("sections.meeting")}
           </button>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button onClick={submit}>Create</Button>
+        <Button onClick={submit}>{t("tasks.create")}</Button>
         <Button variant="ghost" onClick={onClose}>
-          Cancel
+          {t("common.cancel")}
         </Button>
       </div>
     </div>
@@ -639,6 +647,7 @@ function EventForm({
 }
 
 function ImportEventsButton() {
+  const { t } = useTranslation();
   const { createEvent } = useEvents();
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -679,7 +688,7 @@ function ImportEventsButton() {
         className="hidden"
       />
       <span className="text-sm text-primary underline cursor-pointer">
-        Import CSV
+        {t("sections.importCsv")}
       </span>
     </label>
   );

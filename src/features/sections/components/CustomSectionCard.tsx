@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -32,6 +33,7 @@ export default function CustomSectionCard({
   onDelete,
   onDuplicate,
 }: CustomSectionCardProps) {
+  const { t } = useTranslation();
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   const handleEdit = () => {
@@ -79,7 +81,7 @@ export default function CustomSectionCard({
                     variant="outline"
                     className="text-xs bg-secondary/10 text-secondary border-secondary/40"
                   >
-                    Custom
+                    {t("common.custom")}
                   </Badge>
                   <Badge
                     variant="outline"
@@ -114,7 +116,7 @@ export default function CustomSectionCard({
 
         <div className="flex items-center justify-between">
           <div className="text-xs text-muted-foreground">
-            <span>Path: {section.path}</span>
+            <span>{t("sections.path2")} {section.path}</span>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -123,10 +125,10 @@ export default function CustomSectionCard({
               size="sm"
               className="h-8 px-3 hover:bg-primary hover:text-primary-foreground"
               onClick={handleEdit}
-              title="Edit Section"
+              title={t("sections.editSection")}
             >
               <Edit2 className="h-4 w-4 mr-1" />
-              Edit
+              {t("common.edit")}
             </Button>
 
             {onDuplicate && (
@@ -135,10 +137,10 @@ export default function CustomSectionCard({
                 size="sm"
                 className="h-8 px-3"
                 onClick={onDuplicate}
-                title="Duplicate Section"
+                title={t("sections.duplicateSection")}
               >
                 <Copy className="h-4 w-4 mr-1" />
-                Copy
+                {t("sections.copy")}
               </Button>
             )}
 
@@ -147,10 +149,10 @@ export default function CustomSectionCard({
               size="sm"
               className="h-8 px-3 hover:bg-destructive hover:text-destructive-foreground"
               onClick={handleDelete}
-              title="Delete Section"
+              title={t("sections.deleteSection")}
             >
               <Trash2 className="h-4 w-4 mr-1" />
-              Delete
+              {t("common.delete")}
             </Button>
           </div>
         </div>

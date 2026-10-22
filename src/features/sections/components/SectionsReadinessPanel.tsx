@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
   AlertTriangle,
@@ -29,6 +30,7 @@ const reviewTone: Record<string, string> = {
 export function SectionsReadinessPanel({
   onAddSection,
 }: SectionsReadinessPanelProps) {
+  const { t } = useTranslation();
   const { sections: customSections, loading } = useCustomSections();
   const summary = useMemo(
     () =>
@@ -77,13 +79,13 @@ export function SectionsReadinessPanel({
       <CardHeader className="space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="text-xl">Sections Readiness</CardTitle>
+            <CardTitle className="text-xl">{t("sections.sectionsReadiness")}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Custom pages, permissions, templates, and enabled modules are checked here.
+              {t("sections.customPagesPermissionsTemplatesAndEnabledModulesAreCheckedHere")}
             </p>
           </div>
           <Button type="button" onClick={onAddSection}>
-            Add Section
+            {t("sections.addSection")}
           </Button>
         </div>
       </CardHeader>
@@ -114,7 +116,7 @@ export function SectionsReadinessPanel({
         {summary.reviewItems.length > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Section review needed</AlertTitle>
+            <AlertTitle>{t("sections.sectionReviewNeeded")}</AlertTitle>
             <AlertDescription>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {summary.reviewItems.map((item) => (
@@ -136,7 +138,7 @@ export function SectionsReadinessPanel({
           </Alert>
         ) : (
           <div className="rounded-lg border border-success/40 bg-success-muted p-3 text-sm text-success">
-            Active custom sections have pages and permission coverage.
+            {t("sections.activeCustomSectionsHavePagesAndPermissionCoverage")}
           </div>
         )}
       </CardContent>

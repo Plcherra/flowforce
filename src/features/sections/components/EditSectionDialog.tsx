@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -45,6 +46,7 @@ export function EditSectionDialog({
   open,
   onOpenChange,
 }: EditSectionDialogProps) {
+  const { t } = useTranslation();
   const { updateSection, deleteSection } = useCustomSections();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -118,50 +120,50 @@ export function EditSectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit Section</DialogTitle>
+          <DialogTitle>{t("sections.editSection")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Section Name *</Label>
+            <Label htmlFor="name">{t("sections.sectionName2")}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter section name..."
+              placeholder={t("sections.enterSectionName2")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what this section does..."
+              placeholder={t("sections.describeWhatThisSectionDoes")}
               rows={3}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>{t("dashboard.category")}</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="core">Core</SelectItem>
-                  <SelectItem value="operations">Operations</SelectItem>
-                  <SelectItem value="industry">Industry</SelectItem>
-                  <SelectItem value="custom">Custom</SelectItem>
+                  <SelectItem value="core">{t("sections.core")}</SelectItem>
+                  <SelectItem value="operations">{t("navigation.operations")}</SelectItem>
+                  <SelectItem value="industry">{t("registration.companyInfo.industry")}</SelectItem>
+                  <SelectItem value="custom">{t("common.custom")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Icon</Label>
+              <Label>{t("sections.icon")}</Label>
               <Select value={icon} onValueChange={setIcon}>
                 <SelectTrigger>
                   <SelectValue />
@@ -178,12 +180,12 @@ export function EditSectionDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="path">Path *</Label>
+            <Label htmlFor="path">{t("sections.path")}</Label>
             <Input
               id="path"
               value={path}
               onChange={(e) => setPath(e.target.value)}
-              placeholder="/section-path"
+              placeholder={t("sections.sectionPath")}
               required
             />
           </div>
@@ -197,12 +199,12 @@ export function EditSectionDialog({
                   disabled={loading || deleteLoading}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Section
+                  {t("sections.deleteSection")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("sections.areYouSure")}</AlertDialogTitle>
                   <AlertDialogDescription>
                     This will permanently delete the &quot;{section.name}&quot; section
                     and all its data. This action cannot be undone.
@@ -210,7 +212,7 @@ export function EditSectionDialog({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={deleteLoading}>
-                    Cancel
+                    {t("common.cancel")}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
@@ -230,7 +232,7 @@ export function EditSectionDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={loading || deleteLoading}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 type="submit"

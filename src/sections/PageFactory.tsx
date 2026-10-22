@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { CalendarPage } from "./templates/CalendarPage";
 import { TablePage } from "./templates/TablePage";
@@ -13,6 +14,7 @@ export type PageMeta = {
 };
 
 export function PageFactory({ page }: { page: PageMeta }) {
+  const { t } = useTranslation();
   switch (page.type) {
     case "calendar":
       return <CalendarPage title={page.title} description={page.description} />;
@@ -24,7 +26,7 @@ export function PageFactory({ page }: { page: PageMeta }) {
     default:
       return (
         <div className="text-sm text-muted-foreground">
-          This page is a placeholder. Add components later.
+          {t("sections.thisPageIsAPlaceholderAddComponentsLater")}
         </div>
       );
   }

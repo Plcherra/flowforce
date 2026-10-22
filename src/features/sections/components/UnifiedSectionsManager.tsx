@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { AVAILABLE_SECTIONS } from "@/data/availableSections";
 import { useCustomSections } from "@/hooks/useCustomSections";
@@ -79,6 +80,7 @@ export function UnifiedSectionsManager({
   selectedSections,
   onSectionToggle,
 }: Props) {
+  const { t } = useTranslation();
   const { sections: customSections } = useCustomSections();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
@@ -124,11 +126,11 @@ export function UnifiedSectionsManager({
     <Card>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between">
-          <span>Sections</span>
+          <span>{t("common.sections")}</span>
           <div className="flex items-center gap-2">
             <Input
               className="w-56"
-              placeholder="Search sections..."
+              placeholder={t("sections.searchSections")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -141,20 +143,20 @@ export function UnifiedSectionsManager({
               }}
             >
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="All categories" />
+                <SelectValue placeholder={t("inventory.allCategories2")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="core">Core</SelectItem>
-                <SelectItem value="industry">Industry</SelectItem>
-                <SelectItem value="communication">Communication</SelectItem>
-                <SelectItem value="operations">Operations</SelectItem>
-                <SelectItem value="hr">HR</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value="all">{t("schedule.all")}</SelectItem>
+                <SelectItem value="core">{t("sections.core")}</SelectItem>
+                <SelectItem value="industry">{t("registration.companyInfo.industry")}</SelectItem>
+                <SelectItem value="communication">{t("navigation.communication")}</SelectItem>
+                <SelectItem value="operations">{t("navigation.operations")}</SelectItem>
+                <SelectItem value="hr">{t("sections.hr")}</SelectItem>
+                <SelectItem value="custom">{t("common.custom")}</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={() => navigate("/app/add-section")}>
-              Add New Section
+              {t("sections.addNewSection")}
             </Button>
           </div>
         </CardTitle>
@@ -192,7 +194,7 @@ export function UnifiedSectionsManager({
         })}
         {filtered.length === 0 && (
           <div className="text-sm text-muted-foreground text-center py-8">
-            No sections found
+            {t("sections.noSectionsFound")}
           </div>
         )}
       </CardContent>

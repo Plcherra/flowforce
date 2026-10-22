@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -16,11 +17,13 @@ type Props = {
 };
 
 export function TablePage({
-  title = "Table",
+  title,
   columns = ["Name", "Status", "Updated"],
   rows = [],
   description,
 }: Props) {
+  const { t } = useTranslation();
+  const pageTitle = title ?? t("analytics.table");
   const demo = rows.length === 0;
   const data = demo
     ? [
@@ -32,7 +35,7 @@ export function TablePage({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>{pageTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         {description && (

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
@@ -17,12 +18,13 @@ export default function SectionFilters({
   categoryFilter,
   onCategoryChange,
 }: SectionFiltersProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center space-x-4">
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search sections..."
+          placeholder={t("sections.searchSections")}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-10"
@@ -33,11 +35,11 @@ export default function SectionFilters({
         onValueChange={(value: any) => onCategoryChange(value)}
       >
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="core">Core</TabsTrigger>
-          <TabsTrigger value="operations">Operations</TabsTrigger>
-          <TabsTrigger value="industry">Industry</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
+          <TabsTrigger value="all">{t("schedule.all")}</TabsTrigger>
+          <TabsTrigger value="core">{t("sections.core")}</TabsTrigger>
+          <TabsTrigger value="operations">{t("navigation.operations")}</TabsTrigger>
+          <TabsTrigger value="industry">{t("registration.companyInfo.industry")}</TabsTrigger>
+          <TabsTrigger value="custom">{t("common.custom")}</TabsTrigger>
         </TabsList>
       </Tabs>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ function demoMeeting() {
 }
 
 export default function EventsMeetingsPage() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
 
@@ -38,9 +40,9 @@ export default function EventsMeetingsPage() {
                 <Video className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold">Meetings</h1>
+                <h1 className="text-lg font-semibold">{t("common.meetings")}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Upcoming and past meetings
+                  {t("sections.upcomingAndPastMeetings")}
                 </p>
               </div>
             </div>
@@ -51,17 +53,18 @@ export default function EventsMeetingsPage() {
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search meetings..."
+                  placeholder={t("sections.searchMeetings")}
                   className="pl-10 w-56"
                 />
               </div>
-              <Button size={isMobile ? "sm" : "default"}>New Meeting</Button>
+              <Button size={isMobile ? "sm" : "default"}>{t("sections.newMeeting2")}</Button>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          {filtered.map((m) => (
+          {filtered.map((m) => {
+            return (
             <Card key={m.id}>
               <CardHeader className="flex items-center justify-between px-4 py-3">
                 <div>
@@ -72,10 +75,10 @@ export default function EventsMeetingsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="sm">
-                    Join
+                    {t("sections.join")}
                   </Button>
                   <Button variant="ghost" size="sm">
-                    Details
+                    {t("schedule.details")}
                   </Button>
                 </div>
               </CardHeader>
@@ -85,20 +88,21 @@ export default function EventsMeetingsPage() {
                 </p>
               </CardContent>
             </Card>
-          ))}
+          );
+          })}
 
           {filtered.length === 0 && (
             <Card>
               <CardContent className="p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  No meetings found.
+                  {t("sections.noMeetingsFound")}
                 </p>
                 <div className="mt-3">
                   <button
                     className="text-primary underline text-sm"
                     onClick={async () => await createEvent(demoMeeting())}
                   >
-                    Create demo meeting
+                    {t("sections.createDemoMeeting")}
                   </button>
                 </div>
               </CardContent>

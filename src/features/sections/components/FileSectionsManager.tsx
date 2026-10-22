@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { sections as fileSections } from "@/sections/registry";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ const catColor: Record<string, string> = {
 };
 
 export function FileSectionsManager({ onCreate }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<
     "all" | "communication" | "operations" | "hr" | "custom"
@@ -47,32 +49,33 @@ export function FileSectionsManager({ onCreate }: Props) {
     <Card>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center justify-between">
-          <span>File-based Sections</span>
+          <span>{t("sections.fileBasedSections")}</span>
           <div className="flex gap-2">
             <Input
               className="w-56"
-              placeholder="Search sections..."
+              placeholder={t("sections.searchSections")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             <Select value={category} onValueChange={(v: any) => setCategory(v)}>
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="All categories" />
+                <SelectValue placeholder={t("inventory.allCategories2")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
-                <SelectItem value="communication">Communication</SelectItem>
-                <SelectItem value="operations">Operations</SelectItem>
-                <SelectItem value="hr">HR & People</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
+                <SelectItem value="all">{t("inventory.allCategories2")}</SelectItem>
+                <SelectItem value="communication">{t("navigation.communication")}</SelectItem>
+                <SelectItem value="operations">{t("navigation.operations")}</SelectItem>
+                <SelectItem value="hr">{t("sections.hrPeople")}</SelectItem>
+                <SelectItem value="custom">{t("common.custom")}</SelectItem>
               </SelectContent>
             </Select>
-            {onCreate && <Button onClick={onCreate}>Create Section</Button>}
+            {onCreate && <Button onClick={onCreate}>{t("sections.createSection")}</Button>}
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {filtered.map((s) => (
+        {filtered.map((s) => {
+          return (
           <div
             key={s.slug}
             className="flex items-center justify-between p-3 border rounded-lg"
@@ -84,7 +87,7 @@ export function FileSectionsManager({ onCreate }: Props) {
               <div>
                 <div className="font-medium">{s.title}</div>
                 <div className="text-xs text-muted-foreground">
-                  /sections/{s.slug} • Pages: {s.pages.length}
+                  {t("sections.sections")}{s.slug} {t("sections.pages")} {s.pages.length}
                 </div>
               </div>
             </div>
@@ -100,7 +103,7 @@ export function FileSectionsManager({ onCreate }: Props) {
                 size="sm"
                 onClick={() => window.open(`/sections/${s.slug}`, "_self")}
               >
-                <FolderOpen className="h-4 w-4 mr-1" /> View
+                <FolderOpen className="h-4 w-4 mr-1" /> {t("tasks.view")}
               </Button>
               <Button
                 variant="outline"
@@ -109,24 +112,25 @@ export function FileSectionsManager({ onCreate }: Props) {
                   navigator.clipboard.writeText(`npm run gen:section ${s.slug}`)
                 }
               >
-                <Copy className="h-4 w-4 mr-1" /> Copy
+                <Copy className="h-4 w-4 mr-1" /> {t("sections.copy")}
               </Button>
               <Button variant="outline" size="sm">
-                <Edit2 className="h-4 w-4 mr-1" /> Edit
+                <Edit2 className="h-4 w-4 mr-1" /> {t("common.edit")}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 className="hover:bg-destructive hover:text-destructive-foreground"
               >
-                <Trash2 className="h-4 w-4 mr-1" /> Delete
+                <Trash2 className="h-4 w-4 mr-1" /> {t("common.delete")}
               </Button>
             </div>
           </div>
-        ))}
+        );
+        })}
         {filtered.length === 0 && (
           <div className="text-sm text-muted-foreground text-center py-8">
-            No sections found
+            {t("sections.noSectionsFound")}
           </div>
         )}
       </CardContent>

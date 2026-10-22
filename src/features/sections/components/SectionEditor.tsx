@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -114,6 +115,7 @@ export default function SectionEditor({
   onClose,
   onSave,
 }: SectionEditorProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<Partial<CustomSection>>({
     name: "",
     description: "",
@@ -221,7 +223,7 @@ export default function SectionEditor({
                 : "Create Custom Section"}
           </DialogTitle>
           <DialogDescription>
-            Configure your section settings, pages, and permissions
+            {t("sections.configureYourSectionSettingsPagesAndPermissions")}
           </DialogDescription>
         </DialogHeader>
 
@@ -229,22 +231,22 @@ export default function SectionEditor({
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Basic Information</CardTitle>
+              <CardTitle className="text-lg">{t("updates.basicInformation")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Section Name *</Label>
+                  <Label>{t("sections.sectionName2")}</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="e.g., Customer Management"
+                    placeholder={t("sections.eGCustomerManagement")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Category</Label>
+                  <Label>{t("dashboard.category")}</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value) =>
@@ -266,30 +268,30 @@ export default function SectionEditor({
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("tasks.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="Describe what this section is for..."
+                  placeholder={t("sections.describeWhatThisSectionIsFor2")}
                   rows={2}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Path *</Label>
+                  <Label>{t("sections.path")}</Label>
                   <Input
                     value={formData.path}
                     onChange={(e) =>
                       setFormData({ ...formData, path: e.target.value })
                     }
-                    placeholder="/custom-section"
+                    placeholder={t("sections.customSection")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Icon</Label>
+                  <Label>{t("sections.icon")}</Label>
                   <div className="grid grid-cols-6 gap-2">
                     {Object.keys(iconOptions).map((iconName) => (
                       <Button
@@ -315,9 +317,9 @@ export default function SectionEditor({
           {/* Permissions */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Permissions</CardTitle>
+              <CardTitle className="text-lg">{t("registration.roles.permissions")}</CardTitle>
               <CardDescription>
-                Select the permissions required to access this section
+                {t("sections.selectThePermissionsRequiredToAccessThisSection")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -347,25 +349,26 @@ export default function SectionEditor({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">Pages</CardTitle>
+                  <CardTitle className="text-lg">{t("sections.pages2")}</CardTitle>
                   <CardDescription>
-                    Configure the pages within this section
+                    {t("sections.configureThePagesWithinThisSection")}
                   </CardDescription>
                 </div>
                 <Button size="sm" onClick={addPage}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Page
+                  {t("sections.addPage")}
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {pages.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
-                  No pages yet. Add a page to get started.
+                  {t("sections.noPagesYetAddAPageToGetStarted")}
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {pages.map((page, index) => (
+                  {pages.map((page, index) => {
+                    return (
                     <div key={index} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -388,14 +391,14 @@ export default function SectionEditor({
                           onChange={(e) =>
                             updatePage(index, { name: e.target.value })
                           }
-                          placeholder="Page name"
+                          placeholder={t("sections.pageName")}
                         />
                         <Input
                           value={page.route}
                           onChange={(e) =>
                             updatePage(index, { route: e.target.value })
                           }
-                          placeholder="Route path"
+                          placeholder={t("sections.routePath")}
                         />
                       </div>
 
@@ -404,12 +407,13 @@ export default function SectionEditor({
                         onChange={(e) =>
                           updatePage(index, { description: e.target.value })
                         }
-                        placeholder="Page description"
+                        placeholder={t("sections.pageDescription")}
                         rows={2}
                         className="mt-3"
                       />
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               )}
             </CardContent>
@@ -418,7 +422,7 @@ export default function SectionEditor({
           {/* Actions */}
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={!formData.name || saving}>
               <Save className="h-4 w-4 mr-2" />

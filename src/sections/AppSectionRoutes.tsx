@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { sections } from "./registry";
 
@@ -13,11 +14,14 @@ export function buildSectionRoutes(): React.ReactElement[] {
   const routes: React.ReactElement[] = [];
   for (const sec of sections) {
     const Index = React.lazy(() => {
+      const { t } = useTranslation();
       const importFn = pageImports[`./${sec.slug}/index.tsx`];
       if (importFn) {
         return importFn() as Promise<{ default: React.ComponentType<any> }>;
       }
-      return Promise.resolve({ default: () => <div>Page not found</div> });
+      return Promise.resolve({ default: () => {
+        return <div>{t("sections.pageNotFound")}</div>;
+      } });
     });
 
     // Add exact route for section index
@@ -41,11 +45,14 @@ export function buildSectionRoutes(): React.ReactElement[] {
 
       const fileKey = `./${sec.slug}/${capitalize(p.slug)}.tsx`;
       const Lazy = React.lazy(() => {
+        const { t } = useTranslation();
         const importFn = pageImports[fileKey];
         if (importFn) {
           return importFn() as Promise<{ default: React.ComponentType<any> }>;
         }
-        return Promise.resolve({ default: () => <div>Page not found</div> });
+        return Promise.resolve({ default: () => {
+          return <div>{t("sections.pageNotFound")}</div>;
+        } });
       });
       routes.push(
         <React.Fragment key={`${sec.slug}-${p.slug}`}>

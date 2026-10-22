@@ -1,4 +1,5 @@
-﻿import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -96,6 +97,7 @@ export function SectionConfigurationWizard({
   onOpenChange,
   onSave,
 }: SectionConfigurationWizardProps) {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const componentOptions = useMemo(() => listSectionComponents(), []);
   const withComponentMetadata = useCallback(
@@ -298,27 +300,27 @@ export function SectionConfigurationWizard({
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Section Overview</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("sections.sectionOverview")}</h3>
               <p className="text-muted-foreground">
-                Configure the basic settings for your section
+                {t("sections.configureTheBasicSettingsForYourSection")}
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Section Name</Label>
+                <Label htmlFor="name">{t("sections.sectionName")}</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  placeholder="Enter section name"
+                  placeholder={t("sections.enterSectionName")}
                 />
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("tasks.description")}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -328,7 +330,7 @@ export function SectionConfigurationWizard({
                       description: e.target.value,
                     }))
                   }
-                  placeholder="Describe what this section is for"
+                  placeholder={t("sections.describeWhatThisSectionIsFor")}
                   rows={3}
                 />
               </div>
@@ -340,16 +342,16 @@ export function SectionConfigurationWizard({
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Pages & Content</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("sections.pagesContent")}</h3>
               <p className="text-muted-foreground">
-                Add pages to organize content within this section
+                {t("sections.addPagesToOrganizeContentWithinThisSection")}
               </p>
             </div>
 
             {/* Suggested pages from template */}
             {suggestedPages.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-medium">Suggested Pages</h4>
+                <h4 className="font-medium">{t("sections.suggestedPages")}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {suggestedPages.map((p: any, index: number) => {
                     const suggestionSlug = (p.route || "")
@@ -406,7 +408,7 @@ export function SectionConfigurationWizard({
                                   }))
                                 }
                               >
-                                Remove
+                                {t("forms.remove")}
                               </Button>
                             ) : (
                               <Button
@@ -435,7 +437,7 @@ export function SectionConfigurationWizard({
                                   }))
                                 }
                               >
-                                Add
+                                {t("tasks.add")}
                               </Button>
                             )}
                           </div>
@@ -460,7 +462,7 @@ export function SectionConfigurationWizard({
                             updatePage(index, { title: e.target.value })
                           }
                           className="font-medium border-0 p-0 h-auto focus-visible:ring-0"
-                          placeholder="Page title"
+                          placeholder={t("sections.pageTitle")}
                         />
                         <Button
                           variant="ghost"
@@ -477,11 +479,11 @@ export function SectionConfigurationWizard({
                         onChange={(e) =>
                           updatePage(index, { description: e.target.value })
                         }
-                        placeholder="Page description"
+                        placeholder={t("sections.pageDescription")}
                         rows={2}
                       />
                       <div className="space-y-2">
-                        <Label>Primary Component</Label>
+                        <Label>{t("sections.primaryComponent")}</Label>
                         <Select
                           value={page.componentId}
                           onValueChange={(value) =>
@@ -489,7 +491,7 @@ export function SectionConfigurationWizard({
                           }
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Choose component" />
+                            <SelectValue placeholder={t("sections.chooseComponent")} />
                           </SelectTrigger>
                           <SelectContent>
                             {componentOptions.map((option) => (
@@ -516,7 +518,7 @@ export function SectionConfigurationWizard({
                 className="w-full border-dashed border-2"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Page
+                {t("sections.addPage")}
               </Button>
             </div>
           </div>
@@ -526,9 +528,9 @@ export function SectionConfigurationWizard({
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Access Permissions</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("sections.accessPermissions")}</h3>
               <p className="text-muted-foreground">
-                Choose who can access and manage this section
+                {t("sections.chooseWhoCanAccessAndManageThisSection")}
               </p>
             </div>
 
@@ -561,9 +563,9 @@ export function SectionConfigurationWizard({
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Review & Launch</h3>
+              <h3 className="text-lg font-semibold mb-2">{t("sections.reviewLaunch")}</h3>
               <p className="text-muted-foreground">
-                Review your section configuration before launching
+                {t("sections.reviewYourSectionConfigurationBeforeLaunching")}
               </p>
             </div>
 
@@ -641,7 +643,7 @@ export function SectionConfigurationWizard({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Configure Section</DialogTitle>
+          <DialogTitle>{t("sections.configureSection")}</DialogTitle>
         </DialogHeader>
 
         {/* Progress Steps */}
@@ -690,17 +692,17 @@ export function SectionConfigurationWizard({
             disabled={currentStep === 0}
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
-            Previous
+            {t("common.previous")}
           </Button>
 
           {currentStep === WIZARD_STEPS.length - 1 ? (
             <Button onClick={handleSave}>
               <Check className="h-4 w-4 mr-2" />
-              Save & Launch
+              {t("sections.saveLaunch")}
             </Button>
           ) : (
             <Button onClick={handleNext}>
-              Next
+              {t("common.next")}
               <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           )}
