@@ -1,6 +1,5 @@
 import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
 import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,26 +15,21 @@ import type {
   TaskStatusFilter,
   TaskPriorityFilter,
 } from "@/features/tasks/types/filters";
-import { calculateTaskMetrics } from "@/features/tasks/utils/taskMetrics";
 import { filterTasks } from "@/features/tasks/utils/taskFiltering";
 import { generateStatusTabs } from "@/features/tasks/utils/statusTabs";
 import { generatePriorityOptions } from "@/features/tasks/utils";
 import { calculateDueBadge } from "@/features/tasks/utils/dueDateHelpers";
 import {
   applyReadinessFilter,
+  readinessCounts,
   type ReadinessFilter,
 } from "@/features/tasks/utils/readinessFilters";
 import { useCan } from "@/hooks/useCan";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
-import {
-  TaskMetricsCards,
-  TaskFilters,
-  TaskStatusTabs,
-  TaskCard,
-  TaskEmptyState,
-} from "@/features/tasks/components";
+import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
 import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
+import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 
 const CreateTaskDialog = lazy(() =>
@@ -101,8 +95,6 @@ export default function Tasks() {
 
   const totalTasks = tasks.length;
 
-  const metrics = useMemo(() => calculateTaskMetrics(tasks), [tasks]);
-
   const statusTabs = useMemo(
     () => generateStatusTabs(tasks, totalTasks),
     [tasks, totalTasks],
@@ -133,6 +125,11 @@ export default function Tasks() {
   const listedTasks = useMemo(
     () => applyReadinessFilter(filteredTasks, readinessFilter),
     [filteredTasks, readinessFilter],
+  );
+
+  const viewReadinessCounts = useMemo(
+    () => readinessCounts(statusScopedTasks),
+    [statusScopedTasks],
   );
 
   const handleResetFilters = () => {
@@ -203,39 +200,31 @@ export default function Tasks() {
         </Alert>
       )}
 
-      <TaskStatusTabs
+      <TaskViewSection
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
         statusTabs={statusTabs}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        priorityFilter={priorityFilter}
+        onPriorityChange={setPriorityFilter}
+        priorityOptions={priorityOptions}
+        kindFilter={kindFilter}
+        onKindChange={setKindFilter}
+        filtersActive={filtersAreActive}
+        onResetFilters={handleResetFilters}
+        readinessFilter={readinessFilter}
+        onReadinessFilterChange={setReadinessFilter}
+        readinessCounts={viewReadinessCounts}
       />
 
       <TaskExecutionReadinessPanel
         tasks={statusScopedTasks}
-        readinessFilter={readinessFilter}
-        onReadinessFilterChange={setReadinessFilter}
         onOpenTask={openTask}
       />
       {showCreateMenu ? (
         <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
       ) : null}
-
-      <TaskMetricsCards metrics={metrics} />
-
-      <Card className="border-dashed">
-        <CardContent className={isMobile ? "space-y-4 p-4" : "space-y-4 p-5"}>
-          <TaskFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            priorityFilter={priorityFilter}
-            onPriorityChange={setPriorityFilter}
-            priorityOptions={priorityOptions}
-            kindFilter={kindFilter}
-            onKindChange={setKindFilter}
-            filtersActive={filtersAreActive}
-            onResetFilters={handleResetFilters}
-          />
-        </CardContent>
-      </Card>
 
       <div
         className={

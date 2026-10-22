@@ -6,16 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { buildTaskExecutionSummary } from "@/features/tasks/utils/taskExecutionReadiness";
-import {
-  READINESS_DEFINITIONS,
-  readinessCounts,
-  type ReadinessFilter,
-} from "@/features/tasks/utils/readinessFilters";
-
 interface TaskExecutionReadinessPanelProps {
   tasks: TaskWithRelations[];
-  readinessFilter: ReadinessFilter | null;
-  onReadinessFilterChange: (value: ReadinessFilter | null) => void;
   onOpenTask: (taskId: string) => void;
 }
 
@@ -27,16 +19,8 @@ const issueTone: Record<string, string> = {
   info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-100",
 };
 
-const readinessItems: Array<{ key: ReadinessFilter; label: string }> = [
-  { key: "overdue", label: "Overdue" },
-  { key: "unassigned", label: "Unassigned" },
-  { key: "due", label: "Due" },
-];
-
 export function TaskExecutionReadinessPanel({
   tasks,
-  readinessFilter,
-  onReadinessFilterChange,
   onOpenTask,
 }: TaskExecutionReadinessPanelProps) {
   const { reminders } = useReminders();
@@ -44,49 +28,13 @@ export function TaskExecutionReadinessPanel({
     () => buildTaskExecutionSummary({ tasks, reminders }),
     [reminders, tasks],
   );
-  const counts = useMemo(() => readinessCounts(tasks), [tasks]);
 
   return (
     <Card className="border-border/70 bg-background/95 shadow-sm">
-      <CardHeader className="space-y-3">
-        <div>
-          <CardTitle className="text-xl">Execution Readiness</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Counts follow the status tab. Press one to filter the list.
-          </p>
-        </div>
+      <CardHeader className="space-y-1 pb-3">
+        <CardTitle className="text-base">Warnings</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
-          {readinessItems.map((item) => {
-            const pressed = readinessFilter === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                title={READINESS_DEFINITIONS[item.key]}
-                aria-pressed={pressed}
-                data-testid={`tasks-readiness-${item.key}`}
-                className={`rounded-lg border p-3 text-left ${
-                  pressed
-                    ? "border-primary bg-primary/10"
-                    : "border-border/70 bg-muted/30"
-                }`}
-                onClick={() =>
-                  onReadinessFilterChange(pressed ? null : item.key)
-                }
-              >
-                <p className="text-xs font-medium uppercase text-muted-foreground">
-                  {item.label}
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {counts[item.key]}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-
+      <CardContent>
         {summary.issues.length > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />

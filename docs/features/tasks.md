@@ -319,7 +319,7 @@ Prove: Unit test `src/features/tasks/utils/statusHint.test.ts` renders the statu
 
 ### Phase 14 — One View section
 
-- [ ] Group status, search, and filters into one section, and drop the metric cards.
+- [x] Group status, search, and filters into one section, and drop the metric cards.
 
 Rules:
 
@@ -587,6 +587,22 @@ Phone steps for Pedro:
 2. All should show the word All and its count. The sentence "Every task on this page." should not sit under the tab.
 3. Hover All. That sentence should appear once, as a hint.
 4. Hover Overdue. The hint should say the due date is before today, and the task is not done or cancelled.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 14 One View section
+
+Shipped: Status, search, type, priority, and the Overdue, Unassigned, and Due counts sit in one View section. A zero-count status stays under More inside that section. The metric cards are not rendered on the Tasks page. `TaskMetricsCards.tsx` is still in the repo.
+
+Proven: `node scripts/test-tasks-page.mjs` passed, including the status-tab hint test. `npm run typecheck` passed. ESLint passed on the files this phase changed. This phase is layout.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. One section labelled View should hold the status chips, the search box, the type and priority filters, and the three small readiness counts.
+3. In Progress, In Review, Blocked, and Cancelled should be in that section. A status with a zero count should be under More.
+4. The old row of metric cards should be gone.
 
 Blockers: none for this phase.
 
