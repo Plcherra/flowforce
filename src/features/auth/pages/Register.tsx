@@ -68,17 +68,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center py-12">
+    <div className="min-h-screen bg-gradient-to-br from-background to-primary/10 flex items-center justify-center py-12">
       <div className="max-w-2xl w-full mx-auto px-4">
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-8">
-            <div className="w-16 h-16 bg-[#3F51B5] rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Building2 className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Building2 className="h-8 w-8 text-primary-foreground" />
             </div>
-            <CardTitle className="text-3xl font-bold text-gray-900">
+            <CardTitle className="text-3xl font-bold text-foreground">
               Register Your Company
             </CardTitle>
-            <CardDescription className="text-gray-600 text-lg">
+            <CardDescription className="text-muted-foreground text-lg">
               Start your free trial and get your team organized in minutes
             </CardDescription>
           </CardHeader>
@@ -87,8 +87,8 @@ export default function Register() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Company Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Building2 className="h-5 w-5 mr-2 text-[#3F51B5]" />
+                <h3 className="text-lg font-semibold text-foreground flex items-center">
+                  <Building2 className="h-5 w-5 mr-2 text-primary" />
                   Company Information
                 </h3>
 
@@ -156,8 +156,8 @@ export default function Register() {
 
               {/* Contact Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-[#3F51B5]" />
+                <h3 className="text-lg font-semibold text-foreground flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-primary" />
                   Your Information
                 </h3>
 
@@ -193,7 +193,7 @@ export default function Register() {
                   <div>
                     <Label htmlFor="email">Email Address *</Label>
                     <div className="relative mt-1">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="email"
                         type="email"
@@ -211,7 +211,7 @@ export default function Register() {
                   <div>
                     <Label htmlFor="phone">Phone Number</Label>
                     <div className="relative mt-1">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="phone"
                         type="tel"
@@ -228,7 +228,7 @@ export default function Register() {
                   <div className="md:col-span-2">
                     <Label htmlFor="password">Password *</Label>
                     <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="password"
                         type="password"
@@ -246,7 +246,7 @@ export default function Register() {
                   <div className="md:col-span-2">
                     <Label htmlFor="address">Company Address</Label>
                     <div className="relative mt-1">
-                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="address"
                         value={formData.address}
@@ -271,13 +271,13 @@ export default function Register() {
                   }
                   required
                 />
-                <Label htmlFor="terms" className="text-sm text-gray-600">
+                <Label htmlFor="terms" className="text-sm text-muted-foreground">
                   I agree to the{" "}
-                  <Link to="#" className="text-[#3F51B5] hover:underline">
+                  <Link to="#" className="text-primary hover:underline">
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link to="#" className="text-[#3F51B5] hover:underline">
+                  <Link to="#" className="text-primary hover:underline">
                     Privacy Policy
                   </Link>
                 </Label>
@@ -285,17 +285,17 @@ export default function Register() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#3F51B5] hover:bg-[#3F51B5]/90 text-white py-6 text-lg font-semibold"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg font-semibold"
                 disabled={!formData.agreedToTerms}
               >
                 Start Free Trial
               </Button>
 
-              <p className="text-center text-sm text-gray-600">
+              <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link
                   to="/auth"
-                  className="text-[#3F51B5] hover:underline font-medium"
+                  className="text-primary hover:underline font-medium"
                 >
                   Sign in here
                 </Link>

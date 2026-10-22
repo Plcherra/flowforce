@@ -175,7 +175,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 6 — Auth and dashboard
 
-- [ ] Move hard-coded colors in auth and dashboard onto the tokens.
+- [x] Move hard-coded colors in auth and dashboard onto the tokens.
 
 Rules:
 
@@ -517,6 +517,21 @@ Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk.
 2. Open a dialog or the notifications panel. The unread row should use the blue tint, warning badges should be amber, and the badge count should be red with light text.
 3. Switch to Dark in Settings, then General, and open the same dialog. The scrim should stay dark, and the text should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 6 Auth and dashboard
+
+Shipped: Auth and dashboard hard-coded colors now use the theme tokens. Sign-in and register pages use a primary tint instead of a blue or slate gradient. Success copy uses success, errors use destructive, and the operator command center uses success, warning, and destructive for healthy, warning, and critical states. Gray text uses foreground or muted.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `src/features/auth` and `src/features/dashboard` have no baseline entries. `npm run typecheck:src` passed. ESLint passed on those directories.
+
+Phone steps for Pedro:
+1. Open https://www.flowforce.uk/auth signed out. The page should use the FlowForce blue tint, not a separate indigo wash.
+2. Sign in and open the dashboard. Healthy rows should read as green, warning rows as amber, and critical rows as red.
+3. Switch to Dark. Those status colors should stay readable on the dark surface.
 
 Blockers: none. No migration.
 

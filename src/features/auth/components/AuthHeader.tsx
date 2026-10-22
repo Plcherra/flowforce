@@ -14,11 +14,11 @@ export default function AuthHeader({ inviteCode }: AuthHeaderProps) {
     <div className="text-center space-y-2">
       <div className="flex items-center justify-center space-x-2">
         <Building2 className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold text-gray-900">FlowForce</h1>
+        <h1 className="text-3xl font-bold text-foreground">FlowForce</h1>
       </div>
-      <p className="text-gray-600">{t("auth.businessPlatform")}</p>
+      <p className="text-muted-foreground">{t("auth.businessPlatform")}</p>
       {inviteCode && (
-        <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
+        <p className="text-sm text-primary bg-primary/10 p-2 rounded">
           {t("auth.inviteMessage")}
         </p>
       )}

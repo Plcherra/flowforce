@@ -117,7 +117,7 @@ export default function PasswordResetForm({
               </Button>
             </div>
             {password && confirmPassword && password !== confirmPassword && (
-              <p className="text-sm text-red-600">Passwords do not match</p>
+              <p className="text-sm text-destructive">Passwords do not match</p>
             )}
           </div>
 

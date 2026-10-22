@@ -148,7 +148,7 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-primary/10 p-4">
       <div className="w-full max-w-md space-y-6">
         <AuthHeader inviteCode={inviteCode} />
 
@@ -183,7 +183,7 @@ export default function Auth() {
           />
         )}
 
-        <div className="text-center text-sm text-gray-600">
+        <div className="text-center text-sm text-muted-foreground">
           <p>{t("auth.termsMessage")}</p>
         </div>
       </div>

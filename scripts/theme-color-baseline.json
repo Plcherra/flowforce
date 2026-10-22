@@ -441,39 +441,6 @@
     "#ef4444",
     "#f59e0b"
   ],
-  "src/features/auth/components/AuthHeader.tsx": [
-    "bg-blue-50",
-    "text-blue-600",
-    "text-gray-600",
-    "text-gray-900"
-  ],
-  "src/features/auth/components/CompanyRegistrationCard.tsx": [
-    "text-gray-500"
-  ],
-  "src/features/auth/components/InviteSignUpForm.tsx": [
-    "bg-green-50",
-    "border-green-200",
-    "text-green-600",
-    "text-green-700",
-    "text-green-800"
-  ],
-  "src/features/auth/components/PasswordResetForm.tsx": [
-    "text-red-600"
-  ],
-  "src/features/auth/pages/Auth.tsx": [
-    "from-blue-50",
-    "text-gray-600",
-    "to-indigo-100"
-  ],
-  "src/features/auth/pages/Register.tsx": [
-    "#3F51B5",
-    "from-slate-50",
-    "text-gray-400",
-    "text-gray-600",
-    "text-gray-900",
-    "text-white",
-    "to-blue-50"
-  ],
   "src/features/availability/components/AvailabilityRequestForm.tsx": [
     "text-amber-500",
     "text-emerald-600"
@@ -604,35 +571,6 @@
   ],
   "src/features/company-updates/wizard/useCompanyUpdateDraft.ts": [
     "#3b82f6"
-  ],
-  "src/features/dashboard/components/DashboardHeader.tsx": [
-    "text-gray-600",
-    "text-gray-900"
-  ],
-  "src/features/dashboard/components/OperationsHealthCard.tsx": [
-    "text-amber-500",
-    "text-emerald-500"
-  ],
-  "src/features/dashboard/components/OperatorCommandCenter.tsx": [
-    "bg-amber-100",
-    "bg-amber-50",
-    "bg-amber-50/55",
-    "bg-emerald-100",
-    "bg-emerald-50",
-    "bg-emerald-50/45",
-    "bg-red-100",
-    "bg-red-50",
-    "bg-red-50/60",
-    "border-amber-200",
-    "border-emerald-200",
-    "border-red-200",
-    "text-amber-700",
-    "text-amber-800",
-    "text-emerald-700",
-    "text-red-700"
-  ],
-  "src/features/dashboard/components/ProfileCard.tsx": [
-    "bg-gray-200"
   ],
   "src/features/employees/components/HrReadinessPanel.tsx": [
     "bg-amber-100",

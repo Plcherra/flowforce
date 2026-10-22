@@ -79,14 +79,14 @@ export function OperationsHealthCard({
       hint: t("dashboard.operationsSummary.taskCompletionHint", {
         defaultValue: "Operations tasks completed this week.",
       }),
-      iconClass: "text-emerald-500",
+      iconClass: "text-success",
     },
     {
       icon: CalendarDays,
       label: t("dashboard.operationsSummary.shiftsToday"),
       value: stats.todaysShifts,
       hint: t("dashboard.operationsSummary.shiftsHint"),
-      iconClass: "text-amber-500",
+      iconClass: "text-warning",
     },
   ];
 

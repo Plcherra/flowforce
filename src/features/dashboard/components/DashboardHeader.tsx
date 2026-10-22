@@ -28,10 +28,10 @@ export default function DashboardHeader() {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-2xl font-bold tracking-normal text-gray-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
           {greeting}, {displayName}!
         </h1>
-        <p className="mt-1 text-sm text-gray-600 sm:text-base">
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
           Today&apos;s labor, inventory, task, schedule, and risk command center.
         </p>
       </div>

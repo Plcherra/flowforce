@@ -141,14 +141,14 @@ export default function InviteSignUpForm({
       </CardHeader>
       <CardContent>
         {/* Pre-filled employee information */}
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="mb-6 p-4 bg-success-muted border border-success/30 rounded-lg">
           <div className="flex items-center space-x-2 mb-3">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <h4 className="font-medium text-green-800">
+            <CheckCircle2 className="h-5 w-5 text-success" />
+            <h4 className="font-medium text-foreground">
               Your Profile Information
             </h4>
           </div>
-          <div className="space-y-2 text-sm text-green-700">
+          <div className="space-y-2 text-sm text-success">
             <p>
               <strong>Name:</strong> {inviteData.firstName}{" "}
               {inviteData.lastName}

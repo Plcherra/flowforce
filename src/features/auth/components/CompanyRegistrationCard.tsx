@@ -42,14 +42,14 @@ export default function CompanyRegistrationCard({
               <div className="font-medium">
                 {t("auth.registerCompany.title")}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 {t("auth.registerCompany.description")}
               </div>
             </div>
             <ArrowRight className="h-4 w-4" />
           </div>
         </Button>
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-muted-foreground">
           {t("auth.orSignIn")}
         </div>
       </CardContent>

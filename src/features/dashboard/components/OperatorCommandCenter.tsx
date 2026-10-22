@@ -58,21 +58,21 @@ const severityStyles: Record<
   { card: string; icon: string; badge: string; label: string }
 > = {
   good: {
-    card: "border-emerald-200 bg-emerald-50/45",
-    icon: "bg-emerald-100 text-emerald-700",
-    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    card: "border-success/30 bg-success-muted",
+    icon: "bg-success/15 text-success",
+    badge: "border-success/30 bg-success-muted text-success",
     label: "Steady",
   },
   watch: {
-    card: "border-amber-200 bg-amber-50/55",
-    icon: "bg-amber-100 text-amber-700",
-    badge: "border-amber-200 bg-amber-50 text-amber-800",
+    card: "border-warning/30 bg-warning-muted",
+    icon: "bg-warning/15 text-warning",
+    badge: "border-warning/30 bg-warning-muted text-warning-foreground",
     label: "Watch",
   },
   urgent: {
-    card: "border-red-200 bg-red-50/60",
-    icon: "bg-red-100 text-red-700",
-    badge: "border-red-200 bg-red-50 text-red-700",
+    card: "border-destructive/30 bg-destructive/10",
+    icon: "bg-destructive/15 text-destructive",
+    badge: "border-destructive/30 bg-destructive/10 text-destructive",
     label: "Urgent",
   },
 };
