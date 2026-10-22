@@ -16,7 +16,7 @@ import {
 } from "./bottomNavDestinations";
 import { NavGlyph } from "./NavGlyph";
 
-const BOTTOM_NAV_STACK = "calc(4.75rem + env(safe-area-inset-bottom))";
+const BOTTOM_NAV_STACK = "calc(5.85rem + env(safe-area-inset-bottom))";
 
 export function BottomIconNav() {
   const navigate = useNavigate();
@@ -70,23 +70,24 @@ export function BottomIconNav() {
                 <span className="bottom-icon-nav-label">
                   {bottomNavGroupName(t, group)}
                 </span>
-                <span className="bottom-icon-nav-rule" aria-hidden="true" />
-                {group.items.map((item) => {
-                  const label = navItemLabel(t, item);
-                  return (
-                    <BottomIconButton
-                      key={item.id}
-                      label={label}
-                      active={item.isActive}
-                      className={
-                        primaryIds.has(item.id) ? undefined : "hidden lg:flex"
-                      }
-                      onClick={() => navigate(item.href)}
-                    >
-                      <NavGlyph icon={item.icon} />
-                    </BottomIconButton>
-                  );
-                })}
+                <div className="bottom-icon-nav-frame">
+                  {group.items.map((item) => {
+                    const label = navItemLabel(t, item);
+                    return (
+                      <BottomIconButton
+                        key={item.id}
+                        label={label}
+                        active={item.isActive}
+                        className={
+                          primaryIds.has(item.id) ? undefined : "hidden lg:flex"
+                        }
+                        onClick={() => navigate(item.href)}
+                      >
+                        <NavGlyph icon={item.icon} />
+                      </BottomIconButton>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
