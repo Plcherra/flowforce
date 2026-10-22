@@ -117,26 +117,26 @@ export function TaskField({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-destructive/10 text-destructive border-destructive/40";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-warning-muted text-warning-foreground border-warning/40";
       case "low":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-success-muted text-success border-success/40";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-foreground border-border";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-success-muted text-success border-success/40";
       case "in_progress":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-primary/10 text-primary border-primary/40";
       case "pending":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-foreground border-border";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-muted text-foreground border-border";
     }
   };
 
@@ -318,7 +318,7 @@ export function TaskField({
                             type="checkbox"
                             checked={assignedUsers.includes(user.id)}
                             onChange={() => toggleUserAssignment(user.id)}
-                            className="rounded border-gray-300"
+                            className="rounded border-border"
                           />
                           <span className="text-sm text-foreground">
                             {user.name}

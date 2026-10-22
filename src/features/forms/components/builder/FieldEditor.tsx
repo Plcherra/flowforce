@@ -388,7 +388,7 @@ export default function FieldEditor({
                     )}
                     {field.conditional_logic?.enabled && (
                       <Badge variant="outline" className="text-xs">
-                        <div className="w-2 h-2 rounded-full bg-orange-400 mr-1"></div>
+                        <div className="w-2 h-2 rounded-full bg-warning mr-1"></div>
                         Conditional
                       </Badge>
                     )}
@@ -454,7 +454,7 @@ export default function FieldEditor({
                           )}
                           {field.conditional_logic?.enabled && (
                             <Badge variant="outline" className="text-xs">
-                              <div className="w-2 h-2 rounded-full bg-orange-400 mr-1"></div>
+                              <div className="w-2 h-2 rounded-full bg-warning mr-1"></div>
                               Conditional
                             </Badge>
                           )}
@@ -691,7 +691,7 @@ export default function FieldEditor({
                     </div>
 
                     {field.conditional_logic?.enabled && (
-                      <div className="space-y-3 p-3 bg-muted/20 rounded-lg border border-orange-200">
+                      <div className="space-y-3 p-3 bg-muted/20 rounded-lg border border-warning/40">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-sm font-medium">

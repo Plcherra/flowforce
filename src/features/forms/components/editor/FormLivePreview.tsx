@@ -77,7 +77,7 @@ export function FormLivePreview() {
                           <Label className="text-sm font-medium text-foreground">
                             {field.label}
                             {field.required && (
-                              <span className="ml-1 text-red-500">*</span>
+                              <span className="ml-1 text-destructive">*</span>
                             )}
                           </Label>
                           <Textarea
@@ -95,7 +95,7 @@ export function FormLivePreview() {
                           <Label className="text-sm font-medium text-foreground">
                             {field.label}
                             {field.required && (
-                              <span className="ml-1 text-red-500">*</span>
+                              <span className="ml-1 text-destructive">*</span>
                             )}
                           </Label>
                           <Select
@@ -127,7 +127,7 @@ export function FormLivePreview() {
                           <Label className="text-sm font-medium text-foreground">
                             {field.label}
                             {field.required && (
-                              <span className="ml-1 text-red-500">*</span>
+                              <span className="ml-1 text-destructive">*</span>
                             )}
                           </Label>
                           <RadioGroup
@@ -192,7 +192,7 @@ export function FormLivePreview() {
                           <Label className="text-sm font-medium text-foreground">
                             {field.label}
                             {field.required && (
-                              <span className="ml-1 text-red-500">*</span>
+                              <span className="ml-1 text-destructive">*</span>
                             )}
                           </Label>
                           <Input

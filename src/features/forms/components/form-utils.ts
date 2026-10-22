@@ -22,13 +22,13 @@ export const getTypeLabel = (form: FormWithMeta) =>
 export const getStatusColor = (status: string) => {
   switch (status) {
     case "published":
-      return "bg-green-100 text-green-800";
+      return "bg-success-muted text-success";
     case "draft":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-warning-muted text-warning-foreground";
     case "archived":
-      return "bg-gray-100 text-gray-800";
+      return "bg-muted text-foreground";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-muted text-foreground";
   }
 };
 

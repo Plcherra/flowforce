@@ -617,91 +617,12 @@
     "bg-orange-100",
     "text-orange-600"
   ],
-  "src/features/forms/components/builder/FieldEditor.tsx": [
-    "bg-orange-400",
-    "border-orange-200"
-  ],
-  "src/features/forms/components/builder/FormPreview.tsx": [
-    "bg-orange-400"
-  ],
   "src/features/forms/components/builder/RichTextContentEditor.tsx": [
     "#111827"
   ],
-  "src/features/forms/components/editor/FormLivePreview.tsx": [
-    "text-red-500"
-  ],
-  "src/features/forms/components/fields/RatingField.tsx": [
-    "hover:text-yellow-300",
-    "text-green-500",
-    "text-lime-500",
-    "text-orange-500",
-    "text-red-500",
-    "text-yellow-400",
-    "text-yellow-500"
-  ],
-  "src/features/forms/components/fields/ScannerField.tsx": [
-    "bg-black"
-  ],
   "src/features/forms/components/fields/SignatureField.tsx": [
     "#000000",
-    "#ffffff",
-    "bg-white"
-  ],
-  "src/features/forms/components/fields/TaskField.tsx": [
-    "bg-blue-100",
-    "bg-gray-100",
-    "bg-green-100",
-    "bg-red-100",
-    "bg-yellow-100",
-    "border-blue-200",
-    "border-gray-200",
-    "border-gray-300",
-    "border-green-200",
-    "border-red-200",
-    "border-yellow-200",
-    "text-blue-800",
-    "text-gray-800",
-    "text-green-800",
-    "text-red-800",
-    "text-yellow-800"
-  ],
-  "src/features/forms/components/fields/VideoUploadField.tsx": [
-    "bg-black/20",
-    "text-white"
-  ],
-  "src/features/forms/components/form-utils.ts": [
-    "bg-gray-100",
-    "bg-green-100",
-    "bg-yellow-100",
-    "text-gray-800",
-    "text-green-800",
-    "text-yellow-800"
-  ],
-  "src/features/forms/components/FormsReadinessPanel.tsx": [
-    "bg-amber-50",
-    "bg-blue-50",
-    "bg-emerald-50",
-    "bg-red-50",
-    "border-amber-200",
-    "border-blue-200",
-    "border-emerald-200",
-    "border-red-200",
-    "dark:bg-amber-950/30",
-    "dark:bg-blue-950/30",
-    "dark:bg-emerald-950/30",
-    "dark:bg-red-950/30",
-    "dark:border-amber-900/50",
-    "dark:border-blue-900/50",
-    "dark:border-emerald-900/50",
-    "dark:border-red-900/50",
-    "dark:text-amber-100",
-    "dark:text-blue-100",
-    "dark:text-emerald-100",
-    "dark:text-red-100",
-    "text-amber-900",
-    "text-blue-900",
-    "text-emerald-900",
-    "text-red-900"
+    "#ffffff"
   ],
   "src/features/gamification/components/BadgesGallery.tsx": [
     "text-emerald-600"

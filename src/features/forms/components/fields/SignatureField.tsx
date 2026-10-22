@@ -254,7 +254,7 @@ export function SignatureField({
                   <img
                     src={value.signaturedata}
                     alt="Signature"
-                    className="w-full h-24 object-contain bg-white"
+                    className="w-full h-24 object-contain bg-logo-background"
                   />
                 </div>
               </div>
@@ -285,7 +285,7 @@ export function SignatureField({
             <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden">
               <canvas
                 ref={canvasRef}
-                className="w-full h-32 cursor-crosshair bg-white"
+                className="w-full h-32 cursor-crosshair bg-logo-background"
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}

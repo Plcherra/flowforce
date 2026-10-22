@@ -71,8 +71,8 @@ export function RatingField({
               type="button"
               className={`transition-colors duration-150 hover:scale-110 ${
                 isActive
-                  ? "text-yellow-400"
-                  : "text-muted-foreground hover:text-yellow-300"
+                  ? "text-warning"
+                  : "text-muted-foreground hover:text-warning"
               }`}
               onClick={() => handleRatingClick(rating)}
               onMouseEnter={() => setHoverValue(rating)}
@@ -140,11 +140,11 @@ export function RatingField({
 
   const renderEmojiRating = () => {
     const emojis = [
-      { icon: Frown, label: "Very Poor", color: "text-red-500" },
-      { icon: Meh, label: "Poor", color: "text-orange-500" },
-      { icon: Smile, label: "Average", color: "text-yellow-500" },
-      { icon: Smile, label: "Good", color: "text-lime-500" },
-      { icon: Smile, label: "Excellent", color: "text-green-500" },
+      { icon: Frown, label: "Very Poor", color: "text-destructive" },
+      { icon: Meh, label: "Poor", color: "text-warning" },
+      { icon: Smile, label: "Average", color: "text-warning" },
+      { icon: Smile, label: "Good", color: "text-success" },
+      { icon: Smile, label: "Excellent", color: "text-success" },
     ];
 
     const visibleEmojis = emojis.slice(0, maxRating);

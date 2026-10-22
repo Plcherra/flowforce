@@ -218,7 +218,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 9 — Forms
 
-- [ ] Move hard-coded colors on Forms onto the tokens.
+- [x] Move hard-coded colors on Forms onto the tokens.
 
 Rules:
 
@@ -564,6 +564,23 @@ Phone steps for Pedro:
 2. Urgent and high priorities should read as red and amber. Low should read as green. Overdue should read as red, and due soon as amber.
 3. Open a task. Activity rows should use a tint, not a separate rainbow of slate and indigo.
 4. Switch to Dark. Task titles and the overdue row should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 9 Forms
+
+Shipped: Form chrome now uses the theme tokens. Status, priority, and readiness washes use success, warning, destructive, or primary. The rich-text color picker in `RichTextContentEditor` is unchanged, including the `#111827` default. The signature pad stays white through `bg-logo-background`, and the canvas ink stays black on a white fill. The camera well and the video play scrim stay dark in Dark. The baseline keeps the picker hex and the signature ink hex.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Forms.
+2. Published should read as green, draft as amber, and a blocked form as red.
+3. Edit a form and open the rich-text field. The text color control should still be there.
+4. Open a signature field. The pad should stay white in FlowForce, Light, and Dark, and the ink should stay black.
+5. Switch to Dark and open a form with a video or scanner field. The play mark and the camera well should stay dark.
 
 Blockers: none. No migration.
 

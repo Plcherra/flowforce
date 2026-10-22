@@ -331,7 +331,7 @@ export default function FormPreview({
               {renderFieldPreview(field, index)}
               {field.conditional_logic?.enabled && (
                 <div className="text-xs text-muted-foreground mt-1 italic flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                  <div className="w-2 h-2 rounded-full bg-warning"></div>
                   Conditional field - will show when conditions are met
                 </div>
               )}

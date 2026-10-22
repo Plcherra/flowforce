@@ -210,7 +210,7 @@ export function ScannerField({
                   ref={videoRef}
                   autoPlay
                   playsInline
-                  className="w-full h-48 bg-black rounded-lg object-cover"
+                  className="w-full h-48 bg-foreground dark:bg-background rounded-lg object-cover"
                 />
                 <div className="absolute inset-0 border-2 border-dashed border-primary/50 rounded-lg">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-24 border-2 border-primary rounded-lg"></div>

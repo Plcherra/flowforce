@@ -202,8 +202,8 @@ export function VideoUploadField({
                 <div className="flex items-center gap-3">
                   <div className="flex-shrink-0 w-16 h-16 bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
                     <SignedVideoPreview value={item} />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <Play className="h-4 w-4 text-white" />
+                    <div className="absolute inset-0 bg-foreground/20 dark:bg-background/20 flex items-center justify-center">
+                      <Play className="h-4 w-4 text-primary-foreground" />
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
