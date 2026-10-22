@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -51,6 +52,7 @@ export function CreateReminderDialog({
   onOpenChange,
   taskId,
 }: CreateReminderDialogProps) {
+  const { t } = useTranslation();
   const { createReminder } = useReminders();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -172,19 +174,18 @@ export function CreateReminderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Reminder</DialogTitle>
+          <DialogTitle>{t("tasks.createReminder")}</DialogTitle>
           <DialogDescription>
-            Set up a reminder to help you stay on track with your tasks and
-            goals.
+            {t("tasks.setUpAReminderToHelpYouStay")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{t("tasks.title")}</Label>
             <Input
               id="title"
-              placeholder="Enter reminder title"
+              placeholder={t("tasks.enterReminderTitle")}
               value={formData.title}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, title: e.target.value }))
@@ -194,10 +195,10 @@ export function CreateReminderDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
-              placeholder="Enter reminder description"
+              placeholder={t("tasks.enterReminderDescription")}
               value={formData.description}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -211,29 +212,29 @@ export function CreateReminderDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Reminder Time</Label>
+              <Label>{t("tasks.reminderTime")}</Label>
               <Select
                 value={reminderInterval}
                 onValueChange={setReminderInterval}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select timing" />
+                  <SelectValue placeholder={t("tasks.selectTiming")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="15min">15 minutes from now</SelectItem>
-                  <SelectItem value="30min">30 minutes from now</SelectItem>
-                  <SelectItem value="1hour">1 hour from now</SelectItem>
-                  <SelectItem value="2hours">2 hours from now</SelectItem>
-                  <SelectItem value="1day">1 day from now</SelectItem>
-                  <SelectItem value="2days">2 days from now</SelectItem>
-                  <SelectItem value="1week">1 week from now</SelectItem>
-                  <SelectItem value="custom">Custom date & time</SelectItem>
+                  <SelectItem value="15min">{t("tasks.text15MinutesFromNow")}</SelectItem>
+                  <SelectItem value="30min">{t("tasks.text30MinutesFromNow")}</SelectItem>
+                  <SelectItem value="1hour">{t("tasks.text1HourFromNow")}</SelectItem>
+                  <SelectItem value="2hours">{t("tasks.text2HoursFromNow")}</SelectItem>
+                  <SelectItem value="1day">{t("tasks.text1DayFromNow")}</SelectItem>
+                  <SelectItem value="2days">{t("tasks.text2DaysFromNow")}</SelectItem>
+                  <SelectItem value="1week">{t("tasks.text1WeekFromNow")}</SelectItem>
+                  <SelectItem value="custom">{t("tasks.customDateTime")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">{t("tasks.priority")}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
@@ -241,13 +242,13 @@ export function CreateReminderDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
+                  <SelectValue placeholder={t("tasks.selectPriority")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t("tasks.low")}</SelectItem>
+                  <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
+                  <SelectItem value="high">{t("tasks.high")}</SelectItem>
+                  <SelectItem value="urgent">{t("tasks.urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -256,7 +257,7 @@ export function CreateReminderDialog({
           {reminderInterval === "custom" && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Reminder Date *</Label>
+                <Label>{t("tasks.reminderDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -281,7 +282,7 @@ export function CreateReminderDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="time">Reminder Time *</Label>
+                <Label htmlFor="time">{t("tasks.reminderTime2")}</Label>
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -300,14 +301,14 @@ export function CreateReminderDialog({
           {/* Sound Settings */}
           <div className="space-y-3">
             <Label className="text-base font-medium">
-              Sound & Notifications
+              {t("tasks.soundNotifications")}
             </Label>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-sm">Enable Sound</Label>
+                <Label className="text-sm">{t("tasks.enableSound")}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Play sound when reminder triggers
+                  {t("tasks.playSoundWhenReminderTriggers")}
                 </p>
               </div>
               <Switch
@@ -320,7 +321,7 @@ export function CreateReminderDialog({
 
             {formData.sound_enabled && (
               <div className="space-y-2">
-                <Label htmlFor="sound-type">Sound Type</Label>
+                <Label htmlFor="sound-type">{t("tasks.soundType")}</Label>
                 <Select
                   value={formData.sound_type}
                   onValueChange={(value) =>
@@ -328,17 +329,17 @@ export function CreateReminderDialog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select sound" />
+                    <SelectValue placeholder={t("tasks.selectSound")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="default">
-                      Default Notification
+                      {t("tasks.defaultNotification")}
                     </SelectItem>
-                    <SelectItem value="chime">Soft Chime</SelectItem>
-                    <SelectItem value="bell">Bell</SelectItem>
-                    <SelectItem value="alert">Alert Tone</SelectItem>
-                    <SelectItem value="gentle">Gentle Reminder</SelectItem>
-                    <SelectItem value="urgent">Urgent Alert</SelectItem>
+                    <SelectItem value="chime">{t("tasks.softChime")}</SelectItem>
+                    <SelectItem value="bell">{t("tasks.bell")}</SelectItem>
+                    <SelectItem value="alert">{t("tasks.alertTone")}</SelectItem>
+                    <SelectItem value="gentle">{t("tasks.gentleReminder")}</SelectItem>
+                    <SelectItem value="urgent">{t("tasks.urgentAlert")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -348,10 +349,10 @@ export function CreateReminderDialog({
           {/* Notification Methods */}
           <div className="space-y-3">
             <Label className="text-base font-medium">
-              Notification Methods
+              {t("tasks.notificationMethods")}
             </Label>
             <p className="text-sm text-muted-foreground">
-              Choose how you want to receive this reminder
+              {t("tasks.chooseHowYouWantToReceiveThisReminder")}
             </p>
 
             <div className="grid grid-cols-2 gap-3">
@@ -365,10 +366,10 @@ export function CreateReminderDialog({
               >
                 <div className="flex items-center space-x-2">
                   <Bell className="h-4 w-4" />
-                  <span className="text-sm font-medium">In-App</span>
+                  <span className="text-sm font-medium">{t("tasks.inApp")}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Show in notifications panel
+                  {t("tasks.showInNotificationsPanel")}
                 </p>
               </div>
 
@@ -382,10 +383,10 @@ export function CreateReminderDialog({
               >
                 <div className="flex items-center space-x-2">
                   <Monitor className="h-4 w-4" />
-                  <span className="text-sm font-medium">Browser Push</span>
+                  <span className="text-sm font-medium">{t("tasks.browserPush")}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Browser notification popup
+                  {t("tasks.browserNotificationPopup")}
                 </p>
               </div>
 
@@ -399,10 +400,10 @@ export function CreateReminderDialog({
               >
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span className="text-sm font-medium">Email</span>
+                  <span className="text-sm font-medium">{t("tasks.email")}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Send email reminder
+                  {t("tasks.sendEmailReminder")}
                 </p>
               </div>
 
@@ -416,10 +417,10 @@ export function CreateReminderDialog({
               >
                 <div className="flex items-center space-x-2">
                   <Smartphone className="h-4 w-4" />
-                  <span className="text-sm font-medium">Mobile Push</span>
+                  <span className="text-sm font-medium">{t("tasks.mobilePush")}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Mobile app notification
+                  {t("tasks.mobileAppNotification")}
                 </p>
               </div>
             </div>
@@ -441,14 +442,14 @@ export function CreateReminderDialog({
 
           {/* Advanced Options */}
           <div className="space-y-3">
-            <Label className="text-base font-medium">Advanced Options</Label>
+            <Label className="text-base font-medium">{t("tasks.advancedOptions")}</Label>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm">Repeat Reminder</Label>
+                  <Label className="text-sm">{t("tasks.repeatReminder")}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Repeat this reminder at intervals
+                    {t("tasks.repeatThisReminderAtIntervals")}
                   </p>
                 </div>
                 <Switch
@@ -464,7 +465,7 @@ export function CreateReminderDialog({
 
               {formData.repeat_enabled && (
                 <div className="space-y-2">
-                  <Label htmlFor="repeat-interval">Repeat Every</Label>
+                  <Label htmlFor="repeat-interval">{t("tasks.repeatEvery")}</Label>
                   <Select
                     value={formData.repeat_interval}
                     onValueChange={(value) =>
@@ -475,15 +476,15 @@ export function CreateReminderDialog({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select interval" />
+                      <SelectValue placeholder={t("tasks.selectInterval")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="5min">5 minutes</SelectItem>
-                      <SelectItem value="15min">15 minutes</SelectItem>
-                      <SelectItem value="30min">30 minutes</SelectItem>
-                      <SelectItem value="1hour">1 hour</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="5min">{t("tasks.text5Minutes")}</SelectItem>
+                      <SelectItem value="15min">{t("tasks.text15Minutes")}</SelectItem>
+                      <SelectItem value="30min">{t("tasks.text30Minutes")}</SelectItem>
+                      <SelectItem value="1hour">{t("tasks.text1Hour")}</SelectItem>
+                      <SelectItem value="daily">{t("tasks.daily")}</SelectItem>
+                      <SelectItem value="weekly">{t("tasks.weekly")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -491,9 +492,9 @@ export function CreateReminderDialog({
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm">Enable Snooze</Label>
+                  <Label className="text-sm">{t("tasks.enableSnooze")}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Allow snoozing this reminder
+                    {t("tasks.allowSnoozingThisReminder")}
                   </p>
                 </div>
                 <Switch
@@ -509,9 +510,9 @@ export function CreateReminderDialog({
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm">Auto-Complete</Label>
+                  <Label className="text-sm">{t("tasks.autoComplete")}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Mark as completed when task is done
+                    {t("tasks.markAsCompletedWhenTaskIsDone")}
                   </p>
                 </div>
                 <Switch
@@ -530,7 +531,7 @@ export function CreateReminderDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("tasks.cancel")}
             </Button>
             <Button
               type="submit"

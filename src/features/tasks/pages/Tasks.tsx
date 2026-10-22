@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { Suspense, lazy, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTasks, type TaskWithRelations } from "@/hooks/useTasks";
@@ -64,6 +65,7 @@ const RemindersPanel = lazy(() =>
 type TaskListItem = TaskWithRelations & { id: string };
 
 export default function Tasks() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { can, getSource, isLoading: permissionsLoading } = useCan();
   const customCreateLevel = taskCreateLevel({
@@ -178,7 +180,7 @@ export default function Tasks() {
           <h1
             className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold tracking-tight`}
           >
-            Tasks
+            {t("tasks.tasks")}
           </h1>
           <p className="text-muted-foreground">
             {"Today's work, including tasks that came from a shift."}
@@ -209,7 +211,7 @@ export default function Tasks() {
           data-testid="tasks-error"
           className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
         >
-          <AlertTitle>Unable to load tasks</AlertTitle>
+          <AlertTitle>{t("tasks.unableToLoadTasks")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
           <Button
             size="sm"
@@ -217,7 +219,7 @@ export default function Tasks() {
             onClick={() => refetchTasks()}
             data-testid="tasks-retry-button"
           >
-            Retry
+            {t("tasks.retry")}
           </Button>
         </Alert>
       )}

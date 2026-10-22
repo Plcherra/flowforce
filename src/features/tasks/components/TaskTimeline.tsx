@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -80,6 +81,7 @@ const formatMetadata = (activity: TaskActivity) => {
 };
 
 export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
+  const { t } = useTranslation();
   const { activities, loading } = useTaskTimeline(taskId, open);
   const hasTimeline = activities.length > 0;
 
@@ -100,7 +102,7 @@ export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Timeline</h3>
+        <h3 className="text-lg font-semibold">{t("tasks.timeline")}</h3>
         {hasTimeline && (
           <Badge variant="secondary">{activities.length} events</Badge>
         )}
@@ -111,7 +113,7 @@ export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
             <TimelineSkeleton />
           ) : !hasTimeline ? (
             <div className="py-6 px-4 text-sm text-muted-foreground">
-              Activity will appear here as you work on this task.
+              {t("tasks.activityWillAppearHereAsYouWorkOn2")}
             </div>
           ) : (
             <ol className="relative border-l border-border/70 px-4 py-4 space-y-6">

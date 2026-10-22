@@ -161,7 +161,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 5 — Tasks strings
 
-- [ ] Move Tasks chrome into the six locales.
+- [x] Move Tasks chrome into the six locales.
 
 Rules:
 
@@ -818,6 +818,22 @@ Phone steps for Pedro:
 2. Set your language to Español on Settings, then Region. Reload. Buttons such as Add, Publish, and Filters, and the week desk, should be in Spanish. A shift title someone typed stays in the language they wrote.
 3. Switch to Deutsch and open time off and availability. The labels should be German. A reason someone typed stays as they wrote it.
 4. Switch back to English. The schedule labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 5 Tasks strings
+
+Shipped: Tasks chrome under `src/features/tasks` now uses `useTranslation` and the `tasks` namespace. The same strings are in en, es, pt, fr, it, and de. Task titles, descriptions, and comments that people type stay as stored text. The directory is off the hard-coded baseline. A corrupted apostrophe in the activity-feed reconnect line is now a normal apostrophe in every locale. A keyboard-handler type that the checker read as text is a named type so the code stays code.
+
+Proven: `npm run check:i18n` printed 1188 keys for each locale and `hard-coded strings 3873`, then exited 0. `npm run typecheck:src` passed. ESLint passed on the tasks files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Tasks.
+2. Set your language to Français on Settings, then Region. Reload. Filters, empty states, and the new-task dialog should be in French. A task title someone typed stays as they wrote it.
+3. Open a task and look at comments and reminders. The buttons and placeholders should be French. A comment someone typed stays as they wrote it.
+4. Switch to Italiano and confirm the task list labels follow. Switch back to English.
 
 Blockers: none. No migration.
 

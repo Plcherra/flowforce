@@ -4,9 +4,11 @@ interface TaskLike {
   id: string;
 }
 
+type TaskKeyEvent = React.KeyboardEvent<HTMLElement>;
+
 export interface SelectionHandlers {
   onClick: () => void;
-  onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
+  onKeyDown: (event: TaskKeyEvent) => void;
 }
 
 export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
@@ -62,15 +64,17 @@ export function useTaskSelection<T extends TaskLike>(tasks: T[]) {
   }, []);
 
   const getSelectionHandlers = useCallback(
-    (taskId: string): SelectionHandlers => ({
-      onClick: () => openTask(taskId),
-      onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openTask(taskId);
-        }
-      },
-    }),
+    (taskId: string): SelectionHandlers => {
+      return {
+        onClick: () => openTask(taskId),
+        onKeyDown: (event: TaskKeyEvent) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openTask(taskId);
+          }
+        },
+      };
+    },
     [openTask],
   );
 

@@ -2,6 +2,7 @@
  * Task filters component
  */
 
+import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,7 @@ export function TaskFilters({
   filtersActive,
   onResetFilters,
 }: TaskFiltersProps) {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
 
   return (
@@ -54,13 +56,13 @@ export function TaskFilters({
         <div className={isMobile ? "w-full" : "w-64"}>
           <div className="relative">
             <Label htmlFor="tasks-search" className="sr-only">
-              Search tasks
+              {t("tasks.searchTasks")}
             </Label>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="tasks-search"
               data-testid="tasks-search-input"
-              placeholder="Search tasks"
+              placeholder={t("tasks.searchTasks")}
               value={searchTerm}
               onChange={(event) => onSearchChange(event.target.value)}
               className="pl-9"
@@ -77,9 +79,9 @@ export function TaskFilters({
           <SelectTrigger
             className={isMobile ? "w-full" : "w-48"}
             data-testid="tasks-priority-filter"
-            aria-label="Filter tasks by priority"
+            aria-label={t("tasks.filterTasksByPriority")}
           >
-            <SelectValue placeholder="Filter by priority" />
+            <SelectValue placeholder={t("tasks.filterByPriority")} />
           </SelectTrigger>
           <SelectContent>
             {priorityOptions.map((option) => (
@@ -97,12 +99,12 @@ export function TaskFilters({
           <SelectTrigger
             className={isMobile ? "w-full" : "w-44"}
             data-testid="tasks-kind-filter"
-            aria-label="Filter tasks by type"
+            aria-label={t("tasks.filterTasksByType")}
           >
-            <SelectValue placeholder="Filter by type" />
+            <SelectValue placeholder={t("tasks.filterByType")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="all">{t("tasks.allTypes")}</SelectItem>
             <SelectItem value="shift">{TASK_KIND_LABELS.shift}</SelectItem>
             <SelectItem value="checklist">{TASK_KIND_LABELS.checklist}</SelectItem>
             <SelectItem value="custom">{TASK_KIND_LABELS.custom}</SelectItem>
@@ -112,7 +114,7 @@ export function TaskFilters({
 
       {filtersActive && (
         <Button variant="ghost" size="sm" onClick={onResetFilters}>
-          Clear filters
+          {t("tasks.clearFilters")}
         </Button>
       )}
     </div>

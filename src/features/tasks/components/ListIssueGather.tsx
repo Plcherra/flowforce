@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useCan } from "@/hooks/useCan";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
@@ -29,6 +30,7 @@ export function ListIssueGather({
   }>;
   onMarkDone: (taskId: string) => void;
 }) {
+  const { t } = useTranslation();
   const { can, isLoading } = useCan();
   const { profile } = useProfile();
   const { roles } = useCompanyRoles();
@@ -51,7 +53,7 @@ export function ListIssueGather({
 
   return (
     <section className="space-y-2" data-testid="list-issue-gather">
-      <h2 className="text-sm font-semibold">List issues</h2>
+      <h2 className="text-sm font-semibold">{t("tasks.listIssues")}</h2>
       <ul className="divide-y rounded-md border">
         {issues.map((issue) => {
           const kind =
@@ -79,7 +81,7 @@ export function ListIssueGather({
                   data-testid={`list-issue-done-${issue.id}`}
                   onClick={() => onMarkDone(issue.id)}
                 >
-                  Mark done
+                  {t("tasks.markDone")}
                 </Button>
               ) : null}
             </li>

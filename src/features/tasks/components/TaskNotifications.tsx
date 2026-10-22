@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Bell,
@@ -41,6 +42,7 @@ type TaskNotificationsProps = {
 };
 
 export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
+  const { t } = useTranslation();
   const {
     notifications,
     unreadCount,
@@ -97,7 +99,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
     if (due < now) {
       return (
         <Badge variant="destructive" className="text-xs">
-          Overdue
+          {t("tasks.overdue")}
         </Badge>
       );
     } else if (isToday(due)) {
@@ -106,7 +108,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
           variant="outline"
           className="text-xs bg-warning-muted text-warning-foreground border-warning/40"
         >
-          Due Today
+          {t("tasks.dueToday")}
         </Badge>
       );
     } else if (isTomorrow(due)) {
@@ -115,7 +117,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
           variant="outline"
           className="text-xs bg-warning-muted text-warning-foreground border-warning/40"
         >
-          Due Tomorrow
+          {t("tasks.dueTomorrow")}
         </Badge>
       );
     } else if (isThisWeek(due)) {
@@ -124,7 +126,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
           variant="outline"
           className="text-xs bg-primary/10 text-primary border-primary/40"
         >
-          Due This Week
+          {t("tasks.dueThisWeek")}
         </Badge>
       );
     }
@@ -181,7 +183,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Task Notifications</CardTitle>
+              <CardTitle className="text-lg">{t("tasks.taskNotifications")}</CardTitle>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
@@ -189,7 +191,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                   onClick={markAllAsRead}
                   className="text-xs"
                 >
-                  Mark all read
+                  {t("tasks.markAllRead")}
                 </Button>
               )}
             </div>
@@ -206,7 +208,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
               {error && (
                 <div className="p-4 pt-0">
                   <Alert variant="destructive">
-                    <AlertTitle>Notifications unavailable</AlertTitle>
+                    <AlertTitle>{t("tasks.notificationsUnavailable")}</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 </div>
@@ -217,10 +219,10 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Bell className="h-8 w-8 text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    No notifications yet
+                    {t("tasks.noNotificationsYet")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    You&apos;ll see task updates here
+                    {t("tasks.youLlSeeTaskUpdatesHere")}
                   </p>
                 </div>
               ) : (

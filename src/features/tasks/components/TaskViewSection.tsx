@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import type {
   TaskPriorityFilter,
@@ -53,16 +54,17 @@ export function TaskViewSection({
   onReadinessFilterChange,
   readinessCounts,
 }: TaskViewSectionProps) {
+  const { t } = useTranslation();
   return (
     <section
-      aria-label="View"
+      aria-label={t("tasks.view")}
       data-testid="tasks-view-section"
       className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
     >
       <div className="space-y-1">
-        <h2 className="text-sm font-semibold">View</h2>
+        <h2 className="text-sm font-semibold">{t("tasks.view")}</h2>
         <p className="text-sm text-muted-foreground">
-          Status, search, type, priority, and the readiness counts.
+          {t("tasks.statusSearchTypePriorityAndTheReadinessCounts")}
         </p>
       </div>
 

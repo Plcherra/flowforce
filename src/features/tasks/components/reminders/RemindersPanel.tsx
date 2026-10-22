@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ReminderListSkeleton } from "@/components/loading/TaskSkeletons";
 
 export function RemindersPanel() {
+  const { t } = useTranslation();
   const {
     reminders,
     loading,
@@ -64,7 +66,7 @@ export function RemindersPanel() {
     if (isPast(reminderDate)) {
       return (
         <Badge variant="destructive" className="text-xs">
-          Overdue
+          {t("tasks.overdue")}
         </Badge>
       );
     } else if (isToday(reminderDate)) {
@@ -73,7 +75,7 @@ export function RemindersPanel() {
           variant="secondary"
           className="text-xs bg-warning-muted text-warning-foreground"
         >
-          Today
+          {t("tasks.today")}
         </Badge>
       );
     } else if (isTomorrow(reminderDate)) {
@@ -82,13 +84,13 @@ export function RemindersPanel() {
           variant="secondary"
           className="text-xs bg-warning-muted text-warning-foreground"
         >
-          Tomorrow
+          {t("tasks.tomorrow")}
         </Badge>
       );
     }
     return (
       <Badge variant="outline" className="text-xs">
-        Upcoming
+        {t("tasks.upcoming")}
       </Badge>
     );
   };
@@ -153,7 +155,7 @@ export function RemindersPanel() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center">
             <Clock className="h-5 w-5 mr-2 text-primary" />
-            Reminders
+            {t("tasks.reminders")}
           </CardTitle>
           <Button
             variant="outline"
@@ -161,7 +163,7 @@ export function RemindersPanel() {
             onClick={() => setShowCreateDialog(true)}
           >
             <Plus className="h-4 w-4 mr-1" />
-            Add
+            {t("tasks.add")}
           </Button>
         </div>
       </CardHeader>
@@ -175,7 +177,7 @@ export function RemindersPanel() {
               {overdueReminders.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-destructive mb-2">
-                    Overdue
+                    {t("tasks.overdue")}
                   </h4>
                   {overdueReminders.map((reminder) => (
                     <div
@@ -222,7 +224,7 @@ export function RemindersPanel() {
                                   size="sm"
                                   className="h-6 w-6 p-0"
                                   onClick={() => handleSnooze(reminder.id)}
-                                  title="Snooze for 15 minutes"
+                                  title={t("tasks.snoozeFor15Minutes")}
                                 >
                                   <Timer className="h-3 w-3" />
                                 </Button>
@@ -232,7 +234,7 @@ export function RemindersPanel() {
                                 size="sm"
                                 className="h-6 w-6 p-0"
                                 onClick={() => handleTestReminder(reminder.id)}
-                                title="Test notification"
+                                title={t("tasks.testNotification")}
                               >
                                 <Play className="h-3 w-3" />
                               </Button>
@@ -265,7 +267,7 @@ export function RemindersPanel() {
               {upcomingReminders.length > 0 ? (
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                    Upcoming
+                    {t("tasks.upcoming")}
                   </h4>
                   {upcomingReminders.map((reminder) => (
                     <div
@@ -311,7 +313,7 @@ export function RemindersPanel() {
                                 size="sm"
                                 className="h-6 w-6 p-0"
                                 onClick={() => handleTestReminder(reminder.id)}
-                                title="Test notification"
+                                title={t("tasks.testNotification")}
                               >
                                 <Play className="h-3 w-3" />
                               </Button>
@@ -341,14 +343,14 @@ export function RemindersPanel() {
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
                   <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No upcoming reminders</p>
+                  <p className="text-sm">{t("tasks.noUpcomingReminders")}</p>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="mt-2"
                     onClick={() => setShowCreateDialog(true)}
                   >
-                    Create your first reminder
+                    {t("tasks.createYourFirstReminder")}
                   </Button>
                 </div>
               )}

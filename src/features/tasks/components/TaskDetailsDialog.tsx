@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -121,6 +122,7 @@ export function TaskDetailsDialog({
   onClose,
   onTaskUpdate,
 }: TaskDetailsDialogProps) {
+  const { t } = useTranslation();
   const { updateStatus, updateTask, deleteTask } = useTasks();
   const { toast } = useToast();
   const {
@@ -541,7 +543,7 @@ export function TaskDetailsDialog({
                       href={scheduleLink.href}
                       className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                     >
-                      Open shift
+                      {t("tasks.openShift")}
                     </Link>
                   </>
                 ) : null}
@@ -562,7 +564,7 @@ export function TaskDetailsDialog({
           <div className="rounded-md border bg-muted/40 p-4 space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Workflow
+                {t("tasks.workflow")}
               </p>
               <Badge variant="secondary">
                 {getTaskStatusLabel(currentTask.status)}
@@ -624,7 +626,7 @@ export function TaskDetailsDialog({
                 ))
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  No available transitions from this status.
+                  {t("tasks.noAvailableTransitionsFromThisStatus")}
                 </p>
               )}
             </div>
@@ -633,7 +635,7 @@ export function TaskDetailsDialog({
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-3">
-                <CardTitle className="text-base">Execution Controls</CardTitle>
+                <CardTitle className="text-base">{t("tasks.executionControls")}</CardTitle>
                 <Button
                   type="button"
                   variant="ghost"
@@ -650,7 +652,7 @@ export function TaskDetailsDialog({
             <CardContent className="grid gap-4 md:grid-cols-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  Priority
+                  {t("tasks.priority")}
                 </Label>
                 <Select
                   value={executionForm.priority}
@@ -662,13 +664,13 @@ export function TaskDetailsDialog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Priority" />
+                    <SelectValue placeholder={t("tasks.priority")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="low">{t("tasks.low")}</SelectItem>
+                    <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
+                    <SelectItem value="high">{t("tasks.high")}</SelectItem>
+                    <SelectItem value="urgent">{t("tasks.urgent")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -678,7 +680,7 @@ export function TaskDetailsDialog({
                   htmlFor="task-starts-at"
                   className="text-xs font-semibold uppercase text-muted-foreground"
                 >
-                  Starts
+                  {t("tasks.starts")}
                 </Label>
                 <Input
                   id="task-starts-at"
@@ -698,7 +700,7 @@ export function TaskDetailsDialog({
                   htmlFor="task-ends-at"
                   className="text-xs font-semibold uppercase text-muted-foreground"
                 >
-                  Ends
+                  {t("tasks.ends")}
                 </Label>
                 <Input
                   id="task-ends-at"
@@ -715,7 +717,7 @@ export function TaskDetailsDialog({
 
               <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  Publish
+                  {t("tasks.publish")}
                 </Label>
                 <Select
                   value={executionForm.publish_state}
@@ -727,12 +729,12 @@ export function TaskDetailsDialog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Publish" />
+                    <SelectValue placeholder={t("tasks.publish")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="published">Publish now</SelectItem>
-                    <SelectItem value="scheduled">Schedule for the start</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">{t("tasks.publishNow")}</SelectItem>
+                    <SelectItem value="scheduled">{t("tasks.scheduleForTheStart")}</SelectItem>
+                    <SelectItem value="draft">{t("tasks.draft")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -742,7 +744,7 @@ export function TaskDetailsDialog({
                   htmlFor="task-actual-hours"
                   className="text-xs font-semibold uppercase text-muted-foreground"
                 >
-                  Actual hours
+                  {t("tasks.actualHours")}
                 </Label>
                 <Input
                   id="task-actual-hours"
@@ -775,7 +777,7 @@ export function TaskDetailsDialog({
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  Assignee
+                  {t("tasks.assignee")}
                 </Label>
                 <Select
                   value={assignmentValue}
@@ -783,10 +785,10 @@ export function TaskDetailsDialog({
                   disabled={optionsLoading || updatingAssignment}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select team member" />
+                    <SelectValue placeholder={t("tasks.selectTeamMember")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Unassigned</SelectItem>
+                    <SelectItem value="none">{t("tasks.unassigned")}</SelectItem>
                     {assignees.map((assignee) => (
                       <SelectItem key={assignee.id} value={assignee.id}>
                         {assignee.first_name} {assignee.last_name}
@@ -796,14 +798,14 @@ export function TaskDetailsDialog({
                 </Select>
                 {updatingAssignment && (
                   <p className="text-xs text-muted-foreground">
-                    Updating assignment…
+                    {t("tasks.updatingAssignment")}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  Linked Goal
+                  {t("tasks.linkedGoal")}
                 </Label>
                 <Select
                   value={goalValue}
@@ -811,10 +813,10 @@ export function TaskDetailsDialog({
                   disabled={optionsLoading || updatingGoal}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select goal" />
+                    <SelectValue placeholder={t("tasks.selectGoal")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No goal</SelectItem>
+                    <SelectItem value="none">{t("tasks.noGoal")}</SelectItem>
                     {goals.map((goalOption) => (
                       <SelectItem key={goalOption.id} value={goalOption.id}>
                         {goalOption.title}
@@ -824,7 +826,7 @@ export function TaskDetailsDialog({
                 </Select>
                 {updatingGoal && (
                   <p className="text-xs text-muted-foreground">
-                    Updating goal link…
+                    {t("tasks.updatingGoalLink")}
                   </p>
                 )}
                 {goalValue !== "none" && currentTask.goal && (
@@ -838,7 +840,7 @@ export function TaskDetailsDialog({
                 )}
                 {goalValue === "none" && (
                   <p className="text-xs text-muted-foreground">
-                    Not linked to a goal.
+                    {t("tasks.notLinkedToAGoal")}
                   </p>
                 )}
               </div>
@@ -849,7 +851,7 @@ export function TaskDetailsDialog({
               {currentTask.due_date && (
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Due:</span>
+                  <span className="text-muted-foreground">{t("tasks.due")}</span>
                   <span>
                     {format(new Date(currentTask.due_date), "MMM dd, yyyy")}
                   </span>
@@ -857,7 +859,7 @@ export function TaskDetailsDialog({
               )}
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Created:</span>
+                <span className="text-muted-foreground">{t("tasks.created")}</span>
                 <span>
                   {format(new Date(currentTask.created_at), "MMM dd, yyyy")}
                 </span>
@@ -865,7 +867,7 @@ export function TaskDetailsDialog({
               {currentTask.completed_at && (
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Completed:</span>
+                  <span className="text-muted-foreground">{t("tasks.completed")}</span>
                   <span>
                     {format(new Date(currentTask.completed_at), "MMM dd, yyyy")}
                   </span>
@@ -873,7 +875,7 @@ export function TaskDetailsDialog({
               )}
               {currentTask.department && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-muted-foreground">Department:</span>
+                  <span className="text-muted-foreground">{t("tasks.department")}</span>
                   <span>{currentTask.department.name}</span>
                 </div>
               )}
@@ -889,12 +891,12 @@ export function TaskDetailsDialog({
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <MessageSquare className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Comments</h3>
+              <h3 className="text-lg font-semibold">{t("tasks.comments")}</h3>
             </div>
 
             <div className="space-y-2">
               <Textarea
-                placeholder="Add a comment..."
+                placeholder={t("tasks.addAComment")}
                 value={newComment}
                 onChange={(event) => setNewComment(event.target.value)}
                 rows={3}
@@ -916,7 +918,7 @@ export function TaskDetailsDialog({
                 <CommentsSkeleton />
               ) : comments.length === 0 ? (
                 <div className="py-6 text-center text-sm text-muted-foreground">
-                  No comments yet. Be the first to add one.
+                  {t("tasks.noCommentsYetBeTheFirstToAdd")}
                 </div>
               ) : (
                 comments.map((comment) => (

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -44,6 +45,7 @@ export function CreateTaskDialog({
   onClose,
   createLevel = "others",
 }: CreateTaskDialogProps) {
+  const { t } = useTranslation();
   const { createTask } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -113,18 +115,18 @@ export function CreateTaskDialog({
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
-      nextErrors.title = "A title is required.";
+      nextErrors.title = t("tasks.aTitleIsRequired");
     }
     if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
-      nextErrors.points = "Points must be a whole number.";
+      nextErrors.points = t("tasks.pointsMustBeWholeNumber");
     }
     if (formData.starts_at || formData.ends_at) {
       const startsAt = fromDatetimeLocalValue(formData.starts_at);
       const endsAt = fromDatetimeLocalValue(formData.ends_at);
       if (!startsAt || !endsAt) {
-        nextErrors.ends_at = "A window needs a start and an end.";
+        nextErrors.ends_at = t("tasks.windowNeedsStartAndEnd");
       } else if (new Date(endsAt).getTime() < new Date(startsAt).getTime()) {
-        nextErrors.ends_at = "The end must be after the start.";
+        nextErrors.ends_at = t("tasks.endMustBeAfterStart");
       }
     }
     return nextErrors;
@@ -221,18 +223,18 @@ export function CreateTaskDialog({
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle>{t("tasks.createNewTask")}</DialogTitle>
           <DialogDescription>
-            Create a new task to track your work and collaborate with your team.
+            {t("tasks.createANewTaskToTrackYourWork")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{t("tasks.title")}</Label>
             <Input
               id="title"
-              placeholder="Enter task title"
+              placeholder={t("tasks.enterTaskTitle")}
               value={formData.title}
               onChange={(e) => handleFieldChange("title", e.target.value)}
               aria-invalid={Boolean(errors.title)}
@@ -252,10 +254,10 @@ export function CreateTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
-              placeholder="Enter task description"
+              placeholder={t("tasks.enterTaskDescription")}
               value={formData.description}
               onChange={(e) => handleFieldChange("description", e.target.value)}
               rows={3}
@@ -264,25 +266,25 @@ export function CreateTaskDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">{t("tasks.priority")}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value) => handleFieldChange("priority", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
+                  <SelectValue placeholder={t("tasks.selectPriority")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t("tasks.low")}</SelectItem>
+                  <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
+                  <SelectItem value="high">{t("tasks.high")}</SelectItem>
+                  <SelectItem value="urgent">{t("tasks.urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="publish_state">Publish</Label>
+              <Label htmlFor="publish_state">{t("tasks.publish")}</Label>
               <Select
                 value={formData.publish_state}
                 onValueChange={(value) =>
@@ -290,12 +292,12 @@ export function CreateTaskDialog({
                 }
               >
                 <SelectTrigger id="publish_state">
-                  <SelectValue placeholder="Publish" />
+                  <SelectValue placeholder={t("tasks.publish")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="published">Publish now</SelectItem>
-                  <SelectItem value="scheduled">Schedule for the start</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">{t("tasks.publishNow")}</SelectItem>
+                  <SelectItem value="scheduled">{t("tasks.scheduleForTheStart")}</SelectItem>
+                  <SelectItem value="draft">{t("tasks.draft")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -304,12 +306,12 @@ export function CreateTaskDialog({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {createLevel === "self" ? (
               <div className="space-y-2">
-                <Label>Assign To</Label>
-                <p className="text-sm text-muted-foreground">Assigned to you</p>
+                <Label>{t("tasks.assignTo")}</Label>
+                <p className="text-sm text-muted-foreground">{t("tasks.assignedToYou")}</p>
               </div>
             ) : (
             <div className="space-y-2">
-              <Label htmlFor="assigned_to">Assign To</Label>
+              <Label htmlFor="assigned_to">{t("tasks.assignTo")}</Label>
               <Select
                 value={formData.assigned_to || "none"}
                 onValueChange={(value) =>
@@ -330,7 +332,7 @@ export function CreateTaskDialog({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Unassigned</SelectItem>
+                  <SelectItem value="none">{t("tasks.unassigned")}</SelectItem>
                   {assignees.map((assignee) => (
                     <SelectItem key={assignee.id} value={assignee.id}>
                       {assignee.first_name} {assignee.last_name}
@@ -342,7 +344,7 @@ export function CreateTaskDialog({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="goal_id">Linked Goal</Label>
+              <Label htmlFor="goal_id">{t("tasks.linkedGoal")}</Label>
               <Select
                 value={formData.goal_id || "none"}
                 onValueChange={(value) =>
@@ -362,7 +364,7 @@ export function CreateTaskDialog({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No goal</SelectItem>
+                  <SelectItem value="none">{t("tasks.noGoal")}</SelectItem>
                   {goals.map((goal) => (
                     <SelectItem key={goal.id} value={goal.id}>
                       {goal.title}
@@ -375,7 +377,7 @@ export function CreateTaskDialog({
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="starts_at">Starts</Label>
+              <Label htmlFor="starts_at">{t("tasks.starts")}</Label>
               <Input
                 id="starts_at"
                 type="datetime-local"
@@ -384,7 +386,7 @@ export function CreateTaskDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ends_at">Ends</Label>
+              <Label htmlFor="ends_at">{t("tasks.ends")}</Label>
               <Input
                 id="ends_at"
                 type="datetime-local"
@@ -406,17 +408,17 @@ export function CreateTaskDialog({
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            The window is when the task is open. It is not how long the work takes.
+            {t("tasks.theWindowIsWhenTheTaskIsOpen")}
           </p>
 
           <div className="space-y-2">
-            <Label htmlFor="points">Points</Label>
+            <Label htmlFor="points">{t("tasks.points")}</Label>
             <Input
               id="points"
               type="number"
               min={0}
               step={1}
-              placeholder="Optional"
+              placeholder={t("tasks.optional")}
               value={formData.points}
               onChange={(e) => handleFieldChange("points", e.target.value)}
               aria-invalid={Boolean(errors.points)}
@@ -425,7 +427,7 @@ export function CreateTaskDialog({
               }
             />
             <p className="text-sm text-muted-foreground">
-              Whole points. On completion, the leaderboard uses this number as the task XP.
+              {t("tasks.wholePointsOnCompletionTheLeaderboardUsesThis")}
             </p>
             {errors.points && (
               <p className="text-sm text-destructive" id="create-task-points-error">
@@ -442,7 +444,7 @@ export function CreateTaskDialog({
               onCheckedChange={(checked) => setCreateReminder(checked === true)}
             />
             <Label htmlFor="create-reminder" className="text-sm">
-              Create reminder for this task
+              {t("tasks.createReminderForThisTask")}
             </Label>
           </div>
 
@@ -453,7 +455,7 @@ export function CreateTaskDialog({
               onClick={() => handleDialogChange(false)}
               disabled={loading}
             >
-              Cancel
+              {t("tasks.cancel")}
             </Button>
             <Button type="submit" disabled={loading || !formData.title.trim()}>
               {loading ? "Creating..." : "Create Task"}

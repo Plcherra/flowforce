@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
@@ -12,6 +13,7 @@ export function TaskExecutionReadinessPanel({
   tasks,
   onOpenTask,
 }: TaskExecutionReadinessPanelProps) {
+  const { t } = useTranslation();
   const { reminders } = useReminders();
   const summary = useMemo(
     () => buildTaskExecutionSummary({ tasks, reminders }),
@@ -21,8 +23,8 @@ export function TaskExecutionReadinessPanel({
   if (summary.issues.length === 0) return null;
 
   return (
-    <section aria-label="Warnings" data-testid="tasks-warnings" className="space-y-2">
-      <h2 className="text-sm font-semibold">Warnings</h2>
+    <section aria-label={t("tasks.warnings")} data-testid="tasks-warnings" className="space-y-2">
+      <h2 className="text-sm font-semibold">{t("tasks.warnings")}</h2>
       <ul className="divide-y overflow-hidden rounded-lg border border-border/70">
         {summary.issues.map((issue) => (
           <li key={issue.id}>

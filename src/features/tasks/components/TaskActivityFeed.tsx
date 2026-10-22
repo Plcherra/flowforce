@@ -1,4 +1,5 @@
-﻿import { useEffect, useRef } from "react";
+﻿import { useTranslation } from "react-i18next";
+import { useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -32,6 +33,7 @@ import type { TaskActivityWithActor } from "@/features/tasks/repositories/taskAc
 import { logger } from "@/utils/logger";
 
 export function TaskActivityFeed() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const subscriptionRef = useRef<RealtimeChannel | null>(null);
@@ -181,10 +183,10 @@ export function TaskActivityFeed() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center">
             <Clock className="h-5 w-5 mr-2" />
-            Recent Activity
+            {t("tasks.recentActivity")}
           </CardTitle>
           <CardDescription>
-            Latest updates and changes across all tasks
+            {t("tasks.latestUpdatesAndChangesAcrossAllTasks")}
           </CardDescription>
         </CardHeader>
         <ActivityFeedSkeleton />
@@ -197,17 +199,17 @@ export function TaskActivityFeed() {
       <CardHeader>
         <CardTitle className="text-lg flex items-center">
           <Clock className="h-5 w-5 mr-2" />
-          Recent Activity
+          {t("tasks.recentActivity")}
         </CardTitle>
         <CardDescription>
-          Latest updates and changes across all tasks
+          {t("tasks.latestUpdatesAndChangesAcrossAllTasks")}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {error && (
           <div className="p-4">
             <Alert variant="destructive">
-              <AlertTitle>Activity feed unavailable</AlertTitle>
+              <AlertTitle>{t("tasks.activityFeedUnavailable")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           </div>
@@ -217,20 +219,20 @@ export function TaskActivityFeed() {
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Clock className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
-                WeΓÇÖre trying to reconnect to your activity feed.
+                {t("tasks.weReTryingToReconnectToYourActivity")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Updates will resume automatically.
+                {t("tasks.updatesWillResumeAutomatically")}
               </p>
             </div>
           ) : activities.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <Clock className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
-                No recent activity
+                {t("tasks.noRecentActivity")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Activity will appear here as you work on tasks
+                {t("tasks.activityWillAppearHereAsYouWorkOn")}
               </p>
             </div>
           ) : (

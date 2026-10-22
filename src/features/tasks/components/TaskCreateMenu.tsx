@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
@@ -11,6 +12,7 @@ interface TaskCreateMenuProps {
 }
 
 export function TaskCreateMenu({ onCreateCustom }: TaskCreateMenuProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -18,7 +20,7 @@ export function TaskCreateMenu({ onCreateCustom }: TaskCreateMenuProps) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label="Create"
+          aria-label={t("tasks.create")}
           data-testid="tasks-create-button"
           className="above-bottom-icon-nav fixed right-4 z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg print:hidden"
         >
@@ -39,7 +41,7 @@ export function TaskCreateMenu({ onCreateCustom }: TaskCreateMenuProps) {
             onCreateCustom();
           }}
         >
-          New custom task
+          {t("tasks.newCustomTask")}
         </button>
       </PopoverContent>
     </Popover>
