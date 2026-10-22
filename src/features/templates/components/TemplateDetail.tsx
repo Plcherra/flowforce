@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "@/lib/router-adapter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ interface TemplateDetailProps {
 }
 
 export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -36,7 +38,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link to="/" className="hover:text-primary">
-                  Home
+                  {t("onboarding.home")}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -44,7 +46,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link to="/templates" className="hover:text-primary">
-                  Templates
+                  {t("schedule.templates")}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -78,7 +80,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="px-8 py-4">
-                Schedule Demo
+                {t("onboarding.scheduleDemo")}
               </Button>
             </div>
           </div>
@@ -101,7 +103,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-6">
-              Key Features
+              {t("onboarding.keyFeatures")}
             </h2>
             <div className="space-y-4">
               {template.features.map((feature, index) => (
@@ -119,7 +121,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
 
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-6">
-              Included Modules
+              {t("onboarding.includedModules")}
             </h2>
             <div className="space-y-4">
               {template.modules.map((module, index) => (
@@ -146,7 +148,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
         <Card className="bg-gradient-to-r from-muted to-primary border-0">
           <CardContent className="p-12 text-center">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Ready to Get Started?
+              {t("onboarding.readyToGetStarted")}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               Set up your {template.title.toLowerCase()} in minutes with our
@@ -163,7 +165,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="px-8 py-4">
-                Schedule Demo
+                {t("onboarding.scheduleDemo")}
               </Button>
             </div>
           </CardContent>

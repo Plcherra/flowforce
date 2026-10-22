@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -43,6 +44,7 @@ export default function PositionManager({
   open,
   onOpenChange,
 }: PositionManagerProps) {
+  const { t } = useTranslation();
   const [editingPosition, setEditingPosition] =
     useState<OnboardingPosition | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -117,7 +119,7 @@ export default function PositionManager({
                 </h4>
                 <Button onClick={() => handleAddPosition()} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Custom Position
+                  {t("onboarding.addCustomPosition")}
                 </Button>
               </div>
 
@@ -141,7 +143,7 @@ export default function PositionManager({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Done
+              {t("inventory.done")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -106,11 +106,10 @@ export default function TemplateSelector({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-2">
-          Choose Your Business Template
+          {t("onboarding.templateSelection.title")}
         </h3>
         <p className="text-muted-foreground">
-          Select a pre-configured template that matches your business type. You
-          can customize sections later.
+          {t("onboarding.selectAPreConfiguredTemplateThatMatchesYourBusinessTypeYouCanCustomizeSectionsLater")}
         </p>
       </div>
 
@@ -341,7 +340,7 @@ export default function TemplateSelector({
             onClick={loadMoreTemplates}
             className="group"
           >
-            <span>Load More Templates</span>
+            <span>{t("onboarding.loadMoreTemplates")}</span>
             <ChevronDown className="ml-2 h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
           </Button>
         </div>

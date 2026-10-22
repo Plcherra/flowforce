@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -38,6 +39,7 @@ export default function BrandingCustomizer({
   branding,
   onBrandingChange,
 }: BrandingCustomizerProps) {
+  const { t } = useTranslation();
   const [_logoFile, setLogoFile] = useState<File | null>(null);
 
   const handleStyleChange = (property: keyof CustomBranding, value: any) => {
@@ -63,7 +65,7 @@ export default function BrandingCustomizer({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-semibold mb-2">Customize Your Brand</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("onboarding.branding.title")}</h3>
         <p className="text-muted-foreground">
           Create a unique look and feel for your company&apos;s workspace
         </p>
@@ -71,10 +73,10 @@ export default function BrandingCustomizer({
 
       <Tabs defaultValue="logo" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="logo">Logo</TabsTrigger>
-          <TabsTrigger value="typography">Typography</TabsTrigger>
-          <TabsTrigger value="layout">Layout</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+          <TabsTrigger value="logo">{t("onboarding.branding.tabs.logo")}</TabsTrigger>
+          <TabsTrigger value="typography">{t("onboarding.branding.tabs.typography")}</TabsTrigger>
+          <TabsTrigger value="layout">{t("onboarding.branding.tabs.layout")}</TabsTrigger>
+          <TabsTrigger value="advanced">{t("onboarding.branding.tabs.advanced")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="logo" className="space-y-4">
@@ -82,10 +84,10 @@ export default function BrandingCustomizer({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Company Logo
+                {t("onboarding.branding.logo.title")}
               </CardTitle>
               <CardDescription>
-                Upload your company logo (recommended: 200x60px, PNG/SVG)
+                {t("onboarding.branding.logo.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -95,24 +97,24 @@ export default function BrandingCustomizer({
                     <div className="space-y-2">
                       <img
                         src={branding.logo}
-                        alt="Logo preview"
+                        alt={t("onboarding.logoPreview")}
                         className="max-h-16 mx-auto"
                       />
                       <Button
                         variant="outline"
                         onClick={() => handleStyleChange("logo", undefined)}
                       >
-                        Remove Logo
+                        {t("onboarding.branding.logo.removeLogo")}
                       </Button>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
-                        Click to upload or drag and drop
+                        {t("onboarding.branding.logo.uploadText")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        PNG, JPG, SVG up to 2MB
+                        {t("onboarding.branding.logo.supportedFormats")}
                       </p>
                     </div>
                   )}
@@ -173,7 +175,7 @@ export default function BrandingCustomizer({
                           fontFamily: branding.fontFamily,
                         }}
                       >
-                        Sample Heading
+                        {t("onboarding.branding.typography.sampleHeading")}
                       </h4>
                       <p
                         className="text-sm mb-2"
@@ -182,9 +184,7 @@ export default function BrandingCustomizer({
                           fontFamily: branding.fontFamily,
                         }}
                       >
-                        This is how your text will look with the selected font
-                        family and colors. Your workspace will use this
-                        typography throughout the interface.
+                        {t("onboarding.branding.typography.sampleText")}
                       </p>
                       <div
                         className="mt-2 text-xs"
@@ -193,7 +193,7 @@ export default function BrandingCustomizer({
                           fontFamily: branding.fontFamily,
                         }}
                       >
-                        Accent color and font preview
+                        {t("onboarding.branding.typography.accentPreview")}
                       </div>
                       <div className="mt-3 pt-2 border-t border-border">
                         <div className="text-xs text-muted-foreground">
@@ -208,7 +208,7 @@ export default function BrandingCustomizer({
                 </div>
 
                 <div className="space-y-3">
-                  <Label>Header Style</Label>
+                  <Label>{t("onboarding.branding.typography.headerStyle")}</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       {
@@ -262,7 +262,7 @@ export default function BrandingCustomizer({
                               fontFamily: branding.fontFamily,
                             }}
                           >
-                            Header Preview
+                            {t("onboarding.branding.typography.previewHeader")}
                           </div>
                         </div>
                       </div>
@@ -279,15 +279,15 @@ export default function BrandingCustomizer({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Layout className="h-5 w-5" />
-                Layout Style
+                {t("onboarding.branding.layout.title")}
               </CardTitle>
               <CardDescription>
-                Customize the overall layout and component styles
+                {t("onboarding.branding.layout.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Label>Sidebar Style</Label>
+                <Label>{t("onboarding.branding.layout.sidebarStyle")}</Label>
                 <div className="grid grid-cols-1 gap-3">
                   {[
                     {
@@ -342,7 +342,7 @@ export default function BrandingCustomizer({
               </div>
 
               <div className="space-y-3">
-                <Label>Card Style</Label>
+                <Label>{t("onboarding.branding.layout.cardStyle")}</Label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { value: "rounded", label: "Rounded", class: "rounded-lg" },
@@ -376,7 +376,7 @@ export default function BrandingCustomizer({
               </div>
 
               <div className="space-y-3">
-                <Label>Background Pattern</Label>
+                <Label>{t("onboarding.branding.layout.backgroundPattern")}</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     {
@@ -446,16 +446,16 @@ export default function BrandingCustomizer({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Code className="h-5 w-5" />
-                Advanced Customization
+                {t("onboarding.advancedCustomization")}
               </CardTitle>
               <CardDescription>
-                Add custom CSS for advanced styling (optional)
+                {t("onboarding.addCustomCssForAdvancedStylingOptional")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Custom CSS</Label>
+                  <Label>{t("onboarding.customCss")}</Label>
                   <Textarea
                     value={branding.customCSS || ""}
                     onChange={(e) =>
@@ -466,8 +466,7 @@ export default function BrandingCustomizer({
                     className="font-mono text-sm"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Advanced users can add custom CSS to further customize the
-                    appearance
+                    {t("onboarding.advancedUsersCanAddCustomCssToFurtherCustomizeTheAppearance")}
                   </p>
                 </div>
               </div>
@@ -479,9 +478,9 @@ export default function BrandingCustomizer({
       {/* Preview Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Live Preview</CardTitle>
+          <CardTitle>{t("forms.livePreview")}</CardTitle>
           <CardDescription>
-            See how your branding choices will look
+            {t("onboarding.seeHowYourBrandingChoicesWillLook")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -523,7 +522,7 @@ export default function BrandingCustomizer({
                 }}
               >
                 {branding.logo && (
-                  <img src={branding.logo} alt="Logo" className="h-8" />
+                  <img src={branding.logo} alt={t("onboarding.branding.tabs.logo")} className="h-8" />
                 )}
                 <div
                   className={`
@@ -534,7 +533,7 @@ export default function BrandingCustomizer({
                   `}
                   style={{ color: branding.primaryColor }}
                 >
-                  Your Company Name
+                  {t("onboarding.yourCompanyName")}
                 </div>
               </div>
 
@@ -591,25 +590,25 @@ export default function BrandingCustomizer({
 
               {/* Color Palette */}
               <div className="mt-4 pt-4 border-t border-border">
-                <div className="text-sm text-muted-foreground mb-2">Color Palette</div>
+                <div className="text-sm text-muted-foreground mb-2">{t("onboarding.colorPalette")}</div>
                 <div className="flex gap-2">
                   <div
                     className="w-12 h-8 rounded text-primary-foreground text-xs flex items-center justify-center"
                     style={{ backgroundColor: branding.primaryColor }}
                   >
-                    Primary
+                    {t("inventory.primary")}
                   </div>
                   <div
                     className="w-12 h-8 rounded text-primary-foreground text-xs flex items-center justify-center"
                     style={{ backgroundColor: branding.secondaryColor }}
                   >
-                    Secondary
+                    {t("onboarding.secondary")}
                   </div>
                   <div
                     className="w-12 h-8 rounded text-primary-foreground text-xs flex items-center justify-center"
                     style={{ backgroundColor: branding.accentColor }}
                   >
-                    Accent
+                    {t("onboarding.accent")}
                   </div>
                 </div>
               </div>
@@ -621,7 +620,7 @@ export default function BrandingCustomizer({
               style={{ fontFamily: branding.fontFamily }}
             >
               <div className="text-sm text-muted-foreground mb-2">
-                Typography Sample
+                {t("onboarding.typographySample")}
               </div>
               <h3
                 className={`
@@ -632,12 +631,10 @@ export default function BrandingCustomizer({
                 `}
                 style={{ color: branding.primaryColor }}
               >
-                Sample Heading Text
+                {t("onboarding.sampleHeadingText")}
               </h3>
               <p className="text-foreground text-sm">
-                This is how regular paragraph text will appear in your
-                application. The font family and header styles create a cohesive
-                look throughout your workspace.
+                {t("onboarding.thisIsHowRegularParagraphTextWillAppearInYourApplicationTheFontFamilyAndHeaderStylesCreateACohesiveLookThroughoutYourWorkspace")}
               </p>
             </div>
           </div>

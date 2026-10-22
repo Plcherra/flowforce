@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -184,6 +185,7 @@ export default function CompanyOnboardingWizard({
   onComplete,
   onCancel,
 }: CompanyOnboardingWizardProps) {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: "",
@@ -263,10 +265,10 @@ export default function CompanyOnboardingWizard({
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Building2 className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">FlowForce</h1>
+            <h1 className="text-3xl font-bold text-foreground">{t("onboarding.wizard.title")}</h1>
           </div>
           <h2 className="text-2xl font-semibold text-foreground">
-            Company Onboarding
+            {t("onboarding.companyOnboarding")}
           </h2>
           <p className="text-muted-foreground mt-2">
             Let&apos;s set up your business operations platform
@@ -286,16 +288,16 @@ export default function CompanyOnboardingWizard({
                 <CardHeader className="px-0 pt-0">
                   <CardTitle className="flex items-center">
                     <Building2 className="mr-2 h-6 w-6" />
-                    Company Information
+                    {t("onboarding.userInfo.companyInfo")}
                   </CardTitle>
                   <CardDescription>
-                    Tell us about your company to customize your experience
+                    {t("onboarding.tellUsAboutYourCompanyToCustomizeYourExperience")}
                   </CardDescription>
                 </CardHeader>
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="company-name">Company Name *</Label>
+                      <Label htmlFor="company-name">{t("auth.companyName")}</Label>
                       <Input
                         id="company-name"
                         value={companyInfo.name}
@@ -305,11 +307,11 @@ export default function CompanyOnboardingWizard({
                             name: e.target.value,
                           }))
                         }
-                        placeholder="Enter your company name"
+                        placeholder={t("onboarding.userInfo.placeholders.companyName")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="industry">Industry *</Label>
+                      <Label htmlFor="industry">{t("auth.industry")}</Label>
                       <Select
                         value={companyInfo.industry}
                         onValueChange={(value) =>
@@ -320,7 +322,7 @@ export default function CompanyOnboardingWizard({
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select your industry" />
+                          <SelectValue placeholder={t("onboarding.selectYourIndustry")} />
                         </SelectTrigger>
                         <SelectContent>
                           {INDUSTRIES.map((industry) => (
@@ -334,7 +336,7 @@ export default function CompanyOnboardingWizard({
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="company-size">Company Size *</Label>
+                      <Label htmlFor="company-size">{t("auth.companySize")}</Label>
                       <Select
                         value={companyInfo.size}
                         onValueChange={(value) =>
@@ -342,7 +344,7 @@ export default function CompanyOnboardingWizard({
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select company size" />
+                          <SelectValue placeholder={t("onboarding.selectCompanySize")} />
                         </SelectTrigger>
                         <SelectContent>
                           {COMPANY_SIZES.map((size) => (
@@ -354,7 +356,7 @@ export default function CompanyOnboardingWizard({
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="website">Website</Label>
+                      <Label htmlFor="website">{t("onboarding.userInfo.fields.website")}</Label>
                       <Input
                         id="website"
                         value={companyInfo.website}
@@ -369,7 +371,7 @@ export default function CompanyOnboardingWizard({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description">Company Description</Label>
+                    <Label htmlFor="description">{t("onboarding.userInfo.fields.description")}</Label>
                     <Textarea
                       id="description"
                       value={companyInfo.description}
@@ -379,7 +381,7 @@ export default function CompanyOnboardingWizard({
                           description: e.target.value,
                         }))
                       }
-                      placeholder="Brief description of your company and what you do"
+                      placeholder={t("onboarding.briefDescriptionOfYourCompanyAndWhatYouDo")}
                       rows={3}
                     />
                   </div>
@@ -392,25 +394,25 @@ export default function CompanyOnboardingWizard({
                 <CardHeader className="px-0 pt-0">
                   <CardTitle className="flex items-center">
                     <Palette className="mr-2 h-6 w-6" />
-                    Branding & Customization
+                    {t("onboarding.brandingCustomization")}
                   </CardTitle>
                   <CardDescription>
-                    Customize the look and feel of your FlowForce workspace
+                    {t("onboarding.customizeTheLookAndFeelOfYourFlowforceWorkspace")}
                   </CardDescription>
                 </CardHeader>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="logo">Company Logo</Label>
+                    <Label htmlFor="logo">{t("onboarding.branding.logo.title")}</Label>
                     <div className="flex items-center space-x-4">
                       <div className="flex-1">
                         <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                           <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                           <div className="mt-4">
                             <Button variant="outline" size="sm">
-                              Choose File
+                              {t("schedule.chooseFile")}
                             </Button>
                             <p className="text-sm text-muted-foreground mt-2">
-                              PNG, JPG up to 2MB
+                              {t("onboarding.pngJpgUpTo2mb")}
                             </p>
                           </div>
                         </div>
@@ -424,10 +426,9 @@ export default function CompanyOnboardingWizard({
             {currentStep === 3 && (
               <div>
                 <CardHeader className="px-0 pt-0">
-                  <CardTitle>Choose Your Business Template</CardTitle>
+                  <CardTitle>{t("onboarding.templateSelection.title")}</CardTitle>
                   <CardDescription>
-                    Select a pre-configured template that matches your business
-                    type
+                    {t("onboarding.selectAPreConfiguredTemplateThatMatchesYourBusinessType")}
                   </CardDescription>
                 </CardHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -476,9 +477,9 @@ export default function CompanyOnboardingWizard({
             {currentStep === 4 && (
               <div>
                 <CardHeader className="px-0 pt-0">
-                  <CardTitle>Customize Your Sections</CardTitle>
+                  <CardTitle>{t("onboarding.customizeYourSections")}</CardTitle>
                   <CardDescription>
-                    Review and adjust the sections enabled for your workspace
+                    {t("onboarding.reviewAndAdjustTheSectionsEnabledForYourWorkspace")}
                   </CardDescription>
                 </CardHeader>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -514,23 +515,23 @@ export default function CompanyOnboardingWizard({
               <div>
                 {currentStep > 1 && (
                   <Button variant="outline" onClick={handleBack}>
-                    Back
+                    {t("onboarding.wizard.back")}
                   </Button>
                 )}
                 {currentStep === 1 && (
                   <Button variant="outline" onClick={onCancel}>
-                    Cancel
+                    {t("onboarding.wizard.cancel")}
                   </Button>
                 )}
               </div>
               <div>
                 {currentStep < totalSteps ? (
                   <Button onClick={handleNext} disabled={!canProceed()}>
-                    Next
+                    {t("onboarding.wizard.next")}
                   </Button>
                 ) : (
                   <Button onClick={handleComplete} disabled={!canProceed()}>
-                    Complete Setup
+                    {t("onboarding.wizard.complete")}
                   </Button>
                 )}
               </div>

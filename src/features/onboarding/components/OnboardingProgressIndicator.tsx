@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, AlertCircle } from "lucide-react";
@@ -19,33 +20,40 @@ export const OnboardingProgressIndicator = memo(
     enabledSectionCount,
     hasRequiredRoles,
   }: OnboardingProgressIndicatorProps) {
+    const { t } = useTranslation();
     const getProgressIcon = () => {
       if (completionProgress === 100)
         return <CheckCircle className="h-4 w-4 text-success" />;
-      if (completionProgress > 50)
+      if (completionProgress > 50) {
         return <Clock className="h-4 w-4 text-warning" />;
+      }
       return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
     };
 
     return (
       <div className="flex items-center gap-2 text-sm">
         {getProgressIcon()}
-        <span className="font-medium">{completionProgress}% Complete</span>
+        <span className="font-medium">
+          {t("onboarding.percentComplete", { count: completionProgress })}
+        </span>
 
         <div className="flex gap-1 ml-2">
           <Badge variant="outline" className="text-xs">
-            Step {currentStep}/{totalSteps}
+            {t("onboarding.stepOf", {
+              current: currentStep,
+              total: totalSteps,
+            })}
           </Badge>
 
           {enabledSectionCount > 0 && (
             <Badge variant="secondary" className="text-xs">
-              {enabledSectionCount} sections
+              {t("onboarding.sectionCount", { count: enabledSectionCount })}
             </Badge>
           )}
 
           {hasRequiredRoles && (
             <Badge variant="secondary" className="text-xs text-success">
-              Roles configured
+              {t("onboarding.rolesConfigured")}
             </Badge>
           )}
         </div>

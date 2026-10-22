@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
@@ -28,6 +29,7 @@ export function EmployeeFixedAvailabilityStep({
   companyId,
   onSent,
 }: EmployeeFixedAvailabilityStepProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [grid, setGrid] = useState<AvailabilityGrid>({});
 
@@ -72,10 +74,9 @@ export function EmployeeFixedAvailabilityStep({
       data-testid="employee-fixed-availability-onboarding"
       className="mb-4 rounded-lg border bg-background p-4 shadow-sm"
     >
-      <h2 className="text-lg font-semibold">Send your fixed availability</h2>
+      <h2 className="text-lg font-semibold">{t("onboarding.sendYourFixedAvailability")}</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        This is part of employee onboarding. Your company uses fixed
-        availability, so your first login sends the hours you can work.
+        {t("onboarding.thisIsPartOfEmployeeOnboardingYourCompanyUsesFixedAvailabilitySoYourFirstLoginSendsTheHoursYouCanWork")}
       </p>
       <div className="mt-4 space-y-2" data-testid="employee-fixed-availability-days">
         {DAY_LABELS.map((label, dayIndex) => {
@@ -100,7 +101,7 @@ export function EmployeeFixedAvailabilityStep({
                   aria-pressed={allDay}
                   onClick={() => setDayHours(dayIndex, [...FULL_DAY_HOURS])}
                 >
-                  All day on
+                  {t("onboarding.allDayOn")}
                 </Button>
                 <Button
                   type="button"
@@ -114,12 +115,12 @@ export function EmployeeFixedAvailabilityStep({
                     )
                   }
                 >
-                  Off
+                  {t("onboarding.off")}
                 </Button>
               </div>
               {allDay ? null : (
                 <div className="flex flex-wrap items-center gap-2">
-                  <Label className="text-xs text-muted-foreground">From</Label>
+                  <Label className="text-xs text-muted-foreground">{t("onboarding.from")}</Label>
                   <Input
                     aria-label={`${label} from`}
                     type="time"
@@ -132,7 +133,7 @@ export function EmployeeFixedAvailabilityStep({
                       )
                     }
                   />
-                  <Label className="text-xs text-muted-foreground">To</Label>
+                  <Label className="text-xs text-muted-foreground">{t("onboarding.to")}</Label>
                   <Input
                     aria-label={`${label} to`}
                     type="time"
@@ -157,7 +158,7 @@ export function EmployeeFixedAvailabilityStep({
         onClick={() => send.mutate()}
         disabled={send.isPending}
       >
-        Send fixed availability
+        {t("onboarding.sendFixedAvailability")}
       </Button>
     </section>
   );

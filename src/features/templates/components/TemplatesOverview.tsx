@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "@/lib/router-adapter";
 import { BackButton } from "@/components/ui/back-button";
 import {
@@ -12,6 +13,7 @@ import { templates } from "@/data/templateData";
 import { TemplateCard } from "./TemplateCard";
 
 export function TemplatesOverview() {
+  const { t } = useTranslation();
   const _navigate = useNavigate();
 
   return (
@@ -28,13 +30,13 @@ export function TemplatesOverview() {
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link to="/" className="hover:text-primary">
-                  Home
+                  {t("onboarding.home")}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Templates</BreadcrumbPage>
+              <BreadcrumbPage>{t("schedule.templates")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -42,11 +44,10 @@ export function TemplatesOverview() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Industry Templates
+            {t("onboarding.industryTemplates")}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Get started faster with pre-configured templates designed
-            specifically for your business vertical.
+            {t("landing.industries.subtitle")}
           </p>
         </div>
 

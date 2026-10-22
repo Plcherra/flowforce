@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Building2, Settings, Users, CheckCircle, Loader2 } from "lucide-react";
@@ -15,7 +16,9 @@ const AnimationSkeleton = () => (
 );
 
 // Template Animation Component
-const TemplateAnimation = () => (
+const TemplateAnimation = () => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     className="w-full h-64 bg-gradient-to-br from-primary to-secondary rounded-2xl flex flex-col items-center justify-center relative overflow-hidden"
     initial={{ opacity: 0, scale: 0.8 }}
@@ -46,7 +49,7 @@ const TemplateAnimation = () => (
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
     >
-      Choose Your Template
+      {t("onboarding.chooseYourTemplate")}
     </motion.p>
     {/* Floating elements */}
     {[...Array(3)].map((_, i) => (
@@ -71,9 +74,12 @@ const TemplateAnimation = () => (
     ))}
   </motion.div>
 );
+};
 
 // Section Animation Component
-const SectionAnimation = () => (
+const SectionAnimation = () => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     className="w-full h-64 bg-gradient-to-br from-success to-primary rounded-2xl flex flex-col items-center justify-center relative"
     initial={{ opacity: 0, x: 20 }}
@@ -92,7 +98,7 @@ const SectionAnimation = () => (
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
     >
-      Customize Sections
+      {t("onboarding.customizeSections")}
     </motion.p>
     {/* Animated checkboxes */}
     <div className="absolute top-8 right-8 space-y-2">
@@ -115,9 +121,12 @@ const SectionAnimation = () => (
     </div>
   </motion.div>
 );
+};
 
 // Role Animation Component
-const RoleAnimation = () => (
+const RoleAnimation = () => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     className="w-full h-64 bg-gradient-to-br from-warning to-destructive rounded-2xl flex flex-col items-center justify-center relative"
     initial={{ opacity: 0, y: 20 }}
@@ -136,7 +145,7 @@ const RoleAnimation = () => (
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
     >
-      Classes
+      {t("onboarding.steps.roles.title")}
     </motion.p>
     {/* Animated user avatars */}
     <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -158,9 +167,12 @@ const RoleAnimation = () => (
     </div>
   </motion.div>
 );
+};
 
 // Review Animation Component
-const ReviewAnimation = () => (
+const ReviewAnimation = () => {
+  const { t } = useTranslation();
+  return (
   <motion.div
     className="w-full h-64 bg-gradient-to-br from-secondary to-accent rounded-2xl flex flex-col items-center justify-center relative"
     initial={{ opacity: 0, scale: 0.9 }}
@@ -185,7 +197,7 @@ const ReviewAnimation = () => (
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
     >
-      Review & Complete
+      {t("registration.review.title")}
     </motion.p>
     {/* Success particles */}
     {[...Array(8)].map((_, i) => (
@@ -208,6 +220,7 @@ const ReviewAnimation = () => (
     ))}
   </motion.div>
 );
+};
 
 export default function StepIllustration({
   step,

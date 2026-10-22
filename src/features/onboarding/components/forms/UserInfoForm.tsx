@@ -183,7 +183,7 @@ export default function UserInfoForm({
               autoComplete="new-password"
               value={userInfo.password}
               onChange={(e) => handleFieldChange("password", e.target.value)}
-              placeholder="Create a strong, unique password"
+              placeholder={t("onboarding.createAStrongUniquePassword")}
               className={`pl-10 ${hasPasswordErrors ? "border-destructive/40" : validationResult.strength === "strong" ? "border-success/40" : ""}`}
             />
             {validationResult.strength && (
@@ -207,7 +207,7 @@ export default function UserInfoForm({
             validationResult.strength === "strong" && (
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-success" />
-                <p className="text-sm text-success">✓ Strong password!</p>
+                <p className="text-sm text-success">{t("onboarding.strongPassword")}</p>
               </div>
             )}
           {!hasPasswordErrors &&
@@ -216,12 +216,12 @@ export default function UserInfoForm({
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="h-4 w-4 text-warning" />
                 <p className="text-sm text-warning">
-                  Password is acceptable but could be stronger
+                  {t("onboarding.passwordIsAcceptableButCouldBeStronger")}
                 </p>
               </div>
             )}
           <div className="text-xs text-muted-foreground space-y-1">
-            <p className="font-medium">Password requirements:</p>
+            <p className="font-medium">{t("onboarding.passwordRequirements")}</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li
                 className={
@@ -230,7 +230,7 @@ export default function UserInfoForm({
                     : "text-muted-foreground"
                 }
               >
-                At least 8 characters
+                {t("onboarding.atLeast8Characters")}
               </li>
               <li
                 className={
@@ -239,7 +239,7 @@ export default function UserInfoForm({
                     : "text-muted-foreground"
                 }
               >
-                One uppercase letter
+                {t("onboarding.oneUppercaseLetter")}
               </li>
               <li
                 className={
@@ -248,7 +248,7 @@ export default function UserInfoForm({
                     : "text-muted-foreground"
                 }
               >
-                One lowercase letter
+                {t("onboarding.oneLowercaseLetter")}
               </li>
               <li
                 className={
@@ -257,7 +257,7 @@ export default function UserInfoForm({
                     : "text-muted-foreground"
                 }
               >
-                One number
+                {t("onboarding.oneNumber")}
               </li>
               <li
                 className={
@@ -266,7 +266,7 @@ export default function UserInfoForm({
                     : "text-muted-foreground"
                 }
               >
-                One special character
+                {t("onboarding.oneSpecialCharacter")}
               </li>
               <li
                 className={
@@ -275,7 +275,7 @@ export default function UserInfoForm({
                     : "text-muted-foreground"
                 }
               >
-                Not a common or weak password
+                {t("onboarding.notACommonOrWeakPassword")}
               </li>
             </ul>
           </div>

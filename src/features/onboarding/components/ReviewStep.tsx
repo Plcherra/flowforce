@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
@@ -28,21 +29,22 @@ export default function ReviewStep({
   customRoles,
   positions,
 }: ReviewStepProps) {
+  const { t } = useTranslation();
   return (
     <div>
       <CardHeader className="px-0 pt-0">
         <CardTitle className="flex items-center">
           <CheckCircle className="mr-2 h-6 w-6" />
-          Review Your Configuration
+          {t("onboarding.reviewYourConfiguration")}
         </CardTitle>
         <CardDescription>
-          Review your workspace configuration before completing setup
+          {t("onboarding.reviewYourWorkspaceConfigurationBeforeCompletingSetup")}
         </CardDescription>
       </CardHeader>
 
       <div className="space-y-6">
         <div className="p-4 border rounded-lg">
-          <h4 className="font-medium text-foreground mb-2">Business Template</h4>
+          <h4 className="font-medium text-foreground mb-2">{t("onboarding.businessTemplate")}</h4>
           <div className="flex items-center space-x-3">
             <Badge className="bg-success-muted text-success">
               {selectedTemplate.name}

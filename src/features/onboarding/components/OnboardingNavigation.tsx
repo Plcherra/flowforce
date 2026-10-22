@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
@@ -23,6 +24,7 @@ export default function OnboardingNavigation({
   isCreatingAccount,
   onCancel,
 }: OnboardingNavigationProps) {
+  const { t } = useTranslation();
   return (
     <motion.div
       className="flex justify-between mt-8 pt-6 border-t border-border"
@@ -34,11 +36,11 @@ export default function OnboardingNavigation({
         {currentStep > 1 ? (
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("onboarding.wizard.back")}
           </Button>
         ) : (
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            {t("onboarding.wizard.cancel")}
           </Button>
         )}
       </div>
@@ -46,7 +48,7 @@ export default function OnboardingNavigation({
       <div>
         {currentStep < totalSteps ? (
           <Button onClick={onNext} disabled={!canProceed}>
-            Next
+            {t("onboarding.wizard.next")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         ) : (

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -78,6 +79,7 @@ export default function CustomTemplateBuilder({
   onSave,
   onPreview,
 }: CustomTemplateBuilderProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("basic");
 
   const updateTemplate = (updates: Partial<CustomTemplate>) => {
@@ -104,19 +106,19 @@ export default function CustomTemplateBuilder({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold mb-2">Create Custom Template</h2>
+          <h2 className="text-2xl font-bold mb-2">{t("onboarding.createCustomTemplate")}</h2>
           <p className="text-muted-foreground">
-            Build a custom template for your business needs
+            {t("onboarding.buildACustomTemplateForYourBusinessNeeds")}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={onPreview}>
             <Eye className="h-4 w-4 mr-2" />
-            Preview
+            {t("schedule.preview")}
           </Button>
           <Button onClick={onSave}>
             <Save className="h-4 w-4 mr-2" />
-            Save Template
+            {t("schedule.saveTemplate")}
           </Button>
         </div>
       </div>
@@ -125,34 +127,34 @@ export default function CustomTemplateBuilder({
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="basic">
             <Building2 className="h-4 w-4 mr-2" />
-            Basic Info
+            {t("onboarding.basicInfo")}
           </TabsTrigger>
           <TabsTrigger value="branding">
             <Palette className="h-4 w-4 mr-2" />
-            Branding
+            {t("onboarding.review.sections.branding")}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Template Information</CardTitle>
+              <CardTitle>{t("onboarding.customTemplate.templateInfo")}</CardTitle>
               <CardDescription>
-                Basic details about your custom template
+                {t("onboarding.basicDetailsAboutYourCustomTemplate")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Template Name</Label>
+                  <Label>{t("onboarding.customTemplate.templateName")}</Label>
                   <Input
                     value={template.name || ""}
                     onChange={(e) => updateTemplate({ name: e.target.value })}
-                    placeholder="e.g., Custom Retail Template"
+                    placeholder={t("onboarding.eGCustomRetailTemplate")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Industry</Label>
+                  <Label>{t("onboarding.userInfo.fields.industry")}</Label>
                   <Select
                     value={template.industry || ""}
                     onValueChange={(value) =>
@@ -160,7 +162,7 @@ export default function CustomTemplateBuilder({
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select industry" />
+                      <SelectValue placeholder={t("onboarding.userInfo.placeholders.industry")} />
                     </SelectTrigger>
                     <SelectContent>
                       {industries.map((industry) => (
@@ -174,13 +176,13 @@ export default function CustomTemplateBuilder({
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("tasks.description")}</Label>
                 <Textarea
                   value={template.description || ""}
                   onChange={(e) =>
                     updateTemplate({ description: e.target.value })
                   }
-                  placeholder="Describe what this template is designed for..."
+                  placeholder={t("onboarding.describeWhatThisTemplateIsDesignedFor")}
                   rows={3}
                 />
               </div>
@@ -198,11 +200,10 @@ export default function CustomTemplateBuilder({
                       updateTemplate({ isPublic: checked as boolean })
                     }
                   />
-                  <Label htmlFor="isPublic">Make this template public</Label>
+                  <Label htmlFor="isPublic">{t("onboarding.makeThisTemplatePublic")}</Label>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Public templates can be used by other companies as a starting
-                  point
+                  {t("onboarding.publicTemplatesCanBeUsedByOtherCompaniesAsAStartingPoint")}
                 </p>
               </div>
             </CardContent>

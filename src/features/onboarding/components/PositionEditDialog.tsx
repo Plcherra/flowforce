@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -26,6 +27,7 @@ export default function PositionEditDialog({
   position,
   onSave,
 }: PositionEditDialogProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -57,25 +59,25 @@ export default function PositionEditDialog({
           <DialogTitle>
             {position ? "Edit Position" : "Create New Position"}
           </DialogTitle>
-          <DialogDescription>Configure the position details</DialogDescription>
+          <DialogDescription>{t("onboarding.configureThePositionDetails")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Position Name</Label>
+            <Label htmlFor="name">{t("onboarding.positionName")}</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
               }
-              placeholder="Enter position name"
+              placeholder={t("onboarding.enterPositionName")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -85,7 +87,7 @@ export default function PositionEditDialog({
                   description: e.target.value,
                 }))
               }
-              placeholder="Describe this position's responsibilities"
+              placeholder={t("onboarding.describeThisPositionSResponsibilities")}
               rows={3}
             />
           </div>
@@ -96,7 +98,7 @@ export default function PositionEditDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("onboarding.wizard.cancel")}
             </Button>
             <Button type="submit">
               {position ? "Update Position" : "Create Position"}

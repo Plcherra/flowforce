@@ -356,7 +356,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 18 — Onboarding strings
 
-- [ ] Finish onboarding strings in all six locales.
+- [x] Finish onboarding strings in all six locales.
 
 Rules:
 
@@ -1028,6 +1028,23 @@ Phone steps for Pedro:
 2. Set your language to Español on Settings, then Region. Reload. The directory title, search, department filter, tabs, and HR readiness cards should be in Spanish. A person's name stays as it was written. The sample vendor name Acme Supplies stays Acme Supplies.
 3. Open a teammate if you have one. Overview labels such as department, role, and hire date should follow the language. Switch to Deutsch and open Profile (`/app/profile`). Profile settings, the security tab, and the password form should be in German.
 4. If you can invite someone, the class, department, and send labels should follow the language. The paste hint `first_name,last_name,email,phone,class,department` stays in English.
+5. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 18 Onboarding strings
+
+Shipped: Onboarding and template chrome under `src/features/onboarding` and `src/features/templates` now uses `useTranslation` and the `onboarding` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Back, Cancel, Next, and the branding labels, stay on those keys. FlowForce stays FlowForce. A progress check the checker read as the words `50) return` was given braces so the words stayed code. Counts that sit next to a word are one phrase. Both directories are off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3652 keys for each locale and `hard-coded strings 1064`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/onboarding` and `src/features/templates`.
+
+Phone steps for Pedro:
+1. Sign out and open https://www.flowforce.uk. Start company registration if you can, or sign in and open any first-login onboarding that is still waiting.
+2. Set the language to Français before signing in, or on Settings, then Region, after you are in. The company steps, template choice, and branding labels should be in French. FlowForce stays FlowForce.
+3. If an employee still has the fixed-availability step, the from, to, and send labels should follow the language. Switch to Español and check the password requirements on the account step.
+4. Open Templates if it is in your navigation. The template list and detail labels should follow the language. A template name someone typed stays as they wrote it.
 5. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

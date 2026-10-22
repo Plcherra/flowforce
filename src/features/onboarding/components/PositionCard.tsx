@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ export default function PositionCard({
   onEdit,
   onDelete,
 }: PositionCardProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border-l-4" style={{ borderLeftColor: role.color }}>
       <CardContent className="p-4">
@@ -51,7 +53,7 @@ export default function PositionCard({
               onClick={() => onEdit(position)}
             >
               <Edit className="h-3 w-3 mr-1" />
-              Edit
+              {t("common.edit")}
             </Button>
             <Button
               variant="outline"
@@ -60,7 +62,7 @@ export default function PositionCard({
               className="text-destructive hover:text-destructive"
             >
               <Trash2 className="h-3 w-3 mr-1" />
-              Delete
+              {t("onboarding.roleSetup.delete")}
             </Button>
           </div>
         </div>

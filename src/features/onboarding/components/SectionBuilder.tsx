@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -70,6 +71,7 @@ export default function SectionBuilder({
   sections,
   onSectionsChange,
 }: SectionBuilderProps) {
+  const { t } = useTranslation();
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [customCategory, setCustomCategory] = useState("");
   const [newSection, setNewSection] = useState<Partial<CustomSection>>({
@@ -163,9 +165,9 @@ export default function SectionBuilder({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-semibold mb-2">Build Custom Sections</h3>
+        <h3 className="text-xl font-semibold mb-2">{t("onboarding.buildCustomSections")}</h3>
         <p className="text-muted-foreground">
-          Create custom sections and pages that match your business needs
+          {t("onboarding.createCustomSectionsAndPagesThatMatchYourBusinessNeeds")}
         </p>
       </div>
 
@@ -174,26 +176,26 @@ export default function SectionBuilder({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Add New Section
+            {t("sections.addNewSection")}
           </CardTitle>
           <CardDescription>
-            Create a new section for your application
+            {t("onboarding.createANewSectionForYourApplication")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Section Name</Label>
+              <Label>{t("sections.sectionName")}</Label>
               <Input
                 value={newSection.name}
                 onChange={(e) =>
                   setNewSection({ ...newSection, name: e.target.value })
                 }
-                placeholder="e.g., Customer Management"
+                placeholder={t("sections.eGCustomerManagement")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>{t("dashboard.category")}</Label>
               <Select
                 value={
                   newSection.category === "other"
@@ -223,7 +225,7 @@ export default function SectionBuilder({
               </Select>
               {newSection.category === "other" && (
                 <Input
-                  placeholder="Enter custom category name"
+                  placeholder={t("onboarding.enterCustomCategoryName")}
                   value={customCategory}
                   onChange={(e) => {
                     setCustomCategory(e.target.value);
@@ -239,19 +241,19 @@ export default function SectionBuilder({
           </div>
 
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label>{t("tasks.description")}</Label>
             <Textarea
               value={newSection.description}
               onChange={(e) =>
                 setNewSection({ ...newSection, description: e.target.value })
               }
-              placeholder="Describe what this section is for..."
+              placeholder={t("sections.describeWhatThisSectionIsFor2")}
               rows={2}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Icon</Label>
+            <Label>{t("sections.icon")}</Label>
             <div className="grid grid-cols-6 gap-2">
               {Object.keys(sectionIcons).map((iconName) => (
                 <Button
@@ -270,7 +272,7 @@ export default function SectionBuilder({
           </div>
 
           <Button onClick={addSection} disabled={!newSection.name}>
-            Add Section
+            {t("sections.addSection")}
           </Button>
         </CardContent>
       </Card>
@@ -308,7 +310,7 @@ export default function SectionBuilder({
                       )
                     }
                   >
-                    Edit
+                    {t("common.edit")}
                   </Button>
                   <Button
                     variant="ghost"
@@ -326,7 +328,7 @@ export default function SectionBuilder({
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Name</Label>
+                      <Label>{t("schedule.name")}</Label>
                       <Input
                         value={section.name}
                         onChange={(e) =>
@@ -335,7 +337,7 @@ export default function SectionBuilder({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Category</Label>
+                      <Label>{t("dashboard.category")}</Label>
                       <Select
                         value={
                           section.category === "other"
@@ -365,7 +367,7 @@ export default function SectionBuilder({
                       </Select>
                       {section.category === "other" && (
                         <Input
-                          placeholder="Enter custom category name"
+                          placeholder={t("onboarding.enterCustomCategoryName")}
                           value={
                             typeof section.category === "string" &&
                             section.category !== "other"
@@ -384,7 +386,7 @@ export default function SectionBuilder({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Description</Label>
+                    <Label>{t("tasks.description")}</Label>
                     <Textarea
                       value={section.description}
                       onChange={(e) =>
@@ -401,20 +403,20 @@ export default function SectionBuilder({
                   {/* Pages in Section */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label>Pages in this Section</Label>
+                      <Label>{t("onboarding.pagesInThisSection")}</Label>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => addPageToSection(section.id)}
                       >
                         <Plus className="h-4 w-4 mr-1" />
-                        Add Page
+                        {t("sections.addPage")}
                       </Button>
                     </div>
 
                     {section.pages.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
-                        No pages yet. Add a page to get started.
+                        {t("sections.noPagesYetAddAPageToGetStarted")}
                       </p>
                     ) : (
                       <div className="space-y-2">
@@ -456,9 +458,9 @@ export default function SectionBuilder({
           <Card>
             <CardContent className="py-8 text-center">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h4 className="font-medium mb-2">No custom sections yet</h4>
+              <h4 className="font-medium mb-2">{t("onboarding.noCustomSectionsYet")}</h4>
               <p className="text-sm text-muted-foreground mb-4">
-                Start by creating your first custom section above
+                {t("onboarding.startByCreatingYourFirstCustomSectionAbove")}
               </p>
             </CardContent>
           </Card>

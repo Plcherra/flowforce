@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home, Building2 } from "lucide-react";
@@ -19,6 +20,7 @@ export default function OnboardingHeader({
   totalSteps,
   steps,
 }: OnboardingHeaderProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -35,7 +37,7 @@ export default function OnboardingHeader({
             <div className="flex items-center space-x-3">
               <Building2 className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold text-foreground">
-                FlowForce
+                {t("onboarding.wizard.title")}
               </span>
             </div>
             <Button
@@ -45,7 +47,7 @@ export default function OnboardingHeader({
               className="text-muted-foreground hover:text-primary hover:bg-primary/5"
             >
               <Home className="h-4 w-4 mr-2" />
-              Back to Home
+              {t("onboarding.backToHome")}
             </Button>
           </div>
 

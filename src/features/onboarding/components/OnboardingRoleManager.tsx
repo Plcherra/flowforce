@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,7 @@ export default function OnboardingRoleManager({
   roles,
   onRolesChange,
 }: OnboardingRoleManagerProps) {
+  const { t } = useTranslation();
   const [editingRole, setEditingRole] = useState<OnboardingRole | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [rolesOpen, setRolesOpen] = useState(false);
@@ -183,10 +185,9 @@ export default function OnboardingRoleManager({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold">Classes</h3>
+          <h3 className="text-lg font-semibold">{t("onboarding.steps.roles.title")}</h3>
           <p className="mt-1 text-muted-foreground">
-            These four system roles are ready. Continue, or open roles to give
-            or take access.
+            {t("onboarding.theseFourSystemRolesAreReadyContinueOrOpenRolesToGiveOrTakeAccess")}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -199,7 +200,7 @@ export default function OnboardingRoleManager({
           {rolesOpen && (
             <Button onClick={handleAddRole}>
               <Plus className="mr-2 h-4 w-4" />
-              Create class
+              {t("onboarding.createClass")}
             </Button>
           )}
         </div>
@@ -239,10 +240,10 @@ export default function OnboardingRoleManager({
                           {PRODUCT_ROLE_LABELS[productLevel]} level
                         </Badge>
                         {role.is_system_role && (
-                          <Badge variant="secondary">System</Badge>
+                          <Badge variant="secondary">{t("sections.system")}</Badge>
                         )}
                         {role.is_active === false && (
-                          <Badge variant="outline">Archived</Badge>
+                          <Badge variant="outline">{t("forms.archived")}</Badge>
                         )}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
@@ -263,7 +264,7 @@ export default function OnboardingRoleManager({
                         onClick={() => handleEditRole(role)}
                       >
                         <Edit className="mr-1 h-4 w-4" />
-                        Edit
+                        {t("common.edit")}
                       </Button>
                       {role.is_active === false ? (
                         <Button
@@ -271,7 +272,7 @@ export default function OnboardingRoleManager({
                           size="sm"
                           onClick={() => handleRestoreRole(role.id)}
                         >
-                          Restore
+                          {t("onboarding.restore")}
                         </Button>
                       ) : canDeactivateClass(role) ? (
                         <Button
