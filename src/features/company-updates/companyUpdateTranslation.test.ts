@@ -212,6 +212,50 @@ export async function runCompanyUpdateTranslationTests() {
   assert.equal(columns.rich_content, rich);
   assert.equal(columns.update_type, "news");
   assert.equal("content" in columns, false);
+
+  const wizardColumns = companyUpdateWriteColumns({
+    title: updateTitle,
+    body: updateBody,
+    richContent: rich,
+    type: "announcement",
+    priority: "medium",
+    backgroundStyle: { type: "solid", primary: "#3b82f6" },
+    publishingSettings: { publishNow: true, notifications: { email: true } },
+    recipients: { type: "all", targets: [] },
+    isPinned: false,
+  });
+  const companyUpdateColumns = new Set([
+    "assigned_employees",
+    "author_avatar",
+    "author_id",
+    "author_name",
+    "author_role",
+    "background_style",
+    "body",
+    "is_pinned",
+    "priority",
+    "publishing_settings",
+    "recipients",
+    "rich_content",
+    "status",
+    "title",
+    "update_type",
+  ]);
+  for (const key of Object.keys(wizardColumns)) {
+    assert.equal(
+      companyUpdateColumns.has(key),
+      true,
+      `${key} is not a company_updates column`,
+    );
+  }
+  assert.equal(wizardColumns.update_type, "announcement");
+  assert.equal(wizardColumns.rich_content, rich);
+  assert.equal(wizardColumns.is_pinned, false);
+  assert.equal("richContent" in wizardColumns, false);
+  assert.equal("type" in wizardColumns, false);
+  assert.equal("backgroundStyle" in wizardColumns, false);
+  assert.equal("publishingSettings" in wizardColumns, false);
+  assert.equal("isPinned" in wizardColumns, false);
   const savedSettings = withContentSourceLocale(columns.publishing_settings, "en");
   assert.equal(savedSettings.contentSourceLocale, "en");
   assert.equal(
