@@ -20,6 +20,40 @@ const LEVEL_LABELS: Record<string, string> = {
   owner: "schedule.levelOwner",
 };
 
+type PolicyPeoplePickerProps = {
+  employees: Array<{ id: string; first_name?: string | null; last_name?: string | null }>;
+  selectedIds: string[];
+  nameFor: (person: { id: string; first_name?: string | null; last_name?: string | null }) => string;
+  onToggle: (id: string) => void;
+};
+
+export function PolicyPeoplePicker({
+  employees,
+  selectedIds,
+  nameFor,
+  onToggle,
+}: PolicyPeoplePickerProps) {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-medium text-muted-foreground">{t("schedule.people")}</p>
+      <div className="flex flex-wrap gap-2">
+        {employees.map((person) => (
+          <Button
+            key={person.id}
+            type="button"
+            size="sm"
+            variant={selectedIds.includes(person.id) ? "default" : "outline"}
+            onClick={() => onToggle(person.id)}
+          >
+            {nameFor(person)}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 type CompanyPolicyListProps = {
   policies: CompanyPolicyRecord[];
   roles: Array<{ id: string; name: string }>;

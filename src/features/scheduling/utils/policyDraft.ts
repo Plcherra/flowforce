@@ -1,7 +1,8 @@
-import type {
-  CompanyPolicyAssignment,
-  CompanyPolicyRecord,
-  CompanyPolicyType,
+import {
+  assignmentsFromSelection,
+  type CompanyPolicyAssignment,
+  type CompanyPolicyRecord,
+  type CompanyPolicyType,
 } from "@/features/scheduling/utils/companyPolicy";
 import type { TimeOffUnit } from "@/features/scheduling/utils/timeOffPolicy";
 
@@ -50,6 +51,16 @@ export function draftFromPolicy(policy: CompanyPolicyRecord): PolicyDraft {
     levelKeys: idsOf(policy.assignments, "level"),
     storeIds: idsOf(policy.assignments, "store"),
   };
+}
+
+export function assignmentsForDraft(input: {
+  companyId: string;
+  roleIds: string[];
+  userIds: string[];
+  levelKeys: string[];
+  storeIds: string[];
+}): CompanyPolicyAssignment[] {
+  return assignmentsFromSelection(input);
 }
 
 export function exampleKeepsOpenEdit(

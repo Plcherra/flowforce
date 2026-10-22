@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { draftFromPolicy, exampleKeepsOpenEdit } from "./policyDraft";
+import { assignmentsForDraft, draftFromPolicy, exampleKeepsOpenEdit } from "./policyDraft";
 import type { CompanyPolicyRecord } from "./companyPolicy";
 
 const weekend: CompanyPolicyRecord = {
@@ -27,4 +27,26 @@ export function runPolicyDraftTests() {
   assert.equal(exampleKeepsOpenEdit("Weekend", "Weekend"), true);
   assert.equal(exampleKeepsOpenEdit("Weekend", "Weekday"), false);
   assert.equal(exampleKeepsOpenEdit(null, "Weekend"), false);
+
+  const selected = assignmentsForDraft({
+    companyId: "company-1",
+    roleIds: [],
+    userIds: ["person-a", "person-a"],
+    levelKeys: [],
+    storeIds: [],
+  });
+  assert.deepEqual(selected, [{ targetType: "user", targetId: "person-a" }]);
+
+  const everyone = assignmentsForDraft({
+    companyId: "company-1",
+    roleIds: [],
+    userIds: [],
+    levelKeys: [],
+    storeIds: [],
+  });
+  assert.deepEqual(everyone, [{ targetType: "company", targetId: "company-1" }]);
+  assert.equal(
+    everyone.some((assignment) => assignment.targetId === "everyone"),
+    false,
+  );
 }

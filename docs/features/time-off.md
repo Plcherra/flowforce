@@ -183,7 +183,7 @@ Prove: Unit test `src/features/scheduling/utils/policyDraft.test.ts` builds a dr
 
 ### Phase 6 — Pick people from the team
 
-- [ ] Replace the pasted person-id box with the company roster.
+- [x] Replace the pasted person-id box with the company roster.
 
 Rules:
 
@@ -361,5 +361,21 @@ Phone steps for Pedro:
 4. While Edit is open on Weekend, choose Weekday example. Saving adds a Weekday policy and leaves the Weekend row as it was.
 
 Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 6 Pick people from the team
+
+Shipped: The pasted person-id box is gone. People on a policy come from the team list scheduling already loads. Tapping a person adds or removes that person. The chosen ids are `user` assignments. An empty assignment list is still one `company` assignment, so the policy applies to everyone. There is no sentinel id. Matching still uses the Phase 4 matcher.
+
+Proven: `src/features/scheduling/utils/policyDraft.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. Selected people become one `user` assignment each. An empty selection becomes the `company` assignment for that company id, and the target id is not `everyone`. `npm run check:i18n` printed 4623 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as someone who can approve time off and open Company policies, then Create policy.
+2. The people control is the team roster, not a box for pasting ids. Tap a person to add them. Tap that person again to remove them.
+3. Save with nobody selected, and with no role, level, or store selected. The saved policy applies to everyone.
+4. Edit that policy, add one person, and save. The list shows that person, not everyone.
+
+Blockers: none. No migration.
 
 Questions: none.

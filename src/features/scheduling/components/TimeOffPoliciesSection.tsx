@@ -16,11 +16,15 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
 import { PRODUCT_LEVELS } from "@/features/roles/constants/productLevels";
 import { useTimeOffPolicies } from "@/features/scheduling/hooks/useTimeOffPolicies";
-import { assignmentsFromSelection } from "@/features/scheduling/utils/companyPolicy";
+import { useEmployees } from "@/hooks/useEmployees";
 import type { CompanyPolicyRecord, CompanyPolicyType } from "@/features/scheduling/utils/companyPolicy";
-import { draftFromPolicy, exampleKeepsOpenEdit } from "@/features/scheduling/utils/policyDraft";
+import {
+  assignmentsForDraft,
+  draftFromPolicy,
+  exampleKeepsOpenEdit,
+} from "@/features/scheduling/utils/policyDraft";
 import type { TimeOffUnit } from "@/features/scheduling/utils/timeOffPolicy";
-import { CompanyPolicyList } from "@/features/scheduling/components/CompanyPolicyList";
+import { CompanyPolicyList, PolicyPeoplePicker } from "@/features/scheduling/components/CompanyPolicyList";
 
 const WEEKDAYS = [
   { value: 1, label: "Mon" },
@@ -68,7 +72,11 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
   const [roleIds, setRoleIds] = useState<string[]>([]);
   const [levelKeys, setLevelKeys] = useState<string[]>([]);
   const [storeIds, setStoreIds] = useState<string[]>([]);
-  const [userIds, setUserIds] = useState("");
+  const [userIds, setUserIds] = useState<string[]>([]);
+  const { employees, getEmployeeFullName } = useEmployees({
+    companyId,
+    enabled: canManage,
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -96,24 +104,14 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
     setName(exampleName);
   };
 
-  const fillWeekend = () => {
-    prepareExample("Weekend");
+  const fillExample = (name: "Weekend" | "Weekday") => {
+    prepareExample(name);
     setUnit("days");
     setCapWeek("");
-    setCapMonth("2");
-    setCapYear("24");
-    setNoticeDays("0");
-    setWeekdays([6, 0]);
-  };
-
-  const fillWeekday = () => {
-    prepareExample("Weekday");
-    setUnit("days");
-    setCapWeek("");
-    setCapMonth("");
-    setCapYear("90");
-    setNoticeDays("7");
-    setWeekdays([1, 2, 3, 4, 5]);
+    setCapMonth(name === "Weekend" ? "2" : "");
+    setCapYear(name === "Weekend" ? "24" : "90");
+    setNoticeDays(name === "Weekend" ? "0" : "7");
+    setWeekdays(name === "Weekend" ? [6, 0] : [1, 2, 3, 4, 5]);
   };
   const loadPolicy = (policy: CompanyPolicyRecord) => {
     const draft = draftFromPolicy(policy);
@@ -131,7 +129,7 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
     setRoleIds(draft.roleIds);
     setLevelKeys(draft.levelKeys);
     setStoreIds(draft.storeIds);
-    setUserIds(draft.userIds.join(", "));
+    setUserIds(draft.userIds);
     setError(null);
   };
 
@@ -177,13 +175,10 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
         capYear: optionalCap(capYear),
         eligibleWeekdays: weekdays,
         noticeDays: Math.max(0, Number(noticeDays) || 0),
-        assignments: assignmentsFromSelection({
+        assignments: assignmentsForDraft({
           companyId,
           roleIds,
-          userIds: userIds
-            .split(",")
-            .map((id) => id.trim())
-            .filter(Boolean),
+          userIds,
           levelKeys,
           storeIds,
         }),
@@ -261,10 +256,10 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
           {type === "time_off" ? (
             <>
               <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" variant="outline" onClick={fillWeekend}>
+                <Button type="button" size="sm" variant="outline" onClick={() => fillExample("Weekend")}>
                   {t("schedule.weekendExample")}
                 </Button>
-                <Button type="button" size="sm" variant="outline" onClick={fillWeekday}>
+                <Button type="button" size="sm" variant="outline" onClick={() => fillExample("Weekday")}>
                   {t("schedule.weekdayExample")}
                 </Button>
               </div>
@@ -377,15 +372,12 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
               </div>
             </div>
           ) : null}
-          <div className="grid gap-1">
-            <Label htmlFor="policy-people">{t("schedule.people")}</Label>
-            <Input
-              id="policy-people"
-              value={userIds}
-              placeholder={t("schedule.leaveEmptyOrPastePersonIdsSeparatedBy")}
-              onChange={(event) => setUserIds(event.target.value)}
-            />
-          </div>
+          <PolicyPeoplePicker
+            employees={employees}
+            selectedIds={userIds}
+            nameFor={getEmployeeFullName}
+            onToggle={(id) => toggleId(id, userIds, setUserIds)}
+          />
           <p className="text-xs text-muted-foreground">
             {t("schedule.leaveAssignmentsEmptyToApplyThisPolicyToEveryone")}
           </p>
