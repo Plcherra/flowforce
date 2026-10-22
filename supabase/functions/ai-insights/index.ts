@@ -4,6 +4,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import { edgeCorsHeaders } from "../_shared/cors.ts";
 import { readGrokRuntimeConfig } from "../_shared/grokProvider.ts";
 import {
   promptKeyForInsightType,
@@ -13,28 +14,7 @@ import {
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-// Restrict CORS to trusted origins only
-const getAllowedOrigin = (origin: string | null): string => {
-  // In production, replace with your actual frontend domain(s)
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    // Add your production domains here
-    // 'https://yourdomain.com',
-  ];
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    return origin;
-  }
-  // Default to first allowed origin or deny if none match
-  return allowedOrigins[0] || '';
-};
-
-const corsHeaders = (origin: string | null) => ({
-  'Access-Control-Allow-Origin': getAllowedOrigin(origin),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, api_key, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-});
+const corsHeaders = edgeCorsHeaders;
 
 const requestSchema = z.object({
   type: z.enum(['dashboard', 'scheduler', 'expenses', 'reports', 'chat']),

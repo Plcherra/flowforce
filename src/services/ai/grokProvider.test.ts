@@ -272,6 +272,20 @@ export async function runGrokProviderTests() {
     assert.equal(source.includes("gpt-4o-mini"), false);
   }
   assert.equal(insights.includes("runMeteredGrokChat"), true);
+  assert.equal(insights.includes("edgeCorsHeaders"), true);
+  const cors = read("supabase/functions/_shared/cors.ts");
+  for (const origin of [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://www.flowforce.uk",
+    "https://flowforce.uk",
+  ]) {
+    assert.equal(cors.includes(origin), true);
+  }
+  assert.equal(
+    read("supabase/functions/ai-scheduling-assistant/index.ts").includes("edgeCorsHeaders"),
+    true,
+  );
   assert.equal(engagement.includes("runMeteredGrokChat"), true);
   assert.equal(automation.includes("responseFormat: { type: \"json_object\" }"), true);
   assert.equal(read("supabase/functions/_shared/grokProvider.ts").includes(XAI_CHAT_COMPLETIONS_URL), true);

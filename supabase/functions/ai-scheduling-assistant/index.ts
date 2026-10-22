@@ -1,27 +1,9 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { edgeCorsHeaders } from "../_shared/cors.ts";
 
-// Restrict CORS to trusted origins only
-const getAllowedOrigin = (origin: string | null): string => {
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    // Add your production domains here
-    // 'https://yourdomain.com',
-  ];
-  
-  if (origin && allowedOrigins.includes(origin)) {
-    return origin;
-  }
-  return allowedOrigins[0] || '';
-};
-
-const corsHeaders = (origin: string | null) => ({
-  'Access-Control-Allow-Origin': getAllowedOrigin(origin),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, api_key, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-});
+const corsHeaders = edgeCorsHeaders;
 
 // Validate user authentication and company membership
 async function validateAuth(req: Request) {
