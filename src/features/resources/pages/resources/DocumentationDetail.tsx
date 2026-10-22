@@ -22,10 +22,10 @@ export default function DocumentationDetail() {
   if (!doc) {
     return (
       <div className="p-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-foreground mb-4">
           {t("resources.documentation.title")} {t("resources.details.notFound")}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           {t("resources.details.requestedNotFound", {
             type: t("resources.documentation.title").toLowerCase(),
           })}
@@ -51,14 +51,14 @@ export default function DocumentationDetail() {
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <Badge variant="outline">{doc.category}</Badge>
-            <div className="flex items-center text-sm text-gray-600 space-x-2">
+            <div className="flex items-center text-sm text-muted-foreground space-x-2">
               <BookOpen className="h-4 w-4" />
               <span>{doc.version}</span>
             </div>
           </div>
           <CardTitle className="text-3xl mb-4">{doc.title}</CardTitle>
-          <p className="text-gray-600 mb-4">{doc.description}</p>
-          <div className="flex items-center text-sm text-gray-600 space-x-4">
+          <p className="text-muted-foreground mb-4">{doc.description}</p>
+          <div className="flex items-center text-sm text-muted-foreground space-x-4">
             <div className="flex items-center">
               <CalendarDays className="h-4 w-4 mr-1" />
               {t("resources.details.lastUpdated")}:{" "}
@@ -73,7 +73,7 @@ export default function DocumentationDetail() {
         <CardContent>
           <div className="prose max-w-none">
             <p>{doc.content}</p>
-            <p className="mt-4 text-gray-600">
+            <p className="mt-4 text-muted-foreground">
               This is a placeholder for the actual documentation content. The
               full documentation would be loaded here.
             </p>

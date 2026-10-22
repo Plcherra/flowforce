@@ -12,16 +12,16 @@ export default function HelpSection() {
   const { t } = useTranslation();
 
   return (
-    <section className="mt-16 pt-16 border-t border-gray-200">
+    <section className="mt-16 pt-16 border-t border-border">
       <div className="flex items-center mb-8">
-        <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mr-4">
-          <HelpCircle className="h-6 w-6 text-purple-600" />
+        <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mr-4">
+          <HelpCircle className="h-6 w-6 text-secondary" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-foreground">
             {t("resources.help.title")}
           </h2>
-          <p className="text-gray-600">{t("resources.help.subtitle")}</p>
+          <p className="text-muted-foreground">{t("resources.help.subtitle")}</p>
         </div>
       </div>
 
@@ -34,7 +34,7 @@ export default function HelpSection() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {t("resources.help.contactSupport.content")}
             </p>
           </CardContent>
@@ -48,7 +48,7 @@ export default function HelpSection() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {t("resources.help.communityForum.content")}
             </p>
           </CardContent>
@@ -62,7 +62,7 @@ export default function HelpSection() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {t("resources.help.scheduleDemo.content")}
             </p>
           </CardContent>

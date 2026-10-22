@@ -36,7 +36,7 @@ export default function IntegrationGuides() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center justify-between">
           <Breadcrumbs items={breadcrumbItems} />
@@ -47,7 +47,7 @@ export default function IntegrationGuides() {
           <CardHeader>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
-                <Puzzle className="h-6 w-6 text-green-600 mr-3" />
+                <Puzzle className="h-6 w-6 text-success mr-3" />
                 <div>
                   <CardTitle className="text-2xl">Integration Guides</CardTitle>
                   <CardDescription className="mt-2">
@@ -57,7 +57,7 @@ export default function IntegrationGuides() {
               </div>
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary">Tutorial</Badge>
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
                   15 min
                 </div>

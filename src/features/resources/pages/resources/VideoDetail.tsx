@@ -23,10 +23,10 @@ export default function VideoDetail() {
   if (!video) {
     return (
       <div className="p-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-foreground mb-4">
           {t("resources.videos.title")} {t("resources.details.notFound")}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           {t("resources.details.requestedNotFound", { type: "video" })}
         </p>
       </div>
@@ -47,16 +47,16 @@ export default function VideoDetail() {
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <Badge variant="secondary">{video.category}</Badge>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-muted-foreground">
               <User className="h-4 w-4 mr-1" />
               {video.instructor}
             </div>
           </div>
           <CardTitle className="text-3xl mb-4">{video.title}</CardTitle>
-          <p className="text-gray-600 mb-4">{video.description}</p>
+          <p className="text-muted-foreground mb-4">{video.description}</p>
         </CardHeader>
         <CardContent>
-          <div className="aspect-video mb-6 bg-gray-100 rounded-lg overflow-hidden">
+          <div className="aspect-video mb-6 bg-muted rounded-lg overflow-hidden">
             {video.embedUrl ? (
               <iframe
                 src={video.embedUrl}
@@ -68,11 +68,11 @@ export default function VideoDetail() {
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <Play className="h-16 w-16 text-gray-400" />
+                <Play className="h-16 w-16 text-muted-foreground" />
               </div>
             )}
           </div>
-          <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center">
               <Clock className="h-4 w-4 mr-1" />
               {t("resources.details.duration")}: {video.duration}

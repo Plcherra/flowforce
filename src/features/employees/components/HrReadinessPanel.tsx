@@ -37,21 +37,21 @@ interface HrReadinessPanelProps {
 
 const toneStyles = {
   steady: {
-    item: "border-emerald-200 bg-emerald-50/45",
-    icon: "bg-emerald-100 text-emerald-700",
-    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    item: "border-success/40 bg-success-muted",
+    icon: "bg-success-muted text-success",
+    badge: "border-success/40 bg-success-muted text-success",
     label: "Ready",
   },
   watch: {
-    item: "border-amber-200 bg-amber-50/55",
-    icon: "bg-amber-100 text-amber-700",
-    badge: "border-amber-200 bg-amber-50 text-amber-800",
+    item: "border-warning/40 bg-warning-muted",
+    icon: "bg-warning-muted text-warning-foreground",
+    badge: "border-warning/40 bg-warning-muted text-warning-foreground",
     label: "Watch",
   },
   urgent: {
-    item: "border-red-200 bg-red-50/60",
-    icon: "bg-red-100 text-red-700",
-    badge: "border-red-200 bg-red-50 text-red-700",
+    item: "border-destructive/40 bg-destructive/20",
+    icon: "bg-destructive/10 text-destructive",
+    badge: "border-destructive/40 bg-destructive/10 text-destructive",
     label: "Fix",
   },
 };

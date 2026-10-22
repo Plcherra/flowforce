@@ -26,32 +26,32 @@ export default function Resources() {
       title: t("resources.documentation.title"),
       description: t("resources.documentation.description"),
       icon: BookOpen,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
       key: "documentation" as const,
     },
     {
       title: t("resources.blog.title"),
       description: t("resources.blog.description"),
       icon: FileText,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-success",
+      bgColor: "bg-success-muted",
       key: "blog" as const,
     },
     {
       title: t("resources.videos.title"),
       description: t("resources.videos.description"),
       icon: Video,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
+      color: "text-destructive",
+      bgColor: "bg-destructive/10",
       key: "videos" as const,
     },
     {
       title: t("resources.downloads.title"),
       description: t("resources.downloads.description"),
       icon: Download,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-warning",
+      bgColor: "bg-warning-muted",
       key: "downloads" as const,
     },
   ];
@@ -77,14 +77,14 @@ export default function Resources() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Back to Home Button */}
       <div className="fixed top-4 right-4 z-50">
         <Button
           variant="outline"
           size="sm"
           onClick={() => navigate("/")}
-          className="bg-white shadow-lg hover:bg-gray-50"
+          className="bg-background shadow-lg hover:bg-muted"
         >
           <Home className="h-4 w-4 mr-2" />
           Back to Home
@@ -94,10 +94,10 @@ export default function Resources() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("resources.title")}
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("resources.subtitle")}
           </p>
         </div>

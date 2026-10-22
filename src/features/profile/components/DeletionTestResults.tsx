@@ -11,11 +11,11 @@ export default function DeletionTestResults({
   const getStatusIcon = (status: TestStatus) => {
     switch (status) {
       case "success":
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+        return <CheckCircle2 className="h-4 w-4 text-success" />;
       case "failed":
-        return <XCircle className="h-4 w-4 text-red-600" />;
+        return <XCircle className="h-4 w-4 text-destructive" />;
       case "pending":
-        return <div className="h-4 w-4 rounded-full bg-gray-300" />;
+        return <div className="h-4 w-4 rounded-full bg-muted-foreground" />;
     }
   };
 

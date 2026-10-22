@@ -54,7 +54,7 @@ export default function UserManual() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center justify-between">
           <Breadcrumbs items={breadcrumbItems} />
@@ -65,7 +65,7 @@ export default function UserManual() {
           <CardHeader>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
-                <Book className="h-6 w-6 text-orange-600 mr-3" />
+                <Book className="h-6 w-6 text-warning mr-3" />
                 <div>
                   <CardTitle className="text-2xl">User Manual</CardTitle>
                   <CardDescription className="mt-2">
@@ -75,7 +75,7 @@ export default function UserManual() {
               </div>
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary">Manual</Badge>
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
                   45 min
                 </div>
@@ -100,16 +100,16 @@ export default function UserManual() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900">
+                          <h4 className="font-semibold text-foreground">
                             {section.title}
                           </h4>
-                          <div className="flex items-center text-sm text-gray-500">
+                          <div className="flex items-center text-sm text-muted-foreground">
                             {section.pages} pages
                           </div>
                         </div>
-                        <p className="text-gray-600">{section.description}</p>
+                        <p className="text-muted-foreground">{section.description}</p>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-gray-400 ml-4" />
+                      <ChevronRight className="h-5 w-5 text-muted-foreground ml-4" />
                     </div>
                   </div>
                 ))}

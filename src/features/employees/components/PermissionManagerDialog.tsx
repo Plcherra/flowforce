@@ -85,7 +85,7 @@ export function PermissionManagerDialog({
           </div>
 
           {!canManagePermissions && (
-            <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+            <p className="rounded border border-warning/40 bg-warning-muted px-3 py-2 text-sm text-warning-foreground">
               You need elevated access to modify company permissions.
             </p>
           )}

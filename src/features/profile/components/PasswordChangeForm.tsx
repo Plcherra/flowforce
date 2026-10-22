@@ -94,7 +94,7 @@ export default function PasswordChangeForm() {
             </p>
           )}
           {passwordTouched && newPassword && hasErrors && (
-            <ul className="space-y-1 text-xs text-red-600">
+            <ul className="space-y-1 text-xs text-destructive">
               {validationResult.errors.map((error) => (
                 <li key={error} className="flex items-start gap-1">
                   <AlertCircle className="mt-0.5 h-3.5 w-3.5" />
@@ -104,7 +104,7 @@ export default function PasswordChangeForm() {
             </ul>
           )}
           {!hasErrors && newPassword && (
-            <p className="flex items-center gap-1 text-xs text-green-600">
+            <p className="flex items-center gap-1 text-xs text-success">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Looks good! Your password meets all requirements.
             </p>
@@ -125,7 +125,7 @@ export default function PasswordChangeForm() {
             autoComplete="new-password"
           />
           {!passwordsMatch && (
-            <p className="flex items-center gap-1 text-xs text-red-600">
+            <p className="flex items-center gap-1 text-xs text-destructive">
               <AlertCircle className="h-3.5 w-3.5" />
               Passwords do not match. Please re-enter them.
             </p>

@@ -37,7 +37,7 @@ export default function DownloadCard({
           <Badge variant="outline" className="text-xs">
             {type}
           </Badge>
-          {format && <span className="text-xs text-gray-500">{format}</span>}
+          {format && <span className="text-xs text-muted-foreground">{format}</span>}
         </div>
         <CardTitle className="text-lg">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -53,7 +53,7 @@ export default function DownloadCard({
           </div>
         )}
         <Button
-          className="w-full bg-[#3F51B5] hover:bg-[#3F51B5]/90"
+          className="w-full bg-primary hover:bg-primary/90"
           onClick={handleDownload}
         >
           <Download className="mr-2 h-4 w-4" />

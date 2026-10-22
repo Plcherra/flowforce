@@ -1,6 +1,6 @@
 export default function DeletionTestInstructions() {
   return (
-    <div className="text-xs text-gray-600 space-y-1">
+    <div className="text-xs text-muted-foreground space-y-1">
       <p>
         <strong>Note:</strong> To test this properly:
       </p>

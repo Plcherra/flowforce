@@ -55,7 +55,7 @@ export default function DocCard({
           <Badge variant="secondary" className="text-xs">
             {type}
           </Badge>
-          <div className="flex items-center text-sm text-gray-500">
+          <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-1" />
             {readTime} {t("resources.details.readTime")}
           </div>

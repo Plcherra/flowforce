@@ -44,7 +44,7 @@ export default function GettingStarted() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center justify-between">
           <Breadcrumbs items={breadcrumbItems} />
@@ -55,7 +55,7 @@ export default function GettingStarted() {
           <CardHeader>
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center">
-                <BookOpen className="h-6 w-6 text-blue-600 mr-3" />
+                <BookOpen className="h-6 w-6 text-primary mr-3" />
                 <div>
                   <CardTitle className="text-2xl">
                     Getting Started Guide
@@ -67,7 +67,7 @@ export default function GettingStarted() {
               </div>
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary">Guide</Badge>
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <Clock className="h-4 w-4 mr-1" />
                   10 min
                 </div>
@@ -91,20 +91,20 @@ export default function GettingStarted() {
                   >
                     <div className="flex-shrink-0">
                       {step.completed ? (
-                        <CheckCircle className="h-6 w-6 text-green-600" />
+                        <CheckCircle className="h-6 w-6 text-success" />
                       ) : (
-                        <div className="h-6 w-6 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600">
+                        <div className="h-6 w-6 rounded-full border-2 border-border flex items-center justify-center">
+                          <span className="text-sm font-medium text-muted-foreground">
                             {index + 1}
                           </span>
                         </div>
                       )}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">
+                      <h4 className="font-semibold text-foreground">
                         {step.title}
                       </h4>
-                      <p className="text-gray-600">{step.description}</p>
+                      <p className="text-muted-foreground">{step.description}</p>
                     </div>
                   </div>
                 ))}

@@ -116,7 +116,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center text-red-600">
+          <div className="text-center text-destructive">
             <p>Error loading audit logs: {error.message}</p>
           </div>
         </CardContent>
@@ -131,7 +131,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <FileText className="h-8 w-8 text-blue-600" />
+              <FileText className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold">{userAuditLogs.length}</p>
                 <p className="text-sm text-muted-foreground">
@@ -145,7 +145,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <User className="h-8 w-8 text-green-600" />
+              <User className="h-8 w-8 text-success" />
               <div>
                 <p className="text-2xl font-bold">
                   {
@@ -164,7 +164,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Clock className="h-8 w-8 text-orange-600" />
+              <Clock className="h-8 w-8 text-warning" />
               <div>
                 <p className="text-2xl font-bold">
                   {userAuditLogs.length > 0

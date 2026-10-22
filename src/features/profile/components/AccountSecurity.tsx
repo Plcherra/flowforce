@@ -31,7 +31,7 @@ export default function AccountSecurity({
   return (
     <Card className="lg:col-span-3">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-red-600">
+        <CardTitle className="flex items-center gap-2 text-destructive">
           <Shield className="h-5 w-5" />
           Account Security & Data
         </CardTitle>
@@ -42,14 +42,14 @@ export default function AccountSecurity({
       <CardContent className="space-y-6">
         <PasswordChangeForm />
 
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive/40 rounded-lg p-4">
           <div className="flex items-start space-x-3">
-            <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
             <div className="flex-1">
-              <h4 className="font-medium text-red-800">
+              <h4 className="font-medium text-destructive">
                 Permanent Account Deletion
               </h4>
-              <p className="text-sm text-red-600 mt-1">
+              <p className="text-sm text-destructive mt-1">
                 Completely remove your account and all associated data from our
                 servers. This action cannot be undone and will prevent future
                 login.

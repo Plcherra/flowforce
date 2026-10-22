@@ -36,7 +36,7 @@ export default function BlogCard({
           <Badge variant="secondary" className="text-xs">
             {type}
           </Badge>
-          <div className="flex items-center text-sm text-gray-500">
+          <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-1" />
             {readTime}
           </div>
@@ -45,7 +45,7 @@ export default function BlogCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center text-sm text-gray-500 mb-4">
+        <div className="flex items-center text-sm text-muted-foreground mb-4">
           <User className="h-4 w-4 mr-1" />
           {author} • {new Date(publishDate).toLocaleDateString()}
         </div>

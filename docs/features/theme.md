@@ -318,7 +318,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 16 — Resources, employees, and profile
 
-- [ ] Move hard-coded colors on those screens onto the tokens.
+- [x] Move hard-coded colors on those screens onto the tokens.
 
 Rules:
 
@@ -679,6 +679,22 @@ Phone steps for Pedro:
 3. Your chat messages should be blue with light text. The assistant bubble should be muted. The round Co-Pilot button should be blue.
 4. Open Operations. An on-track or resolved row should read as green, a warning as amber, and an overdue or critical row as red. The KPI chart bar should be blue.
 5. Switch to Dark. Badges, chat bubbles, and status text should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 16 Resources, employees, and profile
+
+Shipped: Resources, employees, and profile classes now use the theme tokens. Readiness rows use success, warning, and destructive. Account deletion uses destructive, and the finished state uses success. Download and loading chrome use primary. `src/features/resources`, `src/features/employees`, and `src/features/profile` have no baseline entries.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Resources. Cards and headings should follow the page colors. A download button and the loading spinner should be blue.
+2. Open the team or employees screen. A ready row should read as green, a watch row as amber, and a fix row as red.
+3. Open profile security and the delete-account dialog. The warning copy and the delete button should be red. A finished deletion should read as green.
+4. Switch to Dark. Resource cards, readiness rows, and the delete dialog should stay readable.
 
 Blockers: none. No migration.
 

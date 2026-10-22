@@ -86,8 +86,8 @@ export default function ResourceSection({
           <category.icon className={`h-6 w-6 ${category.color}`} />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">{category.title}</h2>
-          <p className="text-gray-600">{category.description}</p>
+          <h2 className="text-3xl font-bold text-foreground">{category.title}</h2>
+          <p className="text-muted-foreground">{category.description}</p>
         </div>
       </div>
 

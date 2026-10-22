@@ -42,7 +42,7 @@ export function VendorTable({ vendors, isLoading }: VendorTableProps) {
               <TableCell>
                 <div className="flex items-center gap-3 min-w-0">
                   <Avatar className="h-9 w-9">
-                    <AvatarFallback className="bg-orange-100 text-orange-600">
+                    <AvatarFallback className="bg-warning-muted text-warning">
                       <Truck className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>

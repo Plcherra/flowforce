@@ -247,11 +247,11 @@ export function TeamDirectory() {
         >
           <div>
             <h1
-              className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold text-gray-900`}
+              className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold text-foreground`}
             >
               Team Directory
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-muted-foreground mt-1">
               Browse, filter and export your company roster
             </p>
           </div>
@@ -454,28 +454,28 @@ export function TeamDirectory() {
               className={`grid ${isMobile ? "grid-cols-2 gap-3" : "grid-cols-2 md:grid-cols-4 gap-4"} text-center`}
             >
               <div>
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-primary">
                   {employees.length}
                 </div>
-                <div className="text-sm text-gray-600">People</div>
+                <div className="text-sm text-muted-foreground">People</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-success">
                   {activeEmployeesCount}
                 </div>
-                <div className="text-sm text-gray-600">Active</div>
+                <div className="text-sm text-muted-foreground">Active</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-orange-600">
+                <div className="text-2xl font-bold text-warning">
                   {leaderCount}
                 </div>
-                <div className="text-sm text-gray-600">Leads</div>
+                <div className="text-sm text-muted-foreground">Leads</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-600">
+                <div className="text-2xl font-bold text-secondary">
                   {departments.length}
                 </div>
-                <div className="text-sm text-gray-600">Departments</div>
+                <div className="text-sm text-muted-foreground">Departments</div>
               </div>
             </div>
           </CardContent>

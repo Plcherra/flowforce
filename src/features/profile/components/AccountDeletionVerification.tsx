@@ -193,11 +193,11 @@ export default function AccountDeletionVerification() {
   const getStatusIcon = (status: VerificationResult["status"]) => {
     switch (status) {
       case "success":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <CheckCircle className="h-4 w-4 text-success" />;
       case "error":
-        return <XCircle className="h-4 w-4 text-red-600" />;
+        return <XCircle className="h-4 w-4 text-destructive" />;
       case "pending":
-        return <Loader2 className="h-4 w-4 animate-spin text-gray-400" />;
+        return <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />;
     }
   };
 
@@ -205,7 +205,7 @@ export default function AccountDeletionVerification() {
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <AlertTriangle className="h-5 w-5 text-warning" />
           Deletion Verification Tests
         </CardTitle>
         <CardDescription>
@@ -265,7 +265,7 @@ export default function AccountDeletionVerification() {
                 <span className="text-sm font-medium">{result.test}</span>
                 <div className="flex items-center space-x-2">
                   {getStatusIcon(result.status)}
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs text-muted-foreground">
                     {result.message}
                   </span>
                 </div>
@@ -274,7 +274,7 @@ export default function AccountDeletionVerification() {
           </div>
         )}
 
-        <div className="text-xs text-gray-600 space-y-1 p-3 bg-gray-50 rounded">
+        <div className="text-xs text-muted-foreground space-y-1 p-3 bg-muted rounded">
           <p>
             <strong>How to test:</strong>
           </p>
