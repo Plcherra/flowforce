@@ -62,9 +62,9 @@ export default function CompanyInfoForm({
             value={companyInfo.name}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             placeholder={t("onboarding.userInfo.placeholders.companyName")}
-            className={errors.name ? "border-red-500" : ""}
+            className={errors.name ? "border-destructive/40" : ""}
           />
-          {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+          {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -90,13 +90,13 @@ export default function CompanyInfoForm({
               }}
             >
               <SelectTrigger
-                className={errors.industry ? "border-red-500" : ""}
+                className={errors.industry ? "border-destructive/40" : ""}
               >
                 <SelectValue
                   placeholder={t("onboarding.userInfo.placeholders.industry")}
                 />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50">
+              <SelectContent className="bg-background border border-border z-50">
                 {INDUSTRIES.map((industry) => (
                   <SelectItem key={industry} value={industry}>
                     {t(
@@ -122,7 +122,7 @@ export default function CompanyInfoForm({
               />
             )}
             {errors.industry && (
-              <p className="text-sm text-red-500">{errors.industry}</p>
+              <p className="text-sm text-destructive">{errors.industry}</p>
             )}
           </div>
 
@@ -135,7 +135,7 @@ export default function CompanyInfoForm({
               value={companyInfo.size}
               onValueChange={(value) => handleFieldChange("size", value)}
             >
-              <SelectTrigger className={errors.size ? "border-red-500" : ""}>
+              <SelectTrigger className={errors.size ? "border-destructive/40" : ""}>
                 <SelectValue
                   placeholder={t("onboarding.userInfo.placeholders.size")}
                 />
@@ -154,7 +154,7 @@ export default function CompanyInfoForm({
               </SelectContent>
             </Select>
             {errors.size && (
-              <p className="text-sm text-red-500">{errors.size}</p>
+              <p className="text-sm text-destructive">{errors.size}</p>
             )}
           </div>
         </div>

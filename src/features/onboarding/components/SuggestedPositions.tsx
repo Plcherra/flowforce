@@ -36,7 +36,7 @@ export default function SuggestedPositions({
 
   return (
     <div>
-      <h4 className="font-medium text-sm text-gray-700 mb-3">
+      <h4 className="font-medium text-sm text-foreground mb-3">
         Suggested Positions for {selectedTemplate?.name}
       </h4>
       <div className="flex flex-wrap gap-2 mb-4">

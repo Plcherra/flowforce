@@ -195,8 +195,8 @@ export default function CompanyOnboardingWizard({
   });
   const [branding] = useState<Branding>({
     logo: null,
-    primaryColor: "#3b82f6",
-    secondaryColor: "#1e40af",
+    primaryColor: "hsl(var(--primary))",
+    secondaryColor: "hsl(var(--secondary))",
   });
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [selectedSections, setSelectedSections] = useState<SelectedSections>(
@@ -258,22 +258,22 @@ export default function CompanyOnboardingWizard({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary to-primary p-4">
       <div className="max-w-4xl mx-auto py-8">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Building2 className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-900">FlowForce</h1>
+            <h1 className="text-3xl font-bold text-foreground">FlowForce</h1>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800">
+          <h2 className="text-2xl font-semibold text-foreground">
             Company Onboarding
           </h2>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Let&apos;s set up your business operations platform
           </p>
           <div className="mt-4 max-w-md mx-auto">
             <Progress value={progress} className="h-2" />
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Step {currentStep} of {totalSteps}
             </p>
           </div>
@@ -403,13 +403,13 @@ export default function CompanyOnboardingWizard({
                     <Label htmlFor="logo">Company Logo</Label>
                     <div className="flex items-center space-x-4">
                       <div className="flex-1">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                          <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                           <div className="mt-4">
                             <Button variant="outline" size="sm">
                               Choose File
                             </Button>
-                            <p className="text-sm text-gray-500 mt-2">
+                            <p className="text-sm text-muted-foreground mt-2">
                               PNG, JPG up to 2MB
                             </p>
                           </div>
@@ -437,7 +437,7 @@ export default function CompanyOnboardingWizard({
                       className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedTemplate === template.id
                           ? "border-primary bg-primary/5"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-border hover:border-border"
                       }`}
                       onClick={() => handleTemplateSelect(template.id)}
                     >
@@ -447,7 +447,7 @@ export default function CompanyOnboardingWizard({
                           <h3 className="font-semibold text-lg">
                             {template.name}
                           </h3>
-                          <p className="text-gray-600 text-sm mt-1">
+                          <p className="text-muted-foreground text-sm mt-1">
                             {template.description}
                           </p>
                           <div className="flex flex-wrap gap-1 mt-3">
@@ -488,7 +488,7 @@ export default function CompanyOnboardingWizard({
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedSections[section.id]
                           ? "border-primary bg-primary/5"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-border hover:border-border"
                       }`}
                       onClick={() => handleSectionToggle(section.id)}
                     >
@@ -496,7 +496,7 @@ export default function CompanyOnboardingWizard({
                         <section.icon className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                         <div className="flex-1">
                           <h4 className="font-medium">{section.name}</h4>
-                          <p className="text-gray-600 text-sm mt-1">
+                          <p className="text-muted-foreground text-sm mt-1">
                             {section.description}
                           </p>
                         </div>

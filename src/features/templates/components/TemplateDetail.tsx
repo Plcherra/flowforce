@@ -23,7 +23,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <div className="mb-4">
@@ -62,16 +62,16 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
             <div
               className={`w-24 h-24 bg-gradient-to-br ${template.gradient} rounded-3xl flex items-center justify-center mb-6`}
             >
-              <template.icon className="h-12 w-12 text-white" />
+              <template.icon className="h-12 w-12 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
               {template.title}
             </h1>
-            <p className="text-xl text-gray-600 mb-8">{template.description}</p>
+            <p className="text-xl text-muted-foreground mb-8">{template.description}</p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 size="lg"
-                className={`bg-gradient-to-r ${template.gradient} text-white px-8 py-4`}
+                className={`bg-gradient-to-r ${template.gradient} text-primary-foreground px-8 py-4`}
                 onClick={() => navigate(`/register?template=${templateId}`)}
               >
                 Get Started with {template.title}
@@ -91,7 +91,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
               <div
                 className={`w-full h-full bg-gradient-to-br ${template.gradient} rounded-lg opacity-10 flex items-center justify-center`}
               >
-                <template.icon className="h-24 w-24 text-white/50" />
+                <template.icon className="h-24 w-24 text-primary-foreground/50" />
               </div>
             )}
           </div>
@@ -100,7 +100,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
         {/* Features Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl font-bold text-foreground mb-6">
               Key Features
             </h2>
             <div className="space-y-4">
@@ -109,16 +109,16 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
                   <div
                     className={`w-6 h-6 ${template.bgColor} rounded-full flex items-center justify-center mr-4`}
                   >
-                    <Check className="h-4 w-4 text-white" />
+                    <Check className="h-4 w-4 text-primary-foreground" />
                   </div>
-                  <span className="text-gray-700">{feature}</span>
+                  <span className="text-foreground">{feature}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl font-bold text-foreground mb-6">
               Included Modules
             </h2>
             <div className="space-y-4">
@@ -129,10 +129,10 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
                   style={{ borderLeftColor: template.bgColor }}
                 >
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-semibold text-foreground mb-1">
                       {module.name}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {module.description}
                     </p>
                   </CardContent>
@@ -143,12 +143,12 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
         </div>
 
         {/* CTA Section */}
-        <Card className="bg-gradient-to-r from-gray-50 to-blue-50 border-0">
+        <Card className="bg-gradient-to-r from-muted to-primary border-0">
           <CardContent className="p-12 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Ready to Get Started?
             </h2>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
               Set up your {template.title.toLowerCase()} in minutes with our
               pre-configured template. Customize it to match your specific
               workflow needs.
@@ -156,7 +156,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                className={`bg-gradient-to-r ${template.gradient} text-white px-8 py-4`}
+                className={`bg-gradient-to-r ${template.gradient} text-primary-foreground px-8 py-4`}
                 onClick={() => navigate(`/register?template=${templateId}`)}
               >
                 Start with {template.title}

@@ -72,9 +72,9 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
       industry: "",
       companySize: [],
       branding: {
-        primaryColor: "#3b82f6",
-        secondaryColor: "#1e40af",
-        accentColor: "#10b981",
+        primaryColor: "hsl(var(--primary))",
+        secondaryColor: "hsl(var(--secondary))",
+        accentColor: "hsl(var(--success))",
         fontFamily: "Inter, sans-serif",
         headerStyle: "modern",
         sidebarStyle: "expanded",
@@ -106,8 +106,8 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
 
   const [branding] = useState<Branding>({
     logo: null,
-    primaryColor: customTemplate.branding?.primaryColor || "#3b82f6",
-    secondaryColor: customTemplate.branding?.secondaryColor || "#1e40af",
+    primaryColor: customTemplate.branding?.primaryColor || "hsl(var(--primary))",
+    secondaryColor: customTemplate.branding?.secondaryColor || "hsl(var(--secondary))",
   });
 
   const isCustomTemplate = selectedTemplate?.id === "custom";
@@ -285,7 +285,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950 relative overflow-hidden"
+      className="min-h-screen bg-gradient-to-br from-muted via-primary to-secondary relative overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -304,7 +304,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
           <div className="flex gap-8">
             {/* Main Content Area */}
             <div className="flex-1">
-              <Card className="shadow-xl border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+              <Card className="shadow-xl border-0 bg-background/90 backdrop-blur-sm">
                 <CardContent className="p-8">
                   <AnimatedPanel step={currentStep} direction={direction}>
                     <StepRenderer
@@ -338,7 +338,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
 
                   {/* Navigation */}
                   <motion.div
-                    className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700"
+                    className="flex justify-between mt-8 pt-6 border-t border-border"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}

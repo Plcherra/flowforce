@@ -9,15 +9,15 @@ interface StepIllustrationProps {
 
 // Animation Skeleton Component
 const AnimationSkeleton = () => (
-  <div className="w-full h-64 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-2xl flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+  <div className="w-full h-64 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
   </div>
 );
 
 // Template Animation Component
 const TemplateAnimation = () => (
   <motion.div
-    className="w-full h-64 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden"
+    className="w-full h-64 bg-gradient-to-br from-primary to-secondary rounded-2xl flex flex-col items-center justify-center relative overflow-hidden"
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.6 }}
@@ -33,15 +33,15 @@ const TemplateAnimation = () => (
       }}
       className="relative"
     >
-      <Building2 className="h-16 w-16 text-blue-500" />
+      <Building2 className="h-16 w-16 text-primary" />
       <motion.div
-        className="absolute -top-2 -right-2 w-6 h-6 bg-purple-500 rounded-full"
+        className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full"
         animate={{ scale: [0, 1, 0] }}
         transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
       />
     </motion.div>
     <motion.p
-      className="mt-4 text-blue-600 dark:text-blue-400 font-medium"
+      className="mt-4 text-primary font-medium"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
@@ -52,7 +52,7 @@ const TemplateAnimation = () => (
     {[...Array(3)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-2 h-2 bg-blue-300 rounded-full"
+        className="absolute w-2 h-2 bg-primary rounded-full"
         animate={{
           x: [0, 30, -30, 0],
           y: [0, -20, 20, 0],
@@ -75,7 +75,7 @@ const TemplateAnimation = () => (
 // Section Animation Component
 const SectionAnimation = () => (
   <motion.div
-    className="w-full h-64 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950 dark:to-teal-950 rounded-2xl flex flex-col items-center justify-center relative"
+    className="w-full h-64 bg-gradient-to-br from-success to-primary rounded-2xl flex flex-col items-center justify-center relative"
     initial={{ opacity: 0, x: 20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ duration: 0.6 }}
@@ -84,10 +84,10 @@ const SectionAnimation = () => (
       animate={{ y: [-5, 5, -5] }}
       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
     >
-      <Settings className="h-16 w-16 text-green-500" />
+      <Settings className="h-16 w-16 text-success" />
     </motion.div>
     <motion.p
-      className="mt-4 text-green-600 dark:text-green-400 font-medium"
+      className="mt-4 text-success font-medium"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
@@ -105,11 +105,11 @@ const SectionAnimation = () => (
           transition={{ delay: 0.5 + i * 0.2 }}
         >
           <motion.div
-            className="w-3 h-3 bg-green-500 rounded-sm"
+            className="w-3 h-3 bg-success rounded-sm"
             animate={{ scale: [0.8, 1, 0.8] }}
             transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.3 }}
           />
-          <div className="w-8 h-1 bg-green-200 rounded" />
+          <div className="w-8 h-1 bg-success-muted rounded" />
         </motion.div>
       ))}
     </div>
@@ -119,7 +119,7 @@ const SectionAnimation = () => (
 // Role Animation Component
 const RoleAnimation = () => (
   <motion.div
-    className="w-full h-64 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 rounded-2xl flex flex-col items-center justify-center relative"
+    className="w-full h-64 bg-gradient-to-br from-warning to-destructive rounded-2xl flex flex-col items-center justify-center relative"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.6 }}
@@ -128,10 +128,10 @@ const RoleAnimation = () => (
       animate={{ rotate: [0, 10, -10, 0] }}
       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
     >
-      <Users className="h-16 w-16 text-orange-500" />
+      <Users className="h-16 w-16 text-warning" />
     </motion.div>
     <motion.p
-      className="mt-4 text-orange-600 dark:text-orange-400 font-medium"
+      className="mt-4 text-warning font-medium"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
@@ -143,7 +143,7 @@ const RoleAnimation = () => (
       {[...Array(4)].map((_, i) => (
         <motion.div
           key={i}
-          className="w-6 h-6 bg-orange-300 rounded-full"
+          className="w-6 h-6 bg-warning rounded-full"
           animate={{
             y: [0, -8, 0],
             scale: [1, 1.1, 1],
@@ -162,7 +162,7 @@ const RoleAnimation = () => (
 // Review Animation Component
 const ReviewAnimation = () => (
   <motion.div
-    className="w-full h-64 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded-2xl flex flex-col items-center justify-center relative"
+    className="w-full h-64 bg-gradient-to-br from-secondary to-accent rounded-2xl flex flex-col items-center justify-center relative"
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.6 }}
@@ -177,10 +177,10 @@ const ReviewAnimation = () => (
         rotate: { duration: 4, repeat: Infinity, ease: "linear" },
       }}
     >
-      <CheckCircle className="h-16 w-16 text-purple-500" />
+      <CheckCircle className="h-16 w-16 text-secondary" />
     </motion.div>
     <motion.p
-      className="mt-4 text-purple-600 dark:text-purple-400 font-medium"
+      className="mt-4 text-secondary font-medium"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.3 }}
@@ -191,7 +191,7 @@ const ReviewAnimation = () => (
     {[...Array(8)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1 h-1 bg-purple-400 rounded-full"
+        className="absolute w-1 h-1 bg-secondary rounded-full"
         animate={{
           x: [0, Math.cos((i * 45 * Math.PI) / 180) * 40],
           y: [0, Math.sin((i * 45 * Math.PI) / 180) * 40],

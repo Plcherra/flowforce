@@ -42,19 +42,19 @@ export default function ReviewStep({
 
       <div className="space-y-6">
         <div className="p-4 border rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-2">Business Template</h4>
+          <h4 className="font-medium text-foreground mb-2">Business Template</h4>
           <div className="flex items-center space-x-3">
-            <Badge className="bg-green-100 text-green-800">
+            <Badge className="bg-success-muted text-success">
               {selectedTemplate.name}
             </Badge>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
               {selectedTemplate.industry} industry
             </span>
           </div>
         </div>
 
         <div className="p-4 border rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-3">
+          <h4 className="font-medium text-foreground mb-3">
             Enabled Sections ({enabledSections.length})
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -67,7 +67,7 @@ export default function ReviewStep({
         </div>
 
         <div className="p-4 border rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-3">
+          <h4 className="font-medium text-foreground mb-3">
             Your Company Roles ({customRoles.length})
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -82,7 +82,7 @@ export default function ReviewStep({
 
         {positions.length > 0 && (
           <div className="p-4 border rounded-lg">
-            <h4 className="font-medium text-gray-900 mb-3">
+            <h4 className="font-medium text-foreground mb-3">
               Positions ({positions.length})
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">

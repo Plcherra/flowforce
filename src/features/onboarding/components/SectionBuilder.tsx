@@ -213,7 +213,7 @@ export default function SectionBuilder({
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50">
+                <SelectContent className="bg-background border border-border z-50">
                   {sectionCategories.map((cat) => (
                     <SelectItem key={cat.value} value={cat.value}>
                       {cat.label}
@@ -355,7 +355,7 @@ export default function SectionBuilder({
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50">
+                        <SelectContent className="bg-background border border-border z-50">
                           {sectionCategories.map((cat) => (
                             <SelectItem key={cat.value} value={cat.value}>
                               {cat.label}

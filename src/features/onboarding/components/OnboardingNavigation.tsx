@@ -25,7 +25,7 @@ export default function OnboardingNavigation({
 }: OnboardingNavigationProps) {
   return (
     <motion.div
-      className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700"
+      className="flex justify-between mt-8 pt-6 border-t border-border"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
@@ -53,7 +53,7 @@ export default function OnboardingNavigation({
           <Button
             onClick={onComplete}
             disabled={!canProceed || isCreatingAccount}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+            className="bg-gradient-to-r from-primary to-secondary hover:from-primary hover:to-secondary"
           >
             {isCreatingAccount ? "Creating Account..." : "Complete Setup"}
             <CheckCircle className="ml-2 h-4 w-4" />

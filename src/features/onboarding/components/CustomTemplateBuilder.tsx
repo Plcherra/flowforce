@@ -213,9 +213,9 @@ export default function CustomTemplateBuilder({
           <BrandingCustomizer
             branding={
               template.branding || {
-                primaryColor: "#3b82f6",
-                secondaryColor: "#1e40af",
-                accentColor: "#10b981",
+                primaryColor: "hsl(var(--primary))",
+                secondaryColor: "hsl(var(--secondary))",
+                accentColor: "hsl(var(--success))",
                 fontFamily: "Inter, sans-serif",
                 headerStyle: "modern",
                 sidebarStyle: "expanded",

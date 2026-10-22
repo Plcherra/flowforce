@@ -108,7 +108,7 @@ export default function TemplateSelector({
         <h3 className="text-lg font-semibold mb-2">
           Choose Your Business Template
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-muted-foreground">
           Select a pre-configured template that matches your business type. You
           can customize sections later.
         </p>
@@ -127,10 +127,10 @@ export default function TemplateSelector({
           className="group"
         >
           <Card
-            className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-600 ${
+            className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-secondary/40 ${
               selectedTemplateId === "custom"
-                ? "border-purple-500 bg-purple-50 dark:bg-purple-950 shadow-md ring-2 ring-purple-200 dark:ring-purple-800"
-                : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "border-secondary/40 bg-secondary/10 shadow-md ring-2 ring-secondary/40"
+                : "border-border hover:bg-muted"
             }`}
             onClick={() =>
               handleTemplateClick({
@@ -150,8 +150,8 @@ export default function TemplateSelector({
                   <motion.div
                     className={`p-2 rounded-lg transition-colors ${
                       selectedTemplateId === "custom"
-                        ? "bg-purple-500 text-white"
-                        : "bg-gray-100 dark:bg-gray-800 group-hover:bg-purple-100 dark:group-hover:bg-purple-900"
+                        ? "bg-secondary text-primary-foreground"
+                        : "bg-muted group-hover:bg-secondary/20"
                     }`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -164,7 +164,7 @@ export default function TemplateSelector({
                     </CardTitle>
                     <Badge
                       variant="secondary"
-                      className="mt-1 bg-purple-100 text-purple-700"
+                      className="mt-1 bg-secondary/10 text-secondary"
                     >
                       {t("common.custom")}
                     </Badge>
@@ -176,7 +176,7 @@ export default function TemplateSelector({
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <CheckCircle className="h-5 w-5 text-purple-500" />
+                    <CheckCircle className="h-5 w-5 text-secondary" />
                   </motion.div>
                 )}
               </div>
@@ -185,7 +185,7 @@ export default function TemplateSelector({
               <CardDescription className="mb-4">
                 {t("onboarding.customTemplate.description")}
               </CardDescription>
-              <div className="space-y-2 text-sm text-gray-600">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <p>• {t("common.customBranding")}</p>
                 <p>• {t("common.flexibleSections")}</p>
                 <p>• {t("common.uniqueLayouts")}</p>
@@ -215,10 +215,10 @@ export default function TemplateSelector({
                 className="group"
               >
                 <Card
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 ${
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/40 ${
                     isSelected
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-md ring-2 ring-blue-200 dark:ring-blue-800"
-                      : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      ? "border-primary/40 bg-primary/10 shadow-md ring-2 ring-primary/40"
+                      : "border-border hover:bg-muted"
                   }`}
                   onClick={() => handleTemplateClick(template)}
                 >
@@ -228,8 +228,8 @@ export default function TemplateSelector({
                         <motion.div
                           className={`p-2 rounded-lg transition-colors ${
                             isSelected
-                              ? "bg-blue-500 text-white"
-                              : "bg-gray-100 dark:bg-gray-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted group-hover:bg-primary/20"
                           }`}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -255,7 +255,7 @@ export default function TemplateSelector({
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ duration: 0.3 }}
                         >
-                          <CheckCircle className="h-5 w-5 text-blue-500" />
+                          <CheckCircle className="h-5 w-5 text-primary" />
                         </motion.div>
                       )}
                     </div>
@@ -326,7 +326,7 @@ export default function TemplateSelector({
       {/* Loading indicator */}
       {isLoading && (
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary/40"></div>
         </div>
       )}
 
@@ -349,14 +349,14 @@ export default function TemplateSelector({
 
       {selectedTemplateId && (
         <motion.div
-          className="mt-6 p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg"
+          className="mt-6 p-4 bg-success-muted border border-success/40 rounded-lg"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center space-x-2">
-            <CheckCircle className="h-5 w-5 text-green-600 dark: dark:text-green-400" />
-            <span className="text-green-800 dark:text-green-200 font-medium">
+            <CheckCircle className="h-5 w-5 text-success dark: " />
+            <span className="text-success font-medium">
               Template Selected:{" "}
               {(() => {
                 const template = BUSINESS_TEMPLATES.find(

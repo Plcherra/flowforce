@@ -34,13 +34,13 @@ export default function PositionCard({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <h5 className="font-medium text-gray-900">{position.name}</h5>
+              <h5 className="font-medium text-foreground">{position.name}</h5>
               <Badge variant="outline" className="text-xs">
                 {role.name}
               </Badge>
             </div>
             {position.description && (
-              <p className="text-sm text-gray-600">{position.description}</p>
+              <p className="text-sm text-muted-foreground">{position.description}</p>
             )}
           </div>
 
@@ -57,7 +57,7 @@ export default function PositionCard({
               variant="outline"
               size="sm"
               onClick={() => onDelete(position.id)}
-              className="text-red-600 hover:text-red-700"
+              className="text-destructive hover:text-destructive"
             >
               <Trash2 className="h-3 w-3 mr-1" />
               Delete

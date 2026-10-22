@@ -29,11 +29,11 @@ export default function StepProgress({
       <TooltipProvider>
         <div className="flex items-center justify-between relative">
           {/* Progress line background */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 dark:bg-gray-700 -translate-y-1/2 z-0" />
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-muted -translate-y-1/2 z-0" />
 
           {/* Animated progress line */}
           <motion.div
-            className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 -translate-y-1/2 z-10"
+            className="absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-primary to-secondary -translate-y-1/2 z-10"
             initial={{ width: "0%" }}
             animate={{
               width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%`,
@@ -64,8 +64,8 @@ export default function StepProgress({
                       transition-all duration-300 relative overflow-hidden
                       ${
                         step.id <= currentStep
-                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                          : "bg-white dark:bg-gray-800 text-gray-400 border-2 border-gray-200 dark:border-gray-600"
+                          ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg"
+                          : "bg-background text-muted-foreground border-2 border-border"
                       }
                     `}
                     whileTap={{ scale: 0.95 }}
@@ -106,10 +106,10 @@ export default function StepProgress({
                       mt-2 text-xs font-medium text-center max-w-20 leading-tight
                       ${
                         step.id <= currentStep
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-gray-500 dark:text-gray-400"
+                          ? "text-primary"
+                          : "text-muted-foreground"
                       }
-                      ${hoveredStep === step.id ? "text-blue-700 dark:text-blue-300" : ""}
+                      ${hoveredStep === step.id ? "text-primary" : ""}
                     `}
                     animate={{
                       y: hoveredStep === step.id ? -2 : 0,
@@ -123,7 +123,7 @@ export default function StepProgress({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                className="bg-foreground text-primary-foreground"
               >
                 <p className="font-medium">{step.title}</p>
                 <p className="text-sm opacity-75">{step.description}</p>

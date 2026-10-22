@@ -33,10 +33,10 @@ export default function CompanyRegistration() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-muted via-primary to-secondary">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
+          <p className="mt-4 text-muted-foreground">
             {t("onboarding.wizard.settingUp")}
           </p>
         </div>

@@ -40,8 +40,8 @@ export function useOnboardingState() {
 
   const [branding] = useState<Branding>({
     logo: null,
-    primaryColor: "#3b82f6",
-    secondaryColor: "#1e40af",
+    primaryColor: "hsl(var(--primary))",
+    secondaryColor: "hsl(var(--secondary))",
   });
 
   const isCustomTemplate = selectedTemplate?.id === "custom";

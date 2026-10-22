@@ -100,10 +100,10 @@ export default function UserInfoForm({
               value={userInfo.firstName}
               onChange={(e) => handleFieldChange("firstName", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.firstName")}
-              className={errors.firstName ? "border-red-500" : ""}
+              className={errors.firstName ? "border-destructive/40" : ""}
             />
             {errors.firstName && (
-              <p className="text-sm text-red-500">{errors.firstName}</p>
+              <p className="text-sm text-destructive">{errors.firstName}</p>
             )}
           </div>
           <div className="space-y-2">
@@ -118,10 +118,10 @@ export default function UserInfoForm({
               value={userInfo.lastName}
               onChange={(e) => handleFieldChange("lastName", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.lastName")}
-              className={errors.lastName ? "border-red-500" : ""}
+              className={errors.lastName ? "border-destructive/40" : ""}
             />
             {errors.lastName && (
-              <p className="text-sm text-red-500">{errors.lastName}</p>
+              <p className="text-sm text-destructive">{errors.lastName}</p>
             )}
           </div>
         </div>
@@ -132,7 +132,7 @@ export default function UserInfoForm({
             {t("onboarding.userInfo.required")}
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               id="email"
               name="email"
@@ -141,11 +141,11 @@ export default function UserInfoForm({
               value={userInfo.email}
               onChange={(e) => handleFieldChange("email", e.target.value)}
               placeholder={t("onboarding.userInfo.placeholders.email")}
-              className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
+              className={`pl-10 ${errors.email ? "border-destructive/40" : ""}`}
             />
           </div>
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email}</p>
+            <p className="text-sm text-destructive">{errors.email}</p>
           )}
         </div>
 
@@ -154,7 +154,7 @@ export default function UserInfoForm({
             {t("onboarding.userInfo.fields.phone")}
           </Label>
           <div className="relative">
-            <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               id="personalPhone"
               name="tel"
@@ -175,7 +175,7 @@ export default function UserInfoForm({
             {t("onboarding.userInfo.required")}
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               id="password"
               name="new-password"
@@ -184,7 +184,7 @@ export default function UserInfoForm({
               value={userInfo.password}
               onChange={(e) => handleFieldChange("password", e.target.value)}
               placeholder="Create a strong, unique password"
-              className={`pl-10 ${hasPasswordErrors ? "border-red-500" : validationResult.strength === "strong" ? "border-green-500" : ""}`}
+              className={`pl-10 ${hasPasswordErrors ? "border-destructive/40" : validationResult.strength === "strong" ? "border-success/40" : ""}`}
             />
             {validationResult.strength && (
               <div
@@ -196,8 +196,8 @@ export default function UserInfoForm({
           </div>
           {hasPasswordErrors && (
             <div className="flex items-start space-x-2">
-              <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-500">
+              <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-destructive">
                 {validationResult.errors[0]}
               </p>
             </div>
@@ -206,28 +206,28 @@ export default function UserInfoForm({
             userInfo.password &&
             validationResult.strength === "strong" && (
               <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <p className="text-sm text-green-600">✓ Strong password!</p>
+                <CheckCircle className="h-4 w-4 text-success" />
+                <p className="text-sm text-success">✓ Strong password!</p>
               </div>
             )}
           {!hasPasswordErrors &&
             userInfo.password &&
             validationResult.strength === "medium" && (
               <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                <p className="text-sm text-yellow-600">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                <p className="text-sm text-warning">
                   Password is acceptable but could be stronger
                 </p>
               </div>
             )}
-          <div className="text-xs text-gray-500 space-y-1">
+          <div className="text-xs text-muted-foreground space-y-1">
             <p className="font-medium">Password requirements:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li
                 className={
                   userInfo.password.length >= 8
-                    ? "text-green-600"
-                    : "text-gray-400"
+                    ? "text-success"
+                    : "text-muted-foreground"
                 }
               >
                 At least 8 characters
@@ -235,8 +235,8 @@ export default function UserInfoForm({
               <li
                 className={
                   /[A-Z]/.test(userInfo.password)
-                    ? "text-green-600"
-                    : "text-gray-400"
+                    ? "text-success"
+                    : "text-muted-foreground"
                 }
               >
                 One uppercase letter
@@ -244,8 +244,8 @@ export default function UserInfoForm({
               <li
                 className={
                   /[a-z]/.test(userInfo.password)
-                    ? "text-green-600"
-                    : "text-gray-400"
+                    ? "text-success"
+                    : "text-muted-foreground"
                 }
               >
                 One lowercase letter
@@ -253,8 +253,8 @@ export default function UserInfoForm({
               <li
                 className={
                   /\d/.test(userInfo.password)
-                    ? "text-green-600"
-                    : "text-gray-400"
+                    ? "text-success"
+                    : "text-muted-foreground"
                 }
               >
                 One number
@@ -262,8 +262,8 @@ export default function UserInfoForm({
               <li
                 className={
                   /[^A-Za-z0-9]/.test(userInfo.password)
-                    ? "text-green-600"
-                    : "text-gray-400"
+                    ? "text-success"
+                    : "text-muted-foreground"
                 }
               >
                 One special character
@@ -271,8 +271,8 @@ export default function UserInfoForm({
               <li
                 className={
                   !hasPasswordErrors && userInfo.password
-                    ? "text-green-600"
-                    : "text-gray-400"
+                    ? "text-success"
+                    : "text-muted-foreground"
                 }
               >
                 Not a common or weak password

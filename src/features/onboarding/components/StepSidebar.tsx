@@ -49,21 +49,21 @@ export default function StepSidebar({
   if (isMobile) {
     return (
       <motion.div
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border"
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.3 }}
       >
         <div className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <IconComponent className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <IconComponent className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+              <h3 className="font-semibold text-foreground truncate">
                 {currentStepData?.title}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              <p className="text-sm text-muted-foreground truncate">
                 {currentStepData?.description}
               </p>
             </div>
@@ -85,17 +85,17 @@ export default function StepSidebar({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <Card className="shadow-lg bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+      <Card className="shadow-lg bg-background/90 backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl">
-              <IconComponent className="h-6 w-6 text-white" />
+            <div className="p-3 bg-gradient-to-br from-primary to-secondary rounded-xl">
+              <IconComponent className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
               <CardTitle className="text-lg">
                 {currentStepData?.title}
               </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {t("onboarding.wizard.stepOf", {
                   current: currentStep,
                   total: steps.length,
@@ -107,27 +107,27 @@ export default function StepSidebar({
 
         <CardContent className="space-y-4">
           <div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+            <h4 className="font-medium text-foreground mb-2">
               {t("onboarding.sidebar.whatYoureDoing")}:
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               {currentStepData?.description}
             </p>
           </div>
 
           {selectedTemplate && (
             <div>
-              <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+              <h4 className="font-medium text-foreground mb-2">
                 {t("onboarding.sidebar.selectedTemplate")}:
               </h4>
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="p-3 bg-muted rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Badge variant="secondary">{selectedTemplate.industry}</Badge>
                 </div>
                 <p className="font-medium text-sm">
                   {localizedTemplate?.name ?? selectedTemplate.name}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {localizedTemplate?.description ??
                     selectedTemplate.description}
                 </p>
@@ -136,7 +136,7 @@ export default function StepSidebar({
           )}
 
           <div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+            <h4 className="font-medium text-foreground mb-2">
               {t("onboarding.sidebar.progress")}:
             </h4>
             <div className="space-y-2">
@@ -145,24 +145,24 @@ export default function StepSidebar({
                   key={step.id}
                   className={`flex items-center space-x-2 text-sm ${
                     step.id < currentStep
-                      ? "text-green-600 dark:text-green-400"
+                      ? "text-success"
                       : step.id === currentStep
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-gray-400 dark:text-gray-500"
+                        ? "text-primary"
+                        : "text-muted-foreground"
                   }`}
                 >
                   <div
                     className={`w-2 h-2 rounded-full ${
                       step.id < currentStep
-                        ? "bg-green-500"
+                        ? "bg-success"
                         : step.id === currentStep
-                          ? "bg-blue-500"
-                          : "bg-gray-300 dark:bg-gray-600"
+                          ? "bg-primary"
+                          : "bg-muted-foreground"
                     }`}
                   />
                   <span>{step.title}</span>
                   {step.id < currentStep && (
-                    <CheckCircle className="h-3 w-3 text-green-500" />
+                    <CheckCircle className="h-3 w-3 text-success" />
                   )}
                 </div>
               ))}

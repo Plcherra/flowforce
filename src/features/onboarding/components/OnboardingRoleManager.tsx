@@ -184,7 +184,7 @@ export default function OnboardingRoleManager({
       <div className="flex items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold">Classes</h3>
-          <p className="mt-1 text-gray-600">
+          <p className="mt-1 text-muted-foreground">
             These four system roles are ready. Continue, or open roles to give
             or take access.
           </p>
@@ -226,7 +226,7 @@ export default function OnboardingRoleManager({
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-medium text-gray-900">
+                        <h4 className="font-medium text-foreground">
                           {role.name}
                         </h4>
                         <Badge
@@ -245,7 +245,7 @@ export default function OnboardingRoleManager({
                           <Badge variant="outline">Archived</Badge>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {role.description || "No description provided"}
                       </p>
                       <ClassJobBoxList
@@ -278,7 +278,7 @@ export default function OnboardingRoleManager({
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteRole(role.id)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="mr-1 h-4 w-4" />
                           {role.is_system_role ? "Archive" : "Delete"}

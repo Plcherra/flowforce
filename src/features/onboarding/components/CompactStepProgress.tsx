@@ -29,14 +29,14 @@ export default function CompactStepProgress({
             <Tooltip key={step.id}>
               <TooltipTrigger asChild>
                 <motion.div
-                  className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden cursor-pointer"
+                  className="flex-1 h-2 bg-muted rounded-full overflow-hidden cursor-pointer"
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.2 }}
                 >
                   <motion.div
                     className={`h-full rounded-full ${
                       step.id <= currentStep
-                        ? "bg-gradient-to-r from-blue-500 to-purple-500"
+                        ? "bg-gradient-to-r from-primary to-secondary"
                         : "bg-transparent"
                     }`}
                     initial={{ width: "0%" }}
@@ -53,7 +53,7 @@ export default function CompactStepProgress({
               </TooltipTrigger>
               <TooltipContent
                 side="bottom"
-                className="bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                className="bg-foreground text-primary-foreground"
               >
                 <p className="font-medium">{step.title}</p>
                 <p className="text-sm opacity-75">{step.description}</p>
@@ -69,8 +69,8 @@ export default function CompactStepProgress({
               key={step.id}
               className={`text-xs font-medium ${
                 step.id <= currentStep
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-400 dark:text-gray-500"
+                  ? "text-primary"
+                  : "text-muted-foreground"
               }`}
             >
               {step.title}

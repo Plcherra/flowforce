@@ -112,7 +112,7 @@ export default function PositionManager({
 
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium text-sm text-gray-700">
+                <h4 className="font-medium text-sm text-foreground">
                   Current Positions ({rolePositions.length})
                 </h4>
                 <Button onClick={() => handleAddPosition()} size="sm">

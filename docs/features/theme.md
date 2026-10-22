@@ -361,7 +361,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 19 — Onboarding
 
-- [ ] Move hard-coded colors in onboarding onto the tokens.
+- [x] Move hard-coded colors in onboarding onto the tokens.
 
 Rules:
 
@@ -729,6 +729,23 @@ Phone steps for Pedro:
 3. Open the leaderboard or XP view. Gold and bronze should both read as amber, and silver as muted. The XP bar should run from blue through purple to the lavender accent. Earned badges should read as green.
 4. Open a calendar event. The event chip should keep its own color, with light text. A finished checklist dot should be green.
 5. Switch to Dark. Status chips, the XP bar, and the event panel should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 19 Onboarding
+
+Shipped: Onboarding and template classes now use the theme tokens. Wizard chrome uses background, foreground, muted, and primary. Form errors use destructive, a strong password uses success, and a weak password uses warning. Branding defaults are the theme tokens. Pattern swatches use muted and border. `src/features/onboarding` and `src/features/templates` have no baseline entries. The color pickers were already gone.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open company onboarding, or start a new company if you can do that without disrupting the live workspace.
+2. The wizard header and steps should follow the page colors. The active step should be blue. Errors on the account form should be red, and a strong password should read as green.
+3. Open Templates. A template card title should darken to blue on hover, and the explore button should be blue with light text when pressed.
+4. If the branding preview is still on the wizard, the sample heading should be blue and the secondary text the darker blue. Pattern choices should still show dots, lines, or a soft gradient.
+5. Switch to Dark. The wizard, the form, and the template cards should stay readable.
 
 Blockers: none. No migration.
 

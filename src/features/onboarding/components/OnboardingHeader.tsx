@@ -23,7 +23,7 @@ export default function OnboardingHeader({
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50"
+      className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
@@ -33,8 +33,8 @@ export default function OnboardingHeader({
           {/* Logo and Back to Home */}
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-3">
-              <Building2 className="h-8 w-8 text-[#3F51B5]" />
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+              <Building2 className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold text-foreground">
                 FlowForce
               </span>
             </div>
@@ -42,7 +42,7 @@ export default function OnboardingHeader({
               variant="ghost"
               size="sm"
               onClick={() => navigate("/")}
-              className="text-gray-600 dark:text-gray-300 hover:text-[#3F51B5] hover:bg-[#3F51B5]/5"
+              className="text-muted-foreground hover:text-primary hover:bg-primary/5"
             >
               <Home className="h-4 w-4 mr-2" />
               Back to Home
@@ -60,10 +60,10 @@ export default function OnboardingHeader({
 
           {/* Step Info */}
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
+            <p className="text-sm font-medium text-foreground">
               Step {currentStep} of {totalSteps}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {steps[currentStep - 1]?.title}
             </p>
           </div>

@@ -90,7 +90,7 @@ export default function BrandingCustomizer({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <div className="relative border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-border transition-colors">
                   {branding.logo ? (
                     <div className="space-y-2">
                       <img
@@ -107,11 +107,11 @@ export default function BrandingCustomizer({
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Upload className="h-8 w-8 mx-auto text-gray-400" />
-                      <p className="text-sm text-gray-600">
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
                         Click to upload or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         PNG, JPG, SVG up to 2MB
                       </p>
                     </div>
@@ -152,7 +152,7 @@ export default function BrandingCustomizer({
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50">
+                    <SelectContent className="bg-background border border-border z-50">
                       {fontFamilies.map((font) => (
                         <SelectItem key={font} value={font}>
                           <span style={{ fontFamily: font }}>
@@ -164,7 +164,7 @@ export default function BrandingCustomizer({
                   </Select>
 
                   {/* Font Preview */}
-                  <div className="p-4 rounded border bg-gray-50 dark:bg-gray-800">
+                  <div className="p-4 rounded border bg-muted">
                     <div style={{ fontFamily: branding.fontFamily }}>
                       <h4
                         className="text-lg font-bold mb-2"
@@ -195,7 +195,7 @@ export default function BrandingCustomizer({
                       >
                         Accent color and font preview
                       </div>
-                      <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
+                      <div className="mt-3 pt-2 border-t border-border">
                         <div className="text-xs text-muted-foreground">
                           Font:{" "}
                           <span style={{ fontFamily: branding.fontFamily }}>
@@ -237,7 +237,7 @@ export default function BrandingCustomizer({
                         className={`p-3 border rounded-lg cursor-pointer transition-all ${
                           branding.headerStyle === style.value
                             ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                            : "border-gray-200 hover:border-gray-300"
+                            : "border-border hover:border-border"
                         }`}
                         onClick={() =>
                           handleStyleChange("headerStyle", style.value)
@@ -249,13 +249,13 @@ export default function BrandingCustomizer({
                         </div>
 
                         {/* Mini header preview */}
-                        <div className="mt-2 p-2 bg-white rounded text-xs">
+                        <div className="mt-2 p-2 bg-background rounded text-xs">
                           <div
                             className={`
-                               ${style.value === "modern" ? "border-b border-gray-200 pb-1" : ""}
-                               ${style.value === "classic" ? "border-b-2 border-gray-300 pb-1 font-serif" : ""}
+                               ${style.value === "modern" ? "border-b border-border pb-1" : ""}
+                               ${style.value === "classic" ? "border-b-2 border-border pb-1 font-serif" : ""}
                                ${style.value === "minimal" ? "pb-1" : ""}
-                               ${style.value === "bold" ? "border-b-4 border-gray-400 pb-1 font-bold" : ""}
+                               ${style.value === "bold" ? "border-b-4 border-border pb-1 font-bold" : ""}
                              `}
                             style={{
                               color: branding.primaryColor,
@@ -294,19 +294,19 @@ export default function BrandingCustomizer({
                       value: "expanded",
                       label: "Expanded",
                       desc: "Full-width sidebar with labels",
-                      preview: "w-16 h-12 bg-gray-200 rounded-l mr-2",
+                      preview: "w-16 h-12 bg-muted rounded-l mr-2",
                     },
                     {
                       value: "collapsed",
                       label: "Collapsed",
                       desc: "Icon-only sidebar, hover to expand",
-                      preview: "w-8 h-12 bg-gray-200 rounded-l mr-2",
+                      preview: "w-8 h-12 bg-muted rounded-l mr-2",
                     },
                     {
                       value: "floating",
                       label: "Floating",
                       desc: "Floating sidebar with rounded edges",
-                      preview: "w-12 h-10 bg-gray-200 rounded ml-2 mr-2",
+                      preview: "w-12 h-10 bg-muted rounded ml-2 mr-2",
                     },
                   ].map((style) => (
                     <div
@@ -314,7 +314,7 @@ export default function BrandingCustomizer({
                       className={`p-3 border rounded-lg cursor-pointer transition-all ${
                         branding.sidebarStyle === style.value
                           ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-border hover:border-border"
                       }`}
                       onClick={() =>
                         handleStyleChange("sidebarStyle", style.value)
@@ -333,7 +333,7 @@ export default function BrandingCustomizer({
                         {/* Mini layout preview */}
                         <div className="flex items-center">
                           <div className={style.preview}></div>
-                          <div className="w-20 h-12 bg-gray-100 rounded-r"></div>
+                          <div className="w-20 h-12 bg-muted rounded-r"></div>
                         </div>
                       </div>
                     </div>
@@ -358,7 +358,7 @@ export default function BrandingCustomizer({
                       className={`p-3 border cursor-pointer transition-all ${
                         branding.cardStyle === style.value
                           ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-border hover:border-border"
                       } ${style.class}`}
                       onClick={() =>
                         handleStyleChange("cardStyle", style.value)
@@ -367,7 +367,7 @@ export default function BrandingCustomizer({
                       <div className="text-center">
                         <div className="font-medium text-sm">{style.label}</div>
                         <div
-                          className={`mt-2 w-full h-8 bg-gray-100 ${style.class}`}
+                          className={`mt-2 w-full h-8 bg-muted ${style.class}`}
                         ></div>
                       </div>
                     </div>
@@ -382,15 +382,15 @@ export default function BrandingCustomizer({
                     {
                       value: "none",
                       label: "None",
-                      style: { backgroundColor: "#f8f9fa" },
+                      style: { backgroundColor: "hsl(var(--muted))" },
                     },
                     {
                       value: "dots",
                       label: "Dots",
                       style: {
-                        backgroundColor: "#f8f9fa",
+                        backgroundColor: "hsl(var(--muted))",
                         backgroundImage:
-                          "radial-gradient(circle, #e9ecef 1px, transparent 1px)",
+                          "radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)",
                         backgroundSize: "20px 20px",
                       },
                     },
@@ -398,9 +398,9 @@ export default function BrandingCustomizer({
                       value: "lines",
                       label: "Lines",
                       style: {
-                        backgroundColor: "#f8f9fa",
+                        backgroundColor: "hsl(var(--muted))",
                         backgroundImage:
-                          "linear-gradient(45deg, #e9ecef 25%, transparent 25%), linear-gradient(-45deg, #e9ecef 25%, transparent 25%)",
+                          "linear-gradient(45deg, hsl(var(--border)) 25%, transparent 25%), linear-gradient(-45deg, hsl(var(--border)) 25%, transparent 25%)",
                         backgroundSize: "20px 20px",
                       },
                     },
@@ -409,7 +409,7 @@ export default function BrandingCustomizer({
                       label: "Gradient",
                       style: {
                         background:
-                          "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                          "linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--border)) 100%)",
                       },
                     },
                   ].map((pattern) => (
@@ -418,7 +418,7 @@ export default function BrandingCustomizer({
                       className={`p-3 border rounded-lg cursor-pointer transition-all ${
                         (branding.backgroundPattern || "none") === pattern.value
                           ? "border-primary ring-2 ring-primary/20"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-border hover:border-border"
                       }`}
                       onClick={() =>
                         handleStyleChange("backgroundPattern", pattern.value)
@@ -461,7 +461,7 @@ export default function BrandingCustomizer({
                     onChange={(e) =>
                       handleStyleChange("customCSS", e.target.value)
                     }
-                    placeholder="/* Add your custom CSS here */&#10;.my-custom-class {&#10;  /* Custom styles */&#10;}"
+                    placeholder="/* Add your custom CSS here */&#10;.my-custom-class {&#10; /* Custom styles */&#10;}"
                     rows={10}
                     className="font-mono text-sm"
                   />
@@ -502,7 +502,7 @@ export default function BrandingCustomizer({
                   backgroundSize: "20px 20px",
                 }),
                 ...(branding.backgroundPattern === "gradient" && {
-                  background: `linear-gradient(135deg, ${branding.primaryColor}10, ${branding.secondaryColor}10)`,
+                  background: `linear-gradient(135deg, color-mix(in srgb, ${branding.primaryColor} 6%, transparent), color-mix(in srgb, ${branding.secondaryColor} 6%, transparent))`,
                 }),
               }}
             >
@@ -510,8 +510,8 @@ export default function BrandingCustomizer({
               <div
                 className={`
                   flex items-center space-x-3 pb-4 mb-4
-                  ${branding.headerStyle === "modern" ? "border-b border-gray-200" : ""}
-                  ${branding.headerStyle === "classic" ? "border-b-2 border-gray-300" : ""}
+                  ${branding.headerStyle === "modern" ? "border-b border-border" : ""}
+                  ${branding.headerStyle === "classic" ? "border-b-2 border-border" : ""}
                   ${branding.headerStyle === "minimal" ? "" : ""}
                   ${branding.headerStyle === "bold" ? "border-b-4 pb-2" : ""}
                 `}
@@ -543,12 +543,14 @@ export default function BrandingCustomizer({
                 {/* Sidebar Preview */}
                 <div
                   className={`
-                    bg-white/80 border rounded flex flex-col items-center justify-center
+                    bg-background/80 border rounded flex flex-col items-center justify-center
                     ${branding.sidebarStyle === "expanded" ? "w-24 p-3" : ""}
                     ${branding.sidebarStyle === "collapsed" ? "w-12 p-2" : ""}
                     ${branding.sidebarStyle === "floating" ? "w-16 p-2 rounded-xl shadow-lg" : ""}
                   `}
-                  style={{ backgroundColor: branding.secondaryColor + "20" }}
+                  style={{
+                    backgroundColor: `color-mix(in srgb, ${branding.secondaryColor} 12%, transparent)`,
+                  }}
                 >
                   <div
                     className="w-4 h-4 rounded mb-2"
@@ -570,7 +572,7 @@ export default function BrandingCustomizer({
                     <div
                       key={card}
                       className={`
-                        bg-white p-4 border
+                        bg-background p-4 border
                         ${branding.cardStyle === "rounded" ? "rounded-lg" : ""}
                         ${branding.cardStyle === "sharp" ? "rounded-none" : ""}
                         ${branding.cardStyle === "elevated" ? "rounded-lg shadow-lg" : ""}
@@ -580,31 +582,31 @@ export default function BrandingCustomizer({
                         className="w-16 h-3 rounded mb-2"
                         style={{ backgroundColor: branding.primaryColor }}
                       ></div>
-                      <div className="w-full h-2 bg-gray-200 rounded mb-1"></div>
-                      <div className="w-3/4 h-2 bg-gray-200 rounded"></div>
+                      <div className="w-full h-2 bg-muted rounded mb-1"></div>
+                      <div className="w-3/4 h-2 bg-muted rounded"></div>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Color Palette */}
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="text-sm text-gray-600 mb-2">Color Palette</div>
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="text-sm text-muted-foreground mb-2">Color Palette</div>
                 <div className="flex gap-2">
                   <div
-                    className="w-12 h-8 rounded text-white text-xs flex items-center justify-center"
+                    className="w-12 h-8 rounded text-primary-foreground text-xs flex items-center justify-center"
                     style={{ backgroundColor: branding.primaryColor }}
                   >
                     Primary
                   </div>
                   <div
-                    className="w-12 h-8 rounded text-white text-xs flex items-center justify-center"
+                    className="w-12 h-8 rounded text-primary-foreground text-xs flex items-center justify-center"
                     style={{ backgroundColor: branding.secondaryColor }}
                   >
                     Secondary
                   </div>
                   <div
-                    className="w-12 h-8 rounded text-white text-xs flex items-center justify-center"
+                    className="w-12 h-8 rounded text-primary-foreground text-xs flex items-center justify-center"
                     style={{ backgroundColor: branding.accentColor }}
                   >
                     Accent
@@ -615,10 +617,10 @@ export default function BrandingCustomizer({
 
             {/* Typography Sample */}
             <div
-              className="p-4 bg-white rounded-lg border"
+              className="p-4 bg-background rounded-lg border"
               style={{ fontFamily: branding.fontFamily }}
             >
-              <div className="text-sm text-gray-600 mb-2">
+              <div className="text-sm text-muted-foreground mb-2">
                 Typography Sample
               </div>
               <h3
@@ -632,7 +634,7 @@ export default function BrandingCustomizer({
               >
                 Sample Heading Text
               </h3>
-              <p className="text-gray-700 text-sm">
+              <p className="text-foreground text-sm">
                 This is how regular paragraph text will appear in your
                 application. The font family and header styles create a cohesive
                 look throughout your workspace.

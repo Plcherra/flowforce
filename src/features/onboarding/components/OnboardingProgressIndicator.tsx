@@ -21,10 +21,10 @@ export const OnboardingProgressIndicator = memo(
   }: OnboardingProgressIndicatorProps) {
     const getProgressIcon = () => {
       if (completionProgress === 100)
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-success" />;
       if (completionProgress > 50)
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      return <AlertCircle className="h-4 w-4 text-gray-400" />;
+        return <Clock className="h-4 w-4 text-warning" />;
+      return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
     };
 
     return (
@@ -44,7 +44,7 @@ export const OnboardingProgressIndicator = memo(
           )}
 
           {hasRequiredRoles && (
-            <Badge variant="secondary" className="text-xs text-green-600">
+            <Badge variant="secondary" className="text-xs text-success">
               Roles configured
             </Badge>
           )}

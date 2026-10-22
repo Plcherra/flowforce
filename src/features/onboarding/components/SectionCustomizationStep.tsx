@@ -98,8 +98,8 @@ export default function SectionCustomizationStep({
                 key={section.id}
                 className={`p-4 border rounded-lg transition-all ${
                   isEnabled
-                    ? "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950"
-                    : "border-gray-200 dark:border-gray-700"
+                    ? "border-primary/40 bg-primary/10"
+                    : "border-border"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -107,8 +107,8 @@ export default function SectionCustomizationStep({
                     <div
                       className={`p-2 rounded-lg ${
                         isEnabled
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 dark:bg-gray-700"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
                       }`}
                     >
                       <Settings className="h-4 w-4" />
@@ -122,7 +122,7 @@ export default function SectionCustomizationStep({
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-muted-foreground">
                         {section.description}
                       </p>
                     </div>
@@ -178,8 +178,8 @@ export default function SectionCustomizationStep({
                   key={section.id}
                   className={`p-4 border rounded-lg transition-all ${
                     isEnabled
-                      ? "border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950"
-                      : "border-gray-200 dark:border-gray-700"
+                      ? "border-secondary/40 bg-secondary/10"
+                      : "border-border"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -187,8 +187,8 @@ export default function SectionCustomizationStep({
                       <div
                         className={`p-2 rounded-lg ${
                           isEnabled
-                            ? "bg-purple-500 text-white"
-                            : "bg-gray-200 dark:bg-gray-700"
+                            ? "bg-secondary text-primary-foreground"
+                            : "bg-muted"
                         }`}
                       >
                         {/* Custom icon would go here */}
@@ -196,7 +196,7 @@ export default function SectionCustomizationStep({
                       </div>
                       <div>
                         <h4 className="font-medium">{section.name}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {section.description}
                         </p>
                         <Badge variant="outline" className="mt-1 text-xs">
@@ -216,7 +216,7 @@ export default function SectionCustomizationStep({
                   </div>
 
                   {section.pages && section.pages.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <div className="mt-3 pt-3 border-t border-border">
                       <div className="flex flex-wrap gap-1">
                         {section.pages.map((page) => (
                           <Badge
