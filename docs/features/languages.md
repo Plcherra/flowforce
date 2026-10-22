@@ -480,7 +480,7 @@ Prove: `npm run typecheck`. A SQL test is not required in this environment when 
 
 ### Phase 26 — Translate on save and on first view
 
-- [ ] Cache a translation without blocking the original save.
+- [x] Cache a translation without blocking the original save.
 
 Rules:
 
@@ -1157,5 +1157,17 @@ Proven: `npm run typecheck` passed. `npm run typecheck:src` passed. A rolled-bac
 Phone steps for Pedro: none. This phase does not change a screen. Cached translations are not shown yet.
 
 Blockers: none. Migration `20261022151316_content_translations.sql` is applied.
+
+Questions: none.
+
+### 2026-10-22 — Phase 26 Translate on save and on first view
+
+Shipped: `src/server/i18n/translateContent.ts` hashes the original, skips the source language, and skips empty text, names, and values that are only an email, phone, URL, SKU, amount, date, number, boolean, file name, or id. A new hash asks the model for the other five locales and replaces the cache. The same hash does not call the model again. A budget block or a thrown model returns the original and writes no cache row. The model name is `gpt-4o-mini` and the usage key is `content_translation`. The test uses a fake model and a memory cache. It does not call OpenAI and it does not read the hosted table.
+
+Proven: `src/server/i18n/translateContent.test.ts` passed through the jiti runner. `npm run typecheck:src` passed. ESLint passed on the two new files. `npm run check:i18n` still exits 0.
+
+Phone steps for Pedro: none. No screen calls this helper yet.
+
+Blockers: none. No new migration.
 
 Questions: none.
