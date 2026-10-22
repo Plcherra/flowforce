@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -19,17 +20,16 @@ import {
 } from "lucide-react";
 
 export default function Purchasing() {
+  const { t } = useTranslation();
   const { can } = useCan();
 
   if (!can("manageInventory")) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Purchasing</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("common.purchasing")}</h1>
           <p className="text-muted-foreground">
-            Access denied. You don&apos;t have permission to manage purchasing
-            operations.
-          </p>
+            {t("inventory.accessDeniedYouDonTHavePermissionToManagePurchasingOperations")} </p>
         </div>
       </div>
     );
@@ -39,46 +39,37 @@ export default function Purchasing() {
     <div>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Purchasing</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("common.purchasing")}</h1>
           <p className="text-muted-foreground">
-            Manage purchase orders, receiving, and accounting operations
-          </p>
+            {t("inventory.managePurchaseOrdersReceivingAndAccountingOperations")} </p>
         </div>
 
         <Tabs defaultValue="orders" className="space-y-4">
           <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
-              Place Orders
-            </TabsTrigger>
+              {t("inventory.placeOrders")} </TabsTrigger>
             <TabsTrigger value="receive" className="flex items-center gap-2">
               <Truck className="h-4 w-4" />
-              Receive Orders
-            </TabsTrigger>
+              {t("inventory.receiveOrders")} </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="h-4 w-4" />
-              Order History
-            </TabsTrigger>
+              {t("inventory.orderHistory")} </TabsTrigger>
             <TabsTrigger value="schedules" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Weekly Schedules
-            </TabsTrigger>
+              {t("inventory.weeklySchedules")} </TabsTrigger>
             <TabsTrigger value="accounting" className="flex items-center gap-2">
               <Calculator className="h-4 w-4" />
-              Accounting
-            </TabsTrigger>
+              {t("navigation.accounting")} </TabsTrigger>
             <TabsTrigger value="invoices" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Invoices
-            </TabsTrigger>
+              {t("common.invoices")} </TabsTrigger>
             <TabsTrigger value="reminders" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              Credit Reminders
-            </TabsTrigger>
+              {t("inventory.creditReminders")} </TabsTrigger>
             <TabsTrigger value="scanned" className="flex items-center gap-2">
               <Scan className="h-4 w-4" />
-              Scanned Invoices
-            </TabsTrigger>
+              {t("inventory.scannedInvoices")} </TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4">
@@ -86,16 +77,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5" />
-                  Place Orders
-                </CardTitle>
+                  {t("inventory.placeOrders")} </CardTitle>
                 <CardDescription>
-                  Create and submit new purchase orders to suppliers
-                </CardDescription>
+                  {t("inventory.createAndSubmitNewPurchaseOrdersToSuppliers")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Order placement functionality will be implemented here.
-                </p>
+                  {t("inventory.orderPlacementFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -105,16 +93,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Truck className="h-5 w-5" />
-                  Receive Orders
-                </CardTitle>
+                  {t("inventory.receiveOrders")} </CardTitle>
                 <CardDescription>
-                  Process incoming deliveries and update inventory
-                </CardDescription>
+                  {t("inventory.processIncomingDeliveriesAndUpdateInventory")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Order receiving functionality will be implemented here.
-                </p>
+                  {t("inventory.orderReceivingFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -124,16 +109,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <History className="h-5 w-5" />
-                  Order History
-                </CardTitle>
+                  {t("inventory.orderHistory")} </CardTitle>
                 <CardDescription>
-                  View and manage historical purchase orders
-                </CardDescription>
+                  {t("inventory.viewAndManageHistoricalPurchaseOrders")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Order history functionality will be implemented here.
-                </p>
+                  {t("inventory.orderHistoryFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -143,16 +125,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  Weekly Schedules
-                </CardTitle>
+                  {t("inventory.weeklySchedules")} </CardTitle>
                 <CardDescription>
-                  Plan and schedule recurring purchase orders
-                </CardDescription>
+                  {t("inventory.planAndScheduleRecurringPurchaseOrders")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Weekly scheduling functionality will be implemented here.
-                </p>
+                  {t("inventory.weeklySchedulingFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -162,16 +141,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calculator className="h-5 w-5" />
-                  Accounting
-                </CardTitle>
+                  {t("navigation.accounting")} </CardTitle>
                 <CardDescription>
-                  Financial accounting and purchase tracking
-                </CardDescription>
+                  {t("inventory.financialAccountingAndPurchaseTracking")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Accounting functionality will be implemented here.
-                </p>
+                  {t("inventory.accountingFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -181,16 +157,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Invoices
-                </CardTitle>
+                  {t("common.invoices")} </CardTitle>
                 <CardDescription>
-                  Manage supplier invoices and payments
-                </CardDescription>
+                  {t("inventory.manageSupplierInvoicesAndPayments")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Invoice management functionality will be implemented here.
-                </p>
+                  {t("inventory.invoiceManagementFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -200,16 +173,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5" />
-                  Credit Reminders
-                </CardTitle>
+                  {t("inventory.creditReminders")} </CardTitle>
                 <CardDescription>
-                  Manage payment reminders and credit notifications
-                </CardDescription>
+                  {t("inventory.managePaymentRemindersAndCreditNotifications")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Credit reminder functionality will be implemented here.
-                </p>
+                  {t("inventory.creditReminderFunctionalityWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -219,16 +189,13 @@ export default function Purchasing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Scan className="h-5 w-5" />
-                  Scanned Invoices
-                </CardTitle>
+                  {t("inventory.scannedInvoices")} </CardTitle>
                 <CardDescription>
-                  Process and manage digitally scanned invoices
-                </CardDescription>
+                  {t("inventory.processAndManageDigitallyScannedInvoices")} </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Scanned invoice processing will be implemented here.
-                </p>
+                  {t("inventory.scannedInvoiceProcessingWillBeImplementedHere")} </p>
               </CardContent>
             </Card>
           </TabsContent>

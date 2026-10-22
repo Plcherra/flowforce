@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import {
   Card,
@@ -118,6 +119,7 @@ function getStatusColor(status: string) {
 }
 
 function ExpenseReportsTab() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { profile } = useProfile();
   const {
@@ -244,8 +246,7 @@ function ExpenseReportsTab() {
     return (
       <Card>
         <CardContent className="py-8 text-center text-sm text-muted-foreground">
-          Unable to load expense reports right now. Try refreshing the page.
-        </CardContent>
+          {t("inventory.unableToLoadExpenseReportsRightNowTryRefreshingThePage")} </CardContent>
       </Card>
     );
   }
@@ -268,11 +269,9 @@ function ExpenseReportsTab() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Submit a New Expense</DialogTitle>
+              <DialogTitle>{t("inventory.submitANewExpense")}</DialogTitle>
               <DialogDescription>
-                Record reimbursements, store purchases, or payroll adjustments
-                for approval.
-              </DialogDescription>
+                {t("inventory.recordReimbursementsStorePurchasesOrPayrollAdjustmentsForApproval")} </DialogDescription>
             </DialogHeader>
             <ExpenseForm
               onSubmit={handleCreateExpense as any}
@@ -291,7 +290,7 @@ function ExpenseReportsTab() {
       >
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.totalExpenses")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -299,16 +298,14 @@ function ExpenseReportsTab() {
               ${totalAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {filteredExpenses.length} record
-              {filteredExpenses.length === 1 ? "" : "s"}
+              {filteredExpenses.length} {t("inventory.record")} {filteredExpenses.length === 1 ? "" : "s"}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Approval
-            </CardTitle>
+              {t("inventory.pendingApproval")} </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -316,42 +313,40 @@ function ExpenseReportsTab() {
               ${pendingAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {pendingExpenses.length} awaiting review
-            </p>
+              {pendingExpenses.length} {t("inventory.awaitingReview")} </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Filters Applied</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.filtersApplied")}</CardTitle>
             <Filter className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="space-y-1 text-xs text-muted-foreground">
             <p>
-              Status:{" "}
+              {t("inventory.status")}{" "}
               {
                 STATUS_OPTIONS.find((option) => option.value === statusFilter)
                   ?.label
               }
             </p>
             <p>
-              Category:{" "}
+              {t("updates.category")}{" "}
               {
                 CATEGORY_OPTIONS.find(
                   (option) => option.value === categoryFilter,
                 )?.label
               }
             </p>
-            <p>Search term: {searchTerm ? `"${searchTerm}"` : "—"}</p>
+            <p>{t("inventory.searchTerm")} {searchTerm ? `"${searchTerm}"` : "—"}</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filter Expenses</CardTitle>
+          <CardTitle>{t("inventory.filterExpenses")}</CardTitle>
           <CardDescription>
-            Drill into reimbursements, payroll adjustments, and vendor spend.
-          </CardDescription>
+            {t("inventory.drillIntoReimbursementsPayrollAdjustmentsAndVendorSpend")} </CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -364,7 +359,7 @@ function ExpenseReportsTab() {
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search description or category"
+                placeholder={t("inventory.searchDescriptionOrCategory")}
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 className="pl-8"
@@ -372,7 +367,7 @@ function ExpenseReportsTab() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t("schedule.status")} />
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.map((option) => (
@@ -387,7 +382,7 @@ function ExpenseReportsTab() {
               onValueChange={setCategoryFilter}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Category" />
+                <SelectValue placeholder={t("dashboard.category")} />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORY_OPTIONS.map((option) => (
@@ -399,15 +394,14 @@ function ExpenseReportsTab() {
             </Select>
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
+              {t("schedule.export")} </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Expense Reports</CardTitle>
+          <CardTitle>{t("inventory.expenseReports")}</CardTitle>
           <CardDescription>
             {filteredExpenses.length > 0
               ? `Showing ${filteredExpenses.length} expense record${filteredExpenses.length === 1 ? "" : "s"}`
@@ -419,11 +413,9 @@ function ExpenseReportsTab() {
             <div className="py-12 text-center">
               <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-medium text-foreground">
-                No expenses
-              </h3>
+                {t("inventory.noExpenses")} </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Submit a new expense report to get started.
-              </p>
+                {t("inventory.submitANewExpenseReportToGetStarted")} </p>
             </div>
           ) : (
             <div className={isMobile ? "space-y-3" : "space-y-4"}>
@@ -490,6 +482,7 @@ function ExpenseReportsTab() {
 }
 
 export default function Expenses() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { profile, isReady } = useProfile();
   const { can } = useCan();
@@ -524,12 +517,9 @@ export default function Expenses() {
     <div className={isMobile ? "space-y-4 p-4" : "space-y-6 p-6"}>
       <div>
         <h1 className={isMobile ? "text-2xl font-bold" : "text-3xl font-bold"}>
-          Financial Management
-        </h1>
+          {t("common.financialManagement")} </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Consolidated view of employee earnings, labor spend, and expense
-          approvals.
-        </p>
+          {t("inventory.consolidatedViewOfEmployeeEarningsLaborSpendAndExpenseApprovals")} </p>
       </div>
 
       <Tabs
@@ -540,23 +530,19 @@ export default function Expenses() {
         <TabsList className="flex flex-wrap gap-2">
           <TabsTrigger value="employee" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            Employee
-          </TabsTrigger>
+            {t("schedule.employee")} </TabsTrigger>
           {canViewManagement ? (
             <TabsTrigger value="management" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              Management
-            </TabsTrigger>
+              {t("inventory.management")} </TabsTrigger>
           ) : null}
           <TabsTrigger value="expenses" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Expense Reports
-          </TabsTrigger>
+            {t("inventory.expenseReports")} </TabsTrigger>
           {canAccessPayments ? (
             <TabsTrigger value="payments" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              Payroll &amp; Payments
-            </TabsTrigger>
+              {t("inventory.payrollPayments")} </TabsTrigger>
           ) : null}
         </TabsList>
 
@@ -575,8 +561,7 @@ export default function Expenses() {
               fallback={
                 <Card>
                   <CardContent className="py-6 text-center text-sm text-muted-foreground">
-                    Management insights require supervisor or admin access.
-                  </CardContent>
+                    {t("inventory.managementInsightsRequireSupervisorOrAdminAccess")} </CardContent>
                 </Card>
               }
             >
@@ -603,9 +588,7 @@ export default function Expenses() {
               fallback={
                 <Card>
                   <CardContent className="py-6 text-center text-sm text-muted-foreground">
-                    Payroll visibility requires supervisor, manager, or admin
-                    access.
-                  </CardContent>
+                    {t("inventory.payrollVisibilityRequiresSupervisorManagerOrAdminAccess")} </CardContent>
                 </Card>
               }
             >

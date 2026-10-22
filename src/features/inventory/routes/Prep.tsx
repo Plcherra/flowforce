@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function PrepParPage() {
+  const { t } = useTranslation();
   const { data: _inventoryItems = [] } = useInventoryItems();
   const { toast } = useToast();
 
@@ -113,10 +115,9 @@ export default function PrepParPage() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
                 <ChefHat className="h-8 w-8" />
-                Prep & PAR
-              </h1>
+                {t("inventory.prepPar")} </h1>
               <p className="text-muted-foreground">
-                {isWeekend() ? "Weekend" : "Weekday"} prep planning •{" "}
+                {isWeekend() ? "Weekend" : "Weekday"} {t("inventory.prepPlanning")}{" "}
                 {new Date().toLocaleDateString()}
               </p>
             </div>
@@ -129,7 +130,7 @@ export default function PrepParPage() {
                 <div className="text-2xl font-bold text-primary">
                   {completedCount}
                 </div>
-                <p className="text-xs text-muted-foreground">Completed</p>
+                <p className="text-xs text-muted-foreground">{t("inventory.completed")}</p>
               </CardContent>
             </Card>
 
@@ -138,7 +139,7 @@ export default function PrepParPage() {
                 <div className="text-2xl font-bold text-secondary">
                   {inProgressCount}
                 </div>
-                <p className="text-xs text-muted-foreground">In Progress</p>
+                <p className="text-xs text-muted-foreground">{t("certifications.inProgress")}</p>
               </CardContent>
             </Card>
 
@@ -147,7 +148,7 @@ export default function PrepParPage() {
                 <div className="text-2xl font-bold text-muted-foreground">
                   {plannedCount}
                 </div>
-                <p className="text-xs text-muted-foreground">Planned</p>
+                <p className="text-xs text-muted-foreground">{t("inventory.planned")}</p>
               </CardContent>
             </Card>
 
@@ -159,7 +160,7 @@ export default function PrepParPage() {
                     : 0}
                   %
                 </div>
-                <p className="text-xs text-muted-foreground">Complete</p>
+                <p className="text-xs text-muted-foreground">{t("inventory.complete")}</p>
               </CardContent>
             </Card>
           </div>
@@ -169,10 +170,9 @@ export default function PrepParPage() {
             <Card>
               <CardContent className="p-8 text-center">
                 <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">No Prep Items Found</h3>
+                <h3 className="font-semibold mb-2">{t("inventory.noPrepItemsFound")}</h3>
                 <p className="text-muted-foreground">
-                  Items marked for daily preparation will appear here
-                </p>
+                  {t("inventory.itemsMarkedForDailyPreparationWillAppearHere")} </p>
               </CardContent>
             </Card>
           ) : (
@@ -204,32 +204,28 @@ export default function PrepParPage() {
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
                             <div>
                               <span className="text-muted-foreground">
-                                On Hand:
-                              </span>
+                                {t("inventory.onHand4")} </span>
                               <div className="font-medium">
                                 {item.currentStock} {item.unit}
                               </div>
                             </div>
                             <div>
                               <span className="text-muted-foreground">
-                                PAR Min/Max:
-                              </span>
+                                {t("inventory.parMinMax")} </span>
                               <div className="font-medium">
                                 {item.parMin}/{item.parMax} {item.unit}
                               </div>
                             </div>
                             <div>
                               <span className="text-muted-foreground">
-                                Need to Prep:
-                              </span>
+                                {t("inventory.needToPrep")} </span>
                               <div className="font-medium text-primary">
                                 {needed} {item.unit}
                               </div>
                             </div>
                             <div>
                               <span className="text-muted-foreground">
-                                Estimated Batches:
-                              </span>
+                                {t("inventory.estimatedBatches")} </span>
                               <div className="font-medium text-primary">
                                 ≈ {batches}
                               </div>
@@ -251,8 +247,7 @@ export default function PrepParPage() {
                               }
                               className="w-full sm:w-auto"
                             >
-                              Start Prep
-                            </Button>
+                              {t("inventory.startPrep")} </Button>
                           )}
 
                           {status === "in_progress" && (
@@ -263,8 +258,7 @@ export default function PrepParPage() {
                               }
                               className="w-full sm:w-auto"
                             >
-                              Mark Complete
-                            </Button>
+                              {t("inventory.markComplete")} </Button>
                           )}
 
                           {status === "completed" && (
@@ -276,8 +270,7 @@ export default function PrepParPage() {
                               }
                               className="w-full sm:w-auto"
                             >
-                              Reset
-                            </Button>
+                              {t("forms.reset")} </Button>
                           )}
 
                           <Button
@@ -285,8 +278,7 @@ export default function PrepParPage() {
                             size="sm"
                             className="w-full sm:w-auto"
                           >
-                            Adjust PAR
-                          </Button>
+                            {t("inventory.adjustPar")} </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -301,17 +293,14 @@ export default function PrepParPage() {
             <div className="p-4 bg-muted/50 rounded-lg border">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
-                  <h3 className="font-semibold">Today&apos;s Prep Summary</h3>
+                  <h3 className="font-semibold">{t("inventory.todaySPrepSummary")}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {completedCount} of {mockPrepItems.length} prep items
-                    completed
-                  </p>
+                    {completedCount} {t("updates.of")} {mockPrepItems.length} {t("inventory.prepItemsCompleted")} </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline">Save Progress</Button>
+                  <Button variant="outline">{t("inventory.saveProgress")}</Button>
                   <Button disabled={completedCount !== mockPrepItems.length}>
-                    Complete All Prep
-                  </Button>
+                    {t("inventory.completeAllPrep")} </Button>
                 </div>
               </div>
             </div>

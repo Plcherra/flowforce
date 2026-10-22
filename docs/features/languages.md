@@ -281,7 +281,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 13 — Inventory pages and hooks
 
-- [ ] Move the rest of Inventory chrome into the six locales.
+- [x] Move the rest of Inventory chrome into the six locales.
 
 Rules:
 
@@ -947,6 +947,22 @@ Phone steps for Pedro:
 1. Sign in at https://www.flowforce.uk and open Inventory.
 2. Set your language to Español on Settings, then Region. Reload. The item list, counts, and purchasing tabs should be in Spanish. An item name someone typed stays as they wrote it.
 3. Open a purchase order or a count if you have one. The column headers and empty states should follow the language. Switch to Deutsch and check a low-stock line. The current and minimum labels should be German, and the numbers stay numbers.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 13 Inventory pages and hooks
+
+Shipped: The rest of Inventory chrome under `src/features/inventory/pages`, `routes`, and `hooks` now uses `useTranslation` and the `inventory` namespace. The same strings are in en, es, pt, fr, it, and de. Keys from the component phase stay. Item names and stored counts stay as stored text. A row mapper the checker read as text now uses a named variable so the words stayed code. The inventory tree is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 2806 keys for each locale and `hard-coded strings 2106`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/inventory/pages`, `src/features/inventory/routes`, and `src/features/inventory/hooks`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Inventory.
+2. Set your language to Français on Settings, then Region. Reload. The page headings, prep list, and count screens should be in French. An item name someone typed stays as they wrote it.
+3. Open counting and purchasing from the inventory navigation. Empty states and buttons should follow the language.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

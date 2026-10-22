@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useCallback } from "react";
 import {
   Card,
@@ -43,6 +44,7 @@ import {
 } from "./inventoryActionsHelpers";
 
 export default function InventoryActionsPage() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   // Fetch real data
   const {
@@ -245,16 +247,14 @@ export default function InventoryActionsPage() {
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Inventory Actions
-            </h1>
+              {t("common.inventoryActions")} </h1>
             <p className="text-muted-foreground">
-              Record production, waste, adjustments, and transfers
-            </p>
+              {t("inventory.recordProductionWasteAdjustmentsAndTransfers")} </p>
           </div>
 
           {loadError && (
             <Alert variant="destructive">
-              <AlertTitle>Unable to load inventory data</AlertTitle>
+              <AlertTitle>{t("inventory.unableToLoadInventoryData")}</AlertTitle>
               <AlertDescription>
                 {loadError.message ?? "Please refresh and try again."}
               </AlertDescription>
@@ -263,11 +263,9 @@ export default function InventoryActionsPage() {
 
           {showEmptyState && (
             <Alert>
-              <AlertTitle>Inventory setup required</AlertTitle>
+              <AlertTitle>{t("inventory.inventorySetupRequired")}</AlertTitle>
               <AlertDescription>
-                Add at least one inventory item and location to log waste or
-                adjustments.
-              </AlertDescription>
+                {t("inventory.addAtLeastOneInventoryItemAndLocationToLogWasteOrAdjustments")} </AlertDescription>
             </Alert>
           )}
 
@@ -278,29 +276,25 @@ export default function InventoryActionsPage() {
                 className="flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <Factory className="h-4 w-4 text-primary" />
-                Production
-              </TabsTrigger>
+                {t("dashboard.production")} </TabsTrigger>
               <TabsTrigger
                 value="waste"
                 className="flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <Trash2 className="h-4 w-4 text-primary" />
-                Log Waste
-              </TabsTrigger>
+                {t("inventory.logWaste")} </TabsTrigger>
               <TabsTrigger
                 value="adjustments"
                 className="flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <Settings className="h-4 w-4 text-primary" />
-                Adjustments
-              </TabsTrigger>
+                {t("inventory.adjustments")} </TabsTrigger>
               <TabsTrigger
                 value="transfers"
                 className="flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <ArrowRightLeft className="h-4 w-4 text-primary" />
-                Transfers
-              </TabsTrigger>
+                {t("inventory.transfers")} </TabsTrigger>
             </TabsList>
 
             <TabsContent value="production" className="space-y-4">
@@ -308,12 +302,9 @@ export default function InventoryActionsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Factory className="h-5 w-5 text-primary" />
-                    Record Production Event
-                  </CardTitle>
+                    {t("inventory.recordProductionEvent")} </CardTitle>
                   <CardDescription>
-                    Track material usage, yield, and costs for prep, batch,
-                    cooked, or baked production runs.
-                  </CardDescription>
+                    {t("inventory.trackMaterialUsageYieldAndCostsForPrepBatchCookedOrBakedProductionRuns")} </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ProductionEventForm />
@@ -321,11 +312,9 @@ export default function InventoryActionsPage() {
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Production Events</CardTitle>
+                  <CardTitle>{t("inventory.recentProductionEvents")}</CardTitle>
                   <CardDescription>
-                    Cost summaries and material usage for the most recent
-                    production runs.
-                  </CardDescription>
+                    {t("inventory.costSummariesAndMaterialUsageForTheMostRecentProductionRuns")} </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ProductionEventList />
@@ -338,11 +327,9 @@ export default function InventoryActionsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Trash2 className="h-5 w-5 text-primary" />
-                    Log Waste
-                  </CardTitle>
+                    {t("inventory.logWaste")} </CardTitle>
                   <CardDescription>
-                    Record spoilage, prep errors, and other waste
-                  </CardDescription>
+                    {t("inventory.recordSpoilagePrepErrorsAndOtherWaste")} </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {isReferenceDataLoading ? (
@@ -351,7 +338,7 @@ export default function InventoryActionsPage() {
                     <form onSubmit={handleWasteSubmit} className="space-y-4">
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="waste-item">Item *</Label>
+                          <Label htmlFor="waste-item">{t("inventory.item3")}</Label>
                           <Select
                             value={wasteForm.item_id}
                             onValueChange={handleWasteSelect.item}
@@ -378,8 +365,7 @@ export default function InventoryActionsPage() {
                                 ))
                               ) : (
                                 <SelectItem value="" disabled>
-                                  Add an inventory item first
-                                </SelectItem>
+                                  {t("inventory.addAnInventoryItemFirst")} </SelectItem>
                               )}
                             </SelectContent>
                           </Select>
@@ -391,7 +377,7 @@ export default function InventoryActionsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="waste-location">Location</Label>
+                          <Label htmlFor="waste-location">{t("schedule.location")}</Label>
                           <Select
                             value={wasteForm.location_id}
                             onValueChange={handleWasteSelect.location}
@@ -420,15 +406,14 @@ export default function InventoryActionsPage() {
                                 ))
                               ) : (
                                 <SelectItem value="" disabled>
-                                  Create a location first
-                                </SelectItem>
+                                  {t("inventory.createALocationFirst")} </SelectItem>
                               )}
                             </SelectContent>
                           </Select>
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="waste-quantity">Quantity *</Label>
+                          <Label htmlFor="waste-quantity">{t("inventory.quantity2")}</Label>
                           <Input
                             id="waste-quantity"
                             type="number"
@@ -452,7 +437,7 @@ export default function InventoryActionsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="waste-type">Waste Type *</Label>
+                          <Label htmlFor="waste-type">{t("inventory.wasteType")}</Label>
                           <Select
                             value={wasteForm.waste_type}
                             onValueChange={handleWasteSelect.type}
@@ -462,7 +447,7 @@ export default function InventoryActionsPage() {
                             <SelectTrigger
                               aria-invalid={Boolean(wasteErrors.waste_type)}
                             >
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={t("messages.selectType")} />
                             </SelectTrigger>
                             <SelectContent>
                               {wasteTypes.map((type) => (
@@ -481,10 +466,10 @@ export default function InventoryActionsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="waste-reason">Reason/Notes</Label>
+                        <Label htmlFor="waste-reason">{t("inventory.reasonNotes")}</Label>
                         <Textarea
                           id="waste-reason"
-                          placeholder="Describe the reason for waste..."
+                          placeholder={t("inventory.describeTheReasonForWaste")}
                           rows={3}
                           value={wasteForm.reason}
                           onChange={(e) =>
@@ -505,8 +490,7 @@ export default function InventoryActionsPage() {
                           }}
                           disabled={wasteFormDisabled}
                         >
-                          Clear Form
-                        </Button>
+                          {t("inventory.clearForm")} </Button>
                         <Button
                           type="submit"
                           className="flex-1"
@@ -526,11 +510,9 @@ export default function InventoryActionsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5 text-primary" />
-                    Inventory Adjustments
-                  </CardTitle>
+                    {t("inventory.inventoryAdjustments")} </CardTitle>
                   <CardDescription>
-                    Correct inventory counts and make manual adjustments
-                  </CardDescription>
+                    {t("inventory.correctInventoryCountsAndMakeManualAdjustments")} </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {isReferenceDataLoading ? (
@@ -542,7 +524,7 @@ export default function InventoryActionsPage() {
                     >
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="adj-item">Item *</Label>
+                          <Label htmlFor="adj-item">{t("inventory.item3")}</Label>
                           <Select
                             value={adjustmentForm.item_id}
                             onValueChange={handleAdjustmentSelect.item}
@@ -571,8 +553,7 @@ export default function InventoryActionsPage() {
                                 ))
                               ) : (
                                 <SelectItem value="" disabled>
-                                  Add an inventory item first
-                                </SelectItem>
+                                  {t("inventory.addAnInventoryItemFirst")} </SelectItem>
                               )}
                             </SelectContent>
                           </Select>
@@ -584,7 +565,7 @@ export default function InventoryActionsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="adj-location">Location *</Label>
+                          <Label htmlFor="adj-location">{t("inventory.location")}</Label>
                           <Select
                             value={adjustmentForm.location_id}
                             onValueChange={handleAdjustmentSelect.location}
@@ -618,8 +599,7 @@ export default function InventoryActionsPage() {
                                 ))
                               ) : (
                                 <SelectItem value="" disabled>
-                                  Create a location first
-                                </SelectItem>
+                                  {t("inventory.createALocationFirst")} </SelectItem>
                               )}
                             </SelectContent>
                           </Select>
@@ -631,7 +611,7 @@ export default function InventoryActionsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="adj-type">Adjustment Type *</Label>
+                          <Label htmlFor="adj-type">{t("inventory.adjustmentType")}</Label>
                           <Select
                             value={adjustmentForm.adjustment_type}
                             onValueChange={handleAdjustmentSelect.type}
@@ -643,11 +623,11 @@ export default function InventoryActionsPage() {
                                 adjustmentErrors.adjustment_type,
                               )}
                             >
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={t("messages.selectType")} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="increase">Increase</SelectItem>
-                              <SelectItem value="decrease">Decrease</SelectItem>
+                              <SelectItem value="increase">{t("inventory.increase")}</SelectItem>
+                              <SelectItem value="decrease">{t("inventory.decrease")}</SelectItem>
                             </SelectContent>
                           </Select>
                           {adjustmentErrors.adjustment_type && (
@@ -658,7 +638,7 @@ export default function InventoryActionsPage() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="adj-quantity">Quantity *</Label>
+                          <Label htmlFor="adj-quantity">{t("inventory.quantity2")}</Label>
                           <Input
                             id="adj-quantity"
                             type="number"
@@ -683,10 +663,10 @@ export default function InventoryActionsPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="adj-reason">Reason *</Label>
+                        <Label htmlFor="adj-reason">{t("inventory.reason")}</Label>
                         <Textarea
                           id="adj-reason"
-                          placeholder="Describe the reason for adjustment..."
+                          placeholder={t("inventory.describeTheReasonForAdjustment")}
                           rows={3}
                           value={adjustmentForm.reason}
                           onChange={(e) =>
@@ -714,8 +694,7 @@ export default function InventoryActionsPage() {
                           }}
                           disabled={adjustmentFormDisabled}
                         >
-                          Clear Form
-                        </Button>
+                          {t("inventory.clearForm")} </Button>
                         <Button
                           type="submit"
                           className="flex-1"

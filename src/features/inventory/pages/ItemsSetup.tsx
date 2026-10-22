@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -75,6 +76,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function ItemsSetup() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showItemForm, setShowItemForm] = useState(false);
@@ -174,13 +176,13 @@ export default function ItemsSetup() {
   const getStockBadge = (status: string) => {
     switch (status) {
       case "low":
-        return <Badge variant="destructive">Low Stock</Badge>;
+        return <Badge variant="destructive">{t("inventory.lowStock")}</Badge>;
       case "high":
-        return <Badge variant="secondary">Overstocked</Badge>;
+        return <Badge variant="secondary">{t("inventory.overstocked")}</Badge>;
       case "normal":
-        return <Badge variant="default">Normal</Badge>;
+        return <Badge variant="default">{t("messages.normal")}</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge variant="outline">{t("inventory.unknown")}</Badge>;
     }
   };
 
@@ -191,17 +193,17 @@ export default function ItemsSetup() {
 
   const getSetupBadge = (item: InventoryItem) => {
     const health = item.setup_health;
-    if (!health) return <Badge variant="outline">Setup unknown</Badge>;
+    if (!health) return <Badge variant="outline">{t("inventory.setupUnknown")}</Badge>;
 
     if (health.status === "ready") {
-      return <Badge className="bg-success text-primary-foreground">Ready for counts</Badge>;
+      return <Badge className="bg-success text-primary-foreground">{t("inventory.readyForCounts")}</Badge>;
     }
 
     if (health.status === "warning") {
-      return <Badge variant="secondary">Setup warnings</Badge>;
+      return <Badge variant="secondary">{t("inventory.setupWarnings")}</Badge>;
     }
 
-    return <Badge variant="destructive">Setup incomplete</Badge>;
+    return <Badge variant="destructive">{t("inventory.setupIncomplete")}</Badge>;
   };
 
   return (
@@ -211,26 +213,22 @@ export default function ItemsSetup() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
               <Package className="h-8 w-8" />
-              Items & Setup
-            </h1>
+              {t("common.itemsSetup")} </h1>
             <p className="text-muted-foreground">
-              Manage inventory items, stock levels, and configurations
-            </p>
+              {t("inventory.manageInventoryItemsStockLevelsAndConfigurations")} </p>
           </div>
 
           <div className="flex gap-2">
             <Button onClick={handleNewItem}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
+              {t("inventory.addItem")} </Button>
           </div>
         </div>
 
         <Card className={readyForCounts ? "border-success/40" : "border-warning/40"}>
           <CardContent className="p-4">
             <p className="text-xs font-medium uppercase text-muted-foreground">
-              Ready for counts
-            </p>
+              {t("inventory.readyForCounts")} </p>
             <p className="mt-2 text-lg font-semibold">
               {readyForCounts
                 ? "Catalog has a unit and at least one room"
@@ -243,8 +241,7 @@ export default function ItemsSetup() {
           <Card>
             <CardContent className="p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Setup ready
-              </p>
+                {t("inventory.setupReady")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 {setupSummary.readyPercent}%
               </p>
@@ -253,8 +250,7 @@ export default function ItemsSetup() {
           <Card>
             <CardContent className="p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Count-ready items
-              </p>
+                {t("inventory.countReadyItems")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 {setupSummary.ready}
               </p>
@@ -263,8 +259,7 @@ export default function ItemsSetup() {
           <Card>
             <CardContent className="p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Warnings
-              </p>
+                {t("tasks.warnings")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 {setupSummary.warning}
               </p>
@@ -273,8 +268,7 @@ export default function ItemsSetup() {
           <Card>
             <CardContent className="p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Incomplete
-              </p>
+                {t("inventory.incomplete")} </p>
               <p className="mt-2 text-2xl font-semibold text-destructive">
                 {setupSummary.incomplete}
               </p>
@@ -285,11 +279,11 @@ export default function ItemsSetup() {
         <Tabs defaultValue="items" className="space-y-4">
           <TabsList>
             <TabsTrigger value="items">Items ({items.length})</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
-            <TabsTrigger value="locations">Locations</TabsTrigger>
-            <TabsTrigger value="units">Units</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="categories">{t("inventory.categories")}</TabsTrigger>
+            <TabsTrigger value="suppliers">{t("inventory.suppliers")}</TabsTrigger>
+            <TabsTrigger value="locations">{t("inventory.locations")}</TabsTrigger>
+            <TabsTrigger value="units">{t("inventory.units4")}</TabsTrigger>
+            <TabsTrigger value="settings">{t("common.settings")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="items" className="space-y-4">
@@ -298,7 +292,7 @@ export default function ItemsSetup() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search items..."
+                  placeholder={t("inventory.searchItems")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -310,10 +304,10 @@ export default function ItemsSetup() {
                 onValueChange={setSelectedCategory}
               >
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Categories" />
+                  <SelectValue placeholder={t("inventory.allCategories")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">{t("inventory.allCategories")}</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -354,8 +348,7 @@ export default function ItemsSetup() {
                   {!searchTerm && selectedCategory === "all" && (
                     <Button onClick={handleNewItem}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add First Item
-                    </Button>
+                      {t("inventory.addFirstItem")} </Button>
                   )}
                 </CardContent>
               </Card>
@@ -408,27 +401,26 @@ export default function ItemsSetup() {
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
                               <div>
                                 <span className="font-medium">
-                                  SKU / Barcode:
-                                </span>
+                                  {t("inventory.skuBarcode")} </span>
                                 <p className="text-muted-foreground">
                                   {item.sku || "N/A"}
                                   {item.barcode ? ` • ${item.barcode}` : ""}
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">Category:</span>
+                                <span className="font-medium">{t("updates.category")}</span>
                                 <p className="text-muted-foreground">
                                   {categoryName}
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">Supplier:</span>
+                                <span className="font-medium">{t("inventory.supplier2")}</span>
                                 <p className="text-muted-foreground">
                                   {supplierName}
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">On hand:</span>
+                                <span className="font-medium">{t("inventory.onHand3")}</span>
                                 <p
                                   className={`font-medium ${
                                     stockStatus === "low"
@@ -441,53 +433,51 @@ export default function ItemsSetup() {
                                   {onHand} {item.unit?.abbreviation || ""}
                                 </p>
                                 <p className="text-muted-foreground">
-                                  Min {item.min_stock_level || 0} / PAR max{" "}
+                                  {t("forms.min")} {item.min_stock_level || 0} {t("inventory.parMax")}{" "}
                                   {item.max_stock_level || "∞"}
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium">Value:</span>
+                                <span className="font-medium">{t("inventory.value2")}</span>
                                 <p className="text-muted-foreground">
                                   {formatCurrency(stockValue)}
                                 </p>
                                 <p className="text-muted-foreground">
-                                  Fallback {formatCurrency(baseCost)}
+                                  {t("inventory.fallback")} {formatCurrency(baseCost)}
                                 </p>
                                 {recipeCost && baseCost !== recipeCost && (
                                   <p className="text-muted-foreground">
-                                    Recipe {formatCurrency(recipeCost)}
+                                    {t("inventory.recipe")} {formatCurrency(recipeCost)}
                                   </p>
                                 )}
                               </div>
                               <div>
                                 <span className="font-medium">
-                                  Location / Unit:
-                                </span>
+                                  {t("inventory.locationUnit")} </span>
                                 <p className="text-muted-foreground">
                                   {item.location?.name || "No location set"}
                                 </p>
                                 <p className="text-muted-foreground">
-                                  Unit: {primaryUnit}
+                                  {t("inventory.unit")} {primaryUnit}
                                 </p>
                               </div>
                             </div>
 
                             {unitHierarchy && (
                               <p className="text-xs text-muted-foreground mt-2">
-                                Unit hierarchy: {unitHierarchy}
+                                {t("inventory.unitHierarchy")} {unitHierarchy}
                               </p>
                             )}
                             {recipeLineCount > 0 && (
                               <p className="text-xs text-muted-foreground">
-                                Recipe ingredients: {recipeLineCount}
+                                {t("inventory.recipeIngredients")} {recipeLineCount}
                               </p>
                             )}
                             {item.setup_health?.issues.length ? (
                               <div className="mt-4 rounded-md border border-warning/40 bg-warning-muted p-3 text-sm text-warning-foreground">
                                 <div className="flex items-center gap-2 font-medium">
                                   <ShieldCheck className="h-4 w-4" />
-                                  Setup fixes needed
-                                </div>
+                                  {t("inventory.setupFixesNeeded")} </div>
                                 <ul className="mt-2 list-disc space-y-1 pl-5">
                                   {item.setup_health.issues
                                     .slice(0, 3)
@@ -505,8 +495,7 @@ export default function ItemsSetup() {
                               size="sm"
                               onClick={() => handleManageRecipe(item)}
                             >
-                              Recipe
-                            </Button>
+                              {t("inventory.recipe")} </Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -533,7 +522,7 @@ export default function ItemsSetup() {
 
           <TabsContent value="categories" className="space-y-4">
             <CatalogCrudPanel
-              title="Categories"
+              title={t("inventory.categories")}
               description="Organize items into categories"
               emptyLabel="No categories yet"
               items={categories.map((category) => ({
@@ -554,7 +543,7 @@ export default function ItemsSetup() {
 
           <TabsContent value="suppliers" className="space-y-4">
             <CatalogCrudPanel
-              title="Suppliers"
+              title={t("inventory.suppliers")}
               description="Preferred vendors for purchasing"
               emptyLabel="No suppliers yet"
               items={suppliers.map((supplier) => ({
@@ -575,7 +564,7 @@ export default function ItemsSetup() {
 
           <TabsContent value="locations" className="space-y-4">
             <CatalogCrudPanel
-              title="Storage rooms"
+              title={t("inventory.storageRooms")}
               description="Walk-in, freezer, dry storage, and other count rooms"
               emptyLabel="No storage rooms yet. Add one before counts."
               createLabel="Add room"
@@ -606,19 +595,16 @@ export default function ItemsSetup() {
           <TabsContent value="units" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Catalog units</CardTitle>
+                <CardTitle>{t("inventory.catalogUnits")}</CardTitle>
                 <CardDescription>
-                  Shared count, weight, and volume units. Pick one as the item
-                  base unit, such as Pound (lb).
-                </CardDescription>
+                  {t("inventory.sharedCountWeightAndVolumeUnitsPickOneAsTheItemBaseUnitSuchAsPoundLb")} </CardDescription>
               </CardHeader>
               <CardContent>
                 {unitsLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading units…</p>
+                  <p className="text-sm text-muted-foreground">{t("inventory.loadingUnits2")}</p>
                 ) : units.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No catalog units are available yet.
-                  </p>
+                    {t("inventory.noCatalogUnitsAreAvailableYet")} </p>
                 ) : (
                   <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {units.map((unit) => (
@@ -641,15 +627,14 @@ export default function ItemsSetup() {
           <TabsContent value="settings" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Count readiness</CardTitle>
+                <CardTitle>{t("inventory.countReadiness")}</CardTitle>
                 <CardDescription>
-                  A count needs a catalog unit and at least one storage room
-                </CardDescription>
+                  {t("inventory.aCountNeedsACatalogUnitAndAtLeastOneStorageRoom")} </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>Rooms: {locations.length}</p>
-                <p>Catalog units: {units.length}</p>
-                <p>Items with a unit: {items.filter((item) => item.unitid).length}</p>
+                <p>{t("inventory.rooms")} {locations.length}</p>
+                <p>{t("inventory.catalogUnits2")} {units.length}</p>
+                <p>{t("inventory.itemsWithAUnit")} {items.filter((item) => item.unitid).length}</p>
                 <p>
                   {readyForCounts
                     ? "This catalog can stand a count."
@@ -666,7 +651,7 @@ export default function ItemsSetup() {
           open={showItemForm}
           onOpenChange={setShowItemForm}
         >
-          <span className="sr-only">Add item</span>
+          <span className="sr-only">{t("forms.addItem")}</span>
         </InventoryItemForm>
         <AlertDialog
           open={Boolean(itemToDelete)}
@@ -677,18 +662,15 @@ export default function ItemsSetup() {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                Delete {itemToDelete?.name}?
+                {t("common.delete")} {itemToDelete?.name}?
               </AlertDialogTitle>
               <AlertDialogDescription>
-                This removes the item from the catalog. You can add it again
-                later.
-              </AlertDialogDescription>
+                {t("inventory.thisRemovesTheItemFromTheCatalogYouCanAddItAgainLater")} </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={() => void handleDeleteItem()}>
-                Delete item
-              </AlertDialogAction>
+                {t("inventory.deleteItem")} </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

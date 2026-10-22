@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate } from "@/lib/router-adapter";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
 
 export default function InventoryCountsPage() {
+  const { t } = useTranslation();
   const [showWizard, setShowWizard] = useState(false);
   const navigate = useNavigate();
 
@@ -24,26 +26,22 @@ export default function InventoryCountsPage() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
                 <Calculator className="h-8 w-8" />
-                Inventory Counts
-              </h1>
+                {t("inventory.inventoryCounts")} </h1>
               <p className="text-muted-foreground">
-                Counts stay here after Save & Done. Open one to edit and save
-                again.
-              </p>
+                {t("inventory.countsStayHereAfterSaveDoneOpenOneToEditAndSaveAgain")} </p>
             </div>
 
             <div className="flex gap-2">
               <Button onClick={() => setShowWizard(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                New Count
-              </Button>
+                {t("inventory.newCount2")} </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
             {/* Count List */}
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Recent Counts</h2>
+              <h2 className="text-xl font-semibold">{t("inventory.recentCounts")}</h2>
               <CountManagement onViewCount={handleViewCount} />
             </div>
           </div>

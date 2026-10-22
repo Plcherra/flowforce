@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useMemo } from "react";
 import { InventoryLayout } from "../components/InventoryLayout";
 import { IfCan } from "@/components/permissions/IfCan";
@@ -21,6 +22,7 @@ function startOfCurrentMonth() {
 }
 
 export default function InventoryDashboard() {
+  const { t } = useTranslation();
   const { data: itemsData, isLoading: itemsLoading } = useInventoryItems();
   const { data: wasteData, isLoading: wasteLoading } = useInventoryWaste();
   const { data: stockByItem = {}, isLoading: stockLoading } =
@@ -52,8 +54,7 @@ export default function InventoryDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Items
-                </CardTitle>
+                  {t("inventory.totalItems")} </CardTitle>
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -70,8 +71,7 @@ export default function InventoryDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Low Stock Items
-                </CardTitle>
+                  {t("inventory.lowStockItems")} </CardTitle>
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -88,8 +88,7 @@ export default function InventoryDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Inventory Value
-                </CardTitle>
+                  {t("inventory.inventoryValue")} </CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -106,8 +105,7 @@ export default function InventoryDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Waste This Month
-                </CardTitle>
+                  {t("inventory.wasteThisMonth")} </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -127,18 +125,16 @@ export default function InventoryDashboard() {
             <Card>
               <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold">No items yet</h2>
+                  <h2 className="text-lg font-semibold">{t("inventory.noItemsYet")}</h2>
                   <p className="text-sm text-muted-foreground">
-                    Add an item to start the catalog, or start a count once
-                    items exist.
-                  </p>
+                    {t("inventory.addAnItemToStartTheCatalogOrStartACountOnceItemsExist")} </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild>
-                    <Link to="/app/inventory/items">Add item</Link>
+                    <Link to="/app/inventory/items">{t("forms.addItem")}</Link>
                   </Button>
                   <Button asChild variant="outline">
-                    <Link to="/app/inventory/counts">Start count</Link>
+                    <Link to="/app/inventory/counts">{t("inventory.startCount")}</Link>
                   </Button>
                 </div>
               </CardContent>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "@/lib/router-adapter";
 import { useQueryClient } from "@tanstack/react-query";
@@ -136,6 +137,7 @@ type CountEvent = {
 export default function CountDetailPage({
   countId: propCountId,
 }: CountDetailPageProps) {
+  const { t } = useTranslation();
   const { countId: paramCountId } = useParams<{ countId: string }>();
   const countId = propCountId || paramCountId;
   const navigate = useNavigate();
@@ -256,14 +258,13 @@ export default function CountDetailPage({
     return (
       <InventoryLayout>
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Count not found</h1>
+          <h1 className="text-2xl font-bold">{t("inventory.countNotFound")}</h1>
           <Button
             onClick={() => navigate("/app/inventory/counts")}
             className="mt-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Counts
-          </Button>
+            {t("inventory.backToCounts")} </Button>
         </div>
       </InventoryLayout>
     );
@@ -335,22 +336,17 @@ export default function CountDetailPage({
             )}
 
             <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-              Save & Done updates on-hand and keeps this count on the list. Open
-              it anytime, edit, and Save & Done again.
-            </p>
+              {t("inventory.saveDoneUpdatesOnHandAndKeepsThisCountOnTheListOpenItAnytimeEditAndSaveDoneAgain")} </p>
             {countSummary.missingLines > 0 && (
               <p className="rounded-md border border-warning/40 bg-warning-muted px-3 py-2 text-sm text-warning-foreground">
-                {countSummary.missingLines} line
-                {countSummary.missingLines === 1 ? "" : "s"} still missing.
-              </p>
+                {countSummary.missingLines} {t("inventory.line")} {countSummary.missingLines === 1 ? "" : "s"} {t("inventory.stillMissing")} </p>
             )}
 
             <div className="grid gap-3 sm:grid-cols-4">
               <Card>
                 <CardContent className="p-4">
                   <p className="text-xs font-medium uppercase text-muted-foreground">
-                    Counted
-                  </p>
+                    {t("inventory.counted")} </p>
                   <p className="mt-2 text-2xl font-semibold">
                     {countSummary.countedLines}/{countSummary.totalLines}
                   </p>
@@ -359,8 +355,7 @@ export default function CountDetailPage({
               <Card>
                 <CardContent className="p-4">
                   <p className="text-xs font-medium uppercase text-muted-foreground">
-                    Missing
-                  </p>
+                    {t("inventory.missing")} </p>
                   <p className="mt-2 text-2xl font-semibold">
                     {countSummary.missingLines}
                   </p>
@@ -369,8 +364,7 @@ export default function CountDetailPage({
               <Card>
                 <CardContent className="p-4">
                   <p className="text-xs font-medium uppercase text-muted-foreground">
-                    Variance Lines
-                  </p>
+                    {t("inventory.varianceLines2")} </p>
                   <p className="mt-2 text-2xl font-semibold">
                     {countSummary.varianceLines}
                   </p>
@@ -379,8 +373,7 @@ export default function CountDetailPage({
               <Card>
                 <CardContent className="p-4">
                   <p className="text-xs font-medium uppercase text-muted-foreground">
-                    Net Variance
-                  </p>
+                    {t("inventory.netVariance2")} </p>
                   <p className="mt-2 text-2xl font-semibold">
                     {countSummary.netVariance.toFixed(2)}
                   </p>
@@ -391,9 +384,9 @@ export default function CountDetailPage({
 
           <Tabs defaultValue="counting" className="space-y-6">
             <TabsList>
-              <TabsTrigger value="counting">Counting</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="counting">{t("inventory.counting")}</TabsTrigger>
+              <TabsTrigger value="history">{t("inventory.history")}</TabsTrigger>
+              <TabsTrigger value="details">{t("schedule.details")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="counting">
@@ -405,8 +398,7 @@ export default function CountDetailPage({
                     onClick={() => setShowItemSelector(true)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Items
-                  </Button>
+                    {t("inventory.addItems")} </Button>
                 </IfCan>
               </div>
               <MarketManCountingInterface
@@ -427,18 +419,16 @@ export default function CountDetailPage({
             <TabsContent value="history">
               <Card>
                 <CardHeader>
-                  <CardTitle>Count History</CardTitle>
-                  <CardDescription>Activity log for this count</CardDescription>
+                  <CardTitle>{t("inventory.countHistory")}</CardTitle>
+                  <CardDescription>{t("inventory.activityLogForThisCount")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loadingEvents ? (
                     <p className="text-sm text-muted-foreground">
-                      Loading activity…
-                    </p>
+                      {t("inventory.loadingActivity")} </p>
                   ) : events.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
-                      No activity recorded yet.
-                    </p>
+                      {t("inventory.noActivityRecordedYet")} </p>
                   ) : (
                     <div className="space-y-3">
                       {events.map((event) => {
@@ -475,14 +465,14 @@ export default function CountDetailPage({
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                By {actorName}
+                                {t("messages.by")} {actorName}
                               </p>
                               {notes && (
                                 <p className="text-sm">{notes}</p>
                               )}
                               {itemId && (
                                 <p className="text-xs text-muted-foreground">
-                                  Item ID: {itemId}
+                                  {t("inventory.itemId")} {itemId}
                                 </p>
                               )}
                             </div>
@@ -498,35 +488,34 @@ export default function CountDetailPage({
             <TabsContent value="details">
               <Card>
                 <CardHeader>
-                  <CardTitle>Count Details</CardTitle>
+                  <CardTitle>{t("inventory.countDetails")}</CardTitle>
                   <CardDescription>
-                    Information about this inventory count
-                  </CardDescription>
+                    {t("inventory.informationAboutThisInventoryCount")} </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4 text-sm sm:grid-cols-2">
                     <div>
-                      <span className="font-medium">Count Type</span>
+                      <span className="font-medium">{t("inventory.countType")}</span>
                       <p>{formatCountType(count.count_type)}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Day Part</span>
+                      <span className="font-medium">{t("inventory.dayPart")}</span>
                       <p>{getPeriodLabel(count.count_period)}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Count Date</span>
+                      <span className="font-medium">{t("inventory.countDate2")}</span>
                       <p>{new Date(count.count_date).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Status</span>
+                      <span className="font-medium">{t("schedule.status")}</span>
                       <p>{formatCountStatus(count.status)}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Created</span>
+                      <span className="font-medium">{t("forms.created")}</span>
                       <p>{new Date(count.created_at).toLocaleString()}</p>
                     </div>
                     <div>
-                      <span className="font-medium">Done</span>
+                      <span className="font-medium">{t("inventory.done")}</span>
                       <p>
                         {count.completed_at
                           ? new Date(count.completed_at).toLocaleString()
@@ -539,7 +528,7 @@ export default function CountDetailPage({
                     <div className="mt-4 space-y-3">
                       {count.description && (
                         <div>
-                          <span className="font-medium">Description</span>
+                          <span className="font-medium">{t("tasks.description")}</span>
                           <p className="text-sm text-muted-foreground">
                             {count.description}
                           </p>
@@ -547,7 +536,7 @@ export default function CountDetailPage({
                       )}
                       {count.notes && (
                         <div>
-                          <span className="font-medium">Notes</span>
+                          <span className="font-medium">{t("schedule.notes")}</span>
                           <p className="text-sm text-muted-foreground">
                             {count.notes}
                           </p>

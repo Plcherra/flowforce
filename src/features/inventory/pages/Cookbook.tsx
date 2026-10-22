@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState, type ReactNode } from "react";
 import {
   BookOpen,
@@ -27,6 +28,7 @@ import { CreateRecipeDialog } from "@/features/inventory/components/cookbook/Cre
 import type { CookbookRecipe } from "@/features/inventory/services/cookbook";
 
 export default function Cookbook() {
+  const { t } = useTranslation();
   const {
     loading,
     error,
@@ -99,53 +101,46 @@ export default function Cookbook() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <BookOpen className="h-8 w-8" />
-            Inventory Cookbook
-          </h1>
+            {t("inventory.inventoryCookbook")} </h1>
           <p className="text-muted-foreground">
-            Merge recipes with Items &amp; Setup inventory for live costing,
-            smart prep, and waste tracking.
-          </p>
+            {t("inventory.mergeRecipesWithItemsSetupInventoryForLiveCostingSmartPrepAndWasteTracking")} </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handleExportDailyPrep}>
             <FileDown className="h-4 w-4 mr-2" />
-            Daily Prep Summary
-          </Button>
+            {t("inventory.dailyPrepSummary")} </Button>
           <DailyCountDialog items={prepItemsForCount} />
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            New Recipe
-          </Button>
+            {t("inventory.newRecipe")} </Button>
         </div>
       </header>
 
       {error && (
         <Card className="border-destructive/40 bg-destructive/5">
           <CardContent className="py-4 text-sm text-destructive">
-            {error}. Showing synced demo data so you can continue designing the
-            cookbook experience.
-          </CardContent>
+            {error}{t("inventory.showingSyncedDemoDataSoYouCanContinueDesigningTheCookbookExperience")} </CardContent>
         </Card>
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
-          title="Linked Recipes"
+          title={t("inventory.linkedRecipes")}
           value={recipes.length}
           subtitle="Inventory-backed and costed"
         />
         <StatCard
-          title="Favorites"
+          title={t("inventory.favorites")}
           value={favoriteIds.length}
           subtitle="Go-to recipes for quick access"
         />
         <StatCard
-          title="Prep Items"
+          title={t("inventory.prepItems")}
           value={prepItems.length}
           subtitle="Prep planner ready items"
         />
         <StatCard
-          title="Events (7d)"
+          title={t("inventory.events7d")}
           value={productionEvents.length + wasteEvents.length}
           subtitle={`${productionEvents.length} production • ${wasteEvents.length} waste`}
         />
@@ -155,7 +150,7 @@ export default function Cookbook() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search recipes by name…"
+            placeholder={t("inventory.searchRecipesByName")}
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             className="pl-10"
@@ -200,16 +195,13 @@ export default function Cookbook() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold">Daily Prep Planner</h2>
+            <h2 className="text-xl font-semibold">{t("inventory.dailyPrepPlanner")}</h2>
             <p className="text-sm text-muted-foreground">
-              Suggested make quantities with instant production logging and
-              waste tracking.
-            </p>
+              {t("inventory.suggestedMakeQuantitiesWithInstantProductionLoggingAndWasteTracking")} </p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleExportDailyPrep}>
             <FileDown className="h-4 w-4 mr-2" />
-            Export summary
-          </Button>
+            {t("inventory.exportSummary")} </Button>
         </div>
         <PrepList
           items={prepItems}
@@ -224,7 +216,7 @@ export default function Cookbook() {
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <EventCard
-          title="Recent Production"
+          title={t("inventory.recentProduction")}
           icon={<Activity className="h-4 w-4" />}
           empty="Production batches log once Supabase migrations run."
           items={productionEvents.map((event) => ({
@@ -235,7 +227,7 @@ export default function Cookbook() {
           }))}
         />
         <EventCard
-          title="Recent Waste"
+          title={t("inventory.recentWaste")}
           icon={<AlertTriangle className="h-4 w-4" />}
           empty="Waste events log locally when Supabase is unavailable."
           items={wasteEvents.slice(0, 5).map((event) => ({
@@ -314,6 +306,7 @@ interface EventCardProps {
 }
 
 function EventCard({ title, icon, empty, items }: EventCardProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2">
@@ -323,8 +316,7 @@ function EventCard({ title, icon, empty, items }: EventCardProps) {
         <div>
           <CardTitle className="text-base">{title}</CardTitle>
           <CardDescription>
-            Live once Supabase tables are configured—sample data shown today.
-          </CardDescription>
+            {t("inventory.liveOnceSupabaseTablesAreConfiguredSampleDataShownToday")} </CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">

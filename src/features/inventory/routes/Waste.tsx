@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ const wasteTypeLabels: Record<string, string> = {
 };
 
 export default function WasteTrackingPage() {
+  const { t } = useTranslation();
   const { data: wasteRecords = [], isLoading } = useInventoryWaste();
   const summary = useMemo(
     () => summarizeWasteIntelligence(wasteRecords),
@@ -77,11 +79,9 @@ export default function WasteTrackingPage() {
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Waste Tracking
-            </h1>
+              {t("inventory.wasteTracking")} </h1>
             <p className="text-muted-foreground">
-              Monitor and analyze inventory waste across your operations
-            </p>
+              {t("inventory.monitorAndAnalyzeInventoryWasteAcrossYourOperations")} </p>
           </div>
 
           {/* Summary Cards */}
@@ -89,8 +89,7 @@ export default function WasteTrackingPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Waste Records
-                </CardTitle>
+                  {t("inventory.totalWasteRecords")} </CardTitle>
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -98,16 +97,14 @@ export default function WasteTrackingPage() {
                   {summary.totalRecords}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  All time waste events
-                </p>
+                  {t("inventory.allTimeWasteEvents")} </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Quantity Wasted
-                </CardTitle>
+                  {t("inventory.totalQuantityWasted")} </CardTitle>
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -115,16 +112,14 @@ export default function WasteTrackingPage() {
                   {summary.totalQuantity.toFixed(1)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Units across all items
-                </p>
+                  {t("inventory.unitsAcrossAllItems")} </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Value Lost
-                </CardTitle>
+                  {t("inventory.totalValueLost")} </CardTitle>
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -132,16 +127,14 @@ export default function WasteTrackingPage() {
                   ${summary.totalCost.toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Estimated cost impact
-                </p>
+                  {t("inventory.estimatedCostImpact")} </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  7-Day Trend
-                </CardTitle>
+                  {t("inventory.7DayTrend")} </CardTitle>
                 {summary.trendDirection === "down" ? (
                   <TrendingDown className="h-4 w-4 text-success" />
                 ) : (
@@ -153,8 +146,7 @@ export default function WasteTrackingPage() {
                   {summary.trendPercent.toFixed(0)}%
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  ${summary.currentPeriodCost.toFixed(2)} this week
-                </p>
+                  ${summary.currentPeriodCost.toFixed(2)} {t("inventory.thisWeek")} </p>
               </CardContent>
             </Card>
           </div>
@@ -164,12 +156,11 @@ export default function WasteTrackingPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Target className="h-4 w-4" />
-                  Highest Impact
-                </CardTitle>
+                  {t("inventory.highestImpact")} </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Type</span>
+                  <span className="text-muted-foreground">{t("schedule.type")}</span>
                   <span className="font-medium">
                     {summary.topWasteType
                       ? wasteTypeLabels[summary.topWasteType] ??
@@ -178,13 +169,13 @@ export default function WasteTrackingPage() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Item</span>
+                  <span className="text-muted-foreground">{t("inventory.item")}</span>
                   <span className="font-medium">
                     {summary.topItemName ?? "None"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Location</span>
+                  <span className="text-muted-foreground">{t("schedule.location")}</span>
                   <span className="font-medium">
                     {summary.topLocationName ?? "None"}
                   </span>
@@ -194,13 +185,12 @@ export default function WasteTrackingPage() {
 
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="text-base">Outliers</CardTitle>
+                <CardTitle className="text-base">{t("inventory.outliers")}</CardTitle>
               </CardHeader>
               <CardContent>
                 {outliers.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No high-cost outliers in the current data.
-                  </p>
+                    {t("inventory.noHighCostOutliersInTheCurrentData")} </p>
                 ) : (
                   <div className="space-y-3">
                     {outliers.map((record) => (
@@ -223,8 +213,7 @@ export default function WasteTrackingPage() {
                             ${(record.cost_impact ?? 0).toFixed(2)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {record.outlier_score.toFixed(1)}x average
-                          </p>
+                            {record.outlier_score.toFixed(1)}{t("inventory.xAverage")} </p>
                         </div>
                       </div>
                     ))}
@@ -237,20 +226,18 @@ export default function WasteTrackingPage() {
           {/* Waste Records */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Waste Events</CardTitle>
+              <CardTitle>{t("inventory.recentWasteEvents")}</CardTitle>
             </CardHeader>
             <CardContent>
               {wasteRecords.length === 0 ? (
                 <div className="text-center py-8">
                   <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">
-                    No waste records found
-                  </h3>
+                    {t("inventory.noWasteRecordsFound")} </h3>
                   <p className="text-muted-foreground mb-4">
-                    Start tracking waste events to monitor your inventory losses
-                  </p>
+                    {t("inventory.startTrackingWasteEventsToMonitorYourInventoryLosses")} </p>
                   <Button asChild>
-                    <Link to="/app/inventory/actions">Record Waste</Link>
+                    <Link to="/app/inventory/actions">{t("inventory.recordWaste")}</Link>
                   </Button>
                 </div>
               ) : (
@@ -313,7 +300,7 @@ export default function WasteTrackingPage() {
 
                           {record.reason && (
                             <p className="text-sm text-muted-foreground">
-                              <strong>Reason:</strong> {record.reason}
+                              <strong>{t("schedule.reason2")}</strong> {record.reason}
                             </p>
                           )}
                         </div>

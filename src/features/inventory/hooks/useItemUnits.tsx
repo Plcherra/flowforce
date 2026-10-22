@@ -59,12 +59,10 @@ export function useItemUnits(itemId?: string) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return (data ?? []).map(
-        (row) =>
-          fromInventoryItemUnitRow(
-            row as Record<string, unknown>,
-          ) as unknown as InventoryItemUnit,
-      );
+      return (data ?? []).map((row) => {
+        const typed = row as Record<string, unknown>;
+        return fromInventoryItemUnitRow(typed) as unknown as InventoryItemUnit;
+      });
     },
     enabled: !!itemId,
   });
