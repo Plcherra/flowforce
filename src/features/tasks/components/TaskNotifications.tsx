@@ -55,19 +55,19 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "task_assigned":
-        return <User className="h-4 w-4 text-blue-500" />;
+        return <User className="h-4 w-4 text-primary" />;
       case "task_due_soon":
-        return <Clock className="h-4 w-4 text-orange-500" />;
+        return <Clock className="h-4 w-4 text-warning" />;
       case "task_overdue":
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+        return <AlertTriangle className="h-4 w-4 text-destructive" />;
       case "task_completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-success" />;
       case "task_status_changed":
-        return <Flag className="h-4 w-4 text-purple-500" />;
+        return <Flag className="h-4 w-4 text-secondary" />;
       case "task_comment":
-        return <Bell className="h-4 w-4 text-indigo-500" />;
+        return <Bell className="h-4 w-4 text-primary" />;
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+        return <Bell className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -104,7 +104,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
       return (
         <Badge
           variant="outline"
-          className="text-xs bg-orange-50 text-orange-700 border-orange-200"
+          className="text-xs bg-warning-muted text-warning-foreground border-warning/40"
         >
           Due Today
         </Badge>
@@ -113,7 +113,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
       return (
         <Badge
           variant="outline"
-          className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200"
+          className="text-xs bg-warning-muted text-warning-foreground border-warning/40"
         >
           Due Tomorrow
         </Badge>
@@ -122,7 +122,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
       return (
         <Badge
           variant="outline"
-          className="text-xs bg-blue-50 text-blue-700 border-blue-200"
+          className="text-xs bg-primary/10 text-primary border-primary/40"
         >
           Due This Week
         </Badge>

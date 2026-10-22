@@ -71,7 +71,7 @@ export function RemindersPanel() {
       return (
         <Badge
           variant="secondary"
-          className="text-xs bg-orange-100 text-orange-800"
+          className="text-xs bg-warning-muted text-warning-foreground"
         >
           Today
         </Badge>
@@ -80,7 +80,7 @@ export function RemindersPanel() {
       return (
         <Badge
           variant="secondary"
-          className="text-xs bg-yellow-100 text-yellow-800"
+          className="text-xs bg-warning-muted text-warning-foreground"
         >
           Tomorrow
         </Badge>
@@ -174,18 +174,18 @@ export function RemindersPanel() {
               {/* Overdue Reminders */}
               {overdueReminders.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-red-600 mb-2">
+                  <h4 className="text-sm font-medium text-destructive mb-2">
                     Overdue
                   </h4>
                   {overdueReminders.map((reminder) => (
                     <div
                       key={reminder.id}
-                      className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border-l-4 border-l-red-500 mb-2"
+                      className="p-3 bg-destructive/10 rounded-lg border-l-4 border-l-destructive mb-2"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            <p className="text-sm font-medium text-foreground">
                               {reminder.title}
                             </p>
                             {reminder.sound_enabled && (
@@ -196,14 +196,14 @@ export function RemindersPanel() {
                             )}
                           </div>
                           {reminder.description && (
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                               {reminder.description}
                             </p>
                           )}
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center space-x-2">
                               {getReminderBadge(reminder.remind_at)}
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-muted-foreground">
                                 {format(
                                   new Date(reminder.remind_at),
                                   "MMM dd, h:mm a",
@@ -264,18 +264,18 @@ export function RemindersPanel() {
               {/* Upcoming Reminders */}
               {upcomingReminders.length > 0 ? (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">
                     Upcoming
                   </h4>
                   {upcomingReminders.map((reminder) => (
                     <div
                       key={reminder.id}
-                      className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-2"
+                      className="p-3 bg-background rounded-lg mb-2"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            <p className="text-sm font-medium text-foreground">
                               {reminder.title}
                             </p>
                             {reminder.sound_enabled && (
@@ -286,14 +286,14 @@ export function RemindersPanel() {
                             )}
                           </div>
                           {reminder.description && (
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                               {reminder.description}
                             </p>
                           )}
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center space-x-2">
                               {getReminderBadge(reminder.remind_at)}
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-muted-foreground">
                                 {formatDistanceToNow(
                                   new Date(reminder.remind_at),
                                   { addSuffix: true },

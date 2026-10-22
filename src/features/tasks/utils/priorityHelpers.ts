@@ -8,14 +8,14 @@
 export function getPriorityColor(priority: string | null | undefined): string {
   switch (priority) {
     case "urgent":
-      return "bg-red-500";
+      return "bg-destructive";
     case "high":
-      return "bg-orange-500";
+      return "bg-warning";
     case "medium":
-      return "bg-yellow-500";
+      return "bg-warning";
     case "low":
-      return "bg-green-500";
+      return "bg-success";
     default:
-      return "bg-gray-400";
+      return "bg-muted";
   }
 }

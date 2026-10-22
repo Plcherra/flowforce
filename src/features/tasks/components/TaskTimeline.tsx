@@ -22,18 +22,18 @@ interface TaskTimelineProps {
 }
 
 const activityIconMap: Record<string, JSX.Element> = {
-  task_created: <Plus className="h-4 w-4 text-blue-500" />,
-  task_assigned: <User className="h-4 w-4 text-green-500" />,
-  task_status_changed: <Flag className="h-4 w-4 text-purple-500" />,
-  task_completed: <CheckCircle className="h-4 w-4 text-emerald-600" />,
-  task_commented: <MessageSquare className="h-4 w-4 text-indigo-500" />,
-  task_updated: <Edit className="h-4 w-4 text-orange-500" />,
-  task_due_changed: <Calendar className="h-4 w-4 text-red-500" />,
+  task_created: <Plus className="h-4 w-4 text-primary" />,
+  task_assigned: <User className="h-4 w-4 text-success" />,
+  task_status_changed: <Flag className="h-4 w-4 text-secondary" />,
+  task_completed: <CheckCircle className="h-4 w-4 text-success" />,
+  task_commented: <MessageSquare className="h-4 w-4 text-primary" />,
+  task_updated: <Edit className="h-4 w-4 text-warning" />,
+  task_due_changed: <Calendar className="h-4 w-4 text-destructive" />,
 };
 
 const getActivityIcon = (activityType: string) => {
   return (
-    activityIconMap[activityType] ?? <Clock className="h-4 w-4 text-gray-500" />
+    activityIconMap[activityType] ?? <Clock className="h-4 w-4 text-muted-foreground" />
   );
 };
 

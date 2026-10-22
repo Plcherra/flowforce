@@ -359,7 +359,7 @@ export function CreateReminderDialog({
                 className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                   formData.notification_methods.includes("in_app")
                     ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-border hover:border-foreground"
                 }`}
                 onClick={() => toggleNotificationMethod("in_app")}
               >
@@ -376,7 +376,7 @@ export function CreateReminderDialog({
                 className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                   formData.notification_methods.includes("browser")
                     ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-border hover:border-foreground"
                 }`}
                 onClick={() => toggleNotificationMethod("browser")}
               >
@@ -393,7 +393,7 @@ export function CreateReminderDialog({
                 className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                   formData.notification_methods.includes("email")
                     ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-border hover:border-foreground"
                 }`}
                 onClick={() => toggleNotificationMethod("email")}
               >
@@ -410,7 +410,7 @@ export function CreateReminderDialog({
                 className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                   formData.notification_methods.includes("mobile")
                     ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-border hover:border-foreground"
                 }`}
                 onClick={() => toggleNotificationMethod("mobile")}
               >

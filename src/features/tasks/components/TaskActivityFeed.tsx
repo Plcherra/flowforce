@@ -124,42 +124,42 @@ export function TaskActivityFeed() {
   const getActivityIcon = (actionType: string) => {
     switch (actionType) {
       case "task_created":
-        return <Plus className="h-4 w-4 text-blue-500" />;
+        return <Plus className="h-4 w-4 text-primary" />;
       case "task_assigned":
-        return <User className="h-4 w-4 text-green-500" />;
+        return <User className="h-4 w-4 text-success" />;
       case "task_status_changed":
-        return <Flag className="h-4 w-4 text-purple-500" />;
+        return <Flag className="h-4 w-4 text-secondary" />;
       case "task_completed":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <CheckCircle className="h-4 w-4 text-success" />;
       case "task_commented":
-        return <MessageSquare className="h-4 w-4 text-indigo-500" />;
+        return <MessageSquare className="h-4 w-4 text-primary" />;
       case "task_updated":
-        return <Edit className="h-4 w-4 text-orange-500" />;
+        return <Edit className="h-4 w-4 text-warning" />;
       case "task_due_changed":
-        return <Calendar className="h-4 w-4 text-red-500" />;
+        return <Calendar className="h-4 w-4 text-destructive" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getActivityColor = (actionType: string) => {
     switch (actionType) {
       case "task_created":
-        return "bg-blue-50 border-l-blue-500 dark:bg-blue-500/10";
+        return "bg-primary/10 border-l-primary";
       case "task_assigned":
-        return "bg-green-50 border-l-green-500 dark:bg-green-500/10";
+        return "bg-success-muted border-l-success";
       case "task_status_changed":
-        return "bg-purple-50 border-l-purple-500 dark:bg-purple-500/10";
+        return "bg-secondary/10 border-l-secondary";
       case "task_completed":
-        return "bg-green-50 border-l-green-600 dark:bg-green-500/10";
+        return "bg-success-muted border-l-success";
       case "task_commented":
-        return "bg-indigo-50 border-l-indigo-500 dark:bg-indigo-500/10";
+        return "bg-primary/10 border-l-primary";
       case "task_updated":
-        return "bg-orange-50 border-l-orange-500 dark:bg-orange-500/10";
+        return "bg-warning-muted border-l-warning";
       case "task_due_changed":
-        return "bg-red-50 border-l-red-500 dark:bg-red-500/10";
+        return "bg-destructive/10 border-l-destructive";
       default:
-        return "bg-gray-50 border-l-gray-500 dark:bg-slate-800/40";
+        return "bg-background border-l-foreground";
     }
   };
 
@@ -242,7 +242,7 @@ export function TaskActivityFeed() {
                     key={activity.id}
                     className={`p-4 border-l-2 ${getActivityColor(activity.action_type)} ${
                       index !== activities.length - 1
-                        ? "border-b border-gray-100 dark:border-slate-800"
+                        ? "border-b border-border"
                         : ""
                     }`}
                   >
@@ -269,7 +269,7 @@ export function TaskActivityFeed() {
                           </span>
                         </div>
 
-                        <p className="text-sm text-gray-900 mb-2">
+                        <p className="text-sm text-foreground mb-2">
                           {activity.description}
                         </p>
 

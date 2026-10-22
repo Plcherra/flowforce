@@ -18,7 +18,7 @@ export function TaskEmptyState({
   if (hasTasks) {
     return (
       <Card data-testid="tasks-no-results">
-        <CardContent className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
+        <CardContent className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-background py-12 text-center">
           <Search className="h-10 w-10 text-muted-foreground" />
           <h3 className="text-lg font-semibold">No tasks match your filters</h3>
           <p className="max-w-sm text-sm text-muted-foreground">
@@ -37,7 +37,7 @@ export function TaskEmptyState({
 
   return (
     <Card data-testid="tasks-empty-state">
-      <CardContent className="flex flex-col items-center justify-center rounded-lg bg-slate-50 py-12 text-center dark:bg-slate-900/30">
+      <CardContent className="flex flex-col items-center justify-center rounded-lg bg-background py-12 text-center">
         <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No tasks yet</h3>
         <p className="text-muted-foreground text-center">

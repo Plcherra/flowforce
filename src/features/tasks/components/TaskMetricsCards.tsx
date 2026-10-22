@@ -17,7 +17,7 @@ export function TaskMetricsCards({ metrics }: TaskMetricsCardsProps) {
           key={metric.label}
           className={
             metric.tone === "alert"
-              ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/10"
+              ? "border-destructive/40 bg-destructive/10"
               : "border-border"
           }
         >

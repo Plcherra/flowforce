@@ -204,7 +204,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 8 — Tasks
 
-- [ ] Move hard-coded colors on Tasks onto the tokens.
+- [x] Move hard-coded colors on Tasks onto the tokens.
 
 Rules:
 
@@ -548,6 +548,22 @@ Phone steps for Pedro:
 2. Shift chips should still show their saved colors. The vendor list colors should be unchanged.
 3. Ready, watch, and fix pills should read as green, amber, and red. Open a shift with a conflict and confirm the warning is red or amber, not a flat blue.
 4. Switch to Dark in Settings, then General. The schedule text should stay readable, and the shift chips should keep their saved colors.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 8 Tasks
+
+Shipped: Task classes now use the theme tokens. Priority dots are destructive, warning, success, or muted. Due badges use success, warning, or destructive. Activity rows use a primary, secondary, success, or warning wash, and the `dark:` palette classes in these files are gone. `src/features/tasks` has no baseline entries.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. Urgent and high priorities should read as red and amber. Low should read as green. Overdue should read as red, and due soon as amber.
+3. Open a task. Activity rows should use a tint, not a separate rainbow of slate and indigo.
+4. Switch to Dark. Task titles and the overdue row should stay readable.
 
 Blockers: none. No migration.
 

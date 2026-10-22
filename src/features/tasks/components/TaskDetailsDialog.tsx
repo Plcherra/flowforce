@@ -72,15 +72,15 @@ interface TaskDetailsDialogProps {
 const getPriorityColor = (priority?: string | null) => {
   switch (priority) {
     case "urgent":
-      return "bg-red-500";
+      return "bg-destructive";
     case "high":
-      return "bg-orange-500";
+      return "bg-warning";
     case "medium":
-      return "bg-yellow-500";
+      return "bg-warning";
     case "low":
-      return "bg-green-500";
+      return "bg-success";
     default:
-      return "bg-gray-500";
+      return "bg-foreground";
   }
 };
 
@@ -580,7 +580,7 @@ export function TaskDetailsDialog({
                           isActive
                             ? "bg-primary"
                             : isCompleted
-                              ? "bg-emerald-500"
+                              ? "bg-success"
                               : "bg-muted-foreground/40"
                         }`}
                       />
