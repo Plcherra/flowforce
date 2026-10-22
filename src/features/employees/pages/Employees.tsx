@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { Users } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
-import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
+import { useCan } from "@/hooks/useCan";
 
 const TeamDirectory = lazy(async () =>
   import("@/features/employees/components/TeamDirectory").then((module) => ({
@@ -17,17 +17,17 @@ const TeamDirectory = lazy(async () =>
 export default function EmployeesPage() {
   const { t } = useTranslation();
   const { profile } = useProfile();
-  const leadership = isLeadershipLevel({ name: profile?.role });
+  const { can, isLoading: permissionsLoading } = useCan();
   const bootstrap = useCommunicationBootstrap({
     includeInactiveEmployees: true,
   });
 
-  if (profile && !leadership) {
+  if (profile && !permissionsLoading && !can("directory.view")) {
     return (
       <div className="p-6">
         <EmptyStateCard
           title={t("employees.employeeDirectory")}
-          description={t("employees.managersOnly")}
+          description={t("employees.directoryHidden")}
           icon={<Users className="h-5 w-5" />}
         />
       </div>

@@ -1,6 +1,6 @@
 # System and Admin rework
 
-Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 5.
+Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 6.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
@@ -71,7 +71,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3 and 4 are checked. Phase 5 is the next unchecked phase.
+This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3–5 are checked. Phase 6 is the next unchecked phase.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 
@@ -123,7 +123,7 @@ Prove: Extend `permissionAccessTypes.test.ts` so a switch outside read, create, 
 
 ### Phase 5 — Levels are default packs
 
-- [ ] Let a grant turn a permission on for any user, including level 1, and let that grant include the right to grant it.
+- [x] Let a grant turn a permission on for any user, including level 1, and let that grant include the right to grant it.
 
 Rules:
 
@@ -221,5 +221,22 @@ Phone steps for Pedro:
 5. Switch labels on that screen are Read, Create, Edit, Delete, or Grant. There is no Approve, Export, Manage, or Suggest switch.
 
 Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration.
+
+Questions: Which candidates to remove? No new question.
+
+### 2026-10-22 — Phase 5 Levels are default packs
+
+Shipped: Level 2 and level 3 already include `directory.view` by default, and level 1 does not. The employee directory and its sidebar item now follow that permission, including an allow override for level 1 and a deny override for level 2. The level number does not hide the page. An owner, or a person who holds the directory grant right `directory.view.grant`, can grant `directory.view` and can pass that grant right on. Holding `directory.view` alone does not grant it. No new registry key.
+
+Proven: `src/features/roles/constants/permissionGrant.test.ts` passed through `node scripts/test-product-roles-setup.mjs`. Level 2 and level 3 default on. Level 1 defaults off even when the hierarchy number is 4. A level 1 allow override sees the directory. A level 2 deny override does not, even when the hierarchy number is 4. An owner grant turns the directory on for level 1 and includes the grant right, and that person can grant it onward. A manager without the grant right cannot. `npm run check:roles` passed. `npm run check:i18n` printed 4628 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the TypeScript files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as a manager. The team directory is in the sidebar and the page opens.
+2. Sign in as staff. The team directory is hidden, and opening the employee page says directory access is off for this account.
+3. As an owner, grant that staff person directory view. Reload as that person. The directory is in the sidebar and the page opens.
+4. As an owner, deny directory view for a manager. Reload as that manager. The directory is hidden.
+5. As an owner, grant the directory and the grant right to a staff person. That person can pass directory view and the grant right to someone else. A manager who can see the directory, but was not given the grant right, cannot pass it on.
+
+Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration. The grant right is the override key `directory.view.grant` on `user_permissions`. It is not a new registry key.
 
 Questions: Which candidates to remove? No new question.

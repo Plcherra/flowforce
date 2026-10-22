@@ -3933,6 +3933,7 @@
     "invitesFailed": "{{count}} non riusciti",
     "loadingEmployeeDirectory": "Caricamento della rubrica dipendenti...",
     "managersOnly": "Questa pagina è per i responsabili e i livelli superiori.",
+    "directoryHidden": "L'accesso alla rubrica è disattivato per questo account.",
     "roleFallback": "ruolo",
     "accessAct": "Agire",
     "accessNone": "Nessuno",

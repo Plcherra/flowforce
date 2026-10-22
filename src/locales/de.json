@@ -3933,6 +3933,7 @@
     "invitesFailed": "{{count}} fehlgeschlagen",
     "loadingEmployeeDirectory": "Mitarbeiterverzeichnis wird geladen...",
     "managersOnly": "Diese Seite ist für Verantwortliche und höhere Ebenen.",
+    "directoryHidden": "Der Verzeichniszugriff ist für dieses Konto aus.",
     "roleFallback": "Rolle",
     "accessAct": "Handeln",
     "accessNone": "Keine",

@@ -3933,6 +3933,7 @@
     "invitesFailed": "{{count}} échouées",
     "loadingEmployeeDirectory": "Chargement de l'annuaire des employés...",
     "managersOnly": "Cette page est réservée aux responsables et aux niveaux supérieurs.",
+    "directoryHidden": "L'accès à l'annuaire est désactivé pour ce compte.",
     "roleFallback": "rôle",
     "accessAct": "Agir",
     "accessNone": "Aucun",

@@ -49,19 +49,24 @@ export function useNavigationStructure() {
   const featureFlags = useFeatureFlags();
   const { sections: customSections } = useCustomSections();
 
-  const isLeadershipItem = (item: { name?: string; href?: string }) => {
+  const isDirectoryItem = (item: { name?: string; href?: string }) => {
     const name = (item.name || "").trim().toLowerCase();
     const href = canonicalizePath(item.href || "");
     return (
       href === "employees" ||
-      href === "ai-insights" ||
       name === "team directory" ||
-      name === "employee directory" ||
-      name === "ai insights"
+      name === "employee directory"
     );
   };
 
+  const isLeadershipItem = (item: { name?: string; href?: string }) => {
+    const name = (item.name || "").trim().toLowerCase();
+    const href = canonicalizePath(item.href || "");
+    return href === "ai-insights" || name === "ai insights";
+  };
+
   const isItemVisible = (item: any) => {
+    if (isDirectoryItem(item) && !can("directory.view")) return false;
     if (!leadership && isLeadershipItem(item)) return false;
     if (item.roles && !hasRole(item.roles)) return false;
     if (item.permission && !can(item.permission as any)) return false;
@@ -211,7 +216,7 @@ export function useNavigationStructure() {
               canonicalTail === "employee-directory" ||
               normalizedName === "employee directory"
             ) {
-              if (!leadership) return null;
+              if (!can("directory.view")) return null;
               href = "/employees";
             }
 
@@ -269,6 +274,7 @@ export function useNavigationStructure() {
           ...customItems,
           ...fileItems,
         ].filter((item) => {
+          if (isDirectoryItem(item) && !can("directory.view")) return false;
           if (!leadership && isLeadershipItem(item)) return false;
           const canonical = canonicalizePath(item.href);
           if (!canonical) {

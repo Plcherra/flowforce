@@ -3933,6 +3933,7 @@
     "invitesFailed": "{{count}} falharam",
     "loadingEmployeeDirectory": "Carregando o diretório de funcionários...",
     "managersOnly": "Esta página é para responsáveis e níveis acima.",
+    "directoryHidden": "O acesso ao diretório está desativado para esta conta.",
     "roleFallback": "papel",
     "accessAct": "Agir",
     "accessNone": "Nenhum",

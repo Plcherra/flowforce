@@ -3933,6 +3933,7 @@
     "invitesFailed": "{{count}} failed",
     "loadingEmployeeDirectory": "Loading employee directory...",
     "managersOnly": "This page is for managers and above.",
+    "directoryHidden": "Directory access is off for this account.",
     "roleFallback": "role",
     "accessAct": "Act",
     "accessNone": "None",

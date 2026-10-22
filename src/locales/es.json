@@ -3933,6 +3933,7 @@
     "invitesFailed": "{{count}} fallidas",
     "loadingEmployeeDirectory": "Cargando el directorio de empleados...",
     "managersOnly": "Esta página es para responsables y niveles superiores.",
+    "directoryHidden": "El acceso al directorio está desactivado para esta cuenta.",
     "roleFallback": "rol",
     "accessAct": "Actuar",
     "accessNone": "Ninguno",
