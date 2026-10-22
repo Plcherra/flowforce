@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Layers } from "lucide-react";
@@ -20,6 +21,7 @@ const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
 ];
 
 export function OperationsHub() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-muted/30 py-6">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 lg:px-0">
@@ -32,18 +34,17 @@ export function OperationsHub() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5" /> FlowForce
+                <Sparkles className="h-3.5 w-3.5" /> {t("shell.flowforce")}
               </div>
-              <h1 className="mt-2 text-3xl font-semibold">Operations Hub</h1>
+              <h1 className="mt-2 text-3xl font-semibold">{t("operations.operationsHub")}</h1>
               <p className="text-sm text-muted-foreground">
-                KPIs, live issues, and automation drafts in one minimalist
-                board.
+                {t("operations.kpisLiveIssuesAndAutomationDraftsInOneMinimalistBoard")}
               </p>
             </div>
             <div className="hidden text-sm text-muted-foreground lg:flex lg:flex-col lg:items-end">
-              <span>Updated every 15 min</span>
+              <span>{t("operations.updatedEvery15Min")}</span>
               <span className="text-xs uppercase tracking-[0.4em]">
-                FlowForce Operations
+                {t("operations.flowforceOperations")}
               </span>
             </div>
           </div>
@@ -74,9 +75,9 @@ export function OperationsHub() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-                    Ops Widgets
+                    {t("operations.opsWidgets")}
                   </p>
-                  <h3 className="text-lg font-semibold">Realtime Signals</h3>
+                  <h3 className="text-lg font-semibold">{t("operations.realtimeSignals")}</h3>
                 </div>
                 <Layers className="h-5 w-5 text-muted-foreground" />
               </div>

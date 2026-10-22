@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AlertTriangle, Stethoscope, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,7 @@ export function DiagnosePanel({
   stageDescription,
   onRecommend,
 }: DiagnosePanelProps) {
+  const { t } = useTranslation();
   const { companyId, range } = useIdeaContext();
   const aiInsightsQuery = useAIKPIInsights(companyId, {
     start: range.start,
@@ -42,16 +44,16 @@ export function DiagnosePanel({
       <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Stethoscope className="h-4 w-4 text-primary" aria-hidden="true" />
-          Diagnose
+          {t("operations.diagnose")}
         </div>
         <h2 className="text-xl font-semibold text-foreground">
-          Investigate root causes
+          {t("operations.investigateRootCauses")}
         </h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div>
           <Button onClick={onRecommend} disabled={diagnostics.loading}>
             <Target className="mr-2 h-4 w-4" aria-hidden="true" />
-            Recommend actions
+            {t("operations.recommendActions")}
           </Button>
         </div>
       </header>
@@ -59,7 +61,7 @@ export function DiagnosePanel({
       {diagnostics.error ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Diagnostics failed</AlertTitle>
+          <AlertTitle>{t("operations.diagnosticsFailed")}</AlertTitle>
           <AlertDescription>{diagnostics.error.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -83,19 +85,20 @@ export function DiagnosePanel({
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-                Top anomalies
+                {t("operations.topAnomalies")}
               </CardTitle>
               <CardDescription>
-                KPIs with the largest deviations.
+                {t("operations.kpisWithTheLargestDeviations")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {anomalies.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No significant anomalies detected.
+                  {t("operations.noSignificantAnomaliesDetected")}
                 </p>
               ) : (
-                anomalies.slice(0, 6).map((anomaly) => (
+                anomalies.slice(0, 6).map((anomaly) => {
+                  return (
                   <div
                     key={anomaly.id}
                     className="rounded-md border border-border/60 bg-muted/20 p-3"
@@ -104,15 +107,16 @@ export function DiagnosePanel({
                       {anomaly.label}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Change:{" "}
+                      {t("operations.change2")}{" "}
                       {anomaly.delta ? anomaly.delta.toFixed(2) : "0.00"}{" "}
                       {anomaly.unit ?? ""}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Trend: {anomaly.trend ?? "unknown"}
+                      {t("operations.trend")} {anomaly.trend ?? "unknown"}
                     </div>
                   </div>
-                ))
+                );
+                })
               )}
             </CardContent>
           </Card>
@@ -120,17 +124,18 @@ export function DiagnosePanel({
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-                AI intelligence
+                {t("operations.aiIntelligence")}
               </CardTitle>
-              <CardDescription>Probable causes and narratives.</CardDescription>
+              <CardDescription>{t("operations.probableCausesAndNarratives")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {diagnostics.data.causes.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Run diagnostics to surface potential causes.
+                  {t("operations.runDiagnosticsToSurfacePotentialCauses")}
                 </p>
               ) : (
-                diagnostics.data.causes.map((cause) => (
+                diagnostics.data.causes.map((cause) => {
+                  return (
                   <div
                     key={cause.id}
                     className="rounded-md border border-border/40 bg-muted/20 p-3"
@@ -139,10 +144,11 @@ export function DiagnosePanel({
                       {cause.summary}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Confidence {Math.round(cause.confidence * 100)}%
+                      {t("analytics.confidence")} {Math.round(cause.confidence * 100)}%
                     </div>
                   </div>
-                ))
+                );
+                })
               )}
             </CardContent>
           </Card>
@@ -150,10 +156,10 @@ export function DiagnosePanel({
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-                AI KPI insights
+                {t("operations.aiKpiInsights")}
               </CardTitle>
               <CardDescription>
-                Signals surfaced by GPT co-pilot.
+                {t("operations.signalsSurfacedByGptCoPilot")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -161,12 +167,11 @@ export function DiagnosePanel({
                 <AiInsightsSkeleton />
               ) : aiInsightsQuery.isError ? (
                 <p className="text-sm text-muted-foreground">
-                  Unable to load AI KPI insights right now. Try again after
-                  refreshing.
+                  {t("operations.unableToLoadAiKpiInsightsRightNowTryAgainAfterRefreshing")}
                 </p>
               ) : aiInsights.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  AI KPI insights will populate once diagnostic runs complete.
+                  {t("operations.aiKpiInsightsWillPopulateOnceDiagnosticRunsComplete")}
                 </p>
               ) : (
                 aiInsights.map((entry) => {
@@ -183,13 +188,13 @@ export function DiagnosePanel({
                         {entry.metric}
                       </div>
                       <div className="text-xs text-muted-foreground capitalize">
-                        Signal: {entry.signal}
+                        {t("operations.signal")} {entry.signal}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Change: {formattedChange}%
+                        {t("operations.change2")} {formattedChange}%
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Impact: {entry.impact}
+                        {t("operations.impact")} {entry.impact}
                       </div>
                     </div>
                   );

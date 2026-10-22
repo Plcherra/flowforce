@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarClock, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import { logger } from "@/utils/logger";
 const generationWindow = buildGenerationWindow(6);
 
 export function RecurringOperationsCalendarPanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [generating, setGenerating] = useState(false);
@@ -132,35 +134,36 @@ export function RecurringOperationsCalendarPanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Ops Calendar
+            {t("operations.opsCalendar")}
           </p>
-          <h3 className="text-lg font-semibold">Recurring Workload</h3>
+          <h3 className="text-lg font-semibold">{t("operations.recurringWorkload")}</h3>
         </div>
         <Badge variant="outline" className="w-fit gap-1">
           <CalendarClock className="h-3.5 w-3.5" />
-          7 days
+          {t("analytics.7Days")}
         </Badge>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-2xl bg-muted/50 p-3">
           <p className="text-lg font-semibold">{workloadSummary.totalRuns}</p>
-          <p className="text-muted-foreground">Runs</p>
+          <p className="text-muted-foreground">{t("operations.runs2")}</p>
         </div>
         <div className="rounded-2xl bg-muted/50 p-3">
           <p className="text-lg font-semibold">{workloadSummary.overdueRuns}</p>
-          <p className="text-muted-foreground">Overdue</p>
+          <p className="text-muted-foreground">{t("shell.overdue")}</p>
         </div>
         <div className="rounded-2xl bg-muted/50 p-3">
           <p className="text-lg font-semibold">
             {workloadSummary.pendingReviews}
           </p>
-          <p className="text-muted-foreground">Review</p>
+          <p className="text-muted-foreground">{t("inventory.review")}</p>
         </div>
       </div>
 
       <div className="mt-4 space-y-2">
-        {recurringOperationsSchedulePresets.map((preset) => (
+        {recurringOperationsSchedulePresets.map((preset) => {
+          return (
           <div key={preset.id} className="rounded-2xl border bg-muted/30 p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -172,41 +175,44 @@ export function RecurringOperationsCalendarPanel() {
               <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Due {preset.dueTime} · {preset.managerWorkloadSignal}
+              {t("inventory.due")} {preset.dueTime} · {preset.managerWorkloadSignal}
             </p>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       <div className="mt-4 space-y-2">
         {loadingWorkload ? (
           <div className="flex items-center gap-2 rounded-2xl border p-3 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Loading workload
+            {t("operations.loadingWorkload")}
           </div>
         ) : workloadRows.length ? (
-          workloadRows.slice(0, 4).map((row) => (
+          workloadRows.slice(0, 4).map((row) => {
+            return (
             <div
               key={row.workload_date}
               className="flex items-center justify-between rounded-2xl border p-3 text-sm"
             >
               <span className="font-medium">{row.workload_date}</span>
               <span className="text-muted-foreground">
-                {row.total_runs} runs · {row.pending_review_runs} reviews
+                {row.total_runs} {t("operations.runs3")} {row.pending_review_runs} {t("operations.reviews")}
               </span>
             </div>
-          ))
+          );
+          })
         ) : (
           <div className="rounded-2xl border p-3 text-sm text-muted-foreground">
-            No generated workflow runs in the next seven days.
+            {t("operations.noGeneratedWorkflowRunsInTheNextSevenDays")}
           </div>
         )}
       </div>
 
       {lastRun ? (
         <div className="mt-3 rounded-2xl border border-success/40 bg-success-muted p-3 text-sm text-success">
-          Generated {lastRun.runs_created ?? 0} runs and{" "}
-          {lastRun.step_runs_created ?? 0} step runs.
+          {t("analytics.generated")} {lastRun.runs_created ?? 0} {t("operations.runsAnd")}{" "}
+          {lastRun.step_runs_created ?? 0} {t("operations.stepRuns")}
         </div>
       ) : null}
 
@@ -217,10 +223,10 @@ export function RecurringOperationsCalendarPanel() {
           ) : (
             <RefreshCw className="mr-2 h-4 w-4" />
           )}
-          Generate
+          {t("operations.generate")}
         </Button>
         <Button variant="outline" onClick={loadWorkload} disabled={!companyId}>
-          Refresh
+          {t("common.refresh")}
         </Button>
       </div>
     </div>

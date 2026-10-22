@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Archive,
@@ -24,6 +25,7 @@ import {
 import { logger } from "@/utils/logger";
 
 export function CompliancePacksPanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [packs, setPacks] = useState<CompliancePackDashboardRow[]>([]);
@@ -166,28 +168,28 @@ export function CompliancePacksPanel() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Compliance
+            {t("operations.compliance")}
           </p>
-          <h3 className="text-lg font-semibold">Compliance Packs</h3>
+          <h3 className="text-lg font-semibold">{t("operations.compliancePacks")}</h3>
         </div>
         <Badge variant="outline" className="gap-1">
           <ShieldCheck className="h-3.5 w-3.5" />
-          {summary.averageScore} score
+          {summary.averageScore} {t("operations.score")}
         </Badge>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{summary.installed}</p>
-          <p className="text-muted-foreground">packs</p>
+          <p className="text-muted-foreground">{t("operations.packs")}</p>
         </div>
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{summary.overdueRuns}</p>
-          <p className="text-muted-foreground">overdue</p>
+          <p className="text-muted-foreground">{t("analytics.overdue")}</p>
         </div>
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{summary.openExceptions}</p>
-          <p className="text-muted-foreground">exceptions</p>
+          <p className="text-muted-foreground">{t("operations.exceptions")}</p>
         </div>
       </div>
 
@@ -206,7 +208,7 @@ export function CompliancePacksPanel() {
                 <div>
                   <p className="text-sm font-semibold">{pack.label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {Math.round(pack.retentionDays / 365)} year retention
+                    {Math.round(pack.retentionDays / 365)} {t("operations.yearRetention")}
                   </p>
                 </div>
                 <Badge variant={installed ? "default" : "outline"}>
@@ -221,8 +223,7 @@ export function CompliancePacksPanel() {
                     className="h-2"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {installedPack.completed_runs}/{installedPack.total_runs} runs
-                    complete, {installedPack.evidence_count} evidence records
+                    {installedPack.completed_runs}/{installedPack.total_runs} {t("operations.runsComplete")} {installedPack.evidence_count} {t("operations.evidenceRecords")}
                   </p>
                 </div>
               )}
@@ -253,7 +254,7 @@ export function CompliancePacksPanel() {
       {loading && (
         <div className="mt-4 flex items-center gap-2 rounded-2xl border p-3 text-sm text-muted-foreground">
           <Archive className="h-4 w-4" />
-          Loading compliance packs
+          {t("operations.loadingCompliancePacks")}
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   ResponsiveContainer,
   BarChart,
@@ -22,10 +23,9 @@ interface KPIChartsProps {
   title?: string;
 }
 
-export function KPICharts({
-  data,
-  title = "KPI Insights Overview",
-}: KPIChartsProps) {
+export function KPICharts({ data, title }: KPIChartsProps) {
+  const { t } = useTranslation();
+  const chartTitle = title ?? t("operations.kpiInsightsOverview");
   const metrics =
     data?.map((datum) => ({
       name: datum.metric ?? datum.name ?? datum.label ?? "Metric",
@@ -39,8 +39,10 @@ export function KPICharts({
   if (!data?.length) {
     return (
       <EmptyState
-        title="No KPI insights found."
-        description="Connect data sources or adjust the selected time range to generate performance signals."
+        title={t("operations.noKpiInsightsFound")}
+        description={t(
+          "operations.connectDataSourcesOrAdjustTheSelectedTimeRangeToGeneratePerformanceSignals",
+        )}
       />
     );
   }
@@ -49,7 +51,7 @@ export function KPICharts({
     <Card className="border-border/60 bg-background/80 shadow-sm">
       <CardHeader>
         <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-          {title}
+          {chartTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[300px]">
@@ -64,7 +66,7 @@ export function KPICharts({
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            Metrics available, but all values are zero for the selected range.
+            {t("operations.metricsAvailableButAllValuesAreZeroForTheSelectedRange")}
           </div>
         )}
       </CardContent>

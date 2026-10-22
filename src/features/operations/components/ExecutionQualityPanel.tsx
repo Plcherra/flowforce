@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BarChart3, GraduationCap, Loader2, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import {
 import { logger } from "@/utils/logger";
 
 export function ExecutionQualityPanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [summary, setSummary] = useState<ExecutionQualitySummaryRow | null>(null);
   const [trends, setTrends] = useState<ExecutionQualityDailyRow[]>([]);
@@ -96,9 +98,9 @@ export function ExecutionQualityPanel() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Quality
+            {t("operations.quality")}
           </p>
-          <h3 className="text-lg font-semibold">Execution Quality</h3>
+          <h3 className="text-lg font-semibold">{t("operations.executionQuality")}</h3>
         </div>
         <Badge
           variant={
@@ -115,23 +117,23 @@ export function ExecutionQualityPanel() {
       <div className="mt-4">
         <Progress value={quality.execution_quality_score ?? 0} className="h-2" />
         <p className="mt-2 text-xs text-muted-foreground">
-          {quality.completed_runs}/{quality.total_runs} runs completed,{" "}
-          {quality.exception_runs} with exceptions
+          {quality.completed_runs}/{quality.total_runs} {t("operations.runsCompleted")}{" "}
+          {quality.exception_runs} {t("operations.withExceptions")}
         </p>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{quality.completion_rate ?? 0}%</p>
-          <p className="text-muted-foreground">complete</p>
+          <p className="text-muted-foreground">{t("certifications.complete")}</p>
         </div>
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{quality.overdue_runs}</p>
-          <p className="text-muted-foreground">overdue</p>
+          <p className="text-muted-foreground">{t("analytics.overdue")}</p>
         </div>
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{quality.repeat_failure_runs}</p>
-          <p className="text-muted-foreground">repeat</p>
+          <p className="text-muted-foreground">{t("operations.repeat")}</p>
         </div>
       </div>
 
@@ -139,18 +141,19 @@ export function ExecutionQualityPanel() {
         {loading && (
           <div className="flex items-center gap-2 rounded-2xl border p-3 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Loading quality analytics
+            {t("operations.loadingQualityAnalytics")}
           </div>
         )}
 
         {!loading && sortedTrends.length === 0 && (
           <p className="rounded-2xl border p-3 text-sm text-muted-foreground">
-            No workflow history is ready for quality analytics.
+            {t("operations.noWorkflowHistoryIsReadyForQualityAnalytics")}
           </p>
         )}
 
         {!loading &&
-          sortedTrends.slice(0, 3).map((trend) => (
+          sortedTrends.slice(0, 3).map((trend) => {
+            return (
             <div
               key={[
                 trend.metric_date,
@@ -176,11 +179,12 @@ export function ExecutionQualityPanel() {
               </div>
               <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                 <BarChart3 className="h-3.5 w-3.5" />
-                {trend.completed_runs}/{trend.total_runs} complete ·{" "}
-                {trend.exception_runs} exception runs
+                {trend.completed_runs}/{trend.total_runs} {t("operations.complete")}{" "}
+                {trend.exception_runs} {t("operations.exceptionRuns")}
               </p>
             </div>
-          ))}
+          );
+          })}
 
         {!loading && sortedCoaching.slice(0, 2).map((row) => (
           <div key={row.user_id} className="rounded-2xl border p-3">

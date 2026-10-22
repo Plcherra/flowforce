@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -47,6 +48,7 @@ const STAGES: { id: IdeaStage; label: string; description: string }[] = [
 ];
 
 export function IdeaLayout() {
+  const { t } = useTranslation();
   const { stage, setStage, range, companyId, activeCycleId, setActiveCycleId } =
     useIdeaContext();
 
@@ -91,7 +93,7 @@ export function IdeaLayout() {
         {insightsError ? (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Unable to load KPI insights</AlertTitle>
+            <AlertTitle>{t("operations.unableToLoadKpiInsights")}</AlertTitle>
             <AlertDescription>{insightsError.message}</AlertDescription>
           </Alert>
         ) : null}

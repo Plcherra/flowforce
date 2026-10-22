@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { CalendarRange, RefreshCcw } from "lucide-react";
@@ -28,6 +29,7 @@ export function IDEAHeader({
   stageLoading = false,
   children,
 }: IDEAHeaderProps) {
+  const { t } = useTranslation();
   const { range, setRange } = useIdeaContext();
 
   const activePreset = useMemo<string>(() => {
@@ -54,11 +56,10 @@ export function IDEAHeader({
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
-            Operations Intelligence (IDEA)
+            {t("operations.operationsIntelligenceIdea")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Navigate the Identify → Diagnose → Execute → Assess loop to drive
-            continuous improvement.
+            {t("operations.navigateTheIdentifyDiagnoseExecuteAssessLoopToDriveContinuousImprovement")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -74,12 +75,12 @@ export function IDEAHeader({
             onValueChange={handlePresetChange}
           >
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Custom range" />
+              <SelectValue placeholder={t("operations.customRange")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="last-7-days">Last 7 days</SelectItem>
-              <SelectItem value="last-14-days">Last 14 days</SelectItem>
-              <SelectItem value="last-30-days">Last 30 days</SelectItem>
+              <SelectItem value="last-7-days">{t("analytics.last7Days")}</SelectItem>
+              <SelectItem value="last-14-days">{t("operations.last14Days")}</SelectItem>
+              <SelectItem value="last-30-days">{t("analytics.last30Days")}</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -89,7 +90,7 @@ export function IDEAHeader({
             disabled={stageLoading}
           >
             <RefreshCcw className="mr-2 h-4 w-4" />
-            Refresh
+            {t("common.refresh")}
           </Button>
         </div>
       </div>

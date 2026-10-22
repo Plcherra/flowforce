@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { LineChart, RefreshCcw, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function AssessPanel({
   stageDescription,
   onRestart,
 }: AssessPanelProps) {
+  const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
   const assessmentsData = Array.isArray(assessments.data)
     ? assessments.data
@@ -60,27 +62,27 @@ export function AssessPanel({
       <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <LineChart className="h-4 w-4 text-success" aria-hidden="true" />
-          Assess
+          {t("operations.assess")}
         </div>
         <h2 className="text-xl font-semibold text-foreground">
-          Track impact and iterate
+          {t("operations.trackImpactAndIterate")}
         </h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleSave} disabled={assessments.loading || saving}>
             <RefreshCcw className="mr-2 h-4 w-4" aria-hidden="true" />
-            Save assessment
+            {t("operations.saveAssessment")}
           </Button>
           <Button variant="outline" onClick={onRestart}>
             <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
-            Start new cycle
+            {t("operations.startNewCycle")}
           </Button>
         </div>
       </header>
 
       {assessments.error ? (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load assessment analytics</AlertTitle>
+          <AlertTitle>{t("operations.unableToLoadAssessmentAnalytics")}</AlertTitle>
           <AlertDescription>{assessments.error.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -104,7 +106,8 @@ export function AssessPanel({
         </div>
       ) : hasAssessments ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          {assessmentsData.map((metric) => (
+          {assessmentsData.map((metric) => {
+            return (
             <Card
               key={metric.metric}
               className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30"
@@ -114,7 +117,7 @@ export function AssessPanel({
                   {metric.metric}
                 </CardTitle>
                 <CardDescription>
-                  ROI{" "}
+                  {t("operations.roi")}{" "}
                   {metric.roi === null
                     ? "n/a"
                     : `${metric.roi > 0 ? "+" : ""}${metric.roi.toFixed(1)}%`}
@@ -122,21 +125,21 @@ export function AssessPanel({
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span>Before</span>
+                  <span>{t("operations.before")}</span>
                   <span>
                     {metric.before.toLocaleString()}
                     {metric.unit ? ` ${metric.unit}` : ""}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span>After</span>
+                  <span>{t("operations.after")}</span>
                   <span>
                     {metric.after.toLocaleString()}
                     {metric.unit ? ` ${metric.unit}` : ""}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-foreground">
-                  <span>Change</span>
+                  <span>{t("operations.change")}</span>
                   <span
                     className={
                       metric.delta >= 0 ? "text-success" : "text-accent-foreground"
@@ -149,24 +152,24 @@ export function AssessPanel({
                 </div>
               </CardContent>
             </Card>
-          ))}
+          );
+          })}
         </div>
       ) : (
         <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
           <CardHeader>
             <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-              Awaiting actions
+              {t("operations.awaitingActions")}
             </CardTitle>
             <CardDescription>
-              Complete execute-stage work to unlock assessment insights.
+              {t("operations.completeExecuteStageWorkToUnlockAssessmentInsights")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>
-              Once actions are executed, IDEA will compare before and after KPIs
-              to calculate lift and return on impact.
+              {t("operations.onceActionsAreExecutedIdeaWillCompareBeforeAndAfterKpisToCalculateLiftAndReturnOnImpact")}
             </p>
-            <p>Current KPI coverage: {insights.length} tracked metrics.</p>
+            <p>{t("operations.currentKpiCoverage")} {insights.length} {t("operations.trackedMetrics")}</p>
           </CardContent>
         </Card>
       )}

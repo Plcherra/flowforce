@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import IdeaMetricCard from "../IdeaMetricCard";
 
 const meta = {
@@ -7,10 +8,12 @@ const meta = {
 
 export default meta;
 
-export const DefaultMetricCard = () => (
+export const DefaultMetricCard = () => {
+  const { t } = useTranslation();
+  return (
   <div className="max-w-sm">
     <IdeaMetricCard
-      title="Net Sales"
+      title={t("operations.netSales")}
       value={152430}
       delta={12.5}
       unit="USD"
@@ -18,3 +21,4 @@ export const DefaultMetricCard = () => (
     />
   </div>
 );
+};

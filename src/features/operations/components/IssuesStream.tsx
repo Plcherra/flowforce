@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -63,6 +64,7 @@ type IssueRpcResult = {
 };
 
 export function IssuesStream() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [issues, setIssues] = useState<IncidentIssueQueueRow[]>([]);
@@ -236,7 +238,7 @@ export function IssuesStream() {
     if (sortedIssues.length === 0) {
       return (
         <p className="text-sm text-muted-foreground">
-          No live issues. Enjoy the calm.
+          {t("operations.noLiveIssuesEnjoyTheCalm")}
         </p>
       );
     }
@@ -285,7 +287,7 @@ export function IssuesStream() {
                   </Badge>
                   {issue.task_id && (
                     <Badge variant="secondary">
-                      Task {issue.task_status ?? "open"}
+                      {t("forms.task")} {issue.task_status ?? "open"}
                     </Badge>
                   )}
                   {issue.workflow_name && (
@@ -299,7 +301,7 @@ export function IssuesStream() {
                 {!closed && (
                   <Textarea
                     className="mt-3 min-h-[64px]"
-                    placeholder="Resolution notes"
+                    placeholder={t("operations.resolutionNotes")}
                     value={resolutionNotes[issue.issueid] ?? ""}
                     onChange={(event) =>
                       setResolutionNotes((current) => ({
@@ -322,7 +324,7 @@ export function IssuesStream() {
                     ) : (
                       <AlertCircle className="mr-2 h-3.5 w-3.5" />
                     )}
-                    Ack
+                    {t("operations.ack")}
                   </Button>
                   <Button
                     size="sm"
@@ -331,7 +333,7 @@ export function IssuesStream() {
                     onClick={() => void updateIssueStatus(issue, "in_progress")}
                   >
                     <PlayCircle className="mr-2 h-3.5 w-3.5" />
-                    Start
+                    {t("schedule.start")}
                   </Button>
                   <Button
                     size="sm"
@@ -339,7 +341,7 @@ export function IssuesStream() {
                     onClick={() => void updateIssueStatus(issue, "resolved")}
                   >
                     <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                    Resolve
+                    {t("operations.resolve")}
                   </Button>
                   <Button
                     size="sm"
@@ -347,7 +349,7 @@ export function IssuesStream() {
                     onClick={() => void openAutomationDrawer(issue)}
                   >
                     <Bot className="mr-2 h-3.5 w-3.5" />
-                    AI
+                    {t("operations.ai")}
                   </Button>
                 </div>
               </motion.div>
@@ -364,14 +366,14 @@ export function IssuesStream() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Issues
+            {t("operations.issues")}
           </p>
-          <h3 className="text-lg font-semibold">Operational Issues</h3>
+          <h3 className="text-lg font-semibold">{t("operations.operationalIssues")}</h3>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline">{summary.open} open</Badge>
-          <Badge variant="outline">{summary.overdue} overdue</Badge>
-          <Badge variant="outline">{summary.critical} critical</Badge>
+          <Badge variant="outline">{summary.open} {t("operations.open")}</Badge>
+          <Badge variant="outline">{summary.overdue} {t("analytics.overdue")}</Badge>
+          <Badge variant="outline">{summary.critical} {t("operations.critical")}</Badge>
         </div>
       </div>
       <div className="mt-4">{issueList}</div>
@@ -388,14 +390,14 @@ export function IssuesStream() {
       >
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Automation suggestion</DrawerTitle>
+            <DrawerTitle>{t("operations.automationSuggestion")}</DrawerTitle>
             <DrawerDescription>
               FlowForce will design a sequence tailored to &quot;
               {drawerIssue?.title ?? "this issue"}&quot;.
             </DrawerDescription>
           </DrawerHeader>
           <div className="space-y-3 px-4 pb-4 text-sm">
-            {drawerLoading && <p>Generating automation script...</p>}
+            {drawerLoading && <p>{t("operations.generatingAutomationScript")}</p>}
             {drawerError && <p className="text-destructive">{drawerError}</p>}
             {drawerResult && (
               <pre className="max-h-64 overflow-auto rounded-xl bg-muted/60 p-3 text-xs">
@@ -405,7 +407,7 @@ export function IssuesStream() {
           </div>
           <DrawerFooter>
             <DrawerClose asChild>
-              <Button variant="ghost">Close</Button>
+              <Button variant="ghost">{t("common.close")}</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>

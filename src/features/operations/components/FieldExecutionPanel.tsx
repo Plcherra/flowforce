@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -26,6 +27,7 @@ import {
 import { logger } from "@/utils/logger";
 
 export function FieldExecutionPanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [runs, setRuns] = useState<FieldExecutionRunRow[]>([]);
@@ -232,13 +234,13 @@ export function FieldExecutionPanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Field Execution
+            {t("operations.fieldExecution")}
           </p>
-          <h3 className="text-lg font-semibold">Mobile Run Console</h3>
+          <h3 className="text-lg font-semibold">{t("operations.mobileRunConsole")}</h3>
         </div>
         <Badge variant="outline" className="w-fit gap-1">
           <ClipboardCheck className="h-3.5 w-3.5" />
-          {sortedRuns.length} runs
+          {sortedRuns.length} {t("operations.runs")}
         </Badge>
       </div>
 
@@ -266,7 +268,7 @@ export function FieldExecutionPanel() {
       {loading ? (
         <div className="mt-4 flex items-center gap-2 rounded-2xl border p-3 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Loading execution queue
+          {t("operations.loadingExecutionQueue")}
         </div>
       ) : selectedRun && summary ? (
         <div className="mt-4 space-y-4">
@@ -277,8 +279,8 @@ export function FieldExecutionPanel() {
                   {selectedRun.workflow_name ?? "Workflow run"}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Due {selectedRun.due_at?.slice(0, 16) ?? "not scheduled"} ·{" "}
-                  {summary.remaining} remaining
+                  {t("inventory.due")} {selectedRun.due_at?.slice(0, 16) ?? "not scheduled"} ·{" "}
+                  {summary.remaining} {t("operations.remaining")}
                 </p>
               </div>
               <Badge variant="secondary">{selectedRun.run_status}</Badge>
@@ -291,7 +293,7 @@ export function FieldExecutionPanel() {
                 disabled={acting !== null || !companyId}
               >
                 <Play className="mr-2 h-3.5 w-3.5" />
-                Start
+                {t("schedule.start")}
               </Button>
               <Button
                 size="sm"
@@ -300,13 +302,14 @@ export function FieldExecutionPanel() {
                 disabled={acting !== null || !companyId}
               >
                 <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                Complete run
+                {t("operations.completeRun")}
               </Button>
             </div>
           </div>
 
           <div className="space-y-3">
-            {steps.map((step) => (
+            {steps.map((step) => {
+              return (
               <div
                 key={step.step_instanceid}
                 className="rounded-2xl border bg-background p-3"
@@ -342,7 +345,7 @@ export function FieldExecutionPanel() {
 
                 <Textarea
                   className="mt-2 min-h-[64px]"
-                  placeholder="Failure reason for escalation"
+                  placeholder={t("operations.failureReasonForEscalation")}
                   value={failureDrafts[step.step_instanceid] ?? ""}
                   onChange={(event) =>
                     setFailureDrafts((current) => ({
@@ -360,7 +363,7 @@ export function FieldExecutionPanel() {
                     disabled={acting !== null || !companyId}
                   >
                     <Save className="mr-2 h-3.5 w-3.5" />
-                    Draft
+                    {t("tasks.draft")}
                   </Button>
                   <Button
                     size="sm"
@@ -368,7 +371,7 @@ export function FieldExecutionPanel() {
                     disabled={acting !== null || !companyId}
                   >
                     <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-                    Complete
+                    {t("inventory.complete")}
                   </Button>
                   <Button
                     size="sm"
@@ -377,16 +380,17 @@ export function FieldExecutionPanel() {
                     disabled={acting !== null || !companyId}
                   >
                     <AlertTriangle className="mr-2 h-3.5 w-3.5" />
-                    Fail
+                    {t("operations.fail")}
                   </Button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       ) : (
         <div className="mt-4 rounded-2xl border p-3 text-sm text-muted-foreground">
-          No assigned workflow runs are ready for field execution.
+          {t("operations.noAssignedWorkflowRunsAreReadyForFieldExecution")}
         </div>
       )}
     </div>

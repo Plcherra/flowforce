@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ interface KpiCardProps {
 }
 
 export function KpiCard({ kpiKey }: KpiCardProps) {
+  const { t } = useTranslation();
   const snapshot = useMockKpiSnapshot(kpiKey);
   const [open, setOpen] = useState(false);
 
@@ -117,20 +119,20 @@ export function KpiCard({ kpiKey }: KpiCardProps) {
               size="sm"
               className="ml-3 whitespace-nowrap"
             >
-              Fix automatically
+              {t("operations.fixAutomatically")}
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
-              <DrawerTitle>Suggest automation</DrawerTitle>
+              <DrawerTitle>{t("operations.suggestAutomation")}</DrawerTitle>
               <DrawerDescription>
-                FlowForce will design a script to stabilize{" "}
+                {t("operations.flowforceWillDesignAScriptToStabilize")}{" "}
                 {snapshot.label.toLowerCase()}.
               </DrawerDescription>
             </DrawerHeader>
             <div className="space-y-3 px-4 pb-4 text-sm">
               <p>
-                Trend:{" "}
+                {t("operations.trend")}{" "}
                 <span
                   className={
                     snapshot.severity ? severityVariants[snapshot.severity] : ""
@@ -140,17 +142,15 @@ export function KpiCard({ kpiKey }: KpiCardProps) {
                 </span>
               </p>
               <p>
-                The automation generator will craft a task sequence,
-                notifications, and database inserts conforming to the
-                Auto-Script DSL. You will be able to review before execution.
+                {t("operations.theAutomationGeneratorWillCraftATaskSequenceNotificationsAndDatabaseInsertsConformingToTheAutoScriptDslYouWillBeAbleToReviewBeforeExecution")}
               </p>
             </div>
             <DrawerFooter>
               <Button onClick={() => setOpen(false)}>
-                Generate suggestion
+                {t("operations.generateSuggestion")}
               </Button>
               <DrawerClose asChild>
-                <Button variant="ghost">Cancel</Button>
+                <Button variant="ghost">{t("common.cancel")}</Button>
               </DrawerClose>
             </DrawerFooter>
           </DrawerContent>

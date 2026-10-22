@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BellRing, Bot, Loader2, RefreshCw, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import {
 import { logger } from "@/utils/logger";
 
 export function WorkflowAutomationHooksPanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [hooks, setHooks] = useState<WorkflowAutomationHookRow[]>([]);
@@ -103,9 +105,9 @@ export function WorkflowAutomationHooksPanel() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Hooks
+            {t("operations.hooks")}
           </p>
-          <h3 className="text-lg font-semibold">Workflow Automation</h3>
+          <h3 className="text-lg font-semibold">{t("operations.workflowAutomation")}</h3>
         </div>
         <Badge variant={summary.failed > 0 ? "destructive" : "outline"}>
           <Bot className="mr-1 h-3.5 w-3.5" />
@@ -116,15 +118,15 @@ export function WorkflowAutomationHooksPanel() {
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{summary.tasks}</p>
-          <p className="text-muted-foreground">tasks</p>
+          <p className="text-muted-foreground">{t("operations.tasks")}</p>
         </div>
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{summary.inventoryReviews}</p>
-          <p className="text-muted-foreground">reviews</p>
+          <p className="text-muted-foreground">{t("operations.reviews")}</p>
         </div>
         <div className="rounded-2xl border p-2">
           <p className="font-semibold">{summary.notifications}</p>
-          <p className="text-muted-foreground">alerts</p>
+          <p className="text-muted-foreground">{t("operations.alerts")}</p>
         </div>
       </div>
 
@@ -140,20 +142,20 @@ export function WorkflowAutomationHooksPanel() {
         ) : (
           <RefreshCw className="mr-2 h-3.5 w-3.5" />
         )}
-        Check overdue critical runs
+        {t("operations.checkOverdueCriticalRuns")}
       </Button>
 
       <div className="mt-4 space-y-2">
         {loading && (
           <div className="flex items-center gap-2 rounded-2xl border p-3 text-sm text-muted-foreground">
             <BellRing className="h-4 w-4" />
-            Loading automation hooks
+            {t("operations.loadingAutomationHooks")}
           </div>
         )}
 
         {!loading && sortedHooks.length === 0 && (
           <p className="rounded-2xl border p-3 text-sm text-muted-foreground">
-            No workflow hooks have fired yet.
+            {t("operations.noWorkflowHooksHaveFiredYet")}
           </p>
         )}
 

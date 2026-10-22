@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { CheckCircle2, ClipboardList, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function ExecutePanel({
   stageDescription,
   onStageComplete,
 }: ExecutePanelProps) {
+  const { t } = useTranslation();
   const { companyId, range, activeCycleId, setActiveCycleId } =
     useIdeaContext();
   const [creatingCycle, setCreatingCycle] = useState(false);
@@ -212,29 +214,28 @@ export function ExecutePanel({
             className="h-4 w-4 text-secondary"
             aria-hidden="true"
           />
-          Execute
+          {t("operations.execute")}
         </div>
         <h2 className="text-xl font-semibold text-foreground">
-          Launch improvement playbooks
+          {t("operations.launchImprovementPlaybooks")}
         </h2>
         <p className="text-sm text-muted-foreground">{stageDescription}</p>
         <div className="flex flex-wrap gap-2">
           <Button onClick={handleCompleteStage} disabled={!activeCycleId}>
             <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
-            Review results
+            {t("operations.reviewResults")}
           </Button>
         </div>
         {!activeCycleId ? (
           <p className="text-sm text-muted-foreground">
-            Run diagnostics and start a cycle before reviewing or executing
-            actions.
+            {t("operations.runDiagnosticsAndStartACycleBeforeReviewingOrExecutingActions")}
           </p>
         ) : null}
       </header>
 
       {cycleError ? (
         <Alert variant="destructive">
-          <AlertTitle>Action orchestration failed</AlertTitle>
+          <AlertTitle>{t("operations.actionOrchestrationFailed")}</AlertTitle>
           <AlertDescription>{cycleError.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -258,19 +259,20 @@ export function ExecutePanel({
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase text-muted-foreground">
-                Pending queue
+                {t("operations.pendingQueue")}
               </CardTitle>
               <CardDescription>
-                Confirm or automate AI suggested plays.
+                {t("operations.confirmOrAutomateAiSuggestedPlays")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {pendingActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No pending actions. Add recommendations to the queue.
+                  {t("operations.noPendingActionsAddRecommendationsToTheQueue")}
                 </p>
               ) : (
-                pendingActions.map((action) => (
+                pendingActions.map((action) => {
+                  return (
                   <div
                     key={action.id}
                     className="rounded-md border border-border/50 bg-muted/20 p-3"
@@ -281,7 +283,7 @@ export function ExecutePanel({
                           {action.action_name}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Created {new Date(action.created_at).toLocaleString()}
+                          {t("forms.created")} {new Date(action.created_at).toLocaleString()}
                         </div>
                       </div>
                       <Badge variant="outline" className="text-xs capitalize">
@@ -295,11 +297,12 @@ export function ExecutePanel({
                         disabled={disableActionControls}
                       >
                         <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
-                        Execute now
+                        {t("operations.executeNow")}
                       </Button>
                     </div>
                   </div>
-                ))
+                );
+                })
               )}
             </CardContent>
           </Card>
@@ -307,16 +310,16 @@ export function ExecutePanel({
           <Card className="border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-                Recommended plays
+                {t("operations.recommendedPlays")}
               </CardTitle>
               <CardDescription>
-                Queue AI recommendations for execution.
+                {t("operations.queueAiRecommendationsForExecution")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {recommendations.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No AI recommendations yet. Diagnose to generate actions.
+                  {t("operations.noAiRecommendationsYetDiagnoseToGenerateActions")}
                 </p>
               ) : (
                 recommendations.map((recommendation) => {
@@ -347,7 +350,7 @@ export function ExecutePanel({
                             recommendation.id,
                           )}
                         >
-                          Queue action
+                          {t("operations.queueAction")}
                         </Button>
                         <Button
                           size="sm"
@@ -358,7 +361,7 @@ export function ExecutePanel({
                           )}
                         >
                           <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
-                          Execute now
+                          {t("operations.executeNow")}
                         </Button>
                       </div>
                     </div>
@@ -367,7 +370,7 @@ export function ExecutePanel({
               )}
               {disableActionControls ? (
                 <p className="text-sm text-muted-foreground">
-                  Queueing actions is available once a cycle is active.
+                  {t("operations.queueingActionsIsAvailableOnceACycleIsActive")}
                 </p>
               ) : null}
             </CardContent>
@@ -377,14 +380,15 @@ export function ExecutePanel({
             <Card className="lg:col-span-2 border-border/60 bg-background/70 shadow-sm dark:border-border/40 dark:bg-background/30">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold uppercase text-muted-foreground">
-                  Executed plays
+                  {t("operations.executedPlays")}
                 </CardTitle>
                 <CardDescription>
-                  Completed actions with recorded outcomes.
+                  {t("operations.completedActionsWithRecordedOutcomes")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {executedActions.map((action) => (
+                {executedActions.map((action) => {
+                  return (
                   <div
                     key={action.id}
                     className="rounded-md border border-border/40 bg-muted/20 p-3"
@@ -395,7 +399,7 @@ export function ExecutePanel({
                           {action.action_name}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Executed{" "}
+                          {t("operations.executed")}{" "}
                           {new Date(action.created_at).toLocaleString()}
                         </div>
                       </div>
@@ -409,7 +413,8 @@ export function ExecutePanel({
                       </div>
                     ) : null}
                   </div>
-                ))}
+                );
+                })}
               </CardContent>
             </Card>
           ) : null}

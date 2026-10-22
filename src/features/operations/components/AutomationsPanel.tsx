@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ const sectionTitleClass =
   "text-xs uppercase tracking-[0.4em] text-muted-foreground";
 
 export function AutomationsPanel() {
+  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [dispatching, setDispatching] = useState<string | null>(null);
@@ -80,10 +82,10 @@ export function AutomationsPanel() {
     <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className={sectionTitleClass}>Automations</p>
-          <h3 className="text-lg font-semibold">Playbooks</h3>
+          <p className={sectionTitleClass}>{t("operations.automations")}</p>
+          <h3 className="text-lg font-semibold">{t("operations.playbooks")}</h3>
         </div>
-        <Badge variant="outline">FlowForce</Badge>
+        <Badge variant="outline">{t("shell.flowforce")}</Badge>
       </div>
 
       {loading ? (
@@ -98,12 +100,12 @@ export function AutomationsPanel() {
       ) : (
         <div className="mt-4 space-y-5">
           <section>
-            <p className={sectionTitleClass}>Active Automations</p>
+            <p className={sectionTitleClass}>{t("operations.activeAutomations")}</p>
             <ScrollArea className="mt-2 max-h-60 pr-2">
               <div className="space-y-3">
                 {activeAutomations.length === 0 && (
                   <p className="text-sm text-muted-foreground">
-                    None running right now.
+                    {t("operations.noneRunningRightNow")}
                   </p>
                 )}
                 {activeAutomations.map((automation) => (
@@ -127,12 +129,12 @@ export function AutomationsPanel() {
           </section>
 
           <section>
-            <p className={sectionTitleClass}>Suggested Automations</p>
+            <p className={sectionTitleClass}>{t("operations.suggestedAutomations")}</p>
             <ScrollArea className="mt-2 max-h-60 pr-2">
               <div className="space-y-3">
                 {proposedAutomations.length === 0 && (
                   <p className="text-sm text-muted-foreground">
-                    No pending drafts.
+                    {t("operations.noPendingDrafts")}
                   </p>
                 )}
                 {proposedAutomations.map((automation) => (

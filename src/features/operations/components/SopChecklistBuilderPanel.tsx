@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { CheckCircle2, ClipboardList, Loader2, Wand2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ type CreatedTemplate = {
 };
 
 export function SopChecklistBuilderPanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [selectedId, setSelectedId] = useState(
@@ -95,13 +97,13 @@ export function SopChecklistBuilderPanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            SOP Builder
+            {t("operations.sopBuilder")}
           </p>
-          <h3 className="text-lg font-semibold">Checklist Templates</h3>
+          <h3 className="text-lg font-semibold">{t("operations.checklistTemplates")}</h3>
         </div>
         <Badge variant="outline" className="w-fit gap-1">
           <ClipboardList className="h-3.5 w-3.5" />
-          {selectedTemplate.steps.length} steps
+          {selectedTemplate.steps.length} {t("operations.steps")}
         </Badge>
       </div>
 
@@ -128,7 +130,7 @@ export function SopChecklistBuilderPanel() {
             </p>
           </div>
           {selectedTemplate.reviewRequired ? (
-            <Badge variant="secondary">Review</Badge>
+            <Badge variant="secondary">{t("inventory.review")}</Badge>
           ) : null}
         </div>
 
@@ -158,7 +160,7 @@ export function SopChecklistBuilderPanel() {
 
       {createdTemplate ? (
         <div className="mt-3 rounded-2xl border border-success/40 bg-success-muted p-3 text-sm text-success">
-          Published workflow with {createdTemplate.step_count ?? 0} steps.
+          {t("operations.publishedWorkflowWith")} {createdTemplate.step_count ?? 0} {t("operations.steps2")}
         </div>
       ) : null}
 
@@ -169,7 +171,7 @@ export function SopChecklistBuilderPanel() {
           ) : (
             <Wand2 className="mr-2 h-4 w-4" />
           )}
-          Publish
+          {t("tasks.publish")}
         </Button>
       </div>
     </div>

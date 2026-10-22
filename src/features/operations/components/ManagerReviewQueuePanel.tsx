@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -23,6 +24,7 @@ import {
 import { logger } from "@/utils/logger";
 
 export function ManagerReviewQueuePanel() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [rows, setRows] = useState<ManagerReviewQueueRow[]>([]);
@@ -132,28 +134,28 @@ export function ManagerReviewQueuePanel() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Manager Review
+            {t("operations.managerReview")}
           </p>
-          <h3 className="text-lg font-semibold">Workflow Queue</h3>
+          <h3 className="text-lg font-semibold">{t("operations.workflowQueue")}</h3>
         </div>
         <Badge variant="outline" className="w-fit gap-1">
           <MessageSquareWarning className="h-3.5 w-3.5" />
-          {summary.total} open
+          {summary.total} {t("operations.open")}
         </Badge>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-2xl bg-muted/50 p-3">
           <p className="text-lg font-semibold">{summary.severe}</p>
-          <p className="text-muted-foreground">Severe</p>
+          <p className="text-muted-foreground">{t("operations.severe")}</p>
         </div>
         <div className="rounded-2xl bg-muted/50 p-3">
           <p className="text-lg font-semibold">{summary.exceptions}</p>
-          <p className="text-muted-foreground">Exceptions</p>
+          <p className="text-muted-foreground">{t("operations.exceptions2")}</p>
         </div>
         <div className="rounded-2xl bg-muted/50 p-3">
           <p className="text-lg font-semibold">{summary.overdue}</p>
-          <p className="text-muted-foreground">Overdue</p>
+          <p className="text-muted-foreground">{t("shell.overdue")}</p>
         </div>
       </div>
 
@@ -161,10 +163,11 @@ export function ManagerReviewQueuePanel() {
         {loading ? (
           <div className="flex items-center gap-2 rounded-2xl border p-3 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Loading review queue
+            {t("operations.loadingReviewQueue")}
           </div>
         ) : sortedRows.length ? (
-          sortedRows.slice(0, 4).map((row) => (
+          sortedRows.slice(0, 4).map((row) => {
+            return (
             <div
               key={row.workflow_instanceid}
               className="rounded-2xl border bg-muted/30 p-3"
@@ -176,7 +179,7 @@ export function ManagerReviewQueuePanel() {
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {row.scheduled_for ?? "Unscheduled"} ·{" "}
-                    {row.open_exception_count} exceptions
+                    {row.open_exception_count} {t("operations.exceptions")}
                   </p>
                 </div>
                 <Badge variant="secondary" className="shrink-0">
@@ -214,7 +217,7 @@ export function ManagerReviewQueuePanel() {
                   disabled={reviewingId !== null}
                 >
                   <AlertTriangle className="mr-2 h-3.5 w-3.5" />
-                  Needs changes
+                  {t("operations.needsChanges")}
                 </Button>
                 <Button
                   size="sm"
@@ -225,21 +228,22 @@ export function ManagerReviewQueuePanel() {
                   disabled={reviewingId !== null}
                 >
                   <ThumbsDown className="mr-2 h-3.5 w-3.5" />
-                  Reject
+                  {t("schedule.reject")}
                 </Button>
               </div>
             </div>
-          ))
+          );
+          })
         ) : (
           <div className="rounded-2xl border p-3 text-sm text-muted-foreground">
-            No workflow runs need manager review.
+            {t("operations.noWorkflowRunsNeedManagerReview")}
           </div>
         )}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <Button variant="outline" onClick={loadQueue} disabled={!companyId}>
-          Refresh
+          {t("common.refresh")}
         </Button>
       </div>
     </div>

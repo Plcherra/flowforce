@@ -311,7 +311,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 15 — Operations strings
 
-- [ ] Move Operations chrome into the six locales.
+- [x] Move Operations chrome into the six locales.
 
 Rules:
 
@@ -979,6 +979,22 @@ Phone steps for Pedro:
 1. Sign in at https://www.flowforce.uk and open Analytics (`/app/analytics`) and Reports (`/app/reports`).
 2. Set your language to Español on Settings, then Region. Reload. The page title, tabs, filters, and empty states should be in Spanish. A report name someone typed stays as they wrote it.
 3. Open Reports & Intelligence → AI Insights. The header, forecast table, and recommendation labels should follow the language. The status line should say the insights are up to date, or that they are updating. Switch to Deutsch and check the same screens.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 15 Operations strings
+
+Shipped: Operations chrome under `src/features/operations` now uses `useTranslation` and the `operations` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed stay on those keys. Issue titles that people type stay as stored text. A default chart title that the checker read as a `title` attribute now follows the viewer's language. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3165 keys for each locale and `hard-coded strings 1758`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/operations`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Operations (`/app/operations`).
+2. Set your language to Français on Settings, then Region. Reload. The hub, IDEA steps (Identify, Diagnose, Execute, Assess), and empty states should be in French. An issue title someone typed stays as they wrote it.
+3. Open a compliance pack or the review queue if you can. Loading lines and buttons should follow the language. Switch to Español and check the same screens.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
