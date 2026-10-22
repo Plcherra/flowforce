@@ -764,6 +764,88 @@ export type Database = {
         }
         Relationships: []
       }
+      company_policies: {
+        Row: {
+          cap_month: number | null
+          cap_week: number | null
+          cap_year: number | null
+          company_id: string
+          created_at: string
+          eligible_weekdays: number[]
+          id: string
+          name: string
+          notice_days: number
+          type: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          cap_month?: number | null
+          cap_week?: number | null
+          cap_year?: number | null
+          company_id: string
+          created_at?: string
+          eligible_weekdays?: number[]
+          id?: string
+          name: string
+          notice_days?: number
+          type: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cap_month?: number | null
+          cap_week?: number | null
+          cap_year?: number | null
+          company_id?: string
+          created_at?: string
+          eligible_weekdays?: number[]
+          id?: string
+          name?: string
+          notice_days?: number
+          type?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_policy_assignments: {
+        Row: {
+          id: string
+          policy_id: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          id?: string
+          policy_id: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          id?: string
+          policy_id?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_policy_assignments_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "company_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_roles: {
         Row: {
           color: string | null
@@ -6039,54 +6121,6 @@ export type Database = {
           timestamp?: string | null
           updated_at?: string | null
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      time_off_policies: {
-        Row: {
-          applies_to_role_ids: string[]
-          applies_to_user_ids: string[]
-          cap_month: number | null
-          cap_week: number | null
-          cap_year: number | null
-          company_id: string
-          created_at: string
-          eligible_weekdays: number[]
-          id: string
-          name: string
-          notice_days: number
-          unit: string
-          updated_at: string
-        }
-        Insert: {
-          applies_to_role_ids?: string[]
-          applies_to_user_ids?: string[]
-          cap_month?: number | null
-          cap_week?: number | null
-          cap_year?: number | null
-          company_id: string
-          created_at?: string
-          eligible_weekdays?: number[]
-          id?: string
-          name: string
-          notice_days?: number
-          unit: string
-          updated_at?: string
-        }
-        Update: {
-          applies_to_role_ids?: string[]
-          applies_to_user_ids?: string[]
-          cap_month?: number | null
-          cap_week?: number | null
-          cap_year?: number | null
-          company_id?: string
-          created_at?: string
-          eligible_weekdays?: number[]
-          id?: string
-          name?: string
-          notice_days?: number
-          unit?: string
-          updated_at?: string
         }
         Relationships: []
       }

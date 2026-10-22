@@ -5,6 +5,7 @@ import {
   Calendar,
   Clock,
   MoreHorizontal,
+  ScrollText,
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +94,15 @@ export function ScheduleMoreMenu({
               <DropdownMenuItem onClick={() => onAction?.("staff")}>
                 <Users className="mr-2 h-4 w-4" />
                 {t("schedule.teamRequests")}
+              </DropdownMenuItem>
+            ) : null}
+            {role.canApproveRequests ? (
+              <DropdownMenuItem
+                data-testid="schedule-company-policies"
+                onClick={() => onAction?.("company-policies")}
+              >
+                <ScrollText className="mr-2 h-4 w-4" />
+                {t("schedule.companyPolicies")}
               </DropdownMenuItem>
             ) : null}
             {access.canManageTeamAvailability ? (

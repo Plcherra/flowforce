@@ -128,7 +128,7 @@ Prove: `src/features/availability/utils/sendAvailabilityAction.test.ts` returns 
 
 ### Phase 4 — Company policies
 
-- [ ] Give policies one Company policies area, with a type and assignments, and migrate `time_off_policies` into the time-off type.
+- [x] Give policies one Company policies area, with a type and assignments, and migrate `time_off_policies` into the time-off type.
 
 Rules:
 
@@ -329,5 +329,21 @@ Phone steps for Pedro:
 4. Send availability. The week already being posted does not change. The grid is stored on the next window named in the helper.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 4 Company policies
+
+Shipped: Company policies opens from the schedule menu, separate from Team requests. The area is visible to someone who can approve time off. With no policies, it shows "No company policies yet." and Create policy. Create policy saves a time-off policy, and the type list includes Availability and Scheduling rules. Availability and scheduling rules save a name, the type, and assignments. Time off keeps unit, caps, weekdays, notice, and assignments. An empty assignment list is stored as one company assignment. `time_off_policies` rows were copied into `company_policies` with the same ids and type `time_off`, then the old table was dropped. `time_off_requests.policy_id` points at `company_policies`. A person inherits a policy when an assignment matches their user id, role, product level, or store, or when the policy has a company assignment. Team requests no longer contains the policy form. The signed-in person's balance lines stay on that screen when a policy applies. My time off shows a Company policies link for someone who can manage policies.
+
+Proven: `src/features/scheduling/utils/companyPolicy.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. A `time_off_policies` row maps to a `time_off` company policy with the same id and caps. Role ids become `role` assignments, user ids become `user` assignments, and empty roles and people become one `company` assignment. A new user matches a role assignment, a level assignment, a store assignment, and a company assignment, and does not match an unrelated user assignment. The generated `company_policies` type includes `type`. The generated assignment type includes `target_type`. Before the drop, `time_off_policies` had 0 rows and the copied `company_policies` rows for those ids were 0. After the drop, `time_off_policies` is gone, `company_policies` has 0 rows, and `time_off_requests.policy_id` references `company_policies`. Remote migration history has 94 versions and matches the local filenames, including `20261022172555`. `npm run check:i18n` printed 4621 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as someone who can approve time off. Open Schedule, then the more menu. Company policies is its own item. It does not open Team requests.
+2. With no policies, the screen says "No company policies yet." and shows Create policy. The type list is Time off, Availability, and Scheduling rules.
+3. Create a time-off policy. Weekend example and Weekday example still fill the time-off fields. Leave assignments empty and save. That policy applies to everyone, including a new user, with no extra assignment row.
+4. Open My time off. The Company policies link is there. Sign in as someone who cannot approve time off. That link is hidden, and Company policies is not in the schedule menu. Team requests no longer shows the policy form.
+
+Blockers: none. Migration `supabase/migrations/20261022172555_company_policies.sql` is applied. Copy row count was 0 source rows and 0 copied rows.
 
 Questions: none.

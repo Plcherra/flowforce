@@ -4,14 +4,15 @@
  */
 
 import type { LucideIcon } from "lucide-react";
-import { ArrowRightLeft, Calendar, Clock, Settings, Users } from "lucide-react";
+import { ArrowRightLeft, Calendar, Clock, ScrollText, Settings, Users } from "lucide-react";
 
 export type SchedulingPanelId =
   | "staff"
   | "availability"
   | "workflow"
   | "timeoff"
-  | "swaps";
+  | "swaps"
+  | "company-policies";
 
 export interface SchedulingPanel {
   id: SchedulingPanelId;
@@ -50,6 +51,12 @@ export const SCHEDULING_PANELS: SchedulingPanel[] = [
     label: "Reminders",
     icon: Settings,
     description: "Personal reminders and reminders assigned to the team",
+  },
+  {
+    id: "company-policies",
+    label: "Company policies",
+    icon: ScrollText,
+    description: "Time off, availability, and scheduling rules",
   },
 ];
 

@@ -5,6 +5,7 @@ import {
   Bell,
   Calendar,
   Clock,
+  ScrollText,
   Users,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,6 +52,11 @@ const TimeOffRequestPanel = lazy(() =>
     default: m.TimeOffRequestPanel,
   })),
 );
+const TimeOffPoliciesSection = lazy(() =>
+  import("./TimeOffPoliciesSection").then((m) => ({
+    default: m.TimeOffPoliciesSection,
+  })),
+);
 
 const panelIcons: Record<SchedulingPanelId, typeof Users> = {
   staff: Users,
@@ -58,6 +64,7 @@ const panelIcons: Record<SchedulingPanelId, typeof Users> = {
   timeoff: Calendar,
   swaps: ArrowRightLeft,
   workflow: Bell,
+  "company-policies": ScrollText,
 };
 
 interface SchedulingPanelSheetProps {
@@ -102,7 +109,9 @@ export function SchedulingPanelSheet({
             ? "My swaps"
             : panel === "workflow"
               ? "Reminders"
-              : (panelMeta?.label ?? "Scheduling");
+              : panel === "company-policies"
+                ? t("schedule.companyPolicies")
+                : (panelMeta?.label ?? "Scheduling");
   const panelDescription =
     panel === "availability"
       ? availabilityIsTeam
@@ -114,11 +123,13 @@ export function SchedulingPanelSheet({
           ? "Request time away for yourself. Approving other people is under Team requests."
           : panel === "swaps"
             ? "Swaps you asked for or that were offered to you."
-            : panel === "workflow"
+              : panel === "workflow"
               ? role.canManageSchedule
                 ? "Keep your own reminders, and assign ones that staff can see but cannot change."
                 : "Reminders you control for yourself. Assigned reminders stay as a manager set them."
-              : panelMeta?.description;
+              : panel === "company-policies"
+                ? t("schedule.companyPoliciesDescription")
+                : panelMeta?.description;
 
   return (
     <Sheet open={panel !== null} onOpenChange={(open) => !open && onClose()}>
@@ -239,6 +250,20 @@ export function SchedulingPanelSheet({
           <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
             <ScheduleRemindersPanel canAssignReminders={role.canManageSchedule} />
           </Suspense>
+        ) : null}
+
+        {panel === "company-policies" ? (
+          role.canApproveRequests ? (
+            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+              <TimeOffPoliciesSection canManage />
+            </Suspense>
+          ) : (
+            <FeatureUnavailableCard
+              icon={ScrollText}
+              title={t("schedule.companyPoliciesAreLimited")}
+              description={t("schedule.companyPoliciesNeedApprovalAccess")}
+            />
+          )
         ) : null}
       </SheetContent>
     </Sheet>

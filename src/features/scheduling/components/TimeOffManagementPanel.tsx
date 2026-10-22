@@ -26,7 +26,15 @@ import {
   timeLeftLabel,
   timeOffStatusLabel,
 } from "@/features/scheduling/utils/timeOffRequestDetail";
-import { TimeOffPoliciesSection } from "@/features/scheduling/components/TimeOffPoliciesSection";
+import {
+  usePolicySubject,
+  useTimeOffPolicies,
+} from "@/features/scheduling/hooks/useTimeOffPolicies";
+import { timeOffPolicyForSubject } from "@/features/scheduling/utils/companyPolicy";
+import {
+  balanceLabel,
+  remainingBalances,
+} from "@/features/scheduling/utils/timeOffPolicy";
 import { useTimeOffTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
 import { TimeOffCopy } from "@/features/scheduling/components/TimeOffCopy";
 
@@ -75,6 +83,8 @@ export function TimeOffManagementPanel({
   const { toast } = useToast();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? null;
+  const { companyPolicies } = useTimeOffPolicies(companyId);
+  const subject = usePolicySubject();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -189,22 +199,39 @@ export function TimeOffManagementPanel({
   const pendingCount = filteredTimeOffRequests.filter(
     (request) => timeOffStatusLabel(request.status) === "pending",
   ).length;
+  const ownBalances = remainingBalances({
+    policies: companyPolicies.flatMap((policy) => {
+      const match = timeOffPolicyForSubject(policy, subject);
+      return match ? [match] : [];
+    }),
+    usage: timeOffRequests
+      .filter((request) => !request.user_id || request.user_id === profile?.id)
+      .map((request) => ({
+        policyId: request.policy_id ?? "",
+        startDate: request.start_date,
+        endDate: request.end_date,
+        status: request.status ?? "",
+      })),
+    userId: profile?.id,
+    roleId: profile?.roleId,
+    asOf: new Date().toISOString().slice(0, 10),
+  });
 
   return (
     <div className="space-y-4">
-      <TimeOffPoliciesSection
-        companyId={companyId}
-        canManage={canApprove}
-        userId={profile?.id ?? null}
-        roleId={profile?.roleId ?? null}
-        requests={timeOffRequests.map((request) => ({
-          policyId: request.policy_id ?? "",
-          startDate: request.start_date,
-          endDate: request.end_date,
-          status: request.status ?? "",
-          userId: request.user_id,
-        }))}
-      />
+      {ownBalances.length > 0 ? (
+        <div className="space-y-1">
+          {ownBalances.map((balance) => (
+            <p
+              key={balance.policy.id}
+              className="text-sm text-muted-foreground"
+              data-testid="time-off-balance"
+            >
+              {balance.policy.name}: {balanceLabel(balance)}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground">

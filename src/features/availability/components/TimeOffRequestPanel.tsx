@@ -45,10 +45,15 @@ import {
 } from "@/components/ui/select";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useProfile } from "@/hooks/useProfile";
-import { useTimeOffPolicies } from "@/features/scheduling/hooks/useTimeOffPolicies";
+import { useSearchParams } from "@/lib/router-adapter";
+import { useSchedulingRole } from "@/features/scheduling/hooks/useSchedulingRole";
+import {
+  usePolicySubject,
+  useTimeOffPolicies,
+} from "@/features/scheduling/hooks/useTimeOffPolicies";
+import { timeOffPolicyForSubject } from "@/features/scheduling/utils/companyPolicy";
 import {
   balanceLabel,
-  policyAppliesTo,
   remainingBalances,
 } from "@/features/scheduling/utils/timeOffPolicy";
 import type { AvailabilityGrid } from "@/features/availability/components/AvailabilityRequestForm";
@@ -121,9 +126,12 @@ export function TimeOffRequestPanel({
   const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
+  const schedulingRole = useSchedulingRole();
+  const [, setSearchParams] = useSearchParams();
   const { timeOff, shifts, loading, isFallbackData, mutations } =
     useScheduling();
-  const { policies } = useTimeOffPolicies(profile?.companyId ?? null);
+  const { companyPolicies } = useTimeOffPolicies(profile?.companyId ?? null);
+  const baseSubject = usePolicySubject();
 
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [requestPolicyId, setRequestPolicyId] = useState("");
@@ -179,10 +187,14 @@ export function TimeOffRequestPanel({
 
   const applicablePolicies = useMemo(
     () =>
-      policies.filter((policy) =>
-        policyAppliesTo(policy, employeeId, profile?.roleId),
-      ),
-    [employeeId, policies, profile?.roleId],
+      companyPolicies.flatMap((policy) => {
+        const match = timeOffPolicyForSubject(policy, {
+          ...baseSubject,
+          userId: employeeId ?? baseSubject.userId,
+        });
+        return match ? [match] : [];
+      }),
+    [baseSubject, companyPolicies, employeeId],
   );
   const policyBalances = useMemo(
     () =>
@@ -361,7 +373,25 @@ export function TimeOffRequestPanel({
             <CalendarCheck className="h-5 w-5 text-primary" />{t("availability.timeOffCoverage")}</CardTitle>
           <CardDescription>{t("availability.trackRequestsBalancesAndHowTimeOffOverlaps")}</CardDescription>
         </div>
-        <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+        <div className="flex items-center gap-2">
+          {schedulingRole.canApproveRequests ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              data-testid="company-policies-link"
+              onClick={() =>
+                setSearchParams((current) => {
+                  const next = new URLSearchParams(current);
+                  next.set("panel", "company-policies");
+                  return next;
+                })
+              }
+            >
+              {t("schedule.companyPolicies")}
+            </Button>
+          ) : null}
+          <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" disabled={!employeeId || loading}>{t("schedule.requestTimeOff")}</Button>
           </DialogTrigger>
@@ -452,6 +482,7 @@ export function TimeOffRequestPanel({
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
