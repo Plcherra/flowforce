@@ -98,7 +98,7 @@ Prove: Unit test `src/lib/theme/themeTokens.test.ts` reads `app/globals.css` and
 
 ### Phase 2 — Settings switch
 
-- [ ] Add the three-way switch and apply it before paint.
+- [x] Add the three-way switch and apply it before paint.
 
 Rules:
 
@@ -453,6 +453,24 @@ Proven: Unit test `src/lib/theme/themeTokens.test.ts` reads `app/globals.css` an
 
 Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk. The signed-in blue should look the same as before this deploy. This phase does not add a switch yet.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 2 Settings switch
+
+Shipped: General settings has FlowForce, Light, and Dark at the top. Choosing one calls `applyTheme` and writes `flowforce-theme` in this browser. It does not save the company, and it stays usable when the company fields are read-only. An inline script in `app/layout.tsx` applies the stored value before paint. A missing or unknown value is FlowForce, with no `dark` class. Dark sets `dark` and `data-theme="dark"`. The viewport color is `#ffffff` for FlowForce and Light, and `#020817` for Dark. The marketing footer moon button is gone.
+
+Proven: Unit test `src/lib/theme/applyTheme.test.ts` covers the three names, an unknown value, and the class list each one sets. Run with jiti the same way as `scripts/test-tasks-page.mjs`. It passed. `npm run typecheck:app` and `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Settings, then General.
+2. The theme switch sits at the top: FlowForce, Light, and Dark. It is there even if the company fields are read-only.
+3. Tap Dark. The app should turn dark immediately, and Save changes should stay disabled if nothing else was edited.
+4. Reload. Dark should still be on.
+5. Tap FlowForce, reload, and confirm the signed-in blue is back and the page is not using the dark class.
+6. Open the public marketing page. The footer should have no moon button and no Dark mode label.
 
 Blockers: none. No migration.
 

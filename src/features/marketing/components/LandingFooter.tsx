@@ -7,8 +7,6 @@ import {
   Linkedin,
   Youtube,
   Github,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "@/lib/router-adapter";
@@ -16,7 +14,6 @@ import { useTranslation } from "react-i18next";
 
 export function LandingFooter() {
   const [email, setEmail] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
   const { t } = useTranslation();
 
   const handleNewsletterSignup = (e: React.FormEvent) => {
@@ -71,21 +68,6 @@ export function LandingFooter() {
             <p className="text-gray-400 mb-6 max-w-md">
               {t("landing.subtitle")}
             </p>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDarkMode(!darkMode)}
-                className="text-gray-400 hover:text-white"
-              >
-                {darkMode ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </Button>
-              <span className="text-sm text-gray-500">Dark mode</span>
-            </div>
           </div>
 
           {/* Product Column */}

@@ -15,7 +15,14 @@ import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
 import { LogoEditorDialog } from "./LogoEditorDialog";
 import { setCompanyBrand } from "@/lib/theme/companyTheme";
-import { useState } from "react";
+import {
+  applyTheme,
+  resolveThemeName,
+  THEME_NAMES,
+  THEME_STORAGE_KEY,
+  type ThemeName,
+} from "@/lib/theme/applyTheme";
+import { useEffect, useState } from "react";
 import { useGeneralSettings } from "../hooks/useGeneralSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 
@@ -39,6 +46,17 @@ export function GeneralSettingsPanel() {
   } = useGeneralSettings(system);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSource, setEditorSource] = useState<string | null>(null);
+  const [theme, setTheme] = useState<ThemeName>("flowforce");
+
+  useEffect(() => {
+    setTheme(resolveThemeName(localStorage.getItem(THEME_STORAGE_KEY)));
+  }, []);
+
+  const chooseTheme = (next: ThemeName) => {
+    setTheme(next);
+    applyTheme(next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  };
 
   if (globalError) {
     return <ErrorState message={globalError.message} />;
@@ -74,6 +92,34 @@ export function GeneralSettingsPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label id="theme-switch-label">Theme</Label>
+          <p className="text-xs text-muted-foreground">
+            Stored in this browser. It does not change the company.
+          </p>
+          <div
+            role="radiogroup"
+            aria-labelledby="theme-switch-label"
+            className="flex flex-wrap gap-2"
+          >
+            {THEME_NAMES.map((name) => (
+              <Button
+                key={name}
+                type="button"
+                role="radio"
+                aria-checked={theme === name}
+                variant={theme === name ? "default" : "outline"}
+                onClick={() => chooseTheme(name)}
+              >
+                {name === "flowforce"
+                  ? "FlowForce"
+                  : name === "light"
+                    ? "Light"
+                    : "Dark"}
+              </Button>
+            ))}
+          </div>
+        </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="companyName">Company name</Label>
