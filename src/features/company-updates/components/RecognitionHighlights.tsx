@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ export function RecognitionHighlights({
   highlights,
   error,
 }: RecognitionHighlightsProps) {
+  const { t } = useTranslation();
   const computedHighlights = useMemo(
     () => highlights.slice(0, 3),
     [highlights],
@@ -55,13 +57,12 @@ export function RecognitionHighlights({
       <Card className="border-destructive/20 bg-destructive/5">
         <CardHeader>
           <h2 className="text-base font-semibold text-destructive">
-            Recognitions unavailable
-          </h2>
+            {t("updates.recognitionsUnavailable")} </h2>
           <p className="text-sm text-muted-foreground">{error}</p>
         </CardHeader>
         <CardContent>
           <Button variant="link" className="px-0" asChild>
-            <Link to="/recognition">Open recognition history</Link>
+            <Link to="/recognition">{t("updates.openRecognitionHistory")}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -72,14 +73,13 @@ export function RecognitionHighlights({
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <h2 className="text-base font-semibold">No recognitions yet</h2>
+          <h2 className="text-base font-semibold">{t("updates.noRecognitionsYet")}</h2>
           <p className="text-sm text-muted-foreground">
-            Celebrate your team&apos;s wins by sharing the first recognition.
-          </p>
+            {t("updates.celebrateYourTeamSWinsBySharingTheFirstRecognition")} </p>
         </CardHeader>
         <CardContent>
           <Button variant="outline" asChild>
-            <Link to="/recognition">Create recognition</Link>
+            <Link to="/recognition">{t("updates.createRecognition")}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -91,17 +91,14 @@ export function RecognitionHighlights({
       <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-base font-semibold flex items-center gap-2">
-            Team Recognition Highlights
-            <Badge className="bg-primary text-primary-foreground">
-              {computedHighlights.length} new
-            </Badge>
+            {t("updates.teamRecognitionHighlights")} <Badge className="bg-primary text-primary-foreground">
+              {computedHighlights.length} {t("updates.new")} </Badge>
           </h2>
           <p className="text-sm text-muted-foreground">
-            Recent celebrations from goals, tasks, and training accomplishments.
-          </p>
+            {t("updates.recentCelebrationsFromGoalsTasksAndTrainingAccomplishments")} </p>
         </div>
         <Button variant="link" className="px-0" asChild>
-          <Link to="/recognition">View all recognitions</Link>
+          <Link to="/recognition">{t("updates.viewAllRecognitions")}</Link>
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">

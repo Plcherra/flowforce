@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-states";
@@ -32,6 +33,7 @@ function Sparkline({ data }: { data: number[] }) {
 }
 
 export default function EngagementOverview() {
+  const { t } = useTranslation();
   const { updates, isLoading, analyze, isAnalyzing } = useEngagementAnalytics();
 
   useEffect(() => {
@@ -62,8 +64,7 @@ export default function EngagementOverview() {
   if (!updates.length) {
     return (
       <Card className="p-6 text-sm text-muted-foreground">
-        AI engagement analytics will appear after your team publishes updates.
-      </Card>
+        {t("updates.aiEngagementAnalyticsWillAppearAfterYourTeamPublishesUpdates")} </Card>
     );
   }
 
@@ -94,11 +95,11 @@ export default function EngagementOverview() {
           </p>
 
           <div className="text-xs text-muted-foreground flex flex-wrap gap-4">
-            <span>Engagement: {update.engagementScore ?? "–"}</span>
-            <span>Sentiment: {update.sentimentScore ?? "–"}</span>
-            <span>Likes: {update.metrics.likes}</span>
-            <span>Comments: {update.metrics.comments}</span>
-            <span>Views: {update.metrics.views}</span>
+            <span>{t("updates.engagement")} {update.engagementScore ?? "–"}</span>
+            <span>{t("updates.sentiment")} {update.sentimentScore ?? "–"}</span>
+            <span>{t("updates.likes")} {update.metrics.likes}</span>
+            <span>{t("updates.comments")} {update.metrics.comments}</span>
+            <span>{t("updates.views")} {update.metrics.views}</span>
           </div>
         </Card>
       ))}

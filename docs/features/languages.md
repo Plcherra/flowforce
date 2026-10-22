@@ -236,7 +236,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 10 — Company update strings
 
-- [ ] Move Company update chrome into the six locales.
+- [x] Move Company update chrome into the six locales.
 
 Rules:
 
@@ -898,6 +898,23 @@ Phone steps for Pedro:
 3. Open a form and walk the steps. Next, Back, and Submit should follow the language. A question someone wrote stays as they wrote it.
 4. Switch to Deutsch and open the form builder if you can edit forms. Required, Placeholder, and Add field should be German.
 5. Switch back to English. The form labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 10 Company update strings
+
+Shipped: Company update chrome under `src/features/company-updates` now uses `useTranslation` and the `updates` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Cancel, Back, Delete, and Step, stay on those keys. Update titles, bodies, and comments stay as stored text. Table names `company_updates` and `recognitions`, and the color hints `#3b82f6` and `#1e40af`, stay identical in every locale. A return type the checker read as text was given a name so the words stayed code. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 1853 keys for each locale and `hard-coded strings 3238`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/company-updates`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Company updates.
+2. Set your language to Español on Settings, then Region. Reload. The page title, filters, and create button should be in Spanish. An update title or body someone typed stays as they wrote it.
+3. Open the create wizard if you can. The steps, preview, and publish settings should follow the language. Switch to Deutsch and check the same wizard.
+4. If the feed is empty because tables are missing, the setup message should follow the language, and the table names `company_updates` and `recognitions` should stay in English.
+5. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
 

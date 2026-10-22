@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -164,20 +165,19 @@ function WizardTopBar({
   statusLabel: string;
   progress: number;
 }) {
+  const { t } = useTranslation();
   return (
     <header className="shrink-0 border-b border-border/80 bg-background/95 px-4 py-3 pr-12 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <DialogTitle className="text-lg font-semibold">
-            Create company update
-          </DialogTitle>
+            {t("updates.createCompanyUpdate")} </DialogTitle>
           <DialogDescription className="mt-0.5 text-sm text-muted-foreground">
-            Write it, check the preview, then publish.
-          </DialogDescription>
+            {t("updates.writeItCheckThePreviewThenPublish")} </DialogDescription>
         </div>
         <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
           <Badge variant="outline" className="border-dashed">
-            Step {currentStepIndex + 1} of {totalSteps}
+            {t("forms.step")} {currentStepIndex + 1} {t("updates.of")} {totalSteps}
           </Badge>
           <span>{statusLabel}</span>
         </div>
@@ -256,6 +256,7 @@ function WizardFooter({
   onNext: () => void;
   onSubmit: () => void;
 }) {
+  const { t } = useTranslation();
   const isLastStep = currentIndex === WIZARD_STEPS.length - 1;
 
   return (
@@ -268,25 +269,21 @@ function WizardFooter({
           disabled={currentIndex === 0 || isSubmitting}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+          {t("common.back")} </Button>
 
         {!isLastStep ? (
           <Button size="sm" onClick={onNext} disabled={!canProceedNext || isSubmitting}>
-            Next step
-            <ArrowRight className="ml-2 h-4 w-4" />
+            {t("forms.nextStep")} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         ) : (
           <Button size="sm" onClick={onSubmit} disabled={isSubmitting || !canProceedNext}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Publishing…
-              </>
+                {t("updates.publishing")} </>
             ) : (
               <>
-                Publish update
-                <CheckCircle className="ml-2 h-4 w-4" />
+                {t("updates.publishUpdate")} <CheckCircle className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>

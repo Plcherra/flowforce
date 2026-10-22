@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ interface SummaryStepProps {
 }
 
 export function SummaryStep({ formData }: SummaryStepProps) {
+  const { t } = useTranslation();
   const getRecipientSummary = () => {
     if (formData.recipients.type === "all") {
       return "All employees";
@@ -88,16 +90,15 @@ export function SummaryStep({ formData }: SummaryStepProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Review & Publish</h3>
+        <h3 className="text-lg font-semibold mb-2">{t("updates.reviewPublish")}</h3>
         <p className="text-muted-foreground">
-          Review your update before publishing
-        </p>
+          {t("updates.reviewYourUpdateBeforePublishing")} </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Update Preview */}
         <div className="space-y-4">
-          <h4 className="font-semibold">Update Preview</h4>
+          <h4 className="font-semibold">{t("updates.updatePreview")}</h4>
           <CompanyUpdatePreview data={formData} />
         </div>
 
@@ -105,8 +106,7 @@ export function SummaryStep({ formData }: SummaryStepProps) {
         <div className="space-y-4">
           <h4 className="font-semibold flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Settings Summary
-          </h4>
+            {t("updates.settingsSummary")} </h4>
 
           <Card>
             <CardContent className="p-4 space-y-4">
@@ -114,21 +114,21 @@ export function SummaryStep({ formData }: SummaryStepProps) {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Basic Information</span>
+                  <span className="font-medium">{t("updates.basicInformation")}</span>
                 </div>
                 <div className="pl-6 space-y-1 text-sm text-muted-foreground">
                   <div>
-                    Type: <Badge variant="outline">{formData.type}</Badge>
+                    {t("updates.type")} <Badge variant="outline">{formData.type}</Badge>
                   </div>
                   <div>
-                    Priority:{" "}
+                    {t("updates.priority")}{" "}
                     <Badge variant="outline">{formData.priority}</Badge>
                   </div>
                   {formData.category && (
-                    <div>Category: {formData.category}</div>
+                    <div>{t("updates.category")} {formData.category}</div>
                   )}
                   {formData.template && (
-                    <div>Template: {formData.template.name}</div>
+                    <div>{t("updates.template")} {formData.template.name}</div>
                   )}
                 </div>
               </div>
@@ -139,7 +139,7 @@ export function SummaryStep({ formData }: SummaryStepProps) {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Recipients</span>
+                  <span className="font-medium">{t("updates.recipients")}</span>
                 </div>
                 <div className="pl-6 text-sm text-muted-foreground">
                   {getRecipientSummary()}
@@ -152,7 +152,7 @@ export function SummaryStep({ formData }: SummaryStepProps) {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Schedule</span>
+                  <span className="font-medium">{t("updates.schedule")}</span>
                 </div>
                 <div className="pl-6 text-sm text-muted-foreground">
                   {getScheduleSummary()}
@@ -165,7 +165,7 @@ export function SummaryStep({ formData }: SummaryStepProps) {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Bell className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Notifications</span>
+                  <span className="font-medium">{t("shell.notifications")}</span>
                 </div>
                 <div className="pl-6 text-sm text-muted-foreground">
                   {getNotificationSummary()}
@@ -178,7 +178,7 @@ export function SummaryStep({ formData }: SummaryStepProps) {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">Engagement</span>
+                  <span className="font-medium">{t("updates.engagement2")}</span>
                 </div>
                 <div className="pl-6 text-sm text-muted-foreground">
                   {getEngagementSummary()}

@@ -3,6 +3,8 @@ import { UpdateFeedCard } from "@/features/company-updates/components/UpdateFeed
 import { UpdatesEmptyState } from "@/features/company-updates/components/UpdatesEmptyState";
 import { FeedSkeleton } from "@/features/company-updates/components/CompanyUpdatesSkeletons";
 import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
+
+type CommentSubmitResult = void | Promise<void>;
 import type { RecognitionRecord } from "@/types/recognition";
 import { safeArrayLength, safeArrayMap } from "@/utils/reactQueryTypes";
 
@@ -22,7 +24,7 @@ interface CompanyUpdatesFeedSectionProps {
   getUpdateComments: (updateId: string) => UpdateComment[];
   onCreate: () => void;
   onCommentChange: (id: string, value: string) => void;
-  onSubmitComment: (update: CompanyUpdate) => void | Promise<void>;
+  onSubmitComment: (update: CompanyUpdate) => CommentSubmitResult;
   onToggleComments: (update: CompanyUpdate) => void;
   onLike: (updateId: string, currentlyLiked: boolean) => void;
   onArchive: (updateId: string) => void;

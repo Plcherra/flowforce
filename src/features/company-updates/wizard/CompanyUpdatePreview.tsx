@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ export function CompanyUpdatePreview({
   className,
   showMeta = true,
 }: CompanyUpdatePreviewProps) {
+  const { t } = useTranslation();
   const { backgroundStyle } = data;
   const backgroundConfig = getBackgroundConfig(backgroundStyle);
 
@@ -71,15 +73,13 @@ export function CompanyUpdatePreview({
           />
         ) : (
           <p className="text-sm text-muted-foreground">
-            The update text shows up here.
-          </p>
+            {t("updates.theUpdateTextShowsUpHere")} </p>
         )}
 
         {mediaItems.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Attachments
-            </p>
+              {t("schedule.attachments")} </p>
             <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "sm:grid-cols-2")}>
               {mediaItems.map((media) => (
                 <div
@@ -103,8 +103,7 @@ export function CompanyUpdatePreview({
                   <div className="min-w-0">
                     <p className="line-clamp-1 font-medium">{media.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {(media.size / (1024 * 1024)).toFixed(1)} MB
-                    </p>
+                      {(media.size / (1024 * 1024)).toFixed(1)} {t("updates.mb")} </p>
                   </div>
                 </div>
               ))}
@@ -166,8 +165,7 @@ export function CompanyUpdatePreview({
             isCompact ? "px-2 py-0.5 text-[11px]" : "px-2 py-1 text-xs",
           )}
         >
-          Updates
-        </span>
+          {t("updates.updates")} </span>
       </div>
       <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", isCompact ? "p-2" : "p-3 sm:p-4")}>
         <div className="flex min-h-full flex-1 flex-col overflow-hidden rounded-md border bg-card shadow-sm">

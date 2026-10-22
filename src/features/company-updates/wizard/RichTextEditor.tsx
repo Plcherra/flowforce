@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import DOMPurify from "dompurify";
@@ -42,9 +43,10 @@ interface RichTextEditorProps {
 export function RichTextEditor({
   value,
   onChange,
-  placeholder = "Write your update...",
+  placeholder,
   className,
 }: RichTextEditorProps) {
+  const { t } = useTranslation();
   const [color, setColor] = useState("#111827");
   const [colorOpen, setColorOpen] = useState(false);
 
@@ -62,7 +64,9 @@ export function RichTextEditor({
           HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
         },
       }),
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({
+        placeholder: placeholder ?? t("updates.writeYourUpdate"),
+      }),
     ],
     content: value || "<p></p>",
     editorProps: {
@@ -89,8 +93,7 @@ export function RichTextEditor({
   if (!editor) {
     return (
       <div className="rounded-xl border bg-background/60 p-4 text-sm text-muted-foreground">
-        Loading editor…
-      </div>
+        {t("updates.loadingEditor")} </div>
     );
   }
 
@@ -128,55 +131,55 @@ export function RichTextEditor({
         <div className="flex shrink-0 flex-nowrap items-center gap-1 overflow-x-auto rounded-xl border bg-muted/30 p-1.5">
           <ToolbarButton
             icon={Bold}
-            label="Bold"
+            label={t("forms.bold")}
             isActive={isActive("bold")}
             onClick={() => editor.chain().focus().toggleBold().run()}
           />
           <ToolbarButton
             icon={Italic}
-            label="Italic"
+            label={t("forms.italic")}
             isActive={isActive("italic")}
             onClick={() => editor.chain().focus().toggleItalic().run()}
           />
           <ToolbarButton
             icon={UnderlineIcon}
-            label="Underline"
+            label={t("forms.underline")}
             isActive={isActive("underline")}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
           />
           <ToolbarButton
             icon={Heading1}
-            label="Heading 1"
+            label={t("forms.heading1")}
             isActive={isActive("heading", { level: 1 })}
             onClick={() => applyHeading(1)}
           />
           <ToolbarButton
             icon={Heading2}
-            label="Heading 2"
+            label={t("forms.heading2")}
             isActive={isActive("heading", { level: 2 })}
             onClick={() => applyHeading(2)}
           />
           <ToolbarButton
             icon={List}
-            label="Bullet list"
+            label={t("forms.bulletList")}
             isActive={isActive("bulletList")}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
           />
           <ToolbarButton
             icon={ListOrdered}
-            label="Numbered list"
+            label={t("forms.numberedList")}
             isActive={isActive("orderedList")}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
           />
           <ToolbarButton
             icon={Quote}
-            label="Quote"
+            label={t("forms.quote")}
             isActive={isActive("blockquote")}
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
           />
           <ToolbarButton
             icon={LinkIcon}
-            label="Link"
+            label={t("forms.link")}
             isActive={isActive("link")}
             onClick={addLink}
           />
@@ -192,7 +195,7 @@ export function RichTextEditor({
                   editor.isActive("textStyle", { color }) &&
                     "bg-primary/10 text-primary",
                 )}
-                aria-label="Text color"
+                aria-label={t("forms.textColor")}
               >
                 <Palette className="h-4 w-4" />
               </Button>
@@ -212,8 +215,7 @@ export function RichTextEditor({
                     editor.chain().focus().unsetColor().run();
                   }}
                 >
-                  Reset
-                </Button>
+                  {t("forms.reset")} </Button>
               </div>
             </PopoverContent>
           </Popover>

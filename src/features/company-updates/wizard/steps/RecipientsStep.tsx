@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useMemo, useState } from "react";
 import {
   Card,
@@ -80,6 +81,7 @@ export function RecipientsStep({
   formData,
   updateFormData,
 }: RecipientsStepProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const { profile } = useProfile();
   const insights = useRecipientInsights(formData);
@@ -226,18 +228,16 @@ export function RecipientsStep({
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-primary">
           <Target className="h-4 w-4" />
-          Audience Insights
-        </CardTitle>
+          {t("updates.audienceInsights")} </CardTitle>
         <CardDescription className="text-xs text-primary/80">
-          Estimated reach uses active employee data from the last sync.
-        </CardDescription>
+          {t("updates.estimatedReachUsesActiveEmployeeDataFromTheLastSync")} </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
         {insights.loading ? (
           <Skeleton className="h-14 rounded-md" />
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
-            <p className="text-xs text-muted-foreground">Estimated reach</p>
+            <p className="text-xs text-muted-foreground">{t("updates.estimatedReach")}</p>
             <p className="text-lg font-semibold text-primary">
               {insights.estimatedReach.toLocaleString()}
             </p>
@@ -248,7 +248,7 @@ export function RecipientsStep({
           <Skeleton className="h-14 rounded-md" />
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
-            <p className="text-xs text-muted-foreground">Total employees</p>
+            <p className="text-xs text-muted-foreground">{t("updates.totalEmployees")}</p>
             <p className="text-lg font-semibold">
               {insights.totalEmployees.toLocaleString()}
             </p>
@@ -259,7 +259,7 @@ export function RecipientsStep({
           <Skeleton className="h-14 rounded-md" />
         ) : (
           <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
-            <p className="text-xs text-muted-foreground">Active filters</p>
+            <p className="text-xs text-muted-foreground">{t("updates.activeFilters")}</p>
             <p className="text-lg font-semibold">{insights.activeFilters}</p>
           </div>
         )}
@@ -268,8 +268,7 @@ export function RecipientsStep({
           <div className="col-span-full space-y-2 rounded-lg border border-warning/40 bg-warning-muted px-3 py-2 text-xs text-warning-foreground">
             <div className="flex items-center gap-2 font-medium">
               <AlertCircle className="h-3.5 w-3.5" />
-              Review before publishing
-            </div>
+              {t("updates.reviewBeforePublishing")} </div>
             <ul className="list-disc space-y-1 pl-4">
               {insights.actionItems.map((item) => (
                 <li key={item}>{item}</li>
@@ -285,18 +284,15 @@ export function RecipientsStep({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">
-          Suggested Segments
-        </CardTitle>
+          {t("updates.suggestedSegments")} </CardTitle>
         <CardDescription className="text-xs">
-          Pull in frequent audiences with one click.
-        </CardDescription>
+          {t("updates.pullInFrequentAudiencesWithOneClick")} </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
         {insights.loading && <Skeleton className="h-8 w-32 rounded-full" />}
         {!insights.loading && insights.segments.length === 0 && (
           <p className="text-xs text-muted-foreground">
-            No suggestions yet—adjust filters to see recommendations.
-          </p>
+            {t("updates.noSuggestionsYetAdjustFiltersToSeeRecommendations")} </p>
         )}
         {insights.segments.map((segment) => (
           <Button
@@ -323,10 +319,9 @@ export function RecipientsStep({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="mb-2 text-lg font-semibold">Select Recipients</h3>
+        <h3 className="mb-2 text-lg font-semibold">{t("updates.selectRecipients")}</h3>
         <p className="text-muted-foreground">
-          Choose who should receive this update and confirm their reach.
-        </p>
+          {t("updates.chooseWhoShouldReceiveThisUpdateAndConfirmTheirReach")} </p>
       </div>
 
       {insightsBanner}
@@ -341,12 +336,11 @@ export function RecipientsStep({
         >
           <CardContent className="p-4 text-center">
             <Globe className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">All Employees</h4>
-            <p className="text-sm text-muted-foreground">Everyone in company</p>
+            <h4 className="font-semibold">{t("updates.allEmployees")}</h4>
+            <p className="text-sm text-muted-foreground">{t("updates.everyoneInCompany")}</p>
             {formData.recipients.type === "all" && (
               <Badge variant="default" className="mt-2">
-                Selected
-              </Badge>
+                {t("updates.selected")} </Badge>
             )}
           </CardContent>
         </Card>
@@ -361,14 +355,12 @@ export function RecipientsStep({
         >
           <CardContent className="p-4 text-center">
             <Building className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">Departments</h4>
+            <h4 className="font-semibold">{t("updates.departments")}</h4>
             <p className="text-sm text-muted-foreground">
-              Select by department
-            </p>
+              {t("updates.selectByDepartment")} </p>
             {formData.recipients.type === "departments" && (
               <Badge variant="default" className="mt-2">
-                Selected
-              </Badge>
+                {t("updates.selected")} </Badge>
             )}
           </CardContent>
         </Card>
@@ -381,12 +373,11 @@ export function RecipientsStep({
         >
           <CardContent className="p-4 text-center">
             <UserCheck className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">Roles</h4>
-            <p className="text-sm text-muted-foreground">Select by role</p>
+            <h4 className="font-semibold">{t("updates.roles")}</h4>
+            <p className="text-sm text-muted-foreground">{t("updates.selectByRole")}</p>
             {formData.recipients.type === "roles" && (
               <Badge variant="default" className="mt-2">
-                Selected
-              </Badge>
+                {t("updates.selected")} </Badge>
             )}
           </CardContent>
         </Card>
@@ -401,14 +392,12 @@ export function RecipientsStep({
         >
           <CardContent className="p-4 text-center">
             <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">Individuals</h4>
+            <h4 className="font-semibold">{t("updates.individuals")}</h4>
             <p className="text-sm text-muted-foreground">
-              Select specific users
-            </p>
+              {t("updates.selectSpecificUsers")} </p>
             {formData.recipients.type === "individuals" && (
               <Badge variant="default" className="mt-2">
-                Selected
-              </Badge>
+                {t("updates.selected")} </Badge>
             )}
           </CardContent>
         </Card>
@@ -421,8 +410,7 @@ export function RecipientsStep({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">
-                    Select Departments
-                  </CardTitle>
+                    {t("updates.selectDepartments")} </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {departmentOptions.map(({ id, name, count }) => {
@@ -455,7 +443,7 @@ export function RecipientsStep({
             {formData.recipients.type === "roles" && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Select Roles</CardTitle>
+                  <CardTitle className="text-base">{t("updates.selectRoles")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {roleOptions.map(({ id, name, count }) => {
@@ -487,11 +475,9 @@ export function RecipientsStep({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">
-                    Select Individuals
-                  </CardTitle>
+                    {t("updates.selectIndividuals")} </CardTitle>
                   <CardDescription className="text-sm">
-                    Add specific teammates or search across your directory.
-                  </CardDescription>
+                    {t("updates.addSpecificTeammatesOrSearchAcrossYourDirectory")} </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="relative">
@@ -499,16 +485,14 @@ export function RecipientsStep({
                     <Input
                       value={searchTerm}
                       onChange={(event) => setSearchTerm(event.target.value)}
-                      placeholder="Search by name, role, or department"
+                      placeholder={t("updates.searchByNameRoleOrDepartment")}
                       className="pl-9"
                     />
                   </div>
 
                   {filteredUsers.length === 0 ? (
                     <div className="text-sm text-muted-foreground">
-                      No people found. Connect a directory or adjust your
-                      search.
-                    </div>
+                      {t("updates.noPeopleFoundConnectADirectoryOrAdjustYourSearch")} </div>
                   ) : (
                     <div className="space-y-3">
                       {filteredUsers.map((user) => (
@@ -544,30 +528,28 @@ export function RecipientsStep({
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Selection Summary</CardTitle>
+                <CardTitle className="text-base">{t("updates.selectionSummary")}</CardTitle>
                 <CardDescription className="text-sm">
-                  Review the expected reach before sending your announcement.
-                </CardDescription>
+                  {t("updates.reviewTheExpectedReachBeforeSendingYourAnnouncement")} </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Selected audience</span>
+                  <span className="text-sm font-medium">{t("updates.selectedAudience")}</span>
                   <span className="text-sm text-muted-foreground">
                     {getRecipientCountLabel()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Estimated reach</span>
+                  <span className="text-sm font-medium">{t("updates.estimatedReach")}</span>
                   {insights.loading ? (
                     <Skeleton className="h-5 w-16 rounded" />
                   ) : (
                     <span className="text-sm text-muted-foreground">
-                      {insights.estimatedReach.toLocaleString()} people
-                    </span>
+                      {insights.estimatedReach.toLocaleString()} {t("updates.people")} </span>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Active filters</span>
+                  <span className="text-sm font-medium">{t("updates.activeFilters")}</span>
                   {insights.loading ? (
                     <Skeleton className="h-5 w-10 rounded" />
                   ) : (
@@ -580,8 +562,7 @@ export function RecipientsStep({
                 {selectedTargetBadges.length > 0 && (
                   <div>
                     <p className="mb-2 text-xs font-medium uppercase text-muted-foreground tracking-wide">
-                      Current selection
-                    </p>
+                      {t("updates.currentSelection")} </p>
                     <div className="flex flex-wrap gap-2">
                       {selectedTargetBadges.map(({ target, label }) => (
                         <Badge

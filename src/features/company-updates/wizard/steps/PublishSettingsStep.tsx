@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export function PublishSettingsStep({
   formData,
   updateFormData,
 }: PublishSettingsStepProps) {
+  const { t } = useTranslation();
   const updatePublishingSettings = (
     updates: Partial<typeof formData.publishingSettings>,
   ) => {
@@ -78,32 +80,28 @@ export function PublishSettingsStep({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-semibold mb-2">Publishing Settings</h3>
+        <h3 className="text-lg font-semibold mb-2">{t("updates.publishingSettings")}</h3>
         <p className="text-muted-foreground">
-          Configure when and how your update will be published
-        </p>
+          {t("updates.configureWhenAndHowYourUpdateWillBePublished")} </p>
       </div>
 
       <Tabs defaultValue="timing" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="timing">
             <Clock className="h-4 w-4 mr-2" />
-            Timing
-          </TabsTrigger>
+            {t("updates.timing")} </TabsTrigger>
           <TabsTrigger value="notifications">
             <Bell className="h-4 w-4 mr-2" />
-            Notifications
-          </TabsTrigger>
+            {t("shell.notifications")} </TabsTrigger>
           <TabsTrigger value="engagement">
             <MessageSquare className="h-4 w-4 mr-2" />
-            Engagement
-          </TabsTrigger>
+            {t("updates.engagement2")} </TabsTrigger>
         </TabsList>
 
         <TabsContent value="timing" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Publishing Schedule</CardTitle>
+              <CardTitle className="text-base">{t("updates.publishingSchedule")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Immediate vs Scheduled */}
@@ -123,10 +121,9 @@ export function PublishSettingsStep({
                 >
                   <CardContent className="p-4 text-center">
                     <Zap className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <h4 className="font-semibold">Publish Now</h4>
+                    <h4 className="font-semibold">{t("updates.publishNow")}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Send immediately
-                    </p>
+                      {t("updates.sendImmediately")} </p>
                   </CardContent>
                 </Card>
 
@@ -142,8 +139,8 @@ export function PublishSettingsStep({
                 >
                   <CardContent className="p-4 text-center">
                     <CalendarIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <h4 className="font-semibold">Schedule</h4>
-                    <p className="text-sm text-muted-foreground">Send later</p>
+                    <h4 className="font-semibold">{t("updates.schedule")}</h4>
+                    <p className="text-sm text-muted-foreground">{t("updates.sendLater")}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -153,7 +150,7 @@ export function PublishSettingsStep({
                 <div className="space-y-4 border-t pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Schedule Date</Label>
+                      <Label>{t("updates.scheduleDate")}</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
@@ -190,7 +187,7 @@ export function PublishSettingsStep({
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Schedule Time</Label>
+                      <Label>{t("updates.scheduleTime")}</Label>
                       <Input
                         type="time"
                         value={
@@ -206,7 +203,7 @@ export function PublishSettingsStep({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Timezone</Label>
+                    <Label>{t("updates.timezone")}</Label>
                     <Select
                       value={formData.publishingSettings.timezone || "UTC"}
                       onValueChange={(value) =>
@@ -217,19 +214,15 @@ export function PublishSettingsStep({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UTC">UTC</SelectItem>
+                        <SelectItem value="UTC">{t("updates.utc")}</SelectItem>
                         <SelectItem value="America/New_York">
-                          Eastern Time
-                        </SelectItem>
+                          {t("updates.easternTime")} </SelectItem>
                         <SelectItem value="America/Chicago">
-                          Central Time
-                        </SelectItem>
+                          {t("updates.centralTime")} </SelectItem>
                         <SelectItem value="America/Denver">
-                          Mountain Time
-                        </SelectItem>
+                          {t("updates.mountainTime")} </SelectItem>
                         <SelectItem value="America/Los_Angeles">
-                          Pacific Time
-                        </SelectItem>
+                          {t("updates.pacificTime")} </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -243,17 +236,15 @@ export function PublishSettingsStep({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Notification Preferences
-              </CardTitle>
+                {t("updates.notificationPreferences")} </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Email Notifications</Label>
+                    <Label className="text-base">{t("updates.emailNotifications")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Send email to recipients
-                    </p>
+                      {t("updates.sendEmailToRecipients")} </p>
                   </div>
                   <Switch
                     checked={formData.publishingSettings.notifications.email}
@@ -265,10 +256,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Push Notifications</Label>
+                    <Label className="text-base">{t("updates.pushNotifications")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Send mobile push notifications
-                    </p>
+                      {t("updates.sendMobilePushNotifications")} </p>
                   </div>
                   <Switch
                     checked={formData.publishingSettings.notifications.push}
@@ -280,10 +270,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">In-App Notifications</Label>
+                    <Label className="text-base">{t("updates.inAppNotifications")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Show notification in app
-                    </p>
+                      {t("updates.showNotificationInApp")} </p>
                   </div>
                   <Switch
                     checked={formData.publishingSettings.notifications.inApp}
@@ -295,10 +284,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Reminders</Label>
+                    <Label className="text-base">{t("tasks.reminders")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Send reminders for unread updates
-                    </p>
+                      {t("updates.sendRemindersForUnreadUpdates")} </p>
                   </div>
                   <Switch
                     checked={
@@ -312,7 +300,7 @@ export function PublishSettingsStep({
 
                 {formData.publishingSettings.notifications.reminders && (
                   <div className="pl-4 border-l-2 border-muted">
-                    <Label>Reminder Interval</Label>
+                    <Label>{t("updates.reminderInterval")}</Label>
                     <Select
                       value={String(
                         formData.publishingSettings.notifications
@@ -326,11 +314,11 @@ export function PublishSettingsStep({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 hour</SelectItem>
-                        <SelectItem value="4">4 hours</SelectItem>
-                        <SelectItem value="24">24 hours</SelectItem>
-                        <SelectItem value="72">3 days</SelectItem>
-                        <SelectItem value="168">1 week</SelectItem>
+                        <SelectItem value="1">{t("tasks.text1Hour")}</SelectItem>
+                        <SelectItem value="4">{t("updates.4Hours")}</SelectItem>
+                        <SelectItem value="24">{t("updates.24Hours")}</SelectItem>
+                        <SelectItem value="72">{t("updates.3Days")}</SelectItem>
+                        <SelectItem value="168">{t("updates.1Week")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -345,16 +333,14 @@ export function PublishSettingsStep({
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">
-                  Interaction Settings
-                </CardTitle>
+                  {t("updates.interactionSettings")} </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Allow Likes</Label>
+                    <Label className="text-base">{t("updates.allowLikes")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Let users like the update
-                    </p>
+                      {t("updates.letUsersLikeTheUpdate")} </p>
                   </div>
                   <Switch
                     checked={formData.publishingSettings.engagement.allowLikes}
@@ -366,10 +352,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Allow Comments</Label>
+                    <Label className="text-base">{t("updates.allowComments")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Enable comments on the update
-                    </p>
+                      {t("updates.enableCommentsOnTheUpdate")} </p>
                   </div>
                   <Switch
                     checked={
@@ -383,10 +368,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Allow Sharing</Label>
+                    <Label className="text-base">{t("updates.allowSharing")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Let users share the update
-                    </p>
+                      {t("updates.letUsersShareTheUpdate")} </p>
                   </div>
                   <Switch
                     checked={
@@ -402,15 +386,14 @@ export function PublishSettingsStep({
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Display Settings</CardTitle>
+                <CardTitle className="text-base">{t("updates.displaySettings")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Require Confirmation</Label>
+                    <Label className="text-base">{t("updates.requireConfirmation")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Users must confirm they&apos;ve read it
-                    </p>
+                      {t("updates.usersMustConfirmTheyVeReadIt")} </p>
                   </div>
                   <Switch
                     checked={
@@ -424,10 +407,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Show as Pop-up</Label>
+                    <Label className="text-base">{t("updates.showAsPopUp")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Display as modal when users login
-                    </p>
+                      {t("updates.displayAsModalWhenUsersLogin")} </p>
                   </div>
                   <Switch
                     checked={formData.publishingSettings.engagement.showAsPopup}
@@ -439,10 +421,9 @@ export function PublishSettingsStep({
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Author Attribution</Label>
+                    <Label className="text-base">{t("updates.authorAttribution")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Show author name on the update
-                    </p>
+                      {t("updates.showAuthorNameOnTheUpdate")} </p>
                   </div>
                   <Switch
                     checked={formData.publishingSettings.authorAttribution}
@@ -454,13 +435,13 @@ export function PublishSettingsStep({
 
                 {formData.publishingSettings.authorAttribution && (
                   <div className="space-y-2">
-                    <Label>Author Name (Optional)</Label>
+                    <Label>{t("updates.authorNameOptional")}</Label>
                     <Input
                       value={formData.publishingSettings.authorName || ""}
                       onChange={(e) =>
                         updatePublishingSettings({ authorName: e.target.value })
                       }
-                      placeholder="Leave blank to use your name"
+                      placeholder={t("updates.leaveBlankToUseYourName")}
                     />
                   </div>
                 )}

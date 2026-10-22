@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Pagination,
   PaginationContent,
@@ -36,6 +37,7 @@ export function CompanyUpdatesPagination({
   onPageChange,
   onPageSizeChange,
 }: CompanyUpdatesPaginationProps) {
+  const { t } = useTranslation();
   const pageNumbers = getPaginationSequence(page, totalPages);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = total === 0 ? 0 : Math.min(page * pageSize, total);
@@ -44,12 +46,11 @@ export function CompanyUpdatesPagination({
     <div className="rounded-lg border bg-card px-4 py-4 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {from === 0 ? 0 : from}-{to} of {total} updates
-        </p>
+          {t("updates.showing")} {from === 0 ? 0 : from}-{to} {t("updates.of")} {total} {t("updates.updates2")} </p>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
           <div className="flex items-center gap-2 text-sm">
-            <span>Per page</span>
+            <span>{t("updates.perPage")}</span>
             <Select
               value={String(pageSize)}
               onValueChange={(value) => onPageSizeChange(Number(value))}

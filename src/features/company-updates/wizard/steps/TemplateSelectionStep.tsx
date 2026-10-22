@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,7 @@ export function TemplateSelectionStep({
   formData,
   updateFormData,
 }: TemplateSelectionStepProps) {
+  const { t } = useTranslation();
   const handleTemplateSelect = (template?: UpdateTemplate) => {
     if (template) {
       updateFormData({
@@ -77,11 +79,9 @@ export function TemplateSelectionStep({
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">
-          Choose Your Starting Point
-        </h3>
+          {t("updates.chooseYourStartingPoint")} </h3>
         <p className="text-muted-foreground">
-          Select a template to get started quickly, or start from scratch
-        </p>
+          {t("updates.selectATemplateToGetStartedQuicklyOrStartFromScratch")} </p>
       </div>
 
       {/* Start from Scratch Option */}
@@ -97,12 +97,11 @@ export function TemplateSelectionStep({
               <Sparkles className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold">Start from Scratch</h4>
+              <h4 className="font-semibold">{t("updates.startFromScratch")}</h4>
               <p className="text-sm text-muted-foreground">
-                Create a custom update with full creative control
-              </p>
+                {t("updates.createACustomUpdateWithFullCreativeControl")} </p>
             </div>
-            {!formData.template && <Badge variant="default">Selected</Badge>}
+            {!formData.template && <Badge variant="default">{t("updates.selected")}</Badge>}
           </div>
         </CardContent>
       </Card>
@@ -157,8 +156,7 @@ export function TemplateSelectionStep({
 
                 {isSelected && (
                   <Badge variant="default" className="mt-2">
-                    Selected
-                  </Badge>
+                    {t("updates.selected")} </Badge>
                 )}
               </CardContent>
             </Card>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
 import { Megaphone } from "lucide-react";
@@ -13,9 +14,10 @@ export function CompanyUpdatesSetupState({
   onCreate,
   wizardOpen,
 }: CompanyUpdatesSetupStateProps) {
+  const { t } = useTranslation();
   return (
     <FeatureSetupRequiredState
-      title="Company Updates module is not fully set up yet"
+      title={t("updates.companyUpdatesModuleIsNotFullySetUpYet")}
       description="The app is running, but the database tables for company updates and recognitions have not been created in this Supabase project yet."
       icon={<Megaphone className="h-5 w-5" />}
       action={
@@ -25,16 +27,13 @@ export function CompanyUpdatesSetupState({
             aria-expanded={wizardOpen}
             aria-controls="company-updates-wizard"
           >
-            Open create wizard
-          </Button>
+            {t("updates.openCreateWizard")} </Button>
         ) : undefined
       }
       setupDescription={
         <>
-          Missing tables: <code>company_updates</code> and/or{" "}
-          <code>recognitions</code>. Once those migrations are restored, this
-          page will automatically show the update feed.
-        </>
+          {t("updates.missingTables")} <code>{t("updates.companyUpdates")}</code> {t("updates.andOr")}{" "}
+          <code>{t("updates.recognitions")}</code>{t("updates.onceThoseMigrationsAreRestoredThisPageWillAutomaticallyShowTheUpdateFeed")} </>
       }
     />
   );

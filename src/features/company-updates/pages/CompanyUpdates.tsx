@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, {
   lazy,
   Suspense,
@@ -39,6 +40,7 @@ const CreateUpdateWizard = lazy(
 );
 
 export default function CompanyUpdates() {
+  const { t } = useTranslation();
   const bootstrap = useCommunicationBootstrap({
     includeInactiveEmployees: true,
   });
@@ -246,7 +248,7 @@ export default function CompanyUpdates() {
       <div className="p-6">
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Unable to load workspace</AlertTitle>
+          <AlertTitle>{t("updates.unableToLoadWorkspace")}</AlertTitle>
           <AlertDescription>{bootstrap.error}</AlertDescription>
         </Alert>
       </div>
@@ -257,7 +259,7 @@ export default function CompanyUpdates() {
     return (
       <div className="p-6">
         <EmptyStateCard
-          title="Workspace data is still loading"
+          title={t("updates.workspaceDataIsStillLoading")}
           description="Company updates unlock once we have your organization and employee information."
           icon={<Megaphone className="h-5 w-5" />}
         />
@@ -289,7 +291,7 @@ export default function CompanyUpdates() {
             <div className="px-4 pt-4">
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Unable to load updates</AlertTitle>
+                <AlertTitle>{t("updates.unableToLoadUpdates")}</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             </div>

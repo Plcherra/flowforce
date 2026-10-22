@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -38,6 +39,7 @@ export function EditUpdateDialog({
   update,
   onUpdateComplete,
 }: EditUpdateDialogProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const { updateUpdate } = useCompanyUpdateMutations();
@@ -113,18 +115,17 @@ export function EditUpdateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Company Update</DialogTitle>
+          <DialogTitle>{t("updates.editCompanyUpdate")}</DialogTitle>
           <DialogDescription>
-            Make changes to your company update
-          </DialogDescription>
+            {t("updates.makeChangesToYourCompanyUpdate")} </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{t("tasks.title")}</Label>
             <Input
               id="title"
-              placeholder="Update title"
+              placeholder={t("updates.updateTitle")}
               value={formData.title}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, title: e.target.value }))
@@ -134,10 +135,10 @@ export function EditUpdateDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="body">Body</Label>
+            <Label htmlFor="body">{t("updates.body")}</Label>
             <Textarea
               id="body"
-              placeholder="Update content"
+              placeholder={t("updates.updateContent")}
               value={formData.body}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, body: e.target.value }))
@@ -147,19 +148,19 @@ export function EditUpdateDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="richContent">Rich Content (HTML)</Label>
+            <Label htmlFor="richContent">{t("updates.richContentHtml")}</Label>
             <RichTextEditor
               value={formData.richContent}
               onChange={(value) =>
                 setFormData((prev) => ({ ...prev, richContent: value }))
               }
-              placeholder="Write your update content..."
+              placeholder={t("updates.writeYourUpdateContent")}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
+              <Label htmlFor="type">{t("schedule.type")}</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) =>
@@ -173,16 +174,16 @@ export function EditUpdateDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="announcement">Announcement</SelectItem>
-                  <SelectItem value="news">News</SelectItem>
-                  <SelectItem value="event">Event</SelectItem>
-                  <SelectItem value="policy">Policy</SelectItem>
+                  <SelectItem value="announcement">{t("dashboard.announcement")}</SelectItem>
+                  <SelectItem value="news">{t("dashboard.news")}</SelectItem>
+                  <SelectItem value="event">{t("dashboard.event")}</SelectItem>
+                  <SelectItem value="policy">{t("dashboard.policy")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">{t("tasks.priority")}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
@@ -196,9 +197,9 @@ export function EditUpdateDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="low">{t("tasks.low")}</SelectItem>
+                  <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
+                  <SelectItem value="high">{t("tasks.high")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -211,12 +212,10 @@ export function EditUpdateDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
+              {t("updates.saveChanges")} </Button>
           </div>
         </form>
       </DialogContent>

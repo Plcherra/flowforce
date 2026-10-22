@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ export function DesignContentStep({
   formData,
   updateFormData,
 }: DesignContentStepProps) {
+  const { t } = useTranslation();
   const [previewMedia, setPreviewMedia] = useState<UpdateMediaItem | null>(
     null,
   );
@@ -138,8 +140,7 @@ export function DesignContentStep({
             <div className="flex h-5 shrink-0 items-center gap-2 text-muted-foreground">
               <TypeIcon className="h-4 w-4" />
               <span className="text-xs font-medium uppercase tracking-wide">
-                Content
-              </span>
+                {t("dashboard.content")} </span>
             </div>
           <section
             id="wizard-section-content"
@@ -147,13 +148,12 @@ export function DesignContentStep({
           >
             <div className="mb-3 flex shrink-0 justify-end">
               <Badge variant="outline" className="border-dashed">
-                Required
-              </Badge>
+                {t("forms.required")} </Badge>
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-3">
               <div className="shrink-0 space-y-2">
-                <Label htmlFor="title">Title *</Label>
+                <Label htmlFor="title">{t("tasks.title")}</Label>
                 <Textarea
                   id="title"
                   value={formData.title}
@@ -161,19 +161,17 @@ export function DesignContentStep({
                   onChange={(e) =>
                     updateFormData({ title: limitTitleLines(e.target.value) })
                   }
-                  placeholder="Write a short, scannable title"
+                  placeholder={t("updates.writeAShortScannableTitle")}
                   rows={2}
                   className="resize-none rounded-2xl border bg-muted/30 p-3 text-xl font-semibold leading-tight focus-visible:ring-0"
                 />
                 <p className="text-xs text-muted-foreground">
-                  {formData.title.length}/{MAX_TITLE_CHARACTERS} characters ·
-                  limited to two lines
-                </p>
+                  {formData.title.length}/{MAX_TITLE_CHARACTERS} {t("updates.charactersLimitedToTwoLines")} </p>
               </div>
 
               <div className="grid shrink-0 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Type</Label>
+                  <Label>{t("schedule.type")}</Label>
                   <Select
                     value={formData.type}
                     onValueChange={(value) =>
@@ -181,19 +179,19 @@ export function DesignContentStep({
                     }
                   >
                     <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="Announcement" />
+                      <SelectValue placeholder={t("dashboard.announcement")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="announcement">Announcement</SelectItem>
-                      <SelectItem value="news">News</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="policy">Policy</SelectItem>
+                      <SelectItem value="announcement">{t("dashboard.announcement")}</SelectItem>
+                      <SelectItem value="news">{t("dashboard.news")}</SelectItem>
+                      <SelectItem value="event">{t("dashboard.event")}</SelectItem>
+                      <SelectItem value="policy">{t("dashboard.policy")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Priority</Label>
+                  <Label>{t("tasks.priority")}</Label>
                   <Select
                     value={formData.priority}
                     onValueChange={(value) =>
@@ -203,12 +201,12 @@ export function DesignContentStep({
                     }
                   >
                     <SelectTrigger className="rounded-xl">
-                      <SelectValue placeholder="Select priority" />
+                      <SelectValue placeholder={t("tasks.selectPriority")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="high">{t("tasks.high")}</SelectItem>
+                      <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
+                      <SelectItem value="low">{t("tasks.low")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -216,10 +214,9 @@ export function DesignContentStep({
 
               <div className="flex min-h-0 flex-1 flex-col gap-2">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Body</span>
+                  <span>{t("updates.body")}</span>
                   <span>
-                    {bodyPlainText.length}/{MAX_BODY_CHARACTERS} characters
-                  </span>
+                    {bodyPlainText.length}/{MAX_BODY_CHARACTERS} {t("updates.characters")} </span>
                 </div>
                 <RichTextEditor
                   value={formData.body}
@@ -232,8 +229,7 @@ export function DesignContentStep({
 
           <div className="flex h-full min-h-0 flex-col gap-2">
             <p className="flex h-5 items-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Desktop
-            </p>
+              {t("updates.desktop")} </p>
             <CompanyUpdatePreview
               data={formData}
               device="desktop"
@@ -243,8 +239,7 @@ export function DesignContentStep({
           </div>
           <div className="flex h-full min-h-0 flex-col gap-2">
             <p className="flex h-5 items-center justify-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Mobile
-            </p>
+              {t("updates.mobile")} </p>
             <CompanyUpdatePreview
               data={formData}
               device="mobile"
@@ -261,10 +256,9 @@ export function DesignContentStep({
               <div className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4 text-primary" />
                 <div>
-                  <h4 className="text-sm font-semibold">Media & Attachments</h4>
+                  <h4 className="text-sm font-semibold">{t("updates.mediaAttachments")}</h4>
                   <p className="text-xs text-muted-foreground">
-                    Add visuals, video or files to your announcement.
-                  </p>
+                    {t("updates.addVisualsVideoOrFilesToYourAnnouncement")} </p>
                 </div>
               </div>
             </div>
@@ -285,22 +279,20 @@ export function DesignContentStep({
               onDrop={handleDrop}
             >
               <UploadCloud className="h-10 w-10 text-muted-foreground" />
-              <p className="mt-3 text-sm font-medium">Drag & drop files, or</p>
+              <p className="mt-3 text-sm font-medium">{t("updates.dragDropFilesOr")}</p>
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-3 rounded-full"
                 onClick={handleBrowseClick}
               >
-                Browse library
-              </Button>
+                {t("updates.browseLibrary")} </Button>
               <p className="mt-2 text-xs text-muted-foreground">
-                Images, video, PDF or Docs — up to 50MB each
-              </p>
+                {t("updates.imagesVideoPdfOrDocsUpTo50mbEach")} </p>
               {isUploading && (
                 <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Uploading… {progress}%
+                  {t("updates.uploading")} {progress}%
                 </div>
               )}
               {uploadError && (
@@ -349,8 +341,7 @@ export function DesignContentStep({
                         {media.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {(media.size / (1024 * 1024)).toFixed(1)} MB
-                      </p>
+                        {(media.size / (1024 * 1024)).toFixed(1)} {t("updates.mb")} </p>
                     </div>
                     <Button
                       type="button"
@@ -381,10 +372,9 @@ export function DesignContentStep({
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               <div>
-                <h4 className="text-sm font-semibold">Visual Style</h4>
+                <h4 className="text-sm font-semibold">{t("updates.visualStyle")}</h4>
                 <p className="text-xs text-muted-foreground">
-                  Tune background, gradients, and patterns.
-                </p>
+                  {t("updates.tuneBackgroundGradientsAndPatterns")} </p>
               </div>
             </div>
 
@@ -406,15 +396,14 @@ export function DesignContentStep({
                     <div>
                       <p className="text-sm font-medium">{preset.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        Gradient preset
-                      </p>
+                        {t("updates.gradientPreset")} </p>
                     </div>
                   </button>
                 ))}
               </div>
 
               <div className="space-y-2">
-                <Label>Background style</Label>
+                <Label>{t("updates.backgroundStyle")}</Label>
                 <div className="flex flex-wrap gap-2">
                   {(["solid", "gradient", "pattern"] as const).map((style) => (
                     <Button
@@ -436,7 +425,7 @@ export function DesignContentStep({
 
               {formData.backgroundStyle.type === "pattern" && (
                 <div className="space-y-2">
-                  <Label>Pattern</Label>
+                  <Label>{t("updates.pattern")}</Label>
                   <div className="grid grid-cols-2 gap-3">
                     {BACKGROUND_PATTERNS.map((pattern) => (
                       <Button
@@ -464,7 +453,7 @@ export function DesignContentStep({
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="primary-color">Primary color</Label>
+                  <Label htmlFor="primary-color">{t("updates.primaryColor")}</Label>
                   <div className="mt-2 flex gap-2">
                     <input
                       id="primary-color"
@@ -480,7 +469,7 @@ export function DesignContentStep({
                       onChange={(e) =>
                         updateBackgroundStyle({ primary: e.target.value })
                       }
-                      placeholder="#3b82f6"
+                      placeholder={t("updates.3b82f6")}
                       className="rounded-xl"
                     />
                   </div>
@@ -488,7 +477,7 @@ export function DesignContentStep({
 
                 {formData.backgroundStyle.type === "gradient" && (
                   <div>
-                    <Label htmlFor="secondary-color">Secondary color</Label>
+                    <Label htmlFor="secondary-color">{t("updates.secondaryColor")}</Label>
                     <div className="mt-2 flex gap-2">
                       <input
                         id="secondary-color"
@@ -504,7 +493,7 @@ export function DesignContentStep({
                         onChange={(e) =>
                           updateBackgroundStyle({ secondary: e.target.value })
                         }
-                        placeholder="#1e40af"
+                        placeholder={t("updates.1e40af")}
                         className="rounded-xl"
                       />
                     </div>
@@ -540,16 +529,14 @@ export function DesignContentStep({
             <div className="flex flex-col items-center gap-4 py-6 text-center">
               <FileText className="h-10 w-10 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Download to view this document.
-              </p>
+                {t("updates.downloadToViewThisDocument")} </p>
               <Button size="sm" asChild>
                 <a
                   href={previewMediaUrl ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Open attachment
-                </a>
+                  {t("updates.openAttachment")} </a>
               </Button>
             </div>
           )}

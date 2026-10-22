@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,21 +19,20 @@ export function CompanyUpdatesHeader({
   onSearchChange,
   wizardOpen = false,
 }: CompanyUpdatesHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
       <div className="mr-auto">
-        <h1 className="text-xl font-semibold">Updates</h1>
+        <h1 className="text-xl font-semibold">{t("updates.updates")}</h1>
         <p className="text-sm text-muted-foreground">
-          News and announcements for the team.
-        </p>
+          {t("updates.newsAndAnnouncementsForTheTeam")} </p>
       </div>
       <div className="w-full sm:w-56">
         <Label htmlFor="company-updates-search" className="sr-only">
-          Search updates
-        </Label>
+          {t("updates.searchUpdates")} </Label>
         <Input
           id="company-updates-search"
-          placeholder="Search"
+          placeholder={t("nav.search")}
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}
         />
@@ -44,8 +44,7 @@ export function CompanyUpdatesHeader({
           aria-expanded={wizardOpen}
           aria-controls="company-updates-wizard"
         >
-          New update
-        </Button>
+          {t("updates.newUpdate")} </Button>
       )}
     </div>
   );

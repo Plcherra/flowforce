@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card } from "@/components/ui/card";
 import {
@@ -17,17 +18,18 @@ interface UpdateListViewProps {
 }
 
 export function UpdateListView({ updates }: UpdateListViewProps) {
+  const { t } = useTranslation();
   return (
     <div className="px-4 py-6">
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Published</TableHead>
-              <TableHead>Engagement</TableHead>
+              <TableHead>{t("schedule.title")}</TableHead>
+              <TableHead>{t("schedule.type")}</TableHead>
+              <TableHead>{t("tasks.priority")}</TableHead>
+              <TableHead>{t("schedule.published")}</TableHead>
+              <TableHead>{t("updates.engagement2")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

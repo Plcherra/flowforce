@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,6 +63,7 @@ export function UpdateFeedCard({
   viewerHasViewed,
   commentError,
 }: UpdateFeedCardProps) {
+  const { t } = useTranslation();
   const engagement = useMemo(() => getEngagementSettings(update), [update]);
   const isLiked = Boolean(update.viewerHasLiked);
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -162,16 +164,14 @@ export function UpdateFeedCard({
               <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem onClick={() => onArchive(update.id)}>
                   <Archive className="mr-2 h-4 w-4" />
-                  Archive
-                </DropdownMenuItem>
+                  {t("updates.archive")} </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => onDelete(update.id)}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
+                  {t("common.delete")} </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -227,7 +227,7 @@ export function UpdateFeedCard({
                   <Heart
                     className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`}
                   />
-                  <span className="text-xs">Like</span>
+                  <span className="text-xs">{t("updates.like")}</span>
                 </Button>
               )}
               {engagement.allowComments && (
@@ -238,7 +238,7 @@ export function UpdateFeedCard({
                   className="h-8 px-3"
                 >
                   <MessageCircle className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Comment</span>
+                  <span className="text-xs">{t("updates.comment")}</span>
                 </Button>
               )}
             </div>
@@ -248,7 +248,7 @@ export function UpdateFeedCard({
             <div className="space-y-3 pt-3 border-t border-border">
               <div className="space-y-2">
                 <Textarea
-                  placeholder="Write a comment..."
+                  placeholder={t("updates.writeAComment")}
                   value={commentValue}
                   onChange={(event) =>
                     onCommentChange(update.id, event.target.value)
@@ -263,7 +263,7 @@ export function UpdateFeedCard({
                     disabled={!commentValue?.trim()}
                     className="h-8"
                   >
-                    <span className="text-xs">Post</span>
+                    <span className="text-xs">{t("updates.post")}</span>
                   </Button>
                 </div>
                 {commentError && (

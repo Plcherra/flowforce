@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { AlertTriangle, Eye, Megaphone, Send, Users } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,6 +26,7 @@ export function CompanyUpdatesReadinessPanel({
   canCreateUpdate,
   onCreate,
 }: CompanyUpdatesReadinessPanelProps) {
+  const { t } = useTranslation();
   const summary = useMemo(
     () => buildCompanyUpdateReadinessSummary(updates),
     [updates],
@@ -69,15 +71,13 @@ export function CompanyUpdatesReadinessPanel({
         <CardHeader className="space-y-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="text-xl">Update Readiness</CardTitle>
+              <CardTitle className="text-xl">{t("updates.updateReadiness")}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Publishing, reads, comments, and recipient targeting are tracked here.
-              </p>
+                {t("updates.publishingReadsCommentsAndRecipientTargetingAreTrackedHere")} </p>
             </div>
             {canCreateUpdate && (
               <Button type="button" onClick={onCreate}>
-                Create Update
-              </Button>
+                {t("updates.createUpdate")} </Button>
             )}
           </div>
         </CardHeader>
@@ -108,7 +108,7 @@ export function CompanyUpdatesReadinessPanel({
           {summary.reviewItems.length > 0 ? (
             <Alert>
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Publishing review needed</AlertTitle>
+              <AlertTitle>{t("updates.publishingReviewNeeded")}</AlertTitle>
               <AlertDescription>
                 <div className="mt-3 grid gap-2 md:grid-cols-2">
                   {summary.reviewItems.map((item) => (
@@ -130,8 +130,7 @@ export function CompanyUpdatesReadinessPanel({
             </Alert>
           ) : (
             <div className="rounded-lg border border-success/40 bg-success-muted p-3 text-sm text-success">
-              Published and scheduled updates have no immediate review blockers.
-            </div>
+              {t("updates.publishedAndScheduledUpdatesHaveNoImmediateReviewBlockers")} </div>
           )}
         </CardContent>
       </Card>
