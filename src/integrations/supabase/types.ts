@@ -1076,6 +1076,56 @@ export type Database = {
         }
         Relationships: []
       }
+      content_translations: {
+        Row: {
+          company_id: string
+          created_at: string
+          field_path: string
+          id: string
+          locale: string
+          source_hash: string
+          source_id: string
+          source_locale: string
+          source_table: string
+          translated_text: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          field_path: string
+          id?: string
+          locale: string
+          source_hash: string
+          source_id: string
+          source_locale: string
+          source_table: string
+          translated_text: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          field_path?: string
+          id?: string
+          locale?: string
+          source_hash?: string
+          source_id?: string
+          source_locale?: string
+          source_table?: string
+          translated_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_translations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copilot_action_events: {
         Row: {
           actoruser_id: string | null

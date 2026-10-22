@@ -461,7 +461,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 25 — Translation cache
 
-- [ ] Add `content_translations` and the `content_translation` prompt key.
+- [x] Add `content_translations` and the `content_translation` prompt key.
 
 Rules:
 
@@ -1145,5 +1145,17 @@ Phone steps for Pedro:
 4. Switch back to English. Those lines should match the wording from before this deploy. A form section you add still starts with the English title New Section until you rename it.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 25 Translation cache
+
+Shipped: `content_translations` caches a field translation per company, source row, field, and locale. Members can select rows for their company. Authenticated and anon cannot insert, update, or delete. The service role writes. `source_table` allows the tables named in the Audit. `locale` and `source_locale` are the six language codes, and they cannot match. `source_hash` is 64 hex characters. `ai_usage_events` and `record_ai_usage_event` allow the prompt key `content_translation`. That key is not part of the insight schema. The Supabase CLI had no access token, so the migration was applied with the Supabase API. The remote history version is `20261022151316`.
+
+Proven: `npm run typecheck` passed. `npm run typecheck:src` passed. A rolled-back SQL check rejected a same-language row and an unknown source table, then accepted a Spanish translation of an English task title. The table was empty after the rollback.
+
+Phone steps for Pedro: none. This phase does not change a screen. Cached translations are not shown yet.
+
+Blockers: none. Migration `20261022151316_content_translations.sql` is applied.
 
 Questions: none.
