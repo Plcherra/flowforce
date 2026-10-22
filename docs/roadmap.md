@@ -22,7 +22,7 @@ Tasks phases 8, 19, and 22–24 are checked. Phases 9–12 stay skipped. Tasks s
 | --- | --- | --- |
 | System and Admin rework | next | [docs/features/system-admin.md](features/system-admin.md) |
 
-That file lists systems that look wrong or unnecessary. It does not change product code. Phase 2 waits on the owner.
+That file lists systems that look wrong or unnecessary, and Pedro's permission-grant plan. It stays next. It is not the active feature. Candidate phase 2 waits on the owner. The permission-grant phases wait until this file is active.
 
 ## After that
 

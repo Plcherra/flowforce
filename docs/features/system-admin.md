@@ -1,12 +1,16 @@
 # System and Admin rework
 
-Next week. This file is a review list. Do not change product code from these phases.
+Next week. This file is not active. Scheduling + Time Off stays the active feature.
+
+The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
+
+The permission-grant plan is the second half. Those phases wait until this file is marked active. Do not start them from a Time Off run.
 
 Settings the app actually renders live in `src/features/system/pages/SettingsPage.tsx`. The tabs are General, Security, Region, Notifications, AI, Integrations, Billing, and Admin.
 
 ## Candidates
 
-Each row is a candidate for review. Nothing here is a decision to remove it.
+Each row is a candidate for review. Nothing in this list is a decision to remove it. The permission-grant plan below decides the Admin tab and the Admin page. The other candidates stay unmarked.
 
 1. Settings docs still describe `src/modules/system`. `docs/cleanup-progress.md` says that folder was moved to `src/features/system`. The stale docs are `docs/system-settings-architecture.md` and `docs/system-settings-hub.md`.
 2. Sidebar links in `src/data/navigationData.tsx` mix `/app/enhanced-scheduling` with bare paths such as `/tasks`, `/messages`, `/forms`, `/inventory`, `/settings`, and `/admin`. Canonical routes in `src/app-shell/navigation/moduleRouteInventory.json` are under `/app/...`. The bare paths work through redirects in `next.config.mjs`.
@@ -20,7 +24,7 @@ Each row is a candidate for review. Nothing here is a decision to remove it.
 
 ## Phases
 
-Do not change product code. The owner marks keep or drop. Until then, skip the open phase.
+Candidate phase 2 stays blocked until the owner marks keep or drop. Do not change product code for the candidate list.
 
 ### Phase 1 — Candidate list
 
@@ -58,3 +62,124 @@ Proven: the list is the proof. Nothing was deleted or rewired.
 Blockers: Phase 2 is blocked until the owner marks which candidates to remove.
 
 Questions: Which candidates to remove?
+
+## Permission grant plan
+
+This plan is next, not active. Do not start these phases while Scheduling + Time Off is the active feature. Do not change product code from this plan until this file is marked active.
+
+Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
+
+### Decisions
+
+These are locked when this file is the active feature. Implement them. Do not edit this section while implementing one of these phases.
+
+1. Remove the Admin tab and the Admin page as the way access is granted. Settings drops the Admin tab (`SettingsPage` key `admin`, `AdminSettingsPanel`). The sidebar Admin item (`/admin` in `src/data/navigationData.tsx`, `src/features/admin/pages/Admin.tsx`) is not an access model. Controls that still have a job move to the Settings tab whose permission already covers them: billing plan and billing stay on Billing (`billing.manage`), and settings export, audit, and danger actions stay behind `systemSettings`. User management stays behind `manageUsers` on the employee directory. Do not leave a page whose purpose is "you are an admin". Do not delete the registry keys.
+2. A permission shows only the access types it needs, chosen from read, create, edit, and delete. A permission that only needs read does not also show create, edit, and delete. Read uses the existing `.view` key when the registry already has one (`directory.view`, `inventory.view`). Grant is not a fifth page type. Grant is the separate right to give that permission to someone else. Existing keys such as `approveTimeOff` stay. On the grant screen, approving time off is the edit type for that permission. Do not delete the key, and do not add an access type named approve, export, manage, or suggest.
+3. Levels are default packs, not gates. `directory.view` stays on by default for level 2 (manager) and level 3 (admin), and off by default for level 1 (staff). Owner keeps full access. `isLeadershipLevel` is not why a page is hidden. The employee directory (`src/features/employees/pages/Employees.tsx` and `src/hooks/useNavigationStructure.tsx`) shows when `directory.view` resolves on, including for a level 1 user who was granted it. A level 2 user with that permission denied does not see it. An owner, or anyone who has the grant right for a permission, can grant that permission to any user, including level 1, and can grant that user the right to grant it. Store the change as an allow or deny override on `user_permissions`, the same way Team hours stores schedule grants.
+4. A page renders the version the person's permissions allow. It does not render a version from the level number. Schedule: the whole team when `viewTeamSchedules` and `schedule.view` are on; draft only when `editSchedules` is on and `schedule.create`, `schedule.edit`, and `schedule.delete` are off; create, edit, and delete only for the keys that are on. One of those actions does not turn the others on. The same rule covers inventory (`inventory.view`, `inventory.create`, `inventory.edit`, `inventory.delete`), recognition (`src/features/recognition/pages/Recognition/RecognitionPage.tsx`), team leadership (the directory and the leadership schedule tools), onboarding (`src/features/onboarding`), and certifications (`src/features/learning/pages/Certifications/CertificationsPage.tsx`). Add a key to the existing registry only when that area has no key for an action the page already has. A page with no create control does not get a create key. New keys default on for level 2 and level 3, off for level 1, and on for the owner.
+5. The main button follows the edit permission for that action. Someone with edit sees Save changes, and the button writes directly. Someone without edit sees Send request. My Availability does not use this pair. Time Off decision 3 uses one Send availability button, because availability changes need no approval. That screen is specified in [docs/features/time-off.md](time-off.md). Do not relabel it from this plan.
+
+### Phase 3 — Admin is not an access model
+
+- [ ] Remove the Admin tab and the Admin page as the way access is granted.
+
+Rules:
+
+- Files: `src/features/system/pages/SettingsPage.tsx`, `src/data/navigationData.tsx`, `src/features/admin/pages/Admin.tsx`, and a new `src/features/system/utils/settingsTabs.ts` with `src/features/system/utils/settingsTabs.test.ts`.
+- Follow Decision 1. Do not add a permission key.
+- This phase waits until this file is the active feature.
+
+Done when:
+
+- Settings has no Admin tab.
+- The sidebar has no Admin item.
+- Billing plan stays on Billing. Settings export and danger actions stay behind `systemSettings`. User management stays behind `manageUsers`.
+
+Prove: `src/features/system/utils/settingsTabs.test.ts` asserts the settings tab keys do not include `admin`, and the navigation items do not include an Admin href of `/admin`. Run it with `node scripts/test-product-roles-setup.mjs` and add the file to that runner.
+
+### Phase 4 — Access types are only what the permission needs
+
+- [ ] Show read, create, edit, and delete only when that permission needs them.
+
+Rules:
+
+- Files: `src/features/roles/constants/permissionAccessTypes.ts` and `src/features/roles/constants/permissionAccessTypes.test.ts`.
+- Follow Decision 2. Do not add a second permission list.
+- This phase waits until this file is the active feature.
+
+Done when:
+
+- Every switch type is read, create, edit, delete, or the separate grant right.
+- A read-only permission has no create, edit, or delete switch.
+- `approveTimeOff` still exists, and its grant-screen type is edit.
+
+Prove: Extend `permissionAccessTypes.test.ts` so a switch outside read, create, edit, delete, and grant fails, a read-only row has no create, edit, or delete switch, and time off approval maps to edit. Run `node scripts/test-product-roles-setup.mjs`.
+
+### Phase 5 — Levels are default packs
+
+- [ ] Let a grant turn a permission on for any user, including level 1, and let that grant include the right to grant it.
+
+Rules:
+
+- Files: `src/features/roles/constants/productRoleContract.json`, `src/features/employees/pages/Employees.tsx`, `src/hooks/useNavigationStructure.tsx`, and a new `src/features/roles/constants/permissionGrant.test.ts`.
+- Follow Decision 3. Do not add a second matrix.
+- This phase waits until this file is the active feature.
+
+Done when:
+
+- Level 2 and level 3 include `directory.view` by default. Level 1 does not.
+- A level 1 user with an allow override for `directory.view` sees the employee directory.
+- A level 2 user with that permission denied does not.
+- An owner, or a user with the grant right, can grant the permission and can grant the right to grant it.
+
+Prove: `src/features/roles/constants/permissionGrant.test.ts` covers the level 2 and level 3 default, the level 1 default off, an allow override for level 1, a deny override for level 2, and a grant right that can grant `directory.view`. Add the file to `scripts/test-product-roles-setup.mjs` and run it. Also run `npm run check:roles`.
+
+### Phase 6 — Pages render the permitted version
+
+- [ ] Render schedule, inventory, recognition, team leadership, onboarding, and certifications from permissions.
+
+Rules:
+
+- Files: a new `src/features/roles/constants/pageVersion.ts` with `src/features/roles/constants/pageVersion.test.ts`. Add missing keys only in `src/lib/permissions/registry.ts` and `src/features/roles/constants/productRoleContract.json`.
+- Follow Decision 4. Do not branch these pages on `isLeadershipLevel`.
+- This phase waits until this file is the active feature.
+
+Done when:
+
+- Schedule can be the whole team, draft only, or create, edit, and delete, and one action does not turn the others on.
+- Inventory, recognition, team leadership, onboarding, and certifications show only the actions whose keys are on.
+- A level number alone does not choose the version.
+
+Prove: `src/features/roles/constants/pageVersion.test.ts` returns team, draft, and create/edit/delete for the schedule keys in Decision 4. One create key does not turn on edit or delete. The same helper ignores hierarchy level for inventory, recognition, team leadership, onboarding, and certifications. Add the file to `scripts/test-product-roles-setup.mjs` and run it. Also run `npm run check:roles`.
+
+### Phase 7 — Save changes or Send request
+
+- [ ] Label the main button from the edit permission.
+
+Rules:
+
+- Files: a new `src/features/roles/constants/primaryActionLabel.ts` with `src/features/roles/constants/primaryActionLabel.test.ts`.
+- Follow Decision 5.
+- Edit on: label Save changes, and the button writes directly. Edit off: label Send request.
+- Do not use this pair on My Availability. That screen stays Send availability, specified in `docs/features/time-off.md`.
+- This phase waits until this file is the active feature.
+
+Done when:
+
+- A person with edit sees Save changes.
+- A person without edit sees Send request.
+- My Availability is unchanged by this phase.
+
+Prove: `src/features/roles/constants/primaryActionLabel.test.ts` returns Save changes when edit is on and Send request when edit is off. It does not return Send availability. Add the file to `scripts/test-product-roles-setup.mjs` and run it.
+
+## Permission plan progress
+
+### 2026-10-22 — Permission grant plan
+
+Shipped: this plan only. No product code. Decisions 1–5 and phases 3–7 are unchecked. Decision 5 is the button pair: Save changes with edit, Send request without it. My Availability is the exception in Time Off decision 3.
+
+Proven: this file is the plan.
+
+Blockers: these phases wait until this file is marked active. Candidate phase 2 stays blocked on which candidates to remove.
+
+Questions: Which candidates to remove? No new question.
