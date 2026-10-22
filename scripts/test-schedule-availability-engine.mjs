@@ -27,6 +27,9 @@ const { runLeadershipLevelTests } = importTs(
 const { runScheduleGridGroupsTests } = importTs(
   "../src/features/scheduling/utils/scheduleGridGroups.test.ts",
 );
+const { runDayAvailabilityStateTests } = importTs(
+  "../src/features/availability/utils/dayAvailabilityState.test.ts",
+);
 
 runScheduleAvailabilityEngineTests();
 console.log("scheduleAvailabilityEngine tests passed");
@@ -40,3 +43,5 @@ runLeadershipLevelTests();
 console.log("leadershipLevel tests passed");
 runScheduleGridGroupsTests();
 console.log("scheduleGridGroups tests passed");
+runDayAvailabilityStateTests();
+console.log("dayAvailabilityState tests passed");

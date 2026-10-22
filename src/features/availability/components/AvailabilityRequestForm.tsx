@@ -60,12 +60,12 @@ import type {
 } from "@/types/availability";
 import { notifyManagersNewRequest } from "@/notifications/availability";
 import { logger } from "@/utils/logger";
+import { clockRangeFromHours } from "@/features/availability/utils/availabilityUtils";
 import {
-  FULL_DAY_HOURS,
-  clockRangeFromHours,
-  hoursFromClockRange,
-  isFullDayHours,
-} from "@/features/availability/utils/availabilityUtils";
+  dayAvailabilityState,
+  hoursAfterTimeEdit,
+  hoursForDayState,
+} from "@/features/availability/utils/dayAvailabilityState";
 import { useTranslation } from "react-i18next";
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -555,7 +555,7 @@ export function AvailabilityRequestForm({
             <CardDescription>
               {availabilityIsOpen
                 ? "Open availability is any day and any time. The weekday grid is not required."
-                : "Each day is all day on, or off with the hours you can work. Locked weeks require a manager review."}
+                : t("availability.dayStateLegend")}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -602,14 +602,21 @@ export function AvailabilityRequestForm({
               <p className="text-sm text-muted-foreground">{t("availability.thisCompanyUsesOpenAvailabilityYouDoNot")}</p>
             </div>
           ) : (
-          <div className="space-y-2 p-3" data-testid="availability-weekday-rows">
+          <div className="space-y-2 p-3">
+            <p
+              className="text-sm text-muted-foreground"
+              data-testid="availability-state-legend"
+            >
+              {t("availability.dayStateLegend")}
+            </p>
+            <div className="space-y-2" data-testid="availability-weekday-rows">
             {DAY_LABELS.map((label, dayIndex) => {
               const hours = editingGrid[dayIndex] ?? [];
-              const allDay = isFullDayHours(hours);
+              const state = dayAvailabilityState(hours);
               const range =
-                allDay || hours.length === 0
-                  ? { fromTime: "09:00", toTime: "17:00" }
-                  : clockRangeFromHours(hours);
+                state === "set_hours"
+                  ? clockRangeFromHours(hours)
+                  : { fromTime: "09:00", toTime: "17:00" };
               const disabled = !dayIsEditable(dayIndex);
               return (
                 <div
@@ -618,30 +625,51 @@ export function AvailabilityRequestForm({
                   className="flex flex-col gap-2 rounded-md border px-3 py-2 sm:flex-row sm:items-center"
                 >
                   <span className="w-12 text-sm font-medium">{label}</span>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
                       size="sm"
-                      variant={allDay ? "default" : "outline"}
-                      aria-pressed={allDay}
-                      disabled={disabled}
-                      onClick={() => setDayHours(dayIndex, [...FULL_DAY_HOURS])}
-                    >{t("onboarding.allDayOn")}</Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={!allDay ? "default" : "outline"}
-                      aria-pressed={!allDay}
+                      variant={state === "all_day" ? "default" : "outline"}
+                      aria-pressed={state === "all_day"}
+                      data-testid="availability-state-all-day"
                       disabled={disabled}
                       onClick={() =>
                         setDayHours(
                           dayIndex,
-                          hoursFromClockRange(range.fromTime, range.toTime),
+                          hoursForDayState("all_day", range.fromTime, range.toTime),
                         )
                       }
-                    >{t("onboarding.off")}</Button>
+                    >{t("availability.availableAllDay")}</Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={state === "unavailable" ? "default" : "outline"}
+                      aria-pressed={state === "unavailable"}
+                      data-testid="availability-state-unavailable"
+                      disabled={disabled}
+                      onClick={() =>
+                        setDayHours(
+                          dayIndex,
+                          hoursForDayState("unavailable", range.fromTime, range.toTime),
+                        )
+                      }
+                    >{t("availability.unavailable")}</Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={state === "set_hours" ? "default" : "outline"}
+                      aria-pressed={state === "set_hours"}
+                      data-testid="availability-state-hours"
+                      disabled={disabled}
+                      onClick={() =>
+                        setDayHours(
+                          dayIndex,
+                          hoursForDayState("set_hours", range.fromTime, range.toTime),
+                        )
+                      }
+                    >{t("availability.availableAtSetHours")}</Button>
                   </div>
-                  {allDay ? null : (
+                  {state === "all_day" ? null : (
                     <div className="flex flex-wrap items-center gap-2">
                       <Label
                         htmlFor={`availability-${label}-from`}
@@ -657,7 +685,7 @@ export function AvailabilityRequestForm({
                         onChange={(event) =>
                           setDayHours(
                             dayIndex,
-                            hoursFromClockRange(event.target.value, range.toTime),
+                            hoursAfterTimeEdit(event.target.value, range.toTime),
                           )
                         }
                       />
@@ -675,7 +703,7 @@ export function AvailabilityRequestForm({
                         onChange={(event) =>
                           setDayHours(
                             dayIndex,
-                            hoursFromClockRange(range.fromTime, event.target.value),
+                            hoursAfterTimeEdit(range.fromTime, event.target.value),
                           )
                         }
                       />
@@ -684,6 +712,7 @@ export function AvailabilityRequestForm({
                 </div>
               );
             })}
+            </div>
           </div>
           )}
         </div>

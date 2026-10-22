@@ -61,7 +61,7 @@ A phase that adds a migration follows the Feature workflow migration rule. If th
 
 ### Phase 1 — Three day states
 
-- [ ] Replace All day on, Off, and the From/To pair with three states.
+- [x] Replace All day on, Off, and the From/To pair with three states.
 
 Rules:
 
@@ -281,5 +281,21 @@ Shipped: no product code. Four phases are now first: three day states (Decision 
 Proven: docs only.
 
 Blockers: none. Phase 4 adds the company-policies migration. Phase 7 adds `archived_at`. Phases 5–9 wait until the Phase 4 migration is applied.
+
+Questions: none.
+
+### 2026-10-22 — Phase 1 Three day states
+
+Shipped: Each weekday on My Availability is Available all day, Unavailable, or Available at set hours. Available all day stores the existing full-day hours. Unavailable stores an empty hour list. Available at set hours stores the from-time and the to-time. Editing From or To on an Unavailable day selects Available at set hours and stores that range. A legend above the rows names the three states. There is no All day on button and no Off button. Open availability is unchanged. Reset stays.
+
+Proven: `src/features/availability/utils/dayAvailabilityState.test.ts` passed through `node scripts/test-schedule-availability-engine.mjs`. Empty hours map to Unavailable, full-day hours map to Available all day, a clock range maps to Available at set hours, and a time edit on an unavailable day maps to set hours. `npm run check:i18n` printed 4588 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on `AvailabilityRequestForm.tsx`, `dayAvailabilityState.ts`, and `dayAvailabilityState.test.ts`. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk, set the language to English, and open My Availability. The company must be on fixed availability, not open availability.
+2. A legend above the weekday rows says each day is one of three states. Each day has Available all day, Unavailable, and Available at set hours, and only one is selected. There is no All day on button and no Off button.
+3. Set a day to Unavailable, then change From or To. That day should switch to Available at set hours and keep the range you typed.
+4. Available all day should not show From and To. Reset still clears unsaved edits.
+
+Blockers: none. No migration.
 
 Questions: none.
