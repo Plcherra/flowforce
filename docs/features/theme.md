@@ -2,7 +2,7 @@
 
 ## Goal
 
-FlowForce has one brand palette. The signed-in app offers three themes and nothing else: FlowForce, Light, and Dark. FlowForce is the palette already in `app/globals.css` `:root`. Light and Dark are that same palette on different surfaces. There is no color picker, no palette picker, and no company accent.
+FlowForce has one brand palette. The signed-in app offers three themes and nothing else: FlowForce, Light, and Dark. FlowForce is the blue the signed-in app already paints from the company colors, baked into `:root` as fixed tokens. Light and Dark are that same blue on different surfaces. There is no color picker, no palette picker, and no company accent.
 
 A simple switch in Settings stores the choice in this browser. Pages then stop hard-coding Tailwind palette classes and hex colors, and use the shared tokens instead.
 
@@ -12,7 +12,16 @@ Counted on 2026-10-22. These are the numbers a phase has to drive down.
 
 The design tokens live in `app/globals.css`. `:root` is the light brand. `.dark` exists, and `tailwind.config.ts` sets `darkMode: ["class"]`. Nothing adds the `dark` class. `next-themes` is in `package.json` and is not imported.
 
-`CompanyThemeSync` reads `companies.primary_color` and `companies.secondary_color` and `applyCompanyTheme` in `src/lib/theme/companyTheme.ts` overwrites `--primary`, `--ring`, `--sidebar-primary`, `--secondary`, and `--brand-secondary` at runtime. New companies are stored with `#3b82f6` and `#1e40af` (`supabase/migrations/20260509000100_align_onboarding_schema.sql`, `src/hooks/useCompany.tsx`, `app/api/onboarding/complete/route.ts`). Those blues are not the `:root` mint and lavender. The logo plate comes from `system_settings.appearance.logoBackgroundColor`, default `#ffffff`.
+`CompanyThemeSync` reads `companies.primary_color` and `companies.secondary_color` and `applyCompanyTheme` in `src/lib/theme/companyTheme.ts` overwrites tokens at runtime. The code defaults, the column defaults, and `src/hooks/useCompany.tsx` are `#3b82f6` and `#1e40af` (`supabase/migrations/20260509000100_align_onboarding_schema.sql`, `app/api/onboarding/complete/route.ts`). `hexToHslChannels` and `hexToForegroundChannels` turn that pair into the signed-in set:
+
+- `--primary`, `--ring`, `--sidebar-primary`: `217 91% 60%`
+- `--primary-foreground`, `--sidebar-primary-foreground`: `210 40% 98%`
+- `--secondary`, `--brand-secondary`: `226 71% 40%`
+- `--secondary-foreground`: `210 40% 98%`
+- `--logo-background`: `#ffffff`
+- `--logo-foreground`: `222.2 47.4% 11.2%`
+
+`accentColor` `#0ea5e9` is stored on appearance and is not applied. The stylesheet mint `--primary` `174 78% 72%` and lavender `--secondary` `259 76% 87%` show only until the company loads. `--accent` and `--tertiary` stay `270 80% 90%`. `--accent` is the hover and selected row in menus, the calendar, and selects. `--tertiary` is that same lavender and is only the unused tertiary button variant in `src/components/ui/button.tsx`. Nothing else in the app uses the mint or the old secondary lavender. The logo plate default is `#ffffff`.
 
 `AppearanceSettings` in `src/types/system-settings.ts` also has `theme` (`light` | `dark` | `system`), `accentColor`, `logoPlacement`, `sidebarBranding`, `dashboardLayout`, and `preview`. No screen reads `theme`, `logoPlacement`, `sidebarBranding`, or `dashboardLayout`. The accent picker is the onboarding preview only. `applyCompanyTheme` does not set `--accent`.
 
@@ -45,13 +54,13 @@ Columns written today and read by the app: `companies.primary_color`, `companies
 
 These are locked for the auto run. Implement them. Do not edit this section while implementing a phase.
 
-1. FlowForce is the current `:root` block in `app/globals.css`, value for value. Do not retune a token that is already there. The brand is primary `174 78% 72%`, secondary `259 76% 87%`, tertiary `270 80% 90%`, accent `270 80% 90%`, and the foregrounds already beside them. The company hex defaults `#3b82f6` and `#1e40af` are the picker, not the brand. Removing the override is what makes FlowForce the colors on screen.
-2. Light and Dark keep those brand hues. They do not get a new primary, secondary, tertiary, or accent. Light is the same block with the warm input replaced by the neutral border already in the file: `--input` becomes `214.3 31.8% 91.4%`. Every other Light token matches FlowForce, including `--sidebar-ring`. Dark keeps the current `.dark` surface tokens (`background`, `foreground`, `card`, `popover`, `muted`, `border`, `input`, `sidebar-background`, `sidebar-foreground`, `sidebar-accent`, `sidebar-border`) and the current `.dark` destructive pair `0 62.8% 30.6%` / `210 40% 98%`. Dark brand tokens copy FlowForce. Dark `--sidebar-primary` becomes FlowForce primary `174 78% 72%` and its foreground becomes `222.2 47.4% 11.2%`, replacing the blue `224.3 76.3% 48%`. Do not keep Dark secondary `129 42% 72%` or Dark accent `257 63% 89%`. Leave `--ring` and `--sidebar-ring` as each block already has them.
+1. FlowForce is the signed-in blue, baked into `:root` before the override is removed. Use the audit list, which is `applyCompanyTheme` for `#3b82f6` and `#1e40af`. Do not bake `#0ea5e9`. Keep every `:root` token the override does not set, including the warm `--input` and `--sidebar-ring` `217.2 91.2% 59.8%`. Keep `--accent` and `--tertiary` at `270 80% 90%`, and their foregrounds at `222.2 47.4% 11.2%`. That lavender is the secondary accent on today's signed-in screen. Remove mint `174 78% 72%` and stylesheet secondary `259 76% 87%` from `:root`. They are not on screen after sign-in. Phase 3 deletes the picker and the override only after Phase 1 has baked this set, so the signed-in look does not change.
+2. Light and Dark use that baked set for primary, secondary, accent, and tertiary, including the foregrounds. They do not get a new blue, and they do not get the mint back. Light is the FlowForce block with `--input` set to the neutral border already in the file, `214.3 31.8% 91.4%`. Every other Light token matches FlowForce, including `--sidebar-ring`. Dark keeps the current `.dark` surface tokens (`background`, `foreground`, `card`, `popover`, `muted`, `border`, `input`, `sidebar-background`, `sidebar-foreground`, `sidebar-accent`, `sidebar-border`) and the current `.dark` destructive pair `0 62.8% 30.6%` / `210 40% 98%`. Dark brand tokens copy FlowForce, so Dark `--primary`, `--ring`, and `--sidebar-primary` are `217 91% 60%`, and Dark `--sidebar-primary-foreground` is `210 40% 98%`. Do not keep Dark primary `175 100% 75%`, Dark secondary `129 42% 72%`, or Dark accent `257 63% 89%`. Leave `--sidebar-ring` as `217.2 91.2% 59.8%` in all three. The override does not change it.
 3. Status colors that are already on the pages become four tokens, added once, not a new brand. FlowForce and Light: `--success` `142 76% 36%`, `--success-foreground` `210 40% 98%`, `--success-muted` `141 84% 93%`, `--warning` `41 96% 40%`, `--warning-foreground` `222.2 47.4% 11.2%`, `--warning-muted` `55 97% 88%`. Dark uses the same success and warning hues. Its muted pair is `--success-muted` `142 40% 16%` and `--warning-muted` `41 40% 16%`. Do not add more color tokens in later phases. Orange and amber use warning. Green, lime, and emerald use success.
 4. The logo plate is `#ffffff` in all three themes, as `--logo-background`. No logo-color control. Logo image upload stays.
 5. The switch has three values: `flowforce`, `light`, `dark`. Default is `flowforce`. There is no System option and no `prefers-color-scheme` follow. The choice is `localStorage` key `flowforce-theme`. Do not add a theme column.
 6. The switch sits at the top of General settings and works when the company fields are read-only. It does not save the company. FlowForce and Light do not set the `dark` class. Dark sets `dark` and `data-theme="dark"` so existing `dark:` utilities follow the class.
-7. Map hard-coded classes onto the tokens. Gray, slate, zinc, neutral, stone, black, and white become `background`, `foreground`, `muted`, `card`, or `border`. Blue, sky, cyan, teal, and indigo become `primary`. Violet, purple, and fuchsia become `secondary`. Pink and rose become `accent`. Red becomes `destructive`. Green, lime, and emerald become `success`. Yellow, amber, and orange become `warning`. Hex `#3b82f6`, `#1e40af`, `#0ea5e9`, and `#3F51B5` become `primary`. Hex `#10b981` becomes `success`. A `dark:` palette class is deleted. The token moves under `.dark`.
+7. Map hard-coded classes onto the tokens. Gray, slate, zinc, neutral, stone, black, and white become `background`, `foreground`, `muted`, `card`, or `border`. Blue, sky, cyan, teal, and indigo become `primary`. Violet, purple, and fuchsia become `secondary`. Pink and rose become `accent`. Red becomes `destructive`. Green, lime, and emerald become `success`. Yellow, amber, and orange become `warning`. Hex `#3b82f6`, `#0ea5e9`, and `#3F51B5` become `primary`. Hex `#1e40af` becomes `secondary`. Hex `#10b981` becomes `success`. A `dark:` palette class is deleted. The token moves under `.dark`.
 8. Do not change `positions.color`, `schedules.color`, rich-text color, post gradient presets, or the vendor list.
 9. Drop the theme columns only in the last phase, after no code reads or writes them.
 10. Ship each phase with the Ship-To-Main rule: one commit on `main`, then push `main`. Do not open a pull request.
@@ -71,14 +80,17 @@ Color phases follow Decisions 3 and 7. Touch only the files named in that phase.
 Rules:
 
 - Files: `app/globals.css`, and a new `src/lib/theme/themeTokens.test.ts`.
-- Follow Decisions 1, 2, and 3. `:root` is FlowForce. Add `[data-theme="light"]` and keep `.dark` as Dark. Add the success, warning, and `--logo-background` tokens to `tailwind.config.ts` the same way `primary` is wired, and only those.
-- Do not import `next-themes`. Do not add the switch in this phase.
+- Follow Decisions 1, 2, and 3. `:root` is FlowForce. Add `[data-theme="light"]` and keep `.dark` as Dark. Add `--brand-secondary`, the success and warning tokens, and `--logo-background` to `tailwind.config.ts` the same way `primary` is wired, and only those.
+- Do not import `next-themes`. Do not add the switch in this phase. Do not delete `applyCompanyTheme` in this phase.
 
 Done when:
 
-- `:root` still has every token value it has today, plus the new status and logo tokens.
+- `:root` `--primary`, `--ring`, and `--sidebar-primary` are `217 91% 60%`. `--primary-foreground` and `--sidebar-primary-foreground` are `210 40% 98%`.
+- `:root` `--secondary` and `--brand-secondary` are `226 71% 40%`, and `--secondary-foreground` is `210 40% 98%`.
+- `:root` `--accent` and `--tertiary` are still `270 80% 90%`.
+- `:root` does not contain `174 78% 72%` or `259 76% 87%`.
 - Light differs from FlowForce only by `--input` `214.3 31.8% 91.4%`.
-- Dark brand hues match FlowForce, and Dark secondary is not `129 42% 72%`.
+- Dark `--primary`, `--ring`, and `--sidebar-primary` are `217 91% 60%`, Dark secondary matches FlowForce, and Dark does not contain `175 100% 75%` or `129 42% 72%`.
 
 Prove: Unit test `src/lib/theme/themeTokens.test.ts` reads `app/globals.css` and asserts those strings. Run it with the same jiti style as `scripts/test-tasks-page.mjs`.
 
@@ -108,8 +120,9 @@ Prove: Unit test `src/lib/theme/applyTheme.test.ts` covers the three names, an u
 
 Rules:
 
+- Depends on Phase 1. Do not start until `:root` already has the baked blue. Removing the override before that would swap the signed-in screen back to mint.
 - Files: `src/lib/theme/companyTheme.ts`, `src/app-shell/theme/CompanyThemeSync.tsx`, `src/features/system/components/GeneralSettingsPanel.tsx`, `src/features/system/hooks/useGeneralSettings.ts`, `src/features/system/hooks/systemSettingsDefaults.ts`, `src/features/system/hooks/systemSettingsNormalizer.ts`, `src/features/system/hooks/useSystemSettings.ts`, `src/hooks/useCompany.tsx`, `src/types/common.ts`, `src/features/profile/components/ProfileForm.tsx`, `src/features/profile/components/ProfileOverview.tsx`, `app/api/onboarding/complete/route.ts`, `src/features/onboarding/components/BrandingCustomizer.tsx`, `CompanyOnboardingWizard.tsx`, `EnhancedOnboardingWizard.tsx`, and `CustomTemplateBuilder.tsx`.
-- Follow Decisions 4 and 8. Delete primary, secondary, accent, and logo-background inputs. Keep logo upload.
+- Follow Decisions 1, 4, and 8. Delete primary, secondary, accent, and logo-background inputs. Keep logo upload.
 - `CompanyThemeSync` may still pass the logo URL. It must not set a color variable. Delete `applyCompanyTheme` and the hex-to-HSL override.
 - Company save and onboarding complete stop sending `primary_color` and `secondary_color`. Do not drop the columns in this phase.
 - Do not remove the position picker, the shift color, the rich-text color, or the post gradients.
@@ -117,7 +130,7 @@ Rules:
 Done when:
 
 - General settings has the theme switch and no color inputs.
-- Signing in does not change `--primary` or `--secondary`.
+- Signing in leaves `--primary` at `217 91% 60%` and `--secondary` at `226 71% 40%`.
 - Creating a company does not send a primary or secondary color.
 
 Prove: Unit test the save payload builder (extract it if it is inline) and assert the payload has no `primary_color`, `secondary_color`, `primaryColor`, or `secondaryColor`. Run it with the jiti runner.
@@ -410,11 +423,7 @@ Prove: `npm run typecheck`. A unit test is not required for the SQL. If the push
 
 ## Open questions
 
-No phase names a question here. Do not skip a phase because of this note.
-
-### Confirm the brand is the CSS palette
-
-Decision 1 keeps the `:root` mint and lavender and deletes the company blue override. Signed-in screens can still be showing that override today. Phases are not blocked. If the colors to keep are the saved company hex values instead, say so before Phase 1.
+None. Pedro answered on 2026-10-22: keep the blue he sees when signed in.
 
 ## Progress log
 
@@ -425,3 +434,11 @@ Shipped: this file. No app code, no migration, no theme behavior change.
 Blockers: none.
 
 Questions: Confirm the brand is the CSS palette, if the company blue is what should stay.
+
+### 2026-10-22 — Signed-in blue is FlowForce
+
+Shipped: Decision 1 now bakes `#3b82f6` / `#1e40af` into `:root` before the picker is removed. Light and Dark derive from that blue. Mint and the old secondary lavender come out. The lavender accent and tertiary stay, because that is the hover accent still on screen after sign-in. No app code.
+
+Blockers: none.
+
+Questions: none.
