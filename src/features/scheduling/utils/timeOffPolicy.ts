@@ -1,3 +1,8 @@
+import {
+  timeOffPolicyForSubject,
+  type CompanyPolicyRecord,
+} from "@/features/scheduling/utils/companyPolicy";
+
 export type TimeOffUnit = "hours" | "days" | "minutes";
 
 export type TimeOffPolicy = {
@@ -18,6 +23,7 @@ export type TimeOffUsage = {
   startDate: string;
   endDate: string;
   status: string;
+  userId?: string | null;
 };
 
 export type PeriodBalance = {
@@ -92,7 +98,7 @@ export function requestFitsPolicy(input: {
     if (cap == null) continue;
     const groups = groupAmount(policy, dates, kind);
     for (const [key, amount] of groups) {
-      const used = usedInPeriod(policy, input.usage, kind, key);
+      const used = usedInPeriod(policy, input.usage, kind, key, input.userId);
       if (used + amount > cap) {
         return {
           ok: false,
@@ -117,9 +123,9 @@ export function remainingBalances(input: {
     .filter((policy) => policyAppliesTo(policy, input.userId, input.roleId))
     .map((policy) => ({
       policy,
-      week: periodBalance(policy, input.usage, "week", periodKey(asOfDate, "week")),
-      month: periodBalance(policy, input.usage, "month", periodKey(asOfDate, "month")),
-      year: periodBalance(policy, input.usage, "year", periodKey(asOfDate, "year")),
+      week: periodBalance(policy, input.usage, "week", periodKey(asOfDate, "week"), input.userId),
+      month: periodBalance(policy, input.usage, "month", periodKey(asOfDate, "month"), input.userId),
+      year: periodBalance(policy, input.usage, "year", periodKey(asOfDate, "year"), input.userId),
     }));
 }
 
@@ -138,15 +144,66 @@ export function balanceLabel(balance: PolicyBalance): string {
   return parts.join(" · ");
 }
 
+export function balanceLabelForPerson(input: {
+  policy: TimeOffPolicy | null;
+  usage: TimeOffUsage[];
+  userId?: string | null;
+  roleId?: string | null;
+  asOf: string;
+}): string | null {
+  if (!input.policy || !input.userId) return null;
+  const [balance] = remainingBalances({
+    policies: [input.policy],
+    usage: input.usage.filter((row) => !row.userId || row.userId === input.userId),
+    userId: input.userId,
+    roleId: input.roleId,
+    asOf: input.asOf,
+  });
+  return balance ? balanceLabel(balance) : null;
+}
+
+export function teamRequestBalanceLabel(input: {
+  policyId: string | null;
+  userId: string | null;
+  companyId: string;
+  roleId?: string | null;
+  level?: string | null;
+  locationId?: string | null;
+  policies: CompanyPolicyRecord[];
+  usage: TimeOffUsage[];
+  asOf: string;
+}): string | null {
+  if (!input.policyId || !input.userId) return null;
+  const policy =
+    input.policies.flatMap((row) => {
+      const match = timeOffPolicyForSubject(row, {
+        userId: input.userId!,
+        roleId: input.roleId,
+        level: input.level,
+        locationId: input.locationId,
+        companyId: input.companyId,
+      });
+      return match?.id === input.policyId ? [match] : [];
+    })[0] ?? null;
+  return balanceLabelForPerson({
+    policy,
+    usage: input.usage,
+    userId: input.userId,
+    roleId: input.roleId,
+    asOf: input.asOf,
+  });
+}
+
 function periodBalance(
   policy: TimeOffPolicy,
   usage: TimeOffUsage[],
   kind: "week" | "month" | "year",
   key: string,
+  userId?: string | null,
 ): PeriodBalance | null {
   const cap = capFor(policy, kind);
   if (cap == null) return null;
-  const used = usedInPeriod(policy, usage, kind, key);
+  const used = usedInPeriod(policy, usage, kind, key, userId);
   return { cap, used, remaining: Math.max(cap - used, 0) };
 }
 
@@ -161,9 +218,11 @@ function usedInPeriod(
   usage: TimeOffUsage[],
   kind: "week" | "month" | "year",
   key: string,
+  userId?: string | null,
 ): number {
   let total = 0;
   for (const row of usage) {
+    if (userId && row.userId && row.userId !== userId) continue;
     if (row.policyId !== policy.id || !countsTowardCap(row.status)) continue;
     const dates = datesInRange(row.startDate, row.endDate).filter(
       (date) =>

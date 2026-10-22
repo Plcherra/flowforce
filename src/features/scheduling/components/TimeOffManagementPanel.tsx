@@ -16,6 +16,8 @@ import {
 import { TimeOffRequest } from "@/types/scheduling-unified";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { useCompanyRoles } from "@/hooks/useCompanyRoles";
+import { useEmployees } from "@/hooks/useEmployees";
 import {
   fetchTimeOffRequests,
   updateTimeOffStatus,
@@ -35,6 +37,7 @@ import {
   balanceLabel,
   remainingBalances,
 } from "@/features/scheduling/utils/timeOffPolicy";
+import { TeamRequestBalance, usageByRequester } from "@/features/scheduling/components/TeamRequestBalance";
 import { useTimeOffTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
 import { TimeOffCopy } from "@/features/scheduling/components/TimeOffCopy";
 
@@ -85,6 +88,11 @@ export function TimeOffManagementPanel({
   const companyId = profile?.companyId ?? null;
   const { companyPolicies } = useTimeOffPolicies(companyId);
   const subject = usePolicySubject();
+  const { employees } = useEmployees({
+    companyId,
+    enabled: Boolean(companyId) && !staffOnly,
+  });
+  const { roles } = useCompanyRoles();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -216,6 +224,8 @@ export function TimeOffManagementPanel({
     roleId: profile?.roleId,
     asOf: new Date().toISOString().slice(0, 10),
   });
+  const asOf = new Date().toISOString().slice(0, 10);
+  const usageByUser = usageByRequester(timeOffRequests);
 
   return (
     <div className="space-y-4">
@@ -285,6 +295,17 @@ export function TimeOffManagementPanel({
                     >
                       {timeLeftLabel(request.start_date)}
                     </div>
+                    {companyId ? (
+                      <TeamRequestBalance
+                        request={request}
+                        companyId={companyId}
+                        employees={employees}
+                        roles={roles}
+                        policies={companyPolicies}
+                        usageByUser={usageByUser}
+                        asOf={asOf}
+                      />
+                    ) : null}
                     <Badge variant="outline" className="mt-1 capitalize">
                       {request.type}
                     </Badge>

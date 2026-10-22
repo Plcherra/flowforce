@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 import {
   policyAppliesTo,
+  balanceLabel,
+  balanceLabelForPerson,
   remainingBalances,
   requestFitsPolicy,
+  teamRequestBalanceLabel,
   type TimeOffPolicy,
   type TimeOffUsage,
 } from "./timeOffPolicy";
+import type { CompanyPolicyRecord } from "./companyPolicy";
 
 const weekend: TimeOffPolicy = {
   id: "weekend",
@@ -158,4 +162,82 @@ export function runTimeOffPolicyTests() {
   assert.equal(policyAppliesTo(limited, "person", "role-1"), true);
   assert.equal(policyAppliesTo(limited, "person", "role-2"), false);
   assert.equal(policyAppliesTo(weekend, "person", null), true);
+
+  const personA: TimeOffUsage = {
+    policyId: "weekend",
+    startDate: "2026-10-03",
+    endDate: "2026-10-03",
+    status: "approved",
+    userId: "person-a",
+  };
+  const personB: TimeOffUsage = {
+    policyId: "weekend",
+    startDate: "2026-10-04",
+    endDate: "2026-10-04",
+    status: "approved",
+    userId: "person-b",
+  };
+  const shared = [personA, personB];
+  const personABalances = remainingBalances({
+    policies: [weekend],
+    usage: shared,
+    userId: "person-a",
+    asOf: "2026-10-01",
+  });
+  assert.equal(personABalances[0]?.month?.remaining, 1);
+  assert.equal(personABalances[0]?.year?.remaining, 23);
+  assert.match(balanceLabel(personABalances[0]!), /1 days left this month/);
+  const personBBalances = remainingBalances({
+    policies: [weekend],
+    usage: shared,
+    userId: "person-b",
+    asOf: "2026-10-01",
+  });
+  assert.equal(personBBalances[0]?.month?.remaining, 1);
+  assert.equal(
+    balanceLabelForPerson({
+      policy: null,
+      usage: shared,
+      userId: "person-a",
+      asOf: "2026-10-01",
+    }),
+    null,
+  );
+
+  const weekendRecord: CompanyPolicyRecord = {
+    id: "weekend",
+    companyId: "company-1",
+    name: "Weekend",
+    type: "time_off",
+    unit: "days",
+    capWeek: null,
+    capMonth: 2,
+    capYear: 24,
+    eligibleWeekdays: [0, 6],
+    noticeDays: 0,
+    archivedAt: null,
+    assignments: [{ targetType: "company", targetId: "company-1" }],
+  };
+  assert.equal(
+    teamRequestBalanceLabel({
+      policyId: "weekend",
+      userId: "person-a",
+      companyId: "company-1",
+      policies: [weekendRecord],
+      usage: shared,
+      asOf: "2026-10-01",
+    }),
+    balanceLabel(personABalances[0]!),
+  );
+  assert.equal(
+    teamRequestBalanceLabel({
+      policyId: null,
+      userId: "person-a",
+      companyId: "company-1",
+      policies: [weekendRecord],
+      usage: shared,
+      asOf: "2026-10-01",
+    }),
+    null,
+  );
 }

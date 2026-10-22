@@ -221,7 +221,7 @@ Prove: Extend `policyDraft.test.ts` so an archived policy is closed and an open 
 
 ### Phase 8 — The requester's balance on the team row
 
-- [ ] Show the remaining balance for the person who asked, on that request.
+- [x] Show the remaining balance for the person who asked, on that request.
 
 Rules:
 
@@ -393,5 +393,21 @@ Phone steps for Pedro:
 4. Open My time off again. Weekend is not in the request picker and not in the remaining balance lines. The saved request still shows Policy: Weekend. The requested-off day stays on the schedule grid.
 
 Blockers: none. Migration `supabase/migrations/20261022174204_company_policies_archived_at.sql` is applied.
+
+Questions: none.
+
+### 2026-10-22 — Phase 8 The requester's balance on the team row
+
+Shipped: A team request stored on a policy shows that person's remaining balance on the row, from `remainingBalances` and `balanceLabel`. The usage passed in is only that person's requests. Another person's usage does not reduce it. The manager's own balance lines stay. A request with no policy keeps the current row. The 25-day allowance stays on My time off only when no policy applies to that person.
+
+Proven: `src/features/scheduling/utils/timeOffPolicy.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. Two people share Weekend. Person A's month remaining stays 1 day after person B also uses 1 day. The label is in days. A request with no policy has no balance label. `npm run check:i18n` printed 4625 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as someone who can approve time off. Save Weekend for everyone: Saturday and Sunday, 2 days a month, 24 days a year.
+2. Have two people each request one different Weekend day in the same month, on Weekend.
+3. Open Team requests. Each person's row shows that person's Weekend balance in days. Person A's remaining days do not drop because of person B's request. With one day each, each row shows 1 day left this month.
+4. A request with no policy stays on its row without a policy balance. Your own balance lines stay at the top of Team requests. On My time off, the 25-day allowance still shows when no policy applies to you.
+
+Blockers: none. No migration.
 
 Questions: none.
