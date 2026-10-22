@@ -2,6 +2,7 @@
  * Top bar component for form wizard
  */
 
+import { useTranslation } from "react-i18next";
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -26,6 +27,7 @@ export function WizardTopBar({
   progress,
   onClose,
 }: WizardTopBarProps) {
+  const { t } = useTranslation();
   return (
     <header className="shrink-0 border-b border-border/80 bg-background/95 px-4 py-3 pr-12 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -40,13 +42,15 @@ export function WizardTopBar({
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
             <Badge variant="outline" className="border-dashed">
-              Step {currentStepIndex + 1} of {totalSteps}
+              {t("forms.stepProgress", {
+                current: currentStepIndex + 1,
+                total: totalSteps,
+              })}
             </Badge>
             <span>{statusLabel}</span>
           </div>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Close
-          </Button>
+            {t("common.close")}</Button>
         </div>
       </div>
       <Progress value={progress} className="mt-3 h-1" />

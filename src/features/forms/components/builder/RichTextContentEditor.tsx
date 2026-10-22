@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -46,9 +47,10 @@ interface RichTextContentEditorProps {
 export function RichTextContentEditor({
   value,
   onChange,
-  placeholder = "Write description content...",
+  placeholder,
   className,
 }: RichTextContentEditorProps) {
+  const { t } = useTranslation();
   const [color, setColor] = useState("#111827");
   const [colorOpen, setColorOpen] = useState(false);
 
@@ -66,7 +68,9 @@ export function RichTextContentEditor({
           levels: [1, 2, 3],
         },
       }),
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({
+        placeholder: placeholder ?? t("forms.writeDescriptionContent"),
+      }),
     ],
     content: value || "<p></p>",
     editorProps: {
@@ -93,8 +97,7 @@ export function RichTextContentEditor({
   if (!editor) {
     return (
       <div className="rounded-lg border bg-background p-4 text-sm text-muted-foreground">
-        Loading editor...
-      </div>
+        {t("forms.loadingEditor")}</div>
     );
   }
 
@@ -128,25 +131,25 @@ export function RichTextContentEditor({
         <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/20 p-2">
           <ToolbarButton
             icon={Bold}
-            label="Bold"
+            label={t("forms.bold")}
             isActive={isActive("bold")}
             onClick={() => editor.chain().focus().toggleBold().run()}
           />
           <ToolbarButton
             icon={Italic}
-            label="Italic"
+            label={t("forms.italic")}
             isActive={isActive("italic")}
             onClick={() => editor.chain().focus().toggleItalic().run()}
           />
           <ToolbarButton
             icon={UnderlineIcon}
-            label="Underline"
+            label={t("forms.underline")}
             isActive={isActive("underline")}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
           />
           <ToolbarButton
             icon={Heading1}
-            label="Heading 1"
+            label={t("forms.heading1")}
             isActive={isActive("heading", { level: 1 })}
             onClick={() =>
               editor.chain().focus().toggleHeading({ level: 1 }).run()
@@ -154,7 +157,7 @@ export function RichTextContentEditor({
           />
           <ToolbarButton
             icon={Heading2}
-            label="Heading 2"
+            label={t("forms.heading2")}
             isActive={isActive("heading", { level: 2 })}
             onClick={() =>
               editor.chain().focus().toggleHeading({ level: 2 }).run()
@@ -162,36 +165,36 @@ export function RichTextContentEditor({
           />
           <ToolbarButton
             icon={List}
-            label="Bullet list"
+            label={t("forms.bulletList")}
             isActive={isActive("bulletList")}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
           />
           <ToolbarButton
             icon={ListOrdered}
-            label="Numbered list"
+            label={t("forms.numberedList")}
             isActive={isActive("orderedList")}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
           />
           <ToolbarButton
             icon={Quote}
-            label="Quote"
+            label={t("forms.quote")}
             isActive={isActive("blockquote")}
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
           />
           <ToolbarButton
             icon={LinkIcon}
-            label="Link"
+            label={t("forms.link")}
             isActive={isActive("link")}
             onClick={addLink}
           />
           <ToolbarButton
             icon={Undo2}
-            label="Undo"
+            label={t("forms.undo")}
             onClick={() => editor.chain().focus().undo().run()}
           />
           <ToolbarButton
             icon={Redo2}
-            label="Redo"
+            label={t("forms.redo")}
             onClick={() => editor.chain().focus().redo().run()}
           />
 
@@ -202,7 +205,7 @@ export function RichTextContentEditor({
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 rounded-full p-0"
-                aria-label="Text color"
+                aria-label={t("forms.textColor")}
               >
                 <Palette className="h-4 w-4" />
               </Button>
@@ -222,8 +225,7 @@ export function RichTextContentEditor({
                     editor.chain().focus().unsetColor().run();
                   }}
                 >
-                  Reset
-                </Button>
+                  {t("forms.reset")}</Button>
               </div>
             </PopoverContent>
           </Popover>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +40,7 @@ export function AudioRecordingField({
   maxDuration = 300, // 5 minutes
   className = "",
 }: AudioRecordingFieldProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState<number | null>(null);
@@ -325,11 +327,10 @@ export function AudioRecordingField({
                   </Button>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-sm">
-                      Recording {index + 1}
+                      {t("forms.recordingNumber", { index: index + 1 })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Audio recording • Click to play
-                    </p>
+                      {t("forms.audioRecordingClickToPlay")}</p>
                   </div>
                   <Button
                     type="button"
@@ -368,7 +369,7 @@ export function AudioRecordingField({
 
           {isRecording ? (
             <div className="space-y-3">
-              <p className="text-foreground font-medium">Recording...</p>
+              <p className="text-foreground font-medium">{t("forms.recording2")}</p>
               <p className="text-lg font-mono text-primary">
                 {formatTime(recordingTime)} / {formatTime(maxDuration)}
               </p>
@@ -379,8 +380,7 @@ export function AudioRecordingField({
                 className="min-w-[120px]"
               >
                 <Square className="h-4 w-4 mr-2" />
-                Stop Recording
-              </Button>
+                {t("forms.stopRecording")}</Button>
             </div>
           ) : (
             <>
@@ -398,8 +398,7 @@ export function AudioRecordingField({
                   className="min-w-[120px]"
                 >
                   <Mic className="h-4 w-4 mr-2" />
-                  Start Recording
-                </Button>
+                  {t("forms.startRecording")}</Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -407,12 +406,13 @@ export function AudioRecordingField({
                   disabled={uploading}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload Audio
-                </Button>
+                  {t("forms.uploadAudio")}</Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Max {maxRecordings} recordings, {Math.floor(maxDuration / 60)}{" "}
-                min each
+                {t("forms.maxRecordingsEach", {
+                  count: maxRecordings,
+                  minutes: Math.floor(maxDuration / 60),
+                })}
               </p>
             </>
           )}
@@ -421,8 +421,7 @@ export function AudioRecordingField({
 
       {uploading && (
         <div className="text-center text-sm text-muted-foreground">
-          Uploading audio...
-        </div>
+          {t("forms.uploadingAudio")}</div>
       )}
     </div>
   );
@@ -461,10 +460,12 @@ function SignedAudioSource({
 
 // For form builder preview
 export function AudioRecordingFieldPreview({
-  label = "Audio Recording",
+  label: labelProp,
   description = "Record audio or upload audio files",
   className = "",
 }: Partial<AudioRecordingFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.audioRecording");
   return (
     <AudioRecordingField
       label={label}

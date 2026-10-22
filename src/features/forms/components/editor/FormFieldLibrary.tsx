@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -80,6 +81,7 @@ interface FormFieldLibraryProps {
 }
 
 export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
 
   const filteredTemplates = useMemo(() => {
@@ -106,13 +108,12 @@ export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
     <div className="flex h-full flex-col gap-4 border-r bg-muted/30 p-4">
       <div className="space-y-2">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Field library
-        </h3>
+          {t("forms.fieldLibrary")}</h3>
         <Input
-          placeholder="Search fields..."
+          placeholder={t("forms.searchFields")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          aria-label="Search field library"
+          aria-label={t("forms.searchFieldLibrary")}
         />
       </div>
       <ScrollArea className="flex-1">
@@ -137,16 +138,14 @@ export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
                   className="flex-1"
                   onClick={() => onAddField(template)}
                 >
-                  Add
-                </Button>
+                  {t("tasks.add")}</Button>
                 <Button
                   size="sm"
                   variant="outline"
                   draggable
                   onDragStart={(event) => handleDragStart(event, template)}
                 >
-                  Drag
-                </Button>
+                  {t("forms.drag")}</Button>
               </div>
             </div>
           ))}

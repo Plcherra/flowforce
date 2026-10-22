@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
 
 export function FormLivePreview() {
+  const { t } = useTranslation();
   const schema = useFormSchemaStore((state) => state.schema);
   const [formState, setFormState] = useState<Record<string, unknown>>({});
 
@@ -31,8 +33,7 @@ export function FormLivePreview() {
   if (!schema) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-        Preview will appear here once a schema is loaded.
-      </div>
+        {t("forms.previewWillAppearHereOnceASchemaIsLoaded")}</div>
     );
   }
 
@@ -41,12 +42,9 @@ export function FormLivePreview() {
       <div className="sticky top-0 z-10 border-b bg-background/90 p-4 backdrop-blur">
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Live preview
-          </h3>
+            {t("forms.livePreview2")}</h3>
           <p className="text-xs text-muted-foreground">
-            Form is interactive but changes are not saved. Use this preview to
-            validate configuration.
-          </p>
+            {t("forms.formIsInteractiveButChangesAreNotSavedUseThisPreviewToValidateConfiguration")}</p>
         </div>
       </div>
       <ScrollArea className="flex-1">
@@ -56,7 +54,7 @@ export function FormLivePreview() {
               {schema.title}
             </h2>
             {schema.metadata?.ownerOnly && (
-              <p className="text-xs text-muted-foreground">Owner only form</p>
+              <p className="text-xs text-muted-foreground">{t("forms.ownerOnlyForm")}</p>
             )}
           </div>
           {sections.map((section) => (

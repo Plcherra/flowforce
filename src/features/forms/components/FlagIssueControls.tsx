@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -10,12 +11,13 @@ export function FlagIssueControls({
   flaggedIds: string[];
   onToggle: (fieldId: string, flagged: boolean) => void;
 }) {
+  const { t } = useTranslation();
   if (fields.length === 0) return null;
   const flagged = new Set(flaggedIds);
 
   return (
     <div className="space-y-2" data-testid="flag-issue-controls">
-      <p className="text-sm font-medium">Flag an item as an issue</p>
+      <p className="text-sm font-medium">{t("forms.flagAnItemAsAnIssue")}</p>
       <div className="space-y-2">
         {fields.map((field) => (
           <div key={field.id} className="flex items-center gap-2">

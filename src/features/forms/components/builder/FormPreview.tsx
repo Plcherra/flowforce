@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +56,7 @@ export default function FormPreview({
   formDescription,
   fields,
 }: FormPreviewProps) {
+  const { t } = useTranslation();
   const isFieldVisible = (field: FormField, fieldIndex: number) => {
     if (!field.conditional_logic?.enabled) return true;
 
@@ -297,7 +299,7 @@ export default function FormPreview({
             <CardContent className="p-4 text-center">
               {getFieldIcon(field.field_type)}
               <p className="text-sm text-muted-foreground mt-2">
-                {commonProps.label} - Preview not available yet
+                {t("forms.previewNotAvailable", { label: commonProps.label })}
               </p>
             </CardContent>
           </Card>
@@ -309,9 +311,9 @@ export default function FormPreview({
     <div className="w-80 border-l pl-6 flex-shrink-0">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Live Preview</h3>
+          <h3 className="font-semibold">{t("forms.livePreview")}</h3>
           <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-            {fields.length} fields
+            {t("forms.fieldCount", { count: fields.length })}
           </div>
         </div>
         <div className="space-y-4">
@@ -332,8 +334,7 @@ export default function FormPreview({
               {field.conditional_logic?.enabled && (
                 <div className="text-xs text-muted-foreground mt-1 italic flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-warning"></div>
-                  Conditional field - will show when conditions are met
-                </div>
+                  {t("forms.conditionalFieldWillShowWhenConditionsAreMet")}</div>
               )}
             </div>
           ))}
@@ -343,8 +344,7 @@ export default function FormPreview({
                 📝
               </div>
               <p className="text-sm">
-                Preview will appear here as you add fields
-              </p>
+                {t("forms.previewWillAppearHereAsYouAddFields")}</p>
             </div>
           )}
         </div>

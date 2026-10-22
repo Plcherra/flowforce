@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { KeyboardEvent } from "react";
 import { Edit, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -41,6 +42,7 @@ export function FormsSection({
   onFill,
   onEdit,
 }: FormsSectionProps) {
+  const { t } = useTranslation();
   const skeletonRows = Array.from({ length: 3 });
 
   const handleRowKeyDown = (
@@ -62,14 +64,14 @@ export function FormsSection({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last edited</TableHead>
-                  <TableHead>Owner</TableHead>
+                  <TableHead>{t("schedule.name")}</TableHead>
+                  <TableHead>{t("schedule.type")}</TableHead>
+                  <TableHead>{t("schedule.status")}</TableHead>
+                  <TableHead>{t("forms.created")}</TableHead>
+                  <TableHead>{t("forms.lastEdited")}</TableHead>
+                  <TableHead>{t("forms.owner")}</TableHead>
                   {canEdit && (
-                    <TableHead className="w-[60px] text-center">Edit</TableHead>
+                    <TableHead className="w-[60px] text-center">{t("common.edit")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -113,8 +115,7 @@ export function FormsSection({
             {refreshing && (
               <div className="absolute right-4 top-3 z-10 flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Syncing
-              </div>
+                {t("forms.syncing")}</div>
             )}
             <Table
               className={
@@ -123,14 +124,14 @@ export function FormsSection({
             >
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last edited</TableHead>
-                  <TableHead>Owner</TableHead>
+                  <TableHead>{t("schedule.name")}</TableHead>
+                  <TableHead>{t("schedule.type")}</TableHead>
+                  <TableHead>{t("schedule.status")}</TableHead>
+                  <TableHead>{t("forms.created")}</TableHead>
+                  <TableHead>{t("forms.lastEdited")}</TableHead>
+                  <TableHead>{t("forms.owner")}</TableHead>
                   {canEdit && (
-                    <TableHead className="w-[60px] text-center">Edit</TableHead>
+                    <TableHead className="w-[60px] text-center">{t("common.edit")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -165,7 +166,7 @@ export function FormsSection({
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="Edit form"
+                            aria-label={t("forms.editForm")}
                             disabled={!canEdit}
                             onClick={() => {
                               if (!canEdit) return;

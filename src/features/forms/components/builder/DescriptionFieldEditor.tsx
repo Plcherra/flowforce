@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Edit3, FileText } from "lucide-react";
@@ -46,6 +47,7 @@ export function DescriptionFieldEditor({
   field,
   onUpdateField,
 }: DescriptionFieldEditorProps) {
+  const { t } = useTranslation();
   const [showEditor, setShowEditor] = useState(false);
 
   const handleSaveContent = (content: string) => {
@@ -69,7 +71,7 @@ export function DescriptionFieldEditor({
     <>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Rich Text Content</label>
+          <label className="text-sm font-medium">{t("forms.richTextContent")}</label>
           <Button
             variant="outline"
             size="sm"
@@ -77,8 +79,7 @@ export function DescriptionFieldEditor({
             className="flex items-center gap-2"
           >
             <Edit3 className="h-4 w-4" />
-            Edit Content
-          </Button>
+            {t("forms.editContent")}</Button>
         </div>
 
         {/* Content Preview */}

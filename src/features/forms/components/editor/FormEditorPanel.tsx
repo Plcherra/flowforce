@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ const randomId = () => {
 };
 
 export function FormEditorPanel() {
+  const { t } = useTranslation();
   const schema = useFormSchemaStore((state) => state.schema);
   const activeSectionId = useFormSchemaStore((state) => state.activeSectionId);
   const activeFieldId = useFormSchemaStore((state) => state.activeFieldId);
@@ -124,8 +126,7 @@ export function FormEditorPanel() {
   if (!schema) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-        Load a form schema to start editing.
-      </div>
+        {t("forms.loadAFormSchemaToStartEditing")}</div>
     );
   }
 
@@ -143,7 +144,7 @@ export function FormEditorPanel() {
               onValueChange={(value) => setActiveSection(value)}
             >
               <SelectTrigger className="min-w-[200px]">
-                <SelectValue placeholder="Select section" />
+                <SelectValue placeholder={t("forms.selectSection")} />
               </SelectTrigger>
               <SelectContent>
                 {schema.sections.map((section) => (
@@ -158,8 +159,7 @@ export function FormEditorPanel() {
               size="sm"
               onClick={() => addSection("Untitled section")}
             >
-              + Add section
-            </Button>
+              {t("forms.addSection")}</Button>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <label className="flex items-center gap-2">
@@ -168,34 +168,30 @@ export function FormEditorPanel() {
                 onCheckedChange={(checked) =>
                   setMetadata({ ...metadata, ownerOnly: checked })
                 }
-                aria-label="Restrict form to owner"
+                aria-label={t("forms.restrictFormToOwner")}
               />
-              <span>Owner only</span>
+              <span>{t("forms.ownerOnly")}</span>
             </label>
             <span className="hidden md:inline">
-              Drag a field here or use quick add:
-            </span>
+              {t("forms.dragAFieldHereOrUseQuickAdd")}</span>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => handleAddQuickField("text")}
             >
-              Text
-            </Button>
+              {t("forms.text")}</Button>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => handleAddQuickField("select")}
             >
-              Dropdown
-            </Button>
+              {t("forms.dropdown")}</Button>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => handleAddQuickField("checkbox")}
             >
-              Checkbox
-            </Button>
+              {t("forms.checkbox")}</Button>
           </div>
         </div>
       </div>
@@ -218,8 +214,7 @@ export function FormEditorPanel() {
                       : "text-muted-foreground",
                   )}
                 >
-                  Focus section
-                </Button>
+                  {t("forms.focusSection")}</Button>
               </div>
               <div className="space-y-2">
                 {section.fields.map((field) => (
@@ -255,8 +250,7 @@ export function FormEditorPanel() {
                     })
                   }
                 >
-                  + Add field
-                </Button>
+                  {t("forms.addField2")}</Button>
               </div>
             </div>
           ))}
@@ -267,8 +261,7 @@ export function FormEditorPanel() {
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Field label
-              </label>
+                {t("forms.fieldLabel")}</label>
               <Input
                 value={activeField.label}
                 onChange={(event) =>
@@ -281,8 +274,7 @@ export function FormEditorPanel() {
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  Field type
-                </label>
+                  {t("forms.fieldType")}</label>
                 <Select
                   value={activeField.type}
                   onValueChange={(value) =>
@@ -305,8 +297,7 @@ export function FormEditorPanel() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  Placeholder
-                </label>
+                  {t("forms.placeholder")}</label>
                 <Input
                   value={activeField.placeholder ?? ""}
                   onChange={(event) =>
@@ -319,10 +310,9 @@ export function FormEditorPanel() {
             </div>
             <div className="flex items-center justify-between rounded-lg border bg-muted/40 p-3">
               <div>
-                <p className="text-sm font-medium text-foreground">Required</p>
+                <p className="text-sm font-medium text-foreground">{t("forms.required")}</p>
                 <p className="text-xs text-muted-foreground">
-                  Users must complete this field before submitting.
-                </p>
+                  {t("forms.usersMustCompleteThisFieldBeforeSubmitting")}</p>
               </div>
               <Switch
                 checked={Boolean(activeField.required)}
@@ -338,8 +328,7 @@ export function FormEditorPanel() {
               activeField.type === "checkbox") && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  Options (one per line)
-                </label>
+                  {t("forms.optionsOnePerLine")}</label>
                 <Textarea
                   value={(activeField.options ?? []).join("\n")}
                   onChange={(event) =>
@@ -363,8 +352,7 @@ export function FormEditorPanel() {
                   setActiveField(null);
                 }}
               >
-                Remove field
-              </Button>
+                {t("forms.removeField")}</Button>
             </div>
           </div>
         </div>
@@ -372,20 +360,17 @@ export function FormEditorPanel() {
       <div className="border-t bg-background p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-foreground">Formulas</p>
+            <p className="text-sm font-semibold text-foreground">{t("forms.formulas")}</p>
             <p className="text-xs text-muted-foreground">
-              Use formulas to compute values automatically.
-            </p>
+              {t("forms.useFormulasToComputeValuesAutomatically")}</p>
           </div>
           <Button size="sm" variant="outline" onClick={handleAddFormula}>
-            + Add formula
-          </Button>
+            {t("forms.addFormula")}</Button>
         </div>
         <div className="mt-4 space-y-3">
           {formulas.length === 0 && (
             <p className="text-xs text-muted-foreground">
-              No formulas configured yet.
-            </p>
+              {t("forms.noFormulasConfiguredYet")}</p>
           )}
           {formulas.map((formula) => (
             <div
@@ -395,8 +380,7 @@ export function FormEditorPanel() {
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold uppercase text-muted-foreground">
-                    Name
-                  </label>
+                    {t("schedule.name")}</label>
                   <Input
                     value={formula.name}
                     onChange={(event) =>
@@ -406,8 +390,7 @@ export function FormEditorPanel() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold uppercase text-muted-foreground">
-                    Target field
-                  </label>
+                    {t("forms.targetField")}</label>
                   <Select
                     value={formula.targetFieldId}
                     onValueChange={(value) =>
@@ -415,7 +398,7 @@ export function FormEditorPanel() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose field" />
+                      <SelectValue placeholder={t("forms.chooseField")} />
                     </SelectTrigger>
                     <SelectContent>
                       {allFields.map((field) => (
@@ -429,8 +412,7 @@ export function FormEditorPanel() {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold uppercase text-muted-foreground">
-                  Expression
-                </label>
+                  {t("forms.expression")}</label>
                 <Textarea
                   value={formula.expression}
                   onChange={(event) =>
@@ -439,7 +421,7 @@ export function FormEditorPanel() {
                       expression: event.target.value,
                     })
                   }
-                  placeholder="e.g. field_a + field_b"
+                  placeholder={t("forms.eGFieldAFieldB")}
                   rows={2}
                 />
               </div>
@@ -450,8 +432,7 @@ export function FormEditorPanel() {
                   className="text-destructive"
                   onClick={() => removeFormula(formula.id)}
                 >
-                  Remove
-                </Button>
+                  {t("forms.remove")}</Button>
               </div>
             </div>
           ))}

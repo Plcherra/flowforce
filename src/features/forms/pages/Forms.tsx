@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import FormsSection from "@/features/forms/components/FormsSection";
@@ -50,6 +51,7 @@ const matchesQuery = (form: FormWithMeta, query: string) => {
 };
 
 export default function Forms() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const leadership = isLeadershipLevel({ name: profile?.role });
@@ -212,16 +214,14 @@ export default function Forms() {
       <div className="w-full space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Forms</h1>
+            <h1 className="text-3xl font-bold text-foreground">{t("common.forms")}</h1>
             <p className="text-sm text-muted-foreground">
-              Create and manage data collection forms
-            </p>
+              {t("forms.createAndManageDataCollectionForms")}</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-full max-w-xs space-y-1">
               <Label htmlFor="forms-search" className="sr-only">
-                Search forms
-              </Label>
+                {t("forms.searchForms")}</Label>
               <div className="relative">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -229,11 +229,11 @@ export default function Forms() {
                 />
                 <Input
                   id="forms-search"
-                  placeholder="Search forms..."
+                  placeholder={t("forms.searchForms2")}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   className="pl-9"
-                  aria-label="Search forms"
+                  aria-label={t("forms.searchForms")}
                 />
               </div>
             </div>
@@ -243,8 +243,7 @@ export default function Forms() {
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />
-                New form
-              </Button>
+                {t("forms.newForm2")}</Button>
             )}
           </div>
         </div>
@@ -262,10 +261,10 @@ export default function Forms() {
           onValueChange={(value) => setStatusFilter(value as StatusFilter)}
         >
           <TabsList className="flex w-full gap-2 overflow-x-auto px-1 sm:max-w-2xl sm:justify-start">
-            <TabsTrigger value="all">All forms</TabsTrigger>
-            <TabsTrigger value="published">Published</TabsTrigger>
-            <TabsTrigger value="draft">Drafts</TabsTrigger>
-            <TabsTrigger value="archived">Archived</TabsTrigger>
+            <TabsTrigger value="all">{t("forms.allForms")}</TabsTrigger>
+            <TabsTrigger value="published">{t("schedule.published")}</TabsTrigger>
+            <TabsTrigger value="draft">{t("forms.drafts")}</TabsTrigger>
+            <TabsTrigger value="archived">{t("forms.archived")}</TabsTrigger>
           </TabsList>
 
           {statusTabs.map((value) => (
@@ -276,8 +275,9 @@ export default function Forms() {
                     key={section.key}
                     fallback={
                       <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                        Unable to render the {section.title.toLowerCase()}{" "}
-                        section.
+                        {t("forms.unableToRenderSection", {
+                          section: section.title.toLowerCase(),
+                        })}
                       </div>
                     }
                   >
@@ -301,8 +301,7 @@ export default function Forms() {
           <ErrorBoundary
             fallback={
               <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                Unable to open the form creation dialog.
-              </div>
+                {t("forms.unableToOpenTheFormCreationDialog")}</div>
             }
           >
             <CreateFormDialog
@@ -323,8 +322,7 @@ export default function Forms() {
             <ErrorBoundary
               fallback={
                 <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                  Unable to open the form builder. Please refresh and try again.
-                </div>
+                  {t("forms.unableToOpenTheFormBuilderPleaseRefreshAndTryAgain")}</div>
               }
             >
               <FormBuilderDialog
@@ -348,8 +346,7 @@ export default function Forms() {
             <ErrorBoundary
               fallback={
                 <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
-                  Unable to load the form fill experience.
-                </div>
+                  {t("forms.unableToLoadTheFormFillExperience")}</div>
               }
             >
               <FormFillDialog

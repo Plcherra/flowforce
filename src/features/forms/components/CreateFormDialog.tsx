@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
@@ -361,6 +362,7 @@ export default function CreateFormDialog({
   preferredMethod,
   onPreferredMethodHandled,
 }: CreateFormDialogProps) {
+  const { t } = useTranslation();
   const { createForm, saveFormFields } = useForms();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -550,11 +552,9 @@ export default function CreateFormDialog({
       <div className="space-y-6">
         <div className="text-center">
           <h3 className="mb-2 text-lg font-semibold">
-            How would you like to create your form?
-          </h3>
+            {t("forms.howWouldYouLikeToCreateYourForm")}</h3>
           <p className="text-sm text-muted-foreground">
-            Choose the method that works best for you.
-          </p>
+            {t("forms.chooseTheMethodThatWorksBestForYou")}</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -619,13 +619,11 @@ export default function CreateFormDialog({
           onClick={() => setCurrentStep("select-method")}
           disabled={creating}
         >
-          ← Back
-        </Button>
+          {t("forms.back")}</Button>
         <div>
-          <h3 className="text-lg font-semibold">Choose a template</h3>
+          <h3 className="text-lg font-semibold">{t("forms.chooseATemplate")}</h3>
           <p className="text-muted-foreground">
-            Select a pre-built form to get started quickly
-          </p>
+            {t("forms.selectAPreBuiltFormToGetStartedQuickly")}</p>
         </div>
       </div>
 
@@ -659,8 +657,7 @@ export default function CreateFormDialog({
                   </div>
                   {template.popular && (
                     <Badge variant="secondary" className="text-xs">
-                      Popular
-                    </Badge>
+                      {t("forms.popular")}</Badge>
                   )}
                 </div>
                 <p className="mb-2 text-sm text-muted-foreground">
@@ -669,7 +666,9 @@ export default function CreateFormDialog({
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <FileText className="h-3 w-3" />
-                    {template.fieldPresets.length || template.fieldCount} fields
+                    {t("forms.fieldCount", {
+                      count: template.fieldPresets.length || template.fieldCount,
+                    })}
                   </span>
                 </div>
               </CardContent>
@@ -696,7 +695,7 @@ export default function CreateFormDialog({
                 aria-hidden="true"
               />
             )}
-            Use &quot;{selectedTemplate.name}&quot; Template
+            {t("forms.useTemplate", { name: selectedTemplate.name })}
           </Button>
         </div>
       )}
@@ -712,13 +711,11 @@ export default function CreateFormDialog({
           onClick={() => setCurrentStep("select-method")}
           disabled={creating}
         >
-          ← Back
-        </Button>
+          {t("forms.back")}</Button>
         <div>
-          <h3 className="text-lg font-semibold">Upload a file</h3>
+          <h3 className="text-lg font-semibold">{t("forms.uploadAFile")}</h3>
           <p className="text-muted-foreground">
-            Upload a document and we&apos;ll generate a form based on it
-          </p>
+            {t("forms.uploadADocumentAndWeLlGenerateAFormBasedOnIt")}</p>
         </div>
       </div>
 
@@ -736,13 +733,11 @@ export default function CreateFormDialog({
           className={`cursor-pointer ${creating ? "pointer-events-none opacity-60" : ""}`}
         >
           <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h4 className="font-semibold mb-2">Choose a file to upload</h4>
+          <h4 className="font-semibold mb-2">{t("forms.chooseAFileToUpload")}</h4>
           <p className="text-muted-foreground mb-4">
-            Support for PDF, DOC, DOCX, and TXT files
-          </p>
+            {t("forms.supportForPdfDocDocxAndTxtFiles")}</p>
           <Button type="button" variant="outline" disabled={creating}>
-            Browse Files
-          </Button>
+            {t("forms.browseFiles")}</Button>
         </label>
       </div>
 
@@ -781,8 +776,7 @@ export default function CreateFormDialog({
                 aria-hidden="true"
               />
             )}
-            Continue with File
-          </Button>
+            {t("forms.continueWithFile")}</Button>
         </div>
       )}
     </div>
@@ -793,10 +787,9 @@ export default function CreateFormDialog({
       <DialogContent className="top-4 flex max-h-[calc(100dvh-2rem)] w-[min(56rem,calc(100vw-2rem))] translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-[56rem]">
         <div className="flex max-h-full flex-1 flex-col">
           <DialogHeader className="space-y-2 border-b px-6 py-6">
-            <DialogTitle>Create New Form</DialogTitle>
+            <DialogTitle>{t("forms.createNewForm")}</DialogTitle>
             <DialogDescription>
-              Create a new form to collect data from your team or customers.
-            </DialogDescription>
+              {t("forms.createANewFormToCollectDataFromYourTeamOrCustomers")}</DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -810,8 +803,7 @@ export default function CreateFormDialog({
           <div className="pointer-events-auto absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              Preparing your form…
-            </div>
+              {t("forms.preparingYourForm")}</div>
           </div>
         )}
       </DialogContent>

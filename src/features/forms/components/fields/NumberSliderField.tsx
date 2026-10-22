@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -127,10 +128,12 @@ export function NumberSliderField({
 
 // For form builder preview
 export function NumberSliderFieldPreview({
-  label = "Rating Scale",
+  label: labelProp,
   description = "Select a value using the slider",
   className = "",
 }: Partial<NumberSliderFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.ratingScale");
   return (
     <NumberSliderField
       label={label}

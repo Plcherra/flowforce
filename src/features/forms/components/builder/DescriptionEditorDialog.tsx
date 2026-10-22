@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -22,6 +23,7 @@ export function DescriptionEditorDialog({
   content,
   onSave,
 }: DescriptionEditorDialogProps) {
+  const { t } = useTranslation();
   const [editorContent, setEditorContent] = useState(content);
 
   useEffect(() => {
@@ -37,10 +39,9 @@ export function DescriptionEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Edit Description Content</DialogTitle>
+          <DialogTitle>{t("forms.editDescriptionContent")}</DialogTitle>
           <DialogDescription>
-            Use the rich text editor to format and style your content.
-          </DialogDescription>
+            {t("forms.useTheRichTextEditorToFormatAndStyleYourContent")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 flex flex-col gap-4">
@@ -53,9 +54,8 @@ export function DescriptionEditorDialog({
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Confirm</Button>
+            {t("common.cancel")}</Button>
+          <Button onClick={handleSave}>{t("forms.confirm")}</Button>
         </div>
       </DialogContent>
     </Dialog>

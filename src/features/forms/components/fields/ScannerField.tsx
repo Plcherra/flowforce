@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +40,7 @@ export function ScannerField({
   },
   className = "",
 }: ScannerFieldProps) {
+  const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
   const [manualEntry, setManualEntry] = useState(false);
   const [manualValue, setManualValue] = useState("");
@@ -156,14 +158,15 @@ export function ScannerField({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground">
-                  {formatScanType(value.scan_type)} Scanned
-                </p>
+                  {t("forms.scannedType", {
+                    type: formatScanType(value.scan_type),
+                  })}</p>
                 <p className="text-sm text-muted-foreground break-all">
                   {value.scandata}
                 </p>
                 {value.scanformat && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Format: {value.scanformat}
+                    {t("forms.formatValue", { format: value.scanformat })}
                   </p>
                 )}
               </div>
@@ -176,8 +179,7 @@ export function ScannerField({
                 onClick={() => setIsScanning(true)}
               >
                 <ScanLine className="h-3 w-3 mr-1" />
-                Scan Again
-              </Button>
+                {t("forms.scanAgain")}</Button>
               <Button
                 type="button"
                 variant="outline"
@@ -185,8 +187,7 @@ export function ScannerField({
                 onClick={clearScan}
               >
                 <X className="h-3 w-3 mr-1" />
-                Clear
-              </Button>
+                {t("shell.clear")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -197,12 +198,14 @@ export function ScannerField({
               <div className="text-center">
                 <ScanLine className="h-8 w-8 text-primary mx-auto mb-2 animate-pulse" />
                 <p className="text-sm font-medium text-foreground">
-                  Scanning for{" "}
-                  {supportedTypes.map(formatScanType).join(" and ")}
+                  {t("forms.scanningFor", {
+                    types: supportedTypes
+                      .map(formatScanType)
+                      .join(` ${t("forms.and")} `),
+                  })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Position the code within the camera view
-                </p>
+                  {t("forms.positionTheCodeWithinTheCameraView")}</p>
               </div>
 
               <div className="relative">
@@ -225,16 +228,14 @@ export function ScannerField({
                   onClick={stopCamera}
                   className="flex-1"
                 >
-                  Cancel
-                </Button>
+                  {t("common.cancel")}</Button>
                 <Button
                   type="button"
                   size="sm"
                   onClick={simulateScan}
                   className="flex-1"
                 >
-                  Simulate Scan
-                </Button>
+                  {t("forms.simulateScan")}</Button>
               </div>
             </div>
           </CardContent>
@@ -246,13 +247,12 @@ export function ScannerField({
               <div className="text-center">
                 <Type className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm font-medium text-foreground">
-                  Enter Code Manually
-                </p>
+                  {t("forms.enterCodeManually")}</p>
               </div>
 
               <div className="space-y-3">
                 <Input
-                  placeholder="Enter barcode or QR code data"
+                  placeholder={t("forms.enterBarcodeOrQrCodeData")}
                   value={manualValue}
                   onChange={(e) => setManualValue(e.target.value)}
                   onKeyDown={(e) => {
@@ -272,8 +272,7 @@ export function ScannerField({
                     }}
                     className="flex-1"
                   >
-                    Cancel
-                  </Button>
+                    {t("common.cancel")}</Button>
                   <Button
                     type="button"
                     size="sm"
@@ -281,8 +280,7 @@ export function ScannerField({
                     disabled={!manualValue.trim()}
                     className="flex-1"
                   >
-                    Submit
-                  </Button>
+                    {t("forms.submit")}</Button>
                 </div>
               </div>
             </div>
@@ -292,21 +290,21 @@ export function ScannerField({
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
           <ScanLine className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            Scan {supportedTypes.map(formatScanType).join(" or ")}
+            {t("forms.scanTypes", {
+              types: supportedTypes.map(formatScanType).join(` ${t("forms.or")} `),
+            })}
           </p>
           <div className="flex gap-2 justify-center">
             <Button type="button" variant="outline" onClick={startCamera}>
               <Camera className="h-4 w-4 mr-2" />
-              Start Scanning
-            </Button>
+              {t("forms.startScanning")}</Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setManualEntry(true)}
             >
               <Type className="h-4 w-4 mr-2" />
-              Enter Manually
-            </Button>
+              {t("forms.enterManually")}</Button>
           </div>
         </div>
       )}
@@ -316,10 +314,12 @@ export function ScannerField({
 
 // For form builder preview
 export function ScannerFieldPreview({
-  label = "Scanner",
+  label: labelProp,
   description = "Scan a barcode or QR code",
   className = "",
 }: Partial<ScannerFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.scanner");
   return (
     <ScannerField
       label={label}

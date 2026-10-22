@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -85,6 +86,7 @@ export function FormsReadinessPanel({
   canCreateForms,
   onCreateForm,
 }: FormsReadinessPanelProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const formIds = useMemo(() => forms.map((form) => form.id), [forms]);
@@ -186,15 +188,13 @@ export function FormsReadinessPanel({
       <CardHeader className="space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="text-xl">Forms Readiness</CardTitle>
+            <CardTitle className="text-xl">{t("forms.formsReadiness")}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Builder, submissions, advanced fields, and review coverage in one view.
-            </p>
+              {t("forms.builderSubmissionsAdvancedFieldsAndReviewCoverageInOneView")}</p>
           </div>
           {canCreateForms && (
             <Button type="button" onClick={onCreateForm}>
-              New Form
-            </Button>
+              {t("forms.newForm")}</Button>
           )}
         </div>
       </CardHeader>
@@ -225,17 +225,16 @@ export function FormsReadinessPanel({
         {readinessQuery.error && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Unable to load form readiness details</AlertTitle>
+            <AlertTitle>{t("forms.unableToLoadFormReadinessDetails")}</AlertTitle>
             <AlertDescription>
-              Form list loaded, but field/review metadata could not be checked.
-            </AlertDescription>
+              {t("forms.formListLoadedButFieldReviewMetadataCouldNotBeChecked")}</AlertDescription>
           </Alert>
         )}
 
         {summary.reviewItems.length > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Form review needed</AlertTitle>
+            <AlertTitle>{t("forms.formReviewNeeded")}</AlertTitle>
             <AlertDescription>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {summary.reviewItems.map((item) => (
@@ -257,8 +256,7 @@ export function FormsReadinessPanel({
           </Alert>
         ) : (
           <div className="rounded-lg border border-success/40 bg-success-muted p-3 text-sm text-success">
-            Published forms have fields, review coverage, and no immediate submission blockers.
-          </div>
+            {t("forms.publishedFormsHaveFieldsReviewCoverageAndNoImmediateSubmissionBlockers")}</div>
         )}
       </CardContent>
     </Card>

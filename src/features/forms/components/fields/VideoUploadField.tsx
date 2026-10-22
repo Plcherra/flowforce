@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +40,7 @@ export function VideoUploadField({
   maxSize = 100,
   className = "",
 }: VideoUploadFieldProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -208,11 +210,10 @@ export function VideoUploadField({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground text-sm">
-                      Video {index + 1}
+                      {t("forms.videoNumber", { index: index + 1 })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Click to play • Uploaded video
-                    </p>
+                      {t("forms.clickToPlayUploadedVideo")}</p>
                   </div>
                   <Button
                     type="button"
@@ -249,7 +250,7 @@ export function VideoUploadField({
             {uploading ? "Uploading..." : "Upload Videos"}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
-            Max {maxFiles} videos, {maxSize}MB each
+            {t("forms.maxVideosEach", { count: maxFiles, size: maxSize })}
           </p>
         </div>
       )}
@@ -297,10 +298,12 @@ function SignedVideoPreview({ value }: { value: StorageObjectValue }) {
 
 // For form builder preview
 export function VideoUploadFieldPreview({
-  label = "Video Upload",
+  label: labelProp,
   description = "Upload videos for this form field",
   className = "",
 }: Partial<VideoUploadFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.videoUpload");
   return (
     <VideoUploadField
       label={label}

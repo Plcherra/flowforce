@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -202,6 +203,7 @@ const DropdownOptionsEditor = ({
   onUpdateOptions: (options: string[]) => void;
   onUpdateMultiple: (allow: boolean) => void;
 }) => {
+  const { t } = useTranslation();
   const addOption = () => {
     const newOption = `Option ${options.length + 1}`;
     onUpdateOptions([...options, newOption]);
@@ -222,7 +224,7 @@ const DropdownOptionsEditor = ({
     <div className="space-y-4">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium">Items</label>
+          <label className="text-sm font-medium">{t("forms.items")}</label>
           <Button
             variant="outline"
             size="sm"
@@ -230,8 +232,7 @@ const DropdownOptionsEditor = ({
             className="h-8 text-xs"
           >
             <Plus className="h-3 w-3 mr-1" />
-            Add item
-          </Button>
+            {t("forms.addItem")}</Button>
         </div>
 
         <div className="space-y-2">
@@ -244,7 +245,7 @@ const DropdownOptionsEditor = ({
               <Input
                 value={option}
                 onChange={(e) => updateOption(index, e.target.value)}
-                placeholder="Enter option text"
+                placeholder={t("forms.enterOptionText")}
                 className="flex-1 h-8 text-sm"
               />
               <Button
@@ -260,8 +261,7 @@ const DropdownOptionsEditor = ({
 
           {options.length === 0 && (
             <div className="text-center py-6 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-              No items yet. Click &quot;Add item&quot; to get started.
-            </div>
+              {t("forms.noItemsYetClickAddItemToGetStarted")}</div>
           )}
         </div>
       </div>
@@ -272,7 +272,7 @@ const DropdownOptionsEditor = ({
             checked={allowMultiple}
             onCheckedChange={(checked) => onUpdateMultiple(!!checked)}
           />
-          <span className="text-sm font-medium">Multiple selection</span>
+          <span className="text-sm font-medium">{t("forms.multipleSelection")}</span>
         </label>
       </div>
     </div>
@@ -285,6 +285,7 @@ export default function FieldEditor({
   onRemoveField,
   onMoveField,
 }: FieldEditorProps) {
+  const { t } = useTranslation();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isCompactView, setIsCompactView] = useState(false);
@@ -349,15 +350,13 @@ export default function FieldEditor({
               {isCompactView ? "List View" : "Card View"}
             </Button>
             <Button variant="outline" size="sm">
-              Preview
-            </Button>
+              {t("schedule.preview")}</Button>
           </div>
         </div>
 
         <div className="flex-1 space-y-3">
           {fields.map((field, index) =>
             isCompactView ? (
-              // Compact List View
               <div
                 key={index}
                 className={`flex items-center gap-3 p-3 border rounded-lg bg-card hover:shadow-sm transition-all cursor-move ${
@@ -383,14 +382,12 @@ export default function FieldEditor({
                     </span>
                     {field.is_required && (
                       <Badge variant="secondary" className="text-xs">
-                        Required
-                      </Badge>
+                        {t("forms.required")}</Badge>
                     )}
                     {field.conditional_logic?.enabled && (
                       <Badge variant="outline" className="text-xs">
                         <div className="w-2 h-2 rounded-full bg-warning mr-1"></div>
-                        Conditional
-                      </Badge>
+                        {t("forms.conditional")}</Badge>
                     )}
                   </div>
                   {field.description && (
@@ -449,14 +446,12 @@ export default function FieldEditor({
                           {field.label || `Field ${index + 1}`}
                           {field.is_required && (
                             <Badge variant="secondary" className="text-xs">
-                              Required
-                            </Badge>
+                              {t("forms.required")}</Badge>
                           )}
                           {field.conditional_logic?.enabled && (
                             <Badge variant="outline" className="text-xs">
                               <div className="w-2 h-2 rounded-full bg-warning mr-1"></div>
-                              Conditional
-                            </Badge>
+                              {t("forms.conditional")}</Badge>
                           )}
                         </CardTitle>
                         {field.description && (
@@ -488,18 +483,18 @@ export default function FieldEditor({
                       {/* Standard field configuration for all other field types */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-sm font-medium">Label</label>
+                          <label className="text-sm font-medium">{t("forms.label")}</label>
                           <Input
                             value={field.label}
                             onChange={(e) =>
                               onUpdateField(index, { label: e.target.value })
                             }
-                            placeholder="Enter field label"
+                            placeholder={t("forms.enterFieldLabel")}
                             className="text-sm"
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium">Type</label>
+                          <label className="text-sm font-medium">{t("schedule.type")}</label>
                           <Select
                             value={field.field_type}
                             onValueChange={(value) =>
@@ -527,8 +522,7 @@ export default function FieldEditor({
 
                       <div>
                         <label className="text-sm font-medium">
-                          Description (Optional)
-                        </label>
+                          {t("forms.descriptionOptional")}</label>
                         <Input
                           value={field.description}
                           onChange={(e) =>
@@ -536,7 +530,7 @@ export default function FieldEditor({
                               description: e.target.value,
                             })
                           }
-                          placeholder="Help text for this field"
+                          placeholder={t("forms.helpTextForThisField")}
                           className="text-sm"
                         />
                       </div>
@@ -546,8 +540,7 @@ export default function FieldEditor({
                         field.field_type !== "yes_no" && (
                           <div>
                             <label className="text-sm font-medium">
-                              Placeholder (Optional)
-                            </label>
+                              {t("forms.placeholderOptional")}</label>
                             <Input
                               value={field.placeholder}
                               onChange={(e) =>
@@ -555,7 +548,7 @@ export default function FieldEditor({
                                   placeholder: e.target.value,
                                 })
                               }
-                              placeholder="Placeholder text"
+                              placeholder={t("forms.placeholderText")}
                               className="text-sm"
                             />
                           </div>
@@ -569,7 +562,7 @@ export default function FieldEditor({
                               onUpdateField(index, { is_required: !!checked })
                             }
                           />
-                          <span className="text-sm font-medium">Required</span>
+                          <span className="text-sm font-medium">{t("forms.required")}</span>
                         </label>
                       </div>
 
@@ -594,10 +587,9 @@ export default function FieldEditor({
                       {field.field_type === "formula" && (
                         <div>
                           <label className="text-sm font-medium">
-                            Formula Configuration
-                          </label>
+                            {t("forms.formulaConfiguration")}</label>
                           <FormulaField
-                            label="Formula Builder"
+                            label={t("forms.formulaBuilder")}
                             description="Build your formula using available fields"
                             formula={field.formula_expression || ""}
                             availableFields={fields
@@ -623,7 +615,7 @@ export default function FieldEditor({
                       {field.field_type === "number_slider" && (
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <label className="text-sm font-medium">Min</label>
+                            <label className="text-sm font-medium">{t("forms.min")}</label>
                             <Input
                               type="number"
                               value={field.min_value || 0}
@@ -636,7 +628,7 @@ export default function FieldEditor({
                             />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Max</label>
+                            <label className="text-sm font-medium">{t("forms.max")}</label>
                             <Input
                               type="number"
                               value={field.max_value || 100}
@@ -649,7 +641,7 @@ export default function FieldEditor({
                             />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Step</label>
+                            <label className="text-sm font-medium">{t("forms.step")}</label>
                             <Input
                               type="number"
                               value={field.step_value || 1}
@@ -670,8 +662,7 @@ export default function FieldEditor({
                   <div className="border-t pt-4 mt-4">
                     <div className="flex items-center justify-between mb-3">
                       <label className="text-sm font-medium">
-                        Conditional Logic
-                      </label>
+                        {t("forms.conditionalLogic")}</label>
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           checked={field.conditional_logic?.enabled || false}
@@ -685,8 +676,7 @@ export default function FieldEditor({
                           }
                         />
                         <span className="text-sm">
-                          Show this field only if...
-                        </span>
+                          {t("forms.showThisFieldOnlyIf")}</span>
                       </div>
                     </div>
 
@@ -695,8 +685,7 @@ export default function FieldEditor({
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-sm font-medium">
-                              Show only if
-                            </label>
+                              {t("forms.showOnlyIf")}</label>
                             <Select
                               value={field.conditional_logic.fieldid || ""}
                               onValueChange={(value) =>
@@ -709,7 +698,7 @@ export default function FieldEditor({
                               }
                             >
                               <SelectTrigger className="text-sm">
-                                <SelectValue placeholder="Select field" />
+                                <SelectValue placeholder={t("forms.selectField")} />
                               </SelectTrigger>
                               <SelectContent>
                                 {getAvailableFieldsForConditions(index).map(
@@ -727,8 +716,7 @@ export default function FieldEditor({
                           </div>
                           <div>
                             <label className="text-sm font-medium">
-                              Condition
-                            </label>
+                              {t("forms.condition")}</label>
                             <Select
                               value={
                                 field.conditional_logic.condition_type ||
@@ -747,22 +735,17 @@ export default function FieldEditor({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="equals">equals</SelectItem>
+                                <SelectItem value="equals">{t("forms.equals")}</SelectItem>
                                 <SelectItem value="not_equals">
-                                  does not equal
-                                </SelectItem>
+                                  {t("forms.doesNotEqual")}</SelectItem>
                                 <SelectItem value="contains">
-                                  contains
-                                </SelectItem>
+                                  {t("forms.contains")}</SelectItem>
                                 <SelectItem value="not_contains">
-                                  does not contain
-                                </SelectItem>
+                                  {t("forms.doesNotContain")}</SelectItem>
                                 <SelectItem value="any_of">
-                                  is any of
-                                </SelectItem>
+                                  {t("forms.isAnyOf")}</SelectItem>
                                 <SelectItem value="none_of">
-                                  is none of
-                                </SelectItem>
+                                  {t("forms.isNoneOf")}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -781,9 +764,11 @@ export default function FieldEditor({
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-base">
-                    Edit Field:{" "}
-                    {fields[expandedField]?.label ||
-                      `Field ${expandedField + 1}`}
+                    {t("forms.editField", {
+                      label:
+                        fields[expandedField]?.label ||
+                        t("forms.fieldNumber", { index: expandedField + 1 }),
+                    })}
                   </CardTitle>
                   <Button
                     variant="ghost"
@@ -800,7 +785,7 @@ export default function FieldEditor({
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-sm font-medium">Label</label>
+                        <label className="text-sm font-medium">{t("forms.label")}</label>
                         <Input
                           value={fields[expandedField]?.label || ""}
                           onChange={(e) =>
@@ -808,12 +793,12 @@ export default function FieldEditor({
                               label: e.target.value,
                             })
                           }
-                          placeholder="Enter field label"
+                          placeholder={t("forms.enterFieldLabel")}
                           className="text-sm"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium">Type</label>
+                        <label className="text-sm font-medium">{t("schedule.type")}</label>
                         <Select
                           value={fields[expandedField]?.field_type || "text"}
                           onValueChange={(value) =>
@@ -841,8 +826,7 @@ export default function FieldEditor({
 
                     <div>
                       <label className="text-sm font-medium">
-                        Description (Optional)
-                      </label>
+                        {t("forms.descriptionOptional")}</label>
                       <Input
                         value={fields[expandedField]?.description || ""}
                         onChange={(e) =>
@@ -850,15 +834,14 @@ export default function FieldEditor({
                             description: e.target.value,
                           })
                         }
-                        placeholder="Help text for this field"
+                        placeholder={t("forms.helpTextForThisField")}
                         className="text-sm"
                       />
                     </div>
 
                     <div>
                       <label className="text-sm font-medium">
-                        Placeholder (Optional)
-                      </label>
+                        {t("forms.placeholderOptional")}</label>
                       <Input
                         value={fields[expandedField]?.placeholder || ""}
                         onChange={(e) =>
@@ -866,7 +849,7 @@ export default function FieldEditor({
                             placeholder: e.target.value,
                           })
                         }
-                        placeholder="Placeholder text"
+                        placeholder={t("forms.placeholderText")}
                         className="text-sm"
                       />
                     </div>
@@ -881,7 +864,7 @@ export default function FieldEditor({
                             })
                           }
                         />
-                        <span className="text-sm font-medium">Required</span>
+                        <span className="text-sm font-medium">{t("forms.required")}</span>
                       </label>
                     </div>
 
@@ -913,11 +896,9 @@ export default function FieldEditor({
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-muted flex items-center justify-center">
                 <FileText className="h-8 w-8 opacity-50" />
               </div>
-              <p className="text-lg font-medium mb-2">No fields yet</p>
+              <p className="text-lg font-medium mb-2">{t("forms.noFieldsYet")}</p>
               <p className="text-sm">
-                Click &quot;Add field&quot; or select elements from the left to start
-                building your form
-              </p>
+                {t("forms.clickAddFieldOrSelectElementsFromTheLeftToStartBuildingYourForm")}</p>
             </div>
           )}
         </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -173,6 +174,7 @@ export default function FieldTypeSelector({
   onFieldTypeSelect,
   fieldsCount,
 }: FieldTypeSelectorProps) {
+  const { t } = useTranslation();
   const createField = (type: any) => {
     return {
       field_type: type.value as FormFieldType,
@@ -195,23 +197,21 @@ export default function FieldTypeSelector({
         <div className="space-y-3">
           <div>
             <label className="text-sm font-medium text-foreground">
-              Form Title
-            </label>
+              {t("forms.formTitle2")}</label>
             <Input
               value={formTitle}
               onChange={(e) => onFormTitleChange(e.target.value)}
-              placeholder="Enter form title"
+              placeholder={t("forms.enterFormTitle")}
               className="mt-1"
             />
           </div>
           <div>
             <label className="text-sm font-medium text-foreground">
-              Form Description
-            </label>
+              {t("forms.formDescription2")}</label>
             <Textarea
               value={formDescription}
               onChange={(e) => onFormDescriptionChange(e.target.value)}
-              placeholder="Describe what this form is for..."
+              placeholder={t("forms.describeWhatThisFormIsFor")}
               className="mt-1 min-h-[60px]"
             />
           </div>
@@ -222,8 +222,7 @@ export default function FieldTypeSelector({
       <div className="mb-4 flex-shrink-0">
         <Button onClick={onAddField} className="w-full h-8 text-sm font-medium">
           <Plus className="h-4 w-4 mr-2" />
-          Add Field
-        </Button>
+          {t("forms.addField")}</Button>
       </div>
 
       {/* Field Types - Scrollable */}
@@ -232,8 +231,7 @@ export default function FieldTypeSelector({
           {/* Basic Fields Section */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-4 px-1">
-              Basic Fields
-            </h3>
+              {t("forms.basicFields")}</h3>
             <div className="grid grid-cols-2 gap-3">
               {groupFieldsByCategory().basic.map((type) => (
                 <Card
@@ -257,8 +255,7 @@ export default function FieldTypeSelector({
           {/* Media & Files Section */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-4 px-1">
-              Media & Files
-            </h3>
+              {t("forms.mediaFiles")}</h3>
             <div className="grid grid-cols-2 gap-3">
               {groupFieldsByCategory().media.map((type) => (
                 <Card
@@ -282,8 +279,7 @@ export default function FieldTypeSelector({
           {/* Interactive Fields Section */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-4 px-1">
-              Interactive Fields
-            </h3>
+              {t("forms.interactiveFields")}</h3>
             <div className="grid grid-cols-2 gap-3">
               {[
                 ...groupFieldsByCategory().location,

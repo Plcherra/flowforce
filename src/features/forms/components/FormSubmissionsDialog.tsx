@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -25,6 +26,7 @@ export default function FormSubmissionsDialog({
   onOpenChange,
   formId,
 }: FormSubmissionsDialogProps) {
+  const { t } = useTranslation();
   const { getFormSubmissions, getFormFields } = useForms();
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [fields, setFields] = useState<FormField[]>([]);
@@ -104,48 +106,45 @@ export default function FormSubmissionsDialog({
         <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex justify-between items-center">
-              <DialogTitle>Form Submissions</DialogTitle>
+              <DialogTitle>{t("forms.formSubmissions")}</DialogTitle>
               <div className="flex gap-2">
                 <Button onClick={() => setFillDialogOpen(true)}>
-                  Fill Form
-                </Button>
+                  {t("forms.fillForm")}</Button>
                 {submissions.length > 0 && (
                   <Button variant="outline" onClick={exportToCSV}>
                     <Download className="h-4 w-4 mr-2" />
-                    Export CSV
-                  </Button>
+                    {t("forms.exportCsv")}</Button>
                 )}
               </div>
             </div>
             <DialogDescription>
-              View and manage all form submissions. Export data or fill out the
-              form directly.
-            </DialogDescription>
+              {t("forms.viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly")}</DialogDescription>
           </DialogHeader>
 
           {loading ? (
-            <div className="text-center py-8">Loading submissions...</div>
+            <div className="text-center py-8">{t("forms.loadingSubmissions")}</div>
           ) : submissions.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
-                  No submissions yet
-                </h3>
+                  {t("forms.noSubmissionsYet")}</h3>
                 <p className="text-muted-foreground mb-4">
-                  This form hasn&apos;t received any submissions yet
-                </p>
+                  {t("forms.thisFormHasnTReceivedAnySubmissionsYet")}</p>
                 <Button onClick={() => setFillDialogOpen(true)}>
-                  Fill Form
-                </Button>
+                  {t("forms.fillForm")}</Button>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
-                  {submissions.length} submission
-                  {submissions.length !== 1 ? "s" : ""}
+                  {t(
+                    submissions.length === 1
+                      ? "forms.oneSubmission"
+                      : "forms.manySubmissions",
+                    { count: submissions.length },
+                  )}
                 </p>
               </div>
 
@@ -155,7 +154,9 @@ export default function FormSubmissionsDialog({
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-center">
                         <CardTitle className="text-lg">
-                          Submission #{submissions.length - index}
+                          {t("forms.submissionNumber", {
+                            number: submissions.length - index,
+                          })}
                         </CardTitle>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
@@ -192,7 +193,7 @@ export default function FormSubmissionsDialog({
                                     ))}
                                   </div>
                                 ) : field.field_type === "file" ? (
-                                  <Badge variant="outline">File uploaded</Badge>
+                                  <Badge variant="outline">{t("forms.fileUploaded")}</Badge>
                                 ) : (
                                   <p className="text-sm">{String(value)}</p>
                                 )}

@@ -2,6 +2,7 @@
  * Component for rendering form fields based on field type
  */
 
+import { useTranslation } from "react-i18next";
 import React from "react";
 import type { UseFormReturn } from "react-hook-form";
 import {
@@ -57,6 +58,7 @@ interface FormFieldRendererProps {
 }
 
 export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
+  const { t } = useTranslation();
   const fieldName = field.id;
   const options = getFieldOptions(field);
   const fieldType = field.field_type as FormFieldType;
@@ -264,7 +266,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an option" />
+                    <SelectValue placeholder={t("forms.selectAnOption")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

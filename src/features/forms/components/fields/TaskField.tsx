@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,6 +52,7 @@ export function TaskField({
   availableUsers = [],
   className = "",
 }: TaskFieldProps) {
+  const { t } = useTranslation();
   const [isCreating, setIsCreating] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
@@ -194,8 +196,7 @@ export function TaskField({
                   <AlertCircle className="h-3 w-3 mr-1" />
                   {value.priority.charAt(0).toUpperCase() +
                     value.priority.slice(1)}{" "}
-                  Priority
-                </Badge>
+                  {t("tasks.priority")}</Badge>
 
                 <Badge
                   variant="outline"
@@ -210,7 +211,7 @@ export function TaskField({
                 {value.due_date && (
                   <Badge variant="outline">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Due: {formatDate(value.due_date)}
+                    {t("tasks.due")} {formatDate(value.due_date)}
                   </Badge>
                 )}
               </div>
@@ -229,7 +230,7 @@ export function TaskField({
               )}
 
               <div className="text-xs text-muted-foreground">
-                Created: {formatDate(value.created_at)}
+                {t("tasks.created")} {formatDate(value.created_at)}
               </div>
             </div>
           </CardContent>
@@ -241,17 +242,15 @@ export function TaskField({
               <div className="text-center mb-4">
                 <CheckSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm font-medium text-foreground">
-                  Create New Task
-                </p>
+                  {t("tasks.createNewTask")}</p>
               </div>
 
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium text-foreground">
-                    Title *
-                  </label>
+                    {t("tasks.title")}</label>
                   <Input
-                    placeholder="Enter task title"
+                    placeholder={t("tasks.enterTaskTitle")}
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
                   />
@@ -259,10 +258,9 @@ export function TaskField({
 
                 <div>
                   <label className="text-sm font-medium text-foreground">
-                    Description
-                  </label>
+                    {t("tasks.description")}</label>
                   <Textarea
-                    placeholder="Enter task description (optional)"
+                    placeholder={t("forms.enterTaskDescriptionOptional")}
                     value={taskDescription}
                     onChange={(e) => setTaskDescription(e.target.value)}
                     className="min-h-[80px]"
@@ -272,8 +270,7 @@ export function TaskField({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm font-medium text-foreground">
-                      Due Date
-                    </label>
+                      {t("forms.dueDate")}</label>
                     <Input
                       type="date"
                       value={dueDate}
@@ -283,8 +280,7 @@ export function TaskField({
 
                   <div>
                     <label className="text-sm font-medium text-foreground">
-                      Priority
-                    </label>
+                      {t("tasks.priority")}</label>
                     <Select
                       value={priority}
                       onValueChange={(value: "low" | "medium" | "high") =>
@@ -295,9 +291,9 @@ export function TaskField({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="low">Low Priority</SelectItem>
-                        <SelectItem value="medium">Medium Priority</SelectItem>
-                        <SelectItem value="high">High Priority</SelectItem>
+                        <SelectItem value="low">{t("forms.lowPriority")}</SelectItem>
+                        <SelectItem value="medium">{t("forms.mediumPriority")}</SelectItem>
+                        <SelectItem value="high">{t("forms.highPriority")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -306,8 +302,7 @@ export function TaskField({
                 {availableUsers.length > 0 && (
                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">
-                      Assign To (optional)
-                    </label>
+                      {t("forms.assignToOptional")}</label>
                     <div className="space-y-2 max-h-32 overflow-y-auto">
                       {availableUsers.map((user) => (
                         <label
@@ -340,8 +335,7 @@ export function TaskField({
                   onClick={cancelCreation}
                   className="flex-1"
                 >
-                  Cancel
-                </Button>
+                  {t("common.cancel")}</Button>
                 <Button
                   type="button"
                   onClick={createTask}
@@ -349,8 +343,7 @@ export function TaskField({
                   className="flex-1"
                 >
                   <CheckSquare className="h-4 w-4 mr-2" />
-                  Create Task
-                </Button>
+                  {t("forms.createTask")}</Button>
               </div>
             </div>
           </CardContent>
@@ -359,16 +352,14 @@ export function TaskField({
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
           <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            No task created yet
-          </p>
+            {t("forms.noTaskCreatedYet")}</p>
           <Button
             type="button"
             variant="outline"
             onClick={() => setIsCreating(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create Task
-          </Button>
+            {t("forms.createTask")}</Button>
         </div>
       )}
     </div>
@@ -377,10 +368,12 @@ export function TaskField({
 
 // For form builder preview
 export function TaskFieldPreview({
-  label = "Task",
+  label: labelProp,
   description = "Create and assign a task",
   className = "",
 }: Partial<TaskFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.task");
   return (
     <TaskField
       label={label}

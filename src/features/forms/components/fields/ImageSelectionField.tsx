@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +35,7 @@ export function ImageSelectionField({
   maxSelection = 5,
   className = "",
 }: ImageSelectionFieldProps) {
+  const { t } = useTranslation();
   const [customImageUrl, setCustomImageUrl] = useState("");
   const [availableImages, setAvailableImages] =
     useState<string[]>(predefinedImages);
@@ -153,8 +155,7 @@ export function ImageSelectionField({
                 onClick={clearSelection}
               >
                 <X className="h-3 w-3 mr-1" />
-                Clear All
-              </Button>
+                {t("schedule.clearAll")}</Button>
             </div>
             <div className="flex flex-wrap gap-2">
               {selectedImages.map((imageUrl, index) => (
@@ -231,18 +232,17 @@ export function ImageSelectionField({
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Image className="h-12 w-12 mx-auto mb-2" />
-                <p className="text-sm">No images available</p>
+                <p className="text-sm">{t("forms.noImagesAvailable")}</p>
               </div>
             )}
 
             {allowCustomImages && (
               <div className="border-t pt-4">
                 <p className="text-sm font-medium text-foreground mb-2">
-                  Add Custom Image
-                </p>
+                  {t("forms.addCustomImage")}</p>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Enter image URL"
+                    placeholder={t("forms.enterImageUrl")}
                     value={customImageUrl}
                     onChange={(e) => setCustomImageUrl(e.target.value)}
                     onKeyDown={(e) => {
@@ -261,8 +261,7 @@ export function ImageSelectionField({
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Add images by URL (JPG, PNG, GIF, WebP)
-                </p>
+                  {t("forms.addImagesByUrlJpgPngGifWebp")}</p>
               </div>
             )}
           </div>
@@ -274,10 +273,12 @@ export function ImageSelectionField({
 
 // For form builder preview
 export function ImageSelectionFieldPreview({
-  label = "Image Selection",
+  label: labelProp,
   description = "Select one or more images from the options below",
   className = "",
 }: Partial<ImageSelectionFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.imageSelection");
   const sampleImages = [
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
     "https://images.unsplash.com/photo-1447433819943-74ca0d7a6ad8?w=150&h=150&fit=crop",

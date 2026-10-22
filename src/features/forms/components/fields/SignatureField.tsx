@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +11,9 @@ import {
   buildCompanyStoragePath,
   resolveProfileCompanyId,
 } from "@/lib/storagePaths";
+
+type SignatureMouseEvent = React.MouseEvent<HTMLCanvasElement>;
+type SignatureTouchEvent = React.TouchEvent<HTMLCanvasElement>;
 
 interface SignatureData {
   signaturedata: string; // Base64 encoded
@@ -39,6 +43,7 @@ export function SignatureField({
   signerName,
   className = "",
 }: SignatureFieldProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -47,9 +52,7 @@ export function SignatureField({
 
   const startDrawing = useCallback(
     (
-      event:
-        | React.MouseEvent<HTMLCanvasElement>
-        | React.TouchEvent<HTMLCanvasElement>,
+      event: SignatureMouseEvent | SignatureTouchEvent,
     ) => {
       if (!canvasRef.current) return;
 
@@ -81,9 +84,7 @@ export function SignatureField({
 
   const draw = useCallback(
     (
-      event:
-        | React.MouseEvent<HTMLCanvasElement>
-        | React.TouchEvent<HTMLCanvasElement>,
+      event: SignatureMouseEvent | SignatureTouchEvent,
     ) => {
       if (!isDrawing || !canvasRef.current) return;
 
@@ -240,11 +241,10 @@ export function SignatureField({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground">
-                  Signature Captured
-                </p>
+                  {t("forms.signatureCaptured")}</p>
                 {value.signer_name && (
                   <p className="text-sm text-muted-foreground">
-                    Signed by: {value.signer_name}
+                    {t("forms.signedBy", { name: value.signer_name })}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
@@ -253,7 +253,7 @@ export function SignatureField({
                 <div className="mt-3 border rounded-lg overflow-hidden">
                   <img
                     src={value.signaturedata}
-                    alt="Signature"
+                    alt={t("forms.signature")}
                     className="w-full h-24 object-contain bg-logo-background"
                   />
                 </div>
@@ -267,8 +267,7 @@ export function SignatureField({
                 onClick={clearSignature}
               >
                 <X className="h-3 w-3 mr-1" />
-                Clear
-              </Button>
+                {t("shell.clear")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -278,8 +277,7 @@ export function SignatureField({
             <div className="text-center mb-4">
               <PenTool className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">
-                Please sign in the box below
-              </p>
+                {t("forms.pleaseSignInTheBoxBelow")}</p>
             </div>
 
             <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden">
@@ -315,8 +313,7 @@ export function SignatureField({
                 disabled={!hasDrawn}
               >
                 <RotateCcw className="h-3 w-3 mr-1" />
-                Clear
-              </Button>
+                {t("shell.clear")}</Button>
               <Button
                 type="button"
                 size="sm"
@@ -337,10 +334,12 @@ export function SignatureField({
 
 // For form builder preview
 export function SignatureFieldPreview({
-  label = "Signature",
+  label: labelProp,
   description = "Please provide your digital signature",
   className = "",
 }: Partial<SignatureFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.signature");
   return (
     <SignatureField
       label={label}

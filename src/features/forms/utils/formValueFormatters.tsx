@@ -2,7 +2,13 @@
  * Utility functions for formatting form field values for display
  */
 
+import { useTranslation } from "react-i18next";
 import React from "react";
+
+function NoFilesLabel() {
+  const { t } = useTranslation();
+  return <span className="text-muted-foreground">{t("forms.noFiles")}</span>;
+}
 import type { FormFieldType } from "@/types/forms";
 import type {
   ImageSelectionData,
@@ -27,7 +33,7 @@ export function formatAttachmentValue(value: unknown): React.ReactNode {
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <span className="text-muted-foreground">No files</span>;
+      return <NoFilesLabel />;
     }
     return (
       <div className="space-y-1">

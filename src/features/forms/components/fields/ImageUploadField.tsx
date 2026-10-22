@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +42,7 @@ export function ImageUploadField({
   maxSize = 10,
   className = "",
 }: ImageUploadFieldProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -243,7 +245,7 @@ export function ImageUploadField({
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Max {maxFiles} images, {maxSize}MB each
+            {t("forms.maxImagesEach", { count: maxFiles, size: maxSize })}
           </p>
         </div>
       )}
@@ -295,10 +297,12 @@ function SignedImagePreview({
 
 // For form builder preview
 export function ImageUploadFieldPreview({
-  label = "Image Upload",
+  label: labelProp,
   description = "Upload images for this form field",
   className = "",
 }: Partial<ImageUploadFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.imageUpload");
   return (
     <ImageUploadField
       label={label}

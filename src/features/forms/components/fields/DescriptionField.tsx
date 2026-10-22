@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Edit3, Eye } from "lucide-react";
@@ -94,11 +95,11 @@ export function DescriptionField({
 
 // For form builder preview
 export function DescriptionFieldPreview({
-  label: label = "Information",
-  description: description = "This is a description field that can contain important information or instructions.",
-  content = "<p>You can use <strong>rich text formatting</strong> including:</p><ul><li>Bullet points</li><li><em>Italics</em> and <strong>bold text</strong></li><li>Links and other HTML elements</li></ul>",
+  content,
   className = "",
 }: Partial<DescriptionFieldProps>) {
+  const { t } = useTranslation();
+  const previewHtml = content ?? t("forms.descriptionPreviewHtml");
   return (
     <div
       className={`p-4 border-l-4 border-l-primary/20 bg-card rounded-lg ${className}`}
@@ -108,14 +109,14 @@ export function DescriptionFieldPreview({
           <FileText className="h-4 w-4 text-primary" />
         </div>
         <div className="flex-1">
-          {content && (
+          {previewHtml ? (
             <div
               className="prose prose-sm max-w-none text-foreground"
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(content),
+                __html: DOMPurify.sanitize(previewHtml),
               }}
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>

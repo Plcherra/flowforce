@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +32,7 @@ export function LocationField({
   required = false,
   className = "",
 }: LocationFieldProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const getCurrentLocation = useCallback(() => {
@@ -152,7 +154,7 @@ export function LocationField({
                 <MapPin className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground">Location Captured</p>
+                <p className="font-medium text-foreground">{t("forms.locationCaptured")}</p>
                 <p className="text-sm text-muted-foreground break-words">
                   {value.address}
                 </p>
@@ -162,7 +164,11 @@ export function LocationField({
                     {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
                   </span>
                   {value.accuracy && (
-                    <span>±{Math.round(value.accuracy)}m</span>
+                    <span>
+                      {t("forms.accuracyMeters", {
+                        meters: Math.round(value.accuracy),
+                      })}
+                    </span>
                   )}
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
@@ -187,8 +193,7 @@ export function LocationField({
                 size="sm"
                 onClick={clearLocation}
               >
-                Clear
-              </Button>
+                {t("shell.clear")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -196,8 +201,7 @@ export function LocationField({
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
           <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
-            No location captured yet
-          </p>
+            {t("forms.noLocationCapturedYet")}</p>
           <Button
             type="button"
             variant="outline"
@@ -215,10 +219,12 @@ export function LocationField({
 
 // For form builder preview
 export function LocationFieldPreview({
-  label = "Location",
+  label: labelProp,
   description = "Capture your current GPS coordinates and address",
   className = "",
 }: Partial<LocationFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.location");
   return (
     <LocationField
       label={label}

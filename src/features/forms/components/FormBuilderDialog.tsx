@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -53,6 +54,7 @@ export default function FormBuilderDialog({
   initialTitle = "New Form",
   initialDescription = "",
 }: FormBuilderDialogProps) {
+  const { t } = useTranslation();
   const { getFormFields, saveFormFields } = useForms();
   const { toast } = useToast();
 
@@ -266,38 +268,33 @@ export default function FormBuilderDialog({
       <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none">
         <DialogHeader className="flex-shrink-0 space-y-1 border-b px-6 py-4 pr-14">
           <DialogTitle className="text-2xl font-semibold">
-            Form editor
-          </DialogTitle>
+            {t("forms.formEditor")}</DialogTitle>
           <DialogDescription>
-            Compose fields, configure options, and preview the live form
-            experience.
-          </DialogDescription>
+            {t("forms.composeFieldsConfigureOptionsAndPreviewTheLiveFormExperience")}</DialogDescription>
           <div className="flex flex-wrap items-center gap-4 pt-3 text-xs text-muted-foreground">
-            <div>{sectionCount} sections</div>
-            <div>{fieldCount} fields</div>
+            <div>{t("forms.sectionCount", { count: sectionCount })}</div>
+            <div>{t("forms.fieldCount", { count: fieldCount })}</div>
           </div>
           <div className="grid gap-3 pt-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Form title
-              </label>
+                {t("forms.formTitle")}</label>
               <Input
                 value={formTitle}
                 onChange={(event) => setFormTitle(event.target.value)}
-                placeholder="Enter form title"
-                aria-label="Form title"
+                placeholder={t("forms.enterFormTitle")}
+                aria-label={t("forms.formTitle")}
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Description
-              </label>
+                {t("tasks.description")}</label>
               <Textarea
                 value={formDescription}
                 onChange={(event) => setFormDescription(event.target.value)}
-                placeholder="Describe the purpose of this form"
+                placeholder={t("forms.describeThePurposeOfThisForm")}
                 rows={2}
-                aria-label="Form description"
+                aria-label={t("forms.formDescription")}
               />
             </div>
           </div>
@@ -341,8 +338,7 @@ export default function FormBuilderDialog({
                     className="h-4 w-4 animate-spin"
                     aria-hidden="true"
                   />
-                  Loading form fields…
-                </div>
+                  {t("forms.loadingFormFields")}</div>
               </div>
             )}
           </div>
@@ -359,8 +355,7 @@ export default function FormBuilderDialog({
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+              {t("common.cancel")}</Button>
             <Button onClick={handleSave} disabled={loading || isSaving}>
               {isSaving && (
                 <Loader2
@@ -368,8 +363,7 @@ export default function FormBuilderDialog({
                   aria-hidden="true"
                 />
               )}
-              Save changes
-            </Button>
+              {t("forms.saveChanges")}</Button>
           </div>
         </div>
       </DialogContent>

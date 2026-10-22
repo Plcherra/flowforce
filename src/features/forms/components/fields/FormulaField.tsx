@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,12 +47,13 @@ export function FormulaField({
   formData = {},
   availableFields = [],
   required = false,
-  placeholder = "Calculated automatically",
+  placeholder,
   onChange,
   onFormulaChange,
   isBuilding = false,
   className = "",
 }: FormulaFieldProps) {
+  const { t } = useTranslation();
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
   const [formulaElements, setFormulaElements] = useState<FormulaElement[]>([]);
@@ -217,29 +219,28 @@ export function FormulaField({
   const getFormulaHelp = () => (
     <div className="space-y-2 text-sm">
       <div>
-        <strong>Available operations:</strong>
+        <strong>{t("forms.availableOperations")}</strong>
         <ul className="list-disc list-inside mt-1 space-y-1">
-          <li>Addition: +</li>
-          <li>Subtraction: -</li>
-          <li>Multiplication: *</li>
-          <li>Division: /</li>
-          <li>Parentheses: ( )</li>
+          <li>{t("forms.addition")}</li>
+          <li>{t("forms.subtraction")}</li>
+          <li>{t("forms.multiplication")}</li>
+          <li>{t("forms.division")}</li>
+          <li>{t("forms.parentheses")}</li>
         </ul>
       </div>
       <div>
-        <strong>Reference other fields:</strong>
+        <strong>{t("forms.referenceOtherFields")}</strong>
         <p className="mt-1">
-          Use {`{field_name}`} to reference values from other form fields.
+          {t("forms.fieldNameReference", { example: "{field_name}" })}
         </p>
       </div>
       <div>
-        <strong>Example:</strong>
+        <strong>{t("forms.example")}</strong>
         <code className="block mt-1 p-2 bg-muted rounded">
           {`{quantity} * {price} * 1.1`}
         </code>
         <p className="text-xs text-muted-foreground mt-1">
-          Calculates quantity × price with 10% markup
-        </p>
+          {t("forms.calculatesQuantityPriceWith10Markup")}</p>
       </div>
     </div>
   );
@@ -267,7 +268,7 @@ export function FormulaField({
             className="ml-auto"
           >
             <Calculator className="h-3 w-3 mr-1" />
-            {showBuilder ? "Hide" : "Show"} Builder
+            {showBuilder ? t("forms.hideBuilder") : t("forms.showBuilder")}
           </Button>
         )}
       </div>
@@ -279,14 +280,13 @@ export function FormulaField({
       {showBuilder && isBuilding && (
         <Card className="mb-4">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Formula Builder</CardTitle>
+            <CardTitle className="text-sm">{t("forms.formulaBuilder")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {/* Quick Cash Counting Templates */}
             <div>
               <Label className="text-xs text-muted-foreground">
-                Quick Templates
-              </Label>
+                {t("forms.quickTemplates")}</Label>
               <div className="flex flex-wrap gap-1 mt-1">
                 <Button
                   variant="outline"
@@ -306,20 +306,19 @@ export function FormulaField({
                     });
                   }}
                 >
-                  Cash Count Total
-                </Button>
+                  {t("forms.cashCountTotal")}</Button>
               </div>
             </div>
 
             {/* Add Field Selector */}
             <div>
-              <Label className="text-xs text-muted-foreground">Add Field</Label>
+              <Label className="text-xs text-muted-foreground">{t("forms.addField")}</Label>
               <div className="flex gap-2 mt-1">
                 <Select
                   onValueChange={(fieldName) => addFieldToFormula(fieldName)}
                 >
                   <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select a field" />
+                    <SelectValue placeholder={t("forms.selectAField")} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableFields
@@ -337,8 +336,7 @@ export function FormulaField({
             {/* Cash Denominations */}
             <div>
               <Label className="text-xs text-muted-foreground">
-                Add Cash Denomination
-              </Label>
+                {t("forms.addCashDenomination")}</Label>
               <div className="grid grid-cols-3 gap-1 mt-1">
                 {cashDenominations.map((denom) => (
                   <Button
@@ -364,8 +362,7 @@ export function FormulaField({
             {formulaElements.length > 0 && (
               <div>
                 <Label className="text-xs text-muted-foreground">
-                  Formula Preview
-                </Label>
+                  {t("forms.formulaPreview")}</Label>
                 <div className="flex flex-wrap gap-1 mt-1 p-2 bg-muted/30 rounded">
                   {formulaElements.map((element, index) => (
                     <div key={index} className="flex items-center">
@@ -401,7 +398,7 @@ export function FormulaField({
         <Input
           id={`formula-${label}`}
           value={calculatedValue !== null ? calculatedValue.toString() : ""}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("forms.calculatedAutomatically")}
           readOnly
           className="pr-10"
         />
@@ -416,7 +413,7 @@ export function FormulaField({
         <Card className="mt-2 bg-muted/30">
           <CardContent className="pt-3 pb-3">
             <div className="text-xs text-muted-foreground">
-              <strong>Formula:</strong> <code>{formula}</code>
+              <strong>{t("forms.formula")}</strong> <code>{formula}</code>
             </div>
           </CardContent>
         </Card>
@@ -427,10 +424,12 @@ export function FormulaField({
 
 // For form builder preview
 export function FormulaFieldPreview({
-  label = "Total Cash Count",
+  label: labelProp,
   description = "Automatically calculated based on cash denominations",
   className = "",
 }: Partial<FormulaFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.totalCashCount");
   const sampleFields = [
     { label: "$20 Bills", name: "twenty_bills", type: "number" },
     { label: "$10 Bills", name: "ten_bills", type: "number" },

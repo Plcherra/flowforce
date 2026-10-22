@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -54,6 +55,7 @@ export default function FormFillDialog({
   form: initialForm,
   onSubmitted,
 }: FormFillDialogProps) {
+  const { t } = useTranslation();
   const resolvedFormId = formId ?? initialForm?.id ?? null;
   const { submitForm } = useForms();
   const { createTask } = useTasks();
@@ -108,11 +110,11 @@ export default function FormFillDialog({
   const formValues = form.watch();
 
   const statusLabel = useMemo(() => {
-    if (isLoading) return "Loading form fields…";
-    if (isError) return "Unable to load form fields";
-    if (orderedFields.length === 0) return "No fields configured";
-    return `${orderedFields.length} fields ready`;
-  }, [isLoading, isError, orderedFields.length]);
+    if (isLoading) return t("forms.loadingFormFields");
+    if (isError) return t("forms.unableToLoadFormFields");
+    if (orderedFields.length === 0) return t("forms.noFieldsConfigured");
+    return t("forms.fieldsReady", { count: orderedFields.length });
+  }, [isError, isLoading, orderedFields.length, t]);
 
   useEffect(() => {
     if (!open) {
@@ -438,13 +440,12 @@ export default function FormFillDialog({
     if (isError && orderedFields.length === 0) {
       return (
         <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-sm text-destructive">
-          <p className="font-semibold">Unable to load form fields</p>
+          <p className="font-semibold">{t("forms.unableToLoadFormFields")}</p>
           <p className="mt-1 text-muted-foreground">
             {error instanceof Error ? error.message : "Please try again."}
           </p>
           <Button variant="outline" className="mt-4" onClick={() => refetch()}>
-            Try again
-          </Button>
+            {t("forms.tryAgain")}</Button>
         </div>
       );
     }
@@ -452,8 +453,7 @@ export default function FormFillDialog({
     if (orderedFields.length === 0) {
       return (
         <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-          This form doesn’t have any fields configured yet.
-        </div>
+          {t("forms.thisFormDoesntHaveAnyFieldsConfiguredYet")}</div>
       );
     }
 
@@ -472,9 +472,7 @@ export default function FormFillDialog({
               )}
             </div>
             <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
-              Complete the following sections. Required fields are marked and
-              validation runs on each step.
-            </div>
+              {t("forms.completeTheFollowingSectionsRequiredFieldsAreMarkedAndValidationRunsOnEachStep")}</div>
           </div>
         );
       case "questions":
@@ -516,8 +514,7 @@ export default function FormFillDialog({
             />
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" onClick={handleExport}>
-                Download PDF
-              </Button>
+                {t("forms.downloadPdf")}</Button>
             </div>
           </div>
         );

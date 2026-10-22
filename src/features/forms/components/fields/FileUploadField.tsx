@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,6 +51,7 @@ export function FileUploadField({
   acceptedTypes = [],
   className = "",
 }: FileUploadFieldProps) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -312,10 +314,10 @@ export function FileUploadField({
             {uploading ? "Uploading..." : "Upload Files"}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
-            Max {maxFiles} files, {maxSize}MB each
+            {t("forms.maxFilesEach", { count: maxFiles, size: maxSize })}
             {acceptedTypes.length > 0 && (
               <span className="block">
-                Accepted: {acceptedTypes.join(", ")}
+                {t("forms.acceptedTypes", { types: acceptedTypes.join(", ") })}
               </span>
             )}
           </p>
@@ -327,10 +329,12 @@ export function FileUploadField({
 
 // For form builder preview
 export function FileUploadFieldPreview({
-  label = "File Upload",
+  label: labelProp,
   description = "Upload files for this form field",
   className = "",
 }: Partial<FileUploadFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.fileUpload");
   return (
     <FileUploadField
       label={label}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,16 +18,17 @@ export function HandoverNotesField({
   onMakeTaskChange,
   canMakeTask,
 }: HandoverNotesFieldProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3" data-testid="handover-notes">
       <div className="space-y-2">
-        <Label htmlFor="additional-information">Additional information</Label>
+        <Label htmlFor="additional-information">{t("forms.additionalInformation")}</Label>
         <Textarea
           id="additional-information"
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
           rows={3}
-          placeholder="Notes for the next day"
+          placeholder={t("forms.notesForTheNextDay")}
         />
       </div>
       {canMakeTask ? (
@@ -36,7 +38,7 @@ export function HandoverNotesField({
             checked={makeTask}
             onCheckedChange={(checked) => onMakeTaskChange(checked === true)}
           />
-          <Label htmlFor="make-task-tomorrow">Make a task for tomorrow</Label>
+          <Label htmlFor="make-task-tomorrow">{t("forms.makeATaskForTomorrow")}</Label>
         </div>
       ) : null}
     </div>

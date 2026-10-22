@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -28,6 +29,7 @@ export function YesNoField({
   onChange,
   className = "",
 }: YesNoFieldProps) {
+  const { t } = useTranslation();
   const [currentValue, setCurrentValue] = useState<boolean | null>(value);
 
   const handleChange = (newValue: boolean | null) => {
@@ -141,8 +143,7 @@ export function YesNoField({
           onClick={() => handleChange(null)}
           className="mt-2 text-xs"
         >
-          Clear selection
-        </Button>
+          {t("forms.clearSelection")}</Button>
       )}
     </div>
   );
@@ -150,11 +151,13 @@ export function YesNoField({
 
 // For form builder preview
 export function YesNoFieldPreview({
-  label = "Do you agree to the terms?",
+  label: labelProp,
   description = "Please select yes or no",
   variant = "cards",
   className = "",
 }: Partial<YesNoFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.doYouAgreeToTheTerms");
   return (
     <YesNoField
       label={label}

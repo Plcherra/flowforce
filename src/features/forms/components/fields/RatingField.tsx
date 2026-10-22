@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star,   Smile, Meh, Frown } from "lucide-react";
@@ -37,6 +38,7 @@ export function RatingField({
   },
   className = "",
 }: RatingFieldProps) {
+  const { t } = useTranslation();
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
   const maxRating = config.max_rating || 5;
@@ -88,8 +90,7 @@ export function RatingField({
             onClick={clearRating}
             className="ml-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            Clear
-          </button>
+            {t("shell.clear")}</button>
         )}
       </div>
     );
@@ -131,8 +132,7 @@ export function RatingField({
             onClick={clearRating}
             className="ml-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            Clear
-          </button>
+            {t("shell.clear")}</button>
         )}
       </div>
     );
@@ -182,8 +182,7 @@ export function RatingField({
             onClick={clearRating}
             className="ml-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            Clear
-          </button>
+            {t("shell.clear")}</button>
         )}
       </div>
     );
@@ -220,7 +219,10 @@ export function RatingField({
             {value && (
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground">
-                  {value.rating_value} out of {value.max_rating}
+                  {t("forms.ratingOutOf", {
+                    value: value.rating_value,
+                    max: value.max_rating,
+                  })}
                 </p>
                 {labels[value.rating_value - 1] && (
                   <p className="text-xs text-muted-foreground">
@@ -233,7 +235,10 @@ export function RatingField({
             {hoverValue !== null && !value && (
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
-                  {hoverValue} out of {maxRating}
+                  {t("forms.ratingOutOf", {
+                    value: hoverValue,
+                    max: maxRating,
+                  })}
                 </p>
                 {labels[hoverValue - 1] && (
                   <p className="text-xs text-muted-foreground">
@@ -251,10 +256,12 @@ export function RatingField({
 
 // For form builder preview
 export function RatingFieldPreview({
-  label = "Rating",
+  label: labelProp,
   description = "Please rate your experience",
   className = "",
 }: Partial<RatingFieldProps>) {
+  const { t } = useTranslation();
+  const label = labelProp ?? t("forms.rating");
   return (
     <RatingField
       label={label}
