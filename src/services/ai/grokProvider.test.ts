@@ -313,6 +313,21 @@ export async function runGrokProviderTests() {
     read("supabase/functions/ai-scheduling-assistant/index.ts").includes("edgeCorsHeaders"),
     true,
   );
+  const browserPreflightHeader =
+    "authorization, x-client-info, apikey, content-type, x-retry-count";
+  for (const path of [
+    "supabase/functions/copilot-dispatcher/index.ts",
+    "supabase/functions/copilot-evaluate-employee/index.ts",
+    "supabase/functions/copilot-service/index.ts",
+    "supabase/functions/delete-user-account/index.ts",
+    "supabase/functions/learning-admin-enrollments/index.ts",
+    "supabase/functions/learning-progress-history/index.ts",
+  ]) {
+    const source = read(path);
+    assert.equal(source.includes(browserPreflightHeader), true, path);
+    assert.equal(source.includes("api_key"), false, path);
+    assert.equal(source.includes('"Access-Control-Allow-Origin": "*"') || source.includes("'Access-Control-Allow-Origin': '*'"), true, path);
+  }
   assert.equal(engagement.includes("runMeteredGrokChat"), true);
   assert.equal(automation.includes("responseFormat: { type: \"json_object\" }"), true);
   assert.equal(read("supabase/functions/_shared/grokProvider.ts").includes(XAI_CHAT_COMPLETIONS_URL), true);
