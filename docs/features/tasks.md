@@ -463,7 +463,7 @@ Prove: Skip. Do not add a test until the Open question "What counts as one list 
 
 ### Phase 24 — Read, create, edit, and delete
 
-- [ ] Blocked by Open question "Which permissions use read, create, edit, and delete". Skip this phase. Do not replace the access boxes.
+- [x] Blocked by Open question "Which permissions use read, create, edit, and delete". Skip this phase. Do not replace the access boxes.
 
 Prove: Skip. Do not add a test until the Open question "Which permissions use read, create, edit, and delete" is answered.
 
@@ -770,3 +770,9 @@ Questions: The phase needs the Open question "What counts as one list issue" ans
 Skipped. Blocked by Open question "What counts as one list issue". No model is called. The owner still receives list information through the existing pages, and another person's act or read-only grant is not built until an issue is defined. No test was added.
 
 Questions: The phase needs the Open question "What counts as one list issue" answered: which unanswered item, missed form, or supervisor note counts as one issue.
+
+### 2026-10-22 — Phase 24 Read, create, edit, and delete
+
+Skipped. Blocked by Open question "Which permissions use read, create, edit, and delete". The access boxes stay on or off. Task create levels are the section added on the employee card. No test was added.
+
+Questions: The phase needs the Open question "Which permissions use read, create, edit, and delete" answered.
