@@ -25,4 +25,7 @@ export function runStatusHintTests() {
   assert.equal(html.includes(`>${sentence}<`), false);
   assert.equal(html.includes(`${sentence}${sentence}`), false);
   assert.match(html, />All</);
+  assert.match(html, />Cancelled</);
+  assert.equal(html.includes("More"), false);
+  assert.equal(html.includes("tasks-status-more"), false);
 }

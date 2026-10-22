@@ -776,3 +776,15 @@ Questions: The phase needs the Open question "What counts as one list issue" ans
 Skipped. Blocked by Open question "Which permissions use read, create, edit, and delete". The access boxes stay on or off. Task create levels are the section added on the employee card. No test was added.
 
 Questions: The phase needs the Open question "Which permissions use read, create, edit, and delete" answered.
+
+### 2026-10-22 — Status buttons in one row
+
+Shipped: Every status is one button in the View row. In Progress, In Review, Blocked, Done, and Cancelled stay beside All and To Do, including when their count is zero. The More button is gone. The definition is still a hover hint.
+
+Proven: `src/features/tasks/utils/statusHint.test.ts`, run with `node scripts/test-tasks-page.mjs`, renders Cancelled as a button and asserts More is absent. It passed. `npm run typecheck` passed. ESLint passed on the files this change touched.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. All, To Do, In Progress, In Review, Blocked, Done, and Cancelled should sit side by side in the View row.
+3. There should be no More button, and no empty stretch with one button at the far end.
+4. Hover All. The hint should still say Every task on this page, once.

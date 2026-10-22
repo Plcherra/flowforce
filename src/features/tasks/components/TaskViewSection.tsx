@@ -57,7 +57,7 @@ export function TaskViewSection({
     <section
       aria-label="View"
       data-testid="tasks-view-section"
-      className="space-y-4 rounded-xl border border-border/70 bg-background p-4"
+      className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
     >
       <div className="space-y-1">
         <h2 className="text-sm font-semibold">View</h2>
