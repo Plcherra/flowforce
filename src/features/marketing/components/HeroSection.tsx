@@ -69,7 +69,7 @@ export function HeroSection() {
               </div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-foreground">15min</div>
+              <div className="text-2xl font-bold text-foreground">{t("landing.n15min")}</div>
               <div className="text-sm text-muted-foreground">
                 {t("landing.averageSetup")}
               </div>

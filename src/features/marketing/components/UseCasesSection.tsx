@@ -126,7 +126,7 @@ export function UseCasesSection() {
               </div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">1.2M+</div>
+              <div className="text-3xl font-bold mb-2">{t("landing.n12m")}</div>
               <div className="text-primary-foreground">
                 {t("landing.useCases.stats.tasksCompleted")}
               </div>

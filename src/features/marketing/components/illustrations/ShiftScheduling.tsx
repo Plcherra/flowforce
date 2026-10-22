@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
 const ShiftSchedulingSVG = lazy(() =>
-  Promise.resolve({
+  {
+  const { t } = useTranslation();
+  return Promise.resolve({
     default: () => (
       <svg
         viewBox="0 0 300 200"
@@ -33,7 +36,7 @@ const ShiftSchedulingSVG = lazy(() =>
           fontSize="12"
           fontWeight="bold"
         >
-          Schedule
+          {t("updates.schedule")}
         </text>
 
         {/* Calendar Days */}
@@ -134,17 +137,19 @@ const ShiftSchedulingSVG = lazy(() =>
           fontSize="14"
           fontWeight="medium"
         >
-          Shift Scheduling
+          {t("features.shiftScheduling.title")}
         </text>
       </svg>
     ),
-  }),
+  });
+},
 );
 
 export function ShiftScheduling() {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-full bg-success-muted rounded-lg p-4">
-      <Suspense fallback={<IllustrationSkeleton title="Shift Scheduling" />}>
+      <Suspense fallback={<IllustrationSkeleton title={t("features.shiftScheduling.title")} />}>
         <ShiftSchedulingSVG />
       </Suspense>
     </div>

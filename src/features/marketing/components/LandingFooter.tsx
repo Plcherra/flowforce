@@ -63,7 +63,7 @@ export function LandingFooter() {
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
               <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">FlowForce</span>
+              <span className="text-2xl font-bold">{t("shell.flowforce")}</span>
             </div>
             <p className="text-muted-foreground mb-6 max-w-md">
               {t("landing.subtitle")}
@@ -86,17 +86,17 @@ export function LandingFooter() {
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Templates
+                  {t("landing.templatesNav")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Integrations
+                  {t("footer.integrations")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Security
+                  {t("profile.security")}
                 </Link>
               </li>
             </ul>
@@ -108,27 +108,27 @@ export function LandingFooter() {
             <ul className="space-y-3 text-muted-foreground">
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  About
+                  {t("footer.about")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Careers
+                  {t("footer.careers")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Blog
+                  {t("footer.blog")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Press
+                  {t("footer.press")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Partners
+                  {t("footer.partners")}
                 </Link>
               </li>
             </ul>
@@ -140,27 +140,27 @@ export function LandingFooter() {
             <ul className="space-y-3 text-muted-foreground">
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Help Center
+                  {t("footer.helpCenter")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Documentation
+                  {t("resources.documentation.title")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  API Reference
+                  {t("footer.apiReference")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Contact
+                  {t("employees.contact")}
                 </Link>
               </li>
               <li>
                 <Link to="#" className="hover:text-primary-foreground transition-colors">
-                  Status
+                  {t("schedule.status")}
                 </Link>
               </li>
             </ul>

@@ -1,7 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 
 const RetailSceneSVG = lazy(() =>
-  Promise.resolve({
+  {
+  const { t } = useTranslation();
+  return Promise.resolve({
     default: () => (
       <svg
         viewBox="0 0 400 300"
@@ -32,7 +35,7 @@ const RetailSceneSVG = lazy(() =>
           fontSize="14"
           fontWeight="bold"
         >
-          RETAIL STORE
+          {t("landing.retailStore")}
         </text>
 
         {/* Windows */}
@@ -102,7 +105,7 @@ const RetailSceneSVG = lazy(() =>
           fontSize="8"
           fontWeight="bold"
         >
-          SALE
+          {t("landing.sale")}
         </text>
 
         {/* Cash Register in Right Window */}
@@ -134,7 +137,8 @@ const RetailSceneSVG = lazy(() =>
         <circle cx="30" cy="60" r="8" fill="hsl(var(--primary))" opacity="0.2" />
       </svg>
     ),
-  }),
+  });
+},
 );
 
 export function RetailScene() {

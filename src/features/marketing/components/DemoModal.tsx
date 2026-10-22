@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -15,6 +16,7 @@ interface DemoModalProps {
 }
 
 export function DemoModal({ children }: DemoModalProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -24,11 +26,10 @@ export function DemoModal({ children }: DemoModalProps) {
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-2xl font-bold text-foreground flex items-center">
             <Play className="h-6 w-6 mr-2 text-primary" />
-            FlowForce Product Demo
+            {t("landing.flowforceProductDemo")}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            See how FlowForce can transform your business operations in just 2
-            minutes
+            {t("landing.seeHowFlowforceCanTransformYourBusinessOperationsInJust2Minutes")}
           </DialogDescription>
         </DialogHeader>
 
@@ -40,22 +41,22 @@ export function DemoModal({ children }: DemoModalProps) {
               <div className="w-24 h-24 bg-background/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
                 <Play className="h-12 w-12 text-primary-foreground ml-2" />
               </div>
-              <h3 className="text-2xl font-bold mb-2">Coming Soon!</h3>
+              <h3 className="text-2xl font-bold mb-2">{t("landing.comingSoon")}</h3>
               <p className="text-lg opacity-90 mb-6">
-                Our product demo video is currently in production
+                {t("landing.ourProductDemoVideoIsCurrentlyInProduction")}
               </p>
               <div className="space-y-2 text-left max-w-md mx-auto">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-background rounded-full mr-3"></div>
-                  <span>Complete platform walkthrough</span>
+                  <span>{t("landing.completePlatformWalkthrough")}</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-background rounded-full mr-3"></div>
-                  <span>Real-world use case examples</span>
+                  <span>{t("landing.realWorldUseCaseExamples")}</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-background rounded-full mr-3"></div>
-                  <span>Setup and configuration guide</span>
+                  <span>{t("landing.setupAndConfigurationGuide")}</span>
                 </div>
               </div>
             </div>

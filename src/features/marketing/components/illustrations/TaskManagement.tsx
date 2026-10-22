@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
 const TaskManagementSVG = lazy(() =>
-  Promise.resolve({
+  {
+  const { t } = useTranslation();
+  return Promise.resolve({
     default: () => (
       <svg
         viewBox="0 0 300 200"
@@ -28,7 +31,7 @@ const TaskManagementSVG = lazy(() =>
         {/* Checkboxes and tasks */}
         <rect x="115" y="60" width="12" height="12" fill="hsl(var(--success))" rx="2" />
         <text x="135" y="70" fill="hsl(var(--foreground))" fontSize="10">
-          Task completed
+          {t("landing.taskCompleted")}
         </text>
         <path
           d="M119 64 L121 66 L125 62"
@@ -39,7 +42,7 @@ const TaskManagementSVG = lazy(() =>
 
         <rect x="115" y="80" width="12" height="12" fill="hsl(var(--success))" rx="2" />
         <text x="135" y="90" fill="hsl(var(--foreground))" fontSize="10">
-          Review reports
+          {t("dashboard.reviewReports")}
         </text>
         <path
           d="M119 84 L121 86 L125 82"
@@ -59,7 +62,7 @@ const TaskManagementSVG = lazy(() =>
           rx="2"
         />
         <text x="135" y="110" fill="hsl(var(--muted-foreground))" fontSize="10">
-          Pending task
+          {t("landing.pendingTask")}
         </text>
 
         <rect
@@ -73,7 +76,7 @@ const TaskManagementSVG = lazy(() =>
           rx="2"
         />
         <text x="135" y="130" fill="hsl(var(--muted-foreground))" fontSize="10">
-          Future task
+          {t("landing.futureTask")}
         </text>
 
         {/* Progress indicator */}
@@ -89,17 +92,19 @@ const TaskManagementSVG = lazy(() =>
           fontSize="14"
           fontWeight="medium"
         >
-          Task Management
+          {t("features.taskManagement.title")}
         </text>
       </svg>
     ),
-  }),
+  });
+},
 );
 
 export function TaskManagement() {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-full bg-secondary/10 rounded-lg p-4">
-      <Suspense fallback={<IllustrationSkeleton title="Task Management" />}>
+      <Suspense fallback={<IllustrationSkeleton title={t("features.taskManagement.title")} />}>
         <TaskManagementSVG />
       </Suspense>
     </div>

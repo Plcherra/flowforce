@@ -371,7 +371,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 19 — Marketing strings
 
-- [ ] Finish marketing strings in all six locales.
+- [x] Finish marketing strings in all six locales.
 
 Rules:
 
@@ -1046,6 +1046,22 @@ Phone steps for Pedro:
 3. If an employee still has the fixed-availability step, the from, to, and send labels should follow the language. Switch to Español and check the password requirements on the account step.
 4. Open Templates if it is in your navigation. The template list and detail labels should follow the language. A template name someone typed stays as they wrote it.
 5. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 19 Marketing strings
+
+Shipped: Marketing chrome under `src/features/marketing` now uses `useTranslation` and the `landing` and `footer` namespaces. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including the feature titles and Templates, stay on those keys. FlowForce stays FlowForce. Illustration figures such as `$12.5k`, `1.2M+`, and `15min` stay as written. Plan names Starter, Growth, and Enterprise stay as written. The header language switcher stays. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3695 keys for each locale and `hard-coded strings 1004`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/marketing`.
+
+Phone steps for Pedro:
+1. Open https://www.flowforce.uk while signed out. Use the language switcher in the header and choose Italiano. The hero, footer links, and feature labels should be in Italian. FlowForce stays FlowForce.
+2. Open Pricing (`/pricing`). The plan intro and the most-popular label should follow the language. Starter, Growth, and Enterprise stay those names. If checkout was canceled, the reactivate screen should follow the language and mention Stripe by name.
+3. Open the product demo if the button is on the page. The title and the coming-soon line should follow the language. Switch to Deutsch and check the footer: About, Blog, and Help Center should be German.
+4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
 

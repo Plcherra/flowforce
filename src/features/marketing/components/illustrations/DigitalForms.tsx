@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
 const DigitalFormsSVG = lazy(() =>
-  Promise.resolve({
+  {
+  const { t } = useTranslation();
+  return Promise.resolve({
     default: () => (
       <svg
         viewBox="0 0 300 200"
@@ -34,24 +37,24 @@ const DigitalFormsSVG = lazy(() =>
           fontSize="12"
           fontWeight="bold"
         >
-          Digital Form
+          {t("landing.digitalForm")}
         </text>
 
         {/* Form fields */}
         <rect x="95" y="75" width="110" height="12" fill="hsl(var(--background))" rx="2" />
         <text x="100" y="83" fill="hsl(var(--muted-foreground))" fontSize="8">
-          Name field
+          {t("landing.nameField")}
         </text>
 
         <rect x="95" y="95" width="110" height="12" fill="hsl(var(--background))" rx="2" />
         <text x="100" y="103" fill="hsl(var(--muted-foreground))" fontSize="8">
-          Email field
+          {t("landing.emailField")}
         </text>
 
         {/* Checkboxes */}
         <rect x="95" y="115" width="8" height="8" fill="hsl(var(--success))" rx="1" />
         <text x="108" y="122" fill="hsl(var(--foreground))" fontSize="8">
-          Option A ✓
+          {t("landing.optionA")}
         </text>
         <path
           d="M97 118 L99 120 L101 116"
@@ -71,7 +74,7 @@ const DigitalFormsSVG = lazy(() =>
           rx="1"
         />
         <text x="108" y="137" fill="hsl(var(--muted-foreground))" fontSize="8">
-          Option B
+          {t("landing.optionB")}
         </text>
 
         {/* Submit button */}
@@ -84,7 +87,7 @@ const DigitalFormsSVG = lazy(() =>
           fontSize="9"
           fontWeight="bold"
         >
-          Submit
+          {t("forms.submit")}
         </text>
 
         {/* Digital signature area */}
@@ -100,10 +103,10 @@ const DigitalFormsSVG = lazy(() =>
           rx="2"
         />
         <text x="55" y="130" textAnchor="middle" fill="hsl(var(--warning))" fontSize="6">
-          Digital
+          {t("landing.digital")}
         </text>
         <text x="55" y="140" textAnchor="middle" fill="hsl(var(--warning))" fontSize="6">
-          Signature
+          {t("forms.signature")}
         </text>
 
         {/* Title */}
@@ -115,17 +118,19 @@ const DigitalFormsSVG = lazy(() =>
           fontSize="14"
           fontWeight="medium"
         >
-          Digital Forms
+          {t("features.digitalForms.title")}
         </text>
       </svg>
     ),
-  }),
+  });
+},
 );
 
 export function DigitalForms() {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-full bg-warning-muted rounded-lg p-4">
-      <Suspense fallback={<IllustrationSkeleton title="Digital Forms" />}>
+      <Suspense fallback={<IllustrationSkeleton title={t("features.digitalForms.title")} />}>
         <DigitalFormsSVG />
       </Suspense>
     </div>

@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
 const EmployeeManagementSVG = lazy(() =>
-  Promise.resolve({
+  {
+  const { t } = useTranslation();
+  return Promise.resolve({
     default: () => (
       <svg
         viewBox="0 0 300 200"
@@ -55,17 +58,19 @@ const EmployeeManagementSVG = lazy(() =>
           fontSize="14"
           fontWeight="medium"
         >
-          Employee Management
+          {t("features.employeeManagement.title")}
         </text>
       </svg>
     ),
-  }),
+  });
+},
 );
 
 export function EmployeeManagement() {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-full bg-primary/10 rounded-lg p-4">
-      <Suspense fallback={<IllustrationSkeleton title="Employee Management" />}>
+      <Suspense fallback={<IllustrationSkeleton title={t("features.employeeManagement.title")} />}>
         <EmployeeManagementSVG />
       </Suspense>
     </div>

@@ -1,8 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
 const AnalyticsReportingSVG = lazy(() =>
-  Promise.resolve({
+  {
+  const { t } = useTranslation();
+  return Promise.resolve({
     default: () => (
       <svg
         viewBox="0 0 300 200"
@@ -88,20 +91,20 @@ const AnalyticsReportingSVG = lazy(() =>
         />
 
         <text x="95" y="117" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8">
-          Metric
+          {t("landing.metric")}
         </text>
         <text x="150" y="117" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8">
-          Value
+          {t("inventory.value")}
         </text>
         <text x="205" y="117" textAnchor="middle" fill="hsl(var(--foreground))" fontSize="8">
-          Trend
+          {t("landing.trend")}
         </text>
 
         <text x="95" y="130" textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="7">
-          Sales
+          {t("landing.sales")}
         </text>
         <text x="150" y="130" textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="7">
-          $12.5k
+          {t("landing.n125k")}
         </text>
         <text x="205" y="130" textAnchor="middle" fill="hsl(var(--success))" fontSize="7">
           ↗ +15%
@@ -116,18 +119,20 @@ const AnalyticsReportingSVG = lazy(() =>
           fontSize="14"
           fontWeight="medium"
         >
-          Analytics & Reporting
+          {t("features.analyticsReporting.title")}
         </text>
       </svg>
     ),
-  }),
+  });
+},
 );
 
 export function AnalyticsReporting() {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-full bg-primary/10 rounded-lg p-4">
       <Suspense
-        fallback={<IllustrationSkeleton title="Analytics & Reporting" />}
+        fallback={<IllustrationSkeleton title={t("features.analyticsReporting.title")} />}
       >
         <AnalyticsReportingSVG />
       </Suspense>

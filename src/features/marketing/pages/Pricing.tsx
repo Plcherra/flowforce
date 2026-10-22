@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -45,6 +46,7 @@ const PLAN_FEATURES: Record<BillingPlanKey, string[]> = {
 };
 
 export default function Pricing() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -80,26 +82,24 @@ export default function Pricing() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="mb-12 space-y-4 text-center">
-          <Badge variant="secondary">FlowForce billing</Badge>
+          <Badge variant="secondary">{t("landing.flowforceBilling")}</Badge>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Plans for restaurant operations
+            {t("landing.plansForRestaurantOperations")}
           </h1>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            Choose Starter, Growth, or Enterprise. Checkout is handled securely
-            through Stripe and updates your workspace automatically.
+            {t("landing.chooseStarterGrowthOrEnterpriseCheckoutIsHandledSecurelyThroughStripeAndUpdatesYourWorkspaceAutomatically")}
           </p>
           {intent === "reactivate" ? (
             <Alert className="mx-auto max-w-2xl text-left">
-              <AlertTitle>Reactivate your workspace</AlertTitle>
+              <AlertTitle>{t("landing.reactivateYourWorkspace")}</AlertTitle>
               <AlertDescription>
-                Pick a plan below to restore scheduling, inventory, tasks, and
-                reporting for your team.
+                {t("landing.pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam")}
               </AlertDescription>
             </Alert>
           ) : null}
           {checkoutMessage ? (
             <Alert className="mx-auto max-w-2xl text-left">
-              <AlertTitle>Checkout canceled</AlertTitle>
+              <AlertTitle>{t("landing.checkoutCanceled")}</AlertTitle>
               <AlertDescription>{checkoutMessage}</AlertDescription>
             </Alert>
           ) : null}
@@ -117,7 +117,7 @@ export default function Pricing() {
               >
                 <CardHeader className="space-y-3">
                   {isPopular ? (
-                    <Badge className="w-fit">Most popular</Badge>
+                    <Badge className="w-fit">{t("landing.mostPopular")}</Badge>
                   ) : null}
                   <CardTitle>{plan.label}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
@@ -155,11 +155,11 @@ export default function Pricing() {
         <div className="mt-10 text-center text-sm text-muted-foreground">
           {user ? (
             <Link href="/app/settings?tab=billing" className="underline">
-              Return to billing settings
+              {t("landing.returnToBillingSettings")}
             </Link>
           ) : (
             <Link href="/auth" className="underline">
-              Sign in to manage an existing workspace
+              {t("landing.signInToManageAnExistingWorkspace")}
             </Link>
           )}
         </div>
