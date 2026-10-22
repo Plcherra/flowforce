@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CustomReport, useReportData } from "@/hooks/useReports";
+import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
+import { useCustomReportTranslations } from "@/features/analytics/hooks/useReportContentTranslations";
 import {
   FileSpreadsheet,
   FileText,
@@ -44,6 +46,21 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<"table" | "chart">("table");
   const [filters, _setFilters] = useState({});
+  const reportSources = useMemo(() => [report], [report]);
+  const translations = useCustomReportTranslations(reportSources);
+  const stored = translations.get(report.id) ?? null;
+  const display = useFormContentDisplay({
+    recordId: report.id,
+    title: report.name,
+    description: report.description,
+    translation: stored
+      ? {
+          sourceLocale: stored.sourceLocale,
+          title: stored.name,
+          description: stored.description,
+        }
+      : null,
+  });
 
   const { data: reportData, isLoading } = useReportData(
     report.report_type,
@@ -122,12 +139,21 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
               {t("common.back")}
             </Button>
             <div>
-              <CardTitle>{report.name}</CardTitle>
-              {report.description && (
+              <CardTitle>{display.title}</CardTitle>
+              {display.description ? (
                 <p className="text-sm text-muted-foreground mt-1">
-                  {report.description}
+                  {display.description}
                 </p>
-              )}
+              ) : null}
+              {display.control ? (
+                <button
+                  type="button"
+                  className="mt-1 text-left text-xs text-muted-foreground underline"
+                  onClick={display.toggle}
+                >
+                  {display.control}
+                </button>
+              ) : null}
             </div>
           </div>
           <div className="flex items-center space-x-2">

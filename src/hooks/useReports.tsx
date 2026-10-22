@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleCustomReportTranslation } from "@/features/analytics/scheduleReportContent";
 
 export interface CustomReport {
   id: string;
@@ -34,6 +38,10 @@ export function useReports() {
 export function useCreateReport() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const { profile } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   return useMutation({
     mutationFn: async (
@@ -46,6 +54,15 @@ export function useCreateReport() {
         .single();
 
       if (error) throw error;
+      if (companyId && data?.id) {
+        scheduleCustomReportTranslation({
+          companyId,
+          sourceId: data.id,
+          sourceLocale,
+          name: report.name,
+          description: report.description,
+        });
+      }
       return data;
     },
     onSuccess: () => {
@@ -68,6 +85,10 @@ export function useCreateReport() {
 export function useUpdateReport() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { i18n } = useTranslation();
+  const { profile } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   return useMutation({
     mutationFn: async ({
@@ -82,6 +103,19 @@ export function useUpdateReport() {
         .single();
 
       if (error) throw error;
+      if (
+        companyId &&
+        (updates.name !== undefined || updates.description !== undefined)
+      ) {
+        scheduleCustomReportTranslation({
+          companyId,
+          sourceId: id,
+          sourceLocale,
+          name: typeof updates.name === "string" ? updates.name : null,
+          description:
+            typeof updates.description === "string" ? updates.description : null,
+        });
+      }
       return data;
     },
     onSuccess: () => {

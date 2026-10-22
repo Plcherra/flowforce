@@ -636,7 +636,7 @@ Prove: Unit test the two field paths and the empty-cache notification fallback. 
 
 ### Phase 36 — Reports
 
-- [ ] Translate report names and written notes.
+- [x] Translate report names and written notes.
 
 Rules:
 
@@ -1310,6 +1310,22 @@ Phone steps for Pedro:
 3. Set your language to Español and reload Tasks. The reminder title and description should be Spanish, with Traducido de English and a control to see the original.
 4. If the translation has not arrived yet, the reminder still shows the English words you typed. After it arrives, the Spanish text replaces them.
 5. Set the language back to English. The reminder should show the English title and description, with no translated-from line.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 36 Reports
+
+Shipped: A custom report keeps the name and description that were typed. An employee report keeps the note that was typed. The cache paths are `custom_reports.name`, `custom_reports.description`, and `employee_report.notes`. Filters, column ids, amounts, and severity are not sent. The save returns before the model runs. The report viewer shows the translated name and description. The employee report list shows the translated note, with one see-original line when the languages differ. A person's name stays as stored.
+
+Proven: `src/features/analytics/reportContentTranslation.test.ts` passed through the jiti runner. The three prose paths are translated. The model is not called with `128.40`, the column id `hours`, or the severity `4`. An English viewer gets no note translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open the report builder and save a report with an English name and description. Open the employee report inbox and write an English note about a person. Both should save without waiting.
+3. Set your language to Español and open the report again. The name and description should be Spanish. The employee note should be Spanish, with Traducido de English. The person's name, the severity number, and any amount should stay as stored.
+4. Set the language back to English. The name, description, and note should be the English words you typed.
 
 Blockers: none. No new migration.
 

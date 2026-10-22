@@ -35,6 +35,13 @@ export const TRANSLATABLE_FIELDS: Record<
     title: {},
     description: {},
   },
+  custom_reports: {
+    name: {},
+    description: {},
+  },
+  employee_report: {
+    notes: {},
+  },
 };
 
 export function translatableFieldRule(

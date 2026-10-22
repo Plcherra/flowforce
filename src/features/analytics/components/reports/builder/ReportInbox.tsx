@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { AlertTriangle, Download, FileText, Loader2, Plus } from "lucide-react";
@@ -19,6 +19,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleEmployeeReportTranslation } from "@/features/analytics/scheduleReportContent";
+import { useEmployeeReportTranslations } from "@/features/analytics/hooks/useReportContentTranslations";
+import { EmployeeReportNote } from "@/features/analytics/components/reports/builder/EmployeeReportNote";
 import type { EmployeeReportCategory } from "@/types/people";
 import {
   buildCompanyStoragePath,
@@ -58,7 +62,8 @@ const severityLabels: Record<number, string> = {
 };
 
 export function ReportInbox() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -99,6 +104,8 @@ export function ReportInbox() {
       return data ?? [];
     },
   });
+  const employeeReports = useMemo(() => reportsQuery.data ?? [], [reportsQuery.data]);
+  const noteTranslations = useEmployeeReportTranslations(employeeReports);
 
   const summariesQuery = useQuery({
     queryKey: ["report-inbox-summaries"],
@@ -147,10 +154,20 @@ export function ReportInbox() {
         created_by: user.id,
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("employee_report")
-        .insert(insertPayload);
+        .insert(insertPayload)
+        .select("id")
+        .single();
       if (error) throw error;
+      if (data?.id) {
+        scheduleEmployeeReportTranslation({
+          companyId,
+          sourceId: data.id,
+          sourceLocale,
+          notes: values.notes,
+        });
+      }
     },
     onSuccess: () => {
       toast({
@@ -454,9 +471,12 @@ export function ReportInbox() {
                       <span>{dayjs(report.date).format("MMM D, YYYY")}</span>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                    {report.notes}
-                  </p>
+                  {report.notes ? (
+                    <EmployeeReportNote
+                      notes={report.notes}
+                      translation={noteTranslations.get(report.id) ?? null}
+                    />
+                  ) : null}
                   {isEmployeeReportAttachment(report.attachment) && (
                     <Button
                       type="button"
