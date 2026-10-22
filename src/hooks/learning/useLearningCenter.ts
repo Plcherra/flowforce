@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   keepPreviousData,
   useMutation,
@@ -41,6 +42,7 @@ import type {
   LearningProgressSnapshot,
   PersonalLearningSnapshot,
 } from "@/types/learning";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { logger } from "@/utils/logger";
 
 type SkillSnapshot = {
@@ -86,8 +88,10 @@ const adminEnrollmentsResponseSchema = z.object({
 });
 
 export function useLearningCenter() {
+  const { i18n } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const queryClient = useQueryClient();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const profileId = profile?.userId ?? null;
@@ -353,7 +357,7 @@ export function useLearningCenter() {
             : "Company context missing for learning data.",
         );
       }
-      return createLearningCourse(payload, user.id, companyId);
+      return createLearningCourse(payload, user.id, companyId, sourceLocale);
     },
     onSuccess: (course) => {
       toast({

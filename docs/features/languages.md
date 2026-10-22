@@ -706,7 +706,7 @@ Prove: Unit test the two field paths. Run it with the jiti runner.
 
 ### Phase 41 — Learning content
 
-- [ ] Translate course and module titles and descriptions.
+- [x] Translate course and module titles and descriptions.
 
 Rules:
 
@@ -1392,5 +1392,21 @@ Phone steps for Pedro:
 4. Set the language back to English. The goal title should be the English words you typed, with no translated-from line.
 
 Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 41 Learning content
+
+Shipped: A course keeps the title and description that were typed. A module keeps the title and description that were typed. The cache paths are `learning_courses.title`, `learning_courses.description`, `training_modules.title`, `training_modules.description`, `learning_modules.title`, and `learning_modules.description`. The catalog modules people create are stored in `learning_modules`, so that table was added to the cache check. The save returns before the model runs. The learning catalog shows the translated course and each module, with one see-original line per record when the languages differ. XP and hours stay numbers.
+
+Proven: `src/features/learning/learningContentTranslation.test.ts` passed through the jiti runner. The four paths on `learning_courses` and `training_modules` are translated. A second read of the course title does not call the model again. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Learning, then the catalog tab, and create a course with an English title, description, and at least one module title. It should save without waiting. XP and hours stay numbers.
+3. Set your language to Español and open the catalog again. The course title and description should be Spanish, with Traducido de English. Each module title on the card should be Spanish, with its own see-original line.
+4. Set the language back to English. The course and module text should be the English words you typed, with no translated-from line.
+
+Blockers: none. Migration `20261022163546_content_translations_learning_modules` is applied.
 
 Questions: none.

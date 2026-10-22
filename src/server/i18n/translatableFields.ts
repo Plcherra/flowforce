@@ -61,6 +61,18 @@ export const TRANSLATABLE_FIELDS: Record<
     title: {},
     description: {},
   },
+  learning_courses: {
+    title: {},
+    description: {},
+  },
+  learning_modules: {
+    title: {},
+    description: {},
+  },
+  training_modules: {
+    title: {},
+    description: {},
+  },
 };
 
 export function translatableFieldRule(

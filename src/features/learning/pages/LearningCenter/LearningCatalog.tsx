@@ -1,4 +1,10 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { LearningRecordCopy } from "@/features/learning/components/LearningRecordCopy";
+import {
+  useCourseTranslations,
+  useModuleTranslations,
+} from "@/features/learning/hooks/useLearningContentTranslations";
 import {
   Card,
   CardContent,
@@ -34,6 +40,30 @@ export function LearningCatalog({
   canCreateCourse,
 }: LearningCatalogProps) {
   const { t } = useTranslation();
+  const courseSources = useMemo(
+    () =>
+      courses.map((course) => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        updated_at: course.updatedAt,
+      })),
+    [courses],
+  );
+  const moduleSources = useMemo(
+    () =>
+      courses.flatMap((course) =>
+        course.modules.map((module) => ({
+          id: module.id,
+          title: module.title,
+          description: module.description,
+          updated_at: module.createdAt,
+        })),
+      ),
+    [courses],
+  );
+  const courseTranslations = useCourseTranslations(courseSources);
+  const moduleTranslations = useModuleTranslations(moduleSources);
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -82,12 +112,30 @@ export function LearningCatalog({
             return (
               <Card key={course.id} className="shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">{course.title}</CardTitle>
-                  <CardDescription>
-                    {course.description ?? t("learning.noDescriptionProvided")}
-                  </CardDescription>
+                  <LearningRecordCopy
+                    recordId={course.id}
+                    title={course.title}
+                    description={course.description}
+                    emptyDescription={t("learning.noDescriptionProvided")}
+                    translation={courseTranslations.get(course.id) ?? null}
+                    titleClassName="text-xl font-semibold leading-none tracking-tight"
+                  />
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {course.modules.length > 0 ? (
+                    <div className="space-y-2">
+                      {course.modules.map((module) => (
+                        <LearningRecordCopy
+                          key={module.id}
+                          recordId={module.id}
+                          title={module.title}
+                          description={module.description}
+                          translation={moduleTranslations.get(module.id) ?? null}
+                          titleClassName="text-sm font-medium"
+                        />
+                      ))}
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline">
                       {learningLabel(t, CATEGORY_LABEL_KEYS, course.category)}

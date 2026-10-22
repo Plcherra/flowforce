@@ -1,6 +1,12 @@
 ﻿import { z } from "zod";
 
 import { supabase } from "@/integrations/supabase/client";
+import {
+  COURSE_TABLE,
+  LEARNING_MODULE_TABLE,
+} from "@/features/learning/learningContent";
+import { scheduleLearningTranslation } from "@/features/learning/scheduleLearningContent";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
 import type { TablesInsert } from "@/integrations/supabase/public-types";
 import type {
   CourseCreationPayload,
@@ -427,6 +433,7 @@ export async function createLearningCourse(
   payload: CourseCreationPayload,
   createdBy: string,
   companyId: string,
+  sourceLocale?: AppLanguage,
 ) {
   if (!companyId) {
     throw new Error("Company context is required to create learning courses.");
@@ -491,13 +498,39 @@ export async function createLearningCourse(
   }));
 
   if (modulesPayload.length > 0) {
-    const { error: moduleError } =
-      await fromTable(TABLE_MODULES).insert(modulesPayload);
+    const { data: insertedModules, error: moduleError } = await fromTable(TABLE_MODULES)
+      .insert(modulesPayload)
+      .select("id, title, description");
     if (moduleError) {
       // Attempt cleanup so admins don't see orphan course without modules
       await fromTable(TABLE_COURSES).delete().eq("id", courseRecord.id);
       throw moduleError;
     }
+    if (sourceLocale) {
+      const rows = Array.isArray(insertedModules) ? insertedModules : [];
+      for (const row of rows) {
+        if (!row || typeof row.id !== "string") continue;
+        scheduleLearningTranslation({
+          table: LEARNING_MODULE_TABLE,
+          companyId,
+          sourceId: row.id,
+          sourceLocale,
+          title: typeof row.title === "string" ? row.title : null,
+          description: typeof row.description === "string" ? row.description : null,
+        });
+      }
+    }
+  }
+
+  if (sourceLocale) {
+    scheduleLearningTranslation({
+      table: COURSE_TABLE,
+      companyId,
+      sourceId: courseRecord.id,
+      sourceLocale,
+      title: courseRecord.title,
+      description: courseRecord.description,
+    });
   }
 
   return mapCourse(courseRecord);
