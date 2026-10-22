@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import {
   AlertTriangle,
@@ -55,25 +56,22 @@ interface OperatorCommandCenterProps {
 
 const severityStyles: Record<
   Severity,
-  { card: string; icon: string; badge: string; label: string }
+  { card: string; icon: string; badge: string }
 > = {
   good: {
     card: "border-success/30 bg-success-muted",
     icon: "bg-success/15 text-success",
     badge: "border-success/30 bg-success-muted text-success",
-    label: "Steady",
   },
   watch: {
     card: "border-warning/30 bg-warning-muted",
     icon: "bg-warning/15 text-warning",
     badge: "border-warning/30 bg-warning-muted text-warning-foreground",
-    label: "Watch",
   },
   urgent: {
     card: "border-destructive/30 bg-destructive/10",
     icon: "bg-destructive/15 text-destructive",
     badge: "border-destructive/30 bg-destructive/10 text-destructive",
-    label: "Urgent",
   },
 };
 
@@ -140,46 +138,60 @@ function getLaborSeverity(
 function buildCards(
   stats: DashboardStats,
   data: OperatorCommandCenterData,
+  t: (key: string, options?: Record<string, string | number>) => string,
 ): OperatorCard[] {
   return [
     {
-      label: "Schedule coverage",
+      label: t("dashboard.scheduleCoverage"),
       value: `${stats.coverageCompleteness}%`,
-      detail: `${stats.todaysShifts} shifts today, ${data.unassignedShiftsToday} unassigned`,
+      detail: t("dashboard.shiftsTodayUnassigned", {
+        shifts: stats.todaysShifts,
+        unassigned: data.unassignedShiftsToday,
+      }),
       icon: CalendarClock,
       severity: getCoverageSeverity(stats),
       href: "/app/enhanced-scheduling",
-      action: "Review schedule",
+      action: t("dashboard.reviewSchedule"),
     },
     {
-      label: "Labor plan",
+      label: t("dashboard.laborPlan"),
       value: formatHours(data.laborHoursToday),
-      detail: `${currencyFormatter.format(data.laborCostToday)} scheduled labor, ${data.overstaffedShiftsToday} overstaffed shifts`,
+      detail: t("dashboard.scheduledLaborDetail", {
+        labor: currencyFormatter.format(data.laborCostToday),
+        overstaffed: data.overstaffedShiftsToday,
+      }),
       icon: Clock3,
       severity: getLaborSeverity(stats, data),
       href: "/app/enhanced-scheduling",
-      action: "Tune labor",
+      action: t("dashboard.tuneLabor"),
     },
     {
-      label: "Task execution",
+      label: t("dashboard.taskExecution"),
       value: `${stats.taskCompletion}%`,
-      detail: `${data.openTasks} open, ${data.overdueTasks} overdue, ${data.highPriorityTasks} high priority`,
+      detail: t("dashboard.taskExecutionDetail", {
+        open: data.openTasks,
+        overdue: data.overdueTasks,
+        highPriority: data.highPriorityTasks,
+      }),
       icon: ClipboardCheck,
       severity: getTaskSeverity(data),
       href: "/app/tasks",
-      action: "Open tasks",
+      action: t("dashboard.openTasks"),
     },
     {
-      label: "Inventory posture",
+      label: t("dashboard.inventoryPosture"),
       value: String(data.shortageSignalsToday || data.lowStockItems),
-      detail: `${data.activeInventoryItems} active items, ${data.openPurchases} open purchases`,
+      detail: t("dashboard.inventoryPostureDetail", {
+        active: data.activeInventoryItems,
+        purchases: data.openPurchases,
+      }),
       icon: Boxes,
       severity: getInventorySeverity(data),
       href: "/app/inventory",
-      action: "Check stock",
+      action: t("dashboard.checkStock"),
     },
     {
-      label: "Manager risk",
+      label: t("dashboard.managerRisk"),
       value: String(
         stats.pendingTimeOff +
           data.unassignedShiftsToday +
@@ -187,7 +199,10 @@ function buildCards(
           Math.max(data.shortageSignalsToday, data.lowStockItems) +
           data.overduePurchases,
       ),
-      detail: `${stats.pendingTimeOff} time-off requests, ${data.shortageSignalsToday} shortage signals`,
+      detail: t("dashboard.managerRiskDetail", {
+        requests: stats.pendingTimeOff,
+        shortages: data.shortageSignalsToday,
+      }),
       icon: ShieldAlert,
       severity:
         stats.pendingTimeOff +
@@ -199,7 +214,7 @@ function buildCards(
           ? "urgent"
           : "good",
       href: "/app/reports",
-      action: "Review risk",
+      action: t("dashboard.reviewRisk"),
     },
   ];
 }
@@ -207,13 +222,17 @@ function buildCards(
 function buildManagerActions(
   stats: DashboardStats,
   data: OperatorCommandCenterData,
+  t: (key: string, options?: Record<string, string | number>) => string,
 ): ManagerAction[] {
   const actions: ManagerAction[] = [];
 
   if (data.unassignedShiftsToday > 0 || data.draftShiftsToday > 0) {
     actions.push({
-      label: "Finalize today's schedule",
-      detail: `${data.unassignedShiftsToday} unassigned and ${data.draftShiftsToday} draft shifts need manager attention.`,
+      label: t("dashboard.finalizeTodaySSchedule"),
+      detail: t("dashboard.finalizeScheduleDetail", {
+        unassigned: data.unassignedShiftsToday,
+        drafts: data.draftShiftsToday,
+      }),
       href: "/app/enhanced-scheduling",
       severity: "urgent",
     });
@@ -221,8 +240,10 @@ function buildManagerActions(
 
   if (stats.pendingTimeOff > 0) {
     actions.push({
-      label: "Review time-off queue",
-      detail: `${stats.pendingTimeOff} pending requests can affect upcoming coverage.`,
+      label: t("dashboard.reviewTimeOffQueue"),
+      detail: t("dashboard.timeOffQueueDetail", {
+        count: stats.pendingTimeOff,
+      }),
       href: "/app/enhanced-scheduling?panel=timeoff",
       severity: "watch",
     });
@@ -230,8 +251,11 @@ function buildManagerActions(
 
   if (data.overdueTasks > 0 || data.highPriorityTasks > 0) {
     actions.push({
-      label: "Clear task blockers",
-      detail: `${data.overdueTasks} overdue and ${data.highPriorityTasks} high-priority tasks are still open.`,
+      label: t("dashboard.clearTaskBlockers"),
+      detail: t("dashboard.taskBlockersDetail", {
+        overdue: data.overdueTasks,
+        highPriority: data.highPriorityTasks,
+      }),
       href: "/app/tasks",
       severity: "urgent",
     });
@@ -239,8 +263,10 @@ function buildManagerActions(
 
   if (data.lowStockItems > 0) {
     actions.push({
-      label: "Reorder low-stock items",
-      detail: `${data.shortageSignalsToday || data.lowStockItems} inventory items are at or below par.`,
+      label: t("dashboard.reorderLowStockItems"),
+      detail: t("dashboard.lowStockDetail", {
+        count: data.shortageSignalsToday || data.lowStockItems,
+      }),
       href: "/app/inventory",
       severity: data.lowStockItems > 5 ? "urgent" : "watch",
     });
@@ -248,8 +274,11 @@ function buildManagerActions(
 
   if (data.openPurchases > 0) {
     actions.push({
-      label: "Track purchasing",
-      detail: `${data.openPurchases} open purchases total ${currencyFormatter.format(data.openPurchaseValue)}.`,
+      label: t("dashboard.trackPurchasing"),
+      detail: t("dashboard.openPurchasesDetail", {
+        count: data.openPurchases,
+        value: currencyFormatter.format(data.openPurchaseValue),
+      }),
       href: "/app/inventory/purchasing",
       severity: data.overduePurchases > 0 ? "urgent" : "watch",
     });
@@ -257,8 +286,10 @@ function buildManagerActions(
 
   if (data.overstaffedShiftsToday > 0) {
     actions.push({
-      label: "Trim overstaffed shifts",
-      detail: `${data.overstaffedShiftsToday} shifts are above planned headcount in the cost engine.`,
+      label: t("dashboard.trimOverstaffedShifts"),
+      detail: t("dashboard.overstaffedDetail", {
+        count: data.overstaffedShiftsToday,
+      }),
       href: "/app/enhanced-scheduling",
       severity: "watch",
     });
@@ -268,14 +299,14 @@ function buildManagerActions(
 
   return [
     {
-      label: "Walk the floor plan",
-      detail: "Schedule, labor, task, and inventory signals are steady for today.",
+      label: t("dashboard.walkTheFloorPlan"),
+      detail: t("dashboard.scheduleLaborTaskAndInventorySignalsAreSteadyForToday"),
       href: "/app/enhanced-scheduling",
       severity: "good",
     },
     {
-      label: "Review reports",
-      detail: "Use the reporting view to spot trends before they become issues.",
+      label: t("dashboard.reviewReports"),
+      detail: t("dashboard.useTheReportingViewToSpotTrendsBeforeTheyBecomeIssues"),
       href: "/app/reports",
       severity: "good",
     },
@@ -299,6 +330,12 @@ export default function OperatorCommandCenter({
   statsError,
   onRetry,
 }: OperatorCommandCenterProps) {
+  const { t } = useTranslation();
+  const severityLabel: Record<Severity, string> = {
+    good: t("dashboard.steady"),
+    watch: t("dashboard.watch"),
+    urgent: t("dashboard.urgent"),
+  };
   const {
     data,
     loading: commandLoading,
@@ -306,8 +343,8 @@ export default function OperatorCommandCenter({
     refetch,
   } = useOperatorCommandCenterData();
   const loading = statsLoading || commandLoading;
-  const cards = buildCards(stats, data);
-  const actions = buildManagerActions(stats, data);
+  const cards = buildCards(stats, data, t);
+  const actions = buildManagerActions(stats, data, t);
   const urgentCount = cards.filter((card) => card.severity === "urgent").length;
   const watchCount = cards.filter((card) => card.severity === "watch").length;
   const error = statsError ?? commandError;
@@ -318,12 +355,12 @@ export default function OperatorCommandCenter({
   };
 
   return (
-    <section className="space-y-4" aria-label="Operator command center">
+    <section className="space-y-4" aria-label={t("dashboard.operatorCommandCenter")}>
       {error && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <div className="flex-1 space-y-2">
-            <AlertTitle>Command center data needs attention</AlertTitle>
+            <AlertTitle>{t("dashboard.commandCenterDataNeedsAttention")}</AlertTitle>
             <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <span>{error}</span>
               <Button
@@ -333,8 +370,7 @@ export default function OperatorCommandCenter({
                 onClick={handleRetry}
                 disabled={loading}
               >
-                Retry
-              </Button>
+                {t("dashboard.retry")}</Button>
             </AlertDescription>
           </div>
         </Alert>
@@ -343,11 +379,9 @@ export default function OperatorCommandCenter({
       <Card>
         <CardHeader className="gap-3 pb-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <CardTitle className="text-xl">Today&apos;s command center</CardTitle>
+            <CardTitle className="text-xl">{t("dashboard.todaySCommandCenter")}</CardTitle>
             <CardDescription>
-              Labor, inventory, task, schedule, and risk signals for the active
-              tenant.
-            </CardDescription>
+              {t("dashboard.laborInventoryTaskScheduleAndRiskSignalsForTheActiveTenant")}</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge
@@ -359,7 +393,7 @@ export default function OperatorCommandCenter({
                   : severityStyles.good.badge,
               )}
             >
-              {urgentCount} urgent
+              {t("dashboard.urgentCount", { count: urgentCount })}
             </Badge>
             <Badge
               variant="outline"
@@ -370,7 +404,7 @@ export default function OperatorCommandCenter({
                   : severityStyles.good.badge,
               )}
             >
-              {watchCount} watch
+              {t("dashboard.watchCount", { count: watchCount })}
             </Badge>
           </div>
         </CardHeader>
@@ -413,7 +447,7 @@ export default function OperatorCommandCenter({
                           variant="outline"
                           className={cn("shrink-0", styles.badge)}
                         >
-                          {styles.label}
+                          {severityLabel[card.severity]}
                         </Badge>
                       </div>
                       <p className="mt-3 min-h-10 text-sm leading-snug text-muted-foreground">
@@ -433,16 +467,13 @@ export default function OperatorCommandCenter({
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
                   <h2 className="text-base font-semibold">
-                    Manager action queue
-                  </h2>
+                    {t("dashboard.managerActionQueue")}</h2>
                   <p className="text-sm text-muted-foreground">
-                    Ranked by what can disrupt today&apos;s operation.
-                  </p>
+                    {t("dashboard.rankedByWhatCanDisruptTodaySOperation")}</p>
                 </div>
                 <Button type="button" variant="ghost" size="sm" asChild>
                   <Link to="/app/tasks">
-                    Open work
-                    <ArrowUpRight className="ml-1 h-4 w-4" />
+                    {t("dashboard.openWork")}<ArrowUpRight className="ml-1 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
@@ -476,7 +507,7 @@ export default function OperatorCommandCenter({
                             severityStyles[action.severity].badge,
                           )}
                         >
-                          {severityStyles[action.severity].label}
+                          {severityLabel[action.severity]}
                         </Badge>
                       </Link>
                     ))}
@@ -486,7 +517,7 @@ export default function OperatorCommandCenter({
             <div className="rounded-lg border bg-muted/25 p-4">
               <div className="mb-3 flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-primary" />
-                <h2 className="text-base font-semibold">Cost pulse</h2>
+                <h2 className="text-base font-semibold">{t("dashboard.costPulse")}</h2>
               </div>
               {loading ? (
                 <div className="space-y-3">
@@ -504,19 +535,17 @@ export default function OperatorCommandCenter({
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Today&apos;s labor, production, waste, purchasing, and
-                      expense cost.
-                    </p>
+                      {t("dashboard.todaySLaborProductionWastePurchasingAndExpenseCost")}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="rounded-md bg-background p-3">
-                      <div className="text-muted-foreground">Labor</div>
+                      <div className="text-muted-foreground">{t("dashboard.labor")}</div>
                       <div className="font-semibold">
                         {currencyFormatter.format(data.laborCostToday)}
                       </div>
                     </div>
                     <div className="rounded-md bg-background p-3">
-                      <div className="text-muted-foreground">Purchasing</div>
+                      <div className="text-muted-foreground">{t("common.purchasing")}</div>
                       <div className="font-semibold">
                         {currencyFormatter.format(
                           data.purchasingCostToday || data.openPurchaseValue,
@@ -524,13 +553,13 @@ export default function OperatorCommandCenter({
                       </div>
                     </div>
                     <div className="rounded-md bg-background p-3">
-                      <div className="text-muted-foreground">Waste</div>
+                      <div className="text-muted-foreground">{t("dashboard.waste")}</div>
                       <div className="font-semibold">
                         {currencyFormatter.format(data.wasteCostToday)}
                       </div>
                     </div>
                     <div className="rounded-md bg-background p-3">
-                      <div className="text-muted-foreground">Production</div>
+                      <div className="text-muted-foreground">{t("dashboard.production")}</div>
                       <div className="font-semibold">
                         {currencyFormatter.format(data.productionCostToday)}
                       </div>

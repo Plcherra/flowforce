@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "@/lib/router-adapter";
 import {
@@ -31,6 +33,7 @@ export default function InviteSignUpForm({
   onSubmit,
   isLoading,
 }: InviteSignUpFormProps) {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [password, setPassword] = useState("");
@@ -63,9 +66,9 @@ export default function InviteSignUpForm({
 
         if (!response.ok || !data.email) {
           toast({
-            title: "Invalid Invitation",
+            title: t("auth.invalidInvitation"),
             description:
-              data.message || "This invitation link is invalid or has expired.",
+              data.message || t("auth.thisInvitationLinkIsInvalidOrHasExpired"),
             variant: "destructive",
           });
           return;
@@ -87,7 +90,7 @@ export default function InviteSignUpForm({
     };
 
     fetchInviteDetails();
-  }, [searchParams, toast]);
+  }, [searchParams, toast, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,8 +111,7 @@ export default function InviteSignUpForm({
           <div className="text-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
             <p className="mt-2 text-sm text-muted-foreground">
-              Loading invitation...
-            </p>
+              {t("auth.loadingInvitation")}</p>
           </div>
         </CardContent>
       </Card>
@@ -121,7 +123,7 @@ export default function InviteSignUpForm({
       <Card>
         <CardContent className="pt-6">
           <div className="text-center text-muted-foreground">
-            <p>Invalid or expired invitation link.</p>
+            <p>{t("auth.invalidOrExpiredInvitationLink")}</p>
           </div>
         </CardContent>
       </Card>
@@ -133,11 +135,10 @@ export default function InviteSignUpForm({
       <CardHeader>
         <div className="flex items-center space-x-2">
           <Users className="h-5 w-5 text-primary" />
-          <CardTitle>Activate Your Account</CardTitle>
+          <CardTitle>{t("auth.activateYourAccount")}</CardTitle>
         </div>
         <CardDescription>
-          Your account has been pre-created. Set a password to activate it.
-        </CardDescription>
+          {t("auth.yourAccountHasBeenPreCreatedSetAPasswordToActivateIt")}</CardDescription>
       </CardHeader>
       <CardContent>
         {/* Pre-filled employee information */}
@@ -145,28 +146,27 @@ export default function InviteSignUpForm({
           <div className="flex items-center space-x-2 mb-3">
             <CheckCircle2 className="h-5 w-5 text-success" />
             <h4 className="font-medium text-foreground">
-              Your Profile Information
-            </h4>
+              {t("auth.yourProfileInformation")}</h4>
           </div>
           <div className="space-y-2 text-sm text-success">
             <p>
-              <strong>Name:</strong> {inviteData.firstName}{" "}
+              <strong>{t("auth.name")}</strong> {inviteData.firstName}{" "}
               {inviteData.lastName}
             </p>
             <p>
-              <strong>Email:</strong> {inviteData.email}
+              <strong>{t("auth.email2")}</strong> {inviteData.email}
             </p>
             <p>
-              <strong>Role:</strong> {inviteData.role}
+              <strong>{t("auth.role")}</strong> {inviteData.role}
             </p>
             {inviteData.phone && (
               <p>
-                <strong>Phone:</strong> {inviteData.phone}
+                <strong>{t("auth.phone")}</strong> {inviteData.phone}
               </p>
             )}
             {inviteData.birthDate && (
               <p>
-                <strong>Birth Date:</strong>{" "}
+                <strong>{t("auth.birthDate")}</strong>{" "}
                 {new Date(inviteData.birthDate).toLocaleDateString()}
               </p>
             )}
@@ -175,23 +175,22 @@ export default function InviteSignUpForm({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Create Password</Label>
+            <Label htmlFor="password">{t("auth.createPassword")}</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter a secure password"
+              placeholder={t("auth.enterASecurePassword")}
               required
               minLength={8}
             />
             <p className="text-xs text-muted-foreground">
-              Password must be at least 8 characters long
-            </p>
+              {t("auth.passwordMustBeAtLeast8CharactersLong")}</p>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Activating account..." : "Activate Account"}
+            {isLoading ? t("auth.activatingAccount") : t("auth.activateAccount")}
           </Button>
         </form>
       </CardContent>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ export default function ForgotPasswordForm({
   onBack,
   isLoading,
 }: ForgotPasswordFormProps) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,8 +40,7 @@ export default function ForgotPasswordForm({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Reset Password
-        </CardTitle>
+          {t("auth.resetPassword")}</CardTitle>
         <CardDescription className="text-center">
           Enter your email address and we&apos;ll send you a link to reset your
           password.
@@ -47,13 +49,13 @@ export default function ForgotPasswordForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("auth.email")}</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t("auth.emailPlaceholder")}
               required
               disabled={isLoading}
             />
@@ -64,7 +66,7 @@ export default function ForgotPasswordForm({
             className="w-full"
             disabled={isLoading || !email}
           >
-            {isLoading ? "Sending..." : "Send Reset Link"}
+            {isLoading ? t("auth.sending") : t("auth.sendResetLink")}
           </Button>
 
           <Button
@@ -75,8 +77,7 @@ export default function ForgotPasswordForm({
             disabled={isLoading}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Sign In
-          </Button>
+            {t("auth.backToSignIn")}</Button>
         </form>
       </CardContent>
     </Card>

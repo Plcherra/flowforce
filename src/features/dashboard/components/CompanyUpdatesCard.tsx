@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -24,6 +25,7 @@ interface CompanyUpdatesCardProps {
 export default function CompanyUpdatesCard({
   className,
 }: CompanyUpdatesCardProps) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const navigate = useNavigate();
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
@@ -57,11 +59,9 @@ export default function CompanyUpdatesCard({
             <div>
               <CardTitle className="flex items-center text-lg">
                 <Bell className="mr-2 h-5 w-5 text-primary" />
-                Company Updates
-              </CardTitle>
+                {t("common.companyUpdates")}</CardTitle>
               <CardDescription>
-                Latest announcements and company news
-              </CardDescription>
+                {t("dashboard.latestAnnouncementsAndCompanyNews")}</CardDescription>
             </div>
             {can("systemSettings") && (
               <Button
@@ -72,8 +72,7 @@ export default function CompanyUpdatesCard({
                 aria-controls="company-updates-dashboard-wizard"
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Add Update
-              </Button>
+                {t("dashboard.addUpdate")}</Button>
             )}
           </div>
         </CardHeader>
@@ -82,16 +81,14 @@ export default function CompanyUpdatesCard({
             <div className="text-center py-8">
               <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
               <p className="text-muted-foreground mb-3">
-                No company updates yet
-              </p>
+                {t("dashboard.noCompanyUpdatesYet")}</p>
               {can("systemSettings") && (
                 <Button
                   variant="outline"
                   onClick={() => setCreateWizardOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Create First Update
-                </Button>
+                  {t("dashboard.createFirstUpdate")}</Button>
               )}
             </div>
           ) : (
@@ -158,7 +155,9 @@ export default function CompanyUpdatesCard({
                 className="w-full justify-between"
                 onClick={() => navigate("/company-updates")}
               >
-                <span>View All Updates ({updates.length})</span>
+                <span>
+                  {t("dashboard.viewAllUpdates", { count: updates.length })}
+                </span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -21,25 +22,26 @@ import { Building2, Users, Mail, Lock, MapPin, Phone } from "lucide-react";
 import { Link, useNavigate } from "@/lib/router-adapter";
 
 const industries = [
-  "Retail",
-  "Hospitality",
-  "Healthcare",
-  "Manufacturing",
-  "Technology",
-  "Education",
-  "Other",
-];
+  { value: "retail", labelKey: "auth.retail" },
+  { value: "hospitality", labelKey: "auth.hospitality" },
+  { value: "healthcare", labelKey: "auth.healthcare" },
+  { value: "manufacturing", labelKey: "auth.manufacturing" },
+  { value: "technology", labelKey: "auth.technology" },
+  { value: "education", labelKey: "auth.education" },
+  { value: "other", labelKey: "auth.other" },
+] as const;
 
 const companySizes = [
-  "1-5 employees",
-  "6-25 employees",
-  "26-50 employees",
-  "51-100 employees",
-  "101-500 employees",
-  "500+ employees",
-];
+  { value: "1-5 employees", labelKey: "auth.size1To5" },
+  { value: "6-25 employees", labelKey: "auth.size6To25" },
+  { value: "26-50 employees", labelKey: "auth.size26To50" },
+  { value: "51-100 employees", labelKey: "auth.size51To100" },
+  { value: "101-500 employees", labelKey: "auth.size101To500" },
+  { value: "500+ employees", labelKey: "auth.size500Plus" },
+] as const;
 
 export default function Register() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     companyName: "",
     industry: "",
@@ -76,11 +78,9 @@ export default function Register() {
               <Building2 className="h-8 w-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-3xl font-bold text-foreground">
-              Register Your Company
-            </CardTitle>
+              {t("auth.registerCompany.title")}</CardTitle>
             <CardDescription className="text-muted-foreground text-lg">
-              Start your free trial and get your team organized in minutes
-            </CardDescription>
+              {t("auth.startYourFreeTrialAndGetYourTeamOrganizedInMinutes")}</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -89,26 +89,25 @@ export default function Register() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground flex items-center">
                   <Building2 className="h-5 w-5 mr-2 text-primary" />
-                  Company Information
-                </h3>
+                  {t("auth.companyInformation")}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <Label htmlFor="companyName">Company Name *</Label>
+                    <Label htmlFor="companyName">{t("auth.companyName")}</Label>
                     <Input
                       id="companyName"
                       value={formData.companyName}
                       onChange={(e) =>
                         handleInputChange("companyName", e.target.value)
                       }
-                      placeholder="Enter your company name"
+                      placeholder={t("auth.enterYourCompanyName")}
                       required
                       className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="industry">Industry *</Label>
+                    <Label htmlFor="industry">{t("auth.industry")}</Label>
                     <Select
                       value={formData.industry}
                       onValueChange={(value) =>
@@ -116,15 +115,12 @@ export default function Register() {
                       }
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select industry" />
+                        <SelectValue placeholder={t("auth.selectIndustry")} />
                       </SelectTrigger>
                       <SelectContent>
                         {industries.map((industry) => (
-                          <SelectItem
-                            key={industry}
-                            value={industry.toLowerCase()}
-                          >
-                            {industry}
+                          <SelectItem key={industry.value} value={industry.value}>
+                            {t(industry.labelKey)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -132,7 +128,7 @@ export default function Register() {
                   </div>
 
                   <div>
-                    <Label htmlFor="companySize">Company Size *</Label>
+                    <Label htmlFor="companySize">{t("auth.companySize")}</Label>
                     <Select
                       value={formData.companySize}
                       onValueChange={(value) =>
@@ -140,12 +136,12 @@ export default function Register() {
                       }
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select size" />
+                        <SelectValue placeholder={t("auth.selectSize")} />
                       </SelectTrigger>
                       <SelectContent>
                         {companySizes.map((size) => (
-                          <SelectItem key={size} value={size}>
-                            {size}
+                          <SelectItem key={size.value} value={size.value}>
+                            {t(size.labelKey)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -158,40 +154,39 @@ export default function Register() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground flex items-center">
                   <Users className="h-5 w-5 mr-2 text-primary" />
-                  Your Information
-                </h3>
+                  {t("auth.yourInformation")}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName">First Name *</Label>
+                    <Label htmlFor="firstName">{t("auth.firstName")}</Label>
                     <Input
                       id="firstName"
                       value={formData.firstName}
                       onChange={(e) =>
                         handleInputChange("firstName", e.target.value)
                       }
-                      placeholder="Enter your first name"
+                      placeholder={t("auth.enterYourFirstName")}
                       required
                       className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Label htmlFor="lastName">{t("auth.lastName")}</Label>
                     <Input
                       id="lastName"
                       value={formData.lastName}
                       onChange={(e) =>
                         handleInputChange("lastName", e.target.value)
                       }
-                      placeholder="Enter your last name"
+                      placeholder={t("auth.enterYourLastName")}
                       required
                       className="mt-1"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email">Email Address *</Label>
+                    <Label htmlFor="email">{t("auth.emailAddress")}</Label>
                     <div className="relative mt-1">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -201,7 +196,7 @@ export default function Register() {
                         onChange={(e) =>
                           handleInputChange("email", e.target.value)
                         }
-                        placeholder="Enter your email"
+                        placeholder={t("auth.emailPlaceholder")}
                         className="pl-10"
                         required
                       />
@@ -209,7 +204,7 @@ export default function Register() {
                   </div>
 
                   <div>
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">{t("auth.phoneNumber")}</Label>
                     <div className="relative mt-1">
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -219,14 +214,14 @@ export default function Register() {
                         onChange={(e) =>
                           handleInputChange("phone", e.target.value)
                         }
-                        placeholder="Enter your phone"
+                        placeholder={t("auth.enterYourPhone")}
                         className="pl-10"
                       />
                     </div>
                   </div>
 
                   <div className="md:col-span-2">
-                    <Label htmlFor="password">Password *</Label>
+                    <Label htmlFor="password">{t("auth.password2")}</Label>
                     <div className="relative mt-1">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -236,7 +231,7 @@ export default function Register() {
                         onChange={(e) =>
                           handleInputChange("password", e.target.value)
                         }
-                        placeholder="Create a password"
+                        placeholder={t("auth.createAPassword")}
                         className="pl-10"
                         required
                       />
@@ -244,7 +239,7 @@ export default function Register() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <Label htmlFor="address">Company Address</Label>
+                    <Label htmlFor="address">{t("auth.companyAddress")}</Label>
                     <div className="relative mt-1">
                       <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -253,7 +248,7 @@ export default function Register() {
                         onChange={(e) =>
                           handleInputChange("address", e.target.value)
                         }
-                        placeholder="Enter your company address"
+                        placeholder={t("auth.enterYourCompanyAddress")}
                         className="pl-10"
                       />
                     </div>
@@ -272,14 +267,17 @@ export default function Register() {
                   required
                 />
                 <Label htmlFor="terms" className="text-sm text-muted-foreground">
-                  I agree to the{" "}
-                  <Link to="#" className="text-primary hover:underline">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link to="#" className="text-primary hover:underline">
-                    Privacy Policy
-                  </Link>
+                  <Trans
+                    i18nKey="auth.agreeToTerms"
+                    components={{
+                      terms: (
+                        <Link to="#" className="text-primary hover:underline" />
+                      ),
+                      privacy: (
+                        <Link to="#" className="text-primary hover:underline" />
+                      ),
+                    }}
+                  />
                 </Label>
               </div>
 
@@ -288,16 +286,15 @@ export default function Register() {
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg font-semibold"
                 disabled={!formData.agreedToTerms}
               >
-                Start Free Trial
-              </Button>
+                {t("auth.startFreeTrial")}</Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{" "}
+                {t("auth.alreadyHaveAccount")}{" "}
                 <Link
                   to="/auth"
                   className="text-primary hover:underline font-medium"
                 >
-                  Sign in here
+                  {t("auth.signInHere")}
                 </Link>
               </p>
             </form>

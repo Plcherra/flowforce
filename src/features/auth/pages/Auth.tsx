@@ -78,8 +78,8 @@ export default function Auth() {
       };
       if (!response.ok) {
         toast({
-          title: "Could not activate invite",
-          description: result.message || "Check the invite link and try again.",
+          title: t("auth.couldNotActivateInvite"),
+          description: result.message || t("auth.checkTheInviteLinkAndTryAgain"),
           variant: "destructive",
         });
         setIsLoading(false);
@@ -89,9 +89,9 @@ export default function Auth() {
       const { error } = await signIn(email, password);
       if (error) {
         toast({
-          title: "Account activated",
+          title: t("auth.accountActivated"),
           description:
-            "Your password is set. Sign in with that password to continue.",
+            t("auth.yourPasswordIsSetSignInWithThatPasswordToContinue"),
           variant: "destructive",
         });
         setIsLoading(false);

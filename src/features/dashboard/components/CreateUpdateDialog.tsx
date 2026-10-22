@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -29,6 +30,7 @@ interface CreateUpdateDialogProps {
 export default function CreateUpdateDialog({
   children,
 }: CreateUpdateDialogProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,8 +52,8 @@ export default function CreateUpdateDialog({
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast({
-        title: "Update Created",
-        description: "Company update has been published successfully.",
+        title: t("dashboard.updateCreated"),
+        description: t("dashboard.companyUpdateHasBeenPublishedSuccessfully"),
       });
 
       setOpen(false);
@@ -65,8 +67,8 @@ export default function CreateUpdateDialog({
       });
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Failed to create update. Please try again.",
+        title: t("dashboard.error"),
+        description: t("dashboard.failedToCreateUpdatePleaseTryAgain"),
         variant: "destructive",
       });
     } finally {
@@ -80,34 +82,32 @@ export default function CreateUpdateDialog({
         {children || (
           <Button variant="outline" size="sm">
             <Plus className="h-4 w-4 mr-1" />
-            Add Update
-          </Button>
+            {t("dashboard.addUpdate")}</Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Company Update</DialogTitle>
+          <DialogTitle>{t("dashboard.createCompanyUpdate")}</DialogTitle>
           <DialogDescription>
-            Create and publish a new company update to keep your team informed.
-          </DialogDescription>
+            {t("dashboard.createAndPublishANewCompanyUpdateToKeepYourTeamInformed")}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t("dashboard.title")}</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              placeholder="Enter update title..."
+              placeholder={t("dashboard.enterUpdateTitle")}
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
+              <Label htmlFor="type">{t("dashboard.type")}</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value: any) =>
@@ -118,16 +118,16 @@ export default function CreateUpdateDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="announcement">Announcement</SelectItem>
-                  <SelectItem value="news">News</SelectItem>
-                  <SelectItem value="event">Event</SelectItem>
-                  <SelectItem value="policy">Policy</SelectItem>
+                  <SelectItem value="announcement">{t("dashboard.announcement")}</SelectItem>
+                  <SelectItem value="news">{t("dashboard.news")}</SelectItem>
+                  <SelectItem value="event">{t("dashboard.event")}</SelectItem>
+                  <SelectItem value="policy">{t("dashboard.policy")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">{t("dashboard.priority")}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value: any) =>
@@ -138,36 +138,36 @@ export default function CreateUpdateDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="low">{t("dashboard.low")}</SelectItem>
+                  <SelectItem value="medium">{t("dashboard.medium")}</SelectItem>
+                  <SelectItem value="high">{t("dashboard.high")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">{t("dashboard.category")}</Label>
             <Input
               id="category"
               value={formData.category}
               onChange={(e) =>
                 setFormData({ ...formData, category: e.target.value })
               }
-              placeholder="e.g., HR, Operations, General..."
+              placeholder={t("dashboard.eGHrOperationsGeneral")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <Label htmlFor="content">{t("dashboard.content")}</Label>
             <Textarea
               id="content"
               value={formData.content}
               onChange={(e) =>
                 setFormData({ ...formData, content: e.target.value })
               }
-              placeholder="Write your update content here..."
+              placeholder={t("dashboard.writeYourUpdateContentHere")}
               rows={4}
               required
             />
@@ -182,8 +182,7 @@ export default function CreateUpdateDialog({
               }
             />
             <Label htmlFor="pinned" className="text-sm font-normal">
-              Pin this update (shows at the top)
-            </Label>
+              {t("dashboard.pinThisUpdateShowsAtTheTop")}</Label>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
@@ -192,10 +191,9 @@ export default function CreateUpdateDialog({
               variant="outline"
               onClick={() => setOpen(false)}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")}</Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Publishing..." : "Publish Update"}
+              {loading ? t("dashboard.publishing") : t("dashboard.publishUpdate")}
             </Button>
           </div>
         </form>

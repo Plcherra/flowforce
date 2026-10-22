@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,7 @@ const mobileActionIcons: Record<MobileQuickActionId, LucideIcon> = {
 };
 
 export function MobileCoreWorkflowActions() {
+  const { t } = useTranslation();
   const staffDashboardActionIds: MobileQuickActionId[] = [
     "view_schedule",
     "open_tasks",
@@ -43,18 +45,16 @@ export function MobileCoreWorkflowActions() {
 
   return (
     <section
-      aria-label="Daily mobile actions"
+      aria-label={t("dashboard.dailyMobileActions")}
       className="space-y-3"
       data-mobile-core-workflows="true"
     >
       <div className="flex items-end justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-tight">
-            Daily actions
-          </h2>
+            {t("dashboard.dailyActions")}</h2>
           <p className="text-xs text-muted-foreground">
-            Jump into the field workflows used most during a shift.
-          </p>
+            {t("dashboard.jumpIntoTheFieldWorkflowsUsedMostDuringAShift")}</p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">

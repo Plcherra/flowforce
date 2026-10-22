@@ -206,7 +206,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 8 — Dashboard and auth strings
 
-- [ ] Finish dashboard and auth strings in all six locales.
+- [x] Finish dashboard and auth strings in all six locales.
 
 Rules:
 
@@ -866,6 +866,21 @@ Phone steps for Pedro:
 2. Set your language to Español on Settings, then Region. Open a dialog. The close control for a screen reader should be "Cerrar". The sidebar control should be "Alternar barra lateral".
 3. Open a list that has pages, such as employees or inventory. Previous and Next should be "Anterior" and "Siguiente".
 4. Switch to Deutsch and use a Back button. It should say "Zurück". Switch back to English. Back, Close, and Previous should read as they did before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 8 Dashboard and auth strings
+
+Shipped: Dashboard and sign-in chrome now uses `useTranslation`. New strings sit in `dashboard` and `auth`. Keys that already existed, including Cancel, Try Again, and the company registration title, stay on those keys. The same strings are in en, es, pt, fr, it, and de. The product name FlowForce stays FlowForce. Shift titles, update titles, and update bodies that people type stay as stored text. Both directories are off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 1425 keys for each locale and `hard-coded strings 3703`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/dashboard` and `src/features/auth`.
+
+Phone steps for Pedro:
+1. Sign out and open https://www.flowforce.uk/auth. Set the language to Français before signing in. The sign-in form, forgot-password link, and company registration should be in French. FlowForce stays FlowForce.
+2. Sign in and open the dashboard. Set your language to Deutsch on Settings, then Region. Reload. The command center, company updates card, and daily actions should be in German. An update title someone typed stays as they wrote it.
+3. Switch to Español and open the create-update dialog if you can. The fields and buttons should be in Spanish. Switch back to English.
 
 Blockers: none. No migration.
 

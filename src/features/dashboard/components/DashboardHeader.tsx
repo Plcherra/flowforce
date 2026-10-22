@@ -22,7 +22,7 @@ export default function DashboardHeader() {
   }, [t]);
 
   // Provide fallback display for missing profile data
-  const displayName = profile?.first_name || "User";
+  const displayName = profile?.first_name || t("dashboard.defaultUserName");
   const displayRole = useMemo(() => getDisplayRole(), [getDisplayRole]);
 
   return (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ export default function PasswordResetForm({
   onBack,
   isLoading,
 }: PasswordResetFormProps) {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -49,8 +52,7 @@ export default function PasswordResetForm({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Set New Password
-        </CardTitle>
+          {t("auth.setNewPassword")}</CardTitle>
         <CardDescription className="text-center">
           Enter your new password below. Make sure it&apos;s at least 6 characters
           long.
@@ -59,14 +61,14 @@ export default function PasswordResetForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
+            <Label htmlFor="password">{t("auth.newPassword")}</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder={t("auth.enterNewPassword")}
                 required
                 disabled={isLoading}
                 minLength={6}
@@ -89,14 +91,14 @@ export default function PasswordResetForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Label htmlFor="confirmPassword">{t("auth.confirmNewPassword")}</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder={t("auth.confirmNewPassword2")}
                 required
                 disabled={isLoading}
                 minLength={6}
@@ -117,7 +119,7 @@ export default function PasswordResetForm({
               </Button>
             </div>
             {password && confirmPassword && password !== confirmPassword && (
-              <p className="text-sm text-destructive">Passwords do not match</p>
+              <p className="text-sm text-destructive">{t("auth.passwordsDoNotMatch")}</p>
             )}
           </div>
 
@@ -126,7 +128,7 @@ export default function PasswordResetForm({
             className="w-full"
             disabled={isLoading || !isFormValid}
           >
-            {isLoading ? "Updating..." : "Update Password"}
+            {isLoading ? t("auth.updating") : t("auth.updatePassword")}
           </Button>
 
           <Button
@@ -137,8 +139,7 @@ export default function PasswordResetForm({
             disabled={isLoading}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Sign In
-          </Button>
+            {t("auth.backToSignIn")}</Button>
         </form>
       </CardContent>
     </Card>

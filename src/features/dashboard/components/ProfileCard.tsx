@@ -55,7 +55,7 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
         </CardHeader>
         <CardContent>
           <div className="text-center text-muted-foreground">
-            <p className="text-sm">Unable to load profile</p>
+            <p className="text-sm">{t("dashboard.unableToLoadProfile")}</p>
             <p className="text-xs mt-1">{error}</p>
           </div>
         </CardContent>
@@ -84,7 +84,7 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
             {t("dashboard.profile.employeeId")}:
           </span>
           <span className="text-sm text-muted-foreground">
-            {profile?.employee_id || "N/A"}
+            {profile?.employee_id || t("dashboard.notAvailable")}
           </span>
         </div>
         <div className="flex justify-between">

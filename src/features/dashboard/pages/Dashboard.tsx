@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import DashboardHeader from "@/features/dashboard/components/DashboardHeader";
 import ProfileCard from "@/features/dashboard/components/ProfileCard";
 import ActivityCard from "@/features/dashboard/components/ActivityCard";
@@ -13,6 +14,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { appEnv } from "@/lib/env";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const {
     stats,
@@ -33,9 +35,9 @@ export default function Dashboard() {
     appEnv.DEV && profileError ? (
       <div className="w-full px-6 pb-6">
         <div className="rounded-lg border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-          <p className="font-semibold">Supabase profile error</p>
+          <p className="font-semibold">{t("dashboard.supabaseProfileError")}</p>
           <pre className="mt-2 whitespace-pre-wrap break-words">
-            {String(profileError ?? "Unknown error")}
+            {String(profileError ?? t("dashboard.unknownError"))}
           </pre>
         </div>
       </div>
@@ -47,8 +49,8 @@ export default function Dashboard() {
         isLoading={statsLoading}
         error={statsError ?? profileError}
         onRetry={handleRetry}
-        loadingTitle="Loading Dashboard"
-        loadingDescription="Setting up your workspace..."
+        loadingTitle={t("dashboard.loadingDashboard")}
+        loadingDescription={t("dashboard.settingUpYourWorkspace")}
       >
         <div
           className={`${isMobile ? "px-3 py-4 space-y-4" : "px-6 py-6 space-y-6"} w-full`}

@@ -90,7 +90,7 @@ const DashboardStats = React.memo(function DashboardStats({
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <div className="flex-1 space-y-1">
-            <AlertTitle>Failed to load statistics</AlertTitle>
+            <AlertTitle>{t("dashboard.failedToLoadStatistics")}</AlertTitle>
             <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm">{error}</span>
               {onRetry && (
@@ -100,8 +100,7 @@ const DashboardStats = React.memo(function DashboardStats({
                   size="sm"
                   disabled={loading}
                 >
-                  Try Again
-                </Button>
+                  {t("common.tryAgain")}</Button>
               )}
             </AlertDescription>
           </div>

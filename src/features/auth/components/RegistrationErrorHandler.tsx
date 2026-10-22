@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { AlertTriangle, Shield, Network, Database } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,6 +21,7 @@ export default function RegistrationErrorHandler({
   onRetry,
   onDismiss,
 }: RegistrationErrorHandlerProps) {
+  const { t } = useTranslation();
   const getErrorIcon = () => {
     switch (error.type) {
       case "auth":
@@ -36,15 +38,15 @@ export default function RegistrationErrorHandler({
   const getErrorTitle = () => {
     switch (error.type) {
       case "auth":
-        return "Authentication Error";
+        return t("auth.authenticationError");
       case "validation":
-        return "Validation Error";
+        return t("auth.validationError");
       case "network":
-        return "Connection Error";
+        return t("auth.connectionError");
       case "database":
-        return "Server Error";
+        return t("auth.serverError");
       default:
-        return "Registration Error";
+        return t("auth.registrationError");
     }
   };
 
@@ -66,15 +68,15 @@ export default function RegistrationErrorHandler({
   const getHelpText = () => {
     switch (error.type) {
       case "auth":
-        return "Please check your email and password, or try using a different email address.";
+        return t("auth.pleaseCheckYourEmailAndPasswordOrTryUsingADifferentEmailAddress");
       case "validation":
-        return "Please review the highlighted fields and correct any errors.";
+        return t("auth.pleaseReviewTheHighlightedFieldsAndCorrectAnyErrors");
       case "network":
-        return "Please check your internet connection and try again.";
+        return t("auth.pleaseCheckYourInternetConnectionAndTryAgain");
       case "database":
-        return "Our servers are experiencing issues. Please try again in a few moments.";
+        return t("auth.ourServersAreExperiencingIssuesPleaseTryAgainInAFewMoments");
       default:
-        return "If the problem persists, please contact support.";
+        return t("auth.ifTheProblemPersistsPleaseContactSupport");
     }
   };
 
@@ -87,7 +89,7 @@ export default function RegistrationErrorHandler({
         <p className="text-sm text-muted-foreground">{getHelpText()}</p>
         {error.details && (
           <details className="text-xs text-muted-foreground">
-            <summary className="cursor-pointer">Technical details</summary>
+            <summary className="cursor-pointer">{t("auth.technicalDetails")}</summary>
             <p className="mt-1 font-mono bg-muted p-2 rounded">
               {error.details}
             </p>
@@ -96,13 +98,11 @@ export default function RegistrationErrorHandler({
         <div className="flex gap-2 mt-3">
           {shouldShowRetry() && onRetry && (
             <Button size="sm" variant="outline" onClick={onRetry}>
-              Try Again
-            </Button>
+              {t("common.tryAgain")}</Button>
           )}
           {onDismiss && (
             <Button size="sm" variant="ghost" onClick={onDismiss}>
-              Dismiss
-            </Button>
+              {t("auth.dismiss")}</Button>
           )}
         </div>
       </AlertDescription>

@@ -14,7 +14,7 @@ export default function AuthHeader({ inviteCode }: AuthHeaderProps) {
     <div className="text-center space-y-2">
       <div className="flex items-center justify-center space-x-2">
         <Building2 className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold text-foreground">FlowForce</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("auth.productName")}</h1>
       </div>
       <p className="text-muted-foreground">{t("auth.businessPlatform")}</p>
       {inviteCode && (

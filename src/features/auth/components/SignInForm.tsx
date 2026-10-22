@@ -103,8 +103,7 @@ export default function SignInForm({
             onClick={onForgotPassword}
             disabled={isLoading}
           >
-            Forgot your password?
-          </Button>
+            {t("auth.forgotYourPassword")}</Button>
         </form>
       </CardContent>
     </Card>
