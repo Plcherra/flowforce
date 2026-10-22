@@ -406,29 +406,78 @@ Prove: Extend `taskSchedule.test.ts`, or add the XP cases beside `taskCompletion
 
 Prove: Skip. Do not add a test until the Open question "Task points and performance" is answered.
 
+## Shift answers
+
+These are locked for the phases below. Do not edit this section while implementing one of those phases.
+
+19. The person scheduled on a shift is responsible for the tasks and forms attached to that shift at that store. John, scheduled as barista at store 1, has store 1's barista opening, daily, and closing lists because those lists are attached to his shift. This does not say which unanswered item inside a list becomes a new task.
+20. The schedule chooses who receives a handover. When the current person is on a closing shift and may create the task, a note or task is published to the person scheduled tomorrow on that same shift. The same shift is the same template when both have one. Otherwise it is the same store and the same role or position. A shift is closing when its title or role contains the word "close" or "closing". If nobody is scheduled tomorrow, the note is not given to someone else. The form still assigns the note to its author until that form is attached to the closing shift.
+21. A task or form stays on the shift it was attached to. It is not copied onto later shifts.
+22. The owner receives the day's list information. The owner can grant that access to another person. The grant can let them act, or only read. A day needs that person when the lists have two or more issues, or when the lists are clean and a supervisor recorded something the lists did not catch. Do not call a model until Open question "What counts as one list issue" is answered.
+23. The employee directory card is where one person's task create level is edited. Shift, Checklist, and Custom are each None, For myself, or For others. Those six keys are stored on that person. Turning a whole access box on or off does not reset them. A staff person can be granted one of those keys. Their class still starts without them.
+
+### Phase 20 — Tomorrow's person on that shift
+
+- [x] Find who is scheduled tomorrow on the same shift.
+
+Rules:
+
+- Files: a new `src/features/scheduling/utils/tomorrowShift.ts` with `src/features/scheduling/utils/tomorrowShift.test.ts`.
+- Follow Shift answer 20. Do not change the form. Do not add a migration.
+
+Done when:
+
+- A closing shift resolves to tomorrow's assignee on that same shift.
+- An opening shift, a different store, or a tomorrow shift with nobody scheduled does not resolve to a person.
+
+Prove: Unit test `src/features/scheduling/utils/tomorrowShift.test.ts`. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 21 — Task levels on the employee card
+
+- [ ] Edit None, For myself, and For others on the employee card.
+
+Rules:
+
+- Files: a new `src/features/roles/constants/taskCreateKeys.ts`, a new `src/features/tasks/utils/taskCreateAccess.ts` with `src/features/tasks/utils/taskCreateAccess.test.ts`, `src/features/roles/constants/operatorBoxes.ts`, `src/features/roles/constants/productRoleContract.json`, `src/features/roles/constants/productLevels.test.ts`, `src/features/tasks/utils/taskCreateLevel.ts`, `src/features/tasks/pages/Tasks.tsx`, `src/features/forms/components/FormFillDialog.tsx`, `src/features/employees/components/users/UserPermissionsTab.tsx`, and a new `src/features/employees/components/users/TaskCreateAccessSection.tsx`.
+- Follow Shift answer 23. Do not rebuild the access boxes into read, create, edit, and delete.
+
+Done when:
+
+- The employee card has a Tasks section with None, For myself, and For others for Shift, Checklist, and Custom.
+- Saving Checklist as For myself leaves Shift and Custom as they were, and leaves Run lists Edit on when its other keys are on.
+- A saved None is none even when the person can still edit tasks. A missing key still falls back to that edit permission.
+
+Prove: Unit test `src/features/tasks/utils/taskCreateAccess.test.ts`, run with `node scripts/test-tasks-page.mjs`. Also run `npm run test:product-roles` and `npm run check:roles`.
+
+### Phase 22 — Missed item inside a list
+
+- [ ] Blocked by Open question "What counts as one list issue". Skip this phase. Do not insert a task from an unanswered list item.
+
+Prove: Skip. Do not add a test until the Open question "What counts as one list issue" is answered.
+
+### Phase 23 — Copilot gather
+
+- [ ] Blocked by Open question "What counts as one list issue". Skip this phase. Do not call a model.
+
+Prove: Skip. Do not add a test until the Open question "What counts as one list issue" is answered.
+
+### Phase 24 — Read, create, edit, and delete
+
+- [ ] Blocked by Open question "Which permissions use read, create, edit, and delete". Skip this phase. Do not replace the access boxes.
+
+Prove: Skip. Do not add a test until the Open question "Which permissions use read, create, edit, and delete" is answered.
+
 ## Open questions
 
 Do not answer these in a phase. Skip the phase that names the question.
 
-### Missed form, missed item, or reported issue
+### What counts as one list issue
 
-What counts as a missed form, a missed item inside a form, or a reported issue? When does that become a checklist task, and who is it assigned to?
+A scheduled person is responsible for the lists attached to their shift. Which unanswered item, missed form, or supervisor note counts as one issue, and when does that issue become its own task?
 
-### Next opening checklist or shift
+### Which permissions use read, create, edit, and delete
 
-How is the next opening checklist or shift chosen for a handover note? The examples are rubber mats before opening, and fridges defrosting with milk in the walk-in. The match rule is not specified.
-
-### Recurring shift tasks
-
-A shift task such as review the delivery or a vendor visit is described as recurrent and attached to a shift. Does it stay the single row already stored on that shift, or does a template copy it onto later shifts?
-
-### AI draft tasks from form notes
-
-The AI action should help forms and reports by turning additional-information notes into draft tasks. Which notes become drafts, who approves them, and when does it run?
-
-### Where the task-type level is edited
-
-Each person should be able to create a task type for others, for themselves, or not at all. The access grid turns a whole verb on or off, so it cannot store Others, Self, and None separately per type. Which existing screen edits that choice for one person?
+The employee card now edits task create levels. Which other permissions should offer read, create, edit, and delete, instead of on or off?
 
 ### Task points and performance
 
@@ -678,3 +727,17 @@ Questions: none.
 Skipped. Blocked by Open question "Task points and performance". Task points are not written to `staff_performance`. No test was added.
 
 Questions: The phase needs the Open question "Task points and performance" answered: how those points change `staff_performance`, and whether that number is the same as the leaderboard XP.
+
+### 2026-10-22 — Phase 20 Tomorrow's person on that shift
+
+Shipped: A closing shift resolves to the person scheduled tomorrow on that same shift. The same shift is the same template when both have one, otherwise the same store and the same role or position. Opening, a different store, a different template, and a tomorrow shift with nobody scheduled do not resolve to a person. The form still assigns a handover note to its author until the form is attached to the closing shift. No migration.
+
+Proven: Unit test `src/features/scheduling/utils/tomorrowShift.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers closing, opening, another store, an empty tomorrow shift, the same template, and a different template. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. This phase does not change a screen yet. The form's Make a task for tomorrow still assigns the task to the person who wrote the note.
+2. The next time a form is attached to a closing shift, that task should go to whoever is scheduled tomorrow on that shift.
+
+Blockers: none for this phase.
+
+Questions: none.

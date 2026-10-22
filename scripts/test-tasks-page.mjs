@@ -31,6 +31,9 @@ const { runHandoverTaskTests } = importTs(
 const { runTaskScheduleTests } = importTs(
   "../src/features/tasks/utils/taskSchedule.test.ts",
 );
+const { runTomorrowShiftTests } = importTs(
+  "../src/features/scheduling/utils/tomorrowShift.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -39,4 +42,5 @@ runTaskKindTests();
 runTaskCreateLevelTests();
 runHandoverTaskTests();
 runTaskScheduleTests();
+runTomorrowShiftTests();
 console.log("tasks page tests passed");
