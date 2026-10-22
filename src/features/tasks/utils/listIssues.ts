@@ -94,7 +94,7 @@ function draft(input: {
   const key = [
     "list-issue",
     input.kind,
-    input.shiftId ?? "none",
+    input.kind === "missed_form" ? (input.shiftId ?? "none") : "field",
     input.formId,
     input.fieldId ?? "none",
     input.assigneeId,

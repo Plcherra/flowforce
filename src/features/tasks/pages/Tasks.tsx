@@ -34,6 +34,7 @@ import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
 import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
 import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
+import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -192,6 +193,8 @@ export default function Tasks() {
           <TaskNotifications onTaskNavigate={handleNotificationNavigate} />
         </div>
       </div>
+
+      <ListIssueSync />
 
       {!loading && error && (
         <Alert

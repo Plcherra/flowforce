@@ -28,7 +28,10 @@ import {
   WizardFooter,
 } from "./wizard";
 import { HandoverNotesField } from "./HandoverNotesField";
+import { FlagIssueControls } from "./FlagIssueControls";
 import { handoverTaskDraft } from "../utils/handoverTask";
+import { supabase } from "@/integrations/supabase/client";
+import { draftsForSubmission, listIssueKeyFromLinks, newListIssueDrafts } from "@/features/tasks/utils/listIssueInsert";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
 import type {
@@ -87,6 +90,7 @@ export default function FormFillDialog({
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [handoverNote, setHandoverNote] = useState("");
   const [makeHandoverTask, setMakeHandoverTask] = useState(false);
+  const [flaggedFieldIds, setFlaggedFieldIds] = useState<string[]>([]);
 
   const orderedFields = useMemo(() => orderFormFields(fields), [fields]);
   const buckets = useMemo(
@@ -118,6 +122,7 @@ export default function FormFillDialog({
       setSubmissionId(null);
       setHandoverNote("");
       setMakeHandoverTask(false);
+      setFlaggedFieldIds([]);
       wizard.reset();
     }
   }, [open, form, wizard]);
@@ -259,8 +264,12 @@ export default function FormFillDialog({
     }
     setIsSubmitting(true);
     try {
+      const flaggedAnswers: FormSubmissionData = { ...values };
+      for (const fieldId of flaggedFieldIds) {
+        flaggedAnswers[fieldId] = { value: values[fieldId], flagged: true };
+      }
       const { data, error: submitError } = await submitForm(resolvedFormId, {
-        ...values,
+        ...flaggedAnswers,
         additional_information: handoverNote.trim(),
       });
       if (submitError) {
@@ -275,6 +284,48 @@ export default function FormFillDialog({
       setSubmissionId(data?.id ?? null);
 
       let taskFailed = false;
+      if (user) {
+        try {
+          const { data: existing, error: existingError } = await supabase
+            .from("tasks")
+            .select("links")
+            .eq("source", "form")
+            .filter("links->>form_id", "eq", resolvedFormId);
+          if (existingError) throw existingError;
+          const issueDrafts = newListIssueDrafts(
+            draftsForSubmission({
+              formId: resolvedFormId,
+              formTitle: hydratedForm?.title,
+              userId: user.id,
+              fields: orderedFields,
+              answers: flaggedAnswers,
+            }),
+            (existing ?? [])
+              .map((row) => listIssueKeyFromLinks(row.links))
+              .filter((key): key is string => Boolean(key)),
+          );
+          for (const issue of issueDrafts) {
+            const created = await createTask({
+              title: issue.title,
+              description: issue.description,
+              status: issue.status,
+              source: issue.source,
+              priority: issue.priority,
+              due_date: issue.due_date,
+              assigned_to: issue.assigned_to,
+              links: issue.links,
+              created_by: user.id,
+            });
+            if (created.error) taskFailed = true;
+          }
+        } catch (taskError) {
+          taskFailed = true;
+          logger.error("List issue tasks were not created", {
+            error: taskError,
+            tags: ["error"],
+          });
+        }
+      }
       const draft =
         makeHandoverTask && canMakeHandoverTask && user
           ? handoverTaskDraft({
@@ -444,6 +495,17 @@ export default function FormFillDialog({
               headerSubtitle="Preview your answers before submitting."
               meta={metaCardProps}
               sections={reviewSections}
+            />
+            <FlagIssueControls
+              fields={orderedFields}
+              flaggedIds={flaggedFieldIds}
+              onToggle={(fieldId, flagged) =>
+                setFlaggedFieldIds((current) =>
+                  flagged
+                    ? Array.from(new Set([...current, fieldId]))
+                    : current.filter((id) => id !== fieldId),
+                )
+              }
             />
             <HandoverNotesField
               note={handoverNote}
