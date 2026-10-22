@@ -16,68 +16,68 @@ const useCases = [
     metric: "20%",
     titleKey: "landing.useCases.fasterScheduling.title",
     descriptionKey: "landing.useCases.fasterScheduling.description",
-    color: "text-green-600",
-    bgColor: "bg-green-50",
+    color: "text-success",
+    bgColor: "bg-success-muted",
   },
   {
     icon: Clock,
     metric: "15hrs",
     titleKey: "landing.useCases.timeSaved.title",
     descriptionKey: "landing.useCases.timeSaved.description",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
   },
   {
     icon: Users,
     metric: "1,200+",
     titleKey: "landing.useCases.locationsManaged.title",
     descriptionKey: "landing.useCases.locationsManaged.description",
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
+    color: "text-secondary",
+    bgColor: "bg-secondary/10",
   },
   {
     icon: DollarSign,
     metric: "35%",
     titleKey: "landing.useCases.costReduction.title",
     descriptionKey: "landing.useCases.costReduction.description",
-    color: "text-[#FF4081]",
-    bgColor: "bg-pink-50",
+    color: "text-accent",
+    bgColor: "bg-accent/60",
   },
   {
     icon: CheckCircle,
     metric: "99.9%",
     titleKey: "landing.useCases.taskCompletion.title",
     descriptionKey: "landing.useCases.taskCompletion.description",
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
+    color: "text-success",
+    bgColor: "bg-success-muted",
   },
   {
     icon: Zap,
     metric: "2min",
     titleKey: "landing.useCases.averageResponse.title",
     descriptionKey: "landing.useCases.averageResponse.description",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
+    color: "text-warning",
+    bgColor: "bg-warning-muted",
   },
 ];
 
 export function UseCasesSection() {
   const { t } = useTranslation();
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
           <Badge
             variant="outline"
-            className="text-[#3F51B5] border-[#3F51B5] mb-4"
+            className="text-primary border-primary mb-4"
           >
             {t("landing.useCases.badge")}
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("landing.useCases.title")}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("landing.useCases.subtitle")}
           </p>
         </div>
@@ -102,13 +102,13 @@ export function UseCasesSection() {
                   <div className={`text-4xl font-bold ${useCase.color} mb-2`}>
                     {useCase.metric}
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 group-hover:text-[#3F51B5] transition-colors">
+                  <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
                     {t(useCase.titleKey)}
                   </h3>
                 </div>
 
                 {/* Description */}
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {t(useCase.descriptionKey)}
                 </p>
               </CardContent>
@@ -117,29 +117,29 @@ export function UseCasesSection() {
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="mt-16 p-8 bg-gradient-to-r from-[#3F51B5] to-indigo-600 rounded-2xl text-white">
+        <div className="mt-16 p-8 bg-gradient-to-r from-primary to-primary rounded-2xl text-primary-foreground">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold mb-2">50,000+</div>
-              <div className="text-indigo-100">
+              <div className="text-primary-foreground">
                 {t("landing.useCases.stats.employeesManaged")}
               </div>
             </div>
             <div>
               <div className="text-3xl font-bold mb-2">1.2M+</div>
-              <div className="text-indigo-100">
+              <div className="text-primary-foreground">
                 {t("landing.useCases.stats.tasksCompleted")}
               </div>
             </div>
             <div>
               <div className="text-3xl font-bold mb-2">98%</div>
-              <div className="text-indigo-100">
+              <div className="text-primary-foreground">
                 {t("landing.useCases.stats.customerSatisfaction")}
               </div>
             </div>
             <div>
               <div className="text-3xl font-bold mb-2">24/7</div>
-              <div className="text-indigo-100">
+              <div className="text-primary-foreground">
                 {t("landing.useCases.stats.supportAvailable")}
               </div>
             </div>

@@ -116,8 +116,6 @@ export async function POST(request: Request) {
       industry: readMetadataValue(metadata, "company_industry") ?? "Other",
       size: readMetadataValue(metadata, "company_size") ?? "1-10 employees",
       description: readMetadataValue(metadata, "companydescription"),
-      primary_color: "#3b82f6",
-      secondary_color: "#1e40af",
       template_id: readMetadataValue(metadata, "onboarding_template_id"),
       template_name: readMetadataValue(metadata, "onboarding_template_name"),
       enabled_sections: [],

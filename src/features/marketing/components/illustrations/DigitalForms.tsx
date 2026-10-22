@@ -10,7 +10,7 @@ const DigitalFormsSVG = lazy(() =>
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Background */}
-        <rect width="300" height="200" fill="#fff7ed" />
+        <rect width="300" height="200" fill="hsl(var(--warning))" />
 
         {/* Form document */}
         <rect
@@ -19,13 +19,13 @@ const DigitalFormsSVG = lazy(() =>
           width="140"
           height="140"
           fill="white"
-          stroke="#d1d5db"
+          stroke="hsl(var(--border))"
           strokeWidth="2"
           rx="4"
         />
 
         {/* Form header */}
-        <rect x="90" y="40" width="120" height="20" fill="#f97316" />
+        <rect x="90" y="40" width="120" height="20" fill="hsl(var(--warning))" />
         <text
           x="150"
           y="53"
@@ -38,19 +38,19 @@ const DigitalFormsSVG = lazy(() =>
         </text>
 
         {/* Form fields */}
-        <rect x="95" y="75" width="110" height="12" fill="#f3f4f6" rx="2" />
-        <text x="100" y="83" fill="#9ca3af" fontSize="8">
+        <rect x="95" y="75" width="110" height="12" fill="hsl(var(--background))" rx="2" />
+        <text x="100" y="83" fill="hsl(var(--muted-foreground))" fontSize="8">
           Name field
         </text>
 
-        <rect x="95" y="95" width="110" height="12" fill="#f3f4f6" rx="2" />
-        <text x="100" y="103" fill="#9ca3af" fontSize="8">
+        <rect x="95" y="95" width="110" height="12" fill="hsl(var(--background))" rx="2" />
+        <text x="100" y="103" fill="hsl(var(--muted-foreground))" fontSize="8">
           Email field
         </text>
 
         {/* Checkboxes */}
-        <rect x="95" y="115" width="8" height="8" fill="#22c55e" rx="1" />
-        <text x="108" y="122" fill="#374151" fontSize="8">
+        <rect x="95" y="115" width="8" height="8" fill="hsl(var(--success))" rx="1" />
+        <text x="108" y="122" fill="hsl(var(--foreground))" fontSize="8">
           Option A ✓
         </text>
         <path
@@ -66,16 +66,16 @@ const DigitalFormsSVG = lazy(() =>
           width="8"
           height="8"
           fill="white"
-          stroke="#d1d5db"
+          stroke="hsl(var(--border))"
           strokeWidth="1"
           rx="1"
         />
-        <text x="108" y="137" fill="#9ca3af" fontSize="8">
+        <text x="108" y="137" fill="hsl(var(--muted-foreground))" fontSize="8">
           Option B
         </text>
 
         {/* Submit button */}
-        <rect x="120" y="150" width="60" height="15" fill="#f97316" rx="3" />
+        <rect x="120" y="150" width="60" height="15" fill="hsl(var(--warning))" rx="3" />
         <text
           x="150"
           y="160"
@@ -93,16 +93,16 @@ const DigitalFormsSVG = lazy(() =>
           y="120"
           width="30"
           height="30"
-          fill="#fef3c7"
-          stroke="#f59e0b"
+          fill="hsl(var(--warning))"
+          stroke="hsl(var(--warning))"
           strokeWidth="1"
           strokeDasharray="3,3"
           rx="2"
         />
-        <text x="55" y="130" textAnchor="middle" fill="#d97706" fontSize="6">
+        <text x="55" y="130" textAnchor="middle" fill="hsl(var(--warning))" fontSize="6">
           Digital
         </text>
-        <text x="55" y="140" textAnchor="middle" fill="#d97706" fontSize="6">
+        <text x="55" y="140" textAnchor="middle" fill="hsl(var(--warning))" fontSize="6">
           Signature
         </text>
 
@@ -111,7 +111,7 @@ const DigitalFormsSVG = lazy(() =>
           x="150"
           y="190"
           textAnchor="middle"
-          fill="#6b7280"
+          fill="hsl(var(--muted-foreground))"
           fontSize="14"
           fontWeight="medium"
         >
@@ -124,7 +124,7 @@ const DigitalFormsSVG = lazy(() =>
 
 export function DigitalForms() {
   return (
-    <div className="w-full h-full bg-orange-50 rounded-lg p-4">
+    <div className="w-full h-full bg-warning-muted rounded-lg p-4">
       <Suspense fallback={<IllustrationSkeleton title="Digital Forms" />}>
         <DigitalFormsSVG />
       </Suspense>

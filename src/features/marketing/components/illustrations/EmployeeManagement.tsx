@@ -10,22 +10,22 @@ const EmployeeManagementSVG = lazy(() =>
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Background */}
-        <rect width="300" height="200" fill="#f8fafc" />
+        <rect width="300" height="200" fill="hsl(var(--primary))" />
 
         {/* People Icons */}
         <g transform="translate(50, 40)">
-          <circle cx="25" cy="20" r="12" fill="#3b82f6" />
-          <rect x="15" y="32" width="20" height="25" fill="#3b82f6" rx="3" />
+          <circle cx="25" cy="20" r="12" fill="hsl(var(--primary))" />
+          <rect x="15" y="32" width="20" height="25" fill="hsl(var(--primary))" rx="3" />
         </g>
 
         <g transform="translate(150, 40)">
-          <circle cx="25" cy="20" r="12" fill="#10b981" />
-          <rect x="15" y="32" width="20" height="25" fill="#10b981" rx="3" />
+          <circle cx="25" cy="20" r="12" fill="hsl(var(--success))" />
+          <rect x="15" y="32" width="20" height="25" fill="hsl(var(--success))" rx="3" />
         </g>
 
         <g transform="translate(100, 100)">
-          <circle cx="25" cy="20" r="12" fill="#f59e0b" />
-          <rect x="15" y="32" width="20" height="25" fill="#f59e0b" rx="3" />
+          <circle cx="25" cy="20" r="12" fill="hsl(var(--warning))" />
+          <rect x="15" y="32" width="20" height="25" fill="hsl(var(--warning))" rx="3" />
         </g>
 
         {/* Org Chart Lines */}
@@ -34,7 +34,7 @@ const EmployeeManagementSVG = lazy(() =>
           y1="80"
           x2="125"
           y2="120"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="2"
         />
         <line
@@ -42,7 +42,7 @@ const EmployeeManagementSVG = lazy(() =>
           y1="80"
           x2="125"
           y2="120"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="2"
         />
 
@@ -51,7 +51,7 @@ const EmployeeManagementSVG = lazy(() =>
           x="150"
           y="180"
           textAnchor="middle"
-          fill="#6b7280"
+          fill="hsl(var(--muted-foreground))"
           fontSize="14"
           fontWeight="medium"
         >
@@ -64,7 +64,7 @@ const EmployeeManagementSVG = lazy(() =>
 
 export function EmployeeManagement() {
   return (
-    <div className="w-full h-full bg-blue-50 rounded-lg p-4">
+    <div className="w-full h-full bg-primary/10 rounded-lg p-4">
       <Suspense fallback={<IllustrationSkeleton title="Employee Management" />}>
         <EmployeeManagementSVG />
       </Suspense>

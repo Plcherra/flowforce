@@ -29,8 +29,8 @@ const features = [
     icon: Users,
     titleKey: "features.employeeManagement.title",
     descriptionKey: "features.employeeManagement.description",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     anchor: "employee-management",
     illustration: EmployeeManagement,
   },
@@ -38,8 +38,8 @@ const features = [
     icon: Calendar,
     titleKey: "features.shiftScheduling.title",
     descriptionKey: "features.shiftScheduling.description",
-    color: "text-green-600",
-    bgColor: "bg-green-50",
+    color: "text-success",
+    bgColor: "bg-success-muted",
     anchor: "shift-scheduling",
     illustration: ShiftScheduling,
   },
@@ -47,8 +47,8 @@ const features = [
     icon: CheckSquare,
     titleKey: "features.taskManagement.title",
     descriptionKey: "features.taskManagement.description",
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
+    color: "text-secondary",
+    bgColor: "bg-secondary/10",
     anchor: "task-management",
     illustration: TaskManagement,
   },
@@ -56,8 +56,8 @@ const features = [
     icon: MessageSquare,
     titleKey: "features.internalCommunication.title",
     descriptionKey: "features.internalCommunication.description",
-    color: "text-[#FF4081]",
-    bgColor: "bg-pink-50",
+    color: "text-accent",
+    bgColor: "bg-accent/60",
     anchor: "internal-communication",
     illustration: InternalCommunication,
   },
@@ -65,8 +65,8 @@ const features = [
     icon: FileText,
     titleKey: "features.digitalForms.title",
     descriptionKey: "features.digitalForms.description",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
+    color: "text-warning",
+    bgColor: "bg-warning-muted",
     anchor: "digital-forms",
     illustration: DigitalForms,
   },
@@ -74,8 +74,8 @@ const features = [
     icon: BarChart3,
     titleKey: "features.analyticsReporting.title",
     descriptionKey: "features.analyticsReporting.description",
-    color: "text-[#3F51B5]",
-    bgColor: "bg-indigo-50",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     anchor: "analytics-reporting",
     illustration: AnalyticsReporting,
   },
@@ -86,14 +86,14 @@ export function FeaturesGrid() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("landing.everythingNeeds")}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("landing.sixModules")}
           </p>
         </div>
@@ -109,17 +109,17 @@ export function FeaturesGrid() {
                 <div className="h-48 mb-4">
                   <feature.illustration />
                 </div>
-                <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-[#3F51B5] transition-colors">
+                <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
                   {t(feature.titleKey)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <CardDescription className="text-gray-600 mb-6 leading-relaxed">
+                <CardDescription className="text-muted-foreground mb-6 leading-relaxed">
                   {t(feature.descriptionKey)}
                 </CardDescription>
                 <Button
                   variant="ghost"
-                  className="text-[#3F51B5] hover:text-[#3F51B5] hover:bg-[#3F51B5]/5 p-0 h-auto font-semibold group/btn"
+                  className="text-primary hover:text-primary hover:bg-primary/5 p-0 h-auto font-semibold group/btn"
                   onClick={() => navigate(`/features#${feature.anchor}`)}
                 >
                   {t("landing.learnMore")}

@@ -29,8 +29,8 @@ const features = [
     titleKey: "features.employeeManagement.title",
     descriptionKey: "features.employeeManagement.description",
     detailsKey: "features.employeeManagement.details",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     illustration: EmployeeManagement,
   },
   {
@@ -39,8 +39,8 @@ const features = [
     titleKey: "features.shiftScheduling.title",
     descriptionKey: "features.shiftScheduling.description",
     detailsKey: "features.shiftScheduling.details",
-    color: "text-green-600",
-    bgColor: "bg-green-50",
+    color: "text-success",
+    bgColor: "bg-success-muted",
     illustration: ShiftScheduling,
   },
   {
@@ -49,8 +49,8 @@ const features = [
     titleKey: "features.taskManagement.title",
     descriptionKey: "features.taskManagement.description",
     detailsKey: "features.taskManagement.details",
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
+    color: "text-secondary",
+    bgColor: "bg-secondary/10",
     illustration: TaskManagement,
   },
   {
@@ -59,8 +59,8 @@ const features = [
     titleKey: "features.internalCommunication.title",
     descriptionKey: "features.internalCommunication.description",
     detailsKey: "features.internalCommunication.details",
-    color: "text-[#FF4081]",
-    bgColor: "bg-pink-50",
+    color: "text-accent",
+    bgColor: "bg-accent/60",
     illustration: InternalCommunication,
   },
   {
@@ -69,8 +69,8 @@ const features = [
     titleKey: "features.digitalForms.title",
     descriptionKey: "features.digitalForms.description",
     detailsKey: "features.digitalForms.details",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
+    color: "text-warning",
+    bgColor: "bg-warning-muted",
     illustration: DigitalForms,
   },
   {
@@ -79,8 +79,8 @@ const features = [
     titleKey: "features.analyticsReporting.title",
     descriptionKey: "features.analyticsReporting.description",
     detailsKey: "features.analyticsReporting.details",
-    color: "text-[#3F51B5]",
-    bgColor: "bg-indigo-50",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     illustration: AnalyticsReporting,
   },
 ];
@@ -89,7 +89,7 @@ export default function Features() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Back Button */}
         <div className="mb-8">
@@ -97,10 +97,10 @@ export default function Features() {
         </div>
 
         <div className="text-center mb-16">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("features.title")}
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("features.subtitle")}
           </p>
         </div>
@@ -122,14 +122,14 @@ export default function Features() {
                         <feature.icon className={`h-8 w-8 ${feature.color}`} />
                       </div>
                       <CardHeader className="p-0 mb-6">
-                        <CardTitle className="text-3xl font-bold text-gray-900 mb-4">
+                        <CardTitle className="text-3xl font-bold text-foreground mb-4">
                           {t(feature.titleKey)}
                         </CardTitle>
-                        <CardDescription className="text-lg text-gray-600">
+                        <CardDescription className="text-lg text-muted-foreground">
                           {t(feature.descriptionKey)}
                         </CardDescription>
                       </CardHeader>
-                      <p className="text-gray-700 leading-relaxed">
+                      <p className="text-foreground leading-relaxed">
                         {t(feature.detailsKey)}
                       </p>
                     </div>

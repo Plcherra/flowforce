@@ -17,7 +17,7 @@ export function LandingHeader() {
             className="flex items-center cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <Building2 className="h-8 w-8 text-white" />
+            <Building2 className="h-8 w-8 text-primary-foreground" />
           </div>
 
           {/* Navigation - Hidden on mobile, can be expanded later */}

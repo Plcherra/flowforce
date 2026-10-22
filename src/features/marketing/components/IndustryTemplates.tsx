@@ -14,9 +14,9 @@ const industries = [
       "landing.industries.retail.features.tracking",
       "landing.industries.retail.features.automation",
     ],
-    color: "text-blue-600",
-    bgColor: "bg-blue-500",
-    gradient: "from-blue-500 to-blue-600",
+    color: "text-primary",
+    bgColor: "bg-primary",
+    gradient: "from-primary to-primary",
   },
   {
     icon: UtensilsCrossed,
@@ -27,9 +27,9 @@ const industries = [
       "landing.industries.hospitality.features.scheduling",
       "landing.industries.hospitality.features.feedback",
     ],
-    color: "text-orange-600",
-    bgColor: "bg-orange-500",
-    gradient: "from-orange-500 to-red-500",
+    color: "text-warning",
+    bgColor: "bg-warning",
+    gradient: "from-warning to-destructive",
   },
   {
     icon: Heart,
@@ -40,9 +40,9 @@ const industries = [
       "landing.industries.healthcare.features.tracking",
       "landing.industries.healthcare.features.alerts",
     ],
-    color: "text-green-600",
-    bgColor: "bg-green-500",
-    gradient: "from-green-500 to-emerald-600",
+    color: "text-success",
+    bgColor: "bg-success",
+    gradient: "from-success to-success",
   },
 ];
 
@@ -51,14 +51,14 @@ export function IndustryTemplates() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+    <section className="py-24 bg-gradient-to-br from-muted to-primary/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("landing.industries.title")}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t("landing.industries.subtitle")}
           </p>
         </div>
@@ -80,14 +80,14 @@ export function IndustryTemplates() {
                 <div
                   className={`w-20 h-20 bg-gradient-to-br ${industry.gradient} rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
                 >
-                  <industry.icon className="h-10 w-10 text-white" />
+                  <industry.icon className="h-10 w-10 text-primary-foreground" />
                 </div>
 
                 {/* Content */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#3F51B5] transition-colors">
+                <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors">
                   {t(industry.titleKey)}
                 </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <p className="text-muted-foreground mb-6 leading-relaxed">
                   {t(industry.descriptionKey)}
                 </p>
 
@@ -96,7 +96,7 @@ export function IndustryTemplates() {
                   {industry.featuresKeys.map((featureKey, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center text-sm text-gray-600"
+                      className="flex items-center text-sm text-muted-foreground"
                     >
                       <div
                         className={`w-2 h-2 ${industry.bgColor} rounded-full mr-3`}
@@ -109,7 +109,7 @@ export function IndustryTemplates() {
                 {/* CTA */}
                 <Button
                   variant="outline"
-                  className="w-full border-2 border-[#3F51B5] text-[#3F51B5] hover:bg-[#3F51B5] hover:text-white group/btn transition-all duration-300"
+                  className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground group/btn transition-all duration-300"
                   onClick={() =>
                     navigate(`/templates/${t(industry.titleKey).toLowerCase()}`)
                   }

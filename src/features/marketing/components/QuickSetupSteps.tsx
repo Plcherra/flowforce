@@ -11,39 +11,39 @@ export function QuickSetupSteps() {
       step: "01",
       titleKey: "landing.quickSetup.signUp.title",
       descriptionKey: "landing.quickSetup.signUp.description",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      borderColor: "border-primary/40",
     },
     {
       icon: Settings,
       step: "02",
       titleKey: "landing.quickSetup.configure.title",
       descriptionKey: "landing.quickSetup.configure.description",
-      color: "text-[#FF4081]",
-      bgColor: "bg-pink-50",
-      borderColor: "border-pink-200",
+      color: "text-accent",
+      bgColor: "bg-accent/60",
+      borderColor: "border-accent/40",
     },
     {
       icon: Rocket,
       step: "03",
       titleKey: "landing.quickSetup.goLive.title",
       descriptionKey: "landing.quickSetup.goLive.description",
-      color: "text-[#3F51B5]",
-      bgColor: "bg-indigo-50",
-      borderColor: "border-indigo-200",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      borderColor: "border-primary/40",
     },
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("landing.quickSetup.title")}
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {t("landing.quickSetup.subtitle")}
           </p>
         </div>
@@ -53,9 +53,9 @@ export function QuickSetupSteps() {
           {/* Connection Lines - Hidden on Mobile */}
           <div className="hidden lg:block absolute top-20 left-1/2 transform -translate-x-1/2 w-full max-w-4xl">
             <div className="flex justify-between items-center px-8">
-              <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-200 to-pink-200"></div>
+              <div className="flex-1 h-0.5 bg-gradient-to-r from-primary/20 to-accent"></div>
               <div className="w-4"></div>
-              <div className="flex-1 h-0.5 bg-gradient-to-r from-pink-200 to-indigo-200"></div>
+              <div className="flex-1 h-0.5 bg-gradient-to-r from-accent to-primary/20"></div>
             </div>
           </div>
 
@@ -63,7 +63,7 @@ export function QuickSetupSteps() {
             {steps.map((step, index) => (
               <Card
                 key={index}
-                className={`group relative border-2 ${step.borderColor} hover:shadow-xl transition-all duration-500 hover:-translate-y-2 bg-white`}
+                className={`group relative border-2 ${step.borderColor} hover:shadow-xl transition-all duration-500 hover:-translate-y-2 bg-background`}
               >
                 <CardContent className="p-8 text-center">
                   {/* Step Number */}
@@ -85,10 +85,10 @@ export function QuickSetupSteps() {
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#3F51B5] transition-colors">
+                  <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors">
                     {t(step.titleKey)}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed">
                     {t(step.descriptionKey)}
                   </p>
                 </CardContent>
@@ -99,8 +99,8 @@ export function QuickSetupSteps() {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <div className="inline-flex items-center px-6 py-3 rounded-full bg-[#3F51B5]/10 text-[#3F51B5] text-lg font-semibold">
-            <span className="w-3 h-3 bg-[#3F51B5] rounded-full mr-3 animate-pulse"></span>
+          <div className="inline-flex items-center px-6 py-3 rounded-full bg-primary/10 text-primary text-lg font-semibold">
+            <span className="w-3 h-3 bg-primary rounded-full mr-3 animate-pulse"></span>
             {t("landing.averageSetup")}
           </div>
         </div>

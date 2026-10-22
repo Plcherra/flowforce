@@ -10,7 +10,7 @@ const ShiftSchedulingSVG = lazy(() =>
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Background */}
-        <rect width="300" height="200" fill="#f0fdf4" />
+        <rect width="300" height="200" fill="hsl(var(--success))" />
 
         {/* Calendar Grid */}
         <rect
@@ -19,12 +19,12 @@ const ShiftSchedulingSVG = lazy(() =>
           width="160"
           height="120"
           fill="white"
-          stroke="#d1d5db"
+          stroke="hsl(var(--border))"
           strokeWidth="1"
         />
 
         {/* Calendar Header */}
-        <rect x="40" y="40" width="160" height="25" fill="#10b981" />
+        <rect x="40" y="40" width="160" height="25" fill="hsl(var(--success))" />
         <text
           x="120"
           y="57"
@@ -42,7 +42,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="60"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
         <line
@@ -50,7 +50,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="80"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
         <line
@@ -58,7 +58,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="100"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
         <line
@@ -66,7 +66,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="120"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
         <line
@@ -74,7 +74,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="140"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
         <line
@@ -82,7 +82,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="160"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
         <line
@@ -90,14 +90,14 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="65"
           x2="180"
           y2="160"
-          stroke="#e5e7eb"
+          stroke="hsl(var(--muted))"
           strokeWidth="1"
         />
 
         {/* Shifts */}
-        <rect x="45" y="80" width="30" height="15" fill="#3b82f6" rx="2" />
-        <rect x="85" y="100" width="30" height="15" fill="#ef4444" rx="2" />
-        <rect x="125" y="120" width="30" height="15" fill="#8b5cf6" rx="2" />
+        <rect x="45" y="80" width="30" height="15" fill="hsl(var(--primary))" rx="2" />
+        <rect x="85" y="100" width="30" height="15" fill="hsl(var(--destructive))" rx="2" />
+        <rect x="125" y="120" width="30" height="15" fill="hsl(var(--secondary))" rx="2" />
 
         {/* Clock */}
         <circle
@@ -105,7 +105,7 @@ const ShiftSchedulingSVG = lazy(() =>
           cy="100"
           r="30"
           fill="white"
-          stroke="#10b981"
+          stroke="hsl(var(--success))"
           strokeWidth="3"
         />
         <line
@@ -113,7 +113,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="100"
           x2="230"
           y2="85"
-          stroke="#10b981"
+          stroke="hsl(var(--success))"
           strokeWidth="2"
         />
         <line
@@ -121,7 +121,7 @@ const ShiftSchedulingSVG = lazy(() =>
           y1="100"
           x2="240"
           y2="100"
-          stroke="#10b981"
+          stroke="hsl(var(--success))"
           strokeWidth="2"
         />
 
@@ -130,7 +130,7 @@ const ShiftSchedulingSVG = lazy(() =>
           x="150"
           y="180"
           textAnchor="middle"
-          fill="#6b7280"
+          fill="hsl(var(--muted-foreground))"
           fontSize="14"
           fontWeight="medium"
         >
@@ -143,7 +143,7 @@ const ShiftSchedulingSVG = lazy(() =>
 
 export function ShiftScheduling() {
   return (
-    <div className="w-full h-full bg-green-50 rounded-lg p-4">
+    <div className="w-full h-full bg-success-muted rounded-lg p-4">
       <Suspense fallback={<IllustrationSkeleton title="Shift Scheduling" />}>
         <ShiftSchedulingSVG />
       </Suspense>

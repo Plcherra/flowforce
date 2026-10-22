@@ -375,7 +375,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 20 — Marketing and public pages
 
-- [ ] Move hard-coded colors on the public pages onto the tokens.
+- [x] Move hard-coded colors on the public pages onto the tokens.
 
 Rules:
 
@@ -748,5 +748,22 @@ Phone steps for Pedro:
 5. Switch to Dark. The wizard, the form, and the template cards should stay readable.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 20 Marketing and public pages
+
+Shipped: Marketing pages, illustrations, and the public 404 now use the theme tokens. Hero and section washes stay light: muted into primary at low strength. Illustration fills follow primary, secondary, success, warning, destructive, and the neutral tokens. The company repair route no longer sends `primary_color` or `secondary_color`. The viewport `themeColor` stays `#ffffff`, and `app/globals.css` still holds the white logo plate. Those two files stay in the baseline.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Open https://www.flowforce.uk signed out. The landing hero should be a light page with a blue headline and a blue button, not a solid blue screen.
+2. Scroll the feature and industry sections. Cards and illustrations should use blue, green, amber, and red from the theme. Text should stay readable.
+3. Open a missing page, such as https://www.flowforce.uk/this-page-is-missing. The 404 should sit on a muted background, and the home link should be blue.
+4. Sign in, switch to Dark, then open the landing page again. The hero, illustrations, and footer should follow the dark surfaces and stay readable.
+5. The browser status bar stays white until a later pass can give Dark its own bar color. The logo plate stays white.
+
+Blockers: none. No migration. The repair route relies on the database default for the color columns until phase 22 drops them.
 
 Questions: none.

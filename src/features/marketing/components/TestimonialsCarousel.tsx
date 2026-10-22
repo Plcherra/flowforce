@@ -273,14 +273,14 @@ export function TestimonialsCarousel() {
   const testimonials = getTestimonials(i18n.language);
 
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
+    <section className="py-24 bg-gradient-to-br from-muted to-primary/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
             {t("landing.testimonials.title")}
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {t("landing.testimonials.subtitle")}
           </p>
         </div>
@@ -302,10 +302,10 @@ export function TestimonialsCarousel() {
                 <Card className="h-full border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
                   <CardContent className="p-8 h-full flex flex-col">
                     {/* Quote Icon */}
-                    <Quote className="h-8 w-8 text-[#3F51B5] mb-4 opacity-50" />
+                    <Quote className="h-8 w-8 text-primary mb-4 opacity-50" />
 
                     {/* Quote */}
-                    <blockquote className="text-gray-700 mb-6 leading-relaxed flex-grow">
+                    <blockquote className="text-foreground mb-6 leading-relaxed flex-grow">
                       &quot;
                       {t(`landing.testimonials.quotes.${testimonial.quoteKey}`)}
                       &quot;
@@ -316,7 +316,7 @@ export function TestimonialsCarousel() {
                       {[...Array(testimonial.rating)].map((_, i) => (
                         <Star
                           key={i}
-                          className="h-4 w-4 text-yellow-400 fill-current"
+                          className="h-4 w-4 text-warning fill-current"
                         />
                       ))}
                     </div>
@@ -324,17 +324,17 @@ export function TestimonialsCarousel() {
                     {/* Author Info */}
                     <div className="flex items-center">
                       {/* Avatar/Logo */}
-                      <div className="w-12 h-12 bg-[#3F51B5] rounded-full flex items-center justify-center text-white font-bold mr-4 group-hover:scale-110 transition-transform">
+                      <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold mr-4 group-hover:scale-110 transition-transform">
                         {testimonial.logo}
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900">
+                        <div className="font-semibold text-foreground">
                           {testimonial.author}
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-muted-foreground">
                           {testimonial.title}
                         </div>
-                        <div className="text-sm font-medium text-[#3F51B5]">
+                        <div className="text-sm font-medium text-primary">
                           {testimonial.company}
                         </div>
                       </div>
@@ -350,7 +350,7 @@ export function TestimonialsCarousel() {
 
         {/* Trust Indicators */}
         <div className="mt-16 text-center">
-          <p className="text-gray-600 mb-8">
+          <p className="text-muted-foreground mb-8">
             {t("landing.testimonials.trustedBy")}
           </p>
           <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
@@ -364,7 +364,7 @@ export function TestimonialsCarousel() {
             ].map((company, index) => (
               <div
                 key={index}
-                className="text-2xl font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-2xl font-bold text-muted-foreground hover:text-muted-foreground transition-colors"
               >
                 {company}
               </div>
