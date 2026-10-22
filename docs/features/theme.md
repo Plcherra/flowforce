@@ -158,7 +158,7 @@ Prove: `node scripts/check-theme-colors.mjs`. Add `"check:theme-colors"` to `pac
 
 ### Phase 5 — Shell and shared UI
 
-- [ ] Move hard-coded colors in the shell and shared components onto the tokens.
+- [x] Move hard-coded colors in the shell and shared components onto the tokens.
 
 Rules:
 
@@ -502,6 +502,21 @@ Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk and open Settings, then General.
 2. The theme switch should still be FlowForce, Light, and Dark. There should still be no color picker.
 3. Save a company name change. Reload. The name should stick, and the theme choice in this browser should stick.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 5 Shell and shared UI
+
+Shipped: Hard-coded colors in `src/app-shell` and `src/components` now use the theme tokens. Red is destructive, amber and orange are warning, blue and indigo are primary, purple is secondary, and green is success. Gray text and surfaces use foreground, muted, border, popover, or accent. `dark:` palette classes in those files are gone, so Dark follows the `.dark` tokens. Dialog, sheet, drawer, and alert-dialog scrims use `bg-foreground/80` and `dark:bg-background/80`, so the scrim stays dark in Dark. The chart keeps its light and dark keys. Its Recharts grid and paper selectors still match the library defaults, and the painted strokes are `border` and transparent.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `src/app-shell` and `src/components` have no baseline entries. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk.
+2. Open a dialog or the notifications panel. The unread row should use the blue tint, warning badges should be amber, and the badge count should be red with light text.
+3. Switch to Dark in Settings, then General, and open the same dialog. The scrim should stay dark, and the text should stay readable.
 
 Blockers: none. No migration.
 

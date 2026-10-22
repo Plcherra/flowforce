@@ -107,7 +107,7 @@ export function TenantSetupRequired({
         <div className="w-full rounded-lg border bg-card p-6 shadow-sm md:p-8">
           <div className="flex flex-col gap-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-warning-muted text-warning-foreground">
                 <Building2 className="h-6 w-6" />
               </div>
               <div className="space-y-2">

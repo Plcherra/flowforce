@@ -11,10 +11,10 @@ export function IllustrationSkeleton({
 }: IllustrationSkeletonProps) {
   return (
     <div
-      className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}
+      className={`bg-muted rounded-lg flex items-center justify-center ${className}`}
     >
       {title ? (
-        <span className="text-gray-500 text-sm font-medium">{title}</span>
+        <span className="text-muted-foreground text-sm font-medium">{title}</span>
       ) : (
         <Skeleton className="h-full w-full" />
       )}

@@ -26,7 +26,7 @@ export function BackButton({
       variant="ghost"
       size="sm"
       onClick={handleBack}
-      className={`text-gray-600 hover:text-gray-900 hover:bg-gray-100 ${className}`}
+      className={`text-muted-foreground hover:text-foreground hover:bg-muted ${className}`}
     >
       <ArrowLeft className="h-4 w-4 mr-2" />
       Back

@@ -1,89 +1,19 @@
 {
-  "src/app-shell/layout/AccountCluster.tsx": [
-    "bg-red-500",
-    "text-white"
+  "app/api/onboarding/repair/route.ts": [
+    "#1e40af",
+    "#3b82f6"
   ],
-  "src/app-shell/notifications/NotificationsPanel.tsx": [
-    "bg-blue-50",
-    "bg-orange-100",
-    "bg-red-500",
-    "bg-yellow-100",
-    "border-l-blue-500",
-    "dark:bg-blue-900/20",
-    "dark:hover:bg-gray-800",
-    "dark:text-gray-400",
-    "dark:text-white",
-    "hover:bg-gray-50",
-    "text-blue-500",
-    "text-gray-500",
-    "text-gray-600",
-    "text-gray-900",
-    "text-green-500",
-    "text-indigo-500",
-    "text-orange-500",
-    "text-orange-800",
-    "text-purple-500",
-    "text-red-500",
-    "text-white",
-    "text-yellow-800"
+  "app/globals.css": [
+    "#ffffff"
   ],
-  "src/app-shell/tenant/TenantSetupRequired.tsx": [
-    "bg-amber-100",
-    "text-amber-700"
+  "app/layout.tsx": [
+    "#ffffff"
   ],
-  "src/components/permissions/withPermission.tsx": [
-    "text-gray-600",
-    "text-gray-900"
-  ],
-  "src/components/ui/alert-dialog.tsx": [
-    "bg-black/80"
-  ],
-  "src/components/ui/alert.tsx": [
-    "bg-amber-50",
-    "border-amber-500/50",
-    "dark:bg-amber-950/20",
-    "dark:text-amber-100",
-    "text-amber-600",
-    "text-amber-950"
-  ],
-  "src/components/ui/back-button.tsx": [
-    "hover:bg-gray-100",
-    "hover:text-gray-900",
-    "text-gray-600"
-  ],
-  "src/components/ui/chart.tsx": [
-    "#ccc",
-    "#fff"
-  ],
-  "src/components/ui/dialog.tsx": [
-    "bg-black/80"
-  ],
-  "src/components/ui/drawer.tsx": [
-    "bg-black/80"
-  ],
-  "src/components/ui/illustration-skeleton.tsx": [
+  "app/not-found.tsx": [
     "bg-gray-100",
-    "text-gray-500"
-  ],
-  "src/components/ui/language-switcher.tsx": [
-    "#3F51B5",
-    "bg-white",
-    "border-gray-200",
-    "dark:bg-gray-800",
-    "dark:border-gray-700",
-    "dark:hover:bg-gray-700",
-    "dark:text-gray-300",
-    "hover:bg-gray-100",
-    "text-gray-700"
-  ],
-  "src/components/ui/sheet.tsx": [
-    "bg-black/80"
-  ],
-  "src/components/ui/toast.tsx": [
-    "focus:ring-offset-red-600",
-    "focus:ring-red-400",
-    "hover:text-red-50",
-    "text-red-300"
+    "hover:text-blue-700",
+    "text-blue-500",
+    "text-gray-600"
   ],
   "src/constants/taskStatus.ts": [
     "bg-amber-100",
@@ -404,6 +334,14 @@
   "src/features/analytics/components/BusinessAnalyticsBoard.tsx": [
     "text-emerald-600"
   ],
+  "src/features/analytics/components/charts/ComparisonBarChart.tsx": [
+    "#6366f1",
+    "#f97316"
+  ],
+  "src/features/analytics/components/charts/VolumeTrendChart.tsx": [
+    "#10b981",
+    "#3b82f6"
+  ],
   "src/features/analytics/components/FormAnalytics.tsx": [
     "#0088fe",
     "#82ca9d",
@@ -422,13 +360,8 @@
     "text-purple-500",
     "text-yellow-500"
   ],
-  "src/features/analytics/components/charts/ComparisonBarChart.tsx": [
-    "#6366f1",
-    "#f97316"
-  ],
-  "src/features/analytics/components/charts/VolumeTrendChart.tsx": [
-    "#10b981",
-    "#3b82f6"
+  "src/features/analytics/components/kpi/constants.ts": [
+    "text-emerald-500"
   ],
   "src/features/analytics/components/kpi/MetricBlock.tsx": [
     "bg-amber-50/60",
@@ -444,18 +377,15 @@
     "dark:border-emerald-500/30",
     "dark:border-sky-500/30"
   ],
-  "src/features/analytics/components/kpi/constants.ts": [
-    "text-emerald-500"
+  "src/features/analytics/components/reports/builder/ReportViewer.tsx": [
+    "#3b82f6",
+    "bg-gray-200"
   ],
   "src/features/analytics/components/reports/MetricsCards.tsx": [
     "text-blue-500",
     "text-emerald-500",
     "text-indigo-500",
     "text-purple-500"
-  ],
-  "src/features/analytics/components/reports/builder/ReportViewer.tsx": [
-    "#3b82f6",
-    "bg-gray-200"
   ],
   "src/features/analytics/hooks/useKpiTiles.ts": [
     "bg-blue-100",
@@ -722,6 +652,10 @@
     "text-emerald-700",
     "text-red-700"
   ],
+  "src/features/employees/components/invites/InvitePersonCard.tsx": [
+    "hover:text-red-700",
+    "text-red-600"
+  ],
   "src/features/employees/components/PermissionManagerDialog.tsx": [
     "bg-amber-50",
     "border-amber-200",
@@ -735,45 +669,15 @@
     "text-orange-600",
     "text-purple-600"
   ],
-  "src/features/employees/components/VendorTable.tsx": [
-    "bg-orange-100",
-    "text-orange-600"
-  ],
-  "src/features/employees/components/invites/InvitePersonCard.tsx": [
-    "hover:text-red-700",
-    "text-red-600"
-  ],
   "src/features/employees/components/users/UserAuditTab.tsx": [
     "text-blue-600",
     "text-green-600",
     "text-orange-600",
     "text-red-600"
   ],
-  "src/features/forms/components/FormsReadinessPanel.tsx": [
-    "bg-amber-50",
-    "bg-blue-50",
-    "bg-emerald-50",
-    "bg-red-50",
-    "border-amber-200",
-    "border-blue-200",
-    "border-emerald-200",
-    "border-red-200",
-    "dark:bg-amber-950/30",
-    "dark:bg-blue-950/30",
-    "dark:bg-emerald-950/30",
-    "dark:bg-red-950/30",
-    "dark:border-amber-900/50",
-    "dark:border-blue-900/50",
-    "dark:border-emerald-900/50",
-    "dark:border-red-900/50",
-    "dark:text-amber-100",
-    "dark:text-blue-100",
-    "dark:text-emerald-100",
-    "dark:text-red-100",
-    "text-amber-900",
-    "text-blue-900",
-    "text-emerald-900",
-    "text-red-900"
+  "src/features/employees/components/VendorTable.tsx": [
+    "bg-orange-100",
+    "text-orange-600"
   ],
   "src/features/forms/components/builder/FieldEditor.tsx": [
     "bg-orange-400",
@@ -835,6 +739,32 @@
     "text-green-800",
     "text-yellow-800"
   ],
+  "src/features/forms/components/FormsReadinessPanel.tsx": [
+    "bg-amber-50",
+    "bg-blue-50",
+    "bg-emerald-50",
+    "bg-red-50",
+    "border-amber-200",
+    "border-blue-200",
+    "border-emerald-200",
+    "border-red-200",
+    "dark:bg-amber-950/30",
+    "dark:bg-blue-950/30",
+    "dark:bg-emerald-950/30",
+    "dark:bg-red-950/30",
+    "dark:border-amber-900/50",
+    "dark:border-blue-900/50",
+    "dark:border-emerald-900/50",
+    "dark:border-red-900/50",
+    "dark:text-amber-100",
+    "dark:text-blue-100",
+    "dark:text-emerald-100",
+    "dark:text-red-100",
+    "text-amber-900",
+    "text-blue-900",
+    "text-emerald-900",
+    "text-red-900"
+  ],
   "src/features/gamification/components/BadgesGallery.tsx": [
     "text-emerald-600"
   ],
@@ -874,36 +804,6 @@
     "dark:text-emerald-300",
     "text-emerald-600"
   ],
-  "src/features/inventory/components/EnhancedCountingTable.tsx": [
-    "bg-green-100",
-    "bg-green-50",
-    "bg-red-100",
-    "bg-yellow-100",
-    "dark:bg-green-950/20",
-    "text-amber-600",
-    "text-blue-600",
-    "text-green-600",
-    "text-green-800",
-    "text-red-600",
-    "text-red-800",
-    "text-yellow-800"
-  ],
-  "src/features/inventory/components/InventoryTransfersPanel.tsx": [
-    "bg-amber-100",
-    "bg-blue-100",
-    "bg-emerald-100",
-    "bg-rose-100",
-    "text-amber-900",
-    "text-blue-900",
-    "text-emerald-900",
-    "text-rose-900"
-  ],
-  "src/features/inventory/components/MarketManCountingInterface.tsx": [
-    "text-emerald-600"
-  ],
-  "src/features/inventory/components/ProductionEventForm.tsx": [
-    "text-amber-700"
-  ],
   "src/features/inventory/components/cookbook/CookbookGrid.tsx": [
     "text-amber-500"
   ],
@@ -935,6 +835,20 @@
   "src/features/inventory/components/counting/CountingTimers.tsx": [
     "text-blue-600",
     "text-yellow-600"
+  ],
+  "src/features/inventory/components/EnhancedCountingTable.tsx": [
+    "bg-green-100",
+    "bg-green-50",
+    "bg-red-100",
+    "bg-yellow-100",
+    "dark:bg-green-950/20",
+    "text-amber-600",
+    "text-blue-600",
+    "text-green-600",
+    "text-green-800",
+    "text-red-600",
+    "text-red-800",
+    "text-yellow-800"
   ],
   "src/features/inventory/components/expenses/EmployeeFinancialOverview.tsx": [
     "#16a34a",
@@ -979,9 +893,25 @@
     "text-red-800",
     "text-yellow-800"
   ],
+  "src/features/inventory/components/InventoryTransfersPanel.tsx": [
+    "bg-amber-100",
+    "bg-blue-100",
+    "bg-emerald-100",
+    "bg-rose-100",
+    "text-amber-900",
+    "text-blue-900",
+    "text-emerald-900",
+    "text-rose-900"
+  ],
+  "src/features/inventory/components/MarketManCountingInterface.tsx": [
+    "text-emerald-600"
+  ],
   "src/features/inventory/components/overview/InventoryOverview.tsx": [
     "text-green-600",
     "text-red-600"
+  ],
+  "src/features/inventory/components/ProductionEventForm.tsx": [
+    "text-amber-700"
   ],
   "src/features/inventory/hooks/useCountingStats.tsx": [
     "text-green-600",
@@ -1084,92 +1014,6 @@
     "to-blue-50",
     "via-white/70"
   ],
-  "src/features/marketing/components/IndustryTemplates.tsx": [
-    "#3F51B5",
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-orange-500",
-    "from-blue-500",
-    "from-gray-50",
-    "from-green-500",
-    "from-orange-500",
-    "hover:text-white",
-    "text-blue-600",
-    "text-gray-600",
-    "text-gray-900",
-    "text-green-600",
-    "text-orange-600",
-    "text-white",
-    "to-blue-50",
-    "to-blue-600",
-    "to-emerald-600",
-    "to-red-500"
-  ],
-  "src/features/marketing/components/LandingFooter.tsx": [
-    "#3F51B5",
-    "bg-gray-800",
-    "bg-gray-900",
-    "border-gray-700",
-    "border-gray-800",
-    "hover:text-white",
-    "placeholder-gray-400",
-    "text-gray-400",
-    "text-white"
-  ],
-  "src/features/marketing/components/LandingHeader.tsx": [
-    "text-white"
-  ],
-  "src/features/marketing/components/QuickSetupSteps.tsx": [
-    "#3F51B5",
-    "#FF4081",
-    "bg-blue-50",
-    "bg-indigo-50",
-    "bg-pink-50",
-    "bg-white",
-    "border-blue-200",
-    "border-indigo-200",
-    "border-pink-200",
-    "from-blue-200",
-    "from-pink-200",
-    "text-blue-600",
-    "text-gray-600",
-    "text-gray-900",
-    "to-indigo-200",
-    "to-pink-200"
-  ],
-  "src/features/marketing/components/TestimonialsCarousel.tsx": [
-    "#3F51B5",
-    "from-slate-50",
-    "hover:text-gray-600",
-    "text-gray-400",
-    "text-gray-600",
-    "text-gray-700",
-    "text-gray-900",
-    "text-white",
-    "text-yellow-400",
-    "to-blue-50"
-  ],
-  "src/features/marketing/components/UseCasesSection.tsx": [
-    "#3F51B5",
-    "#FF4081",
-    "bg-blue-50",
-    "bg-emerald-50",
-    "bg-green-50",
-    "bg-orange-50",
-    "bg-pink-50",
-    "bg-purple-50",
-    "bg-white",
-    "text-blue-600",
-    "text-emerald-600",
-    "text-gray-600",
-    "text-gray-900",
-    "text-green-600",
-    "text-indigo-100",
-    "text-orange-600",
-    "text-purple-600",
-    "text-white",
-    "to-indigo-600"
-  ],
   "src/features/marketing/components/illustrations/AnalyticsReporting.tsx": [
     "#0891b2",
     "#10b981",
@@ -1262,6 +1106,92 @@
     "#faf5ff",
     "bg-purple-50"
   ],
+  "src/features/marketing/components/IndustryTemplates.tsx": [
+    "#3F51B5",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-orange-500",
+    "from-blue-500",
+    "from-gray-50",
+    "from-green-500",
+    "from-orange-500",
+    "hover:text-white",
+    "text-blue-600",
+    "text-gray-600",
+    "text-gray-900",
+    "text-green-600",
+    "text-orange-600",
+    "text-white",
+    "to-blue-50",
+    "to-blue-600",
+    "to-emerald-600",
+    "to-red-500"
+  ],
+  "src/features/marketing/components/LandingFooter.tsx": [
+    "#3F51B5",
+    "bg-gray-800",
+    "bg-gray-900",
+    "border-gray-700",
+    "border-gray-800",
+    "hover:text-white",
+    "placeholder-gray-400",
+    "text-gray-400",
+    "text-white"
+  ],
+  "src/features/marketing/components/LandingHeader.tsx": [
+    "text-white"
+  ],
+  "src/features/marketing/components/QuickSetupSteps.tsx": [
+    "#3F51B5",
+    "#FF4081",
+    "bg-blue-50",
+    "bg-indigo-50",
+    "bg-pink-50",
+    "bg-white",
+    "border-blue-200",
+    "border-indigo-200",
+    "border-pink-200",
+    "from-blue-200",
+    "from-pink-200",
+    "text-blue-600",
+    "text-gray-600",
+    "text-gray-900",
+    "to-indigo-200",
+    "to-pink-200"
+  ],
+  "src/features/marketing/components/TestimonialsCarousel.tsx": [
+    "#3F51B5",
+    "from-slate-50",
+    "hover:text-gray-600",
+    "text-gray-400",
+    "text-gray-600",
+    "text-gray-700",
+    "text-gray-900",
+    "text-white",
+    "text-yellow-400",
+    "to-blue-50"
+  ],
+  "src/features/marketing/components/UseCasesSection.tsx": [
+    "#3F51B5",
+    "#FF4081",
+    "bg-blue-50",
+    "bg-emerald-50",
+    "bg-green-50",
+    "bg-orange-50",
+    "bg-pink-50",
+    "bg-purple-50",
+    "bg-white",
+    "text-blue-600",
+    "text-emerald-600",
+    "text-gray-600",
+    "text-gray-900",
+    "text-green-600",
+    "text-indigo-100",
+    "text-orange-600",
+    "text-purple-600",
+    "text-white",
+    "to-indigo-600"
+  ],
   "src/features/marketing/pages/Features.tsx": [
     "#3F51B5",
     "#FF4081",
@@ -1282,6 +1212,24 @@
   ],
   "src/features/marketing/pages/Index.tsx": [
     "#3F51B5"
+  ],
+  "src/features/messages/components/announcements/AnnouncementBanner.tsx": [
+    "bg-blue-100",
+    "bg-gray-100",
+    "bg-orange-100",
+    "bg-red-100",
+    "border-blue-200",
+    "border-gray-200",
+    "border-orange-200",
+    "border-red-200",
+    "text-blue-500",
+    "text-blue-800",
+    "text-gray-500",
+    "text-gray-800",
+    "text-orange-500",
+    "text-orange-800",
+    "text-red-500",
+    "text-red-800"
   ],
   "src/features/messages/components/CommunicationReadinessPanel.tsx": [
     "bg-amber-50",
@@ -1309,47 +1257,16 @@
     "text-emerald-900",
     "text-red-900"
   ],
-  "src/features/messages/components/MessageScheduler.tsx": [
-    "hover:text-red-700",
-    "text-red-500"
-  ],
-  "src/features/messages/components/VideoCallDialog.tsx": [
-    "bg-black/50",
-    "bg-blue-500",
-    "bg-gray-700",
-    "bg-gray-800",
-    "bg-gray-900",
-    "bg-green-500",
-    "border-gray-700",
-    "text-blue-400",
-    "text-gray-300",
-    "text-green-400",
-    "text-white"
-  ],
-  "src/features/messages/components/announcements/AnnouncementBanner.tsx": [
-    "bg-blue-100",
-    "bg-gray-100",
-    "bg-orange-100",
-    "bg-red-100",
-    "border-blue-200",
-    "border-gray-200",
-    "border-orange-200",
-    "border-red-200",
-    "text-blue-500",
-    "text-blue-800",
-    "text-gray-500",
-    "text-gray-800",
-    "text-orange-500",
-    "text-orange-800",
-    "text-red-500",
-    "text-red-800"
-  ],
   "src/features/messages/components/conversations/MessageAttachments.tsx": [
     "text-blue-500",
     "text-gray-500"
   ],
   "src/features/messages/components/layout/MessagesPortalContent.tsx": [
     "bg-black/50"
+  ],
+  "src/features/messages/components/MessageScheduler.tsx": [
+    "hover:text-red-700",
+    "text-red-500"
   ],
   "src/features/messages/components/modals/ChannelMembers.tsx": [
     "bg-blue-100",
@@ -1373,6 +1290,19 @@
   "src/features/messages/components/ops/InventorySignalWidget.tsx": [
     "text-amber-600",
     "text-emerald-600"
+  ],
+  "src/features/messages/components/VideoCallDialog.tsx": [
+    "bg-black/50",
+    "bg-blue-500",
+    "bg-gray-700",
+    "bg-gray-800",
+    "bg-gray-900",
+    "bg-green-500",
+    "border-gray-700",
+    "text-blue-400",
+    "text-gray-300",
+    "text-green-400",
+    "text-white"
   ],
   "src/features/onboarding/components/BrandingCustomizer.tsx": [
     "#e9ecef",
@@ -1446,6 +1376,27 @@
     "from-slate-50",
     "to-purple-50",
     "via-blue-50"
+  ],
+  "src/features/onboarding/components/forms/CompanyInfoForm.tsx": [
+    "bg-white",
+    "border-gray-200",
+    "border-red-500",
+    "dark:bg-gray-800",
+    "dark:border-gray-700",
+    "text-red-500"
+  ],
+  "src/features/onboarding/components/forms/UserInfoForm.tsx": [
+    "border-green-500",
+    "border-red-500",
+    "text-gray-400",
+    "text-gray-500",
+    "text-green-600",
+    "text-red-500",
+    "text-yellow-600"
+  ],
+  "src/features/onboarding/components/hooks/useOnboardingState.tsx": [
+    "#1e40af",
+    "#3b82f6"
   ],
   "src/features/onboarding/components/OnboardingHeader.tsx": [
     "#3F51B5",
@@ -1620,27 +1571,6 @@
   "src/features/onboarding/components/WizardNavigation.tsx": [
     "border-white"
   ],
-  "src/features/onboarding/components/forms/CompanyInfoForm.tsx": [
-    "bg-white",
-    "border-gray-200",
-    "border-red-500",
-    "dark:bg-gray-800",
-    "dark:border-gray-700",
-    "text-red-500"
-  ],
-  "src/features/onboarding/components/forms/UserInfoForm.tsx": [
-    "border-green-500",
-    "border-red-500",
-    "text-gray-400",
-    "text-gray-500",
-    "text-green-600",
-    "text-red-500",
-    "text-yellow-600"
-  ],
-  "src/features/onboarding/components/hooks/useOnboardingState.tsx": [
-    "#1e40af",
-    "#3b82f6"
-  ],
   "src/features/onboarding/pages/CompanyRegistration.tsx": [
     "dark:from-slate-900",
     "dark:text-gray-400",
@@ -1650,6 +1580,26 @@
     "text-gray-600",
     "to-purple-50",
     "via-blue-50"
+  ],
+  "src/features/operations/components/idea/AssessPanel.tsx": [
+    "text-emerald-500",
+    "text-rose-500"
+  ],
+  "src/features/operations/components/idea/DiagnosePanel.tsx": [
+    "text-sky-500"
+  ],
+  "src/features/operations/components/idea/ExecutePanel.tsx": [
+    "text-violet-500"
+  ],
+  "src/features/operations/components/idea/IdeaMetricCard.tsx": [
+    "text-emerald-500",
+    "text-rose-500"
+  ],
+  "src/features/operations/components/idea/IdentifyPanel.tsx": [
+    "text-amber-500"
+  ],
+  "src/features/operations/components/idea/KPICharts.tsx": [
+    "#4f46e5"
   ],
   "src/features/operations/components/IssuesStream.tsx": [
     "border-amber-200",
@@ -1676,26 +1626,6 @@
     "border-emerald-200",
     "text-emerald-600",
     "text-emerald-900"
-  ],
-  "src/features/operations/components/idea/AssessPanel.tsx": [
-    "text-emerald-500",
-    "text-rose-500"
-  ],
-  "src/features/operations/components/idea/DiagnosePanel.tsx": [
-    "text-sky-500"
-  ],
-  "src/features/operations/components/idea/ExecutePanel.tsx": [
-    "text-violet-500"
-  ],
-  "src/features/operations/components/idea/IdeaMetricCard.tsx": [
-    "text-emerald-500",
-    "text-rose-500"
-  ],
-  "src/features/operations/components/idea/IdentifyPanel.tsx": [
-    "text-amber-500"
-  ],
-  "src/features/operations/components/idea/KPICharts.tsx": [
-    "#4f46e5"
   ],
   "src/features/permissions/components/PermissionExamples.tsx": [
     "bg-blue-50",
@@ -1813,26 +1743,6 @@
     "text-gray-900",
     "text-purple-600"
   ],
-  "src/features/resources/components/LoadingSpinner.tsx": [
-    "#3F51B5",
-    "bg-white",
-    "text-gray-600"
-  ],
-  "src/features/resources/components/ResourceSection.tsx": [
-    "text-gray-600",
-    "text-gray-900"
-  ],
-  "src/features/resources/components/VideoCard.tsx": [
-    "bg-black/20",
-    "bg-black/70",
-    "bg-white/20",
-    "bg-yellow-500",
-    "group-hover:bg-black/10",
-    "text-black",
-    "text-gray-600",
-    "text-gray-900",
-    "text-white"
-  ],
   "src/features/resources/components/integrations/CustomIntegrationsSection.tsx": [
     "bg-blue-50",
     "border-blue-200",
@@ -1862,6 +1772,26 @@
     "text-blue-600",
     "text-gray-700"
   ],
+  "src/features/resources/components/LoadingSpinner.tsx": [
+    "#3F51B5",
+    "bg-white",
+    "text-gray-600"
+  ],
+  "src/features/resources/components/ResourceSection.tsx": [
+    "text-gray-600",
+    "text-gray-900"
+  ],
+  "src/features/resources/components/VideoCard.tsx": [
+    "bg-black/20",
+    "bg-black/70",
+    "bg-white/20",
+    "bg-yellow-500",
+    "group-hover:bg-black/10",
+    "text-black",
+    "text-gray-600",
+    "text-gray-900",
+    "text-white"
+  ],
   "src/features/resources/pages/Resources.tsx": [
     "bg-blue-50",
     "bg-green-50",
@@ -1877,16 +1807,6 @@
     "text-red-600"
   ],
   "src/features/resources/pages/resources/BlogDetail.tsx": [
-    "text-gray-600",
-    "text-gray-900"
-  ],
-  "src/features/resources/pages/resources/DocumentationDetail.tsx": [
-    "text-gray-600",
-    "text-gray-900"
-  ],
-  "src/features/resources/pages/resources/VideoDetail.tsx": [
-    "bg-gray-100",
-    "text-gray-400",
     "text-gray-600",
     "text-gray-900"
   ],
@@ -1918,6 +1838,16 @@
     "text-gray-600",
     "text-gray-900",
     "text-orange-600"
+  ],
+  "src/features/resources/pages/resources/DocumentationDetail.tsx": [
+    "text-gray-600",
+    "text-gray-900"
+  ],
+  "src/features/resources/pages/resources/VideoDetail.tsx": [
+    "bg-gray-100",
+    "text-gray-400",
+    "text-gray-600",
+    "text-gray-900"
   ],
   "src/features/roles/components/AISuggestionsPanel.tsx": [
     "text-gray-800"
@@ -1963,6 +1893,11 @@
   "src/features/scheduling/components/AutoScheduleDialog.tsx": [
     "text-amber-500"
   ],
+  "src/features/scheduling/components/calendar/ScheduleWeekDesk.tsx": [
+    "bg-green-500",
+    "bg-red-500",
+    "bg-yellow-500"
+  ],
   "src/features/scheduling/components/CalendarGrid.tsx": [
     "text-gray-500"
   ],
@@ -1977,6 +1912,38 @@
     "text-gray-500",
     "text-gray-600",
     "text-gray-900"
+  ],
+  "src/features/scheduling/components/drag-drop/ScheduleTemplatesPanel.tsx": [
+    "#fff"
+  ],
+  "src/features/scheduling/components/drag-drop/ShiftChip.tsx": [
+    "#3b82f6",
+    "text-amber-600",
+    "text-white",
+    "text-white/80"
+  ],
+  "src/features/scheduling/components/drag-drop/WeekGrid.tsx": [
+    "bg-amber-100",
+    "bg-amber-500/10",
+    "bg-emerald-500/15",
+    "bg-emerald-500/5",
+    "border-amber-500/60",
+    "border-amber-500/70",
+    "border-emerald-500/20",
+    "border-emerald-500/30",
+    "dark:text-amber-300",
+    "dark:text-emerald-300",
+    "text-amber-700",
+    "text-amber-950",
+    "text-emerald-700"
+  ],
+  "src/features/scheduling/components/drag-drop/WeekGridFooter.tsx": [
+    "bg-amber-500/15",
+    "bg-emerald-500/15",
+    "dark:text-amber-300",
+    "dark:text-emerald-300",
+    "text-amber-700",
+    "text-emerald-700"
   ],
   "src/features/scheduling/components/DragDropScheduleCalendar.tsx": [
     "#3b82f6"
@@ -2065,6 +2032,17 @@
     "bg-purple-500",
     "text-white"
   ],
+  "src/features/scheduling/components/shift-wizard/NotesTab.tsx": [
+    "border-gray-200",
+    "text-gray-400",
+    "text-gray-600"
+  ],
+  "src/features/scheduling/components/shift-wizard/UsersTab.tsx": [
+    "bg-blue-200",
+    "bg-blue-50",
+    "hover:bg-gray-50",
+    "text-blue-700"
+  ],
   "src/features/scheduling/components/ShiftDetailsPanel.tsx": [
     "#3b82f6",
     "bg-red-50",
@@ -2108,6 +2086,11 @@
     "bg-yellow-500",
     "text-gray-600"
   ],
+  "src/features/scheduling/components/WeeklyHourSummary.tsx": [
+    "bg-amber-500",
+    "bg-emerald-500",
+    "bg-rose-500"
+  ],
   "src/features/scheduling/components/WeekView.tsx": [
     "#6366f1",
     "bg-gray-200",
@@ -2125,59 +2108,6 @@
     "text-red-600",
     "text-white",
     "text-yellow-600"
-  ],
-  "src/features/scheduling/components/WeeklyHourSummary.tsx": [
-    "bg-amber-500",
-    "bg-emerald-500",
-    "bg-rose-500"
-  ],
-  "src/features/scheduling/components/calendar/ScheduleWeekDesk.tsx": [
-    "bg-green-500",
-    "bg-red-500",
-    "bg-yellow-500"
-  ],
-  "src/features/scheduling/components/drag-drop/ScheduleTemplatesPanel.tsx": [
-    "#fff"
-  ],
-  "src/features/scheduling/components/drag-drop/ShiftChip.tsx": [
-    "#3b82f6",
-    "text-amber-600",
-    "text-white",
-    "text-white/80"
-  ],
-  "src/features/scheduling/components/drag-drop/WeekGrid.tsx": [
-    "bg-amber-100",
-    "bg-amber-500/10",
-    "bg-emerald-500/15",
-    "bg-emerald-500/5",
-    "border-amber-500/60",
-    "border-amber-500/70",
-    "border-emerald-500/20",
-    "border-emerald-500/30",
-    "dark:text-amber-300",
-    "dark:text-emerald-300",
-    "text-amber-700",
-    "text-amber-950",
-    "text-emerald-700"
-  ],
-  "src/features/scheduling/components/drag-drop/WeekGridFooter.tsx": [
-    "bg-amber-500/15",
-    "bg-emerald-500/15",
-    "dark:text-amber-300",
-    "dark:text-emerald-300",
-    "text-amber-700",
-    "text-emerald-700"
-  ],
-  "src/features/scheduling/components/shift-wizard/NotesTab.tsx": [
-    "border-gray-200",
-    "text-gray-400",
-    "text-gray-600"
-  ],
-  "src/features/scheduling/components/shift-wizard/UsersTab.tsx": [
-    "bg-blue-200",
-    "bg-blue-50",
-    "hover:bg-gray-50",
-    "text-blue-700"
   ],
   "src/features/scheduling/constants/templates.ts": [
     "#0ea5e9",
@@ -2288,18 +2218,6 @@
     "text-purple-700",
     "text-purple-800"
   ],
-  "src/features/sections/components/SectionTemplateSelector.tsx": [
-    "bg-blue-100",
-    "bg-gray-100",
-    "bg-green-100",
-    "bg-orange-100",
-    "bg-purple-100",
-    "text-blue-800",
-    "text-gray-800",
-    "text-green-800",
-    "text-orange-800",
-    "text-purple-800"
-  ],
   "src/features/sections/components/SectionsReadinessPanel.tsx": [
     "bg-amber-50",
     "bg-blue-50",
@@ -2325,6 +2243,18 @@
     "text-blue-900",
     "text-emerald-900",
     "text-red-900"
+  ],
+  "src/features/sections/components/SectionTemplateSelector.tsx": [
+    "bg-blue-100",
+    "bg-gray-100",
+    "bg-green-100",
+    "bg-orange-100",
+    "bg-purple-100",
+    "text-blue-800",
+    "text-gray-800",
+    "text-green-800",
+    "text-orange-800",
+    "text-purple-800"
   ],
   "src/features/sections/components/UnifiedSectionsManager.tsx": [
     "bg-amber-100",
@@ -2428,6 +2358,29 @@
   "src/features/system/hooks/useAdminSettings.ts": [
     "#6b7280"
   ],
+  "src/features/tasks/components/reminders/CreateReminderDialog.tsx": [
+    "border-gray-200",
+    "hover:border-gray-300"
+  ],
+  "src/features/tasks/components/reminders/RemindersPanel.tsx": [
+    "bg-gray-50",
+    "bg-orange-100",
+    "bg-red-50",
+    "bg-yellow-100",
+    "border-l-red-500",
+    "dark:bg-gray-800",
+    "dark:bg-red-900/20",
+    "dark:text-gray-300",
+    "dark:text-gray-400",
+    "dark:text-white",
+    "text-gray-500",
+    "text-gray-600",
+    "text-gray-700",
+    "text-gray-900",
+    "text-orange-800",
+    "text-red-600",
+    "text-yellow-800"
+  ],
   "src/features/tasks/components/TaskActivityFeed.tsx": [
     "bg-blue-50",
     "bg-gray-50",
@@ -2508,29 +2461,6 @@
     "text-orange-500",
     "text-purple-500",
     "text-red-500"
-  ],
-  "src/features/tasks/components/reminders/CreateReminderDialog.tsx": [
-    "border-gray-200",
-    "hover:border-gray-300"
-  ],
-  "src/features/tasks/components/reminders/RemindersPanel.tsx": [
-    "bg-gray-50",
-    "bg-orange-100",
-    "bg-red-50",
-    "bg-yellow-100",
-    "border-l-red-500",
-    "dark:bg-gray-800",
-    "dark:bg-red-900/20",
-    "dark:text-gray-300",
-    "dark:text-gray-400",
-    "dark:text-white",
-    "text-gray-500",
-    "text-gray-600",
-    "text-gray-700",
-    "text-gray-900",
-    "text-orange-800",
-    "text-red-600",
-    "text-yellow-800"
   ],
   "src/features/tasks/utils/dueDateHelpers.ts": [
     "bg-green-100",
@@ -2694,22 +2624,6 @@
     "#ddd",
     "#f0f0f0",
     "#f2f2f2"
-  ],
-  "app/api/onboarding/repair/route.ts": [
-    "#1e40af",
-    "#3b82f6"
-  ],
-  "app/globals.css": [
-    "#ffffff"
-  ],
-  "app/layout.tsx": [
-    "#ffffff"
-  ],
-  "app/not-found.tsx": [
-    "bg-gray-100",
-    "hover:text-blue-700",
-    "text-blue-500",
-    "text-gray-600"
   ],
   "tests/playwright/scheduling-phase-04-opaque-chips.spec.ts": [
     "#3b82f6",

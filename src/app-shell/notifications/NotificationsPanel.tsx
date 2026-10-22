@@ -45,19 +45,19 @@ export function NotificationsPanel({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "task_assigned":
-        return <AlertCircle className="h-4 w-4 text-blue-500" />;
+        return <AlertCircle className="h-4 w-4 text-primary" />;
       case "task_completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-success" />;
       case "task_due_soon":
-        return <Clock className="h-4 w-4 text-orange-500" />;
+        return <Clock className="h-4 w-4 text-warning" />;
       case "task_overdue":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-destructive" />;
       case "task_status_changed":
-        return <MessageSquare className="h-4 w-4 text-purple-500" />;
+        return <MessageSquare className="h-4 w-4 text-secondary" />;
       case "task_comment":
-        return <MessageSquare className="h-4 w-4 text-indigo-500" />;
+        return <MessageSquare className="h-4 w-4 text-primary" />;
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+        return <Bell className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -95,7 +95,7 @@ export function NotificationsPanel({
       return (
         <Badge
           variant="secondary"
-          className="text-xs bg-orange-100 text-orange-800"
+          className="text-xs bg-warning-muted text-warning-foreground"
         >
           Due Today
         </Badge>
@@ -104,7 +104,7 @@ export function NotificationsPanel({
       return (
         <Badge
           variant="secondary"
-          className="text-xs bg-yellow-100 text-yellow-800"
+          className="text-xs bg-warning-muted text-warning-foreground"
         >
           Due Tomorrow
         </Badge>
@@ -171,9 +171,9 @@ export function NotificationsPanel({
                   {notifications.map((notification) => (
                     <div key={notification.id}>
                       <div
-                        className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${
+                        className={`p-4 hover:bg-muted cursor-pointer transition-colors ${
                           !notification.read_at
-                            ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500"
+                            ? "bg-primary/10 border-l-4 border-l-primary"
                             : ""
                         }`}
                         onClick={() => handleNotificationClick(notification)}
@@ -184,7 +184,7 @@ export function NotificationsPanel({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              <p className="text-sm font-medium text-foreground truncate">
                                 {getNotificationTitle(notification)}
                               </p>
                               <div className="flex items-center space-x-2">
@@ -208,11 +208,11 @@ export function NotificationsPanel({
                                 </Button>
                               </div>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                               {notification.message}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-muted-foreground">
                                 {formatDistanceToNow(
                                   new Date(notification.created_at),
                                   { addSuffix: true },
@@ -258,7 +258,7 @@ export function NotificationsPanel({
             <Bell className="h-5 w-5" />
           )}
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs">
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
