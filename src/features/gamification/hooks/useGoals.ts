@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { scheduleGoalTranslation } from "@/features/gamification/goalContent";
 import type {
   Tables,
   TablesInsert,
@@ -131,6 +134,8 @@ function mapGoalRecord(record: RawGoalRecord): GoalWithTasks {
 }
 
 export function useGoals(options: UseGoalsOptions = {}) {
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const { filters, enabled = true } = options;
   const { profile } = useProfile();
   const queryClient = useQueryClient();
@@ -222,9 +227,22 @@ export function useGoals(options: UseGoalsOptions = {}) {
         company_id: companyId,
         created_by: creatorId,
       };
-      const { error } = await supabase.from("goals").insert(payload);
+      const { data, error } = await supabase
+        .from("goals")
+        .insert(payload)
+        .select("id, title, description")
+        .single();
       if (error) {
         throw new Error(error.message ?? "Failed to create goal");
+      }
+      if (data?.id) {
+        scheduleGoalTranslation({
+          companyId,
+          sourceId: data.id,
+          sourceLocale,
+          title: typeof data.title === "string" ? data.title : null,
+          description: typeof data.description === "string" ? data.description : null,
+        });
       }
     },
     onSuccess: invalidateGoalQueries,
@@ -252,6 +270,16 @@ export function useGoals(options: UseGoalsOptions = {}) {
         .eq("company_id", companyId);
       if (error) {
         throw new Error(error.message ?? "Failed to update goal");
+      }
+      if (updates.title !== undefined || updates.description !== undefined) {
+        scheduleGoalTranslation({
+          companyId,
+          sourceId: id,
+          sourceLocale,
+          title: typeof updates.title === "string" ? updates.title : null,
+          description:
+            typeof updates.description === "string" ? updates.description : null,
+        });
       }
     },
     onSuccess: invalidateGoalQueries,

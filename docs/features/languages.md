@@ -692,7 +692,7 @@ Prove: Unit test the cache hit and the budget block. Run it with the jiti runner
 
 ### Phase 40 — Goals
 
-- [ ] Translate goal title and description.
+- [x] Translate goal title and description.
 
 Rules:
 

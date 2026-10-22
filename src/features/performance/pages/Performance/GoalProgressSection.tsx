@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -5,6 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useGoalTranslations } from "@/features/gamification/hooks/useGoalTranslations";
+import { GoalTitle } from "@/features/performance/pages/Performance/GoalTitle";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -27,6 +30,11 @@ export function GoalProgressSection({
   loading,
 }: GoalProgressSectionProps) {
   const { t } = useTranslation();
+  const goalSources = useMemo(
+    () => goals.map((goal) => ({ id: goal.id, title: goal.title })),
+    [goals],
+  );
+  const translations = useGoalTranslations(goalSources);
   if (loading && goals.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -68,7 +76,11 @@ export function GoalProgressSection({
         {goals.map((goal) => (
           <div key={goal.id} className="space-y-1">
             <div className="flex flex-col justify-between gap-1 text-sm font-medium text-foreground sm:flex-row sm:items-center">
-              <p>{goal.title}</p>
+              <GoalTitle
+                goalId={goal.id}
+                title={goal.title}
+                translation={translations.get(goal.id) ?? null}
+              />
               <span className="text-xs capitalize text-muted-foreground">
                 {goal.status.replace(/_/g, " ")}
                 {goal.targetDate

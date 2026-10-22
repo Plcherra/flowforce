@@ -57,6 +57,10 @@ export const TRANSLATABLE_FIELDS: Record<
   messages: {
     content: {},
   },
+  goals: {
+    title: {},
+    description: {},
+  },
 };
 
 export function translatableFieldRule(
