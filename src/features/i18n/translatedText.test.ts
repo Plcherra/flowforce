@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { translatedTextView } from "./TranslatedText";
+import { translatedTextView } from "./translatedTextView";
 
 const original = "Close the walk-in before 9.";
 const translated = "Cierra la cámara antes de las 9.";

@@ -16,8 +16,16 @@ try {
   const { runTranslateContentTests } = importTs(
     "../src/server/i18n/translateContent.test.ts",
   );
+  const { runCompanyUpdateCommentTranslationTests } = importTs(
+    "../src/features/company-updates/companyUpdateCommentTranslation.test.ts",
+  );
+  const { runTranslatedTextTests } = importTs(
+    "../src/features/i18n/translatedText.test.ts",
+  );
   await runCompanyUpdateTranslationTests();
+  await runCompanyUpdateCommentTranslationTests();
   await runTranslateContentTests();
+  runTranslatedTextTests();
   console.log("company update translation tests passed");
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);

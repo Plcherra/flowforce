@@ -11,6 +11,9 @@ export const TRANSLATABLE_FIELDS: Record<
     body: {},
     rich_content: { richHtml: true },
   },
+  company_update_comments: {
+    content: {},
+  },
 };
 
 export function translatableFieldRule(

@@ -82,6 +82,7 @@ type CreateCommentParams = {
   updateId: string;
   userId: string;
   content: string;
+  sourceLocale?: AppLanguage;
 };
 
 const profileSchema = z
@@ -509,17 +510,34 @@ const createComment = async ({
   updateId,
   userId,
   content,
+  sourceLocale,
 }: CreateCommentParams) => {
-  const { error } = await supabase.from("company_update_comments").insert({
-    company_id: companyId,
-    updateid: updateId,
-    author_id: userId,
-    content,
+  const id = crypto.randomUUID();
+  await saveCompanyUpdateWithoutModel({
+    save: async () => {
+      const { error } = await supabase.from("company_update_comments").insert({
+        id,
+        company_id: companyId,
+        updateid: updateId,
+        author_id: userId,
+        content,
+      });
+      if (error) throw error;
+    },
+    translate:
+      sourceLocale && content.trim()
+        ? async () => {
+            void requestContentTranslation({
+              companyId,
+              sourceTable: "company_update_comments",
+              sourceId: id,
+              sourceLocale,
+              viewerLocale: sourceLocale,
+              fields: [{ fieldPath: "content", text: content }],
+            }).catch(() => undefined);
+          }
+        : undefined,
   });
-
-  if (error) {
-    throw error;
-  }
 };
 
 export const companyUpdatesRepository = {

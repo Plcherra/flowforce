@@ -30,6 +30,7 @@ import {
   getEngagementSettings,
 } from "@/features/company-updates/utils";
 import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
+import { CompanyUpdateCommentText } from "@/features/company-updates/components/CompanyUpdateCommentText";
 import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 
 interface UpdateFeedCardProps {
@@ -292,9 +293,7 @@ export function UpdateFeedCard({
                           })}
                         </span>
                       </div>
-                      <p className="text-xs leading-relaxed">
-                        {comment.content}
-                      </p>
+                      <CompanyUpdateCommentText comment={comment} />
                     </div>
                     <Button variant="ghost" size="sm" className="h-6 px-2 mt-1">
                       <Heart className="h-3 w-3 mr-1" />

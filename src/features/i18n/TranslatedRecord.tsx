@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { languageName, translatedTextView } from "@/features/i18n/TranslatedText";
+import { languageName, translatedTextView } from "@/features/i18n/translatedTextView";
 import { appLanguageFromTag, type AppLanguage } from "@/i18n/resolveLanguage";
 
 export interface TranslatedRecordField {

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/useProfile";
+import { useCompanyUpdateCommentTranslations } from "@/features/company-updates/hooks/useCompanyUpdateCommentTranslations";
 import { companyUpdatesRepository } from "@/features/company-updates/repositories/companyUpdatesRepository";
 import type { CommentRow } from "@/features/company-updates/repositories/companyUpdatesRepository";
 import type { UpdateComment } from "@/types/companyUpdates";
@@ -60,9 +61,24 @@ export function useCompanyUpdateComments(updateIds: string[]) {
       {},
     );
   }, [commentsQuery.data]);
+  const flatComments = useMemo(
+    () => Object.values(commentsByUpdate).flat(),
+    [commentsByUpdate],
+  );
+  const translations = useCompanyUpdateCommentTranslations(flatComments);
+  const translatedCommentsByUpdate = useMemo<Record<string, UpdateComment[]>>(() => {
+    const next: Record<string, UpdateComment[]> = {};
+    for (const [updateId, comments] of Object.entries(commentsByUpdate)) {
+      next[updateId] = comments.map((comment) => ({
+        ...comment,
+        contentTranslation: translations.get(comment.id) ?? null,
+      }));
+    }
+    return next;
+  }, [commentsByUpdate, translations]);
 
   return {
-    commentsByUpdate,
+    commentsByUpdate: translatedCommentsByUpdate,
     loading: commentsQuery.isLoading,
     error: commentsQuery.error,
   };

@@ -17,6 +17,7 @@ import {
   Globe,
 } from "lucide-react";
 import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
+import { CompanyUpdateCommentText } from "@/features/company-updates/components/CompanyUpdateCommentText";
 import { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -329,7 +330,10 @@ export function UpdatesFeedView({
                                 )}
                               </span>
                             </div>
-                            <p className="text-sm">{comment.content}</p>
+                            <CompanyUpdateCommentText
+                              comment={comment}
+                              className="text-sm"
+                            />
                           </div>
                           <div className="flex items-center space-x-2 mt-2">
                             <Button

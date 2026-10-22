@@ -254,6 +254,7 @@ export function useCompanyUpdateMutations() {
         updateId,
         userId: profile.id,
         content,
+        sourceLocale: appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
       });
     },
     onMutate: async ({ updateId, content }) => {

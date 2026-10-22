@@ -98,6 +98,10 @@ export interface UpdateComment {
   likes: number;
   createdAt: string;
   updatedAt: string;
+  contentTranslation?: {
+    sourceLocale: AppLanguage;
+    content: string;
+  } | null;
 }
 
 export type CreateCompanyUpdateInput = {

@@ -534,7 +534,7 @@ Prove: Unit test the field list and the hash replacement for a company update. R
 
 ### Phase 29 — Company update comments
 
-- [ ] Translate a comment on a company update.
+- [x] Translate a comment on a company update.
 
 Rules:
 
@@ -1197,5 +1197,21 @@ Phone steps for Pedro:
 4. Switch back to English. On the update, open the menu and choose Edit. Change the body and save. Switch to Español and reload. The new body should be the new Spanish text. The title should stay the earlier Spanish title. A comment stays in the language it was typed.
 
 Blockers: none. No new migration. Translation calls OpenAI `gpt-4o-mini` with `OPENAI_API_KEY` on the server.
+
+Questions: none.
+
+### 2026-10-22 — Phase 29 Company update comments
+
+Shipped: A company update comment keeps the text that was typed. The save returns before the model runs. The cache field path is `content`. A viewer in another language sees the translation and one Translated from line for that comment. The author's language shows the original and no line. The comment author's name stays as written.
+
+Proven: `src/features/company-updates/companyUpdateCommentTranslation.test.ts` passed through the jiti runner. The cached field path is `content`. A Spanish viewer sees the Spanish comment and "Traducido de English. Ver original". An English viewer of that comment gets the original and no line. `npm run check:i18n` still exits 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Company updates, open comments on an update, and post an English sentence. The comment should appear without waiting.
+3. Set your language to Español and reload. Open the same comments. The comment should be Spanish, with Traducido de English. Ver original. Tap it to read the English comment. Tap again for Spanish.
+4. Set the language back to English and reload. The comment should be the English sentence you typed, with no translated-from line. The person's name above the comment stays as it was written.
+
+Blockers: none. No new migration.
 
 Questions: none.
