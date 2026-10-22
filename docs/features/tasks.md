@@ -457,7 +457,7 @@ Prove: Skip. Do not add a test until the Open question "What counts as one list 
 
 ### Phase 23 — Copilot gather
 
-- [ ] Blocked by Open question "What counts as one list issue". Skip this phase. Do not call a model.
+- [x] Blocked by Open question "What counts as one list issue". Skip this phase. Do not call a model.
 
 Prove: Skip. Do not add a test until the Open question "What counts as one list issue" is answered.
 
@@ -764,3 +764,9 @@ Questions: none.
 Skipped. Blocked by Open question "What counts as one list issue". A person scheduled on a shift is responsible for the lists attached to that shift. No task is inserted from an unanswered item. No test was added.
 
 Questions: The phase needs the Open question "What counts as one list issue" answered.
+
+### 2026-10-22 — Phase 23 Copilot gather
+
+Skipped. Blocked by Open question "What counts as one list issue". No model is called. The owner still receives list information through the existing pages, and another person's act or read-only grant is not built until an issue is defined. No test was added.
+
+Questions: The phase needs the Open question "What counts as one list issue" answered: which unanswered item, missed form, or supervisor note counts as one issue.
