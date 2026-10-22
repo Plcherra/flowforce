@@ -132,14 +132,16 @@
     right: 0;
     z-index: 40;
     display: flex;
+    align-items: flex-end;
     justify-content: center;
     border: 0;
-    background: transparent;
+    background: hsl(var(--background));
     box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    pointer-events: none;
-    bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    pointer-events: auto;
+    bottom: 0;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
 
   .bottom-icon-nav-icons {

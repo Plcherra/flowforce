@@ -53,7 +53,7 @@ export function BottomIconNav() {
   return (
     <TooltipProvider delayDuration={300}>
       <nav aria-label="Main" data-bottom-icon-nav="true" className="bottom-icon-nav">
-        <div className="bottom-icon-nav-icons border-0 bg-transparent shadow-none backdrop-blur-none">
+        <div className="bottom-icon-nav-icons border-0 shadow-none backdrop-blur-none">
           {groups.map((group) => {
             const visibleOnPhone = group.items.some((item) =>
               primaryIds.has(item.id),
