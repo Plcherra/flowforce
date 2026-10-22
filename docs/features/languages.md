@@ -734,7 +734,7 @@ Prove: Unit test the two field paths. Run it with the jiti runner.
 
 ### Phase 43 — Remaining written text
 
-- [ ] Translate the remaining notes people type.
+- [x] Translate the remaining notes people type.
 
 Rules:
 
@@ -1424,5 +1424,21 @@ Phone steps for Pedro:
 4. Set the language back to English. The message and the reason should be the English words that were stored, with no translated-from line.
 
 Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 43 Remaining written text
+
+Shipped: Helpdesk subjects and descriptions, operations issue titles and descriptions, expense descriptions and notes, and vendor visit descriptions can be translated. The cache paths are `helpdesk_tickets.subject`, `helpdesk_tickets.description`, `ops_issues.title`, `ops_issues.description`, `expenses.description`, `expenses.notes`, and `vendor_visits.description`. Vendor names, amounts, and receipt URLs are not sent. The save returns before the model runs. Expense reports show the translated description and notes. The operations issue list shows the translated title and description. A shift's vendor visit shows the translated description. The vendor name and the expense amount stay as stored. Helpdesk tickets have no screen in the app, so that path is covered by the field test only. Detector-created issues are English at the source.
+
+Proven: `src/features/i18n/remainingWrittenText.test.ts` passed through the jiti runner. The seven field paths are translated. The model is not called with `North Dock Seafood`, `128.40`, or `https://receipts.example/file.pdf`. A second read of the vendor description does not call the model again. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Add an expense with an English description and note. Add a vendor visit with an English note. Open Operations and look at an issue title. The amount, the vendor name, and any receipt link should stay as stored.
+3. Set your language to Español. Open Expenses. The description and note should be Spanish, with Traducido de English. The amount should be the same number. Open the shift that has the vendor visit. The note should be Spanish and the vendor name unchanged. Open Operations. The issue title and description should be Spanish when the issue was created after this deploy.
+4. Set the language back to English. Those words should be the English text that was stored, with no translated-from line.
+
+Blockers: none. No new migration. Helpdesk has no screen, so there is no phone check for a ticket.
 
 Questions: none.

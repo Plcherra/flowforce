@@ -403,10 +403,13 @@ export function useSchedulingConsolidated(
       try {
         ensureCompanyContext();
 
-        const event = await upsertVendorEventRecord({
-          ...payload,
-          company_id: companyId!,
-        });
+        const event = await upsertVendorEventRecord(
+          {
+            ...payload,
+            company_id: companyId!,
+          },
+          sourceLocale,
+        );
         await refetchAll();
         return event;
       } catch (err) {
@@ -420,7 +423,7 @@ export function useSchedulingConsolidated(
         return null;
       }
     },
-    [companyId, ensureCompanyContext, refetchAll, toast],
+    [companyId, ensureCompanyContext, refetchAll, sourceLocale, toast],
   );
 
   const loading = schedulesQuery.isLoading && !isUsingFallback;

@@ -36,6 +36,19 @@ import {
   type IncidentIssueStatus,
 } from "@/services/operations/incidentIssueTracking";
 import { logger } from "@/utils/logger";
+import { LearningRecordCopy } from "@/features/learning/components/LearningRecordCopy";
+import { useOpsIssueTranslations } from "@/features/i18n/hooks/useRemainingTextTranslations";
+
+function opsIssueId(issue: IncidentIssueQueueRow & { issue_id?: string | null }) {
+  return issue.issue_id || issue.issueid || "";
+}
+
+function opsIssueSourceLocale(issue: IncidentIssueQueueRow) {
+  const source = (issue as IncidentIssueQueueRow & {
+    source?: { contentSourceLocale?: string } | null;
+  }).source;
+  return source?.contentSourceLocale ?? null;
+}
 
 const severityClasses: Record<IncidentIssueQueueRow["severity"], string> = {
   info: "border-border text-muted-foreground",
@@ -83,6 +96,18 @@ export function IssuesStream() {
 
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const sortedIssues = useMemo(() => sortIncidentIssues(issues), [issues]);
+  const issueSources = useMemo(
+    () =>
+      sortedIssues.map((issue) => ({
+        id: opsIssueId(issue),
+        title: issue.title,
+        description: issue.description,
+        sourceLocale: opsIssueSourceLocale(issue),
+        updated_at: issue.updated_at,
+      })),
+    [sortedIssues],
+  );
+  const issueTranslations = useOpsIssueTranslations(issueSources);
   const summary = useMemo(
     () => summarizeIncidentIssues(sortedIssues),
     [sortedIssues],
@@ -258,9 +283,27 @@ export function IssuesStream() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold">
-                      {issue.title ?? "Operational issue"}
-                    </p>
+                    <LearningRecordCopy
+                      recordId={opsIssueId(issue)}
+                      title={issue.title ?? "Operational issue"}
+                      description={issue.description}
+                      translation={
+                        issueTranslations.get(opsIssueId(issue))
+                          ? {
+                              sourceLocale: issueTranslations.get(opsIssueId(issue))!.sourceLocale,
+                              title:
+                                issueTranslations.get(opsIssueId(issue))!.values.title ??
+                                issue.title ??
+                                "Operational issue",
+                              description: issue.description
+                                ? issueTranslations.get(opsIssueId(issue))!.values.description ??
+                                  issue.description
+                                : null,
+                            }
+                          : null
+                      }
+                      titleClassName="text-sm font-semibold"
+                    />
                     <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
                       {issue.issue_type ?? "general"}
                       {issue.owner_name ? ` | ${issue.owner_name}` : ""}
@@ -271,11 +314,6 @@ export function IssuesStream() {
                   </Badge>
                 </div>
 
-                {issue.description && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {issue.description}
-                  </p>
-                )}
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Badge

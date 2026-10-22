@@ -1,7 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { appLanguageFromTag, type AppLanguage } from "@/i18n/resolveLanguage";
+import { scheduleWrittenText } from "@/features/i18n/scheduleRemainingText";
+import { EXPENSE_TABLE, expenseTextFields } from "@/features/i18n/remainingWrittenText";
+
+function scheduleExpenseTranslation(
+  companyId: string,
+  sourceLocale: AppLanguage,
+  row: { id?: string; description?: string | null; notes?: string | null },
+) {
+  if (!row.id) return;
+  scheduleWrittenText({
+    table: EXPENSE_TABLE,
+    companyId,
+    sourceId: row.id,
+    sourceLocale,
+    fields: expenseTextFields(row),
+  });
+}
 
 export interface Expense {
   id: string;
@@ -40,9 +59,11 @@ type ExpenseInput = Omit<
 >;
 
 export function useExpenses() {
+  const { i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
   const query = useQuery({
@@ -88,6 +109,11 @@ export function useExpenses() {
         .single();
 
       if (error) throw error;
+      scheduleExpenseTranslation(companyId, sourceLocale, {
+        id: data?.id,
+        description: typeof data?.description === "string" ? data.description : null,
+        notes: typeof data?.notes === "string" ? data.notes : null,
+      });
       return data;
     },
     onSuccess: () => {
@@ -126,6 +152,14 @@ export function useExpenses() {
         .single();
 
       if (error) throw error;
+      if (safeUpdates.description !== undefined || safeUpdates.notes !== undefined) {
+        scheduleExpenseTranslation(companyId, sourceLocale, {
+          id,
+          description:
+            typeof safeUpdates.description === "string" ? safeUpdates.description : null,
+          notes: typeof safeUpdates.notes === "string" ? safeUpdates.notes : null,
+        });
+      }
       return data;
     },
     onSuccess: () => {

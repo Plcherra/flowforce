@@ -39,6 +39,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCan } from "@/hooks/useCan";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ExpenseForm from "@/features/inventory/components/expenses/ExpenseForm";
+import { LearningRecordCopy } from "@/features/learning/components/LearningRecordCopy";
+import { useExpenseTranslations } from "@/features/i18n/hooks/useRemainingTextTranslations";
 import PaymentsOverview from "@/features/inventory/components/expenses/PaymentsOverview";
 import RoleGuard from "@/app-shell/guards/RoleGuard";
 import { logger } from "@/utils/logger";
@@ -135,6 +137,7 @@ function ExpenseReportsTab() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
+  const expenseTranslations = useExpenseTranslations(expenses);
   const filteredExpenses = useMemo(
     () =>
       expenses.filter((expense) => {
@@ -427,9 +430,28 @@ function ExpenseReportsTab() {
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-medium text-foreground">
-                          {expense.description}
-                        </h3>
+                        <div className="font-medium text-foreground">
+                          <LearningRecordCopy
+                            recordId={expense.id}
+                            title={expense.description}
+                            description={expense.notes}
+                            translation={
+                              expenseTranslations.get(expense.id)
+                                ? {
+                                    sourceLocale: expenseTranslations.get(expense.id)!.sourceLocale,
+                                    title:
+                                      expenseTranslations.get(expense.id)!.values.description ??
+                                      expense.description,
+                                    description: expense.notes
+                                      ? expenseTranslations.get(expense.id)!.values.notes ??
+                                        expense.notes
+                                      : null,
+                                  }
+                                : null
+                            }
+                            titleClassName="font-medium text-foreground"
+                          />
+                        </div>
                         <Badge className={getStatusColor(expense.status)}>
                           {expense.status}
                         </Badge>
@@ -444,9 +466,6 @@ function ExpenseReportsTab() {
                           )}
                         </span>
                       </div>
-                      {expense.notes ? (
-                        <p className="text-sm text-muted-foreground">{expense.notes}</p>
-                      ) : null}
                     </div>
                     {expense.status === "pending" && (
                       <RoleGuard permission="approveExpenses">

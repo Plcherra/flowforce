@@ -21,6 +21,12 @@ import type {
   PublishWeekValidationResult,
 } from "@/features/scheduling/services/availability/evaluateShiftAssignment";
 import { isoWeekStartForDate } from "@/features/scheduling/utils/timeWindows";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
+import { scheduleWrittenText } from "@/features/i18n/scheduleRemainingText";
+import {
+  VENDOR_VISIT_TABLE,
+  vendorVisitTextFields,
+} from "@/features/i18n/remainingWrittenText";
 
 const jsonSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([
@@ -510,6 +516,7 @@ export async function unassignUserFromShift(
 
 export async function upsertVendorEvent(
   payload: VendorEventUpsertInput,
+  sourceLocale?: AppLanguage,
 ): Promise<VendorEventRow | null> {
   // vendor_event is a view, so we need to insert/update vendor_visits instead
   const {
@@ -565,6 +572,19 @@ export async function upsertVendorEvent(
   }
 
   if (result.error) throw result.error;
+
+  if (result.data?.id && result.data.company_id && sourceLocale) {
+    scheduleWrittenText({
+      table: VENDOR_VISIT_TABLE,
+      companyId: result.data.company_id,
+      sourceId: result.data.id,
+      sourceLocale,
+      fields: vendorVisitTextFields({
+        description: result.data.description,
+        vendorName: result.data.vendor_name,
+      }),
+    });
+  }
 
   // Map back to vendor_event view schema for return type
   if (result.data) {

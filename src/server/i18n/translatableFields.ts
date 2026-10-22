@@ -79,6 +79,21 @@ export const TRANSLATABLE_FIELDS: Record<
   employee_badge: {
     reason: {},
   },
+  helpdesk_tickets: {
+    subject: {},
+    description: {},
+  },
+  ops_issues: {
+    title: {},
+    description: {},
+  },
+  expenses: {
+    description: {},
+    notes: {},
+  },
+  vendor_visits: {
+    description: {},
+  },
 };
 
 export function translatableFieldRule(

@@ -27,7 +27,7 @@ export async function createIssue(input: CreateIssueInput) {
     title,
     description: description ?? null,
     severity,
-    source: metadata ?? {},
+    source: { ...(metadata ?? {}), contentSourceLocale: "en" },
   };
 
   const { data, error } = await supabaseAdmin

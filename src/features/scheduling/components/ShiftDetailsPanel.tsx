@@ -38,6 +38,8 @@ import { useToast } from "@/hooks/use-toast";
 import { RequestShiftSwapButton } from "@/features/scheduling/components/RequestShiftSwapButton";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
 import { eventShowsOnShift } from "@/features/scheduling/services/placeDayEvents";
+import { RecognitionText } from "@/features/recognition/components/RecognitionText";
+import { useVendorDescriptionTranslations } from "@/features/i18n/hooks/useRemainingTextTranslations";
 import {
   parseCalendarInstant,
   vendorEventStart,
@@ -697,6 +699,15 @@ export function ShiftDetailsPanel({
         : [],
     [shift, vendorEvents],
   );
+  const vendorSources = useMemo(
+    () =>
+      linkedVendorVisits.map((event) => ({
+        id: event.id ?? undefined,
+        description: event.description,
+      })),
+    [linkedVendorVisits],
+  );
+  const vendorTranslations = useVendorDescriptionTranslations(vendorSources);
   const conflictWarnings = useMemo(
     () =>
       shift
@@ -796,17 +807,31 @@ export function ShiftDetailsPanel({
                       const start = vendorEventStart(event);
                       const end = parseCalendarInstant(event.end_time);
                       return (
-                      <div
-                        key={event.id}
-                        className="flex items-center justify-between text-xs"
-                      >
-                        <span className="font-medium text-muted-foreground">
-                          {getVendorLabel(event.service_type || event.vendor_name)}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {start ? format(start, "MMM d · HH:mm") : "—"}
-                          {end ? `–${format(end, "HH:mm")}` : ""}
-                        </span>
+                      <div key={event.id} className="space-y-1 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-muted-foreground">
+                            {getVendorLabel(event.service_type || event.vendor_name)}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {start ? format(start, "MMM d · HH:mm") : "—"}
+                            {end ? `–${format(end, "HH:mm")}` : ""}
+                          </span>
+                        </div>
+                        {event.description && event.id ? (
+                          <RecognitionText
+                            recordId={event.id}
+                            text={event.description}
+                            translation={
+                              vendorTranslations.get(event.id)?.values.description
+                                ? {
+                                    sourceLocale: vendorTranslations.get(event.id)!.sourceLocale,
+                                    text: vendorTranslations.get(event.id)!.values.description,
+                                  }
+                                : null
+                            }
+                            className="text-xs text-muted-foreground"
+                          />
+                        ) : null}
                       </div>
                       );
                     })}
