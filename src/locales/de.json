@@ -4501,6 +4501,8 @@
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",
+    "primarySaveChanges": "Änderungen speichern",
+    "primarySendRequest": "Anfrage senden",
     "activeModules": "Aktive Module",
     "apply": "Übernehmen",
     "archivedClasses": "Archivierte Klassen",

@@ -1,6 +1,6 @@
 # System and Admin rework
 
-Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 7.
+Active. The roadmap marks this file for the 6 AM run. Phases 3–7 are checked. The only unchecked phase is phase 2, and it stays blocked.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
@@ -71,7 +71,7 @@ Questions: Which candidates to remove?
 
 ## Permission grant plan
 
-This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3–6 are checked. Phase 7 is the next unchecked phase.
+This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phases 3–7 are checked.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 
@@ -160,7 +160,7 @@ Prove: `src/features/roles/constants/pageVersion.test.ts` returns team, draft, a
 
 ### Phase 7 — Save changes or Send request
 
-- [ ] Label the main button from the edit permission.
+- [x] Label the main button from the edit permission.
 
 Rules:
 
@@ -255,5 +255,21 @@ Phone steps for Pedro:
 5. Open Recognition as staff. Sync automation is hidden. Open it as a manager. Sync automation is shown. Certifications still has refresh only.
 
 Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration.
+
+Questions: Which candidates to remove? No new question.
+
+### 2026-10-22 — Phase 7 Save changes or Send request
+
+Shipped: The main-button pair is Save changes when edit is on, and that action writes directly. It is Send request when edit is off, and that action does not write directly. The helper does not return Send availability. My Availability was not relabeled.
+
+Proven: `src/features/roles/constants/primaryActionLabel.test.ts` passed through `node scripts/test-product-roles-setup.mjs`. Edit on returns Save changes and writes directly. Edit off returns Send request and does not write directly. Neither result is Send availability. `npm run check:i18n` printed 4630 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the TypeScript files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open My Availability. The button still says Send availability. It does not say Save changes or Send request.
+2. The edit pair is Save changes when the edit permission is on, and that button writes directly.
+3. The edit pair is Send request when the edit permission is off.
+4. This phase does not put that pair on My Availability.
+
+Blockers: Phase 2 stays skipped. Open question "Which candidates to remove" is still unanswered. No migration. Phases 3–7 are checked. This file stays active because phase 2 is still unchecked.
 
 Questions: Which candidates to remove? No new question.

@@ -4501,6 +4501,8 @@
   },
   "roles": {
     "aiSuggestions": "Suggestions d'IA",
+    "primarySaveChanges": "Enregistrer les modifications",
+    "primarySendRequest": "Envoyer la demande",
     "activeModules": "Modules actifs",
     "apply": "Appliquer",
     "archivedClasses": "Classes archivées",
