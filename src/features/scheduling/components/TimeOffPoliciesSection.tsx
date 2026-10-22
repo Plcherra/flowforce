@@ -17,8 +17,10 @@ import { useCompanyRoles } from "@/hooks/useCompanyRoles";
 import { PRODUCT_LEVELS } from "@/features/roles/constants/productLevels";
 import { useTimeOffPolicies } from "@/features/scheduling/hooks/useTimeOffPolicies";
 import { assignmentsFromSelection } from "@/features/scheduling/utils/companyPolicy";
-import type { CompanyPolicyType } from "@/features/scheduling/utils/companyPolicy";
+import type { CompanyPolicyRecord, CompanyPolicyType } from "@/features/scheduling/utils/companyPolicy";
+import { draftFromPolicy, exampleKeepsOpenEdit } from "@/features/scheduling/utils/policyDraft";
 import type { TimeOffUnit } from "@/features/scheduling/utils/timeOffPolicy";
+import { CompanyPolicyList } from "@/features/scheduling/components/CompanyPolicyList";
 
 const WEEKDAYS = [
   { value: 1, label: "Mon" },
@@ -67,11 +69,13 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
   const [levelKeys, setLevelKeys] = useState<string[]>([]);
   const [storeIds, setStoreIds] = useState<string[]>([]);
   const [userIds, setUserIds] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const storesQuery = useQuery({
     queryKey: ["company-policy-stores", companyId],
-    enabled: Boolean(companyId) && canManage && formOpen,
+    enabled: Boolean(companyId) && canManage,
     queryFn: async () => {
       const { data, error: storeError } = await supabase
         .from("inv_locations")
@@ -82,10 +86,18 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
       return data ?? [];
     },
   });
+  const prepareExample = (exampleName: string) => {
+    if (!exampleKeepsOpenEdit(editingName, exampleName)) {
+      setEditingId(null);
+      setEditingName(null);
+    }
+    setFormOpen(true);
+    setType("time_off");
+    setName(exampleName);
+  };
 
   const fillWeekend = () => {
-    setType("time_off");
-    setName("Weekend");
+    prepareExample("Weekend");
     setUnit("days");
     setCapWeek("");
     setCapMonth("2");
@@ -95,14 +107,32 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
   };
 
   const fillWeekday = () => {
-    setType("time_off");
-    setName("Weekday");
+    prepareExample("Weekday");
     setUnit("days");
     setCapWeek("");
     setCapMonth("");
     setCapYear("90");
     setNoticeDays("7");
     setWeekdays([1, 2, 3, 4, 5]);
+  };
+  const loadPolicy = (policy: CompanyPolicyRecord) => {
+    const draft = draftFromPolicy(policy);
+    setEditingId(draft.id);
+    setEditingName(draft.name);
+    setFormOpen(true);
+    setType(draft.type);
+    setName(draft.name);
+    setUnit(draft.unit);
+    setCapWeek(draft.capWeek == null ? "" : String(draft.capWeek));
+    setCapMonth(draft.capMonth == null ? "" : String(draft.capMonth));
+    setCapYear(draft.capYear == null ? "" : String(draft.capYear));
+    setNoticeDays(String(draft.noticeDays));
+    setWeekdays(draft.eligibleWeekdays);
+    setRoleIds(draft.roleIds);
+    setLevelKeys(draft.levelKeys);
+    setStoreIds(draft.storeIds);
+    setUserIds(draft.userIds.join(", "));
+    setError(null);
   };
 
   const toggleWeekday = (value: number) => {
@@ -138,6 +168,7 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
     setError(null);
     try {
       await savePolicy({
+        id: editingId ?? undefined,
         name,
         type,
         unit,
@@ -158,6 +189,8 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
         }),
       });
       setName("");
+      setEditingId(null);
+      setEditingName(null);
       setFormOpen(false);
     } catch (saveError) {
       setError(
@@ -177,11 +210,23 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
           {t("schedule.noCompanyPoliciesYet")}
         </p>
       ) : null}
+      <CompanyPolicyList
+        policies={companyPolicies}
+        roles={roles}
+        stores={storesQuery.data ?? []}
+        onEdit={loadPolicy}
+      />
       <Button
         type="button"
         size="sm"
         data-testid="company-policies-create"
-        onClick={() => setFormOpen(true)}
+        onClick={() => {
+          setEditingId(null);
+          setEditingName(null);
+          setName("");
+          setError(null);
+          setFormOpen(true);
+        }}
       >
         {t("schedule.createPolicy")}
       </Button>

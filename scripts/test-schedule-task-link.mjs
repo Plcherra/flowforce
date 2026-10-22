@@ -25,10 +25,14 @@ const { runTimeOffPolicyTests } = importTs(
 const { runCompanyPolicyTests } = importTs(
   "../src/features/scheduling/utils/companyPolicy.test.ts",
 );
+const { runPolicyDraftTests } = importTs(
+  "../src/features/scheduling/utils/policyDraft.test.ts",
+);
 
 runScheduleTaskLinkTests();
 runDoneTabTests();
 runScheduleTaskSyncTests();
 runTimeOffPolicyTests();
 runCompanyPolicyTests();
+runPolicyDraftTests();
 console.log("scheduleTaskLink tests passed");

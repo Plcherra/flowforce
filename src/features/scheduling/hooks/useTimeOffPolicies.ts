@@ -187,7 +187,8 @@ export function useTimeOffPolicies(companyId: string | null) {
         const updated = await supabase
           .from("company_policies")
           .update(row)
-          .eq("id", policyId);
+          .eq("id", policyId)
+          .eq("company_id", companyId);
         if (updated.error) throw updated.error;
         const removed = await supabase
           .from("company_policy_assignments")

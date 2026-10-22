@@ -163,7 +163,7 @@ Prove: `src/features/scheduling/utils/companyPolicy.test.ts` maps a `time_off_po
 
 ### Phase 5 — List and edit a saved policy
 
-- [ ] Show saved policies and update the row the maker picks.
+- [x] Show saved policies and update the row the maker picks.
 
 Rules:
 
@@ -345,5 +345,21 @@ Phone steps for Pedro:
 4. Open My time off. The Company policies link is there. Sign in as someone who cannot approve time off. That link is hidden, and Company policies is not in the schedule menu. Team requests no longer shows the policy form.
 
 Blockers: none. Migration `supabase/migrations/20261022172555_company_policies.sql` is applied. Copy row count was 0 source rows and 0 copied rows.
+
+Questions: none.
+
+### 2026-10-22 — Phase 5 List and edit a saved policy
+
+Shipped: Company policies lists each saved time-off policy with its name, unit, week cap, month cap, year cap, weekdays, notice, and who it applies to. Edit loads that row into the form and save updates that id. It does not insert a second policy with the same name. Weekend example and Weekday example still fill a new policy. They keep the open edit only when that edit is already the same example. Reads and writes stay on `company_policies` where the type is time off.
+
+Proven: `src/features/scheduling/utils/policyDraft.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. A draft built from a saved policy keeps the id, the week, month, and year caps, the weekdays, and the notice. Weekend example keeps an open Weekend edit. Weekday example does not keep an open Weekend edit. `npm run check:i18n` printed 4623 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as someone who can approve time off and open Company policies.
+2. Create policy, choose Weekend example, and save. Create policy again, choose Weekday example, and save. Both Weekend and Weekday appear in the list, with their unit, caps, weekdays, notice, and who they apply to.
+3. Edit Weekend. Change the month cap and save. The list still has one Weekend row, and that row shows the new month cap.
+4. While Edit is open on Weekend, choose Weekday example. Saving adds a Weekday policy and leaves the Weekend row as it was.
+
+Blockers: none. No new migration.
 
 Questions: none.
