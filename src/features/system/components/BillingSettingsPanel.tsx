@@ -22,6 +22,7 @@ import {
   BillingStatusBadge,
 } from "./BillingStatusBadge";
 import { getPaymentGraceEndsAt } from "@/services/billing/billingGracePeriod";
+import { useTranslation } from "react-i18next";
 
 const formatDate = (value?: string | null) => {
   if (!value) return "Not set";
@@ -35,6 +36,7 @@ const formatDate = (value?: string | null) => {
 };
 
 export function BillingSettingsPanel() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const checkoutState = searchParams.get("checkout");
   const { settings, loading, error } = useSystemSettingsContext();
@@ -57,27 +59,22 @@ export function BillingSettingsPanel() {
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
-            <CardTitle>Workspace billing</CardTitle>
-            <CardDescription>
-              Your plan, seat usage, and workspace access status.
-            </CardDescription>
+            <CardTitle>{t("settings.workspaceBilling")}</CardTitle>
+            <CardDescription>{t("settings.yourPlanSeatUsageAndWorkspaceAccessStatus")}</CardDescription>
           </div>
           <BillingStatusBadge tenant={tenant} />
         </CardHeader>
         <CardContent className="space-y-6">
           {checkoutState === "success" ? (
             <Alert>
-              <AlertTitle>Payment received</AlertTitle>
-              <AlertDescription>
-                Stripe checkout completed. Your workspace billing status will
-                update within a few seconds.
-              </AlertDescription>
+              <AlertTitle>{t("settings.paymentReceived")}</AlertTitle>
+              <AlertDescription>{t("settings.stripeCheckoutCompletedYourWorkspaceBillingStatusWill")}</AlertDescription>
             </Alert>
           ) : null}
 
           {tenant?.paymentFailedAt && status === "active" ? (
             <Alert variant="destructive">
-              <AlertTitle>Payment failed</AlertTitle>
+              <AlertTitle>{t("settings.paymentFailed")}</AlertTitle>
               <AlertDescription>
                 {paymentGraceEndsAt
                   ? `We could not charge your card. Update your payment method in Manage billing before ${formatDate(paymentGraceEndsAt)} to avoid interruption.`
@@ -107,10 +104,10 @@ export function BillingSettingsPanel() {
                 </p>
                 {!trialEnded && !adminDeactivated && !tenant?.paymentFailedAt ? (
                   <ul className="list-disc space-y-1 pl-5 text-sm">
-                    <li>Scheduling, tasks, and daily execution workflows</li>
-                    <li>Inventory, purchasing, and waste tracking</li>
-                    <li>Team messaging, updates, and checklists</li>
-                    <li>Reports and cost visibility for owners</li>
+                    <li>{t("settings.schedulingTasksAndDailyExecutionWorkflows")}</li>
+                    <li>{t("settings.inventoryPurchasingAndWasteTracking")}</li>
+                    <li>{t("settings.teamMessagingUpdatesAndChecklists")}</li>
+                    <li>{t("settings.reportsAndCostVisibilityForOwners")}</li>
                   </ul>
                 ) : null}
               </AlertDescription>
@@ -119,28 +116,26 @@ export function BillingSettingsPanel() {
 
           {status === "trial" && tenant?.trialEndsAt ? (
             <Alert>
-              <AlertTitle>Trial workspace</AlertTitle>
+              <AlertTitle>{t("settings.trialWorkspace")}</AlertTitle>
               <AlertDescription>
                 {`Your trial ends on ${formatDate(tenant.trialEndsAt)}. Upgrade before then to avoid interruption.`}
               </AlertDescription>
             </Alert>
           ) : status === "trial" ? (
             <Alert>
-              <AlertTitle>Trial workspace</AlertTitle>
-              <AlertDescription>
-                You are on a trial plan with full pilot access.
-              </AlertDescription>
+              <AlertTitle>{t("settings.trialWorkspace")}</AlertTitle>
+              <AlertDescription>{t("settings.youAreOnATrialPlanWithFull")}</AlertDescription>
             </Alert>
           ) : null}
 
           <dl className="grid gap-4 sm:grid-cols-2">
             <div>
-              <dt className="text-sm text-muted-foreground">Plan</dt>
+              <dt className="text-sm text-muted-foreground">{t("settings.plan")}</dt>
               <dd className="text-base font-medium">{plan.label}</dd>
               <dd className="text-xs text-muted-foreground">{plan.description}</dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Seats</dt>
+              <dt className="text-sm text-muted-foreground">{t("settings.seats")}</dt>
               <dd className="text-base font-medium">
                 {loading
                   ? "…"
@@ -148,20 +143,20 @@ export function BillingSettingsPanel() {
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Billing contact</dt>
+              <dt className="text-sm text-muted-foreground">{t("settings.billingContact")}</dt>
               <dd className="text-base font-medium">
                 {tenant?.billingEmail ?? tenant?.primaryOwnerEmail ?? "Not set"}
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted-foreground">Current period ends</dt>
+              <dt className="text-sm text-muted-foreground">{t("settings.currentPeriodEnds")}</dt>
               <dd className="text-base font-medium">
                 {formatDate(tenant?.currentPeriodEndsAt)}
               </dd>
             </div>
             {tenant?.cancelAt ? (
               <div>
-                <dt className="text-sm text-muted-foreground">Scheduled cancel</dt>
+                <dt className="text-sm text-muted-foreground">{t("settings.scheduledCancel")}</dt>
                 <dd className="text-base font-medium">
                   {formatDate(tenant.cancelAt)}
                 </dd>

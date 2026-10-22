@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import type { Employee } from "@/hooks/useEmployees";
 import { buildInitials, formatRoleLabel } from "@/shared/utils";
 import { resolveProductLevel } from "@/features/roles/constants/productLevels";
+import { useTranslation } from "react-i18next";
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -56,6 +57,7 @@ export function EmployeeCard({
   onNavigateToEmployee,
   onNavigateToPerformance,
 }: EmployeeCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const reliability = employee.reliability ?? undefined;
   const reliabilityLabel =
@@ -143,26 +145,18 @@ export function EmployeeCard({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onResetPassword(employee.email)}>
-              <KeyRound className="mr-2 h-4 w-4" />
-              Send reset email
-            </DropdownMenuItem>
+              <KeyRound className="mr-2 h-4 w-4" />{t("admin.sendResetEmail")}</DropdownMenuItem>
             <DropdownMenuItem onClick={() => onStatusToggle(employee)}>
               {showReactivate ? (
                 <>
-                  <UserCheck className="mr-2 h-4 w-4" />
-                  Reactivate
-                </>
+                  <UserCheck className="mr-2 h-4 w-4" />{t("admin.reactivate")}</>
               ) : (
                 <>
-                  <UserX className="mr-2 h-4 w-4" />
-                  Deactivate
-                </>
+                  <UserX className="mr-2 h-4 w-4" />{t("schedule.deactivate")}</>
               )}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onNavigateToEmployee(employee.id)}>
-              <ArrowRight className="mr-2 h-4 w-4" />
-              Open in directory
-            </DropdownMenuItem>
+              <ArrowRight className="mr-2 h-4 w-4" />{t("admin.openInDirectory")}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -170,7 +164,7 @@ export function EmployeeCard({
       <div className="flex flex-col gap-3">
         <div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Reliability</span>
+            <span>{t("employees.reliability")}</span>
             <span>{reliabilityLabel}</span>
           </div>
           <Progress value={reliability ?? 0} className="h-2" />
@@ -180,17 +174,13 @@ export function EmployeeCard({
             <div className="font-medium text-foreground">
               {employee.skillLevel ?? "—"}
             </div>
-            <div className="text-[11px] uppercase tracking-wide">
-              Skill level
-            </div>
+            <div className="text-[11px] uppercase tracking-wide">{t("admin.skillLevel")}</div>
           </div>
           <div className="rounded-md border border-dashed border-border p-2">
             <div className="font-medium text-foreground">
               {employee.noShowCount ?? 0} NS / {employee.lateCount ?? 0} late
             </div>
-            <div className="text-[11px] uppercase tracking-wide">
-              Attendance (30d)
-            </div>
+            <div className="text-[11px] uppercase tracking-wide">{t("admin.attendance30d")}</div>
           </div>
         </div>
       </div>
@@ -203,7 +193,7 @@ export function EmployeeCard({
           }
         >
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Update class" />
+            <SelectValue placeholder={t("admin.updateClass")} />
           </SelectTrigger>
           <SelectContent>
             {roleOptions
@@ -224,17 +214,13 @@ export function EmployeeCard({
           size="sm"
           onClick={() => onNavigateToPerformance(employee.id)}
         >
-          <Sparkles className="mr-2 h-4 w-4" />
-          Performance
-        </Button>
+          <Sparkles className="mr-2 h-4 w-4" />{t("common.performance")}</Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => navigate(`/app/enhanced-scheduling?focus=${employee.id}`)}
         >
-          <Clock className="mr-2 h-4 w-4" />
-          Scheduling
-        </Button>
+          <Clock className="mr-2 h-4 w-4" />{t("common.scheduling")}</Button>
       </div>
     </div>
   );

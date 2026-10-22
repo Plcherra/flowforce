@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { RoleKey, ModuleId } from "../types/permissions";
 import { ROLE_ORDER, ROLE_LABELS, ROLE_ACCENTS } from "../constants/roles";
 import { ROLE_MODULES } from "../constants/modules";
+import { useTranslation } from "react-i18next";
 
 interface RoleMatrixTableProps {
   matrix: Record<RoleKey, Record<ModuleId, boolean>>;
@@ -26,13 +27,12 @@ export function RoleMatrixTable({
   dirtyRoles,
   assignmentByRole,
 }: RoleMatrixTableProps) {
+  const { t } = useTranslation();
   return (
     <table className="min-w-[720px] w-full text-sm">
       <thead>
         <tr className="border-b">
-          <th className="text-left py-3 pr-4 font-medium text-muted-foreground">
-            Module
-          </th>
+          <th className="text-left py-3 pr-4 font-medium text-muted-foreground">{t("settings.module")}</th>
           {ROLE_ORDER.map((role) => {
             const assignmentInfo = assignmentByRole.get(role);
             return (
@@ -59,9 +59,7 @@ export function RoleMatrixTable({
                     {assignmentInfo?.employees.length || 0} employees
                   </span>
                   {dirtyRoles.has(role) && (
-                    <span className="mt-1 text-xs font-semibold text-primary">
-                      Unsaved
-                    </span>
+                    <span className="mt-1 text-xs font-semibold text-primary">{t("roles.unsaved")}</span>
                   )}
                 </button>
               </th>
@@ -116,17 +114,13 @@ export function RoleMatrixTable({
                       {value ? "Enabled" : "Disabled"}
                     </div>
                     {isHighRisk && (
-                      <Badge variant="destructive" className="text-[10px]">
-                        Elevated Risk
-                      </Badge>
+                      <Badge variant="destructive" className="text-[10px]">{t("roles.elevatedRisk")}</Badge>
                     )}
                     {!value &&
                       module.risk === "high" &&
                       role !== "owner" &&
                       (role === "admin" || role === "manager") && (
-                        <Badge variant="outline" className="text-[10px]">
-                          Critical module off
-                        </Badge>
+                        <Badge variant="outline" className="text-[10px]">{t("roles.criticalModuleOff")}</Badge>
                       )}
                   </div>
                 </td>

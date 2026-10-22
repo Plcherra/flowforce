@@ -24,8 +24,10 @@ import {
 import { useEffect, useState } from "react";
 import { useGeneralSettings } from "../hooks/useGeneralSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
+import { useTranslation } from "react-i18next";
 
 export function GeneralSettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -80,17 +82,13 @@ export function GeneralSettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Company Profile</CardTitle>
-        <CardDescription>
-          Update the public branding and contact details for this workspace.
-        </CardDescription>
+        <CardTitle>{t("settings.companyProfile")}</CardTitle>
+        <CardDescription>{t("settings.updateThePublicBrandingAndContactDetailsFor")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label id="theme-switch-label">Theme</Label>
-          <p className="text-xs text-muted-foreground">
-            Stored in this browser. It does not change the company.
-          </p>
+          <Label id="theme-switch-label">{t("settings.theme")}</Label>
+          <p className="text-xs text-muted-foreground">{t("settings.storedInThisBrowserItDoesNotChange")}</p>
           <div
             role="radiogroup"
             aria-labelledby="theme-switch-label"
@@ -116,7 +114,7 @@ export function GeneralSettingsPanel() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="companyName">Company name</Label>
+            <Label htmlFor="companyName">{t("settings.companyName")}</Label>
             <Input
               id="companyName"
               value={state.companyName}
@@ -130,7 +128,7 @@ export function GeneralSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor="website">{t("onboarding.userInfo.fields.website")}</Label>
             <Input
               id="website"
               value={state.website}
@@ -142,7 +140,7 @@ export function GeneralSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contactEmail">Primary email</Label>
+            <Label htmlFor="contactEmail">{t("settings.primaryEmail")}</Label>
             <Input
               id="contactEmail"
               type="email"
@@ -157,7 +155,7 @@ export function GeneralSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contactPhone">Phone</Label>
+            <Label htmlFor="contactPhone">{t("onboarding.userInfo.fields.phone")}</Label>
             <Input
               id="contactPhone"
               value={state.contactPhone}
@@ -174,7 +172,7 @@ export function GeneralSettingsPanel() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="companyAddress">Address / HQ</Label>
+            <Label htmlFor="companyAddress">{t("settings.addressHq")}</Label>
             <Textarea
               id="companyAddress"
               value={state.address}
@@ -186,7 +184,7 @@ export function GeneralSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="companyDescription">Description</Label>
+            <Label htmlFor="companyDescription">{t("schedule.description")}</Label>
             <Textarea
               id="companyDescription"
               value={state.companyDescription}
@@ -207,21 +205,16 @@ export function GeneralSettingsPanel() {
             {logoUrl ? (
               <img
                 src={logoUrl}
-                alt="Logo preview"
+                alt={t("onboarding.logoPreview")}
                 className="h-[88px] w-[88px] object-contain"
               />
             ) : (
-              <div className="text-center text-xs text-muted-foreground">
-                No logo
-              </div>
+              <div className="text-center text-xs text-muted-foreground">{t("settings.noLogo")}</div>
             )}
           </div>
           <div className="flex-1 space-y-2">
-            <Label>Company logo</Label>
-            <p className="text-sm text-muted-foreground">
-              Upload a PNG, JPEG, or SVG (max 2MB). Crop and center it on the
-              white logo plate.
-            </p>
+            <Label>{t("settings.companyLogo")}</Label>
+            <p className="text-sm text-muted-foreground">{t("settings.uploadAPngJpegOrSvgMax2mb")}</p>
             <div className="flex flex-wrap items-center gap-2">
               <label
                 className={cn(
@@ -230,7 +223,7 @@ export function GeneralSettingsPanel() {
                 )}
               >
                 <UploadCloud className="h-4 w-4" />
-                <span>Upload logo</span>
+                <span>{t("settings.uploadLogo")}</span>
                 <input
                   type="file"
                   className="hidden"
@@ -251,9 +244,7 @@ export function GeneralSettingsPanel() {
                   size="sm"
                   onClick={() => handleFileChange(null)}
                   disabled={loading}
-                >
-                  Reset logo
-                </Button>
+                >{t("settings.resetLogo")}</Button>
               )}
             </div>
           </div>
@@ -274,9 +265,7 @@ export function GeneralSettingsPanel() {
             variant="secondary"
             disabled={!dirty || saving || !canEdit}
             onClick={reset}
-          >
-            Discard
-          </Button>
+          >{t("settings.discard")}</Button>
           <Button
             type="button"
             onClick={save}
@@ -284,10 +273,9 @@ export function GeneralSettingsPanel() {
           >
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-              </>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("settings.saving")}</>
             ) : (
-              "Save changes"
+              t("settings.saveChanges")
             )}
           </Button>
         </div>

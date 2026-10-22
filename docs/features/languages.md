@@ -416,7 +416,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 22 — Settings, admin, and roles strings
 
-- [ ] Move settings, admin, and roles chrome into the six locales.
+- [x] Move settings, admin, and roles chrome into the six locales.
 
 Rules:
 
@@ -1093,6 +1093,22 @@ Phone steps for Pedro:
 1. Open the Learning Center on https://www.flowforce.uk and switch to Español in Settings, then Region, or with the header switcher if you are signed out of marketing only. The snapshot, catalog filters, and empty states should be Spanish. A course title you already saved stays as you wrote it.
 2. Create a course in Français. The wizard steps, category list, role chips, and module types should be French. The saved category and role codes stay the English values. The title and module title you type stay as written. The espresso example is only the placeholder.
 3. Open Certifications in Deutsch. The header, status badges, and metric cards should be German. A certification name stored in the catalog stays as stored.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 22 Settings, admin, and roles strings
+
+Shipped: Settings, admin, and roles chrome under `src/features/system`, `src/features/admin`, and `src/features/roles` now uses `useTranslation` and the `settings`, `admin`, and `roles` namespaces. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Cancel, Edit, Refresh, Settings, and Access Denied, stay on those keys. Language names stay English, Español, Français, Deutsch, Italiano, and Português. FlowForce, Stripe, QuickBooks, Xero, Toast, MarketMan, Copilot, Co-Pilot, MFA, and the class words See, Edit, Create / delete, Admin, Manager, Staff, and Owner stay as written where the screen still uses those words. Example emails and the date and time patterns stay as written. The three directories are off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 4240 keys for each locale and `hard-coded strings 480`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/system`, `src/features/admin`, and `src/features/roles`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Settings.
+2. Set your language to Español on Settings, then Region. Reload. The settings tabs, company profile, security, region, notifications, and billing labels should be in Spanish. The language list stays English, Español, Français, Deutsch, Italiano, and Português. A company name you typed stays as you wrote it.
+3. Open Admin (`/app/admin`) in Français. User management, role configuration, and the audit log should be in French. A person's name stays as it was written. Switch to Deutsch and open role configuration. Class instructions should be German. See, Edit, Create / delete, Admin, Manager, Staff, and Owner stay those words.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

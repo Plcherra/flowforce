@@ -18,6 +18,7 @@ import {
   startStripeCheckout,
 } from "@/services/billing/stripeBillingClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const STATUS_VARIANT: Record<
   BillingStatus,
@@ -56,6 +57,7 @@ export function BillingStatusActions({
   className,
   showHelperText = false,
 }: BillingStatusActionsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [loading, setLoading] = useState<
     "checkout" | "portal" | BillingPlanKey | null
@@ -113,10 +115,7 @@ export function BillingStatusActions({
           {loading === "portal" ? "Opening Stripe…" : "Manage billing"}
         </Button>
         {showHelperText ? (
-          <p className="text-sm text-muted-foreground">
-            Update payment method, invoices, or cancel through the Stripe
-            customer portal.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("settings.updatePaymentMethodInvoicesOrCancelThroughThe")}</p>
         ) : null}
       </div>
     );
@@ -144,9 +143,7 @@ export function BillingStatusActions({
             : trialEndedWithoutUpgrade
               ? "Your trial period has ended. Pick a plan to keep your workspace active."
               : "Compare Starter, Growth, and Enterprise plans for your restaurant workspace."}{" "}
-          <a href="/pricing" className="underline">
-            View all plans
-          </a>
+          <a href="/pricing" className="underline">{t("settings.viewAllPlans")}</a>
         </p>
       ) : null}
     </div>

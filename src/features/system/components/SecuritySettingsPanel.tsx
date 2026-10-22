@@ -15,8 +15,10 @@ import { Loader2 } from "lucide-react";
 import { ErrorState } from "./ErrorState";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useSecuritySettings } from "../hooks/useSecuritySettings";
+import { useTranslation } from "react-i18next";
 
 export function SecuritySettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -39,23 +41,15 @@ export function SecuritySettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Security & Access Controls</CardTitle>
-        <CardDescription>
-          Control how the team signs in and how long a shared tablet can stay
-          unlocked.
-        </CardDescription>
+        <CardTitle>{t("settings.securityAccessControls")}</CardTitle>
+        <CardDescription>{t("settings.controlHowTheTeamSignsInAndHow")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
             <div>
-              <p className="text-sm font-medium text-foreground">
-                Enforce multi-factor authentication
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Require verified authenticator apps or passkeys for all user
-                sign-ins.
-              </p>
+              <p className="text-sm font-medium text-foreground">{t("settings.enforceMultiFactorAuthentication")}</p>
+              <p className="text-xs text-muted-foreground">{t("settings.requireVerifiedAuthenticatorAppsOrPasskeysForAll")}</p>
             </div>
             <Switch
               checked={state.twoFactorRequired}
@@ -67,13 +61,8 @@ export function SecuritySettingsPanel() {
           </div>
           <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
             <div>
-              <p className="text-sm font-medium text-foreground">
-                Admins must use MFA
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Automatically enforce MFA for owners, company admins, and
-                managers.
-              </p>
+              <p className="text-sm font-medium text-foreground">{t("settings.adminsMustUseMfa")}</p>
+              <p className="text-xs text-muted-foreground">{t("settings.automaticallyEnforceMfaForOwnersCompanyAdminsAnd")}</p>
             </div>
             <Switch
               checked={state.enforceForAdmins}
@@ -87,16 +76,14 @@ export function SecuritySettingsPanel() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              Password policy
-            </h3>
+            <h3 className="text-sm font-semibold text-muted-foreground">{t("settings.passwordPolicy")}</h3>
             <Badge variant="outline">
               min {state.passwordPolicy.minLength} chars
             </Badge>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="password-min-length">Minimum length</Label>
+              <Label htmlFor="password-min-length">{t("settings.minimumLength")}</Label>
               <Input
                 id="password-min-length"
                 type="number"
@@ -149,12 +136,8 @@ export function SecuritySettingsPanel() {
         <section className="space-y-3 rounded-lg border p-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Label htmlFor="idle-sign-out">Sign out idle staff</Label>
-              <p className="text-xs text-muted-foreground">
-                After this time on a shared tablet or computer, FlowForce signs
-                the person out. Turn it off, or set 0, to leave people signed
-                in.
-              </p>
+              <Label htmlFor="idle-sign-out">{t("settings.signOutIdleStaff")}</Label>
+              <p className="text-xs text-muted-foreground">{t("settings.afterThisTimeOnASharedTabletOr")}</p>
             </div>
             <Switch
               id="idle-sign-out"
@@ -200,12 +183,10 @@ export function SecuritySettingsPanel() {
                 }
                 disabled={!canEdit || loading}
               />
-              <span className="text-sm text-muted-foreground">minutes</span>
+              <span className="text-sm text-muted-foreground">{t("settings.minutes")}</span>
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">
-              Idle sign-out is off.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("settings.idleSignOutIsOff")}</p>
           )}
         </section>
 
@@ -218,19 +199,16 @@ export function SecuritySettingsPanel() {
             variant="outline"
             disabled={!dirty || saving || !canEdit}
             onClick={reset}
-          >
-            Discard
-          </Button>
+          >{t("settings.discard")}</Button>
           <Button
             onClick={save}
             disabled={!canEdit || !dirty || saving || loading}
           >
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-              </>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("settings.saving")}</>
             ) : (
-              "Save security policies"
+              t("settings.saveSecurityPolicies")
             )}
           </Button>
         </div>

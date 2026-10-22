@@ -58,6 +58,7 @@ import {
 import { ErrorState } from "./ErrorState";
 import { useIntegrationSettings } from "../hooks/useIntegrationSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
+import { useTranslation } from "react-i18next";
 
 type ProviderMeta = {
   key: string;
@@ -106,6 +107,7 @@ const PROVIDERS: ProviderMeta[] = [
 ];
 
 export function IntegrationSettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -214,10 +216,8 @@ export function IntegrationSettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Integrations</CardTitle>
-        <CardDescription>
-          Manage third-party connections and synchronization rules.
-        </CardDescription>
+        <CardTitle>{t("footer.integrations")}</CardTitle>
+        <CardDescription>{t("settings.manageThirdPartyConnectionsAndSynchronizationRules")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
@@ -259,9 +259,7 @@ export function IntegrationSettingsPanel() {
                         size="sm"
                         onClick={() => handleDisconnect(provider.key)}
                         disabled={!canEdit || saving}
-                      >
-                        Disconnect
-                      </Button>
+                      >{t("settings.disconnect")}</Button>
                     ) : (
                       <Button
                         size="sm"
@@ -278,9 +276,7 @@ export function IntegrationSettingsPanel() {
                         href={provider.documentation}
                         target="_blank"
                         rel="noreferrer"
-                      >
-                        Docs
-                      </a>
+                      >{t("settings.docs")}</a>
                     </Button>
                   </div>
                 </CardContent>
@@ -292,9 +288,7 @@ export function IntegrationSettingsPanel() {
         <div className="rounded-md border bg-muted/20 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                POS sync health
-              </h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("settings.posSyncHealth")}</h3>
               <p className="mt-1 text-xs text-muted-foreground">
                 Toast is the first POS foundation target. Health metadata is
                 tenant-scoped and client-visible only; credentials stay in
@@ -353,21 +347,15 @@ export function IntegrationSettingsPanel() {
         <div className="rounded-md border bg-muted/20 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Accounting and payroll readiness
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                QuickBooks and Xero export scope, payroll labor import scope,
-                retry logs, and reconciliation views are defined before live
-                provider sync.
-              </p>
+              <h3 className="text-sm font-semibold text-foreground">{t("settings.accountingAndPayrollReadiness")}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">{t("settings.quickbooksAndXeroExportScopePayrollLaborImport")}</p>
             </div>
-            <Badge variant="secondary">foundation</Badge>
+            <Badge variant="secondary">{t("settings.foundation")}</Badge>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-4">
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Accounting exports</span>
+                <span className="text-sm font-medium">{t("settings.accountingExports")}</span>
                 <Badge
                   variant={
                     accountingReadiness.quickBooksAndXeroExportScopesReady
@@ -378,14 +366,11 @@ export function IntegrationSettingsPanel() {
                   {accountingExportScopes.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                QuickBooks/Xero bills, expenses, payments, credits, summaries,
-                and journal entries.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.quickbooksXeroBillsExpensesPaymentsCreditsSummariesAnd")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Payroll imports</span>
+                <span className="text-sm font-medium">{t("settings.payrollImports")}</span>
                 <Badge
                   variant={
                     accountingReadiness.payrollLaborImportScopesReady
@@ -396,32 +381,24 @@ export function IntegrationSettingsPanel() {
                   {payrollImportScopes.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Employees, labor actuals, pay periods, wage rates, and payroll
-                journal summaries.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.employeesLaborActualsPayPeriodsWageRatesAnd")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Logs and retries</span>
+                <span className="text-sm font-medium">{t("settings.logsAndRetries")}</span>
                 <Badge
                   variant={
                     accountingReadiness.exportLogsAndRetriesReady
                       ? "default"
                       : "outline"
                   }
-                >
-                  Ready
-                </Badge>
+                >{t("analytics.ready")}</Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Payload hashes, idempotency keys, attempts, errors, and next
-                retry timestamps.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.payloadHashesIdempotencyKeysAttemptsErrorsAndNext")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Reconciliation</span>
+                <span className="text-sm font-medium">{t("settings.reconciliation")}</span>
                 <Badge
                   variant={
                     accountingReadiness.reconciliationViewsReady
@@ -432,9 +409,7 @@ export function IntegrationSettingsPanel() {
                   {reconciliationViews.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Export, payroll labor, and cost-of-goods mismatch review views.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.exportPayrollLaborAndCostOfGoodsMismatch")}</p>
             </div>
           </div>
         </div>
@@ -442,36 +417,26 @@ export function IntegrationSettingsPanel() {
         <div className="rounded-md border bg-muted/20 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Public API and webhooks
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                API keys, webhook subscriptions, event catalog, rate limits, and
-                delivery audit logs are defined before external developer
-                access.
-              </p>
+              <h3 className="text-sm font-semibold text-foreground">{t("settings.publicApiAndWebhooks")}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">{t("settings.apiKeysWebhookSubscriptionsEventCatalogRateLimits")}</p>
             </div>
-            <Badge variant="secondary">platform foundation</Badge>
+            <Badge variant="secondary">{t("settings.platformFoundation")}</Badge>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-4">
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">API key model</span>
+                <span className="text-sm font-medium">{t("settings.apiKeyModel")}</span>
                 <Badge
                   variant={
                     publicApiReadiness.apiKeyModelReady ? "default" : "outline"
                   }
-                >
-                  Scoped
-                </Badge>
+                >{t("settings.scoped")}</Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Tenant-scoped, hashed, shown once, revocable, expiring keys.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.tenantScopedHashedShownOnceRevocableExpiringKeys")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Webhook events</span>
+                <span className="text-sm font-medium">{t("settings.webhookEvents")}</span>
                 <Badge
                   variant={
                     publicApiReadiness.eventCatalogReady ? "default" : "outline"
@@ -480,14 +445,11 @@ export function IntegrationSettingsPanel() {
                   {publicApiEventCatalog.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Employees, schedules, inventory counts, purchase orders,
-                workflows, and incidents.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.employeesSchedulesInventoryCountsPurchaseOrdersWorkflowsAnd")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Rate limits</span>
+                <span className="text-sm font-medium">{t("settings.rateLimits")}</span>
                 <Badge
                   variant={
                     publicApiReadiness.rateLimitsReady ? "default" : "outline"
@@ -496,26 +458,18 @@ export function IntegrationSettingsPanel() {
                   {publicApiRateLimits.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Tenant API limits and webhook delivery limits with blocking
-                behavior.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.tenantApiLimitsAndWebhookDeliveryLimitsWith")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Audit logs</span>
+                <span className="text-sm font-medium">{t("settings.auditLogs")}</span>
                 <Badge
                   variant={
                     publicApiReadiness.auditActionsReady ? "default" : "outline"
                   }
-                >
-                  Ready
-                </Badge>
+                >{t("analytics.ready")}</Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Key lifecycle, webhook delivery, and rate-limit decisions are
-                audited.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.keyLifecycleWebhookDeliveryAndRateLimitDecisions")}</p>
             </div>
           </div>
         </div>
@@ -523,14 +477,8 @@ export function IntegrationSettingsPanel() {
         <div className="rounded-md border bg-muted/20 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Integration monitoring
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Sync health, last success, failures, retries, warnings, alerts,
-                and support diagnostics are visible before live monitoring
-                workers.
-              </p>
+              <h3 className="text-sm font-semibold text-foreground">{t("settings.integrationMonitoring")}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">{t("settings.syncHealthLastSuccessFailuresRetriesWarningsAlerts")}</p>
             </div>
             <Badge
               variant={
@@ -547,7 +495,7 @@ export function IntegrationSettingsPanel() {
           <div className="mt-4 grid gap-3 md:grid-cols-4">
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Status dashboard</span>
+                <span className="text-sm font-medium">{t("settings.statusDashboard")}</span>
                 <Badge
                   variant={
                     monitoringReadiness.syncStatusDashboardReady
@@ -566,7 +514,7 @@ export function IntegrationSettingsPanel() {
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Critical alerts</span>
+                <span className="text-sm font-medium">{t("settings.criticalAlerts")}</span>
                 <Badge
                   variant={
                     monitoringReadiness.criticalAlertingReady
@@ -577,13 +525,11 @@ export function IntegrationSettingsPanel() {
                   {monitoringDashboard.staleCriticalCount}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Broken critical syncs trigger tenant admin and support review.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.brokenCriticalSyncsTriggerTenantAdminAndSupport")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Diagnostics</span>
+                <span className="text-sm font-medium">{t("settings.diagnostics")}</span>
                 <Badge
                   variant={
                     monitoringReadiness.supportDiagnosticsReady
@@ -594,28 +540,20 @@ export function IntegrationSettingsPanel() {
                   {monitoringDiagnostics.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Support-safe evidence includes last success, failures, next
-                retry, and warnings.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.supportSafeEvidenceIncludesLastSuccessFailuresNext")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Simulated failures</span>
+                <span className="text-sm font-medium">{t("settings.simulatedFailures")}</span>
                 <Badge
                   variant={
                     monitoringReadiness.simulatedFailuresVisible
                       ? "default"
                       : "outline"
                   }
-                >
-                  Visible
-                </Badge>
+                >{t("settings.visible")}</Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Toast, QuickBooks, MarketMan, and webhook issues are represented
-                in the dashboard contract.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.toastQuickbooksMarketmanAndWebhookIssuesAreRepresented")}</p>
             </div>
           </div>
         </div>
@@ -623,20 +561,15 @@ export function IntegrationSettingsPanel() {
         <div className="rounded-md border bg-muted/20 p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Migration and integration signoff
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Customer playbook, sample data packs, demo migration flow, and
-                test-tenant population checks are ready for pilot handoff.
-              </p>
+              <h3 className="text-sm font-semibold text-foreground">{t("settings.migrationAndIntegrationSignoff")}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">{t("settings.customerPlaybookSampleDataPacksDemoMigrationFlow")}</p>
             </div>
-            <Badge variant="default">Plan 09 signoff</Badge>
+            <Badge variant="default">{t("settings.plan09Signoff")}</Badge>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-4">
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Playbook</span>
+                <span className="text-sm font-medium">{t("settings.playbook")}</span>
                 <Badge
                   variant={
                     signoffReadiness.customerMigrationPlaybookReady
@@ -647,13 +580,11 @@ export function IntegrationSettingsPanel() {
                   {migrationPlaybook.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Scope, prepare, import, validate, connect, monitor, and handoff.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.scopePrepareImportValidateConnectMonitorAndHandoff")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Sample packs</span>
+                <span className="text-sm font-medium">{t("settings.samplePacks")}</span>
                 <Badge
                   variant={
                     signoffReadiness.sampleDataPacksReady
@@ -664,13 +595,11 @@ export function IntegrationSettingsPanel() {
                   {sampleDataPacks.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Restaurant, retail, and operations workflow demo tenants.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.restaurantRetailAndOperationsWorkflowDemoTenants")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Demo flow</span>
+                <span className="text-sm font-medium">{t("settings.demoFlow")}</span>
                 <Badge
                   variant={
                     signoffReadiness.demoMigrationFlowReady
@@ -681,14 +610,11 @@ export function IntegrationSettingsPanel() {
                   {demoMigrationFlow.length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Test tenant creation through owner acceptance and open-risk
-                review.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.testTenantCreationThroughOwnerAcceptanceAndOpen")}</p>
             </div>
             <div className="rounded-md border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">Test tenant</span>
+                <span className="text-sm font-medium">{t("settings.testTenant")}</span>
                 <Badge
                   variant={
                     signoffReadiness.testTenantCanBePopulated
@@ -699,25 +625,20 @@ export function IntegrationSettingsPanel() {
                   {Object.keys(testTenantPopulationPlan.expectedRecords).length}
                 </Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Expected records and signoff checks are defined for sample
-                population.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("settings.expectedRecordsAndSignoffChecksAreDefinedFor")}</p>
             </div>
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground">
-            Connection activity
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("settings.connectionActivity")}</h3>
           <Table className="mt-3">
             <TableHeader>
               <TableRow>
-                <TableHead>Provider</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Connected</TableHead>
-                <TableHead>Last sync</TableHead>
+                <TableHead>{t("inventory.provider")}</TableHead>
+                <TableHead>{t("schedule.status")}</TableHead>
+                <TableHead>{t("settings.connected")}</TableHead>
+                <TableHead>{t("settings.lastSync")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -726,9 +647,7 @@ export function IntegrationSettingsPanel() {
                   <TableCell
                     colSpan={4}
                     className="text-center text-sm text-muted-foreground"
-                  >
-                    No connections yet.
-                  </TableCell>
+                  >{t("settings.noConnectionsYet")}</TableCell>
                 </TableRow>
               ) : (
                 integrations.connections.map((connection) => (
@@ -755,9 +674,7 @@ export function IntegrationSettingsPanel() {
         </div>
 
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>
-            Adjust auto-sync rules and mappings as integrations go live.
-          </span>
+          <span>{t("settings.adjustAutoSyncRulesAndMappingsAsIntegrations")}</span>
           <Button
             variant="ghost"
             size="sm"
@@ -769,9 +686,7 @@ export function IntegrationSettingsPanel() {
               })
             }
             disabled={saving || !canEdit}
-          >
-            Refresh mappings
-          </Button>
+          >{t("settings.refreshMappings")}</Button>
         </div>
 
         {saveError && <ErrorState message={saveError.message} />}
@@ -782,32 +697,24 @@ export function IntegrationSettingsPanel() {
               <DialogHeader>
                 <DialogTitle>Connect {activeProvider.name}</DialogTitle>
               </DialogHeader>
-              <p className="text-sm text-muted-foreground">
-                Raw API keys are never stored in browser-readable settings. This
-                marks setup as pending until server-side credential custody is
-                configured.
-              </p>
+              <p className="text-sm text-muted-foreground">{t("settings.rawApiKeysAreNeverStoredInBrowser")}</p>
               {activeProvider.authType === "api_key" ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      API Key
-                    </label>
+                    <label className="text-sm font-medium text-foreground">{t("settings.apiKey")}</label>
                     <Input
                       value={apiKey}
                       onChange={(event) => setApiKey(event.target.value)}
-                      placeholder="Paste API key"
+                      placeholder={t("settings.pasteApiKey")}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Notes
-                    </label>
+                    <label className="text-sm font-medium text-foreground">{t("schedule.notes")}</label>
                     <Textarea
                       value={notes}
                       onChange={(event) => setNotes(event.target.value)}
                       rows={3}
-                      placeholder="Optional context for teammates"
+                      placeholder={t("settings.optionalContextForTeammates")}
                     />
                   </div>
                 </div>
@@ -821,9 +728,7 @@ export function IntegrationSettingsPanel() {
                 <Button
                   variant="outline"
                   onClick={() => setActiveProvider(null)}
-                >
-                  Cancel
-                </Button>
+                >{t("common.cancel")}</Button>
                 <Button
                   onClick={() => handleConnect(activeProvider)}
                   disabled={

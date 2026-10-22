@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { RoleKey } from "../types/permissions";
 import { ROLE_LABELS, ROLE_ACCENTS } from "../constants/roles";
 import { formatPermissionLabel } from "../utils/permissionHelpers";
+import { useTranslation } from "react-i18next";
 
 interface PermissionPreviewProps {
   selectedRole: RoleKey;
@@ -36,15 +37,14 @@ export function PermissionPreview({
   dirtySelectedRole,
   onResetRole,
 }: PermissionPreviewProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle>Live Permission Preview</CardTitle>
-            <CardDescription>
-              Real-time view of permissions granted to the selected role.
-            </CardDescription>
+            <CardTitle>{t("roles.livePermissionPreview")}</CardTitle>
+            <CardDescription>{t("roles.realTimeViewOfPermissionsGrantedToThe")}</CardDescription>
           </div>
           {selectedRole !== "owner" && (
             <Button
@@ -62,16 +62,12 @@ export function PermissionPreview({
           <Badge className={cn("border", ROLE_ACCENTS[selectedRole])}>
             {ROLE_LABELS[selectedRole]}
           </Badge>
-          {dirtySelectedRole && <Badge variant="secondary">Pending save</Badge>}
+          {dirtySelectedRole && <Badge variant="secondary">{t("roles.pendingSave")}</Badge>}
         </div>
         <div className="mt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Active modules
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("roles.activeModules")}</p>
           {activeModules.length === 0 ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              No modules enabled.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("roles.noModulesEnabled")}</p>
           ) : (
             <div className="mt-2 flex flex-wrap gap-2">
               {activeModules.map((module) => (
@@ -89,9 +85,7 @@ export function PermissionPreview({
             Permissions granted ({activePermissions.length})
           </p>
           {activePermissions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Toggle modules on to grant feature access for this role.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("roles.toggleModulesOnToGrantFeatureAccessFor")}</p>
           ) : (
             <ScrollArea className="max-h-48 rounded-md border">
               <div className="flex flex-wrap gap-2 p-3 text-xs">

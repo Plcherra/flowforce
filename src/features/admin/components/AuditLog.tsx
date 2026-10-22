@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   useAuditLogs,
@@ -8,6 +9,7 @@ import { Activity, User, Clock } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AuditLog() {
+  const { t } = useTranslation();
   const {
     data: auditLogs = [],
     isLoading,
@@ -20,13 +22,8 @@ export default function AuditLog() {
       <Card>
         <CardContent className="p-8 text-center">
           <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-            Audit Logs Disabled
-          </h3>
-          <p className="text-muted-foreground">
-            Enable the audit logs feature to track administrative actions in
-            this view.
-          </p>
+          <h3 className="text-lg font-semibold text-muted-foreground mb-2">{t("admin.auditLogsDisabled")}</h3>
+          <p className="text-muted-foreground">{t("admin.enableTheAuditLogsFeatureToTrackAdministrative")}</p>
         </CardContent>
       </Card>
     );
@@ -45,12 +42,8 @@ export default function AuditLog() {
       <Card>
         <CardContent className="p-8 text-center">
           <Activity className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-destructive mb-2">
-            Error Loading Audit Log
-          </h3>
-          <p className="text-muted-foreground">
-            Failed to load audit log data. Please try again.
-          </p>
+          <h3 className="text-lg font-semibold text-destructive mb-2">{t("admin.errorLoadingAuditLog")}</h3>
+          <p className="text-muted-foreground">{t("admin.failedToLoadAuditLogDataPleaseTry")}</p>
         </CardContent>
       </Card>
     );
@@ -99,25 +92,16 @@ export default function AuditLog() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Activity Audit Log</h2>
-        <p className="text-muted-foreground">
-          Track privileged user, permission, settings, invite, and automation
-          actions.
-        </p>
+        <h2 className="text-2xl font-bold">{t("admin.activityAuditLog")}</h2>
+        <p className="text-muted-foreground">{t("admin.trackPrivilegedUserPermissionSettingsInviteAndAutomation")}</p>
       </div>
 
       {auditLogs.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
             <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-              No Audit Entries
-            </h3>
-            <p className="text-muted-foreground">
-              No sensitive actions have been recorded yet. When admins change
-              roles, permissions, settings, invites, or automation controls,
-              they will appear here.
-            </p>
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">{t("admin.noAuditEntries")}</h3>
+            <p className="text-muted-foreground">{t("admin.noSensitiveActionsHaveBeenRecordedYetWhen")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -170,7 +154,7 @@ export default function AuditLog() {
 
                     {log.performed_byprofile && (
                       <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
-                        <strong>Changed by:</strong>{" "}
+                        <strong>{t("admin.changedBy")}</strong>{" "}
                         {log.performed_byprofile.first_name}{" "}
                         {log.performed_byprofile.last_name} (
                         {log.performed_byprofile.email})

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import type { ViewMode, StatusFilter } from "../types/userManagement";
+import { useTranslation } from "react-i18next";
 
 interface UserManagementFiltersProps {
   searchTerm: string;
@@ -43,13 +44,14 @@ export function UserManagementFilters({
   onDepartmentChange,
   onViewModeChange,
 }: UserManagementFiltersProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, department, or position"
+            placeholder={t("admin.searchByNameEmailDepartmentOrPosition")}
             className="pl-9"
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -58,12 +60,12 @@ export function UserManagementFilters({
         <Select value={statusFilter} onValueChange={onStatusChange}>
           <SelectTrigger className="w-full sm:w-[160px]">
             <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t("schedule.status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="active">{t("sections.active")}</SelectItem>
+            <SelectItem value="inactive">{t("admin.inactive")}</SelectItem>
+            <SelectItem value="all">{t("schedule.allStatuses2")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -72,10 +74,10 @@ export function UserManagementFilters({
         <Select value={roleFilter} onValueChange={onRoleChange}>
           <SelectTrigger className="w-full sm:w-[160px]">
             <Shield className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Role" />
+            <SelectValue placeholder={t("messages.role")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All roles</SelectItem>
+            <SelectItem value="all">{t("admin.allRoles")}</SelectItem>
             {roleOptions.map((role) => (
               <SelectItem key={role.id} value={role.id}>
                 {role.name}
@@ -86,11 +88,11 @@ export function UserManagementFilters({
         <Select value={departmentFilter} onValueChange={onDepartmentChange}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <Building2 className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Department" />
+            <SelectValue placeholder={t("dashboard.profile.department")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All departments</SelectItem>
-            <SelectItem value="unassigned">Unassigned</SelectItem>
+            <SelectItem value="all">{t("admin.allDepartments")}</SelectItem>
+            <SelectItem value="unassigned">{t("schedule.unassigned")}</SelectItem>
             {departments.map((department) => (
               <SelectItem key={department.id} value={department.id}>
                 {department.name}
@@ -105,18 +107,14 @@ export function UserManagementFilters({
             className="gap-2"
             onClick={() => onViewModeChange("department")}
           >
-            <LayoutGrid className="h-4 w-4" />
-            Department
-          </Button>
+            <LayoutGrid className="h-4 w-4" />{t("dashboard.profile.department")}</Button>
           <Button
             variant={viewMode === "role" ? "default" : "ghost"}
             size="sm"
             className="gap-2"
             onClick={() => onViewModeChange("role")}
           >
-            <Shield className="h-4 w-4" />
-            Role
-          </Button>
+            <Shield className="h-4 w-4" />{t("messages.role")}</Button>
         </div>
       </div>
     </div>

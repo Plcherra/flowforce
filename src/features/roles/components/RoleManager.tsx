@@ -18,6 +18,7 @@ import {
   PRODUCT_ROLE_LABELS,
 } from "../constants/productRoles";
 import { Shield, Crown, Users, UserCheck, Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface RoleManagerProps {
   userId: string;
@@ -32,6 +33,7 @@ export default function RoleManager({
   userName,
   onRoleChange,
 }: RoleManagerProps) {
+  const { t } = useTranslation();
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
   const { roles, loading: rolesLoading } = useCompanyRoles();
@@ -148,7 +150,7 @@ export default function RoleManager({
   return (
     <div className="flex items-center space-x-4">
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-muted-foreground">Current Role:</span>
+        <span className="text-sm text-muted-foreground">{t("roles.currentRole")}</span>
         {getRoleBadge(currentRole)}
       </div>
 

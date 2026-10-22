@@ -18,6 +18,7 @@ import {
   findLogoContentCenter,
   offsetToCenterContent,
 } from "../utils/exportCompanyLogo";
+import { useTranslation } from "react-i18next";
 
 const VIEWPORT = 280;
 
@@ -36,6 +37,7 @@ export function LogoEditorDialog({
   onOpenChange,
   onConfirm,
 }: LogoEditorDialogProps) {
+  const { t } = useTranslation();
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [removeWhite, setRemoveWhite] = useState(true);
@@ -146,11 +148,8 @@ export function LogoEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Adjust company logo</DialogTitle>
-          <DialogDescription>
-            Drag to position, zoom to crop, then confirm. White backgrounds can
-            be removed so the sidebar mark stays clean.
-          </DialogDescription>
+          <DialogTitle>{t("settings.adjustCompanyLogo")}</DialogTitle>
+          <DialogDescription>{t("settings.dragToPositionZoomToCropThenConfirm")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -189,7 +188,7 @@ export function LogoEditorDialog({
             {sourceUrl ? (
               <img
                 src={sourceUrl}
-                alt="Logo being cropped"
+                alt={t("settings.logoBeingCropped")}
                 className="pointer-events-none absolute max-h-none max-w-none"
                 style={{
                   width: drawWidth,
@@ -205,7 +204,7 @@ export function LogoEditorDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Zoom</Label>
+            <Label>{t("settings.zoom")}</Label>
             <Slider
               min={1}
               max={3}
@@ -223,10 +222,8 @@ export function LogoEditorDialog({
 
           <div className="flex items-center justify-between rounded-lg border px-3 py-2">
             <div>
-              <Label htmlFor="keepCentered">Snap to horizontal and vertical center</Label>
-              <p className="text-xs text-muted-foreground">
-                Finds the mark in the image and keeps it on the crosshair.
-              </p>
+              <Label htmlFor="keepCentered">{t("settings.snapToHorizontalAndVerticalCenter")}</Label>
+              <p className="text-xs text-muted-foreground">{t("settings.findsTheMarkInTheImageAndKeeps")}</p>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -234,9 +231,7 @@ export function LogoEditorDialog({
                 variant="outline"
                 size="sm"
                 onClick={() => snapToCenter()}
-              >
-                Center now
-              </Button>
+              >{t("settings.centerNow")}</Button>
               <Switch
                 id="keepCentered"
                 checked={keepCentered}
@@ -250,10 +245,8 @@ export function LogoEditorDialog({
 
           <div className="flex items-center justify-between rounded-lg border px-3 py-2">
             <div>
-              <Label htmlFor="removeWhite">Remove white background</Label>
-              <p className="text-xs text-muted-foreground">
-                Best for PNG marks exported on a white canvas.
-              </p>
+              <Label htmlFor="removeWhite">{t("settings.removeWhiteBackground")}</Label>
+              <p className="text-xs text-muted-foreground">{t("settings.bestForPngMarksExportedOnAWhite")}</p>
             </div>
             <Switch
               id="removeWhite"
@@ -270,9 +263,7 @@ export function LogoEditorDialog({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
+          >{t("common.cancel")}</Button>
           <Button
             type="button"
             onClick={() => void handleConfirm()}

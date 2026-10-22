@@ -41,6 +41,7 @@ import {
   Settings,
   Eye,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const AVAILABLE_ICONS = [
   { value: "Users", label: "Users", icon: Users },
@@ -67,6 +68,7 @@ export default function RoleManagementDialog({
   onSave,
   isLoading = false,
 }: RoleManagementDialogProps) {
+  const { t } = useTranslation();
   const [startFrom, setStartFrom] = useState("level:manager");
   const [formData, setFormData] = useState<CreateRoleData>(() => {
     if (role) {
@@ -184,21 +186,21 @@ export default function RoleManagementDialog({
         <form onSubmit={handleSubmit} className="space-y-6">
           <Tabs defaultValue="basic" className="w-full">
             <TabsList>
-              <TabsTrigger value="basic">Basic Information</TabsTrigger>
-              <TabsTrigger value="permissions">Access</TabsTrigger>
+              <TabsTrigger value="basic">{t("updates.basicInformation")}</TabsTrigger>
+              <TabsTrigger value="permissions">{t("employees.access")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Role Name</Label>
+                  <Label htmlFor="name">{t("onboarding.roleSetup.roleName")}</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
-                    placeholder="Enter role name"
+                    placeholder={t("roles.enterRoleName")}
                     required
                   />
                 </div>
@@ -236,7 +238,7 @@ export default function RoleManagementDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("schedule.description")}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -246,14 +248,14 @@ export default function RoleManagementDialog({
                       description: e.target.value,
                     }))
                   }
-                  placeholder="Describe this role's responsibilities"
+                  placeholder={t("roles.describeThisRoleSResponsibilities")}
                   rows={3}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="color">Color</Label>
+                  <Label htmlFor="color">{t("roles.color")}</Label>
                   <div className="flex items-center space-x-2">
                     <Input
                       id="color"
@@ -272,14 +274,12 @@ export default function RoleManagementDialog({
                         backgroundColor: formData.color,
                         color: "white",
                       }}
-                    >
-                      Preview
-                    </Badge>
+                    >{t("schedule.preview")}</Badge>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="icon">Icon</Label>
+                  <Label htmlFor="icon">{t("sections.icon")}</Label>
                   <Select
                     value={formData.icon}
                     onValueChange={(value) =>
@@ -321,10 +321,7 @@ export default function RoleManagementDialog({
             </TabsContent>
 
             <TabsContent value="permissions" className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Each class starts from its level. Give or take the access types
-                that permission needs.
-              </p>
+              <p className="text-sm text-muted-foreground">{t("roles.eachClassStartsFromItsLevelGiveOr")}</p>
               <OperatorAccessGrid
                 level={productLevel}
                 permissions={formData.permissions}
@@ -339,9 +336,7 @@ export default function RoleManagementDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
+            >{t("common.cancel")}</Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? "Saving..." : role ? "Update class" : "Create class"}
             </Button>

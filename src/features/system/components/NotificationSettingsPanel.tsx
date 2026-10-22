@@ -16,6 +16,7 @@ import { ErrorState } from "./ErrorState";
 import { useSystemNotifications } from "../hooks/useSystemNotifications";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const NOTIFICATION_CHANNELS: Array<{
   key: "email" | "in_app" | "sms" | "push";
@@ -60,6 +61,7 @@ const MODULE_OPTIONS: Array<{
 ];
 
 export function NotificationSettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -91,16 +93,12 @@ export function NotificationSettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Notification Center</CardTitle>
-        <CardDescription>
-          Choose delivery channels and overrides for each product module.
-        </CardDescription>
+        <CardTitle>{t("settings.notificationCenter")}</CardTitle>
+        <CardDescription>{t("settings.chooseDeliveryChannelsAndOverridesForEachProduct")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-muted-foreground">
-            Delivery channels
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("settings.deliveryChannels")}</h3>
           <div className="flex flex-wrap gap-3">
             {NOTIFICATION_CHANNELS.map((channel) => {
               const active = channels.includes(channel.key);
@@ -128,23 +126,17 @@ export function NotificationSettingsPanel() {
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                Daily digest
-              </span>
+              <span className="text-sm font-medium text-foreground">{t("settings.dailyDigest")}</span>
               <Switch
                 checked={digestEnabled}
                 onCheckedChange={setDigestEnabled}
                 disabled={!canEdit || loading}
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Send a bundled summary email during quiet hours.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("settings.sendABundledSummaryEmailDuringQuietHours")}</p>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Digest hour (24h)
-            </label>
+            <label className="text-sm font-medium text-foreground">{t("settings.digestHour24h")}</label>
             <Input
               type="number"
               min={0}
@@ -155,9 +147,7 @@ export function NotificationSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Reminder window (minutes)
-            </label>
+            <label className="text-sm font-medium text-foreground">{t("settings.reminderWindowMinutes")}</label>
             <Input
               type="number"
               min={5}
@@ -170,9 +160,7 @@ export function NotificationSettingsPanel() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-muted-foreground">
-            Per-module overrides
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("settings.perModuleOverrides")}</h3>
           <div className="grid gap-4 md:grid-cols-2">
             {modules.map((module) => {
               const override =
@@ -189,7 +177,7 @@ export function NotificationSettingsPanel() {
                         {module.description}
                       </p>
                     </div>
-                    <Badge variant="outline">Module</Badge>
+                    <Badge variant="outline">{t("settings.module")}</Badge>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {NOTIFICATION_CHANNELS.map((channel) => (
@@ -230,16 +218,13 @@ export function NotificationSettingsPanel() {
             variant="outline"
             disabled={!dirty || saving || !canEdit}
             onClick={reset}
-          >
-            Discard
-          </Button>
+          >{t("settings.discard")}</Button>
           <Button onClick={save} disabled={!canEdit || !dirty || saving}>
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-              </>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("settings.saving")}</>
             ) : (
-              "Save notifications"
+              t("settings.saveNotifications")
             )}
           </Button>
         </div>

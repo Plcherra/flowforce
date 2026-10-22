@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Bell,
   Building2,
@@ -65,12 +66,13 @@ const PanelFallback = () => (
 );
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   return (
     <SystemSettingsLayout
       tabs={[
         {
           key: "general",
-          label: "General",
+          label: t("settings.tabGeneral"),
           icon: Building2,
           content: (
             <ErrorBoundary
@@ -86,7 +88,7 @@ export default function SettingsPage() {
         },
         {
           key: "security",
-          label: "Security",
+          label: t("settings.tabSecurity"),
           icon: Shield,
           content: (
             <ErrorBoundary
@@ -102,7 +104,7 @@ export default function SettingsPage() {
         },
         {
           key: "localization",
-          label: "Region",
+          label: t("settings.tabRegion"),
           icon: Globe,
           content: (
             <ErrorBoundary
@@ -119,7 +121,7 @@ export default function SettingsPage() {
         },
         {
           key: "notifications",
-          label: "Notifications",
+          label: t("settings.tabNotifications"),
           icon: Bell,
           content: (
             <ErrorBoundary
@@ -135,7 +137,7 @@ export default function SettingsPage() {
         },
         {
           key: "copilot",
-          label: "AI",
+          label: t("settings.tabAi"),
           icon: Sparkles,
           content: (
             <ErrorBoundary
@@ -151,7 +153,7 @@ export default function SettingsPage() {
         },
         {
           key: "integrations",
-          label: "Integrations",
+          label: t("footer.integrations"),
           icon: Plug,
           content: (
             <ErrorBoundary
@@ -167,7 +169,7 @@ export default function SettingsPage() {
         },
         {
           key: "billing",
-          label: "Billing",
+          label: t("settings.tabBilling"),
           icon: CreditCard,
           content: (
             <ErrorBoundary
@@ -183,7 +185,7 @@ export default function SettingsPage() {
         },
         {
           key: "admin",
-          label: "Admin",
+          label: t("common.admin"),
           icon: SlidersHorizontal,
           content: (
             <ErrorBoundary

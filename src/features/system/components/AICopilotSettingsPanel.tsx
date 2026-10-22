@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
 import { useAICopilotSettings } from "../hooks/useAICopilotSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
+import { useTranslation } from "react-i18next";
 
 const SCOPE_OPTIONS = [
   "scheduling",
@@ -31,6 +32,7 @@ const SCOPE_OPTIONS = [
 ];
 
 export function AICopilotSettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -55,22 +57,14 @@ export function AICopilotSettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Co-Pilot</CardTitle>
-        <CardDescription>
-          Configure automation boundaries and scope access for AI-enabled
-          workflows.
-        </CardDescription>
+        <CardTitle>{t("settings.aiCoPilot")}</CardTitle>
+        <CardDescription>{t("settings.configureAutomationBoundariesAndScopeAccessForAi")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-start justify-between rounded-lg border p-4">
           <div>
-            <p className="text-sm font-medium text-foreground">
-              Enable AI Co-Pilot automation
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Allow FlowForce to generate proactive suggestions with optional
-              execution.
-            </p>
+            <p className="text-sm font-medium text-foreground">{t("settings.enableAiCoPilotAutomation")}</p>
+            <p className="text-xs text-muted-foreground">{t("settings.allowFlowforceToGenerateProactiveSuggestionsWithOptional")}</p>
           </div>
           <Switch
             checked={state.enabled}
@@ -81,9 +75,7 @@ export function AICopilotSettingsPanel() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Automation level
-            </label>
+            <label className="text-sm font-medium text-foreground">{t("settings.automationLevel")}</label>
             <Select
               value={state.automationLevel ?? "suggestion"}
               onValueChange={(value) =>
@@ -95,16 +87,14 @@ export function AICopilotSettingsPanel() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="suggestion">Suggestions only</SelectItem>
-                <SelectItem value="assist">Assist (requires review)</SelectItem>
-                <SelectItem value="autopilot">Autopilot</SelectItem>
+                <SelectItem value="suggestion">{t("settings.suggestionsOnly")}</SelectItem>
+                <SelectItem value="assist">{t("settings.assistRequiresReview")}</SelectItem>
+                <SelectItem value="autopilot">{t("settings.autopilot")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Last audit
-            </label>
+            <label className="text-sm font-medium text-foreground">{t("settings.lastAudit")}</label>
             <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
               {state.lastAuditAt
                 ? new Date(state.lastAuditAt).toLocaleString()
@@ -114,7 +104,7 @@ export function AICopilotSettingsPanel() {
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-medium text-foreground">Allowed scopes</p>
+          <p className="text-sm font-medium text-foreground">{t("settings.allowedScopes")}</p>
           <div className="flex flex-wrap gap-2">
             {SCOPE_OPTIONS.map((scope) => {
               const active = state.scopes.includes(scope);
@@ -140,9 +130,7 @@ export function AICopilotSettingsPanel() {
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-medium text-foreground">
-            Restricted modules
-          </p>
+          <p className="text-sm font-medium text-foreground">{t("settings.restrictedModules")}</p>
           <div className="flex flex-wrap gap-2">
             {SCOPE_OPTIONS.map((scope) => {
               const restricted = state.restrictedModules.includes(scope);
@@ -177,16 +165,13 @@ export function AICopilotSettingsPanel() {
             variant="outline"
             disabled={!dirty || saving || !canEdit}
             onClick={reset}
-          >
-            Discard
-          </Button>
+          >{t("settings.discard")}</Button>
           <Button onClick={save} disabled={!canEdit || !dirty || saving}>
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-              </>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("settings.saving")}</>
             ) : (
-              "Save AI settings"
+              t("settings.saveAiSettings")
             )}
           </Button>
         </div>

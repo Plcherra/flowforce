@@ -28,8 +28,10 @@ import {
   RoleSummarySidebar,
   CopilotInsightsPanel,
 } from "./";
+import { useTranslation } from "react-i18next";
 
 export default function UserManagement() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const {
@@ -204,21 +206,14 @@ export default function UserManagement() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Team Management</h2>
-          <p className="text-muted-foreground">
-            Search, filter, and manage your entire team from one dashboard.
-            Invite new hires, adjust roles, and keep permissions aligned.
-          </p>
+          <h2 className="text-3xl font-bold text-foreground">{t("common.positionManagement")}</h2>
+          <p className="text-muted-foreground">{t("admin.searchFilterAndManageYourEntireTeamFrom")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetchEmployees()}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
+            <RefreshCw className="mr-2 h-4 w-4" />{t("common.refresh")}</Button>
           <Button onClick={() => navigate("/employees?invite=1")}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Full Invite Flow
-          </Button>
+            <UserPlus className="mr-2 h-4 w-4" />{t("admin.fullInviteFlow")}</Button>
         </div>
       </div>
 
@@ -255,19 +250,14 @@ export default function UserManagement() {
           {isBusy ? (
             <Card>
               <CardContent className="flex h-48 items-center justify-center">
-                <div className="text-sm text-muted-foreground">
-                  Loading team data…
-                </div>
+                <div className="text-sm text-muted-foreground">{t("admin.loadingTeamData")}</div>
               </CardContent>
             </Card>
           ) : groupedEmployees.length === 0 ? (
             <Card>
               <CardContent className="flex h-48 flex-col items-center justify-center text-center">
                 <Users className="mb-3 h-8 w-8 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  No employees match your filters. Adjust filters or invite a
-                  new team member.
-                </p>
+                <p className="text-sm text-muted-foreground">{t("admin.noEmployeesMatchYourFiltersAdjustFiltersOr")}</p>
               </CardContent>
             </Card>
           ) : (

@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { Suggestion } from "../types/permissions";
 import { ROLE_LABELS, ROLE_ACCENTS } from "../constants/roles";
 import { ROLE_MODULES } from "../constants/modules";
+import { useTranslation } from "react-i18next";
 
 interface AISuggestionsPanelProps {
   suggestions: Suggestion[];
@@ -29,6 +30,7 @@ export function AISuggestionsPanel({
   suggestions,
   onSuggestionAction,
 }: AISuggestionsPanelProps) {
+  const { t } = useTranslation();
   if (suggestions.length === 0) {
     return (
       <Card>
@@ -36,20 +38,13 @@ export function AISuggestionsPanel({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                AI Suggestions
-              </CardTitle>
-              <CardDescription>
-                Performance and risk-based adjustments generated in real time.
-              </CardDescription>
+                <Sparkles className="h-4 w-4 text-primary" />{t("roles.aiSuggestions")}</CardTitle>
+              <CardDescription>{t("roles.performanceAndRiskBasedAdjustmentsGeneratedInReal")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-dashed p-4 text-xs text-muted-foreground">
-            No active suggestions. Keep monitoring performance for fresh
-            insights.
-          </div>
+          <div className="rounded-lg border border-dashed p-4 text-xs text-muted-foreground">{t("roles.noActiveSuggestionsKeepMonitoringPerformanceForFresh")}</div>
         </CardContent>
       </Card>
     );
@@ -61,12 +56,8 @@ export function AISuggestionsPanel({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              AI Suggestions
-            </CardTitle>
-            <CardDescription>
-              Performance and risk-based adjustments generated in real time.
-            </CardDescription>
+              <Sparkles className="h-4 w-4 text-primary" />{t("roles.aiSuggestions")}</CardTitle>
+            <CardDescription>{t("roles.performanceAndRiskBasedAdjustmentsGeneratedInReal")}</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -108,16 +99,12 @@ export function AISuggestionsPanel({
                     size="sm"
                     variant="default"
                     onClick={() => onSuggestionAction(suggestion, "apply")}
-                  >
-                    Apply
-                  </Button>
+                  >{t("roles.apply")}</Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => onSuggestionAction(suggestion, "dismiss")}
-                  >
-                    Dismiss
-                  </Button>
+                  >{t("roles.dismiss")}</Button>
                 </div>
               </div>
             </div>

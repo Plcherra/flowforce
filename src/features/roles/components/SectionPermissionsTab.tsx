@@ -24,8 +24,10 @@ import {
   PropagationSummary,
   AISuggestionsPanel,
 } from "./";
+import { useTranslation } from "react-i18next";
 
 export default function SectionPermissionsTab() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const {
     roles,
@@ -138,11 +140,8 @@ export default function SectionPermissionsTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Role Matrix</CardTitle>
-              <CardDescription>
-                Toggle module access per role. Changes update live previews and
-                propagate to linked positions.
-              </CardDescription>
+              <CardTitle>{t("roles.roleMatrix")}</CardTitle>
+              <CardDescription>{t("roles.toggleModuleAccessPerRoleChangesUpdateLive")}</CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -150,9 +149,7 @@ export default function SectionPermissionsTab() {
                 size="sm"
                 onClick={handleResetAll}
                 disabled={saving}
-              >
-                Reset All
-              </Button>
+              >{t("roles.resetAll")}</Button>
               <Button onClick={handleSave} disabled={saving}>
                 {saving ? "Saving..." : "Save Changes"}
               </Button>

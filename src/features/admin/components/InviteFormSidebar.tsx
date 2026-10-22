@@ -17,6 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { InvitePersonStack } from "@/features/employees/components/invites/InvitePersonStack";
 import type { CompanyInvite } from "../types/userManagement";
 import { formatRoleLabel, formatDateTimeLocale } from "@/shared/utils";
+import { useTranslation } from "react-i18next";
 
 interface InviteFormSidebarProps {
   generatedInviteLink: string | null;
@@ -33,17 +34,13 @@ export function InviteFormSidebar({
   onCopyLink,
   onInviteSent,
 }: InviteFormSidebarProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5" />
-          Invite team member
-        </CardTitle>
-        <CardDescription>
-          Pick a class. The boxes paint. Give or take only what you can
-          grant.
-        </CardDescription>
+          <UserPlus className="h-5 w-5" />{t("admin.inviteTeamMember")}</CardTitle>
+        <CardDescription>{t("employees.pickAClassTheBoxesPaintGiveOrTakeOnlyWhatYouCanGrant")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <InvitePersonStack hideIntro onSuccess={onInviteSent} />
@@ -51,16 +48,14 @@ export function InviteFormSidebar({
         {generatedInviteLink && (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
             <div className="mb-2 flex items-center justify-between">
-              <span>New invite link</span>
+              <span>{t("admin.newInviteLink")}</span>
               <Button
                 variant="ghost"
                 size="sm"
                 type="button"
                 onClick={onCopyLink}
               >
-                <Copy className="mr-2 h-4 w-4" />
-                Copy
-              </Button>
+                <Copy className="mr-2 h-4 w-4" />{t("sections.copy")}</Button>
             </div>
             <div className="truncate font-medium text-foreground">
               {generatedInviteLink}
@@ -71,18 +66,12 @@ export function InviteFormSidebar({
         <Separator />
 
         <div>
-          <div className="mb-2 flex items-center justify-between text-sm font-medium text-muted-foreground">
-            Pending invites
-            <Badge variant="outline">{pendingInvites.length}</Badge>
+          <div className="mb-2 flex items-center justify-between text-sm font-medium text-muted-foreground">{t("admin.pendingInvites")}<Badge variant="outline">{pendingInvites.length}</Badge>
           </div>
           {isLoading ? (
-            <div className="text-xs text-muted-foreground">
-              Loading pending invites…
-            </div>
+            <div className="text-xs text-muted-foreground">{t("admin.loadingPendingInvites")}</div>
           ) : pendingInvites.length === 0 ? (
-            <div className="text-xs text-muted-foreground">
-              Everyone invited has joined. Great job!
-            </div>
+            <div className="text-xs text-muted-foreground">{t("admin.everyoneInvitedHasJoinedGreatJob")}</div>
           ) : (
             <ScrollArea className="h-48">
               <div className="space-y-3 pr-2">

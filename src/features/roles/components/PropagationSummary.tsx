@@ -12,6 +12,7 @@ import {
 import type { RoleKey } from "../types/permissions";
 import type { Position } from "@/hooks/usePositions";
 import { ROLE_LABELS } from "../constants/roles";
+import { useTranslation } from "react-i18next";
 
 interface PropagationSummaryProps {
   selectedRole: RoleKey;
@@ -26,10 +27,11 @@ export function PropagationSummary({
   employees,
   dirtySelectedRole,
 }: PropagationSummaryProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Propagation Summary</CardTitle>
+        <CardTitle>{t("roles.propagationSummary")}</CardTitle>
         <CardDescription>
           Automatically syncs with positions and employees assigned to{" "}
           {ROLE_LABELS[selectedRole]}.
@@ -37,9 +39,7 @@ export function PropagationSummary({
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         <div className="rounded-lg border border-dashed p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Positions impacted
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("roles.positionsImpacted")}</p>
           <p className="mt-1 text-lg font-semibold text-foreground">
             {positions.length}
           </p>
@@ -56,9 +56,7 @@ export function PropagationSummary({
         </div>
 
         <div className="rounded-lg border border-dashed p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Employees affected
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("roles.employeesAffected")}</p>
           <p className="mt-1 text-lg font-semibold text-foreground">
             {employees.length}
           </p>
@@ -75,21 +73,14 @@ export function PropagationSummary({
         </div>
 
         <div className="rounded-lg border border-dashed p-4 bg-muted/40">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Propagation mode
-          </p>
-          <p className="mt-1 text-sm text-foreground">
-            Changes publish instantly through Position Management so team
-            members stay aligned with their role.
-          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("roles.propagationMode")}</p>
+          <p className="mt-1 text-sm text-foreground">{t("roles.changesPublishInstantlyThroughPositionManagementSoTeam")}</p>
           {dirtySelectedRole ? (
             <p className="mt-2 text-xs font-medium text-primary">
               Pending save – press &quot;Save Changes&quot; to sync updates.
             </p>
           ) : (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Up to date – last synced with Position Management.
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{t("roles.upToDateLastSyncedWithPositionManagement")}</p>
           )}
         </div>
       </CardContent>

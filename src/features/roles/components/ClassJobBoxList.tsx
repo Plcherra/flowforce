@@ -5,6 +5,7 @@ import {
   getVisibleOperatorAreas,
 } from "@/features/roles/constants/operatorBoxes";
 import type { ProductLevel } from "@/features/roles/constants/productLevels";
+import { useTranslation } from "react-i18next";
 
 export function ClassJobBoxList({
   level,
@@ -13,6 +14,7 @@ export function ClassJobBoxList({
   level: ProductLevel;
   permissions?: Record<string, boolean> | null;
 }) {
+  const { t } = useTranslation();
   const areas = getVisibleOperatorAreas(level)
     .map((area) => ({
       area,
@@ -22,7 +24,7 @@ export function ClassJobBoxList({
 
   if (areas.length === 0) {
     return (
-      <p className="mt-2 text-xs text-muted-foreground">No job access yet</p>
+      <p className="mt-2 text-xs text-muted-foreground">{t("roles.noJobAccessYet")}</p>
     );
   }
 

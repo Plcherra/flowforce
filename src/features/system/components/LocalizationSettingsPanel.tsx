@@ -19,6 +19,7 @@ import { Loader2 } from "lucide-react";
 import { ErrorState } from "./ErrorState";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useLocalizationSettings } from "../hooks/useLocalizationSettings";
+import { useTranslation } from "react-i18next";
 
 const TIMEZONE_OPTIONS = [
   { value: "UTC", label: "UTC" },
@@ -49,6 +50,7 @@ const CURRENCY_OPTIONS = [
 ];
 
 export function LocalizationSettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -71,16 +73,13 @@ export function LocalizationSettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Localization</CardTitle>
-        <CardDescription>
-          Align currency, timezone, and regional formatting across analytics and
-          communications.
-        </CardDescription>
+        <CardTitle>{t("settings.localization")}</CardTitle>
+        <CardDescription>{t("settings.alignCurrencyTimezoneAndRegionalFormattingAcrossAnalytics")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label>Timezone</Label>
+            <Label>{t("updates.timezone")}</Label>
             <Select
               value={state.timezone}
               onValueChange={(value) =>
@@ -89,7 +88,7 @@ export function LocalizationSettingsPanel() {
               disabled={!canEdit || loading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select timezone" />
+                <SelectValue placeholder={t("settings.selectTimezone")} />
               </SelectTrigger>
               <SelectContent>
                 {TIMEZONE_OPTIONS.map((option) => (
@@ -101,7 +100,7 @@ export function LocalizationSettingsPanel() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Language</Label>
+            <Label>{t("settings.language")}</Label>
             <Select
               value={state.language}
               onValueChange={(value) =>
@@ -110,7 +109,7 @@ export function LocalizationSettingsPanel() {
               disabled={!canEdit || loading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select language" />
+                <SelectValue placeholder={t("settings.selectLanguage")} />
               </SelectTrigger>
               <SelectContent>
                 {LANGUAGE_OPTIONS.map((option) => (
@@ -122,7 +121,7 @@ export function LocalizationSettingsPanel() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Currency</Label>
+            <Label>{t("settings.currency")}</Label>
             <Select
               value={state.currency}
               onValueChange={(value) =>
@@ -131,7 +130,7 @@ export function LocalizationSettingsPanel() {
               disabled={!canEdit || loading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
+                <SelectValue placeholder={t("settings.selectCurrency")} />
               </SelectTrigger>
               <SelectContent>
                 {CURRENCY_OPTIONS.map((option) => (
@@ -145,12 +144,10 @@ export function LocalizationSettingsPanel() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground">
-            Regional formats
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("settings.regionalFormats")}</h3>
           <div className="mt-3 grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="format-date">Date pattern</Label>
+              <Label htmlFor="format-date">{t("settings.datePattern")}</Label>
               <Input
                 id="format-date"
                 value={state.regionalFormats.date}
@@ -158,11 +155,11 @@ export function LocalizationSettingsPanel() {
                   updateRegionalFormat("date", event.target.value)
                 }
                 disabled={!canEdit || loading}
-                placeholder="MM/DD/YYYY"
+                placeholder={t("settings.mmDdYyyy")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="format-time">Time pattern</Label>
+              <Label htmlFor="format-time">{t("settings.timePattern")}</Label>
               <Input
                 id="format-time"
                 value={state.regionalFormats.time}
@@ -170,11 +167,11 @@ export function LocalizationSettingsPanel() {
                   updateRegionalFormat("time", event.target.value)
                 }
                 disabled={!canEdit || loading}
-                placeholder="hh:mm A"
+                placeholder={t("settings.hhMmA")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="format-number">Number pattern</Label>
+              <Label htmlFor="format-number">{t("settings.numberPattern")}</Label>
               <Input
                 id="format-number"
                 value={state.regionalFormats.number}
@@ -195,19 +192,16 @@ export function LocalizationSettingsPanel() {
             variant="outline"
             disabled={!dirty || saving || !canEdit}
             onClick={reset}
-          >
-            Discard
-          </Button>
+          >{t("settings.discard")}</Button>
           <Button
             onClick={save}
             disabled={!canEdit || !dirty || saving || loading}
           >
             {saving ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-              </>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("settings.saving")}</>
             ) : (
-              "Save localization"
+              t("settings.saveLocalization")
             )}
           </Button>
         </div>

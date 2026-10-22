@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "@/lib/router-adapter";
 import type { RoleSummary, PositionCoverage } from "../types/userManagement";
+import { useTranslation } from "react-i18next";
 
 interface RoleSummarySidebarProps {
   roleSummaries: RoleSummary[];
@@ -25,6 +26,7 @@ export function RoleSummarySidebar({
   roleSummaries,
   positionCoverage,
 }: RoleSummarySidebarProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -34,21 +36,13 @@ export function RoleSummarySidebar({
           <Shield className="h-5 w-5" />
           Role &amp; permission snapshot
         </CardTitle>
-        <CardDescription>
-          Track coverage across roles and ensure permissions reflect your
-          operating model.
-        </CardDescription>
+        <CardDescription>{t("admin.trackCoverageAcrossRolesAndEnsurePermissionsReflect")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-3">
-          <div className="text-xs font-medium uppercase text-muted-foreground">
-            Top roles
-          </div>
+          <div className="text-xs font-medium uppercase text-muted-foreground">{t("admin.topRoles")}</div>
           {roleSummaries.length === 0 ? (
-            <div className="text-xs text-muted-foreground">
-              No custom roles found yet. Configure roles to unlock tailored
-              permissions.
-            </div>
+            <div className="text-xs text-muted-foreground">{t("admin.noCustomRolesFoundYetConfigureRolesTo")}</div>
           ) : (
             roleSummaries.map((role) => (
               <div
@@ -78,13 +72,9 @@ export function RoleSummarySidebar({
         <Separator />
 
         <div className="space-y-3">
-          <div className="text-xs font-medium uppercase text-muted-foreground">
-            Position coverage
-          </div>
+          <div className="text-xs font-medium uppercase text-muted-foreground">{t("admin.positionCoverage")}</div>
           {positionCoverage.length === 0 ? (
-            <div className="text-xs text-muted-foreground">
-              Assign positions to understand workload coverage.
-            </div>
+            <div className="text-xs text-muted-foreground">{t("admin.assignPositionsToUnderstandWorkloadCoverage")}</div>
           ) : (
             positionCoverage.map((position) => (
               <div
@@ -110,16 +100,12 @@ export function RoleSummarySidebar({
             variant="outline"
             className="flex-1"
             onClick={() => navigate("/settings?tab=roles")}
-          >
-            Manage roles
-          </Button>
+          >{t("admin.manageRoles")}</Button>
           <Button
             variant="outline"
             className="flex-1"
             onClick={() => navigate("/settings?tab=positions")}
-          >
-            Manage positions
-          </Button>
+          >{t("admin.managePositions")}</Button>
         </div>
       </CardContent>
     </Card>

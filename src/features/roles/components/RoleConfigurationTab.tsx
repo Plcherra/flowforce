@@ -21,8 +21,10 @@ import { ClassJobBoxList } from "./ClassJobBoxList";
 import { Plus, Edit, Trash2, Shield, AlertTriangle } from "lucide-react";
 import { useCan } from "@/hooks/useCan";
 import { logger } from "@/utils/logger";
+import { useTranslation } from "react-i18next";
 
 export default function RoleConfigurationTab() {
+  const { t } = useTranslation();
   const { can } = useCan();
   const { company, updateCompany } = useCompany();
   const invitePolicy = parseInviteGrantPolicy(company?.template_config);
@@ -106,18 +108,16 @@ export default function RoleConfigurationTab() {
     return (
       <div className="text-center py-12">
         <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium text-foreground mb-2">
-          Access Denied
-        </h3>
+        <h3 className="text-lg font-medium text-foreground mb-2">{t("common.accessDenied")}</h3>
         <p className="text-sm text-muted-foreground">
-          You don&apos;t have permission to manage roles.
+          {t("roles.noPermissionToManageRoles")}
         </p>
       </div>
     );
   }
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading roles...</div>;
+    return <div className="flex justify-center p-8">{t("roles.loadingRoles")}</div>;
   }
 
   const rolesArray = Array.isArray(roles) ? roles : [];
@@ -155,10 +155,10 @@ export default function RoleConfigurationTab() {
                     {PRODUCT_ROLE_LABELS[productLevel]} level
                   </Badge>
                   {role.is_system_role && (
-                    <Badge variant="secondary">System Role</Badge>
+                    <Badge variant="secondary">{t("roles.systemRole")}</Badge>
                   )}
                   {role.is_active === false && (
-                    <Badge variant="outline">Archived</Badge>
+                    <Badge variant="outline">{t("forms.archived")}</Badge>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -177,17 +177,13 @@ export default function RoleConfigurationTab() {
                 size="sm"
                 onClick={() => handleEditRole(role)}
               >
-                <Edit className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
+                <Edit className="h-4 w-4 mr-1" />{t("common.edit")}</Button>
               {role.is_active === false ? (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleRestoreRole(role)}
-                >
-                  Restore
-                </Button>
+                >{t("onboarding.restore")}</Button>
               ) : canDeactivateClass(role) ? (
                 <Button
                   variant="outline"
@@ -195,9 +191,7 @@ export default function RoleConfigurationTab() {
                   onClick={() => handleDeleteRole(role)}
                   className="text-destructive hover:text-destructive"
                 >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Archive
-                </Button>
+                  <Trash2 className="h-4 w-4 mr-1" />{t("updates.archive")}</Button>
               ) : null}
             </div>
           </div>
@@ -210,30 +204,18 @@ export default function RoleConfigurationTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Role Configuration</h3>
-          <p className="text-muted-foreground mt-1">
-            Plant classes on a locked level, then give or take See, Edit, and
-            Create / delete. Archive Admin, Manager, or Staff to hide them.
-            Owner stays.
-          </p>
+          <h3 className="text-lg font-semibold">{t("sections.roleConfiguration")}</h3>
+          <p className="text-muted-foreground mt-1">{t("roles.plantClassesOnALockedLevelThenGive")}</p>
         </div>
         <Button onClick={handleCreateRole}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create class
-        </Button>
+          <Plus className="h-4 w-4 mr-2" />{t("onboarding.createClass")}</Button>
       </div>
 
       <Card>
         <CardContent className="flex items-start justify-between gap-4 p-4">
           <div className="space-y-1">
-            <Label htmlFor="manager-invite-managers">
-              Managers can invite Manager-level classes
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Leave this on so a GM can invite Kitchen manager. Turn it off if
-              managers should only invite Staff. They still cannot grant Admin
-              or billing.
-            </p>
+            <Label htmlFor="manager-invite-managers">{t("roles.managersCanInviteManagerLevelClasses")}</Label>
+            <p className="text-sm text-muted-foreground">{t("roles.leaveThisOnSoAGmCanInvite")}</p>
           </div>
           <Switch
             id="manager-invite-managers"
@@ -248,9 +230,7 @@ export default function RoleConfigurationTab() {
 
       {archivedRoles.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground">
-            Archived classes
-          </h4>
+          <h4 className="text-sm font-medium text-muted-foreground">{t("roles.archivedClasses")}</h4>
           <div className="grid gap-4">{archivedRoles.map(renderRoleCard)}</div>
         </div>
       )}
@@ -258,16 +238,10 @@ export default function RoleConfigurationTab() {
       {rolesArray.length === 0 && (
         <div className="text-center py-12">
           <Shield className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">
-            No roles found
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            Create your first class to get started
-          </p>
+          <h3 className="text-lg font-medium text-foreground mb-2">{t("roles.noRolesFound")}</h3>
+          <p className="text-muted-foreground mb-4">{t("roles.createYourFirstClassToGetStarted")}</p>
           <Button onClick={handleCreateRole}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create class
-          </Button>
+            <Plus className="h-4 w-4 mr-2" />{t("onboarding.createClass")}</Button>
         </div>
       )}
 

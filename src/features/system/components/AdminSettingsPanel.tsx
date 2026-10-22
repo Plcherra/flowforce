@@ -35,11 +35,13 @@ import {
 import {
   BillingStatusBadge,
 } from "./BillingStatusBadge";
+import { useTranslation } from "react-i18next";
 
 const toBillingIsoDate = (value: string) =>
   value ? new Date(`${value}T23:59:59.000Z`).toISOString() : null;
 
 export function AdminSettingsPanel() {
+  const { t } = useTranslation();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -122,17 +124,14 @@ export function AdminSettingsPanel() {
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Tenant management</CardTitle>
-            <CardDescription>
-              Internal billing controls for ownership, seats, and workspace
-              access. Use the Billing tab for the owner-facing summary.
-            </CardDescription>
+            <CardTitle>{t("settings.tenantManagement")}</CardTitle>
+            <CardDescription>{t("settings.internalBillingControlsForOwnershipSeatsAndWorkspace")}</CardDescription>
           </div>
           <BillingStatusBadge tenant={tenant} />
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="tenant-owner">Primary owner email</Label>
+            <Label htmlFor="tenant-owner">{t("settings.primaryOwnerEmail")}</Label>
             <Input
               id="tenant-owner"
               value={tenant?.primaryOwnerEmail ?? ""}
@@ -147,11 +146,11 @@ export function AdminSettingsPanel() {
                 }))
               }
               disabled={!canEdit || loading}
-              placeholder="owner@example.com"
+              placeholder={t("settings.ownerExampleCom")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-plan">Plan</Label>
+            <Label htmlFor="tenant-plan">{t("settings.plan")}</Label>
             <select
               id="tenant-plan"
               className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -179,7 +178,7 @@ export function AdminSettingsPanel() {
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-billing-status">Workspace access</Label>
+            <Label htmlFor="tenant-billing-status">{t("settings.workspaceAccess")}</Label>
             <select
               id="tenant-billing-status"
               className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -204,7 +203,7 @@ export function AdminSettingsPanel() {
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-active-seats">Active seats</Label>
+            <Label htmlFor="tenant-active-seats">{t("settings.activeSeats")}</Label>
             <Input
               id="tenant-active-seats"
               type="number"
@@ -224,7 +223,7 @@ export function AdminSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-max-seats">Seat limit</Label>
+            <Label htmlFor="tenant-max-seats">{t("settings.seatLimit")}</Label>
             <Input
               id="tenant-max-seats"
               type="number"
@@ -249,7 +248,7 @@ export function AdminSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-billing-email">Billing email</Label>
+            <Label htmlFor="tenant-billing-email">{t("settings.billingEmail")}</Label>
             <Input
               id="tenant-billing-email"
               type="email"
@@ -265,11 +264,11 @@ export function AdminSettingsPanel() {
                 }))
               }
               disabled={!canEdit || loading}
-              placeholder="billing@example.com"
+              placeholder={t("settings.billingExampleCom")}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-trial-ends">Trial ends</Label>
+            <Label htmlFor="tenant-trial-ends">{t("settings.trialEnds")}</Label>
             <Input
               id="tenant-trial-ends"
               type="date"
@@ -288,7 +287,7 @@ export function AdminSettingsPanel() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="tenant-period-ends">Current period ends</Label>
+            <Label htmlFor="tenant-period-ends">{t("settings.currentPeriodEnds")}</Label>
             <Input
               id="tenant-period-ends"
               type="date"
@@ -312,11 +311,8 @@ export function AdminSettingsPanel() {
       <Card>
         <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle>Business structure snapshot</CardTitle>
-            <CardDescription>
-              Sync locations and role templates from live company data for
-              downstream governance.
-            </CardDescription>
+            <CardTitle>{t("settings.businessStructureSnapshot")}</CardTitle>
+            <CardDescription>{t("settings.syncLocationsAndRoleTemplatesFromLiveCompany")}</CardDescription>
           </div>
           <Button
             onClick={refreshSnapshot}
@@ -353,29 +349,21 @@ export function AdminSettingsPanel() {
       <Card className="border-destructive/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            High-risk admin actions
-          </CardTitle>
-          <CardDescription>
-            Stage sensitive tenant changes behind explicit confirmation. Changes
-            are not applied until you save admin settings.
-          </CardDescription>
+            <AlertTriangle className="h-5 w-5 text-destructive" />{t("settings.highRiskAdminActions")}</CardTitle>
+          <CardDescription>{t("settings.stageSensitiveTenantChangesBehindExplicitConfirmationChanges")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Confirmation required</AlertTitle>
-            <AlertDescription>
-              Type <span className="font-semibold">{confirmationPhrase}</span>{" "}
+            <AlertTitle>{t("settings.confirmationRequired")}</AlertTitle>
+            <AlertDescription>{t("dashboard.type")}<span className="font-semibold">{confirmationPhrase}</span>{" "}
               to unlock high-risk actions for this workspace.
             </AlertDescription>
           </Alert>
 
           <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
             <div className="space-y-2">
-              <Label htmlFor="danger-confirmation">
-                Workspace confirmation
-              </Label>
+              <Label htmlFor="danger-confirmation">{t("settings.workspaceConfirmation")}</Label>
               <Input
                 id="danger-confirmation"
                 value={dangerConfirmation}
@@ -389,22 +377,15 @@ export function AdminSettingsPanel() {
               variant="outline"
               onClick={handleExportSettingsBackup}
             >
-              <Download className="mr-2 h-4 w-4" />
-              Export backup
-            </Button>
+              <Download className="mr-2 h-4 w-4" />{t("settings.exportBackup")}</Button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-lg border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Stage workspace deactivation
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Marks the workspace as deactivated for billing and support
-                    review.
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{t("settings.stageWorkspaceDeactivation")}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t("settings.marksTheWorkspaceAsDeactivatedForBillingAnd")}</p>
                 </div>
                 <ShieldOff className="h-5 w-5 text-destructive" />
               </div>
@@ -415,21 +396,14 @@ export function AdminSettingsPanel() {
                 className="mt-4"
                 onClick={stageTenantDeactivation}
                 disabled={!canEdit || !dangerousActionsUnlocked || loading}
-              >
-                Stage deactivation
-              </Button>
+              >{t("settings.stageDeactivation")}</Button>
             </div>
 
             <div className="rounded-lg border p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    Pause AI automation
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Disables AI execution and returns automation to suggestion
-                    mode.
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{t("settings.pauseAiAutomation")}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t("settings.disablesAiExecutionAndReturnsAutomationToSuggestion")}</p>
                 </div>
                 <BotOff className="h-5 w-5 text-destructive" />
               </div>
@@ -440,9 +414,7 @@ export function AdminSettingsPanel() {
                 className="mt-4"
                 onClick={stageAiPause}
                 disabled={!canEdit || !dangerousActionsUnlocked || loading}
-              >
-                Stage AI pause
-              </Button>
+              >{t("settings.stageAiPause")}</Button>
             </div>
           </div>
         </CardContent>
@@ -450,26 +422,22 @@ export function AdminSettingsPanel() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent audit activity</CardTitle>
-          <CardDescription>
-            Track privileged configuration changes across the tenant.
-          </CardDescription>
+          <CardTitle>{t("settings.recentAuditActivity")}</CardTitle>
+          <CardDescription>{t("settings.trackPrivilegedConfigurationChangesAcrossTheTenant")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {auditLogs.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading audit
-              history…
-            </div>
+              <Loader2 className="h-4 w-4 animate-spin" />{t("settings.loadingAuditHistory")}</div>
           ) : auditLogs.error ? (
             <ErrorState message={(auditLogs.error as Error).message} />
           ) : auditLogs.data && auditLogs.data.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Actor</TableHead>
-                  <TableHead>When</TableHead>
+                  <TableHead>{t("employees.action")}</TableHead>
+                  <TableHead>{t("settings.actor")}</TableHead>
+                  <TableHead>{t("settings.when")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -491,9 +459,7 @@ export function AdminSettingsPanel() {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              No audit events recorded.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("settings.noAuditEventsRecorded")}</p>
           )}
         </CardContent>
       </Card>
@@ -505,19 +471,16 @@ export function AdminSettingsPanel() {
           variant="outline"
           disabled={!dirty || saving || !canEdit}
           onClick={reset}
-        >
-          Discard
-        </Button>
+        >{t("settings.discard")}</Button>
         <Button
           onClick={save}
           disabled={!canEdit || !dirty || saving || loading}
         >
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-            </>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("settings.saving")}</>
           ) : (
-            "Save admin settings"
+            t("settings.saveAdminSettings")
           )}
         </Button>
       </div>

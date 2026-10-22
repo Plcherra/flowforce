@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { CopilotInsight } from "../types/userManagement";
+import { useTranslation } from "react-i18next";
 
 interface CopilotInsightsPanelProps {
   insights: CopilotInsight[];
@@ -38,6 +39,7 @@ export function CopilotInsightsPanel({
   onRefresh,
   onReactivate,
 }: CopilotInsightsPanelProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -45,17 +47,11 @@ export function CopilotInsightsPanel({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-secondary" />
-            AI Co-Pilot insights
-          </CardTitle>
-          <CardDescription>
-            Loading insights from your team data…
-          </CardDescription>
+            <Sparkles className="h-5 w-5 text-secondary" />{t("admin.aiCoPilotInsights")}</CardTitle>
+          <CardDescription>{t("admin.loadingInsightsFromYourTeamData")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground">
-            Analyzing team patterns…
-          </div>
+          <div className="text-sm text-muted-foreground">{t("admin.analyzingTeamPatterns")}</div>
         </CardContent>
       </Card>
     );
@@ -66,12 +62,8 @@ export function CopilotInsightsPanel({
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-secondary" />
-            AI Co-Pilot insights
-          </CardTitle>
-          <CardDescription>
-            Surface gaps, opportunities, and at-risk teammates automatically.
-          </CardDescription>
+            <Sparkles className="h-5 w-5 text-secondary" />{t("admin.aiCoPilotInsights")}</CardTitle>
+          <CardDescription>{t("admin.surfaceGapsOpportunitiesAndAtRiskTeammatesAutomatically")}</CardDescription>
         </div>
         {onRefresh && (
           <Button
@@ -82,16 +74,12 @@ export function CopilotInsightsPanel({
           >
             <RefreshCw
               className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")}
-            />
-            Refresh
-          </Button>
+            />{t("common.refresh")}</Button>
         )}
       </CardHeader>
       <CardContent>
         {insights.length === 0 ? (
-          <div className="text-sm text-muted-foreground">
-            No alerts from Copilot. Coverage and engagement look healthy!
-          </div>
+          <div className="text-sm text-muted-foreground">{t("admin.noAlertsFromCopilotCoverageAndEngagementLook")}</div>
         ) : (
           <div className="space-y-3">
             {insights.map((insight) => {
@@ -114,9 +102,7 @@ export function CopilotInsightsPanel({
                         onClick={() =>
                           navigate(`/performance?focus=${insight.employeeId}`)
                         }
-                      >
-                        Review
-                      </Button>
+                      >{t("inventory.review")}</Button>
                     );
                   }
                   break;
@@ -132,9 +118,7 @@ export function CopilotInsightsPanel({
                         onClick={() =>
                           navigate(`/performance?focus=${insight.employeeId}`)
                         }
-                      >
-                        View notes
-                      </Button>
+                      >{t("admin.viewNotes")}</Button>
                     );
                   }
                   break;
@@ -147,9 +131,7 @@ export function CopilotInsightsPanel({
                       variant="outline"
                       size="sm"
                       onClick={() => navigate("/position-management")}
-                    >
-                      Assign
-                    </Button>
+                    >{t("admin.assign")}</Button>
                   );
                   break;
                 case "inactive":
@@ -164,17 +146,13 @@ export function CopilotInsightsPanel({
                         onClick={() =>
                           navigate(`/employees?focus=${insight.employeeId}`)
                         }
-                      >
-                        Review
-                      </Button>
+                      >{t("inventory.review")}</Button>
                       {onReactivate && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => onReactivate(insight.employeeId!)}
-                        >
-                          Reactivate
-                        </Button>
+                        >{t("admin.reactivate")}</Button>
                       )}
                     </div>
                   ) : null;

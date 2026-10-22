@@ -11,6 +11,7 @@ import { SystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useSystemSettings } from "../hooks/useSystemSettings";
 import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
+import { useTranslation } from "react-i18next";
 
 type TabConfig = {
   key: string;
@@ -24,6 +25,7 @@ type SystemSettingsLayoutProps = {
 };
 
 export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
+  const { t } = useTranslation();
   const system = useSystemSettings();
   const {
     company,
@@ -56,23 +58,21 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
 
   const fallback = (
     <EmptyState
-      title="No settings available"
-      description="We couldn’t find any system settings for this company."
+      title={t("settings.noSettingsAvailable")}
+      description={t("settings.noSettingsForCompany")}
       action={
-        <Button variant="outline" onClick={refresh}>
-          Refresh
-        </Button>
+        <Button variant="outline" onClick={refresh}>{t("common.refresh")}</Button>
       }
     />
   );
 
   const missingCompanyFallback = (
     <EmptyState
-      title="No company detected"
-      description="Your profile is not linked to a company yet. Create a new company or ask an administrator to grant access."
+      title={t("shell.noCompanyDetected")}
+      description={t("settings.profileNotLinkedToCompany")}
       action={
         <Button asChild>
-          <a href="/company-registration">Go to company setup</a>
+          <a href="/company-registration">{t("settings.goToCompanySetup")}</a>
         </Button>
       }
     />
@@ -87,7 +87,7 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
         <div className="flex h-full items-center justify-center py-24">
           <div className="flex flex-col items-center gap-3 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <p>Loading system settings…</p>
+            <p>{t("settings.loadingSystemSettings")}</p>
           </div>
         </div>
       </RoleGuard>
@@ -113,12 +113,9 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
       >
         <div className="flex h-full flex-col items-center justify-center gap-4 p-10 text-center">
           <div className="space-y-2 max-w-md">
-            <h2 className="text-xl font-semibold text-foreground">
-              No company detected
-            </h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("shell.noCompanyDetected")}</h2>
             <p className="text-sm text-muted-foreground">
-              Your profile isn&apos;t linked to a workspace yet. You can create
-              a demo workspace now or ask an administrator to grant access.
+              {t("settings.profileNotLinkedToWorkspace")}
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -129,10 +126,10 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
               {system.linkingCompany ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              Create demo workspace
+              {t("settings.createDemoWorkspace")}
             </Button>
             <Button variant="outline" asChild>
-              <a href="/company-registration">Go to company setup</a>
+              <a href="/company-registration">{t("settings.goToCompanySetup")}</a>
             </Button>
           </div>
           {system.linkCompanyError && (
@@ -164,16 +161,14 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
       <SystemSettingsContext.Provider value={system}>
         <div className="space-y-6 p-6 md:p-10">
           <header className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Settings
-            </h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("common.settings")}</h1>
             <Button
               type="button"
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
               onClick={refresh}
-              aria-label="Refresh settings"
+              aria-label={t("settings.refreshSettings")}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
