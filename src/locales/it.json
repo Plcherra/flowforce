@@ -2418,6 +2418,8 @@
     "requestedOff": "Permesso richiesto",
     "requiredHeadcount": "Organico richiesto",
     "requiredStaffShouldBeANumber": "Il personale richiesto deve essere un numero",
+    "retirePolicy": "Ritira la politica",
+    "retired": "Ritirata",
     "retry": "Riprova",
     "returnToDraft": "Torna alla bozza",
     "reviewAndApproveTeamTimeOffRequests": "Rivedi e approva le richieste di permesso del team.",

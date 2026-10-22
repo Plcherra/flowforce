@@ -34,6 +34,7 @@ export type CompanyPolicyRecord = {
   capYear: number | null;
   eligibleWeekdays: number[];
   noticeDays: number;
+  archivedAt: string | null;
   assignments: CompanyPolicyAssignment[];
 };
 
@@ -73,6 +74,7 @@ export function companyPolicyFromTimeOffRow(
     capYear: row.capYear,
     eligibleWeekdays: row.eligibleWeekdays,
     noticeDays: row.noticeDays,
+    archivedAt: null,
     assignments,
   };
 }
@@ -164,6 +166,7 @@ export function timeOffPolicyForSubject(
   subject: PolicySubject,
 ): TimeOffPolicy | null {
   if (policy.type !== "time_off") return null;
+  if (policy.archivedAt) return null;
   if (!policyMatchesSubject(policy.assignments, subject)) return null;
   const mapped = toTimeOffPolicy(policy);
   const matchedByRoleOrUser =

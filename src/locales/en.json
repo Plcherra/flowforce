@@ -2418,6 +2418,8 @@
     "requestedOff": "Requested off",
     "requiredHeadcount": "Required headcount",
     "requiredStaffShouldBeANumber": "Required Staff should be a number",
+    "retirePolicy": "Retire policy",
+    "retired": "Retired",
     "retry": "Retry",
     "returnToDraft": "Return to draft",
     "reviewAndApproveTeamTimeOffRequests": "Review and approve team time off requests.",

@@ -39,6 +39,7 @@ type PolicyRow = {
   cap_year: number | null;
   eligible_weekdays: number[] | null;
   notice_days: number | null;
+  archived_at: string | null;
 };
 
 type AssignmentRow = {
@@ -82,6 +83,7 @@ function toRecord(row: PolicyRow, assignments: AssignmentRow[]): CompanyPolicyRe
     capYear: row.cap_year,
     eligibleWeekdays: row.eligible_weekdays ?? [],
     noticeDays: row.notice_days ?? 0,
+    archivedAt: row.archived_at,
     assignments: assignments
       .filter((assignment) => assignment.policy_id === row.id)
       .map((assignment) => ({
@@ -155,7 +157,7 @@ export function useTimeOffPolicies(companyId: string | null) {
       const { data, error } = await supabase
         .from("company_policies")
         .select(
-          "id, company_id, name, type, unit, cap_week, cap_month, cap_year, eligible_weekdays, notice_days",
+          "id, company_id, name, type, unit, cap_week, cap_month, cap_year, eligible_weekdays, notice_days, archived_at",
         )
         .eq("company_id", companyId!);
       if (error) throw error;
@@ -220,13 +222,34 @@ export function useTimeOffPolicies(companyId: string | null) {
     },
   });
 
+  const retire = useMutation({
+    mutationFn: async (policyId: string) => {
+      if (!companyId) throw new Error("Company missing");
+      const retired = await supabase
+        .from("company_policies")
+        .update({
+          archived_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", policyId)
+        .eq("company_id", companyId);
+      if (retired.error) throw retired.error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["time-off-policies", companyId],
+      });
+    },
+  });
+
   return {
     policies: companyPolicies
-      .filter((policy) => policy.type === "time_off")
+      .filter((policy) => policy.type === "time_off" && policy.archivedAt == null)
       .map(toTimeOffPolicy),
     companyPolicies,
     isLoading: query.isLoading,
     savePolicy: save.mutateAsync,
     isSaving: save.isPending,
+    retirePolicy: retire.mutateAsync,
   };
 }

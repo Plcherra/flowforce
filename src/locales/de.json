@@ -2418,6 +2418,8 @@
     "requestedOff": "Abwesenheit beantragt",
     "requiredHeadcount": "Erforderliche Personenzahl",
     "requiredStaffShouldBeANumber": "Erforderliches Personal muss eine Zahl sein",
+    "retirePolicy": "Richtlinie zurückziehen",
+    "retired": "Zurückgezogen",
     "retry": "Erneut versuchen",
     "returnToDraft": "Zurück zum Entwurf",
     "reviewAndApproveTeamTimeOffRequests": "Prüfen und genehmigen Sie die Abwesenheitsanträge des Teams.",

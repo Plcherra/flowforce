@@ -63,6 +63,10 @@ export function assignmentsForDraft(input: {
   return assignmentsFromSelection(input);
 }
 
+export function policyIsOpen(policy: Pick<CompanyPolicyRecord, "archivedAt">): boolean {
+  return policy.archivedAt == null;
+}
+
 export function exampleKeepsOpenEdit(
   editingName: string | null,
   exampleName: string,

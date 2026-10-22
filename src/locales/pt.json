@@ -2418,6 +2418,8 @@
     "requestedOff": "Folga solicitada",
     "requiredHeadcount": "Número de pessoas necessário",
     "requiredStaffShouldBeANumber": "A equipe necessária deve ser um número",
+    "retirePolicy": "Retirar política",
+    "retired": "Retirada",
     "retry": "Tentar de novo",
     "returnToDraft": "Voltar para rascunho",
     "reviewAndApproveTeamTimeOffRequests": "Revise e aprove os pedidos de folga da equipe.",

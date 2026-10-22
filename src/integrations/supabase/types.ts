@@ -766,6 +766,7 @@ export type Database = {
       }
       company_policies: {
         Row: {
+          archived_at: string | null
           cap_month: number | null
           cap_week: number | null
           cap_year: number | null
@@ -780,6 +781,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           cap_month?: number | null
           cap_week?: number | null
           cap_year?: number | null
@@ -794,6 +796,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           cap_month?: number | null
           cap_week?: number | null
           cap_year?: number | null

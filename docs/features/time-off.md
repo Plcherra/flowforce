@@ -201,7 +201,7 @@ Prove: Extend `policyDraft.test.ts` so selected people become `user` assignments
 
 ### Phase 7 — Retire a policy
 
-- [ ] Stop a policy from taking new requests without dropping its history.
+- [x] Stop a policy from taking new requests without dropping its history.
 
 Rules:
 
@@ -377,5 +377,21 @@ Phone steps for Pedro:
 4. Edit that policy, add one person, and save. The list shows that person, not everyone.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 7 Retire a policy
+
+Shipped: Retire on a company policy sets `archived_at`. It does not delete the row. Old requests keep `policy_id`. An archived policy is off the request picker and off the applies-to-you balance lines. A request already stored against it stays on My time off and on the schedule grid, and that request still shows the policy name. Cap math is unchanged.
+
+Proven: `src/features/scheduling/utils/policyDraft.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. An archived policy is closed and an open policy stays open. The generated `company_policies` type includes `archived_at`. An archived policy does not match a person for a new request. `npm run check:i18n` printed 4625 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment. Remote migration history has 95 versions and matches the local filenames, including `20261022174204`. `archived_at` is a nullable timestamp.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as someone who can approve time off. Open Company policies, create Weekend, and save it.
+2. Open My time off, request time off, and choose Weekend. After you submit, the request history shows Policy: Weekend.
+3. Open Company policies and tap Retire policy on Weekend. The row stays in the list and says Retired. The policy is not deleted.
+4. Open My time off again. Weekend is not in the request picker and not in the remaining balance lines. The saved request still shows Policy: Weekend. The requested-off day stays on the schedule grid.
+
+Blockers: none. Migration `supabase/migrations/20261022174204_company_policies_archived_at.sql` is applied.
 
 Questions: none.

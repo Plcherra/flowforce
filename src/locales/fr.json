@@ -2418,6 +2418,8 @@
     "requestedOff": "Congé demandé",
     "requiredHeadcount": "Effectif requis",
     "requiredStaffShouldBeANumber": "L'effectif requis doit être un nombre",
+    "retirePolicy": "Retirer la politique",
+    "retired": "Retirée",
     "retry": "Réessayer",
     "returnToDraft": "Revenir au brouillon",
     "reviewAndApproveTeamTimeOffRequests": "Examinez et approuvez les demandes de congé de l'équipe.",

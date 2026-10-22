@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import type { CompanyPolicyRecord } from "@/features/scheduling/utils/companyPolicy";
+import { policyIsOpen } from "@/features/scheduling/utils/policyDraft";
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const WEEKDAY_LABEL: Record<number, string> = {
@@ -59,6 +60,7 @@ type CompanyPolicyListProps = {
   roles: Array<{ id: string; name: string }>;
   stores: Array<{ id: string; name: string | null }>;
   onEdit: (policy: CompanyPolicyRecord) => void;
+  onRetire: (policyId: string) => void;
 };
 
 function capText(value: number | null): string {
@@ -76,6 +78,7 @@ export function CompanyPolicyList({
   roles,
   stores,
   onEdit,
+  onRetire,
 }: CompanyPolicyListProps) {
   const { t } = useTranslation();
   const timeOff = policies.filter((policy) => policy.type === "time_off");
@@ -117,9 +120,26 @@ export function CompanyPolicyList({
             <p className="font-medium" data-testid="company-policy-name">
               {policy.name}
             </p>
-            <Button type="button" size="sm" variant="outline" onClick={() => onEdit(policy)}>
-              {t("common.edit")}
-            </Button>
+            <div className="flex gap-2">
+              {policyIsOpen(policy) ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  data-testid="company-policy-retire"
+                  onClick={() => onRetire(policy.id)}
+                >
+                  {t("schedule.retirePolicy")}
+                </Button>
+              ) : (
+                <span className="text-xs text-muted-foreground" data-testid="company-policy-retired">
+                  {t("schedule.retired")}
+                </span>
+              )}
+              <Button type="button" size="sm" variant="outline" onClick={() => onEdit(policy)}>
+                {t("common.edit")}
+              </Button>
+            </div>
           </div>
           <p className="text-muted-foreground">
             {t("schedule.unit")}: {unitLabel(policy.unit)}

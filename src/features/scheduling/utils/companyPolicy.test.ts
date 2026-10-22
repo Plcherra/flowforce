@@ -4,6 +4,7 @@ import path from "node:path";
 import {
   companyPolicyFromTimeOffRow,
   policyMatchesSubject,
+  timeOffPolicyForSubject,
   type PolicySubject,
 } from "./companyPolicy";
 
@@ -91,6 +92,14 @@ export function runCompanyPolicyTests() {
   assert.equal(
     policyMatchesSubject([{ targetType: "user", targetId: "someone-else" }], newbie),
     false,
+  );
+  assert.ok(timeOffPolicyForSubject(companyWide, newbie));
+  assert.equal(
+    timeOffPolicyForSubject(
+      { ...companyWide, archivedAt: "2026-10-22T17:42:04.000Z" },
+      newbie,
+    ),
+    null,
   );
 
   assertGeneratedCompanyPolicyTypes();

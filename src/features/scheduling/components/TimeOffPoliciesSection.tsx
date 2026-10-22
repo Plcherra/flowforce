@@ -58,7 +58,7 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
   const { t } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? null;
-  const { companyPolicies, savePolicy, isSaving, isLoading } = useTimeOffPolicies(companyId);
+  const { companyPolicies, savePolicy, retirePolicy, isSaving, isLoading } = useTimeOffPolicies(companyId);
   const { roles } = useCompanyRoles();
   const [formOpen, setFormOpen] = useState(false);
   const [type, setType] = useState<CompanyPolicyType>("time_off");
@@ -196,6 +196,24 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
     }
   };
 
+  const handleRetire = async (policyId: string) => {
+    setError(null);
+    try {
+      await retirePolicy(policyId);
+      if (editingId === policyId) {
+        setEditingId(null);
+        setEditingName(null);
+        setFormOpen(false);
+      }
+    } catch (retireError) {
+      setError(
+        retireError instanceof Error
+          ? retireError.message
+          : t("schedule.couldNotSaveThePolicy"),
+      );
+    }
+  };
+
   if (!canManage) return null;
 
   return (
@@ -210,6 +228,9 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
         roles={roles}
         stores={storesQuery.data ?? []}
         onEdit={loadPolicy}
+        onRetire={(policyId) => {
+          void handleRetire(policyId);
+        }}
       />
       <Button
         type="button"

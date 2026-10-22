@@ -544,6 +544,9 @@ export function TimeOffRequestPanel({
               <div className="space-y-3">
                 {personalRequests.map((request) => {
                   const conflicts = conflictsByRequest.get(request.id) ?? [];
+                  const policyName = companyPolicies.find(
+                    (policy) => policy.id === request.policy_id,
+                  )?.name;
                   return (
                     <div
                       key={request.id}
@@ -590,6 +593,11 @@ export function TimeOffRequestPanel({
                               “{request.reason}”
                             </p>
                           )}
+                          {policyName ? (
+                            <p className="text-xs text-muted-foreground" data-testid="time-off-request-policy">
+                              {t("dashboard.policy")}: {policyName}
+                            </p>
+                          ) : null}
                         </div>
                         <Badge
                           className={cn(
