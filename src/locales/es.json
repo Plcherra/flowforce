@@ -827,5 +827,9 @@
     "title": "Gestión de inventario",
     "transactionHistory": "El historial de transacciones se mostrará aquí.",
     "transactions": "Transacciones"
+  },
+  "personalLanguage": {
+    "label": "Tu idioma",
+    "placeholder": "Idioma de la empresa"
   }
 }

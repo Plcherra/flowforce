@@ -827,5 +827,9 @@
     "title": "Gestion des stocks",
     "transactionHistory": "L'historique des transactions s'affichera ici.",
     "transactions": "Transactions"
+  },
+  "personalLanguage": {
+    "label": "Votre langue",
+    "placeholder": "Langue de l'entreprise"
   }
 }

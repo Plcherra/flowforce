@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { resolveLanguage } from "@/i18n/resolveLanguage";
 import { logger } from "@/utils/logger";
 
 interface LanguageContextType {
@@ -27,9 +30,41 @@ export const languages = [
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
+  const { user } = useAuth();
   const [currentLanguage, setCurrentLanguage] = useState(
     i18n?.language || "en",
   );
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    void (async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("language, company_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      let companyLanguage: unknown = null;
+      if (profile?.company_id) {
+        const { data: settings } = await supabase
+          .from("system_settings")
+          .select("localization")
+          .eq("company_id", profile.company_id)
+          .maybeSingle();
+        const localization = settings?.localization;
+        if (localization && typeof localization === "object" && "language" in localization) {
+          companyLanguage = localization.language;
+        }
+      }
+      if (!active) return;
+      const next = resolveLanguage(profile?.language, companyLanguage);
+      await i18n.changeLanguage(next);
+      localStorage.setItem("i18nextLng", next);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [i18n, user]);
 
   useEffect(() => {
     // Check if i18n is initialized and has the 'on' method

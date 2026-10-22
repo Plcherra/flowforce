@@ -4690,6 +4690,7 @@ export type Database = {
           id: string
           invitation_token: string | null
           is_company_admin: boolean | null
+          language: string | null
           last_name: string
           location_id: string | null
           phone: string | null
@@ -4714,6 +4715,7 @@ export type Database = {
           id: string
           invitation_token?: string | null
           is_company_admin?: boolean | null
+          language?: string | null
           last_name: string
           location_id?: string | null
           phone?: string | null
@@ -4738,6 +4740,7 @@ export type Database = {
           id?: string
           invitation_token?: string | null
           is_company_admin?: boolean | null
+          language?: string | null
           last_name?: string
           location_id?: string | null
           phone?: string | null

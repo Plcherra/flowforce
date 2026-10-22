@@ -12,6 +12,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { SystemSettingsLayout } from "../components/SystemSettingsLayout";
+import { PersonalLanguageSelect } from "../components/PersonalLanguageSelect";
 import { ErrorState } from "../components/ErrorState";
 
 const GeneralSettingsPanel = lazy(async () => {
@@ -109,6 +110,7 @@ export default function SettingsPage() {
                 <ErrorState message={error.message} />
               )}
             >
+              <PersonalLanguageSelect />
               <Suspense fallback={<PanelFallback />}>
                 <LocalizationSettingsPanel />
               </Suspense>

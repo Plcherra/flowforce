@@ -827,5 +827,9 @@
     "title": "Inventarverwaltung",
     "transactionHistory": "Der Buchungsverlauf wird hier angezeigt.",
     "transactions": "Buchungen"
+  },
+  "personalLanguage": {
+    "label": "Ihre Sprache",
+    "placeholder": "Unternehmenssprache"
   }
 }

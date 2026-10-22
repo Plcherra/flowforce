@@ -127,7 +127,7 @@ Prove: `npm run check:i18n`. A unit test of the two comparators, with a fixture 
 
 ### Phase 3 — Personal language, company fallback
 
-- [ ] Resolve the viewer's language and let them set it.
+- [x] Resolve the viewer's language and let them set it.
 
 Rules:
 
@@ -787,5 +787,22 @@ Phone steps for Pedro:
 2. No new screen and no new setting.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 3 Personal language, company fallback
+
+Shipped: After sign-in, the viewer's language is `profiles.language` when it is one of the six codes, otherwise the company language, otherwise English. That choice is written to `i18nextLng`. Signed-out pages still use the browser detector. Settings, on the Region tab, has a personal language select that stays usable when the company fields are read-only. It writes `profiles.language` and switches the app. The company language list now includes Italian. Saving the company language does not write the profile column. `profiles.language` is nullable text limited to en, es, pt, fr, it, and de. Existing rows were not backfilled. The existing own-profile update policy already allows the write, so no second policy was added.
+
+Proven: `src/i18n/resolveLanguage.test.ts` covers a profile language, the company fallback, and English. Run with jiti. It passed. `npm run typecheck` and `npm run typecheck:src` passed. ESLint passed on the files this phase changed. `npm run check:i18n` still exits 0.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Settings, then Region.
+2. Your language sits above the company fields. It is there even when those fields are read-only.
+3. Pick Español or Deutsch. The app should switch immediately. Reload. The same language should still be on.
+4. The company language list should include Italiano. Change it and save. Your personal language should stay what you picked.
+5. A person who has not picked a personal language follows the company language. If the company language is also empty, the app is English.
+
+Blockers: none. The Supabase CLI had no access token, so `supabase db push` could not run. The migration was applied with the Supabase API. Remote history version `20261022114112` matches `supabase/migrations/20261022114112_profiles_language.sql`.
 
 Questions: none.

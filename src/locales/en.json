@@ -827,5 +827,9 @@
       "description": "Set up a new business workspace"
     },
     "orSignIn": "or sign in to existing account"
+  },
+  "personalLanguage": {
+    "label": "Your language",
+    "placeholder": "Company language"
   }
 }
