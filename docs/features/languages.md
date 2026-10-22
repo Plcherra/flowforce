@@ -91,7 +91,7 @@ Do the UI phases (1 through 24) before any content phase (25 through 43). A cont
 
 ### Phase 1 — Same keys in all six locales
 
-- [ ] Fill the gaps so en, es, pt, fr, it, and de have one key set.
+- [x] Fill the gaps so en, es, pt, fr, it, and de have one key set.
 
 Rules:
 
@@ -757,5 +757,21 @@ None. The model, the price table, and the monthly cap are the ones the app alrea
 Shipped: this file. No app code, no locale edits, no migration.
 
 Blockers: none.
+
+Questions: none.
+
+### 2026-10-22 — Phase 1 Same keys in all six locales
+
+Shipped: en, es, pt, fr, it, and de now share one flat key set of 603 keys. Missing keys were added in the language of that file. Existing values were left as they were. No screen was rewired.
+
+Proven: `node scripts/check-locale-keys.mjs` printed 603 for each locale and exited 0.
+
+Phone steps for Pedro:
+1. Open https://www.flowforce.uk signed out and use the language switch in the header.
+2. Choose Español, then Português, Français, Italiano, and Deutsch. Labels that used to stay in English should follow the language you picked.
+3. Switch back to English. Wording that was already English should read the same as before this deploy.
+4. Sign in and open the dashboard. A greeting or profile label should follow the language chosen in the header.
+
+Blockers: none. No migration.
 
 Questions: none.

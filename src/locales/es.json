@@ -5,13 +5,13 @@
     "employees": "Empleados",
     "scheduling": "Programación",
     "tasks": "Tareas",
-  "goals": "Objetivos",
-  "financialManagement": "Gestión Financiera",
-  "inventory": "Inventario",
-  "payments": "Pagos",
-  "purchaseOrders": "Órdenes de Compra",
-  "invoices": "Facturas",
-  "costAnalysis": "Análisis de Costos",
+    "goals": "Objetivos",
+    "financialManagement": "Gestión Financiera",
+    "inventory": "Inventario",
+    "payments": "Pagos",
+    "purchaseOrders": "Órdenes de Compra",
+    "invoices": "Facturas",
+    "costAnalysis": "Análisis de Costos",
     "expenses": "Gastos",
     "calendar": "Calendario",
     "messages": "Mensajes",
@@ -40,7 +40,20 @@
     "startCertification": "Iniciar Certificación",
     "inventoryCountExecution": "Ejecución de Conteo de Inventario",
     "positionManagement": "Gestión de Equipos",
-    "companyUpdates": "Actualizaciones de la Empresa"
+    "companyUpdates": "Actualizaciones de la Empresa",
+    "admin": "Admin",
+    "custom": "Personalizado",
+    "customBranding": "Marca y colores personalizados",
+    "defaultRoles": "Roles predeterminados",
+    "events": "Eventos",
+    "flexibleSections": "Configuración flexible de secciones",
+    "inventoryActions": "Acciones de inventario",
+    "itemsSetup": "Artículos y configuración",
+    "leaderboard": "Clasificación",
+    "more": "más",
+    "purchasing": "Compras",
+    "sections": "Secciones",
+    "uniqueLayouts": "Diseños de flujo de trabajo únicos"
   },
   "navigation": {
     "communication": "Comunicación",
@@ -53,7 +66,14 @@
     "userManagement": "Gestión de Usuarios",
     "inviteEmployee": "Invitar Empleado",
     "sectionsPermissions": "Secciones y Permisos",
-    "systemSettings": "Configuración del Sistema"
+    "systemSettings": "Configuración del Sistema",
+    "accounting": "Contabilidad",
+    "calendarEvents": "Calendario y eventos",
+    "dailyOperations": "Operaciones diarias",
+    "financial": "Finanzas",
+    "leaderboard": "Clasificación",
+    "operationsIntelligence": "Inteligencia de operaciones",
+    "team": "Equipo"
   },
   "landing": {
     "usedBy": "Usado por más de 1,200 ubicaciones en todo el mundo",
@@ -70,26 +90,6 @@
     "learnMore": "Aprender Más",
     "features": "Características",
     "templatesNav": "Plantillas",
-    "industries": "Industrias",
-    "pricing": "Precios",
-    "resources": "Recursos",
-    "startFreeTrial": "Iniciar Prueba Gratuita",
-    "quickSetup": {
-      "title": "Comienza en Minutos",
-      "subtitle": "Nuestro proceso de configuración simplificado hace que toda tu organización sea operativa más rápido que cualquier otra plataforma.",
-      "signUp": {
-        "title": "Regístrate",
-        "description": "Crea tu cuenta empresarial en menos de 60 segundos con nuestra incorporación simplificada."
-      },
-      "configure": {
-        "title": "Configurar Roles", 
-        "description": "Configura la estructura de tu equipo, permisos y flujos de trabajo usando nuestras plantillas inteligentes."
-      },
-      "goLive": {
-        "title": "Ponerse en Marcha",
-        "description": "Comienza a gestionar tus operaciones inmediatamente sin curva de aprendizaje para tu equipo."
-      }
-    },
     "industries": {
       "title": "Construido para Tu Industria",
       "subtitle": "Comienza más rápido con plantillas preconfiguradas diseñadas específicamente para tu sector empresarial.",
@@ -123,6 +123,25 @@
         }
       }
     },
+    "pricing": "Precios",
+    "resources": "Recursos",
+    "startFreeTrial": "Iniciar Prueba Gratuita",
+    "quickSetup": {
+      "title": "Comienza en Minutos",
+      "subtitle": "Nuestro proceso de configuración simplificado hace que toda tu organización sea operativa más rápido que cualquier otra plataforma.",
+      "signUp": {
+        "title": "Regístrate",
+        "description": "Crea tu cuenta empresarial en menos de 60 segundos con nuestra incorporación simplificada."
+      },
+      "configure": {
+        "title": "Configurar Roles",
+        "description": "Configura la estructura de tu equipo, permisos y flujos de trabajo usando nuestras plantillas inteligentes."
+      },
+      "goLive": {
+        "title": "Ponerse en Marcha",
+        "description": "Comienza a gestionar tus operaciones inmediatamente sin curva de aprendizaje para tu equipo."
+      }
+    },
     "testimonials": {
       "title": "Amado por Empresas en Crecimiento",
       "subtitle": "Únete a miles de empresas que han transformado sus operaciones con FlowForce.",
@@ -137,7 +156,27 @@
         "mariaLopez": "FlowForce transformó completamente nuestra gestión de turnos. Ahora coordinamos 15 restaurantes sin esfuerzo y nuestros empleados están más satisfechos.",
         "alejandroMartinez": "Como director médico, necesitaba una solución que cumpliera con las normativas sanitarias españolas. FlowForce superó todas nuestras expectativas de seguridad.",
         "anaRuiz": "El ahorro de tiempo es increíble. Lo que antes nos tomaba horas en coordinación de tiendas, ahora lo hacemos en minutos.",
-        "pedroSanchez": "FlowForce nos ayudó a crecer de manera sostenible. Es la herramienta perfecta para empresas españolas en expansión rápida."
+        "pedroSanchez": "FlowForce nos ayudó a crecer de manera sostenible. Es la herramienta perfecta para empresas españolas en expansión rápida.",
+        "anaSantos": "FlowForce transformó cómo gestionamos los turnos. Coordinar nuestros 15 restaurantes en Oporto nunca ha sido tan fácil.",
+        "andreaWagner": "La implementación fue fluida y el retorno fue inmediato. Vemos un 25% más de eficiencia en todas nuestras tiendas.",
+        "camilleLefebvre": "El ahorro de tiempo es notable. Lo que antes nos llevaba horas de gestión de tiendas ahora lo hacemos en minutos.",
+        "carlosOliveira": "Como director médico, necesitaba una solución que cumpliera la normativa sanitaria portuguesa. FlowForce superó todas nuestras expectativas.",
+        "davideConti": "FlowForce nos ayudó a crecer de forma sostenible. Es la herramienta perfecta para las empresas italianas que crecen rápido.",
+        "francescaEsposito": "El ahorro de tiempo es increíble. Lo que antes llevaba horas de coordinación de tiendas ahora lo hacemos en minutos.",
+        "giuliaBianchi": "FlowForce transformó la gestión de turnos. Coordinar nuestros 15 restaurantes en Roma nunca ha sido tan fácil.",
+        "joaoSilva": "La implementación fue perfecta y el retorno fue inmediato. Vemos un 25% más de eficiencia en todas nuestras cafeterías de Lisboa.",
+        "julienBernard": "Como director médico, necesitaba una solución conforme a la normativa sanitaria francesa. FlowForce superó todas nuestras expectativas.",
+        "klausWeber": "FlowForce transformó por completo nuestras operaciones. Pasamos del caos a una eficiencia organizada en solo dos semanas. Los conflictos de horarios bajaron un 90%.",
+        "lucMoreau": "FlowForce nos ayudó a crecer de forma sostenible. Es la herramienta perfecta para las empresas francesas que crecen rápido.",
+        "lucaFerrari": "Como director médico, necesitaba una solución conforme a la normativa sanitaria italiana. FlowForce superó todas nuestras expectativas.",
+        "marcoRossi": "La implementación fue perfecta y el retorno fue inmediato. Vemos un 25% más de eficiencia en todas nuestras sedes de Milán.",
+        "mariaCostaE": "El ahorro de tiempo es increíble. Lo que antes llevaba horas coordinar tiendas ahora lo hacemos en minutos.",
+        "michaelBauer": "FlowForce crece con nosotros a la perfección. De 50 a 200 empleados, lo gestiona todo sin fallar. Un cambio decisivo para el crecimiento.",
+        "pedroAlmeida": "FlowForce nos ayudó a crecer de forma sostenible. Es la herramienta perfecta para las empresas portuguesas que crecen rápido.",
+        "pierreMartin": "La implementación fue fluida y el retorno fue inmediato. Vemos un 25% más de eficiencia en todos nuestros cafés de París.",
+        "sabineSchneider": "Solo la gestión de tareas nos ahorró 15 horas por semana. La automatización es increíble y el equipo la adoptó de inmediato.",
+        "sophieDubois": "FlowForce transformó la gestión de nuestro equipo. Coordinar nuestros 15 restaurantes en Lyon nunca ha sido tan fácil.",
+        "thomasMuller": "La mejor inversión que hemos hecho para nuestras clínicas. El flujo de pacientes mejoró de forma notable y el personal por fin tiene claras sus responsabilidades diarias."
       }
     },
     "useCases": {
@@ -305,11 +344,85 @@
       "managePeopleDesc": "Actualiza roles y asignaciones de departamento",
       "openTasks": "Abrir tareas",
       "openTasksDesc": "Consulta los pendientes prioritarios"
+    },
+    "profile": {
+      "assigned": "Asignado",
+      "department": "Departamento",
+      "description": "Consulta y gestiona tu perfil de empleado",
+      "employeeId": "ID de empleado",
+      "employmentStatus": "Estado laboral",
+      "hireDate": "Fecha de contratación",
+      "notSet": "Sin definir",
+      "position": "Puesto",
+      "title": "Tu perfil",
+      "unassigned": "Sin asignar"
     }
   },
   "registration": {
     "title": "Registro de Empresa",
-    "subtitle": "Configura tu espacio de trabajo en minutos"
+    "subtitle": "Configura tu espacio de trabajo en minutos",
+    "branding": {
+      "description": "Hazlo tuyo con colores y un logotipo propios",
+      "primaryColor": "Color primario",
+      "secondaryColor": "Color secundario",
+      "title": "Personalizar la marca",
+      "uploadLogo": "Subir logotipo"
+    },
+    "companyInfo": {
+      "description": "Descripción",
+      "industry": "Sector",
+      "name": "Nombre de la empresa",
+      "phone": "Número de teléfono",
+      "size": "Tamaño de la empresa",
+      "title": "Datos de la empresa",
+      "website": "Sitio web"
+    },
+    "navigation": {
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "next": "Siguiente",
+      "tryAgain": "Intentar de nuevo"
+    },
+    "review": {
+      "complete": "Terminar la configuración",
+      "creating": "Creando tu espacio de trabajo...",
+      "description": "Revisa la configuración y termínala",
+      "title": "Revisar y terminar"
+    },
+    "roles": {
+      "addRole": "Añadir rol",
+      "description": "Define los roles de usuario y los permisos",
+      "permissions": "Permisos",
+      "roleName": "Nombre del rol",
+      "title": "Configurar roles"
+    },
+    "sections": {
+      "analytics": "Analíticas",
+      "communication": "Comunicación",
+      "description": "Elige las funciones que necesitas",
+      "hr": "RR. HH. y desarrollo",
+      "operations": "Operaciones",
+      "title": "Secciones del espacio de trabajo"
+    },
+    "template": {
+      "custom": "Plantilla personalizada",
+      "description": "Selecciona una plantilla que encaje con tu negocio",
+      "education": "Educación",
+      "healthcare": "Salud",
+      "manufacturing": "Fabricación",
+      "restaurant": "Gestión de restaurantes",
+      "retail": "Operaciones de comercio",
+      "title": "Elegir plantilla"
+    },
+    "userInfo": {
+      "confirmPassword": "Confirmar contraseña",
+      "description": "Cuéntanos sobre ti",
+      "email": "Correo electrónico",
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "password": "Contraseña",
+      "title": "Tus datos"
+    }
   },
   "onboarding": {
     "sidebar": {
@@ -331,7 +444,54 @@
     },
     "userInfo": {
       "title": "Empecemos",
-      "description": "Cuéntanos sobre ti y tu empresa para configurar tu espacio de trabajo"
+      "description": "Cuéntanos sobre ti y tu empresa para configurar tu espacio de trabajo",
+      "companyInfo": "Información de la empresa",
+      "companySizes": {
+        "1-10": "1-10 empleados",
+        "11-50": "11-50 empleados",
+        "201-500": "201-500 empleados",
+        "500+": "Más de 500 empleados",
+        "51-200": "51-200 empleados"
+      },
+      "fields": {
+        "companyName": "Nombre de la empresa",
+        "description": "Descripción de la empresa",
+        "email": "Correo electrónico",
+        "firstName": "Nombre",
+        "industry": "Sector",
+        "lastName": "Apellidos",
+        "password": "Contraseña",
+        "phone": "Teléfono",
+        "size": "Tamaño de la empresa",
+        "website": "Sitio web"
+      },
+      "industries": {
+        "construction": "Construcción",
+        "education": "Educación",
+        "finance": "Finanzas",
+        "foodBeverage": "Alimentación y bebidas",
+        "healthcare": "Salud",
+        "manufacturing": "Fabricación",
+        "other": "Otro",
+        "professionalServices": "Servicios profesionales",
+        "retail": "Comercio minorista",
+        "technology": "Tecnología"
+      },
+      "personalInfo": "Tus datos",
+      "placeholders": {
+        "companyName": "Introduce el nombre de tu empresa",
+        "customIndustry": "Introduce tu sector",
+        "description": "Breve descripción de tu empresa...",
+        "email": "Introduce tu correo electrónico",
+        "firstName": "Introduce tu nombre",
+        "industry": "Selecciona un sector",
+        "lastName": "Introduce tus apellidos",
+        "password": "Crea una contraseña (mín. 6 caracteres)",
+        "phone": "+1 (555) 123-4567",
+        "size": "Selecciona el tamaño",
+        "website": "https://yourcompany.com"
+      },
+      "required": "*"
     },
     "templateSelection": {
       "title": "Elige Tu Plantilla de Negocio",
@@ -351,6 +511,221 @@
         "sections": "Al menos una sección debe estar seleccionada",
         "templateName": "El nombre de la plantilla es requerido",
         "templateDescription": "La descripción de la plantilla es requerida"
+      },
+      "email": "Introduce un correo electrónico válido",
+      "minimumRoles": "Se requieren al menos 4 roles",
+      "password": "La contraseña debe tener al menos 6 caracteres",
+      "required": "Este campo es obligatorio",
+      "selectSections": "Selecciona al menos una sección",
+      "selectTemplate": "Selecciona una plantilla para continuar"
+    },
+    "branding": {
+      "colors": {
+        "accent": "Color de acento",
+        "description": "Define los colores de tu marca que se usarán en toda la aplicación",
+        "primary": "Color primario",
+        "secondary": "Color secundario",
+        "title": "Esquema de color"
+      },
+      "description": "Crea un aspecto propio para el espacio de trabajo de tu empresa",
+      "layout": {
+        "backgroundPattern": "Patrón de fondo",
+        "backgroundPatterns": {
+          "dots": "Puntos",
+          "gradient": "Degradado",
+          "lines": "Líneas",
+          "none": "Ninguno"
+        },
+        "cardStyle": "Estilo de tarjeta",
+        "cardStyles": {
+          "elevated": "Elevado",
+          "rounded": "Redondeado",
+          "sharp": "Recto"
+        },
+        "description": "Personaliza el diseño general y el estilo de los componentes",
+        "sidebarStyle": "Estilo de la barra lateral",
+        "sidebarStyles": {
+          "collapsed": {
+            "description": "Barra lateral solo con iconos; pasa el cursor para expandirla",
+            "label": "Contraída"
+          },
+          "expanded": {
+            "description": "Barra lateral completa con etiquetas",
+            "label": "Expandida"
+          },
+          "floating": {
+            "description": "Barra lateral flotante con bordes redondeados",
+            "label": "Flotante"
+          }
+        },
+        "title": "Estilo de diseño"
+      },
+      "logo": {
+        "description": "Sube el logotipo de tu empresa (recomendado: 200x60 px, PNG/SVG)",
+        "removeLogo": "Quitar logotipo",
+        "supportedFormats": "PNG, JPG, SVG de hasta 2 MB",
+        "title": "Logotipo de la empresa",
+        "uploadText": "Haz clic para subir o arrastra y suelta"
+      },
+      "tabs": {
+        "advanced": "Avanzado",
+        "colors": "Colores",
+        "layout": "Diseño",
+        "logo": "Logotipo",
+        "typography": "Tipografía"
+      },
+      "title": "Personaliza tu marca",
+      "typography": {
+        "accentPreview": "Vista previa del color de acento y la fuente",
+        "description": "Elige fuentes que reflejen la personalidad de tu marca",
+        "fontFamily": "Familia tipográfica",
+        "fontLabel": "Fuente:",
+        "headerStyle": "Estilo del encabezado",
+        "headerStyles": {
+          "bold": {
+            "description": "Sombras marcadas y bordes gruesos",
+            "label": "Negrita"
+          },
+          "classic": {
+            "description": "Tradicional, con elementos serif",
+            "label": "Clásico"
+          },
+          "minimal": {
+            "description": "Muy limpio, sin bordes",
+            "label": "Mínimo"
+          },
+          "modern": {
+            "description": "Líneas limpias y sombras mínimas",
+            "label": "Moderno"
+          }
+        },
+        "previewHeader": "Vista previa del encabezado",
+        "sampleHeading": "Título de ejemplo",
+        "sampleText": "Así se verá tu texto con la familia tipográfica y los colores elegidos. Tu espacio de trabajo usará esta tipografía en toda la interfaz.",
+        "title": "Tipografía"
+      }
+    },
+    "customTemplate": {
+      "description": "Crea una plantilla personalizada para las necesidades de tu negocio",
+      "descriptionPlaceholder": "Describe tu plantilla personalizada...",
+      "namePlaceholder": "Introduce el nombre de la plantilla",
+      "templateDescription": "Descripción de la plantilla",
+      "templateInfo": "Información de la plantilla",
+      "templateName": "Nombre de la plantilla",
+      "title": "Crea tu plantilla personalizada"
+    },
+    "fallbacks": {
+      "loadingTemplate": "Cargando plantilla...",
+      "noTemplateSelected": "Ninguna plantilla seleccionada",
+      "selectTemplateFirst": "Selecciona primero una plantilla"
+    },
+    "messages": {
+      "accountCreated": "Cuenta creada correctamente",
+      "accountCreatedDescription": "{{companyName}} está configurada. Inicia sesión para continuar.",
+      "accountCreationFailed": "No se pudo crear la cuenta",
+      "emailExists": "Ya existe una cuenta con este correo. Usa otro correo o inicia sesión.",
+      "positionError": "Hubo un problema al configurar los puestos de tu empresa. Revisa la configuración de puestos.",
+      "roleError": "Hubo un problema al configurar los roles de tu empresa. Revisa la configuración de roles.",
+      "setupError": "Error de configuración",
+      "setupErrorDescription": "Hubo un error al configurar tu empresa. Inténtalo de nuevo.",
+      "welcomeDescription": "{{companyName}} se configuró correctamente. Bienvenido a tu nuevo espacio de trabajo.",
+      "welcomeTitle": "Bienvenido a FlowForce"
+    },
+    "review": {
+      "backToDashboard": "Volver al panel",
+      "companyDetails": "Datos de la empresa",
+      "customTemplate": "Plantilla personalizada",
+      "description": "Revisa toda la configuración antes de terminar",
+      "getStarted": "Empezar",
+      "positions": "Puestos",
+      "roles": "Roles",
+      "rolesAndPositions": "Roles y puestos",
+      "sections": {
+        "branding": "Marca",
+        "company": "Información de la empresa",
+        "roles": "Clases",
+        "template": "Plantilla seleccionada",
+        "workspaceSections": "Secciones del espacio de trabajo"
+      },
+      "selectedTemplate": "Plantilla seleccionada",
+      "setupComplete": "Configuración completa",
+      "successMessage": "Tu espacio de trabajo de FlowForce se configuró correctamente.",
+      "title": "Revisa tu configuración",
+      "workspaceSections": "Secciones del espacio de trabajo"
+    },
+    "roleSetup": {
+      "addPosition": "Añadir puesto",
+      "addRole": "Añadir rol",
+      "cancel": "Cancelar",
+      "createFirst": "Crea tu primer {{type}} para empezar",
+      "delete": "Eliminar",
+      "department": "Departamento",
+      "description": "Define los roles de usuario y la estructura de tu empresa",
+      "editPosition": "Editar puesto",
+      "editRole": "Editar rol",
+      "noPositions": "No hay puestos configurados",
+      "noRoles": "No hay roles configurados",
+      "permissions": "Permisos",
+      "positionHierarchy": "Jerarquía de puestos",
+      "positionTitle": "Título del puesto",
+      "reportsTo": "Reporta a",
+      "roleDescription": "Descripción del rol",
+      "roleName": "Nombre del rol",
+      "rolesAndPermissions": "Roles y permisos",
+      "save": "Guardar",
+      "title": "Configurar roles y puestos"
+    },
+    "roles": {
+      "description": "Owner, Admin, Manager y Staff ya están creados. Continúa, o abre los roles para dar o quitar acceso. Los puestos no son obligatorios aquí.",
+      "title": "Clases"
+    },
+    "sectionCustomization": {
+      "availableSections": "Secciones disponibles",
+      "description": "Selecciona y configura las secciones que necesita tu negocio",
+      "disableSection": "Desactivar {{name}}",
+      "enableSection": "Activar {{name}}",
+      "noSectionsSelected": "Ninguna sección seleccionada",
+      "selectSections": "Selecciona al menos una sección para continuar",
+      "selectedSections": "Secciones seleccionadas",
+      "title": "Personalizar las secciones del espacio de trabajo"
+    },
+    "sections": {
+      "addCustomSection": "Añadir sección personalizada",
+      "availableSections": "Secciones disponibles",
+      "customBadge": "Personalizado",
+      "customSections": "Secciones personalizadas",
+      "description": "Elige qué secciones incluir en tu espacio de trabajo y crea otras personalizadas",
+      "deselectAll": "Quitar toda la selección",
+      "hideBuilder": "Ocultar el constructor",
+      "selectAll": "Seleccionar todo",
+      "selected": "{{count}} seleccionadas",
+      "templateBadge": "Plantilla",
+      "title": "Personaliza las secciones de tu espacio de trabajo"
+    },
+    "steps": {
+      "custom": {
+        "description": "Crear plantilla personalizada",
+        "title": "Personalizado"
+      },
+      "info": {
+        "description": "Tus datos y los de la empresa",
+        "title": "Datos"
+      },
+      "review": {
+        "description": "Revisar y terminar la configuración",
+        "title": "Revisión"
+      },
+      "roles": {
+        "description": "Los roles del sistema ya están creados. Continúa o abre los roles.",
+        "title": "Clases"
+      },
+      "sections": {
+        "description": "Personaliza las secciones de tu espacio de trabajo",
+        "title": "Secciones"
+      },
+      "template": {
+        "description": "Elige la plantilla de tu negocio",
+        "title": "Plantilla"
       }
     }
   },
@@ -389,5 +764,68 @@
       "description": "Configura un nuevo espacio de trabajo empresarial"
     },
     "orSignIn": "o inicia sesión en una cuenta existente"
+  },
+  "admin": {
+    "accessDenied": "Acceso denegado",
+    "description": "Gestiona usuarios, roles y la configuración del sistema",
+    "noPermission": "No tienes permiso para acceder a la consola de administración.",
+    "title": "Consola de administración"
+  },
+  "certifications": {
+    "available": "Disponible",
+    "badgeAwarded": "Insignia otorgada",
+    "complete": "completo",
+    "customerServiceSpecialist": {
+      "description": "Certificación en técnicas avanzadas de atención al cliente",
+      "name": "Especialista en atención al cliente"
+    },
+    "description": "Sigue tus logros profesionales y certificaciones",
+    "earned": "Obtenido",
+    "earnedDate": "Obtenido",
+    "emptyDescription": "Cuando se publiquen los requisitos, verás aquí las certificaciones disponibles y tu progreso.",
+    "emptyState": "Aún no hay certificaciones disponibles",
+    "errors": {
+      "load": "No pudimos cargar las certificaciones en este momento. Inténtalo de nuevo."
+    },
+    "expired": "Caducado",
+    "inProgress": "En progreso",
+    "issuedBy": "Emitido por",
+    "lastEvaluated": "Última evaluación",
+    "metrics": {
+      "completedGoals": "Objetivos completados",
+      "completedTasks": "Tareas completadas",
+      "coursesCompleted": "Cursos completados",
+      "xpEarned": "XP total"
+    },
+    "pendingBadge": "Insignia pendiente de revisión de Copilot",
+    "requiredCourses": "Cursos obligatorios ({{count}}): {{codes}}",
+    "requirementLabels": {
+      "courses": "Cursos completados",
+      "goals": "Objetivos completados",
+      "tasks": "Tareas completadas",
+      "xp": "XP obtenida"
+    },
+    "requirements": "Requisitos",
+    "safetyCompliance": {
+      "description": "Certificación de seguridad laboral y cumplimiento",
+      "name": "Cumplimiento de seguridad"
+    },
+    "teamLeadership": {
+      "description": "Certificación de liderazgo y gestión de equipos",
+      "name": "Liderazgo de equipo"
+    },
+    "title": "Certificaciones e insignias"
+  },
+  "inventory": {
+    "accessDenied": "Acceso denegado",
+    "description": "Gestiona artículos, controla el stock y administra las órdenes de compra",
+    "inventoryItems": "Artículos de inventario",
+    "noPermission": "No tienes permiso para acceder a la gestión de inventario.",
+    "purchaseOrderManagement": "La gestión de órdenes de compra se mostrará aquí.",
+    "purchaseOrders": "Órdenes de compra",
+    "recentTransactions": "Transacciones recientes",
+    "title": "Gestión de inventario",
+    "transactionHistory": "El historial de transacciones se mostrará aquí.",
+    "transactions": "Transacciones"
   }
 }

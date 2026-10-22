@@ -1,4 +1,3 @@
-
 {
   "common": {
     "dashboard": "Dashboard",
@@ -53,7 +52,8 @@
     "defaultRoles": "Default Roles",
     "viewCertificate": "View Certificate",
     "startCertification": "Start Certification",
-    "companyUpdates": "Company Updates"
+    "companyUpdates": "Company Updates",
+    "financialManagement": "Financial Management"
   },
   "navigation": {
     "communication": "Communication",
@@ -90,26 +90,6 @@
     "learnMore": "Learn More",
     "features": "Features",
     "templatesNav": "Templates",
-    "industries": "Industries",
-    "pricing": "Pricing",
-    "resources": "Resources",
-    "startFreeTrial": "Start Free Trial",
-    "quickSetup": {
-      "title": "Get Started in Minutes",
-      "subtitle": "Our streamlined setup process gets your entire organization operational faster than any other platform.",
-      "signUp": {
-        "title": "Sign Up",
-        "description": "Create your company account in under 60 seconds with our streamlined onboarding."
-      },
-      "configure": {
-        "title": "Configure Roles", 
-        "description": "Set up your team structure, permissions, and workflows using our intelligent templates."
-      },
-      "goLive": {
-        "title": "Go Live",
-        "description": "Start managing your operations immediately with zero learning curve for your team."
-      }
-    },
     "industries": {
       "title": "Built for Your Industry",
       "subtitle": "Get started faster with pre-configured templates designed specifically for your business vertical.",
@@ -120,7 +100,7 @@
         "description": "Point-of-sale integration, inventory tracking, and multi-location management.",
         "features": {
           "alerts": "Shift coverage alerts",
-          "tracking": "Sales performance tracking", 
+          "tracking": "Sales performance tracking",
           "automation": "Inventory automation"
         }
       },
@@ -134,13 +114,32 @@
         }
       },
       "healthcare": {
-        "title": "Healthcare", 
+        "title": "Healthcare",
         "description": "Patient care coordination, compliance tracking, and staff certification management.",
         "features": {
           "compliance": "HIPAA compliance",
           "tracking": "Patient flow tracking",
           "alerts": "Certification alerts"
         }
+      }
+    },
+    "pricing": "Pricing",
+    "resources": "Resources",
+    "startFreeTrial": "Start Free Trial",
+    "quickSetup": {
+      "title": "Get Started in Minutes",
+      "subtitle": "Our streamlined setup process gets your entire organization operational faster than any other platform.",
+      "signUp": {
+        "title": "Sign Up",
+        "description": "Create your company account in under 60 seconds with our streamlined onboarding."
+      },
+      "configure": {
+        "title": "Configure Roles",
+        "description": "Set up your team structure, permissions, and workflows using our intelligent templates."
+      },
+      "goLive": {
+        "title": "Go Live",
+        "description": "Start managing your operations immediately with zero learning curve for your team."
       }
     },
     "testimonials": {
@@ -152,7 +151,32 @@
         "michaelRodriguez": "The task management system alone saved us 15 hours per week. The automation features are incredible and the team adopted it instantly.",
         "amandaFoster": "Best investment we've made for our clinics. Patient flow improved dramatically and our staff finally has clarity on their daily responsibilities.",
         "jamesPark": "Implementation was seamless and the ROI was immediate. We're seeing 25% better efficiency across all our retail locations.",
-        "lisaThompson": "FlowForce scales with us perfectly. From 50 to 200 employees, it handles everything without missing a beat. Game-changer for growth."
+        "lisaThompson": "FlowForce scales with us perfectly. From 50 to 200 employees, it handles everything without missing a beat. Game-changer for growth.",
+        "alejandroMartinez": "As a medical director, I needed a solution that met Spanish healthcare regulations. FlowForce exceeded all of our security expectations.",
+        "anaRuiz": "The time savings are incredible. What used to take us hours of store coordination now takes minutes.",
+        "anaSantos": "FlowForce transformed how we manage shifts. Coordinating our 15 restaurants in Porto has never been easier.",
+        "andreaWagner": "Implementation was seamless and the ROI was immediate. We're seeing 25% better efficiency across all of our retail locations.",
+        "camilleLefebvre": "The time savings are remarkable. What used to take us hours to manage our stores now takes minutes.",
+        "carlosGarcia": "Implementation was flawless and the return on investment was immediate. We're seeing 25% more efficiency across all of our café locations.",
+        "carlosOliveira": "As a medical director, I needed a solution that met Portuguese healthcare regulations. FlowForce exceeded all of our expectations.",
+        "davideConti": "FlowForce helped us grow sustainably. It's the perfect tool for fast-growing Italian companies.",
+        "francescaEsposito": "The time savings are incredible. What used to take hours to coordinate stores now takes minutes.",
+        "giuliaBianchi": "FlowForce transformed shift management. Coordinating our 15 restaurants in Rome has never been easier.",
+        "joaoSilva": "Implementation was flawless and the ROI was immediate. We're seeing 25% more efficiency across all of our café locations in Lisbon.",
+        "julienBernard": "As a medical director, I needed a solution that complied with French healthcare regulations. FlowForce exceeded all of our expectations.",
+        "klausWeber": "FlowForce completely transformed our operations. We went from chaos to organized efficiency in just two weeks. Our scheduling conflicts dropped by 90%.",
+        "lucMoreau": "FlowForce helped us grow sustainably. It's the perfect tool for fast-growing French companies.",
+        "lucaFerrari": "As a medical director, I needed a solution that complied with Italian healthcare regulations. FlowForce exceeded all of our expectations.",
+        "marcoRossi": "Implementation was flawless and the ROI was immediate. We're seeing 25% more efficiency across all of our locations in Milan.",
+        "mariaCostaE": "The time savings are incredible. What used to take hours to coordinate stores now takes minutes.",
+        "mariaLopez": "FlowForce completely transformed our shift management. We now coordinate 15 restaurants with ease, and our employees are more satisfied.",
+        "michaelBauer": "FlowForce scales with us perfectly. From 50 to 200 employees, it handles everything without missing a beat. A game-changer for growth.",
+        "pedroAlmeida": "FlowForce helped us grow sustainably. It's the perfect tool for fast-growing Portuguese companies.",
+        "pedroSanchez": "FlowForce helped us grow sustainably. It's the perfect tool for fast-growing Spanish companies.",
+        "pierreMartin": "Implementation was seamless and the ROI was immediate. We're seeing 25% more efficiency across all of our cafés in Paris.",
+        "sabineSchneider": "The task management system alone saved us 15 hours a week. The automation features are incredible, and the team adopted it immediately.",
+        "sophieDubois": "FlowForce transformed our team management. Coordinating our 15 restaurants in Lyon has never been easier.",
+        "thomasMuller": "The best investment we've made for our clinics. Patient flow improved dramatically, and our staff finally has clarity about their daily responsibilities."
       }
     },
     "useCases": {
@@ -252,7 +276,7 @@
       "details": "Manage your entire workforce with comprehensive employee profiles, role-based permissions, and organizational charts. Track certifications, skills, and performance metrics all in one place."
     },
     "shiftScheduling": {
-      "title": "Shift Scheduling", 
+      "title": "Shift Scheduling",
       "description": "Visual drag-and-drop scheduling with automated conflict detection and overtime management.",
       "details": "Create schedules effortlessly with our intuitive drag-and-drop interface. Automatically detect conflicts, manage overtime, and ensure proper coverage with intelligent scheduling algorithms."
     },
@@ -280,7 +304,7 @@
   "dashboard": {
     "greeting": {
       "morning": "Good morning",
-      "afternoon": "Good afternoon", 
+      "afternoon": "Good afternoon",
       "evening": "Good evening"
     },
     "welcome": "Welcome to your FlowForce dashboard",
@@ -424,11 +448,10 @@
     },
     "companyInfo": {
       "title": "Company Details",
-      "description": "Tell us about your company",
+      "description": "Description",
       "name": "Company Name",
       "industry": "Industry",
       "size": "Company Size",
-      "description": "Description",
       "website": "Website",
       "phone": "Phone Number"
     },
@@ -453,7 +476,7 @@
       "title": "Workspace Sections",
       "description": "Choose which features you need",
       "communication": "Communication",
-      "operations": "Operations", 
+      "operations": "Operations",
       "hr": "HR & Development",
       "analytics": "Analytics"
     },
@@ -472,7 +495,7 @@
     },
     "navigation": {
       "back": "Back",
-      "next": "Next", 
+      "next": "Next",
       "cancel": "Cancel",
       "tryAgain": "Try Again"
     }
@@ -480,7 +503,7 @@
   "onboarding": {
     "sidebar": {
       "whatYoureDoing": "What you're doing",
-      "selectedTemplate": "Selected Template", 
+      "selectedTemplate": "Selected Template",
       "progress": "Progress"
     },
     "wizard": {
@@ -624,7 +647,7 @@
             "description": "Clean lines, minimal shadows"
           },
           "classic": {
-            "label": "Classic", 
+            "label": "Classic",
             "description": "Traditional, serif elements"
           },
           "minimal": {
@@ -697,7 +720,18 @@
         "branding": "Branding",
         "workspaceSections": "Workspace Sections",
         "roles": "Classes"
-      }
+      },
+      "backToDashboard": "Back to Dashboard",
+      "companyDetails": "Company Details",
+      "customTemplate": "Custom Template",
+      "getStarted": "Get Started",
+      "positions": "Positions",
+      "roles": "Roles",
+      "rolesAndPositions": "Roles and Positions",
+      "selectedTemplate": "Selected Template",
+      "setupComplete": "Setup Complete!",
+      "successMessage": "Your FlowForce workspace has been set up successfully.",
+      "workspaceSections": "Workspace Sections"
     },
     "validation": {
       "required": "This field is required",
@@ -714,7 +748,11 @@
         "password": "Password must be at least 6 characters",
         "companyName": "Company name is required",
         "industry": "Industry is required",
-        "size": "Company size is required"
+        "size": "Company size is required",
+        "sections": "At least one section must be selected",
+        "template": "Template selection is required",
+        "templateDescription": "Template description is required",
+        "templateName": "Template name is required"
       }
     },
     "messages": {
@@ -733,6 +771,38 @@
       "selectTemplateFirst": "Please select a template first",
       "loadingTemplate": "Loading template...",
       "noTemplateSelected": "No template selected"
+    },
+    "roleSetup": {
+      "addPosition": "Add Position",
+      "addRole": "Add Role",
+      "cancel": "Cancel",
+      "createFirst": "Create your first {{type}} to get started",
+      "delete": "Delete",
+      "department": "Department",
+      "description": "Define user roles and organizational structure for your company",
+      "editPosition": "Edit Position",
+      "editRole": "Edit Role",
+      "noPositions": "No positions configured",
+      "noRoles": "No roles configured",
+      "permissions": "Permissions",
+      "positionHierarchy": "Position Hierarchy",
+      "positionTitle": "Position Title",
+      "reportsTo": "Reports to",
+      "roleDescription": "Role Description",
+      "roleName": "Role Name",
+      "rolesAndPermissions": "Roles and Permissions",
+      "save": "Save",
+      "title": "Set Up Roles and Positions"
+    },
+    "sectionCustomization": {
+      "availableSections": "Available Sections",
+      "description": "Select and configure the sections you need for your business",
+      "disableSection": "Disable {{name}}",
+      "enableSection": "Enable {{name}}",
+      "noSectionsSelected": "No sections selected",
+      "selectSections": "Select at least one section to continue",
+      "selectedSections": "Selected Sections",
+      "title": "Customize Workspace Sections"
     }
   },
   "auth": {

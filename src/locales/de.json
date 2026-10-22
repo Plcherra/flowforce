@@ -1,4 +1,3 @@
-
 {
   "common": {
     "dashboard": "Dashboard",
@@ -6,17 +5,17 @@
     "employees": "Mitarbeiter",
     "scheduling": "Planung",
     "tasks": "Aufgaben",
-  "goals": "Ziele",
-  "financialManagement": "Finanzmanagement",
-  "inventory": "Inventar",
-  "payments": "Zahlungen",
-  "purchaseOrders": "Bestellungen",
-  "invoices": "Rechnungen",
-  "costAnalysis": "Kostenanalyse",
+    "goals": "Ziele",
+    "financialManagement": "Finanzmanagement",
+    "inventory": "Inventar",
+    "payments": "Zahlungen",
+    "purchaseOrders": "Bestellungen",
+    "invoices": "Rechnungen",
+    "costAnalysis": "Kostenanalyse",
     "expenses": "Ausgaben",
-  "messages": "Nachrichten",
-  "events": "Ereignisse",
-  "meetings": "Meetings",
+    "messages": "Nachrichten",
+    "events": "Ereignisse",
+    "meetings": "Meetings",
     "analytics": "Analysen",
     "reports": "Berichte",
     "forms": "Formulare",
@@ -37,7 +36,24 @@
     "continue": "Weiter",
     "refresh": "Aktualisieren",
     "viewCertificate": "Zertifikat Anzeigen",
-    "startCertification": "Zertifizierung Starten"
+    "startCertification": "Zertifizierung Starten",
+    "admin": "Admin",
+    "calendar": "Kalender",
+    "companyUpdates": "Unternehmensupdates",
+    "custom": "Benutzerdefiniert",
+    "customBranding": "Eigenes Branding und Farben",
+    "defaultRoles": "Standardrollen",
+    "flexibleSections": "Flexible Bereichskonfiguration",
+    "inventoryActions": "Inventaraktionen",
+    "inventoryCountExecution": "Inventurzählung durchführen",
+    "itemsSetup": "Artikel und Einrichtung",
+    "leaderboard": "Rangliste",
+    "more": "mehr",
+    "positionManagement": "Teamverwaltung",
+    "purchasing": "Einkauf",
+    "sections": "Bereiche",
+    "timeOff": "Abwesenheit",
+    "uniqueLayouts": "Eigene Ablauf-Layouts"
   },
   "navigation": {
     "communication": "Kommunikation",
@@ -48,7 +64,16 @@
     "userManagement": "Benutzerverwaltung",
     "inviteEmployee": "Mitarbeiter Einladen",
     "sectionsPermissions": "Bereiche & Berechtigungen",
-    "systemSettings": "Systemeinstellungen"
+    "systemSettings": "Systemeinstellungen",
+    "accounting": "Buchhaltung",
+    "calendarEvents": "Kalender und Ereignisse",
+    "companyUpdates": "Unternehmensupdates",
+    "dailyOperations": "Tägliche Abläufe",
+    "financial": "Finanzen",
+    "inventory": "Inventar",
+    "leaderboard": "Rangliste",
+    "operationsIntelligence": "Betriebsintelligenz",
+    "team": "Team"
   },
   "landing": {
     "usedBy": "Verwendet von 1.200+ Standorten weltweit",
@@ -65,26 +90,6 @@
     "learnMore": "Mehr Erfahren",
     "features": "Funktionen",
     "templatesNav": "Vorlagen",
-    "industries": "Branchen",
-    "pricing": "Preise",
-    "resources": "Ressourcen",
-    "startFreeTrial": "Kostenlose Testversion Starten",
-    "quickSetup": {
-      "title": "In Minuten Starten",
-      "subtitle": "Unser optimierter Einrichtungsprozess macht Ihre gesamte Organisation schneller einsatzbereit als jede andere Plattform.",
-      "signUp": {
-        "title": "Anmelden",
-        "description": "Erstellen Sie Ihr Firmenkonto in unter 60 Sekunden mit unserem optimierten Onboarding."
-      },
-      "configure": {
-        "title": "Rollen Konfigurieren",
-        "description": "Richten Sie Ihre Teamstruktur, Berechtigungen und Arbeitsabläufe mit unseren intelligenten Vorlagen ein."
-      },
-      "goLive": {
-        "title": "Live Gehen",
-        "description": "Beginnen Sie sofort mit der Verwaltung Ihrer Operationen - ohne Lernkurve für Ihr Team."
-      }
-    },
     "industries": {
       "title": "Für Ihre Branche Gebaut",
       "subtitle": "Starten Sie schneller mit vorkonfigurierten Vorlagen, die speziell für Ihren Geschäftsbereich entwickelt wurden.",
@@ -118,6 +123,25 @@
         }
       }
     },
+    "pricing": "Preise",
+    "resources": "Ressourcen",
+    "startFreeTrial": "Kostenlose Testversion Starten",
+    "quickSetup": {
+      "title": "In Minuten Starten",
+      "subtitle": "Unser optimierter Einrichtungsprozess macht Ihre gesamte Organisation schneller einsatzbereit als jede andere Plattform.",
+      "signUp": {
+        "title": "Anmelden",
+        "description": "Erstellen Sie Ihr Firmenkonto in unter 60 Sekunden mit unserem optimierten Onboarding."
+      },
+      "configure": {
+        "title": "Rollen Konfigurieren",
+        "description": "Richten Sie Ihre Teamstruktur, Berechtigungen und Arbeitsabläufe mit unseren intelligenten Vorlagen ein."
+      },
+      "goLive": {
+        "title": "Live Gehen",
+        "description": "Beginnen Sie sofort mit der Verwaltung Ihrer Operationen - ohne Lernkurve für Ihr Team."
+      }
+    },
     "testimonials": {
       "title": "Geliebt von Wachsenden Unternehmen",
       "subtitle": "Schließen Sie sich Tausenden von Unternehmen an, die ihre Abläufe mit FlowForce transformiert haben.",
@@ -127,7 +151,32 @@
         "sabineSchneider": "Allein das Aufgabenverwaltungssystem sparte uns 15 Stunden pro Woche. Die Automatisierungsfunktionen sind unglaublich und das Team hat es sofort übernommen.",
         "thomasMuller": "Die beste Investition, die wir für unsere Kliniken gemacht haben. Der Patientenfluss verbesserte sich dramatisch und unser Personal hat endlich Klarheit über ihre täglichen Verantwortlichkeiten.",
         "andreaWagner": "Die Implementierung war nahtlos und der ROI war sofort da. Wir sehen 25% bessere Effizienz in allen unseren Einzelhandelsstandorten.",
-        "michaelBauer": "FlowForce skaliert perfekt mit uns. Von 50 auf 200 Mitarbeiter, es bewältigt alles ohne einen Takt zu verpassen. Ein Spielveränderer für Wachstum."
+        "michaelBauer": "FlowForce skaliert perfekt mit uns. Von 50 auf 200 Mitarbeiter, es bewältigt alles ohne einen Takt zu verpassen. Ein Spielveränderer für Wachstum.",
+        "alejandroMartinez": "Als ärztlicher Leiter brauchte ich eine Lösung, die die spanischen Gesundheitsvorschriften erfüllt. FlowForce hat alle unsere Sicherheitserwartungen übertroffen.",
+        "amandaFoster": "Die beste Investition, die wir für unsere Kliniken gemacht haben. Der Patientenfluss verbesserte sich dramatisch und unser Personal hat endlich Klarheit über die täglichen Verantwortlichkeiten.",
+        "anaRuiz": "Die Zeitersparnis ist unglaublich. Was früher Stunden an Filialkoordination brauchte, erledigen wir jetzt in Minuten.",
+        "anaSantos": "FlowForce hat unsere Schichtplanung verändert. Die Abstimmung unserer 15 Restaurants in Porto war noch nie so einfach.",
+        "camilleLefebvre": "Die Zeitersparnis ist bemerkenswert. Was früher Stunden für die Filialsteuerung brauchte, erledigen wir jetzt in Minuten.",
+        "carlosGarcia": "Die Einführung war fehlerfrei und der Nutzen sofort da. Wir sehen 25 % mehr Effizienz in allen unseren Cafés.",
+        "carlosOliveira": "Als ärztlicher Leiter brauchte ich eine Lösung, die die portugiesischen Gesundheitsvorschriften erfüllt. FlowForce hat alle unsere Erwartungen übertroffen.",
+        "davideConti": "FlowForce hat uns geholfen, nachhaltig zu wachsen. Es ist das richtige Werkzeug für schnell wachsende italienische Unternehmen.",
+        "francescaEsposito": "Die Zeitersparnis ist unglaublich. Was früher Stunden für die Filialkoordination brauchte, erledigen wir jetzt in Minuten.",
+        "giuliaBianchi": "FlowForce hat die Schichtplanung verändert. Die Abstimmung unserer 15 Restaurants in Rom war noch nie so einfach.",
+        "jamesPark": "Die Einführung verlief reibungslos und der Nutzen war sofort da. Wir sehen 25 % mehr Effizienz in allen unseren Einzelhandelsstandorten.",
+        "joaoSilva": "Die Einführung war fehlerfrei und der Nutzen sofort da. Wir sehen 25 % mehr Effizienz in allen unseren Cafés in Lissabon.",
+        "julienBernard": "Als ärztlicher Leiter brauchte ich eine Lösung, die die französischen Gesundheitsvorschriften erfüllt. FlowForce hat alle unsere Erwartungen übertroffen.",
+        "lisaThompson": "FlowForce wächst perfekt mit uns. Von 50 auf 200 Mitarbeiter bewältigt es alles, ohne aus dem Takt zu kommen. Ein Wendepunkt für das Wachstum.",
+        "lucMoreau": "FlowForce hat uns geholfen, nachhaltig zu wachsen. Es ist das richtige Werkzeug für schnell wachsende französische Unternehmen.",
+        "lucaFerrari": "Als ärztlicher Leiter brauchte ich eine Lösung, die die italienischen Gesundheitsvorschriften erfüllt. FlowForce hat alle unsere Erwartungen übertroffen.",
+        "marcoRossi": "Die Einführung war fehlerfrei und der Nutzen sofort da. Wir sehen 25 % mehr Effizienz an allen unseren Standorten in Mailand.",
+        "mariaCostaE": "Die Zeitersparnis ist unglaublich. Was früher Stunden für die Filialkoordination brauchte, erledigen wir jetzt in Minuten.",
+        "mariaLopez": "FlowForce hat unsere Schichtplanung völlig verändert. Wir koordinieren jetzt 15 Restaurants ohne Aufwand, und unsere Mitarbeiter sind zufriedener.",
+        "michaelRodriguez": "Allein die Aufgabenverwaltung hat uns 15 Stunden pro Woche gespart. Die Automatisierung ist beeindruckend und das Team hat sie sofort übernommen.",
+        "pedroAlmeida": "FlowForce hat uns geholfen, nachhaltig zu wachsen. Es ist das richtige Werkzeug für schnell wachsende portugiesische Unternehmen.",
+        "pedroSanchez": "FlowForce hat uns geholfen, nachhaltig zu wachsen. Es ist das richtige Werkzeug für schnell wachsende spanische Unternehmen.",
+        "pierreMartin": "Die Einführung verlief reibungslos und der Nutzen war sofort da. Wir sehen 25 % mehr Effizienz in allen unseren Cafés in Paris.",
+        "sarahChen": "FlowForce hat unseren Betrieb völlig verändert. In nur zwei Wochen wurden aus dem Chaos geordnete Abläufe. Unsere Planungskonflikte sind um 90 % gesunken.",
+        "sophieDubois": "FlowForce hat unsere Teamplanung verändert. Die Abstimmung unserer 15 Restaurants in Lyon war noch nie so einfach."
       }
     },
     "useCases": {
@@ -245,6 +294,11 @@
       "title": "Digitale Formulare",
       "description": "Benutzerdefinierter Formular-Builder mit bedingter Logik, digitalen Signaturen und automatischer PDF-Generierung.",
       "details": "Erstellen Sie benutzerdefinierte Formulare mit bedingter Logik, sammeln Sie digitale Signaturen und generieren Sie automatisch PDFs. Optimieren Sie Papierkram und eliminieren Sie manuelle Dateneingabe."
+    },
+    "analyticsReporting": {
+      "description": "Echtzeit-Dashboards, eigene Berichte und konkrete Hinweise, um den Betrieb zu verbessern.",
+      "details": "Treffen Sie Entscheidungen anhand umfassender Analysen, eigener Berichte und Echtzeit-Dashboards. Sie erhalten konkrete Hinweise, um den Betrieb zu verbessern und effizienter zu arbeiten.",
+      "title": "Analysen und Berichte"
     }
   },
   "footer": {
@@ -274,11 +328,10 @@
     },
     "companyInfo": {
       "title": "Unternehmensdetails",
-      "description": "Erzählen Sie uns von Ihrem Unternehmen",
+      "description": "Beschreibung",
       "name": "Firmenname",
       "industry": "Branche",
       "size": "Unternehmensgröße",
-      "description": "Beschreibung",
       "website": "Website",
       "phone": "Telefonnummer"
     },
@@ -480,7 +533,14 @@
       "setupComplete": "Einrichtung abgeschlossen!",
       "successMessage": "Ihr FlowForce-Arbeitsbereich wurde erfolgreich konfiguriert.",
       "getStarted": "Loslegen",
-      "backToDashboard": "Zurück zum Dashboard"
+      "backToDashboard": "Zurück zum Dashboard",
+      "sections": {
+        "branding": "Branding",
+        "company": "Unternehmensinformationen",
+        "roles": "Klassen",
+        "template": "Ausgewählte Vorlage",
+        "workspaceSections": "Bereiche des Arbeitsbereichs"
+      }
     },
     "validation": {
       "completeRequired": "Bitte füllen Sie alle erforderlichen Felder aus",
@@ -496,7 +556,133 @@
         "sections": "Mindestens ein Abschnitt muss ausgewählt werden",
         "templateName": "Vorlagenname ist erforderlich",
         "templateDescription": "Vorlagenbeschreibung ist erforderlich"
+      },
+      "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "minimumRoles": "Mindestens 4 Rollen erforderlich",
+      "password": "Das Passwort muss mindestens 6 Zeichen haben",
+      "required": "Dieses Feld ist erforderlich",
+      "selectSections": "Bitte wählen Sie mindestens einen Bereich",
+      "selectTemplate": "Bitte wählen Sie eine Vorlage, um fortzufahren"
+    },
+    "branding": {
+      "colors": {
+        "accent": "Akzentfarbe",
+        "description": "Legen Sie die Markenfarben fest, die in der gesamten Anwendung verwendet werden",
+        "primary": "Primärfarbe",
+        "secondary": "Sekundärfarbe",
+        "title": "Farbschema"
+      },
+      "description": "Geben Sie dem Arbeitsbereich Ihres Unternehmens ein eigenes Erscheinungsbild",
+      "layout": {
+        "backgroundPattern": "Hintergrundmuster",
+        "backgroundPatterns": {
+          "dots": "Punkte",
+          "gradient": "Verlauf",
+          "lines": "Linien",
+          "none": "Keins"
+        },
+        "cardStyle": "Kartenstil",
+        "cardStyles": {
+          "elevated": "Erhöht",
+          "rounded": "Abgerundet",
+          "sharp": "Kantig"
+        },
+        "description": "Passen Sie das Gesamtlayout und die Komponentenstile an",
+        "sidebarStyle": "Stil der Seitenleiste",
+        "sidebarStyles": {
+          "collapsed": {
+            "description": "Seitenleiste nur mit Symbolen, zum Aufklappen darüberfahren",
+            "label": "Eingeklappt"
+          },
+          "expanded": {
+            "description": "Volle Seitenleiste mit Beschriftungen",
+            "label": "Ausgeklappt"
+          },
+          "floating": {
+            "description": "Schwebende Seitenleiste mit abgerundeten Ecken",
+            "label": "Schwebend"
+          }
+        },
+        "title": "Layout-Stil"
+      },
+      "logo": {
+        "description": "Laden Sie Ihr Firmenlogo hoch (empfohlen: 200x60 px, PNG/SVG)",
+        "removeLogo": "Logo entfernen",
+        "supportedFormats": "PNG, JPG, SVG bis 2 MB",
+        "title": "Firmenlogo",
+        "uploadText": "Zum Hochladen klicken oder Datei hierher ziehen"
+      },
+      "tabs": {
+        "advanced": "Erweitert",
+        "colors": "Farben",
+        "layout": "Layout",
+        "logo": "Logo",
+        "typography": "Typografie"
+      },
+      "title": "Marke anpassen",
+      "typography": {
+        "accentPreview": "Vorschau von Akzentfarbe und Schrift",
+        "description": "Wählen Sie Schriften, die zu Ihrer Marke passen",
+        "fontFamily": "Schriftfamilie",
+        "fontLabel": "Schrift:",
+        "headerStyle": "Kopfzeilenstil",
+        "headerStyles": {
+          "bold": {
+            "description": "Starke Schatten, dicke Rahmen",
+            "label": "Fett"
+          },
+          "classic": {
+            "description": "Traditionell, mit Serifen",
+            "label": "Klassisch"
+          },
+          "minimal": {
+            "description": "Sehr klar, ohne Rahmen",
+            "label": "Minimal"
+          },
+          "modern": {
+            "description": "Klare Linien, wenig Schatten",
+            "label": "Modern"
+          }
+        },
+        "previewHeader": "Kopfzeilenvorschau",
+        "sampleHeading": "Beispielüberschrift",
+        "sampleText": "So sieht Ihr Text mit der gewählten Schriftfamilie und den Farben aus. Ihr Arbeitsbereich verwendet diese Typografie in der gesamten Oberfläche.",
+        "title": "Typografie"
       }
+    },
+    "fallbacks": {
+      "loadingTemplate": "Vorlage wird geladen...",
+      "noTemplateSelected": "Keine Vorlage ausgewählt",
+      "selectTemplateFirst": "Bitte zuerst eine Vorlage auswählen"
+    },
+    "messages": {
+      "accountCreated": "Konto erfolgreich erstellt",
+      "accountCreatedDescription": "{{companyName}} ist eingerichtet. Melden Sie sich an, um fortzufahren.",
+      "accountCreationFailed": "Konto konnte nicht erstellt werden",
+      "emailExists": "Ein Konto mit dieser E-Mail existiert bereits. Verwenden Sie eine andere E-Mail oder melden Sie sich an.",
+      "positionError": "Beim Einrichten der Positionen Ihres Unternehmens ist ein Problem aufgetreten. Prüfen Sie die Positionskonfiguration.",
+      "roleError": "Beim Einrichten der Rollen Ihres Unternehmens ist ein Problem aufgetreten. Prüfen Sie die Rollenkonfiguration.",
+      "setupError": "Einrichtungsfehler",
+      "setupErrorDescription": "Beim Einrichten Ihres Unternehmens ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+      "welcomeDescription": "{{companyName}} wurde erfolgreich eingerichtet. Willkommen in Ihrem neuen Arbeitsbereich.",
+      "welcomeTitle": "Willkommen bei FlowForce"
+    },
+    "roles": {
+      "description": "Owner, Admin, Manager und Staff sind bereits angelegt. Fahren Sie fort oder öffnen Sie die Rollen, um Zugriff zu geben oder zu entziehen. Positionen sind hier nicht erforderlich.",
+      "title": "Klassen"
+    },
+    "sections": {
+      "addCustomSection": "Eigenen Bereich hinzufügen",
+      "availableSections": "Verfügbare Bereiche",
+      "customBadge": "Benutzerdefiniert",
+      "customSections": "Eigene Bereiche",
+      "description": "Wählen Sie die Bereiche für Ihren Arbeitsbereich und legen Sie eigene an",
+      "deselectAll": "Auswahl aufheben",
+      "hideBuilder": "Builder ausblenden",
+      "selectAll": "Alle auswählen",
+      "selected": "{{count}} ausgewählt",
+      "templateBadge": "Vorlage",
+      "title": "Bereiche Ihres Arbeitsbereichs anpassen"
     }
   },
   "auth": {
@@ -521,5 +707,125 @@
       "description": "Neuen Geschäftsarbeitsbereich einrichten"
     },
     "orSignIn": "oder melden Sie sich bei einem bestehenden Konto an"
+  },
+  "admin": {
+    "accessDenied": "Zugriff verweigert",
+    "description": "Benutzer, Rollen und Systemeinstellungen verwalten",
+    "noPermission": "Sie haben keine Berechtigung für die Administrationskonsole.",
+    "title": "Administrationskonsole"
+  },
+  "certifications": {
+    "available": "Verfügbar",
+    "badgeAwarded": "Abzeichen verliehen",
+    "complete": "abgeschlossen",
+    "customerServiceSpecialist": {
+      "description": "Zertifiziert in fortgeschrittenen Kundenservice-Methoden",
+      "name": "Spezialist für Kundenservice"
+    },
+    "description": "Verfolgen Sie Ihre beruflichen Erfolge und Zertifizierungen",
+    "earned": "Erreicht",
+    "earnedDate": "Erreicht",
+    "emptyDescription": "Sobald die Anforderungen veröffentlicht sind, sehen Sie hier mögliche Zertifizierungen und den Fortschritt.",
+    "emptyState": "Noch keine Zertifizierungen verfügbar",
+    "errors": {
+      "load": "Die Zertifizierungen konnten gerade nicht geladen werden. Bitte versuchen Sie es erneut."
+    },
+    "expired": "Abgelaufen",
+    "inProgress": "In Bearbeitung",
+    "issuedBy": "Ausgestellt von",
+    "lastEvaluated": "Zuletzt bewertet",
+    "metrics": {
+      "completedGoals": "Abgeschlossene Ziele",
+      "completedTasks": "Abgeschlossene Aufgaben",
+      "coursesCompleted": "Abgeschlossene Kurse",
+      "xpEarned": "XP gesamt"
+    },
+    "pendingBadge": "Abzeichen wartet auf Copilot-Prüfung",
+    "requiredCourses": "Erforderliche Kurse ({{count}}): {{codes}}",
+    "requirementLabels": {
+      "courses": "Abgeschlossene Kurse",
+      "goals": "Ziele abgeschlossen",
+      "tasks": "Aufgaben abgeschlossen",
+      "xp": "Verdiente XP"
+    },
+    "requirements": "Anforderungen",
+    "safetyCompliance": {
+      "description": "Zertifizierung für Arbeitssicherheit und Compliance",
+      "name": "Sicherheits-Compliance"
+    },
+    "teamLeadership": {
+      "description": "Zertifizierung für Führung und Teammanagement",
+      "name": "Teamführung"
+    },
+    "title": "Zertifizierungen und Abzeichen"
+  },
+  "dashboard": {
+    "greeting": {
+      "afternoon": "Guten Tag",
+      "evening": "Guten Abend",
+      "morning": "Guten Morgen"
+    },
+    "operationsSummary": {
+      "activeEmployees": "Aktive Mitarbeiter",
+      "activeEmployeesHint": "Von {{total}} insgesamt",
+      "coverageHint": "{{coverage}}% aktive Belegschaft",
+      "departmentCount": "Abteilungen",
+      "description": "Behalten Sie den Überblick mit einer kurzen Zusammenfassung der heutigen Aktivität.",
+      "managePeople": "Mitarbeiter verwalten",
+      "managePeopleDesc": "Rollen und Abteilungszuweisungen aktualisieren",
+      "noCoverage": "Noch keine Besetzungsdaten",
+      "openTasks": "Aufgabenbereich öffnen",
+      "openTasksDesc": "Prüfen Sie die Punkte, die Aufmerksamkeit brauchen",
+      "pendingTimeOff": "Offene Abwesenheiten",
+      "quickActions": "Schnellaktionen",
+      "requestsHint": "Wartet auf Prüfung",
+      "requestsHintDetailed": "{{approved}} bevorstehende genehmigt • {{balance}} Tage übrig",
+      "reviewTimeOff": "Abwesenheit prüfen",
+      "reviewTimeOffDesc": "Offene Anträge genehmigen oder ablehnen",
+      "shiftsHint": "Geplant über alle Standorte",
+      "shiftsToday": "Schichten heute",
+      "title": "Betriebsüberblick",
+      "viewSchedule": "Dienstplan öffnen",
+      "viewScheduleDesc": "Zur Planung wechseln und die Besetzung anpassen"
+    },
+    "profile": {
+      "assigned": "Zugewiesen",
+      "department": "Abteilung",
+      "description": "Mitarbeiterprofil ansehen und verwalten",
+      "employeeId": "Mitarbeiter-ID",
+      "employmentStatus": "Beschäftigungsstatus",
+      "hireDate": "Eintrittsdatum",
+      "notSet": "Nicht festgelegt",
+      "position": "Position",
+      "title": "Ihr Profil",
+      "unassigned": "Nicht zugewiesen"
+    },
+    "stats": {
+      "activeDepartments": "Aktive Abteilungen",
+      "activeEmployees": "aktiv",
+      "currentTime": "Aktuelle Uhrzeit",
+      "departments": "Abteilungen",
+      "pendingRequests": "Offene Anträge",
+      "scheduledToday": "Heute geplant",
+      "timeOffBalance": "Abwesenheitssaldo",
+      "timeOffBalanceHint": "{{used}} Tage in diesem Jahr bereits genutzt",
+      "timeOffRequests": "Abwesenheitsanträge",
+      "timeOffRequestsDetail": "{{approved}} bevorstehende genehmigt • {{used}} Tage seit Jahresbeginn genutzt",
+      "todaysShifts": "Heutige Schichten",
+      "totalEmployees": "Mitarbeiter gesamt"
+    },
+    "welcome": "Willkommen in Ihrem FlowForce-Dashboard"
+  },
+  "inventory": {
+    "accessDenied": "Zugriff verweigert",
+    "description": "Artikel verwalten, Bestände verfolgen und Bestellungen bearbeiten",
+    "inventoryItems": "Inventarartikel",
+    "noPermission": "Sie haben keine Berechtigung für die Inventarverwaltung.",
+    "purchaseOrderManagement": "Die Bestellverwaltung wird hier angezeigt.",
+    "purchaseOrders": "Bestellungen",
+    "recentTransactions": "Letzte Buchungen",
+    "title": "Inventarverwaltung",
+    "transactionHistory": "Der Buchungsverlauf wird hier angezeigt.",
+    "transactions": "Buchungen"
   }
 }
