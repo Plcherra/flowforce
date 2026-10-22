@@ -200,10 +200,17 @@ export function useEmployeePerformance() {
   });
 }
 
+type TrendProfile = Pick<Tables<"profiles">, "created_at">;
+type TrendTask = Pick<
+  Tables<"tasks">,
+  "created_at" | "completed_at" | "status"
+>;
+type TrendTimeOff = Pick<Tables<"time_off_requests">, "created_at" | "status">;
+
 function buildMonthlyTrends(
-  employees: Pick<Tables<"profiles">, "created_at">[],
-  tasks: Pick<Tables<"tasks">, "created_at" | "completed_at" | "status">[],
-  timeOffRequests: Pick<Tables<"time_off_requests">, "created_at" | "status">[],
+  employees: TrendProfile[],
+  tasks: TrendTask[],
+  timeOffRequests: TrendTimeOff[],
 ): AnalyticsData["monthlyTrends"] {
   const now = new Date();
   const buckets = new Map<

@@ -1,10 +1,1 @@
-[
-  "app/not-found.tsx: Oops! Page not found",
-  "app/not-found.tsx: Return to Home",
-  "src/hooks/useAnalytics.tsx: [], tasks: Pick",
-  "src/hooks/useAnalytics.tsx: [], timeOffRequests: Pick",
-  "src/hooks/useUserPermissions.tsx: [] ).reduce",
-  "src/shared/components/FeatureErrorState.tsx: Unable to load module",
-  "src/shared/components/FeatureLoadingState.tsx: Loading module...",
-  "src/stores/useFormSchemaStore.ts: New Section"
-]
+[]

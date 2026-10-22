@@ -446,7 +446,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 24 — Routes and hooks
 
-- [ ] Move remaining route and hook chrome into the six locales.
+- [x] Move remaining route and hook chrome into the six locales.
 
 Rules:
 
@@ -1127,6 +1127,22 @@ Phone steps for Pedro:
 3. Open time off and availability. The request form, the queue, and lock controls should be Spanish. A reason you typed stays as you wrote it.
 4. Open team positions in Français. Create and edit position labels should be French. A position name stays as it was written. Role words such as Manager stay as written.
 5. Open HR and the leaderboard in Deutsch. Badge, recognition, and XP labels should be German. XP stays XP. Switch to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 24 Routes and hooks
+
+Shipped: The not-found page, the shared module loading state, and the shared module error state now use `useTranslation` and the `shell` namespace. The same four strings are in en, es, pt, fr, it, and de. Two hook type signatures were rewritten so the checker no longer treats generic TypeScript as chrome. The form builder's default section title stays the English words New Section, because that value is stored on the section. The hard-coded baseline is empty.
+
+Proven: `npm run check:i18n` printed 4582 keys for each locale and `hard-coded strings 0`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `app/not-found.tsx`, `src/hooks/useAnalytics.tsx`, `src/hooks/useUserPermissions.tsx`, `src/shared/components/FeatureErrorState.tsx`, `src/shared/components/FeatureLoadingState.tsx`, and `src/stores/useFormSchemaStore.ts`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set the language to Español.
+2. Open a route that does not exist, such as https://www.flowforce.uk/this-page-is-missing. The message and the home link should be Spanish. The number 404 stays 404.
+3. Open a screen that is still loading, or one that fails to load a module. The loading line and the unable-to-load line should be Spanish when those shared states appear.
+4. Switch back to English. Those lines should match the wording from before this deploy. A form section you add still starts with the English title New Section until you rename it.
 
 Blockers: none. No migration.
 

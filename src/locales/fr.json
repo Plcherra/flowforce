@@ -2715,7 +2715,11 @@
     "setup": "Configuration",
     "thisViewIsTemporarilyUnavailable": "Cette vue est temporairement indisponible.",
     "workspaceLinkMissing": "Lien vers l'espace de travail manquant",
-    "yourSignInWorkedButThisAccountIs": "La connexion a fonctionné, mais ce compte n'est pas encore relié à l'espace d'une entreprise. FlowForce a besoin de ce lien avant de charger les données en sécurité."
+    "yourSignInWorkedButThisAccountIs": "La connexion a fonctionné, mais ce compte n'est pas encore relié à l'espace d'une entreprise. FlowForce a besoin de ce lien avant de charger les données en sécurité.",
+    "oopsPageNotFound": "Oups ! Page introuvable",
+    "returnToHome": "Retour à l'accueil",
+    "unableToLoadModule": "Impossible de charger le module",
+    "loadingModule": "Chargement du module…"
   },
   "nav": {
     "addNew": "Ajouter",

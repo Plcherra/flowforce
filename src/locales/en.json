@@ -2715,7 +2715,11 @@
     "setup": "Setup",
     "thisViewIsTemporarilyUnavailable": "This view is temporarily unavailable.",
     "workspaceLinkMissing": "Workspace link missing",
-    "yourSignInWorkedButThisAccountIs": "Your sign-in worked, but this account is not connected to a company workspace yet. FlowForce needs that link before it can load tenant data safely."
+    "yourSignInWorkedButThisAccountIs": "Your sign-in worked, but this account is not connected to a company workspace yet. FlowForce needs that link before it can load tenant data safely.",
+    "oopsPageNotFound": "Oops! Page not found",
+    "returnToHome": "Return to Home",
+    "unableToLoadModule": "Unable to load module",
+    "loadingModule": "Loading module..."
   },
   "nav": {
     "addNew": "Add new",

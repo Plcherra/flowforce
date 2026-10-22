@@ -143,15 +143,17 @@ export function useSaveUserPermissions() {
 
       if (existingError) throw existingError;
 
-      const previousOverrideValues = (
-        (existingData ?? []) as Pick<
-          UserPermissionOverride,
-          "permission_key" | "permission_value"
-        >[]
-      ).reduce<Record<string, PermissionValue>>((acc, override) => {
-        acc[override.permission_key] = override.permission_value;
-        return acc;
-      }, {});
+      const existingOverrides = (existingData ?? []) as Pick<
+        UserPermissionOverride,
+        "permission_key" | "permission_value"
+      >[];
+      const previousOverrideValues = existingOverrides.reduce(
+        (acc, override) => {
+          acc[override.permission_key] = override.permission_value;
+          return acc;
+        },
+        {} as Record<string, PermissionValue>,
+      );
 
       // Get current user ID for created_by field
       const {

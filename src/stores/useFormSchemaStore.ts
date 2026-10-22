@@ -73,12 +73,13 @@ export const useFormSchemaStore = create<FormSchemaState>()(
         set({ schema: null, activeSectionId: null, activeFieldId: null }),
       setActiveSection: (sectionId) => set({ activeSectionId: sectionId }),
       setActiveField: (fieldId) => set({ activeFieldId: fieldId }),
-      addSection: (title = "New Section") => {
+      addSection: (title?: string) => {
         const current = get().schema;
         if (!current) return;
+        const sectionTitle = title ?? "New Section";
         const newSection: FormSchemaSection = {
           id: randomId(),
-          title,
+          title: sectionTitle,
           fields: [],
         };
         set({

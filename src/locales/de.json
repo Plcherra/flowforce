@@ -2715,7 +2715,11 @@
     "setup": "Einrichtung",
     "thisViewIsTemporarilyUnavailable": "Diese Ansicht ist vorübergehend nicht verfügbar.",
     "workspaceLinkMissing": "Verknüpfung zum Arbeitsbereich fehlt",
-    "yourSignInWorkedButThisAccountIs": "Die Anmeldung hat funktioniert, aber dieses Konto ist noch nicht mit einem Unternehmens-Arbeitsbereich verbunden. FlowForce braucht diese Verknüpfung, bevor es Mandantendaten sicher laden kann."
+    "yourSignInWorkedButThisAccountIs": "Die Anmeldung hat funktioniert, aber dieses Konto ist noch nicht mit einem Unternehmens-Arbeitsbereich verbunden. FlowForce braucht diese Verknüpfung, bevor es Mandantendaten sicher laden kann.",
+    "oopsPageNotFound": "Hoppla! Seite nicht gefunden",
+    "returnToHome": "Zurück zur Startseite",
+    "unableToLoadModule": "Modul konnte nicht geladen werden",
+    "loadingModule": "Modul wird geladen..."
   },
   "nav": {
     "addNew": "Neu hinzufügen",
