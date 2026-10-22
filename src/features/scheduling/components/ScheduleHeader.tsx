@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { SchedulingToolbar } from "./SchedulingToolbar";
@@ -30,6 +31,7 @@ export function ScheduleHeader({
   hideToolbar = false,
   mode = "scheduling",
 }: ScheduleHeaderProps) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const isScheduling = mode === "scheduling";
   const heading = isScheduling ? "Schedule" : "Events Calendar";
@@ -104,7 +106,7 @@ export function ScheduleHeader({
             onClick={onToggleFilters}
           >
             <Filter className="mr-2 h-4 w-4" />
-            Filters
+            {t("schedule.filters")}
           </Button>
         )}
         {shouldShowToolbar && (

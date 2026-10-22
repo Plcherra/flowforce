@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Calendar, Clock, Users, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,17 +28,18 @@ export function ScheduleTemplatesPanel({
   onTemplateClick,
   onQuickVendorVisit,
 }: ScheduleTemplatesPanelProps) {
+  const { t } = useTranslation();
   return (
     <Card className="lg:w-80 flex-shrink-0">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
-          Role Templates
+          {t("schedule.roleTemplates")}
         </CardTitle>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onQuickVendorVisit}>
             <Plus className="h-3 w-3 mr-1" />
-            Vendor Visit
+            {t("schedule.vendorVisit")}
           </Button>
         </div>
       </CardHeader>
@@ -69,8 +71,8 @@ export function ScheduleTemplatesPanel({
 
         <div className="pt-4 mt-4 border-t space-y-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Vendor Visits</h3>
-            <Badge variant="outline">Drag to schedule</Badge>
+            <h3 className="text-sm font-semibold">{t("schedule.vendorVisits")}</h3>
+            <Badge variant="outline">{t("schedule.dragToSchedule")}</Badge>
           </div>
           {vendors.map((vendor) => (
             <div
@@ -88,7 +90,7 @@ export function ScheduleTemplatesPanel({
                   className="text-[10px]"
                   style={{ backgroundColor: vendor.color, color: "#fff" }}
                 >
-                  Vendor
+                  {t("schedule.vendor")}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">

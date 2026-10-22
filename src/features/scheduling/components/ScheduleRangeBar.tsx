@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export function ScheduleRangeBar({
   onNext,
   onJumpToToday,
 }: ScheduleRangeBarProps) {
+  const { t } = useTranslation();
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
 
@@ -46,7 +48,7 @@ export function ScheduleRangeBar({
           variant="ghost"
           size="icon"
           className="h-9 w-9 shrink-0 rounded-full"
-          aria-label="Previous period"
+          aria-label={t("schedule.previousPeriod")}
           onClick={onPrevious}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -88,7 +90,7 @@ export function ScheduleRangeBar({
           variant="ghost"
           size="icon"
           className="h-9 w-9 shrink-0 rounded-full"
-          aria-label="Next period"
+          aria-label={t("schedule.nextPeriod")}
           onClick={onNext}
         >
           <ChevronRight className="h-4 w-4" />
@@ -98,7 +100,7 @@ export function ScheduleRangeBar({
       <div className="flex items-center gap-2">
         <div
           role="radiogroup"
-          aria-label="Board"
+          aria-label={t("schedule.board")}
           className="inline-flex rounded-full bg-muted p-0.5"
         >
           {views.map((view) => {

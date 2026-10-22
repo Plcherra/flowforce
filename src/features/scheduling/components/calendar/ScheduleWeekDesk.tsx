@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, SlidersHorizontal } from "lucide-react";
@@ -131,6 +132,7 @@ export function ScheduleWeekDesk({
   smartFillOpen = false,
   onToggleSmartFill,
 }: ScheduleWeekDeskProps) {
+  const { t } = useTranslation();
   const [deskOpen, setDeskOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
@@ -178,11 +180,11 @@ export function ScheduleWeekDesk({
       variant="outline"
       size="sm"
       className="h-8 gap-1 rounded-full px-2.5"
-      aria-label="Week desk"
+      aria-label={t("schedule.weekDesk")}
       onClick={() => setDeskOpen(true)}
     >
       <SlidersHorizontal className="h-3.5 w-3.5" />
-      <span className="hidden sm:inline">Desk</span>
+      <span className="hidden sm:inline">{t("schedule.desk")}</span>
     </Button>
   );
 
@@ -198,7 +200,7 @@ export function ScheduleWeekDesk({
               className="h-8 rounded-full"
               onClick={onOpenTimeOffPanel}
             >
-              Request time off
+              {t("schedule.requestTimeOff")}
             </Button>,
             slot,
           )
@@ -209,7 +211,7 @@ export function ScheduleWeekDesk({
           <PopoverTrigger asChild>
             <button
               type="button"
-              aria-label="Create"
+              aria-label={t("schedule.create")}
               data-testid="add-shift-control"
               className="above-bottom-icon-nav fixed right-4 z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg print:hidden"
             >
@@ -237,41 +239,41 @@ export function ScheduleWeekDesk({
           className="max-h-[min(78dvh,36rem)] overflow-y-auto rounded-t-3xl pb-[max(1.25rem,env(safe-area-inset-bottom))]"
         >
           <SheetHeader className="text-left">
-            <SheetTitle>Week desk</SheetTitle>
+            <SheetTitle>{t("schedule.weekDesk")}</SheetTitle>
             <SheetDescription>{summary}</SheetDescription>
           </SheetHeader>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <section aria-label="Look">
-              <h3 className="px-2 text-xs text-muted-foreground">Look</h3>
+            <section aria-label={t("schedule.look")}>
+              <h3 className="px-2 text-xs text-muted-foreground">{t("schedule.look")}</h3>
               <DeskSwitch
-                label="Compact rows"
+                label={t("schedule.compactRows")}
                 checked={minimizedView}
                 onCheckedChange={setMinimizedView}
               />
               <DeskSwitch
-                label="Day totals"
+                label={t("schedule.dayTotals")}
                 checked={showDailyInfo}
                 onCheckedChange={setShowDailyInfo}
               />
               {setShowAvailabilityLayer ? (
                 <DeskSwitch
-                  label="Availability shading"
+                  label={t("schedule.availabilityShading")}
                   checked={showAvailabilityLayer}
                   onCheckedChange={setShowAvailabilityLayer}
                 />
               ) : null}
             </section>
             {!readOnly ? (
-              <section aria-label="Patterns">
-                <h3 className="px-2 text-xs text-muted-foreground">Patterns</h3>
-                <DeskCommand label="Role templates" onClick={() => run(onToggleTemplates)} />
+              <section aria-label={t("schedule.patterns")}>
+                <h3 className="px-2 text-xs text-muted-foreground">{t("schedule.patterns")}</h3>
+                <DeskCommand label={t("schedule.roleTemplates2")} onClick={() => run(onToggleTemplates)} />
                 <DeskCommand
-                  label="Week blueprints"
+                  label={t("schedule.weekBlueprints")}
                   onClick={() => run(onOpenWeekTemplates)}
                 />
                 {onToggleSmartFill ? (
                   <DeskCommand
-                    label="Coverage coach"
+                    label={t("schedule.coverageCoach")}
                     pressed={smartFillOpen}
                     onClick={() => run(onToggleSmartFill)}
                   />
@@ -279,31 +281,31 @@ export function ScheduleWeekDesk({
               </section>
             ) : null}
             {!readOnly ? (
-              <section aria-label="This week" className="sm:col-span-2">
-                <h3 className="px-2 text-xs text-muted-foreground">This week</h3>
+              <section aria-label={t("schedule.thisWeek")} className="sm:col-span-2">
+                <h3 className="px-2 text-xs text-muted-foreground">{t("schedule.thisWeek")}</h3>
                 <div className="grid sm:grid-cols-2">
                   <DeskCommand
-                    label="Repeat previous week"
+                    label={t("schedule.repeatPreviousWeek")}
                     onClick={() => run(onCopyPreviousWeek)}
                   />
                   {onAutoScheduleWeek ? (
                     <DeskCommand
-                      label="Auto-fill week"
+                      label={t("schedule.autoFillWeek")}
                       disabled={autoScheduleDisabled}
                       onClick={() => run(onAutoScheduleWeek)}
                     />
                   ) : null}
-                  <DeskCommand label="Empty this week" onClick={() => run(onClearWeek)} />
+                  <DeskCommand label={t("schedule.emptyThisWeek")} onClick={() => run(onClearWeek)} />
                   <DeskCommand
-                    label="Publish to the team"
+                    label={t("schedule.publishToTheTeam")}
                     onClick={() => run(() => onPublishWeek(true))}
                   />
                   <DeskCommand
-                    label="Return to draft"
+                    label={t("schedule.returnToDraft")}
                     onClick={() => run(() => onPublishWeek(false))}
                   />
-                  <DeskCommand label="Download CSV" onClick={() => run(onExportWeekCsv)} />
-                  <DeskCommand label="Print this week" onClick={() => run(onPrintWeek)} />
+                  <DeskCommand label={t("schedule.downloadCsv")} onClick={() => run(onExportWeekCsv)} />
+                  <DeskCommand label={t("schedule.printThisWeek")} onClick={() => run(onPrintWeek)} />
                 </div>
               </section>
             ) : null}
@@ -311,21 +313,21 @@ export function ScheduleWeekDesk({
               <div className="flex flex-wrap gap-3 px-2 text-[11px] text-muted-foreground sm:col-span-2">
                 <span className="inline-flex items-center gap-1">
                   <span className="h-2 w-2 rounded-sm bg-success" />
-                  Published
+                  {t("schedule.published")}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <span className="h-2 w-2 rounded-sm bg-warning" />
-                  Draft
+                  {t("schedule.draft")}
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <span className="h-2 w-2 rounded-sm bg-destructive" />
-                  Understaffed
+                  {t("schedule.understaffed")}
                 </span>
               </div>
             ) : null}
             {readOnly && onOpenTimeOffPanel ? (
               <DeskCommand
-                label="Request time off"
+                label={t("schedule.requestTimeOff")}
                 onClick={() => run(onOpenTimeOffPanel)}
               />
             ) : null}

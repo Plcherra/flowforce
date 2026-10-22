@@ -2,6 +2,7 @@
  * Add time off dialog component
  */
 
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -64,6 +65,7 @@ export function AddTimeOffDialog({
   onReasonChange,
   onSubmit,
 }: AddTimeOffDialogProps) {
+  const { t } = useTranslation();
   const handleSubmit = async () => {
     if (!userId || !startDate || !endDate) return;
     const success = await onSubmit({
@@ -87,14 +89,14 @@ export function AddTimeOffDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="z-50 max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto bg-background sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Add Time Off</DialogTitle>
+          <DialogTitle>{t("schedule.addTimeOff")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label>User</Label>
+            <Label>{t("schedule.user")}</Label>
             <Select value={userId} onValueChange={onUserIdChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a user" />
+                <SelectValue placeholder={t("schedule.selectAUser")} />
               </SelectTrigger>
               <SelectContent className="z-50 bg-background border shadow-lg">
                 {employees.map((u) => (
@@ -107,7 +109,7 @@ export function AddTimeOffDialog({
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <Label>Start date</Label>
+              <Label>{t("schedule.startDate")}</Label>
               <Input
                 type="date"
                 value={startDate}
@@ -115,7 +117,7 @@ export function AddTimeOffDialog({
               />
             </div>
             <div>
-              <Label>End date</Label>
+              <Label>{t("schedule.endDate")}</Label>
               <Input
                 type="date"
                 value={endDate}
@@ -125,7 +127,7 @@ export function AddTimeOffDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Type</Label>
+              <Label>{t("schedule.type")}</Label>
               <Select
                 value={type}
                 onValueChange={(value) => {
@@ -143,31 +145,31 @@ export function AddTimeOffDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="z-50 bg-background border shadow-lg">
-                  <SelectItem value="vacation">Vacation</SelectItem>
-                  <SelectItem value="sick">Sick</SelectItem>
-                  <SelectItem value="personal">Personal</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="vacation">{t("schedule.vacation")}</SelectItem>
+                  <SelectItem value="sick">{t("schedule.sick")}</SelectItem>
+                  <SelectItem value="personal">{t("schedule.personal")}</SelectItem>
+                  <SelectItem value="other">{t("schedule.other")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>Reason</Label>
+              <Label>{t("schedule.reason")}</Label>
               <Input
                 value={reason}
                 onChange={(e) => onReasonChange(e.target.value)}
-                placeholder="Optional"
+                placeholder={t("schedule.optional")}
               />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("schedule.cancel")}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!userId || !startDate || !endDate}
             >
-              Save
+              {t("schedule.save")}
             </Button>
           </div>
         </div>

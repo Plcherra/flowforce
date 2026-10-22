@@ -146,7 +146,7 @@ Prove: Unit test `src/i18n/resolveLanguage.test.ts` covers profile, company fall
 
 ### Phase 4 — Schedule strings
 
-- [ ] Move Schedule chrome into the six locales.
+- [x] Move Schedule chrome into the six locales.
 
 Rules:
 
@@ -804,5 +804,21 @@ Phone steps for Pedro:
 5. A person who has not picked a personal language follows the company language. If the company language is also empty, the app is English.
 
 Blockers: none. The Supabase CLI had no access token, so `supabase db push` could not run. The migration was applied with the Supabase API. Remote history version `20261022114112` matches `supabase/migrations/20261022114112_profiles_language.sql`.
+
+Questions: none.
+
+### 2026-10-22 — Phase 4 Schedule strings
+
+Shipped: Schedule chrome under `src/features/scheduling` now uses `useTranslation` and the `schedule` namespace. The same strings are in en, es, pt, fr, it, and de. Shift notes, shift titles, and time-off reasons that people type stay as stored text. The directory is off the hard-coded baseline. Two type signatures that the checker read as text were rewritten so the words stayed code.
+
+Proven: `npm run check:i18n` printed 1036 keys for each locale and `hard-coded strings 4046`, then exited 0. `npm run typecheck:src` passed. ESLint passed on the scheduling files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open the schedule.
+2. Set your language to Español on Settings, then Region. Reload. Buttons such as Add, Publish, and Filters, and the week desk, should be in Spanish. A shift title someone typed stays in the language they wrote.
+3. Switch to Deutsch and open time off and availability. The labels should be German. A reason someone typed stays as they wrote it.
+4. Switch back to English. The schedule labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
 
 Questions: none.

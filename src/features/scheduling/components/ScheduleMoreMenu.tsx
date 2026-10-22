@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   ArrowRightLeft,
   Bell,
@@ -42,6 +43,7 @@ export function ScheduleMoreMenu({
   onAction,
   onOpenAvailability,
 }: ScheduleMoreMenuProps) {
+  const { t } = useTranslation();
   const access = scheduleMenuAccess(role);
   const showTeam =
     access.canReviewTeam || access.canManageTeamAvailability;
@@ -54,8 +56,8 @@ export function ScheduleMoreMenu({
           variant="ghost"
           size="sm"
           className="relative h-7 w-7 shrink-0 p-0"
-          aria-label="More options"
-          title="More options"
+          aria-label={t("schedule.moreOptions")}
+          title={t("schedule.moreOptions")}
           data-testid="schedule-more-options"
         >
           <MoreHorizontal className="h-4 w-4" />
@@ -65,38 +67,38 @@ export function ScheduleMoreMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>You</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("schedule.you")}</DropdownMenuLabel>
         <DropdownMenuItem onClick={() => onOpenAvailability?.("personal")}>
           <Clock className="mr-2 h-4 w-4" />
-          My availability
+          {t("schedule.myAvailability2")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAction?.("timeoff")}>
           <Calendar className="mr-2 h-4 w-4" />
-          My time off
+          {t("schedule.myTimeOff")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAction?.("swaps")}>
           <ArrowRightLeft className="mr-2 h-4 w-4" />
-          My swaps
+          {t("schedule.mySwaps")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAction?.("workflow")}>
           <Bell className="mr-2 h-4 w-4" />
-          Reminders
+          {t("schedule.reminders")}
         </DropdownMenuItem>
 
         {showTeam ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Team</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("schedule.team")}</DropdownMenuLabel>
             {access.canReviewTeam ? (
               <DropdownMenuItem onClick={() => onAction?.("staff")}>
                 <Users className="mr-2 h-4 w-4" />
-                Team requests
+                {t("schedule.teamRequests")}
               </DropdownMenuItem>
             ) : null}
             {access.canManageTeamAvailability ? (
               <DropdownMenuItem onClick={() => onOpenAvailability?.("team")}>
                 <Clock className="mr-2 h-4 w-4" />
-                Team availability
+                {t("schedule.teamAvailability")}
               </DropdownMenuItem>
             ) : null}
           </>
@@ -105,7 +107,7 @@ export function ScheduleMoreMenu({
         {conflicts.length > 0 ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Conflict warnings</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("schedule.conflictWarnings2")}</DropdownMenuLabel>
             <div className="max-h-48 space-y-1 overflow-y-auto px-1 pb-1">
               {conflicts.slice(0, 4).map((conflict) => (
                 <div

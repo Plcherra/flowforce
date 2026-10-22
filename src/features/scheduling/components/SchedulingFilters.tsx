@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export function SchedulingFilters({
   filters,
   onFiltersChange,
 }: SchedulingFiltersProps) {
+  const { t } = useTranslation();
   const { positions } = usePositions();
   const [, setShowCustomFilter] = useState(false);
 
@@ -70,10 +72,10 @@ export function SchedulingFilters({
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Filters</CardTitle>
+          <CardTitle className="text-lg">{t("schedule.filters")}</CardTitle>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-              Clear All
+              {t("schedule.clearAll")}
             </Button>
           )}
         </div>
@@ -82,7 +84,7 @@ export function SchedulingFilters({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Job/Position Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Job/Position</label>
+            <label className="text-sm font-medium">{t("schedule.jobPosition2")}</label>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {positions.map((position) => (
                 <div key={position.id} className="flex items-center space-x-2">
@@ -104,7 +106,7 @@ export function SchedulingFilters({
 
           {/* Status Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Status</label>
+            <label className="text-sm font-medium">{t("schedule.status")}</label>
             <Select
               value={filters.status}
               onValueChange={(value) =>
@@ -115,21 +117,21 @@ export function SchedulingFilters({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="All statuses" />
+                <SelectValue placeholder={t("schedule.allStatuses2")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="assigned">Assigned</SelectItem>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                <SelectItem value="understaffed">Understaffed</SelectItem>
-                <SelectItem value="overstaffed">Overstaffed</SelectItem>
+                <SelectItem value="all">{t("schedule.allStatuses")}</SelectItem>
+                <SelectItem value="assigned">{t("schedule.assigned")}</SelectItem>
+                <SelectItem value="unassigned">{t("schedule.unassigned")}</SelectItem>
+                <SelectItem value="understaffed">{t("schedule.understaffed")}</SelectItem>
+                <SelectItem value="overstaffed">{t("schedule.overstaffed")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Published Filter */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Published</label>
+            <label className="text-sm font-medium">{t("schedule.published")}</label>
             <Select
               value={filters.published}
               onValueChange={(value) =>
@@ -140,19 +142,19 @@ export function SchedulingFilters({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="All" />
+                <SelectValue placeholder={t("schedule.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="all">{t("schedule.all")}</SelectItem>
+                <SelectItem value="published">{t("schedule.published")}</SelectItem>
+                <SelectItem value="draft">{t("schedule.draft")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Custom Filters */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Custom</label>
+            <label className="text-sm font-medium">{t("schedule.custom")}</label>
             <Button
               variant="outline"
               size="sm"
@@ -160,7 +162,7 @@ export function SchedulingFilters({
               className="w-full justify-start"
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add Filter
+              {t("schedule.addFilter")}
             </Button>
           </div>
         </div>
@@ -168,7 +170,7 @@ export function SchedulingFilters({
         {/* Active Filters Display */}
         {hasActiveFilters && (
           <div className="space-y-2">
-            <label className="text-sm font-medium">Active Filters:</label>
+            <label className="text-sm font-medium">{t("schedule.activeFilters")}</label>
             <div className="flex flex-wrap gap-2">
               {filters.positions?.map((positionId: string) => {
                 const position = positions.find((p) => p.id === positionId);

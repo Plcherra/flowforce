@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ export function TimeOffPoliciesSection({
   roleId,
   requests,
 }: TimeOffPoliciesSectionProps) {
+  const { t } = useTranslation();
   const { policies, savePolicy, isSaving } = useTimeOffPolicies(companyId);
   const { roles } = useCompanyRoles();
   const [name, setName] = useState("");
@@ -145,9 +147,9 @@ export function TimeOffPoliciesSection({
   return (
     <section className="space-y-3" data-testid="time-off-policies">
       <div className="space-y-1">
-        <h3 className="text-sm font-medium">Time off policies</h3>
+        <h3 className="text-sm font-medium">{t("schedule.timeOffPolicies")}</h3>
         {balances.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No policy applies yet.</p>
+          <p className="text-sm text-muted-foreground">{t("schedule.noPolicyAppliesYet")}</p>
         ) : (
           balances.map((balance) => (
             <p
@@ -164,44 +166,44 @@ export function TimeOffPoliciesSection({
         <div className="space-y-3 rounded-lg border p-3">
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" variant="outline" onClick={fillWeekend}>
-              Weekend example
+              {t("schedule.weekendExample")}
             </Button>
             <Button type="button" size="sm" variant="outline" onClick={fillWeekday}>
-              Weekday example
+              {t("schedule.weekdayExample")}
             </Button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="grid gap-1">
-              <Label htmlFor="policy-name">Name</Label>
+              <Label htmlFor="policy-name">{t("schedule.name")}</Label>
               <Input id="policy-name" value={name} onChange={(event) => setName(event.target.value)} />
             </div>
             <div className="grid gap-1">
-              <Label>Unit</Label>
+              <Label>{t("schedule.unit")}</Label>
               <Select value={unit} onValueChange={(value) => setUnit(value as TimeOffUnit)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="days">Days</SelectItem>
-                  <SelectItem value="hours">Hours</SelectItem>
-                  <SelectItem value="minutes">Minutes</SelectItem>
+                  <SelectItem value="days">{t("schedule.days")}</SelectItem>
+                  <SelectItem value="hours">{t("schedule.hours")}</SelectItem>
+                  <SelectItem value="minutes">{t("schedule.minutes")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="cap-week">Max per week</Label>
+              <Label htmlFor="cap-week">{t("schedule.maxPerWeek")}</Label>
               <Input id="cap-week" value={capWeek} onChange={(event) => setCapWeek(event.target.value)} />
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="cap-month">Max per month</Label>
+              <Label htmlFor="cap-month">{t("schedule.maxPerMonth")}</Label>
               <Input id="cap-month" value={capMonth} onChange={(event) => setCapMonth(event.target.value)} />
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="cap-year">Max per year</Label>
+              <Label htmlFor="cap-year">{t("schedule.maxPerYear")}</Label>
               <Input id="cap-year" value={capYear} onChange={(event) => setCapYear(event.target.value)} />
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="notice-days">Notice in days</Label>
+              <Label htmlFor="notice-days">{t("schedule.noticeInDays")}</Label>
               <Input id="notice-days" value={noticeDays} onChange={(event) => setNoticeDays(event.target.value)} />
             </div>
           </div>
@@ -232,16 +234,16 @@ export function TimeOffPoliciesSection({
             ))}
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="policy-people">People</Label>
+            <Label htmlFor="policy-people">{t("schedule.people")}</Label>
             <Input
               id="policy-people"
               value={userIds}
-              placeholder="Leave empty, or paste person ids separated by commas"
+              placeholder={t("schedule.leaveEmptyOrPastePersonIdsSeparatedBy")}
               onChange={(event) => setUserIds(event.target.value)}
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Leave roles and people empty to apply this policy to everyone.
+            {t("schedule.leaveRolesAndPeopleEmptyToApplyThis")}
           </p>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <Button type="button" size="sm" onClick={handleSave} disabled={isSaving || !companyId}>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ interface WorkflowStep {
 }
 
 export function SchedulingWorkflow() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const today = new Date();
   const weekStart = startOfWeek(today);
@@ -100,10 +102,10 @@ export function SchedulingWorkflow() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
-          Weekly Scheduling Flow
+          {t("schedule.weeklySchedulingFlow")}
         </CardTitle>
         <CardDescription>
-          Automated workflow for consistent scheduling process
+          {t("schedule.automatedWorkflowForConsistentSchedulingProcess")}
         </CardDescription>
       </CardHeader>
 
@@ -145,7 +147,7 @@ export function SchedulingWorkflow() {
                     <h3 className="font-semibold text-sm">{step.title}</h3>
                     {step.isToday && (
                       <Badge variant="default" className="text-xs">
-                        Today
+                        {t("schedule.today")}
                       </Badge>
                     )}
                   </div>
@@ -180,13 +182,13 @@ export function SchedulingWorkflow() {
             </div>
             <div>
               <h4 className="font-medium text-sm mb-1">
-                Notification Settings
+                {t("schedule.notificationSettings")}
               </h4>
               <p className="text-xs text-muted-foreground mb-2">
-                Automated reminders will be sent according to this schedule
+                {t("schedule.automatedRemindersWillBeSentAccordingToThis")}
               </p>
               <Button variant="outline" size="sm" className="text-xs">
-                Configure Notifications
+                {t("schedule.configureNotifications")}
               </Button>
             </div>
           </div>

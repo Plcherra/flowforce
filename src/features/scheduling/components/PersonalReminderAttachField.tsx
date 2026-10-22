@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 
 import { Label } from "@/components/ui/label";
@@ -38,6 +39,7 @@ export function PersonalReminderAttachField({
   onKindChange,
   onRecordChange,
 }: PersonalReminderAttachFieldProps) {
+  const { t } = useTranslation();
   const recordsQuery = useQuery({
     queryKey: ["personal-reminder-records", companyId, kind],
     enabled: Boolean(companyId) && kind !== "",
@@ -81,7 +83,7 @@ export function PersonalReminderAttachField({
   return (
     <div className="grid gap-2 sm:grid-cols-2">
       <div className="space-y-1">
-        <Label>Opens</Label>
+        <Label>{t("schedule.opens")}</Label>
         <Select
           value={kind || NONE}
           onValueChange={(value) => {
@@ -89,14 +91,14 @@ export function PersonalReminderAttachField({
             onRecordChange("");
           }}
         >
-          <SelectTrigger aria-label="Reminder opens" data-testid="personal-reminder-opens">
+          <SelectTrigger aria-label={t("schedule.reminderOpens")} data-testid="personal-reminder-opens">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={NONE}>Just this reminder</SelectItem>
-            <SelectItem value="task">A task</SelectItem>
-            <SelectItem value="form">A form</SelectItem>
-            <SelectItem value="shift">A shift</SelectItem>
+            <SelectItem value={NONE}>{t("schedule.justThisReminder")}</SelectItem>
+            <SelectItem value="task">{t("schedule.aTask")}</SelectItem>
+            <SelectItem value="form">{t("schedule.aForm")}</SelectItem>
+            <SelectItem value="shift">{t("schedule.aShift")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

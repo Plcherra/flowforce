@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export function UsersTab({
   setFormData,
   isUserAvailableForWindow,
 }: UsersTabProps) {
+  const { t } = useTranslation();
   const [userViews, setUserViews] = useState<{
     time: boolean;
     qualified: boolean;
@@ -57,7 +59,7 @@ export function UsersTab({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">Visualization</div>
+        <div className="text-sm text-muted-foreground">{t("schedule.visualization")}</div>
         <div className="inline-flex gap-1">
           <Button
             type="button"
@@ -66,7 +68,7 @@ export function UsersTab({
             className="h-8"
             onClick={() => setUserViews((v) => ({ ...v, time: !v.time }))}
           >
-            By Time
+            {t("schedule.byTime")}
           </Button>
           <Button
             type="button"
@@ -77,21 +79,21 @@ export function UsersTab({
               setUserViews((v) => ({ ...v, qualified: !v.qualified }))
             }
           >
-            Qualified
+            {t("schedule.qualified")}
           </Button>
         </div>
       </div>
 
       <div>
-        <Label>Select Users</Label>
+        <Label>{t("schedule.selectUsers")}</Label>
         <div className="space-y-3">
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center justify-between">
-                <span>Users</span>
+                <span>{t("schedule.users")}</span>
                 {employeesLoading && (
                   <span className="text-sm text-muted-foreground">
-                    Loading...
+                    {t("schedule.loading")}
                   </span>
                 )}
               </CardTitle>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRightLeft, Calendar } from "lucide-react";
 import { ShiftSwapsPanel } from "./ShiftSwapsPanel";
@@ -9,15 +10,15 @@ import { useSchedulingRole } from "../hooks/useSchedulingRole";
  * Availability and separate time-off/swap panels are opened contextually.
  */
 export function StaffShiftManagement() {
+  const { t } = useTranslation();
   const role = useSchedulingRole();
 
   return (
     <div className="space-y-6" data-testid="team-requests">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Team requests</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("schedule.teamRequests")}</h2>
         <p className="text-muted-foreground">
-          Review other people's shift swaps and time off. Your own hours and
-          requests stay in My availability, My time off, and My swaps.
+          {t("schedule.reviewOtherPeopleSShiftSwapsAndTime")}
         </p>
       </div>
 
@@ -25,11 +26,11 @@ export function StaffShiftManagement() {
         <TabsList>
           <TabsTrigger value="swaps" className="flex items-center gap-2">
             <ArrowRightLeft className="h-4 w-4" />
-            Shift Swaps
+            {t("schedule.shiftSwaps")}
           </TabsTrigger>
           <TabsTrigger value="timeoff" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Time Off
+            {t("schedule.timeOff")}
           </TabsTrigger>
         </TabsList>
 

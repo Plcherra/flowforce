@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -27,6 +28,7 @@ export function LinkedRecordReminders({
   userId,
   personalReminders,
 }: LinkedRecordRemindersProps) {
+  const { t } = useTranslation();
   const linked = useLinkedRecordReminders(userId, personalReminders);
   const reminders = linked.data ?? [];
 
@@ -36,7 +38,7 @@ export function LinkedRecordReminders({
     return (
       <Alert>
         <AlertDescription>
-          Reminders that open a task, form, or shift could not be loaded.
+          {t("schedule.remindersThatOpenATaskFormOrShift")}
         </AlertDescription>
       </Alert>
     );
@@ -46,9 +48,9 @@ export function LinkedRecordReminders({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Open from a reminder</CardTitle>
+        <CardTitle className="text-base">{t("schedule.openFromAReminder")}</CardTitle>
         <CardDescription>
-          Tasks, forms, and shifts you can already open. These stay reminders.
+          {t("schedule.tasksFormsAndShiftsYouCanAlreadyOpen")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">

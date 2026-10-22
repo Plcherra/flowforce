@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -86,6 +87,7 @@ export function DragDropScheduleCalendar({
   smartFillOpen = false,
   onToggleSmartFill,
 }: DragDropScheduleCalendarProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [draggedVendor, setDraggedVendor] = useState<
     (typeof VENDOR_PALETTE)[number] | null
@@ -439,11 +441,11 @@ export function DragDropScheduleCalendar({
       <Dialog open={showMultiAdd} onOpenChange={setShowMultiAdd}>
         <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-[560px]">
           <DialogHeader>
-            <DialogTitle>Add Multiple Shifts</DialogTitle>
+            <DialogTitle>{t("schedule.addMultipleShifts")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label htmlFor="mtitle">Title</Label>
+              <Label htmlFor="mtitle">{t("schedule.title")}</Label>
               <Input
                 id="mtitle"
                 value={multiTitle}
@@ -452,7 +454,7 @@ export function DragDropScheduleCalendar({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Start</Label>
+                <Label>{t("schedule.start")}</Label>
                 <Input
                   type="time"
                   value={multiStart}
@@ -460,7 +462,7 @@ export function DragDropScheduleCalendar({
                 />
               </div>
               <div>
-                <Label>End</Label>
+                <Label>{t("schedule.end")}</Label>
                 <Input
                   type="time"
                   value={multiEnd}
@@ -469,7 +471,7 @@ export function DragDropScheduleCalendar({
               </div>
             </div>
             <div>
-              <Label>Days of this week</Label>
+              <Label>{t("schedule.daysOfThisWeek")}</Label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {weekDays.map((d, idx) => (
                   <Button
@@ -491,7 +493,7 @@ export function DragDropScheduleCalendar({
               </div>
             </div>
             <div>
-              <Label>Required headcount</Label>
+              <Label>{t("schedule.requiredHeadcount")}</Label>
               <Input
                 type="number"
                 min={1}
@@ -504,7 +506,7 @@ export function DragDropScheduleCalendar({
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowMultiAdd(false)}>
-                Cancel
+                {t("schedule.cancel")}
               </Button>
               <Button
                 onClick={async () => {
@@ -557,7 +559,7 @@ export function DragDropScheduleCalendar({
                 }}
                 disabled={multiDays.length === 0}
               >
-                Create
+                {t("schedule.create")}
               </Button>
             </div>
           </div>

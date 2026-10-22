@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -28,6 +29,7 @@ export function ImportShiftsDialog({
   open,
   onOpenChange,
 }: ImportShiftsDialogProps) {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -76,9 +78,9 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Import Shifts</DialogTitle>
+          <DialogTitle>{t("schedule.importShifts")}</DialogTitle>
           <DialogDescription>
-            Upload a CSV or Excel file to import multiple shifts at once
+            {t("schedule.uploadACsvOrExcelFileToImport")}
           </DialogDescription>
         </DialogHeader>
 
@@ -88,10 +90,10 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center">
                 <FileSpreadsheet className="mr-2 h-5 w-5" />
-                Download Template
+                {t("schedule.downloadTemplate")}
               </CardTitle>
               <CardDescription>
-                Start with our template to ensure proper formatting
+                {t("schedule.startWithOurTemplateToEnsureProperFormatting")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -101,7 +103,7 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
                 className="w-full"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Download CSV Template
+                {t("schedule.downloadCsvTemplate")}
               </Button>
             </CardContent>
           </Card>
@@ -111,15 +113,15 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center">
                 <Upload className="mr-2 h-5 w-5" />
-                Upload File
+                {t("schedule.uploadFile")}
               </CardTitle>
               <CardDescription>
-                Select your CSV or Excel file to import
+                {t("schedule.selectYourCsvOrExcelFileToImport")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="file-upload">Choose File</Label>
+                <Label htmlFor="file-upload">{t("schedule.chooseFile")}</Label>
                 <Input
                   id="file-upload"
                   type="file"
@@ -147,12 +149,12 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
                 <div className="flex items-start">
                   <AlertCircle className="h-4 w-4 text-warning mr-2 mt-0.5" />
                   <div className="text-sm text-warning-foreground">
-                    <p className="font-medium">Important Notes:</p>
+                    <p className="font-medium">{t("schedule.importantNotes")}</p>
                     <ul className="mt-1 list-disc list-inside space-y-1 text-xs">
-                      <li>Dates should be in YYYY-MM-DD format</li>
-                      <li>Times should be in HH:MM format (24-hour)</li>
-                      <li>Required Staff should be a number</li>
-                      <li>Invalid rows will be skipped with errors shown</li>
+                      <li>{t("schedule.datesShouldBeInYyyyMmDdFormat")}</li>
+                      <li>{t("schedule.timesShouldBeInHhMmFormat24")}</li>
+                      <li>{t("schedule.requiredStaffShouldBeANumber")}</li>
+                      <li>{t("schedule.invalidRowsWillBeSkippedWithErrorsShown")}</li>
                     </ul>
                   </div>
                 </div>
@@ -163,7 +165,7 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
           {/* Actions */}
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("schedule.cancel")}
             </Button>
             <Button onClick={handleImport} disabled={!selectedFile || loading}>
               {loading ? "Importing..." : "Import Shifts"}

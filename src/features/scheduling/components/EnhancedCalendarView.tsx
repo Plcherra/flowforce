@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MonthView } from "./MonthView";
@@ -50,6 +51,7 @@ export function EnhancedCalendarView({
   smartFillOpen = false,
   onToggleSmartFill,
 }: EnhancedCalendarViewProps) {
+  const { t } = useTranslation();
   const { shifts, loading, setWeekReference, weekRange } = useScheduling();
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -251,7 +253,7 @@ export function EnhancedCalendarView({
               <div className="text-center">
                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Loading schedule...
+                  {t("schedule.loadingSchedule")}
                 </p>
               </div>
             </div>

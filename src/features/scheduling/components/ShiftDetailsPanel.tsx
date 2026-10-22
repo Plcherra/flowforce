@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -156,6 +157,7 @@ export function ShiftDetailsPanel({
   shiftId,
   onClose,
 }: ShiftDetailsPanelProps) {
+  const { t } = useTranslation();
   const {
     shifts,
     timeOff,
@@ -731,14 +733,14 @@ export function ShiftDetailsPanel({
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Shift Details</CardTitle>
+            <CardTitle>{t("schedule.shiftDetails")}</CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Shift not found</p>
+          <p className="text-sm text-muted-foreground">{t("schedule.shiftNotFound")}</p>
         </CardContent>
       </Card>
     );
@@ -753,13 +755,13 @@ export function ShiftDetailsPanel({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
-            Shift Details
+            {t("schedule.shiftDetails")}
           </CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            aria-label="Close shift details"
+            aria-label={t("schedule.closeShiftDetails")}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -769,9 +771,9 @@ export function ShiftDetailsPanel({
       <CardContent className="min-h-0 flex-1 space-y-6 overflow-y-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="tasks">Tasks</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="details">{t("schedule.details")}</TabsTrigger>
+            <TabsTrigger value="tasks">{t("schedule.tasks")}</TabsTrigger>
+            <TabsTrigger value="templates">{t("schedule.templates")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-4">
@@ -786,7 +788,7 @@ export function ShiftDetailsPanel({
               {linkedVendorVisits.length > 0 && (
                 <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold">Vendor Visits</span>
+                    <span className="text-sm font-semibold">{t("schedule.vendorVisits")}</span>
                     <Badge variant="outline">{linkedVendorVisits.length}</Badge>
                   </div>
                   <div className="space-y-2">
@@ -815,7 +817,7 @@ export function ShiftDetailsPanel({
                 <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/60 p-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-destructive">
-                      Conflict Warnings
+                      {t("schedule.conflictWarnings")}
                     </span>
                     <Badge
                       variant="outline"
@@ -840,13 +842,13 @@ export function ShiftDetailsPanel({
                 <div className="rounded-lg border border-border/60 bg-muted/30 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold">AI Copilot Draft</p>
+                      <p className="text-sm font-semibold">{t("schedule.aiCopilotDraft")}</p>
                       <p className="text-xs text-muted-foreground">
                         Run {copilotMeta.runId?.slice?.(0, 8) ?? "—"} •{" "}
                         {copilotMeta.status ?? "draft-only"}
                       </p>
                     </div>
-                    <Badge variant="outline">Draft</Badge>
+                    <Badge variant="outline">{t("schedule.draft")}</Badge>
                   </div>
                   {copilotWarnings.length > 0 ? (
                     <div className="space-y-2">
@@ -874,27 +876,27 @@ export function ShiftDetailsPanel({
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      No conflicts on this draft.
+                      {t("schedule.noConflictsOnThisDraft")}
                     </p>
                   )}
                 </div>
               )}
 
               <div>
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">{t("schedule.title")}</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
-                  placeholder="Shift title"
+                  placeholder={t("schedule.shiftTitle2")}
                 />
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="start_time">Start Time</Label>
+                  <Label htmlFor="start_time">{t("schedule.startTime")}</Label>
                   <Input
                     id="start_time"
                     type="datetime-local"
@@ -905,7 +907,7 @@ export function ShiftDetailsPanel({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="end_time">End Time</Label>
+                  <Label htmlFor="end_time">{t("schedule.endTime")}</Label>
                   <Input
                     id="end_time"
                     type="datetime-local"
@@ -918,19 +920,19 @@ export function ShiftDetailsPanel({
               </div>
 
               <div>
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{t("schedule.location")}</Label>
                 <Input
                   id="location"
                   value={formData.location}
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  placeholder="Shift location"
+                  placeholder={t("schedule.shiftLocation")}
                 />
               </div>
 
               <div>
-                <Label htmlFor="hourly_rate">Hourly Rate</Label>
+                <Label htmlFor="hourly_rate">{t("schedule.hourlyRate")}</Label>
                 <Input
                   id="hourly_rate"
                   type="number"
@@ -943,19 +945,19 @@ export function ShiftDetailsPanel({
                       hourly_rate: e.target.value,
                     })
                   }
-                  placeholder="Optional labor cost rate"
+                  placeholder={t("schedule.optionalLaborCostRate")}
                 />
               </div>
 
               <div>
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t("schedule.notes")}</Label>
                 <Textarea
                   id="notes"
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData({ ...formData, notes: e.target.value })
                   }
-                  placeholder="Additional notes..."
+                  placeholder={t("schedule.additionalNotes")}
                   rows={3}
                 />
               </div>
@@ -963,7 +965,7 @@ export function ShiftDetailsPanel({
 
             {/* Assigned Employees */}
             <div className="space-y-3">
-              <Label>Assigned Employees</Label>
+              <Label>{t("schedule.assignedEmployees")}</Label>
               <EmployeeSelector
                 shiftId={shift.id}
                 selectedEmployees={shift.assignments || []}
@@ -985,14 +987,14 @@ export function ShiftDetailsPanel({
             {/* Linked Events */}
             <div className="space-y-2 border rounded-md p-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">Linked Events</h4>
+                <h4 className="text-sm font-medium">{t("schedule.linkedEvents")}</h4>
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={openVisitSetup}
                   disabled={addingVisit}
-                  title="Add vendor visit"
-                  aria-label="Add vendor visit"
+                  title={t("schedule.addVendorVisit")}
+                  aria-label={t("schedule.addVendorVisit")}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -1000,14 +1002,14 @@ export function ShiftDetailsPanel({
 
               {visitSetupOpen && (
                 <div className="space-y-3 rounded-md border bg-muted/20 p-3">
-                  <p className="text-sm font-medium">Schedule vendor visit</p>
+                  <p className="text-sm font-medium">{t("schedule.scheduleVendorVisit2")}</p>
                   <div className="space-y-2">
-                    <Label htmlFor="visit-type">Visit type</Label>
+                    <Label htmlFor="visit-type">{t("schedule.visitType")}</Label>
                     <div className="relative">
                       <Input
                         id="visit-type"
                         value={visitForm.vendorType}
-                        placeholder="Type a visit type"
+                        placeholder={t("schedule.typeAVisitType")}
                         className="pr-16"
                         onChange={(event) =>
                           setVisitForm((current) => ({
@@ -1028,8 +1030,8 @@ export function ShiftDetailsPanel({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          aria-label="Save visit type"
-                          title="Save visit type"
+                          aria-label={t("schedule.saveVisitType")}
+                          title={t("schedule.saveVisitType")}
                           disabled={!visitForm.vendorType.trim()}
                           onClick={saveCurrentVisitType}
                         >
@@ -1040,8 +1042,8 @@ export function ShiftDetailsPanel({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          aria-label="Delete visit type"
-                          title="Delete visit type"
+                          aria-label={t("schedule.deleteVisitType")}
+                          title={t("schedule.deleteVisitType")}
                           disabled={
                             !savedVisitTypes.some(
                               (type) =>
@@ -1091,7 +1093,7 @@ export function ShiftDetailsPanel({
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="visit-name">Vendor name</Label>
+                    <Label htmlFor="visit-name">{t("schedule.vendorName")}</Label>
                     <Input
                       id="visit-name"
                       value={visitForm.vendorName}
@@ -1106,7 +1108,7 @@ export function ShiftDetailsPanel({
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="visit-start">Start</Label>
+                      <Label htmlFor="visit-start">{t("schedule.start")}</Label>
                       <Input
                         id="visit-start"
                         type="datetime-local"
@@ -1120,7 +1122,7 @@ export function ShiftDetailsPanel({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="visit-end">End</Label>
+                      <Label htmlFor="visit-end">{t("schedule.end")}</Label>
                       <Input
                         id="visit-end"
                         type="datetime-local"
@@ -1135,11 +1137,11 @@ export function ShiftDetailsPanel({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="visit-location">Location</Label>
+                    <Label htmlFor="visit-location">{t("schedule.location")}</Label>
                     <Input
                       id="visit-location"
                       value={visitForm.location}
-                      placeholder="Where they should go"
+                      placeholder={t("schedule.whereTheyShouldGo")}
                       onChange={(event) =>
                         setVisitForm((current) => ({
                           ...current,
@@ -1149,12 +1151,12 @@ export function ShiftDetailsPanel({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="visit-notes">Notes</Label>
+                    <Label htmlFor="visit-notes">{t("schedule.notes")}</Label>
                     <Textarea
                       id="visit-notes"
                       rows={2}
                       value={visitForm.notes}
-                      placeholder="What should the shift do for this visit?"
+                      placeholder={t("schedule.whatShouldTheShiftDoForThisVisit")}
                       onChange={(event) =>
                         setVisitForm((current) => ({
                           ...current,
@@ -1177,7 +1179,7 @@ export function ShiftDetailsPanel({
                       onClick={() => setVisitSetupOpen(false)}
                       disabled={addingVisit}
                     >
-                      Cancel
+                      {t("schedule.cancel")}
                     </Button>
                   </div>
                 </div>
@@ -1185,7 +1187,7 @@ export function ShiftDetailsPanel({
 
               {linkedEvents.length === 0 && !visitSetupOpen && (
                 <p className="text-xs text-muted-foreground">
-                  No events linked to this shift.
+                  {t("schedule.noEventsLinkedToThisShift")}
                 </p>
               )}
 
@@ -1205,7 +1207,7 @@ export function ShiftDetailsPanel({
                           }))
                         }
                         className="h-8 text-sm"
-                        placeholder="Event title"
+                        placeholder={t("schedule.eventTitle")}
                       />
                       <div className="text-xs text-muted-foreground mt-1">
                         {new Date(ev.start).toLocaleString()}{" "}
@@ -1228,7 +1230,7 @@ export function ShiftDetailsPanel({
                             }))
                           }
                           className="h-8 text-sm"
-                          placeholder="Location"
+                          placeholder={t("schedule.location")}
                         />
                       </div>
                     </div>
@@ -1239,8 +1241,8 @@ export function ShiftDetailsPanel({
                       <Button
                         variant="ghost"
                         size="icon"
-                        title="Delete event"
-                        aria-label="Delete event"
+                        title={t("schedule.deleteEvent")}
+                        aria-label={t("schedule.deleteEvent")}
                         onClick={async () => {
                           if (confirm("Delete this linked event?")) {
                             await deleteEvent(ev.id);
@@ -1293,7 +1295,7 @@ export function ShiftDetailsPanel({
             />
             {shiftTasks.length === 0 && !shiftTasksQuery.isLoading && (
               <p className="text-sm text-muted-foreground">
-                No tasks on this shift yet. Add one here, or type it and use Save Changes.
+                {t("schedule.noTasksOnThisShiftYetAddOne")}
               </p>
             )}
             {taskError && (
@@ -1301,7 +1303,7 @@ export function ShiftDetailsPanel({
             )}
             {shiftTasksQuery.isError && (
               <p className="text-sm text-destructive">
-                Saved tasks could not be reloaded. A task you just added still stays in this list.
+                {t("schedule.savedTasksCouldNotBeReloadedATask")}
               </p>
             )}
           </TabsContent>
@@ -1316,13 +1318,13 @@ export function ShiftDetailsPanel({
               {templateSaving ? "Saving template..." : "Save as Shift Template"}
             </Button>
             <div className="space-y-2">
-              <Label htmlFor="shift-template">Load from Template</Label>
+              <Label htmlFor="shift-template">{t("schedule.loadFromTemplate")}</Label>
               <Select
                 value={selectedTemplateId || undefined}
                 onValueChange={setSelectedTemplateId}
                 disabled={templates.length === 0}
               >
-                <SelectTrigger id="shift-template" aria-label="Shift template">
+                <SelectTrigger id="shift-template" aria-label={t("schedule.shiftTemplate")}>
                   <SelectValue
                     placeholder={
                       templates.length === 0
@@ -1345,7 +1347,7 @@ export function ShiftDetailsPanel({
                 onClick={handleLoadTemplate}
                 disabled={!selectedTemplateId}
               >
-                Load from Template
+                {t("schedule.loadFromTemplate")}
               </Button>
             </div>
           </TabsContent>
@@ -1365,7 +1367,7 @@ export function ShiftDetailsPanel({
             disabled={loading}
           >
             <Eye className="mr-2 h-4 w-4" />
-            Publish this shift only
+            {t("schedule.publishThisShiftOnly")}
           </Button>
         )}
 
@@ -1375,7 +1377,7 @@ export function ShiftDetailsPanel({
           disabled={loading}
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete Shift
+          {t("schedule.deleteShift")}
         </Button>
       </div>
     </Card>

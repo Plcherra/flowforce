@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 type ViewType = "month" | "week" | "day" | "year";
@@ -15,6 +16,7 @@ export function ViewSelector({
   isMobile = false,
   mode = "scheduling",
 }: ViewSelectorProps) {
+  const { t } = useTranslation();
   const isScheduling = mode === "scheduling";
 
   if (isMobile) {
@@ -27,7 +29,7 @@ export function ViewSelector({
             className="flex-1"
             onClick={() => onViewChange("day")}
           >
-            Day
+            {t("schedule.day")}
           </Button>
           <Button
             variant={currentView === "week" ? "default" : "outline"}
@@ -35,7 +37,7 @@ export function ViewSelector({
             className="flex-1"
             onClick={() => onViewChange("week")}
           >
-            Week
+            {t("schedule.week")}
           </Button>
           <Button
             variant={currentView === "month" ? "default" : "outline"}
@@ -43,7 +45,7 @@ export function ViewSelector({
             className="flex-1"
             onClick={() => onViewChange("month")}
           >
-            Month
+            {t("schedule.month")}
           </Button>
         </div>
 
@@ -51,15 +53,15 @@ export function ViewSelector({
           <div className="flex items-center justify-center space-x-4 text-xs text-muted-foreground">
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-success rounded-full"></div>
-              <span>Published</span>
+              <span>{t("schedule.published")}</span>
             </div>
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-warning rounded-full"></div>
-              <span>Draft</span>
+              <span>{t("schedule.draft")}</span>
             </div>
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-destructive rounded-full"></div>
-              <span>Understaffed</span>
+              <span>{t("schedule.understaffed")}</span>
             </div>
           </div>
         )}
@@ -75,21 +77,21 @@ export function ViewSelector({
           size="sm"
           onClick={() => onViewChange("day")}
         >
-          Day
+          {t("schedule.day")}
         </Button>
         <Button
           variant={currentView === "week" ? "default" : "outline"}
           size="sm"
           onClick={() => onViewChange("week")}
         >
-          Week
+          {t("schedule.week")}
         </Button>
         <Button
           variant={currentView === "month" ? "default" : "outline"}
           size="sm"
           onClick={() => onViewChange("month")}
         >
-          Month
+          {t("schedule.month")}
         </Button>
         {isScheduling && (
           <Button
@@ -97,7 +99,7 @@ export function ViewSelector({
             size="sm"
             onClick={() => onViewChange("year")}
           >
-            Year
+            {t("schedule.year")}
           </Button>
         )}
       </div>
@@ -106,15 +108,15 @@ export function ViewSelector({
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <div className="flex items-center space-x-1">
             <div className="w-3 h-3 bg-success rounded"></div>
-            <span>Published</span>
+            <span>{t("schedule.published")}</span>
           </div>
           <div className="flex items-center space-x-1">
             <div className="w-3 h-3 bg-warning rounded"></div>
-            <span>Draft</span>
+            <span>{t("schedule.draft")}</span>
           </div>
           <div className="flex items-center space-x-1">
             <div className="w-3 h-3 bg-destructive rounded"></div>
-            <span>Understaffed</span>
+            <span>{t("schedule.understaffed")}</span>
           </div>
         </div>
       )}

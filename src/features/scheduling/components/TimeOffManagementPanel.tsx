@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,6 +69,7 @@ export function TimeOffManagementPanel({
   canApprove = false,
   staffOnly = false,
 }: TimeOffManagementPanelProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? null;
@@ -137,7 +139,7 @@ export function TimeOffManagementPanel({
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Connect your company profile to manage time off requests.
+          {t("schedule.connectYourCompanyProfileToManageTimeOff")}
         </CardContent>
       </Card>
     );
@@ -147,8 +149,7 @@ export function TimeOffManagementPanel({
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Unable to load time off requests right now. Please try again in a
-          moment.
+          {t("schedule.unableToLoadTimeOffRequestsRightNow")}
         </CardContent>
       </Card>
     );
@@ -192,7 +193,7 @@ export function TimeOffManagementPanel({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground">
-            Review and approve team time off requests.
+            {t("schedule.reviewAndApproveTeamTimeOffRequests")}
           </p>
           {pendingCount > 0 && (
             <Badge variant="secondary" className="mt-2">
@@ -203,7 +204,7 @@ export function TimeOffManagementPanel({
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search requests..."
+            placeholder={t("schedule.searchRequests")}
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             className="pl-8"
@@ -274,7 +275,7 @@ export function TimeOffManagementPanel({
                           handleTimeOffAction(request.id, "approve")
                         }
                       >
-                        Approve
+                        {t("schedule.approve")}
                       </Button>
                       <Button
                         size="sm"
@@ -283,7 +284,7 @@ export function TimeOffManagementPanel({
                           handleTimeOffAction(request.id, "reject")
                         }
                       >
-                        Reject
+                        {t("schedule.reject")}
                       </Button>
                     </div>
                   )}
@@ -292,7 +293,7 @@ export function TimeOffManagementPanel({
 
               {request.reason && (
                 <div className="mt-3 rounded bg-muted/50 p-2 text-sm">
-                  <strong>Reason:</strong> {request.reason}
+                  <strong>{t("schedule.reason2")}</strong> {request.reason}
                 </div>
               )}
             </CardContent>

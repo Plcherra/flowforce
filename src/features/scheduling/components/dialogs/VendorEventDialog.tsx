@@ -2,6 +2,7 @@
  * Vendor event dialog component
  */
 
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,6 +71,7 @@ export function VendorEventDialog({
   onFormChange,
   onCreateVendorEvent,
 }: VendorEventDialogProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const handleSubmit = async () => {
@@ -105,20 +107,20 @@ export function VendorEventDialog({
         className="z-50 max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto bg-background sm:max-w-[520px]"
       >
         <DialogHeader>
-          <DialogTitle>Schedule Vendor Visit</DialogTitle>
+          <DialogTitle>{t("schedule.scheduleVendorVisit")}</DialogTitle>
         </DialogHeader>
         {pendingVendorEvent ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Vendor</Label>
+                <Label>{t("schedule.vendor")}</Label>
                 <Input
                   value={getVendorLabel(pendingVendorEvent.vendor.vendorType)}
                   disabled
                 />
               </div>
               <div>
-                <Label>Date</Label>
+                <Label>{t("schedule.date")}</Label>
                 <Input
                   value={format(pendingVendorEvent.start, "yyyy-MM-dd")}
                   disabled
@@ -127,7 +129,7 @@ export function VendorEventDialog({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Start time</Label>
+                <Label>{t("schedule.startTime2")}</Label>
                 <Input
                   type="time"
                   value={vendorForm.startTime}
@@ -140,7 +142,7 @@ export function VendorEventDialog({
                 />
               </div>
               <div>
-                <Label>End time</Label>
+                <Label>{t("schedule.endTime2")}</Label>
                 <Input
                   type="time"
                   value={vendorForm.endTime}
@@ -154,7 +156,7 @@ export function VendorEventDialog({
               </div>
             </div>
             <div>
-              <Label>Location</Label>
+              <Label>{t("schedule.location")}</Label>
               <Select
                 value={vendorForm.locationId}
                 onValueChange={(value) =>
@@ -162,12 +164,12 @@ export function VendorEventDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select location" />
+                  <SelectValue placeholder={t("schedule.selectLocation")} />
                 </SelectTrigger>
                 <SelectContent className="z-50 bg-background border shadow-lg">
                   {locations.length === 0 ? (
                     <SelectItem value="" disabled>
-                      No locations available
+                      {t("schedule.noLocationsAvailable")}
                     </SelectItem>
                   ) : (
                     locations.map((loc) => (
@@ -180,7 +182,7 @@ export function VendorEventDialog({
               </Select>
             </div>
             <div>
-              <Label>Link to shift (optional)</Label>
+              <Label>{t("schedule.linkToShiftOptional")}</Label>
               <Select
                 value={vendorForm.shiftId}
                 onValueChange={(value) =>
@@ -188,10 +190,10 @@ export function VendorEventDialog({
                 }
               >
                 <SelectTrigger data-testid="vendor-event-shift-select">
-                  <SelectValue placeholder="Select shift" />
+                  <SelectValue placeholder={t("schedule.selectShift")} />
                 </SelectTrigger>
                 <SelectContent className="z-50 bg-background border shadow-lg max-h-60 overflow-y-auto">
-                  <SelectItem value="">No linked shift</SelectItem>
+                  <SelectItem value="">{t("schedule.noLinkedShift")}</SelectItem>
                   {candidateVendorShifts
                     .filter(
                       (
@@ -214,10 +216,10 @@ export function VendorEventDialog({
               </Select>
             </div>
             <div>
-              <Label>Notes</Label>
+              <Label>{t("schedule.notes")}</Label>
               <Textarea
                 rows={3}
-                placeholder="Preparation details, contact, etc."
+                placeholder={t("schedule.preparationDetailsContactEtc")}
                 value={vendorForm.notes}
                 onChange={(e) =>
                   onFormChange({
@@ -229,20 +231,20 @@ export function VendorEventDialog({
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                {t("schedule.cancel")}
               </Button>
               <Button
                 data-testid="vendor-event-save"
                 onClick={handleSubmit}
                 disabled={!vendorForm.startTime || !vendorForm.endTime}
               >
-                Save visit
+                {t("schedule.saveVisit")}
               </Button>
             </div>
           </div>
         ) : (
           <div className="text-sm text-muted-foreground">
-            Select a time slot to schedule a vendor visit.
+            {t("schedule.selectATimeSlotToScheduleAVendor")}
           </div>
         )}
       </DialogContent>

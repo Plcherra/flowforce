@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import {
   endOfDay,
@@ -61,6 +62,7 @@ export function SchedulingCalendar({
   onShiftSelect,
   onOverlayEventSelect,
 }: SchedulingCalendarProps = {}) {
+  const { t } = useTranslation();
   const { shifts, loading, error: schedulingError } = useScheduling();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView] = useState<ViewType>(
@@ -214,7 +216,7 @@ export function SchedulingCalendar({
     <div className="space-y-6">
       {setupMissing ? (
         <FeatureSetupRequiredState
-          title="Scheduling calendar is not fully set up yet"
+          title={t("schedule.schedulingCalendarIsNotFullySetUpYet")}
           description={getSupabaseSetupMessage(
             combinedError,
             "Scheduling calendar",
@@ -222,15 +224,15 @@ export function SchedulingCalendar({
           icon={<CalendarDays className="h-5 w-5" />}
           setupDescription={
             <>
-              Missing scheduling or calendar tables. Restore the migrations for{" "}
-              <code>schedules</code> and <code>calendar_events_full</code>, then
-              refresh this page.
+              {t("schedule.missingSchedulingOrCalendarTables")}{" "}
+              <code>{t("schedule.schedules")}</code> {t("schedule.and")} <code>{t("schedule.calendarEventsFull")}</code>,{" "}
+              {t("schedule.thenRefreshThisPage")}
             </>
           }
         />
       ) : combinedError ? (
         <FeatureErrorState
-          title="Calendar data may be stale"
+          title={t("schedule.calendarDataMayBeStale")}
           description={combinedError}
         />
       ) : null}

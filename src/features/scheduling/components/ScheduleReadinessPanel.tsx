@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -121,6 +122,7 @@ function StaffReadinessPanel({
   onAction?: (target: ReadinessAction) => void;
   onOpenAvailability?: (view: "personal" | "team") => void;
 }) {
+  const { t } = useTranslation();
   const { shifts, timeOff, loading, isFallbackData, error } = useScheduling();
   const profileId = role.profileId;
 
@@ -187,12 +189,12 @@ function StaffReadinessPanel({
   return (
     <section
       className="rounded-md border bg-background px-2 py-1"
-      aria-label="My schedule summary"
+      aria-label={t("schedule.myScheduleSummary")}
       data-testid="schedule-readiness-bar"
     >
       <div className="flex items-center gap-1.5">
         <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          This week
+          {t("schedule.thisWeek")}
         </span>
 
         {(isFallbackData || error) && (
@@ -247,6 +249,7 @@ function ManagerReadinessPanel({
   onOpenAvailability?: (view: "personal" | "team") => void;
   hoursSummary?: HoursSummary;
 }) {
+  const { t } = useTranslation();
   const {
     shifts,
     timeOff,
@@ -328,12 +331,12 @@ function ManagerReadinessPanel({
   return (
     <section
       className="rounded-md border bg-background px-2 py-1"
-      aria-label="Schedule readiness"
+      aria-label={t("schedule.scheduleReadiness")}
       data-testid="schedule-readiness-bar"
     >
       <div className="flex items-center gap-1.5">
         <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-          Readiness
+          {t("schedule.readiness")}
         </span>
 
         <Badge

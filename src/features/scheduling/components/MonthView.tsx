@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   format,
   startOfMonth,
@@ -37,6 +38,7 @@ export function MonthView({
   selectedEventId = null,
   locationFilter,
 }: MonthViewProps) {
+  const { t } = useTranslation();
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
   const monthStart = startOfMonth(selectedDate);
@@ -146,7 +148,7 @@ export function MonthView({
                   )}
                   {dayEvents.length === 0 && dayShifts.length === 0 && (
                     <p className="text-[10px] text-muted-foreground">
-                      No shifts
+                      {t("schedule.noShifts")}
                     </p>
                   )}
                 </div>
@@ -251,7 +253,7 @@ export function MonthView({
                 )}
                 {dayEvents.length === 0 && dayShifts.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    No shifts scheduled
+                    {t("schedule.noShiftsScheduled")}
                   </p>
                 )}
               </div>

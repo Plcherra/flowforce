@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -39,6 +40,7 @@ interface AvailabilityChoiceEditorProps {
 export function AvailabilityChoiceEditor({
   orgId,
 }: AvailabilityChoiceEditorProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [choice, setChoice] = useState<"" | AvailabilityChoice>("");
@@ -114,19 +116,18 @@ export function AvailabilityChoiceEditor({
       className="space-y-4 rounded-lg border bg-background p-4"
     >
       <div>
-        <h3 className="text-lg font-semibold">Availability choice</h3>
+        <h3 className="text-lg font-semibold">{t("schedule.availabilityChoice")}</h3>
         <p className="text-sm text-muted-foreground">
-          Open is any day and any time. Fixed uses the weekday rows. The three
-          weekdays set the schedule window and the posting day.
+          {t("schedule.openIsAnyDayAndAnyTimeFixed")}
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="availability-choice">Choice</Label>
+          <Label htmlFor="availability-choice">{t("schedule.choice")}</Label>
           <select
             id="availability-choice"
             data-testid="availability-choice"
-            aria-label="Availability choice"
+            aria-label={t("schedule.availabilityChoice")}
             className={selectClassName}
             value={choice}
             disabled={prefsQuery.isLoading || saveMutation.isPending}
@@ -134,28 +135,28 @@ export function AvailabilityChoiceEditor({
               setChoice(event.target.value as "" | AvailabilityChoice)
             }
           >
-            <option value="">Select</option>
-            <option value="open">Open</option>
-            <option value="fixed">Fixed</option>
+            <option value="">{t("schedule.select")}</option>
+            <option value="open">{t("schedule.open")}</option>
+            <option value="fixed">{t("schedule.fixed")}</option>
           </select>
         </div>
         <WeekdaySelect
           id="schedule-window-start"
-          label="Window start"
+          label={t("schedule.windowStart")}
           value={windowStart}
           disabled={prefsQuery.isLoading || saveMutation.isPending}
           onChange={setWindowStart}
         />
         <WeekdaySelect
           id="schedule-window-end"
-          label="Window end"
+          label={t("schedule.windowEnd")}
           value={windowEnd}
           disabled={prefsQuery.isLoading || saveMutation.isPending}
           onChange={setWindowEnd}
         />
         <WeekdaySelect
           id="schedule-posting-weekday"
-          label="Posting weekday"
+          label={t("schedule.postingWeekday")}
           value={postingWeekday}
           disabled={prefsQuery.isLoading || saveMutation.isPending}
           onChange={setPostingWeekday}
@@ -166,7 +167,7 @@ export function AvailabilityChoiceEditor({
         onClick={() => saveMutation.mutate()}
         disabled={saveMutation.isPending || prefsQuery.isLoading}
       >
-        Save availability choice
+        {t("schedule.saveAvailabilityChoice")}
       </Button>
     </section>
   );
@@ -185,6 +186,7 @@ function WeekdaySelect({
   disabled: boolean;
   onChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
@@ -197,7 +199,7 @@ function WeekdaySelect({
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
       >
-        <option value="">Not set</option>
+        <option value="">{t("schedule.notSet")}</option>
         {WEEKDAYS.map((day) => (
           <option key={day.value} value={day.value}>
             {day.label}

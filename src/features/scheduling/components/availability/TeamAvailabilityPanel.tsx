@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { ShieldAlert } from "lucide-react";
 
@@ -30,6 +31,7 @@ interface TeamAvailabilityPanelProps {
 export function TeamAvailabilityPanel({
   className,
 }: TeamAvailabilityPanelProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
@@ -92,19 +94,17 @@ export function TeamAvailabilityPanel({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Team Availability Controls</CardTitle>
+          <CardTitle>{t("schedule.teamAvailabilityControls")}</CardTitle>
           <CardDescription>
-            Connect your Supabase tables to unlock organization-wide
-            availability management.
+            {t("schedule.connectYourSupabaseTablesToUnlockOrganizationWide")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-primary/40 bg-primary/5 text-primary">
             <ShieldAlert className="h-5 w-5" />
-            <AlertTitle>Preview mode</AlertTitle>
+            <AlertTitle>{t("schedule.previewMode")}</AlertTitle>
             <AlertDescription>
-              Managers will be able to manage locks, approve requests, and
-              handle exceptions once live scheduling data is available.
+              {t("schedule.managersWillBeAbleToManageLocksApprove")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -116,7 +116,7 @@ export function TeamAvailabilityPanel({
     return (
       <Card className={className}>
         <CardContent className="py-10">
-          <LoadingSpinner text="Loading availability management..." />
+          <LoadingSpinner text={t("schedule.loadingAvailabilityManagement")} />
         </CardContent>
       </Card>
     );
@@ -128,10 +128,9 @@ export function TeamAvailabilityPanel({
         <CardContent className="py-10">
           <Alert variant="destructive" className="border-destructive/40">
             <ShieldAlert className="h-5 w-5 text-destructive" />
-            <AlertTitle>Profile not found</AlertTitle>
+            <AlertTitle>{t("schedule.profileNotFound")}</AlertTitle>
             <AlertDescription>
-              We couldn&apos;t load your profile details. Refresh the page or
-              contact an administrator if the issue persists.
+              {t("schedule.couldNotLoadProfileDetails")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -145,10 +144,9 @@ export function TeamAvailabilityPanel({
         <CardContent className="py-10">
           <Alert className="border-primary/40">
             <ShieldAlert className="h-5 w-5 text-primary" />
-            <AlertTitle>Organization context missing</AlertTitle>
+            <AlertTitle>{t("schedule.organizationContextMissing")}</AlertTitle>
             <AlertDescription>
-              FlowForce needs an active company to manage availability. Add
-              your company profile or reach out to support for help.
+              {t("schedule.flowforceNeedsAnActiveCompanyToManageAvailability")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -160,15 +158,14 @@ export function TeamAvailabilityPanel({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Team Availability Controls</CardTitle>
+          <CardTitle>{t("schedule.teamAvailabilityControls")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Alert className="border-primary/40">
             <ShieldAlert className="h-5 w-5 text-primary" />
-            <AlertTitle>Schedule permission required</AlertTitle>
+            <AlertTitle>{t("schedule.schedulePermissionRequired")}</AlertTitle>
             <AlertDescription>
-              Team hours are for people allowed to build the schedule. Your own
-              hours stay under My availability.
+              {t("schedule.teamHoursAreForPeopleAllowedToBuild")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -180,7 +177,7 @@ export function TeamAvailabilityPanel({
     return (
       <Card className={className}>
         <CardContent className="py-10">
-          <LoadingSpinner text="Loading availability data..." />
+          <LoadingSpinner text={t("schedule.loadingAvailabilityData")} />
         </CardContent>
       </Card>
     );
@@ -190,19 +187,17 @@ export function TeamAvailabilityPanel({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Team Availability Controls</CardTitle>
+          <CardTitle>{t("schedule.teamAvailabilityControls")}</CardTitle>
           <CardDescription>
-            Initialize organization preferences to start managing availability.
+            {t("schedule.initializeOrganizationPreferencesToStartManagingAvailability")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-primary/40">
             <ShieldAlert className="h-5 w-5 text-primary" />
-            <AlertTitle>Availability settings need setup</AlertTitle>
+            <AlertTitle>{t("schedule.availabilitySettingsNeedSetup")}</AlertTitle>
             <AlertDescription className="text-sm text-primary/90">
-              We couldn&apos;t find lock preferences for this organization yet.
-              Use your default selections to create the first configuration so
-              your team can start submitting availability.
+              {t("schedule.couldNotFindLockPreferences")}
             </AlertDescription>
           </Alert>
           <div className="mt-4">
@@ -212,8 +207,8 @@ export function TeamAvailabilityPanel({
               disabled={management.updateLockSettingsPending}
             >
               {management.updateLockSettingsPending
-                ? "Initializing..."
-                : "Create default settings"}
+                ? t("schedule.initializing")
+                : t("schedule.createDefaultSettings")}
             </Button>
           </div>
         </CardContent>
@@ -229,20 +224,19 @@ export function TeamAvailabilityPanel({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Team Availability Controls</CardTitle>
+          <CardTitle>{t("schedule.teamAvailabilityControls")}</CardTitle>
           <CardDescription>
-            Provision the availability tables to unlock approval workflows.
+            {t("schedule.provisionTheAvailabilityTablesToUnlockApprovalWorkflows")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-primary/40">
             <ShieldAlert className="h-5 w-5 text-primary" />
-            <AlertTitle>Database tables missing</AlertTitle>
+            <AlertTitle>{t("schedule.databaseTablesMissing")}</AlertTitle>
             <AlertDescription className="text-sm text-primary/90">
-              Make sure migrations for <code>availability_request</code>,{" "}
-              <code>availability_exception</code>, and{" "}
-              <code>staff_availability</code> are applied before managing team
-              availability.
+              {t("schedule.makeSureMigrationsFor")} <code>{t("schedule.availabilityRequest")}</code>,{" "}
+              <code>{t("schedule.availabilityException")}</code>, {t("schedule.and")}{" "}
+              <code>{t("schedule.staffAvailability")}</code> {t("schedule.areAppliedBeforeManagingTeamAvailability")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -256,7 +250,7 @@ export function TeamAvailabilityPanel({
         <CardContent className="py-10">
           <Alert variant="destructive" className="border-destructive/40">
             <ShieldAlert className="h-5 w-5 text-destructive" />
-            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertTitle>{t("schedule.somethingWentWrong")}</AlertTitle>
             <AlertDescription>
               {firstError.message ||
                 "We ran into an unexpected error while loading availability data."}
@@ -270,10 +264,9 @@ export function TeamAvailabilityPanel({
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Team Availability Controls</CardTitle>
+        <CardTitle>{t("schedule.teamAvailabilityControls")}</CardTitle>
         <CardDescription>
-          Availability choice and change requests for other people. Your own
-          hours stay on My availability.
+          {t("schedule.availabilityChoiceAndChangeRequestsForOtherPeople")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

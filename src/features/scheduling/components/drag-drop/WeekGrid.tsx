@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -69,23 +70,24 @@ const formatName = (employee: EmployeeSummary) =>
   "Unknown User";
 
 function AvailabilityLegend() {
+  const { t } = useTranslation();
   return (
     <div
       className="flex flex-wrap items-center gap-3 px-2 py-1.5 text-[10px] text-muted-foreground border-b bg-muted/10"
       data-testid="schedule-availability-legend"
     >
-      <span className="font-medium text-foreground">Availability</span>
+      <span className="font-medium text-foreground">{t("schedule.availability")}</span>
       <span className="inline-flex items-center gap-1">
         <span className="h-2.5 w-2.5 rounded-sm bg-destructive/20 border border-destructive/40" />
-        Off / Unavailable
+        {t("schedule.offUnavailable")}
       </span>
       <span className="inline-flex items-center gap-1">
         <span className="h-2.5 w-2.5 rounded-sm bg-success/15 border border-success/30" />
-        Partial
+        {t("schedule.partial")}
       </span>
       <span className="inline-flex items-center gap-1">
         <span className="h-2.5 w-2.5 rounded-sm border-2 border-warning/70 bg-warning/10" />
-        PTO pending
+        {t("schedule.ptoPending")}
       </span>
     </div>
   );
@@ -186,6 +188,7 @@ function GridCellComponent({
   minimizedView?: boolean;
   requestedOff?: boolean;
 }) {
+  const { t } = useTranslation();
   const dropId = `${employeeId ?? "unassigned"}-${dayIso(day)}`;
   const { isOver, setNodeRef } = useDroppable({
     id: dropId,
@@ -227,7 +230,7 @@ function GridCellComponent({
           className="pointer-events-none absolute left-1 top-1 z-[7] rounded bg-warning-muted px-1 text-[10px] font-medium text-warning-foreground"
           data-testid="schedule-requested-off"
         >
-          Requested off
+          {t("schedule.requestedOff")}
         </div>
       ) : null}
       <div className="flex flex-wrap gap-1">
@@ -376,6 +379,7 @@ export function WeekGrid({
   minimizedView = false,
   timeOffRequests = [],
 }: WeekGridProps) {
+  const { t } = useTranslation();
   const internalScrollRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = scrollContainerRef ?? internalScrollRef;
@@ -397,13 +401,11 @@ export function WeekGrid({
     return () => cancelAnimationFrame(frame);
   }, [weekDays, weekKey]);
 
-  const unassignedLookup = useMemo(
-    () =>
-      new Map<string, ShiftWithAssignments[]>(
-        unassignedShifts.map(({ day, shifts }) => [day.toISOString(), shifts]),
-      ),
-    [unassignedShifts],
-  );
+  const unassignedLookup = useMemo(() => {
+    return new Map<string, ShiftWithAssignments[]>(
+      unassignedShifts.map(({ day, shifts }) => [day.toISOString(), shifts]),
+    );
+  }, [unassignedShifts]);
 
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
     () => new Set(),
@@ -493,7 +495,7 @@ export function WeekGrid({
         {showAvailabilityLayer ? <AvailabilityLegend /> : null}
         <div className="grid grid-cols-8 border-b bg-background relative z-10">
           <div className="p-2 text-sm font-medium text-muted-foreground">
-            Employee
+            {t("schedule.employee")}
           </div>
           {weekDays.map((day) => (
             <div key={day.toISOString()} className="p-2 text-center border-l">
@@ -507,7 +509,7 @@ export function WeekGrid({
 
         <div className="grid grid-cols-8 border-b bg-muted/20 relative z-0">
           <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center">
-            Unassigned shifts
+            {t("schedule.unassignedShifts")}
           </div>
           {weekDays.map((day) => {
             const shifts = unassignedLookup.get(day.toISOString()) ?? [];

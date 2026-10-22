@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,6 +71,7 @@ export function DetailsTab({
   laborCost,
   shiftTemplates,
 }: DetailsTabProps) {
+  const { t } = useTranslation();
   const [showPositionSuggestions, setShowPositionSuggestions] = useState(false);
   const [positionActiveIndex, setPositionActiveIndex] = useState<number>(-1);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
@@ -118,24 +120,24 @@ export function DetailsTab({
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="title">Shift Title</Label>
+        <Label htmlFor="title">{t("schedule.shiftTitle")}</Label>
         <Input
           id="title"
           value={formData.title}
           onChange={(event) =>
             setFormData((prev) => ({ ...prev, title: event.target.value }))
           }
-          placeholder="e.g., Barista Closing"
+          placeholder={t("schedule.eGBaristaClosing")}
           required
         />
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="job_position">Job Position</Label>
+        <Label htmlFor="job_position">{t("schedule.jobPosition")}</Label>
         <div className="relative">
           <Input
             id="job_position"
-            placeholder="Type a position name"
+            placeholder={t("schedule.typeAPositionName")}
             value={formData.job_position_input}
             onChange={(event) => {
               const value = event.target.value;
@@ -205,7 +207,7 @@ export function DetailsTab({
                 ))}
                 {filteredPositions.length === 0 && (
                   <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No matches. Press Enter to keep as typed.
+                    {t("schedule.noMatchesPressEnterToKeepAsTyped")}
                   </div>
                 )}
               </div>
@@ -214,15 +216,14 @@ export function DetailsTab({
         </div>
         {formData.job_position_input && !formData.job_position_id && (
           <p className="text-xs text-muted-foreground">
-            Will save without linking to a saved position unless you choose a
-            suggestion.
+            {t("schedule.willSaveWithoutLinkingToASavedPosition")}
           </p>
         )}
       </div>
 
       <div className="space-y-3">
         <div>
-          <Label>Date</Label>
+          <Label>{t("schedule.date")}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -236,7 +237,7 @@ export function DetailsTab({
                 {formData.date ? (
                   format(formData.date, "PPP")
                 ) : (
-                  <span>Pick a date</span>
+                  <span>{t("schedule.pickADate")}</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -262,13 +263,13 @@ export function DetailsTab({
               setFormData((prev) => ({ ...prev, is_all_day: checked }))
             }
           />
-          <Label htmlFor="all-day">All day</Label>
+          <Label htmlFor="all-day">{t("schedule.allDay")}</Label>
         </div>
 
         {!formData.is_all_day && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="start_time">Start</Label>
+              <Label htmlFor="start_time">{t("schedule.start")}</Label>
               <Input
                 id="start_time"
                 type="time"
@@ -283,7 +284,7 @@ export function DetailsTab({
               />
             </div>
             <div>
-              <Label htmlFor="end_time">End</Label>
+              <Label htmlFor="end_time">{t("schedule.end")}</Label>
               <Input
                 id="end_time"
                 type="time"
@@ -335,10 +336,10 @@ export function DetailsTab({
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <Label>Breaks</Label>
+          <Label>{t("schedule.breaks")}</Label>
           <Button type="button" size="sm" variant="outline" onClick={addBreak}>
             <Plus className="mr-1 h-4 w-4" />
-            Add Break
+            {t("schedule.addBreak")}
           </Button>
         </div>
         <div className="space-y-2">
@@ -348,7 +349,7 @@ export function DetailsTab({
                 <div className="flex items-center justify-between">
                   <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
                     <Input
-                      placeholder="Break title"
+                      placeholder={t("schedule.breakTitle")}
                       value={breakItem.title}
                       onChange={(event) => {
                         const updated = formData.breaks.map((item) =>
@@ -361,7 +362,7 @@ export function DetailsTab({
                     />
                     <Input
                       type="number"
-                      placeholder="Duration (min)"
+                      placeholder={t("schedule.durationMin")}
                       value={breakItem.duration_minutes}
                       onChange={(event) => {
                         const updated = formData.breaks.map((item) =>
@@ -388,7 +389,7 @@ export function DetailsTab({
                           setFormData((prev) => ({ ...prev, breaks: updated }));
                         }}
                       />
-                      <Label className="text-xs">Paid</Label>
+                      <Label className="text-xs">{t("schedule.paid")}</Label>
                     </div>
                   </div>
                   <Button
@@ -407,7 +408,7 @@ export function DetailsTab({
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="hourly_rate">Hourly Rate</Label>
+        <Label htmlFor="hourly_rate">{t("schedule.hourlyRate")}</Label>
         <Input
           id="hourly_rate"
           type="number"
@@ -420,15 +421,15 @@ export function DetailsTab({
               hourly_rate: event.target.value,
             }))
           }
-          placeholder="Optional labor cost rate"
+          placeholder={t("schedule.optionalLaborCostRate")}
         />
         <p className="text-xs text-muted-foreground">
-          Used for labor-cost reporting. Leave blank if rates are not configured.
+          {t("schedule.usedForLaborCostReportingLeaveBlankIf")}
         </p>
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="required_headcount">Headcount</Label>
+        <Label htmlFor="required_headcount">{t("schedule.headcount")}</Label>
         <Input
           id="required_headcount"
           type="number"
@@ -443,10 +444,10 @@ export function DetailsTab({
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="load-shift-template">Load shift template</Label>
+        <Label htmlFor="load-shift-template">{t("schedule.loadShiftTemplate")}</Label>
         <select
           id="load-shift-template"
-          aria-label="Load shift template"
+          aria-label={t("schedule.loadShiftTemplate")}
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
           value=""
           onChange={(event) => {
@@ -471,7 +472,7 @@ export function DetailsTab({
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor="location">{t("schedule.location")}</Label>
         <div className="relative">
           <Input
             id="location"
@@ -488,7 +489,7 @@ export function DetailsTab({
             onBlur={() =>
               setTimeout(() => setShowLocationSuggestions(false), 120)
             }
-            placeholder="Select or type a location (store)"
+            placeholder={t("schedule.selectOrTypeALocationStore")}
           />
           {showLocationSuggestions && (
             <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
@@ -524,7 +525,7 @@ export function DetailsTab({
                     .includes((formData.location || "").toLowerCase()),
                 ).length === 0 && (
                   <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No saved locations. Type to add a new one.
+                    {t("schedule.noSavedLocationsTypeToAddANew")}
                   </div>
                 )}
               </div>

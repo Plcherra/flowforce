@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,7 @@ export function SchedulingToolbar({
   selectedDate,
   currentView,
 }: SchedulingToolbarProps) {
+  const { t } = useTranslation();
   const [showAddShift, setShowAddShift] = useState(false);
   const [showWeekTemplate, setShowWeekTemplate] = useState(false);
   const [showImportShifts, setShowImportShifts] = useState(false);
@@ -67,31 +69,31 @@ export function SchedulingToolbar({
           <DropdownMenuTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add
+              {t("schedule.add")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={() => setShowAddShift(true)}>
               <Calendar className="mr-2 h-4 w-4" />
-              Single Shift
+              {t("schedule.singleShift")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setShowAddShift(true)}>
               <Copy className="mr-2 h-4 w-4" />
-              Multiple Shifts
+              {t("schedule.multipleShifts")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setShowImportShifts(true)}>
               <Upload className="mr-2 h-4 w-4" />
-              Import from Excel/CSV
+              {t("schedule.importFromExcelCsv")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Users className="mr-2 h-4 w-4" />
-              Add Unavailability
+              {t("schedule.addUnavailability")}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Calendar className="mr-2 h-4 w-4" />
-              Add Time-off
+              {t("schedule.addTimeOff2")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -101,31 +103,31 @@ export function SchedulingToolbar({
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               <Settings className="mr-2 h-4 w-4" />
-              Week Actions
+              {t("schedule.weekActions")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={handleCopyPreviousWeek}>
               <Copy className="mr-2 h-4 w-4" />
-              Copy Previous Week
+              {t("schedule.copyPreviousWeek")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleAutoAssign}>
               <Wand2 className="mr-2 h-4 w-4" />
-              Auto-assign Unfilled
+              {t("schedule.autoAssignUnfilled")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleClearWeek}>
               <Trash2 className="mr-2 h-4 w-4" />
-              Clear Week
+              {t("schedule.clearWeek")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handlePublishWeek}>
               <Eye className="mr-2 h-4 w-4" />
-              Publish Week
+              {t("schedule.publishWeek")}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <EyeOff className="mr-2 h-4 w-4" />
-              Unpublish Week
+              {t("schedule.unpublishWeek")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -135,22 +137,22 @@ export function SchedulingToolbar({
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
-              Export
+              {t("schedule.export")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => handleExportWeek("csv")}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Export as CSV
+              {t("schedule.exportAsCsv")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExportWeek("xlsx")}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Export as Excel
+              {t("schedule.exportAsExcel")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleExportWeek("print")}>
               <Printer className="mr-2 h-4 w-4" />
-              Print Week
+              {t("schedule.printWeek")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -158,7 +160,7 @@ export function SchedulingToolbar({
         {/* Templates */}
         <Button variant="outline" onClick={() => setShowWeekTemplate(true)}>
           <Settings className="mr-2 h-4 w-4" />
-          Templates
+          {t("schedule.templates")}
         </Button>
       </div>
 

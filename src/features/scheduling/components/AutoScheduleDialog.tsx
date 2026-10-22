@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -36,6 +37,7 @@ export function AutoScheduleDialog({
   defaultLocationId,
   companyId,
 }: AutoScheduleDialogProps) {
+  const { t } = useTranslation();
   const [ruleSets, setRuleSets] = useState<
     Array<{
       id: string;
@@ -116,18 +118,16 @@ export function AutoScheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Auto-schedule week</DialogTitle>
+          <DialogTitle>{t("schedule.autoScheduleWeek")}</DialogTitle>
           <DialogDescription>
-            Generate a full draft week from location coverage templates and
-            compliance guardrails. For gap-by-gap suggestions, use Smart Fill on
-            the schedule board.
+            {t("schedule.generateAFullDraftWeekFromLocationCoverage")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">{t("schedule.location")}</Label>
               <Select
                 value={locationId}
                 onValueChange={(value) => {
@@ -148,7 +148,7 @@ export function AutoScheduleDialog({
                 <SelectContent>
                   {rulesLoading ? (
                     <SelectItem value="loading" disabled>
-                      Loading locations...
+                      {t("schedule.loadingLocations")}
                     </SelectItem>
                   ) : (
                     ruleSets.map((rule) => (
@@ -174,7 +174,7 @@ export function AutoScheduleDialog({
 
             <div className="space-y-2">
               <Label htmlFor="weekStart" className="flex items-center gap-2">
-                Week starting
+                {t("schedule.weekStarting")}
                 <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               </Label>
               <Input
@@ -226,7 +226,7 @@ export function AutoScheduleDialog({
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-lg border p-4">
-                  <h4 className="text-sm font-medium mb-2">Coverage by area</h4>
+                  <h4 className="text-sm font-medium mb-2">{t("schedule.coverageByArea")}</h4>
                   <dl className="space-y-2 text-sm">
                     {Object.entries(lastResult.summary.coverageByArea).map(
                       ([area, stats]) => (
@@ -245,12 +245,12 @@ export function AutoScheduleDialog({
                   </dl>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <h4 className="text-sm font-medium mb-2">Warnings</h4>
+                  <h4 className="text-sm font-medium mb-2">{t("schedule.warnings")}</h4>
                   <ScrollArea className="max-h-40">
                     <div className="space-y-2 text-sm">
                       {lastResult.warnings.length === 0 && (
                         <p className="text-muted-foreground">
-                          No conflicts detected.
+                          {t("schedule.noConflictsDetected")}
                         </p>
                       )}
                       {lastResult.warnings.map((warning, index) => (

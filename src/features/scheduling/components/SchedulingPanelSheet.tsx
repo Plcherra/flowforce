@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import {
   ArrowRightLeft,
@@ -80,6 +81,7 @@ export function SchedulingPanelSheet({
   onRetry,
   onAvailabilityViewChange,
 }: SchedulingPanelSheetProps) {
+  const { t } = useTranslation();
   const fullWidthAvailability = panel === "availability";
   const panelMeta = SCHEDULING_PANELS.find((entry) => entry.id === panel);
   const Icon = panel ? panelIcons[panel] : Users;
@@ -142,7 +144,7 @@ export function SchedulingPanelSheet({
           advancedFeaturesDisabled ? (
             <FeatureUnavailableCard
               icon={Users}
-              title="Team requests need a live connection"
+              title={t("schedule.teamRequestsNeedALiveConnection")}
               description="We need live staff data to process swaps and time-off requests."
               actionLabel="Retry data sync"
               onAction={onRetry}
@@ -155,7 +157,7 @@ export function SchedulingPanelSheet({
           ) : (
             <FeatureUnavailableCard
               icon={Users}
-              title="Team requests are limited"
+              title={t("schedule.teamRequestsAreLimited")}
               description="Approving other people's swaps and time off needs schedule or approval permission. Your own requests stay under My time off and My swaps."
             />
           )
@@ -165,7 +167,7 @@ export function SchedulingPanelSheet({
           advancedFeaturesDisabled ? (
             <FeatureUnavailableCard
               icon={Clock}
-              title="Availability preview mode"
+              title={t("schedule.availabilityPreviewMode")}
               description="Employee availability updates are read-only until the live connection is restored."
               actionLabel="Retry data sync"
               onAction={onRetry}
@@ -178,8 +180,8 @@ export function SchedulingPanelSheet({
               className="space-y-4"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="personal">My hours</TabsTrigger>
-                <TabsTrigger value="team">Team hours</TabsTrigger>
+                <TabsTrigger value="personal">{t("schedule.myHours")}</TabsTrigger>
+                <TabsTrigger value="team">{t("schedule.teamHours")}</TabsTrigger>
               </TabsList>
               <TabsContent value="personal" className="mt-0">
                 <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
@@ -203,7 +205,7 @@ export function SchedulingPanelSheet({
           advancedFeaturesDisabled ? (
             <FeatureUnavailableCard
               icon={Calendar}
-              title="Time off unavailable"
+              title={t("schedule.timeOffUnavailable")}
               description="Time off requests resume once scheduling data is back online."
               actionLabel="Retry data sync"
               onAction={onRetry}
@@ -220,7 +222,7 @@ export function SchedulingPanelSheet({
           advancedFeaturesDisabled ? (
             <FeatureUnavailableCard
               icon={ArrowRightLeft}
-              title="Shift swaps unavailable"
+              title={t("schedule.shiftSwapsUnavailable")}
               description="Shift swap requests resume once scheduling data is back online."
               actionLabel="Retry data sync"
               onAction={onRetry}

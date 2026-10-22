@@ -2,6 +2,7 @@
  * Weekly hour summary card component
  */
 
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -31,11 +32,12 @@ export function WeeklyHourSummary({
   appliedFilterLabel,
   loading,
 }: WeeklyHourSummaryProps) {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Weekly Hour Summary</CardTitle>
+          <CardTitle>{t("schedule.weeklyHourSummary")}</CardTitle>
           <CardDescription>{appliedFilterLabel}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -50,13 +52,13 @@ export function WeeklyHourSummary({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Weekly Hour Summary</CardTitle>
+        <CardTitle>{t("schedule.weeklyHourSummary")}</CardTitle>
         <CardDescription>{appliedFilterLabel}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div>
-            <p className="text-sm text-muted-foreground">Scheduled Hours</p>
+            <p className="text-sm text-muted-foreground">{t("schedule.scheduledHours")}</p>
             <p className="text-2xl font-semibold">
               {hoursSummary.totalHours > 0
                 ? hoursSummary.totalHours.toFixed(1)
@@ -65,7 +67,7 @@ export function WeeklyHourSummary({
           </div>
           <div>
             <p className="text-sm text-muted-foreground">
-              Labor Hours (with headcount)
+              {t("schedule.laborHoursWithHeadcount")}
             </p>
             <p className="text-2xl font-semibold">
               {hoursSummary.totalLaborHours > 0
@@ -75,7 +77,7 @@ export function WeeklyHourSummary({
           </div>
           <div>
             <p className="text-sm text-muted-foreground">
-              Average Shift Length
+              {t("schedule.averageShiftLength")}
             </p>
             <p className="text-2xl font-semibold">
               {hoursSummary.averageShiftHours > 0
@@ -85,7 +87,7 @@ export function WeeklyHourSummary({
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Shifts Counted</p>
+            <p className="text-sm text-muted-foreground">{t("schedule.shiftsCounted")}</p>
             <p className="text-2xl font-semibold">{hoursSummary.shiftCount}</p>
           </div>
         </div>
@@ -94,10 +96,10 @@ export function WeeklyHourSummary({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Shift Coverage
+                {t("schedule.shiftCoverage")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Filled vs in-progress vs open
+                {t("schedule.filledVsInProgressVsOpen")}
               </p>
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
@@ -135,11 +137,11 @@ export function WeeklyHourSummary({
 
         <div className="border-t pt-4">
           <p className="mb-3 text-sm font-medium text-muted-foreground">
-            Daily Scheduled Hours
+            {t("schedule.dailyScheduledHours")}
           </p>
           {dailyHourEntries.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No shifts scheduled for this period.
+              {t("schedule.noShiftsScheduledForThisPeriod")}
             </p>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -77,6 +78,7 @@ export function ShiftSwapsPanel({
   canApprove = false,
   staffOnly = false,
 }: ShiftSwapsPanelProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? null;
@@ -151,7 +153,7 @@ export function ShiftSwapsPanel({
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Connect your company profile to view shift swap requests.
+          {t("schedule.connectYourCompanyProfileToViewShiftSwap")}
         </CardContent>
       </Card>
     );
@@ -161,7 +163,7 @@ export function ShiftSwapsPanel({
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Unable to load shift swaps right now. Please try again in a moment.
+          {t("schedule.unableToLoadShiftSwapsRightNowPlease")}
         </CardContent>
       </Card>
     );
@@ -205,7 +207,7 @@ export function ShiftSwapsPanel({
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search swaps..."
+            placeholder={t("schedule.searchSwaps")}
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             className="pl-8"
@@ -289,14 +291,14 @@ export function ShiftSwapsPanel({
                         size="sm"
                         onClick={() => handleSwapAction(swap.id, "approve")}
                       >
-                        Approve
+                        {t("schedule.approve")}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleSwapAction(swap.id, "reject")}
                       >
-                        Reject
+                        {t("schedule.reject")}
                       </Button>
                     </div>
                   )}
@@ -305,7 +307,7 @@ export function ShiftSwapsPanel({
 
               {swap.reason && (
                 <div className="mt-3 rounded bg-muted/50 p-2 text-sm">
-                  <strong>Reason:</strong> {swap.reason}
+                  <strong>{t("schedule.reason2")}</strong> {swap.reason}
                 </div>
               )}
             </CardContent>

@@ -2,6 +2,7 @@
  * Add unavailability dialog component
  */
 
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +67,7 @@ export function AddUnavailabilityDialog({
   onReasonChange,
   onSubmit,
 }: AddUnavailabilityDialogProps) {
+  const { t } = useTranslation();
   const [repeat, setRepeat] = useState<RepeatChoice>("none");
   const handleSubmit = async () => {
     if (!userId || !start || !end) return;
@@ -91,14 +93,14 @@ export function AddUnavailabilityDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="z-50 max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto bg-background sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Add Unavailability</DialogTitle>
+          <DialogTitle>{t("schedule.addUnavailability")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label>User</Label>
+            <Label>{t("schedule.user")}</Label>
             <Select value={userId} onValueChange={onUserIdChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a user" />
+                <SelectValue placeholder={t("schedule.selectAUser")} />
               </SelectTrigger>
               <SelectContent className="z-50 bg-background border shadow-lg">
                 {employees.map((u) => (
@@ -111,7 +113,7 @@ export function AddUnavailabilityDialog({
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <Label>Start</Label>
+              <Label>{t("schedule.start")}</Label>
               <Input
                 type="datetime-local"
                 value={start}
@@ -119,7 +121,7 @@ export function AddUnavailabilityDialog({
               />
             </div>
             <div>
-              <Label>End</Label>
+              <Label>{t("schedule.end")}</Label>
               <Input
                 type="datetime-local"
                 value={end}
@@ -128,7 +130,7 @@ export function AddUnavailabilityDialog({
             </div>
           </div>
           <div>
-            <Label>Repeats</Label>
+            <Label>{t("schedule.repeats")}</Label>
             <Select value={repeat} onValueChange={(value) => setRepeat(value as RepeatChoice)}>
               <SelectTrigger>
                 <SelectValue />
@@ -143,19 +145,19 @@ export function AddUnavailabilityDialog({
             </Select>
           </div>
           <div>
-            <Label>Reason</Label>
+            <Label>{t("schedule.reason")}</Label>
             <Input
               value={reason}
               onChange={(e) => onReasonChange(e.target.value)}
-              placeholder="e.g., class, appointment"
+              placeholder={t("schedule.eGClassAppointment")}
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("schedule.cancel")}
             </Button>
             <Button onClick={handleSubmit} disabled={!userId || !start || !end}>
-              Save
+              {t("schedule.save")}
             </Button>
           </div>
         </div>

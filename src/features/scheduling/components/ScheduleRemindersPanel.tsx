@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -72,6 +73,7 @@ interface ScheduleRemindersPanelProps {
 export function ScheduleRemindersPanel({
   canAssignReminders,
 }: ScheduleRemindersPanelProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
   const profileId = profile?.id ?? null;
@@ -212,11 +214,10 @@ export function ScheduleRemindersPanel({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Bell className="h-4 w-4 text-primary" />
-            Your reminders
+            {t("schedule.yourReminders")}
           </CardTitle>
           <CardDescription>
-            These stay with you. Turning one off does not change a reminder a
-            manager assigned.
+            {t("schedule.theseStayWithYouTurningOneOffDoes")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -264,18 +265,18 @@ export function ScheduleRemindersPanel({
 
           <div className="grid gap-2 sm:grid-cols-[1fr_9rem_7rem_auto]">
             <div className="space-y-1">
-              <Label htmlFor="personal-reminder-title">New reminder</Label>
+              <Label htmlFor="personal-reminder-title">{t("schedule.newReminder")}</Label>
               <Input
                 id="personal-reminder-title"
                 value={personalTitle}
                 onChange={(event) => setPersonalTitle(event.target.value)}
-                placeholder="Check the board"
+                placeholder={t("schedule.checkTheBoard")}
               />
             </div>
             <div className="space-y-1">
-              <Label>Day</Label>
+              <Label>{t("schedule.day")}</Label>
               <Select value={personalDay} onValueChange={setPersonalDay}>
-                <SelectTrigger aria-label="Personal reminder day">
+                <SelectTrigger aria-label={t("schedule.personalReminderDay")}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -288,7 +289,7 @@ export function ScheduleRemindersPanel({
               </Select>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="personal-reminder-time">Time</Label>
+              <Label htmlFor="personal-reminder-time">{t("schedule.time")}</Label>
               <Input
                 id="personal-reminder-time"
                 type="time"
@@ -303,7 +304,7 @@ export function ScheduleRemindersPanel({
                 onClick={addPersonal}
                 disabled={!personalTitle.trim() || (Boolean(personalKind) && !personalRecordId)}
               >
-                Add
+                {t("schedule.add")}
               </Button>
             </div>
           </div>
@@ -337,8 +338,7 @@ export function ScheduleRemindersPanel({
           {assignedQuery.isError ? (
             <Alert>
               <AlertDescription>
-                Assigned reminders could not be loaded. Your personal reminders
-                above are still saved on this device.
+                {t("schedule.assignedRemindersCouldNotBeLoadedYourPersonal")}
               </AlertDescription>
             </Alert>
           ) : null}
@@ -409,32 +409,32 @@ export function ScheduleRemindersPanel({
           {canAssignReminders ? (
             <div className="grid gap-2 border-t pt-3">
               <div className="space-y-1">
-                <Label htmlFor="team-reminder-title">Reminder</Label>
+                <Label htmlFor="team-reminder-title">{t("schedule.reminder")}</Label>
                 <Input
                   id="team-reminder-title"
                   value={teamTitle}
                   onChange={(event) => setTeamTitle(event.target.value)}
-                  placeholder="Update availability"
+                  placeholder={t("schedule.updateAvailability")}
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="team-reminder-message">Note</Label>
+                <Label htmlFor="team-reminder-message">{t("schedule.note")}</Label>
                 <Input
                   id="team-reminder-message"
                   value={teamMessage}
                   onChange={(event) => setTeamMessage(event.target.value)}
-                  placeholder="Send hours before Thursday night"
+                  placeholder={t("schedule.sendHoursBeforeThursdayNight")}
                 />
               </div>
               <div className="grid gap-2 sm:grid-cols-3">
                 <div className="space-y-1">
-                  <Label>Who</Label>
+                  <Label>{t("schedule.who")}</Label>
                   <Select value={teamTarget} onValueChange={setTeamTarget}>
-                    <SelectTrigger aria-label="Reminder recipient">
+                    <SelectTrigger aria-label={t("schedule.reminderRecipient")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="me">Me</SelectItem>
+                      <SelectItem value="me">{t("schedule.me")}</SelectItem>
                       {(peopleQuery.data ?? [])
                         .filter((person) => person.id !== profileId)
                         .map((person) => (
@@ -446,9 +446,9 @@ export function ScheduleRemindersPanel({
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label>Day</Label>
+                  <Label>{t("schedule.day")}</Label>
                   <Select value={teamDay} onValueChange={setTeamDay}>
-                    <SelectTrigger aria-label="Assigned reminder day">
+                    <SelectTrigger aria-label={t("schedule.assignedReminderDay")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -461,7 +461,7 @@ export function ScheduleRemindersPanel({
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="team-reminder-time">Time</Label>
+                  <Label htmlFor="team-reminder-time">{t("schedule.time")}</Label>
                   <Input
                     id="team-reminder-time"
                     type="time"

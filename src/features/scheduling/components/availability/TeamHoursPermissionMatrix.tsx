@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,6 +31,7 @@ interface TeamHoursPermissionMatrixProps {
 export function TeamHoursPermissionMatrix({
   orgId,
 }: TeamHoursPermissionMatrixProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { can, isLoading: permissionLoading } = useCan();
   const queryClient = useQueryClient();
@@ -157,14 +159,13 @@ export function TeamHoursPermissionMatrix({
       className="space-y-3 rounded-lg border bg-background p-4"
     >
       <div>
-        <h3 className="text-lg font-semibold">Schedule permissions</h3>
+        <h3 className="text-lg font-semibold">{t("schedule.schedulePermissions")}</h3>
         <p className="text-sm text-muted-foreground">
-          Turn schedule permissions on or off for someone else. Draft weeks
-          and creating shifts stay off until they are turned on for that person.
+          {t("schedule.turnSchedulePermissionsOnOrOffForSomeone")}
         </p>
       </div>
       {matrixQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading people...</p>
+        <p className="text-sm text-muted-foreground">{t("schedule.loadingPeople")}</p>
       ) : (
         <div className="space-y-3">
           {(matrixQuery.data?.people ?? []).map((person) => {

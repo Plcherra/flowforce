@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ export function WeekView({
   selectedEventId = null,
   locationFilter,
 }: WeekViewProps) {
+  const { t } = useTranslation();
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
   const weekStart = startOfWeek(selectedDate);
@@ -166,7 +168,7 @@ export function WeekView({
                 </h3>
                 {dayShifts.length === 0 && (
                   <div className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
-                    No shifts scheduled
+                    {t("schedule.noShiftsScheduled")}
                   </div>
                 )}
                 {dayShifts.map((shift) => (
@@ -247,7 +249,7 @@ export function WeekView({
       {/* Header with day names and coverage stats */}
       <div className="grid grid-cols-8 border-b">
         <div className="p-4 border-r bg-muted/30">
-          <div className="text-sm font-medium text-muted-foreground">Staff</div>
+          <div className="text-sm font-medium text-muted-foreground">{t("schedule.staff")}</div>
         </div>
         {weekDays.map((day) => {
           const stats = getCoverageStats(day);
@@ -294,10 +296,10 @@ export function WeekView({
       <div className="grid grid-cols-8 border-b bg-muted/40">
         <div className="p-3 border-r">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Meetings & Events
+            {t("schedule.meetingsEvents")}
           </div>
           <div className="text-[11px] text-muted-foreground">
-            Sessions linked to the schedule
+            {t("schedule.sessionsLinkedToTheSchedule")}
           </div>
         </div>
         {weekDays.map((day) => {
@@ -311,7 +313,7 @@ export function WeekView({
             <div key={`events-${day.toISOString()}`} className="border-r p-2">
               {dayEvents.length === 0 ? (
                 <div className="h-20 flex items-center justify-center text-[11px] text-muted-foreground">
-                  No sessions
+                  {t("schedule.noSessions")}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -481,7 +483,7 @@ export function WeekView({
                                       variant="secondary"
                                       className="text-[10px] mt-1"
                                     >
-                                      Draft
+                                      {t("schedule.draft")}
                                     </Badge>
                                   )}
                                   {linkedEvents.length > 0 && (

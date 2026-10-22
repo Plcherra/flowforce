@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export function RequestShiftSwapButton({
   scheduleId,
   requestingUserId,
 }: RequestShiftSwapButtonProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const requestSwap = useMutation({
@@ -46,7 +48,7 @@ export function RequestShiftSwapButton({
       disabled={requestSwap.isPending}
       onClick={() => requestSwap.mutate()}
     >
-      Request swap
+      {t("schedule.requestSwap")}
     </Button>
   );
 }

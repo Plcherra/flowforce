@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,10 +15,12 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
 import type { ShiftTask } from "./types";
 
+type MaybeVoid = Promise<void> | void;
+
 type TasksTabProps = {
   tasks: ShiftTask[];
-  onAddTask: (task: ShiftTask) => void | Promise<void>;
-  onRemoveTask: (taskId: string) => void | Promise<void>;
+  onAddTask: (task: ShiftTask) => MaybeVoid;
+  onRemoveTask: (taskId: string) => MaybeVoid;
   onDraftChange?: (
     draft: Pick<ShiftTask, "title" | "description" | "priority" | "estimated_minutes"> | null,
   ) => void;
@@ -31,6 +34,7 @@ export function TasksTab({
   onDraftChange,
   draftResetKey = 0,
 }: TasksTabProps) {
+  const { t } = useTranslation();
   const [newTask, setNewTask] = useState<
     Pick<ShiftTask, "title" | "description" | "priority" | "estimated_minutes">
   >({
@@ -83,16 +87,16 @@ export function TasksTab({
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Add Shift Task</CardTitle>
+          <CardTitle className="text-base">{t("schedule.addShiftTask")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Input
-            placeholder="Task title"
+            placeholder={t("schedule.taskTitle")}
             value={newTask.title}
             onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
           />
           <Textarea
-            placeholder="Task description"
+            placeholder={t("schedule.taskDescription")}
             value={newTask.description}
             onChange={(e) =>
               setNewTask({ ...newTask, description: e.target.value })
@@ -113,14 +117,14 @@ export function TasksTab({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="low">{t("schedule.low")}</SelectItem>
+                <SelectItem value="medium">{t("schedule.medium")}</SelectItem>
+                <SelectItem value="high">{t("schedule.high")}</SelectItem>
               </SelectContent>
             </Select>
             <Input
               type="number"
-              placeholder="Minutes"
+              placeholder={t("schedule.minutes")}
               className="w-24"
               value={newTask.estimated_minutes}
               onChange={(event) =>
@@ -131,9 +135,9 @@ export function TasksTab({
                 })
               }
             />
-            <Button type="button" aria-label="Add shift task" onClick={addTask}>
+            <Button type="button" aria-label={t("schedule.addShiftTask2")} onClick={addTask}>
               <Plus className="mr-1 h-4 w-4" />
-              Add task
+              {t("schedule.addTask")}
             </Button>
           </div>
         </CardContent>

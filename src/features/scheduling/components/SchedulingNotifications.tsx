@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -14,6 +15,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 export function SchedulingNotifications() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const {
     reminders,
@@ -52,12 +54,12 @@ export function SchedulingNotifications() {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BellRing className="h-5 w-5 text-primary" />
-            Scheduling Notifications
+            {t("schedule.schedulingNotifications")}
           </div>
           <Switch checked={isEnabled} onCheckedChange={toggleReminders} />
         </CardTitle>
         <CardDescription>
-          Automated reminders for your weekly scheduling workflow
+          {t("schedule.automatedRemindersForYourWeeklySchedulingWorkflow")}
         </CardDescription>
       </CardHeader>
 
@@ -69,10 +71,10 @@ export function SchedulingNotifications() {
               <Bell className="h-5 w-5 text-warning mt-0.5" />
               <div className="flex-1">
                 <h4 className="font-medium text-sm text-warning-foreground mb-1">
-                  Enable Browser Notifications
+                  {t("schedule.enableBrowserNotifications")}
                 </h4>
                 <p className="text-sm text-warning-foreground mb-3">
-                  Get reminders even when the app is closed
+                  {t("schedule.getRemindersEvenWhenTheAppIsClosed")}
                 </p>
                 <Button
                   size="sm"
@@ -80,7 +82,7 @@ export function SchedulingNotifications() {
                   onClick={handlePermissionRequest}
                   className="border-warning/40 text-warning-foreground hover:bg-warning-muted"
                 >
-                  Enable Notifications
+                  {t("schedule.enableNotifications")}
                 </Button>
               </div>
             </div>
@@ -92,7 +94,7 @@ export function SchedulingNotifications() {
           <div>
             <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Upcoming Reminders
+              {t("schedule.upcomingReminders")}
             </h3>
             <div className="space-y-2">
               {upcomingReminders.slice(0, 3).map((reminder, index) => (
@@ -119,7 +121,7 @@ export function SchedulingNotifications() {
         <div>
           <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Reminder Schedule
+            {t("schedule.reminderSchedule")}
           </h3>
           <div className="space-y-3">
             {reminders.map((reminder, index) => (
@@ -165,7 +167,7 @@ export function SchedulingNotifications() {
             }}
             className="w-full"
           >
-            Test Notification
+            {t("schedule.testNotification")}
           </Button>
         </div>
       </CardContent>

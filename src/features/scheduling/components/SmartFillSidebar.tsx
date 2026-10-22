@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ export function SmartFillSidebar({
   useDrawer,
   onOpenChange,
 }: SmartFillSidebarProps) {
+  const { t } = useTranslation();
   const { shifts, timeOff, unavailability, staffAvailability, weekRange, refetchAll } =
     useScheduling();
   const [expanded, setExpanded] = useState(false);
@@ -120,11 +122,10 @@ export function SmartFillSidebar({
           <div>
             <CardTitle className="flex items-center gap-2 text-base font-semibold">
               <Sparkles className="h-4 w-4 text-primary" />
-              Smart Fill
+              {t("schedule.smartFill")}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              Draft shifts from coverage templates, staff availability, and
-              current week load.
+              {t("schedule.draftShiftsFromCoverageTemplatesStaffAvailabilityAnd")}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
@@ -141,7 +142,7 @@ export function SmartFillSidebar({
               variant="ghost"
               size="sm"
               className="h-7 w-7 p-0"
-              aria-label="Hide Smart Fill"
+              aria-label={t("schedule.hideSmartFill")}
               onClick={() => onOpenChange(false)}
             >
               <X className="h-4 w-4" />
@@ -159,9 +160,9 @@ export function SmartFillSidebar({
           />
         ) : (
           <div className="grid grid-cols-2 gap-2 text-center">
-            <MetricPill label="Suggested shifts" value={draftCount} />
+            <MetricPill label={t("schedule.suggestedShifts")} value={draftCount} />
             <MetricPill
-              label="Coverage gaps"
+              label={t("schedule.coverageGaps")}
               value={coverageCount}
               tone={coverageCount > 0 ? "warning" : "success"}
             />
@@ -174,7 +175,7 @@ export function SmartFillSidebar({
           <CardContent className="space-y-4 p-0">
             {scheduler.error ? (
               <Alert variant="destructive" className="m-4">
-                <AlertTitle>Could not build suggestions</AlertTitle>
+                <AlertTitle>{t("schedule.couldNotBuildSuggestions")}</AlertTitle>
                 <AlertDescription>{scheduler.error}</AlertDescription>
               </Alert>
             ) : null}
@@ -196,7 +197,7 @@ export function SmartFillSidebar({
             <ScrollArea className="max-h-72 px-4 pb-4">
               <SectionHeader
                 icon={<Sparkles className="h-4 w-4 text-primary" />}
-                title="Suggested draft shifts"
+                title={t("schedule.suggestedDraftShifts")}
               />
               {scheduler.draftShifts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
@@ -239,7 +240,7 @@ export function SmartFillSidebar({
                   <Separator className="my-4" />
                   <SectionHeader
                     icon={<AlertTriangle className="h-4 w-4 text-warning" />}
-                    title="Remaining gaps"
+                    title={t("schedule.remainingGaps")}
                   />
                   <ul className="space-y-2">
                     {scheduler.coverageGaps.map((gap) => (
@@ -270,7 +271,7 @@ export function SmartFillSidebar({
                 disabled={scheduler.loading}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh suggestions
+                {t("schedule.refreshSuggestions")}
               </Button>
               <Button
                 size="sm"
@@ -279,12 +280,11 @@ export function SmartFillSidebar({
                 disabled={scheduler.loading || scheduler.draftShifts.length === 0}
               >
                 <UploadCloud className="mr-2 h-4 w-4" />
-                Add drafts to board
+                {t("schedule.addDraftsToBoard")}
               </Button>
             </div>
             <p className="w-full text-center text-[11px] leading-snug text-muted-foreground">
-              Adds draft shifts to the week board. Publish the full week from
-              Week desk when ready.
+              {t("schedule.addsDraftShiftsToTheWeekBoardPublish")}
             </p>
             <Button
               variant="ghost"
@@ -293,7 +293,7 @@ export function SmartFillSidebar({
               onClick={() => setExpanded(false)}
             >
               <ChevronUp className="mr-2 h-4 w-4" />
-              Collapse
+              {t("schedule.collapse")}
             </Button>
           </CardFooter>
         </>
@@ -306,7 +306,7 @@ export function SmartFillSidebar({
             onClick={() => setExpanded(true)}
           >
             <ChevronDown className="mr-2 h-4 w-4" />
-            Show suggestions
+            {t("schedule.showSuggestions")}
           </Button>
         </CardFooter>
       )}
@@ -320,7 +320,7 @@ export function SmartFillSidebar({
           <SheetHeader className="border-b px-4 py-3 text-left">
             <SheetTitle className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
-              Smart Fill
+              {t("schedule.smartFill")}
             </SheetTitle>
           </SheetHeader>
           <Card className="border-0 shadow-none">{sidebarBody}</Card>
@@ -439,6 +439,7 @@ function SectionHeader({
 }
 
 function SummaryList({ summary }: { summary: ScheduleSummary }) {
+  const { t } = useTranslation();
   const employeeEntries = Object.entries(summary.hoursByEmployee)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 4);
@@ -446,13 +447,13 @@ function SummaryList({ summary }: { summary: ScheduleSummary }) {
   return (
     <div className="space-y-3 text-sm">
       <div className="flex items-center justify-between">
-        <span className="text-muted-foreground">Suggested hours</span>
+        <span className="text-muted-foreground">{t("schedule.suggestedHours")}</span>
         <span className="font-medium">{summary.totalHours.toFixed(1)} hrs</span>
       </div>
       {employeeEntries.length > 0 ? (
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Staff load (incl. current week)
+            {t("schedule.staffLoadInclCurrentWeek")}
           </p>
           <ul className="space-y-1">
             {employeeEntries.map(([employeeId, hours]) => (

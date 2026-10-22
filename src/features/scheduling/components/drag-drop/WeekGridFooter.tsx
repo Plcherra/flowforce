@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { DailyGridStats } from "@/features/scheduling/utils/hoursCalculation";
 import { dayIso } from "@/features/scheduling/utils/gridIndexes";
@@ -17,13 +18,14 @@ export function WeekGridFooter({
   weekDays,
   dailyGridStats,
 }: WeekGridFooterProps) {
+  const { t } = useTranslation();
   return (
     <div
       className="grid grid-cols-8 border-t bg-muted/30 relative z-10"
       data-testid="schedule-grid-footer"
     >
       <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center">
-        Labor / Coverage
+        {t("schedule.laborCoverage")}
       </div>
       {weekDays.map((day) => {
         const key = dayIso(day);

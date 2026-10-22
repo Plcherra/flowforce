@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { addDays, format, startOfWeek } from "date-fns";
 import {
@@ -61,6 +62,7 @@ export function WeekTemplateDialog({
   assign: assignProp,
   refetchAll: refetchAllProp,
 }: WeekTemplateDialogProps) {
+  const { t } = useTranslation();
   const { shifts, refetchAll: contextRefetch, mutations } = useScheduling();
   const {
     templates,
@@ -207,16 +209,16 @@ export function WeekTemplateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] w-[calc(100%-1rem)] overflow-y-auto sm:max-w-[600px]" data-testid="week-template-dialog">
         <DialogHeader>
-          <DialogTitle>Week Templates</DialogTitle>
+          <DialogTitle>{t("schedule.weekTemplates")}</DialogTitle>
           <DialogDescription>
-            Save current week as template or load from existing templates
+            {t("schedule.saveCurrentWeekAsTemplateOrLoadFrom")}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="load">Load Template</TabsTrigger>
-            <TabsTrigger value="save">Save Template</TabsTrigger>
+            <TabsTrigger value="load">{t("schedule.loadTemplate")}</TabsTrigger>
+            <TabsTrigger value="save">{t("schedule.saveTemplate")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="load" className="space-y-4">
@@ -229,7 +231,7 @@ export function WeekTemplateDialog({
                     size="sm"
                     onClick={() => setPreviewId(null)}
                   >
-                    Back
+                    {t("schedule.back")}
                   </Button>
                 </div>
                 <div className="max-h-72 overflow-y-auto space-y-2 text-sm">
@@ -252,9 +254,9 @@ export function WeekTemplateDialog({
                 {templates.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-                    <p>No week templates found</p>
+                    <p>{t("schedule.noWeekTemplatesFound")}</p>
                     <p className="text-sm">
-                      Create your first template to get started
+                      {t("schedule.createYourFirstTemplateToGetStarted")}
                     </p>
                   </div>
                 ) : (
@@ -284,7 +286,7 @@ export function WeekTemplateDialog({
                               onClick={() => setPreviewId(template.id)}
                             >
                               <Eye className="mr-2 h-4 w-4" />
-                              Preview
+                              {t("schedule.preview")}
                             </Button>
                             <Button
                               variant="outline"
@@ -299,7 +301,7 @@ export function WeekTemplateDialog({
                               data-testid={`week-template-load-${template.id}`}
                               onClick={() => handleLoadTemplate(template)}
                             >
-                              Load Template
+                              {t("schedule.loadTemplate")}
                             </Button>
                           </div>
                         </div>
@@ -314,7 +316,7 @@ export function WeekTemplateDialog({
           <TabsContent value="save" className="space-y-4">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="template-name">Template Name</Label>
+                <Label htmlFor="template-name">{t("schedule.templateName")}</Label>
                 <Input
                   id="template-name"
                   data-testid="week-template-name"
@@ -322,12 +324,12 @@ export function WeekTemplateDialog({
                   onChange={(e) =>
                     setNewTemplate({ ...newTemplate, name: e.target.value })
                   }
-                  placeholder="e.g., Standard Week, Holiday Schedule"
+                  placeholder={t("schedule.eGStandardWeekHolidaySchedule")}
                 />
               </div>
 
               <div>
-                <Label htmlFor="template-description">Description</Label>
+                <Label htmlFor="template-description">{t("schedule.description")}</Label>
                 <Textarea
                   id="template-description"
                   value={newTemplate.description}
@@ -337,32 +339,32 @@ export function WeekTemplateDialog({
                       description: e.target.value,
                     })
                   }
-                  placeholder="Describe when to use this template..."
+                  placeholder={t("schedule.describeWhenToUseThisTemplate")}
                   rows={3}
                 />
               </div>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Current Week Summary</h4>
+                <h4 className="font-medium mb-2">{t("schedule.currentWeekSummary")}</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Total Shifts:</span>
+                    <span className="text-muted-foreground">{t("schedule.totalShifts")}</span>
                     <span className="ml-2 font-medium">
                       {currentTemplateData.metadata.total_shifts}
                     </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Total Hours:</span>
+                    <span className="text-muted-foreground">{t("schedule.totalHours")}</span>
                     <span className="ml-2 font-medium">
                       {currentTemplateData.metadata.total_hours}
                     </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Staff Assigned:</span>
+                    <span className="text-muted-foreground">{t("schedule.staffAssigned")}</span>
                     <span className="ml-2 font-medium">{assignedCount}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Week of:</span>
+                    <span className="text-muted-foreground">{t("schedule.weekOf")}</span>
                     <span className="ml-2 font-medium">
                       {format(weekStart, "MMM d, yyyy")}
                     </span>

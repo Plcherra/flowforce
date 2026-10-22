@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   useCallback,
   useEffect,
@@ -109,6 +110,7 @@ export function ShiftWizardDialog({
   templateSeed = null,
   children,
 }: ShiftWizardDialogProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("details");
   const [formData, setFormData] = useState<ShiftWizardFormData>(() =>
     createDefaultFormState(selectedDate),
@@ -509,22 +511,22 @@ export function ShiftWizardDialog({
                   variant="secondary"
                   className="text-[10px] uppercase tracking-wide"
                 >
-                  Preview
+                  {t("schedule.preview")}
                 </Badge>
               )}
             </DialogTitle>
             <DialogDescription>
-              Set up a new shift with detailed scheduling options.
+              {t("schedule.setUpANewShiftWithDetailedScheduling")}
             </DialogDescription>
             {isFallbackData && (
               <p className="mt-2 text-xs text-muted-foreground">
-                Live scheduling updates are disabled while demo data is active.
+                {t("schedule.liveSchedulingUpdatesAreDisabledWhileDemoData")}
               </p>
             )}
             {draftWarnings.length > 0 && (
               <Alert variant="destructive" className="mt-4">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Conflict warning</AlertTitle>
+                <AlertTitle>{t("schedule.conflictWarning")}</AlertTitle>
                 <AlertDescription>
                   {draftWarnings[0]?.message}
                   {draftWarnings.length > 1
@@ -544,10 +546,10 @@ export function ShiftWizardDialog({
               className="flex h-full flex-col"
             >
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="users">Users</TabsTrigger>
-                <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                <TabsTrigger value="notes">Notes</TabsTrigger>
+                <TabsTrigger value="details">{t("schedule.details")}</TabsTrigger>
+                <TabsTrigger value="users">{t("schedule.users")}</TabsTrigger>
+                <TabsTrigger value="tasks">{t("schedule.tasks")}</TabsTrigger>
+                <TabsTrigger value="notes">{t("schedule.notes")}</TabsTrigger>
               </TabsList>
 
               <div className="mt-4 flex-1 min-h-0">
@@ -588,7 +590,7 @@ export function ShiftWizardDialog({
                           }
                         />
                         <Label htmlFor="can-claim">
-                          Enable users to claim this shift
+                          {t("schedule.enableUsersToClaimThisShift")}
                         </Label>
                       </div>
 
@@ -660,12 +662,12 @@ export function ShiftWizardDialog({
                   resetForm();
                 }}
               >
-                Cancel
+                {t("schedule.cancel")}
               </Button>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                 {isFallbackData && (
                   <span className="text-xs text-muted-foreground sm:mr-2">
-                    Preview mode — actions disabled
+                    {t("schedule.previewModeActionsDisabled")}
                   </span>
                 )}
                 <Button

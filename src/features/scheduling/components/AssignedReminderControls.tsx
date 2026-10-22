@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -26,6 +27,7 @@ export function AssignedReminderControls({
   isAssignee,
   canGrantDeactivate,
 }: AssignedReminderControlsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
@@ -104,7 +106,7 @@ export function AssignedReminderControls({
           data-testid="deactivate-reminder"
           onClick={() => void deactivate()}
         >
-          Deactivate
+          {t("schedule.deactivate")}
         </Button>
       ) : null}
     </div>

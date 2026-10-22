@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CalendarPlus, Clock, LayoutGrid, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -55,6 +56,7 @@ export function ScheduleEmptyState({
   onOpenAvailability,
   onSuggestFills,
 }: ScheduleEmptyStateProps) {
+  const { t } = useTranslation();
   const copy = readOnly ? staffCopy : managerCopyByView[view];
 
   if (variant === "banner") {
@@ -76,7 +78,7 @@ export function ScheduleEmptyState({
             <p className="text-xs text-muted-foreground">{copy.description}</p>
             {hasLocationFilter ? (
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Try clearing the location filter to see shifts at other sites.
+                {t("schedule.tryClearingTheLocationFilterToSeeShifts")}
               </p>
             ) : null}
           </div>
@@ -84,24 +86,24 @@ export function ScheduleEmptyState({
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {readOnly && onOpenAvailability ? (
             <Button size="sm" variant="outline" onClick={onOpenAvailability}>
-              Update availability
+              {t("schedule.updateAvailability")}
             </Button>
           ) : null}
           {!readOnly && view === "week" && onSuggestFills ? (
             <Button size="sm" variant="secondary" onClick={onSuggestFills}>
               <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-              Suggest fills
+              {t("schedule.suggestFills")}
             </Button>
           ) : null}
           {!readOnly && view !== "week" && onSwitchToWeek ? (
             <Button size="sm" onClick={onSwitchToWeek}>
               <LayoutGrid className="mr-1.5 h-3.5 w-3.5" />
-              Open week board
+              {t("schedule.openWeekBoard")}
             </Button>
           ) : null}
           {!readOnly && view === "staff" && onOpenStaffPanel ? (
             <Button size="sm" variant="outline" onClick={onOpenStaffPanel}>
-              Team requests
+              {t("schedule.teamRequests")}
             </Button>
           ) : null}
         </div>
@@ -124,25 +126,25 @@ export function ScheduleEmptyState({
       </p>
       {hasLocationFilter ? (
         <p className="mt-2 text-xs text-muted-foreground">
-          Try clearing the location filter to see shifts at other sites.
+          {t("schedule.tryClearingTheLocationFilterToSeeShifts")}
         </p>
       ) : null}
       <p className="mt-3 max-w-sm text-xs text-muted-foreground">{copy.hint}</p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         {readOnly && onOpenAvailability ? (
           <Button size="sm" variant="outline" onClick={onOpenAvailability}>
-            Update availability
+            {t("schedule.updateAvailability")}
           </Button>
         ) : null}
         {!readOnly && view !== "week" && onSwitchToWeek ? (
           <Button size="sm" onClick={onSwitchToWeek}>
             <LayoutGrid className="mr-2 h-4 w-4" />
-            Open week board
+            {t("schedule.openWeekBoard")}
           </Button>
         ) : null}
         {!readOnly && view === "staff" && onOpenStaffPanel ? (
           <Button size="sm" variant="outline" onClick={onOpenStaffPanel}>
-            Team requests
+            {t("schedule.teamRequests")}
           </Button>
         ) : null}
       </div>

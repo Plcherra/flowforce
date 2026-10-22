@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, lazy, Suspense, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export function NextGenSchedulingSystem({
 }: {
   locationFilter?: string;
 }) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const schedulingRole = useSchedulingRole();
   const {
@@ -130,7 +132,7 @@ export function NextGenSchedulingSystem({
       <div className="flex min-h-0 w-full flex-1 flex-col px-2 py-1.5 sm:px-3">
         {schedulingSetupMissing ? (
           <FeatureSetupRequiredState
-            title="Scheduling module is not fully set up yet"
+            title={t("schedule.schedulingModuleIsNotFullySetUpYet")}
             description={getSupabaseSetupMessage(schedulingError, "Scheduling")}
             icon={<Calendar className="h-5 w-5" />}
             action={
@@ -140,21 +142,19 @@ export function NextGenSchedulingSystem({
                 onClick={handleRetry}
                 disabled={retryDisabled}
               >
-                Retry
+                {t("schedule.retry")}
               </Button>
             }
             setupDescription={
               <>
-                Missing scheduling database resources. Restore the scheduling
-                migrations for <code>schedules</code>,{" "}
-                <code>schedule_assignments</code>, time off, availability, and
-                vendor visits, then refresh this page.
+                {t("schedule.missingSchedulingDatabaseResourcesRestoreTheSchedulingMigrations")} <code>{t("schedule.schedules")}</code>,{" "}
+                <code>{t("schedule.scheduleAssignments")}</code>, {t("schedule.timeOffAvailabilityVendorVisitsThenRefresh")}
               </>
             }
           />
         ) : schedulingError ? (
           <FeatureErrorState
-            title="Scheduling data unavailable"
+            title={t("schedule.schedulingDataUnavailable")}
             description={statusDescription}
             action={
               <Button
@@ -163,7 +163,7 @@ export function NextGenSchedulingSystem({
                 onClick={handleRetry}
                 disabled={retryDisabled}
               >
-                Retry
+                {t("schedule.retry")}
               </Button>
             }
             className="mb-4"
@@ -183,7 +183,7 @@ export function NextGenSchedulingSystem({
                 onClick={handleRetry}
                 disabled={retryDisabled}
               >
-                Retry
+                {t("schedule.retry")}
               </Button>
             </div>
           </Alert>

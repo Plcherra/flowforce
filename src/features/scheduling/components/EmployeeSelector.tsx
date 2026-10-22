@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ export function EmployeeSelector({
   shiftId,
   selectedEmployees = [],
 }: EmployeeSelectorProps) {
+  const { t } = useTranslation();
   const { employees = [], loading, error } = useEmployees();
   const {
     mutations: { assign: assignUserToShift, unassign: unassignUserFromShift },
@@ -89,7 +91,7 @@ export function EmployeeSelector({
 
   if (loading) {
     return (
-      <div className="text-sm text-muted-foreground">Loading employees...</div>
+      <div className="text-sm text-muted-foreground">{t("schedule.loadingEmployees")}</div>
     );
   }
 
@@ -139,7 +141,7 @@ export function EmployeeSelector({
         </div>
       ) : (
         <div className="text-sm text-muted-foreground text-center py-4">
-          No employees assigned
+          {t("schedule.noEmployeesAssigned")}
         </div>
       )}
 
@@ -153,13 +155,13 @@ export function EmployeeSelector({
             data-testid="employee-selector-add"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Add Employee
+            {t("schedule.addEmployee")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search employees..." />
-            <CommandEmpty>No employees found.</CommandEmpty>
+            <CommandInput placeholder={t("schedule.searchEmployees")} />
+            <CommandEmpty>{t("schedule.noEmployeesFound")}</CommandEmpty>
             <CommandGroup>
               {Array.isArray(availableEmployees) &&
               availableEmployees.length > 0 ? (
@@ -198,7 +200,7 @@ export function EmployeeSelector({
                 })
               ) : (
                 <div className="p-2 text-sm text-muted-foreground">
-                  No available employees
+                  {t("schedule.noAvailableEmployees")}
                 </div>
               )}
             </CommandGroup>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -42,6 +43,7 @@ export function AssignFormReminderForm({
   people,
   profileId,
 }: AssignFormReminderFormProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [formId, setFormId] = useState("");
@@ -103,10 +105,10 @@ export function AssignFormReminderForm({
   return (
     <div className="grid gap-2 border-t pt-3" data-testid="assign-form-reminder">
       <div className="space-y-1">
-        <Label>Form</Label>
+        <Label>{t("schedule.form")}</Label>
         <Select value={formId} onValueChange={setFormId}>
-          <SelectTrigger aria-label="Form reminder">
-            <SelectValue placeholder="Choose a form" />
+          <SelectTrigger aria-label={t("schedule.formReminder")}>
+            <SelectValue placeholder={t("schedule.chooseAForm")} />
           </SelectTrigger>
           <SelectContent>
             {(formsQuery.data ?? []).map((form) => (
@@ -119,10 +121,10 @@ export function AssignFormReminderForm({
       </div>
       <div className="grid gap-2 sm:grid-cols-3">
         <div className="space-y-1">
-          <Label>Who</Label>
+          <Label>{t("schedule.who")}</Label>
           <Select value={targetId} onValueChange={setTargetId}>
-            <SelectTrigger aria-label="Form reminder recipient">
-              <SelectValue placeholder="Choose a person" />
+            <SelectTrigger aria-label={t("schedule.formReminderRecipient")}>
+              <SelectValue placeholder={t("schedule.chooseAPerson")} />
             </SelectTrigger>
             <SelectContent>
               {others.map((person) => (
@@ -134,22 +136,22 @@ export function AssignFormReminderForm({
           </Select>
         </div>
         <div className="space-y-1">
-          <Label htmlFor="form-reminder-time">Time</Label>
+          <Label htmlFor="form-reminder-time">{t("schedule.time")}</Label>
           <Input
             id="form-reminder-time"
-            aria-label="Form reminder time"
+            aria-label={t("schedule.formReminderTime")}
             type="time"
             value={time}
             onChange={(event) => setTime(event.target.value)}
           />
         </div>
         <div className="space-y-1">
-          <Label>How often</Label>
+          <Label>{t("schedule.howOften")}</Label>
           <Select
             value={repeat}
             onValueChange={(value) => setRepeat(value as ReminderRepeat)}
           >
-            <SelectTrigger aria-label="How often">
+            <SelectTrigger aria-label={t("schedule.howOften")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

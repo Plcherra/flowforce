@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { format, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,6 +37,7 @@ export function DayView({
   overlayEvents = [],
   selectedEventId = null,
 }: DayViewProps) {
+  const { t } = useTranslation();
   const [showAddShift, setShowAddShift] = useState(false);
   const dayShifts = schedules.filter((schedule) =>
     isSameDay(parseISO(schedule.start_time), selectedDate),
@@ -74,12 +76,12 @@ export function DayView({
         <div className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold text-foreground">
-            Meetings & events
+            {t("schedule.meetingsEvents2")}
           </h3>
         </div>
         {dayEvents.length === 0 ? (
           <div className="rounded-md border border-dashed border-muted-foreground/40 p-4 text-sm text-muted-foreground">
-            No sessions scheduled for this day.
+            {t("schedule.noSessionsScheduledForThisDay")}
           </div>
         ) : (
           <div className="grid gap-3">
@@ -141,7 +143,7 @@ export function DayView({
         <div>
           <h3 className="flex items-center text-lg font-semibold mb-4">
             <Users className="h-5 w-5 mr-2" />
-            Staff Timeline
+            {t("schedule.staffTimeline")}
           </h3>
           <div className="space-y-4">
             {Array.from({ length: 24 }, (_, hour) => {
@@ -191,7 +193,7 @@ export function DayView({
                       </div>
                     ) : (
                       <div className="text-xs text-muted-foreground italic">
-                        No staff scheduled
+                        {t("schedule.noStaffScheduled")}
                       </div>
                     )}
                   </div>
@@ -203,12 +205,12 @@ export function DayView({
 
         {/* Shift list */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">All Shifts</h3>
+          <h3 className="text-lg font-semibold mb-4">{t("schedule.allShifts")}</h3>
           {dayShifts.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               <h4 className="text-lg font-medium text-foreground mb-2">
-                No events scheduled
+                {t("schedule.noEventsScheduled")}
               </h4>
               {!hideShiftActions && (
                 <>
@@ -218,7 +220,7 @@ export function DayView({
                   </p>
                   <Button onClick={() => setShowAddShift(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Shift
+                    {t("schedule.addShift")}
                   </Button>
                 </>
               )}
@@ -249,7 +251,7 @@ export function DayView({
                     <div className="text-sm text-muted-foreground">
                       <div className="flex items-center mb-1">
                         <Clock className="h-4 w-4 mr-1" />
-                        <span className="font-medium">Time:</span>
+                        <span className="font-medium">{t("schedule.time2")}</span>
                       </div>
                       <div className="ml-5">
                         {format(new Date(shift.start_time), "HH:mm")} -
@@ -296,7 +298,7 @@ export function DayView({
                         </div>
                       ) : (
                         <div className="ml-5 text-muted-foreground italic">
-                          No staff assigned
+                          {t("schedule.noStaffAssigned")}
                         </div>
                       )}
                     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -42,6 +43,7 @@ const hasId = (value: unknown): value is { id: string } =>
 export function PersonalAvailabilityPanel({
   className,
 }: PersonalAvailabilityPanelProps) {
+  const { t } = useTranslation();
   const { profile, loading: profileLoading } = useProfile();
   const {
     loading: schedulingLoading,
@@ -151,20 +153,18 @@ export function PersonalAvailabilityPanel({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <CalendarCheck className="h-5 w-5 text-primary" />
-            My Availability
+            {t("schedule.myAvailability")}
           </CardTitle>
           <CardDescription>
-            Connect to your scheduling data to enable availability editing.
+            {t("schedule.connectToYourSchedulingDataToEnableAvailability")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-primary/40 bg-primary/5 text-primary">
             <ShieldAlert className="h-5 w-5" />
-            <AlertTitle>Preview mode</AlertTitle>
+            <AlertTitle>{t("schedule.previewMode")}</AlertTitle>
             <AlertDescription>
-              The schedule is currently showing demo data. Once Supabase tables
-              are available this section will let you adjust your working
-              preferences.
+              {t("schedule.theScheduleIsCurrentlyShowingDemoDataOnce")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -176,7 +176,7 @@ export function PersonalAvailabilityPanel({
     return (
       <Card className={className}>
         <CardContent className="py-10">
-          <LoadingSpinner text="Loading your availability..." />
+          <LoadingSpinner text={t("schedule.loadingYourAvailability")} />
         </CardContent>
       </Card>
     );
@@ -188,10 +188,9 @@ export function PersonalAvailabilityPanel({
         <CardContent className="py-10">
           <Alert variant="destructive" className="border-destructive/40">
             <ShieldAlert className="h-5 w-5 text-destructive" />
-            <AlertTitle>No profile found</AlertTitle>
+            <AlertTitle>{t("schedule.noProfileFound")}</AlertTitle>
             <AlertDescription>
-              We couldn&apos;t load your profile information. Try reloading the
-              page or contact your manager for help.
+              {t("schedule.couldNotLoadProfileInformation")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -203,7 +202,7 @@ export function PersonalAvailabilityPanel({
     return (
       <Card className={className}>
         <CardContent className="py-10">
-          <LoadingSpinner text="Preparing your availability editor..." />
+          <LoadingSpinner text={t("schedule.preparingAvailabilityEditor")} />
         </CardContent>
       </Card>
     );
@@ -216,9 +215,9 @@ export function PersonalAvailabilityPanel({
         <CardContent className="py-10">
           <Alert variant="destructive" className="border-destructive/40">
             <ShieldAlert className="h-5 w-5 text-destructive" />
-            <AlertTitle>Couldn&apos;t load availability</AlertTitle>
+            <AlertTitle>{t("schedule.couldNotLoadAvailability")}</AlertTitle>
             <AlertDescription>
-              {error.message || "Please try again in a few moments."}
+              {error.message || t("schedule.pleaseTryAgainInAFewMoments")}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -232,11 +231,10 @@ export function PersonalAvailabilityPanel({
         <div>
           <CardTitle className="flex items-center gap-2 text-lg">
             <CalendarCheck className="h-5 w-5 text-primary" />
-            My Availability
+            {t("schedule.myAvailability")}
           </CardTitle>
           <CardDescription>
-            These hours are only yours. They do not change another employee's
-            availability. Submit a request if this week is locked.
+            {t("schedule.theseHoursAreOnlyYoursTheyDoNot")}
           </CardDescription>
         </div>
         <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 px-3 py-2 text-xs text-primary">
@@ -257,8 +255,7 @@ export function PersonalAvailabilityPanel({
               : "Update as needed"}
           </AlertTitle>
           <AlertDescription>
-            Choose the hours you prefer to work each day. Locked weeks still let
-            you submit a change request for manager approval.
+            {t("schedule.chooseTheHoursYouPreferToWorkEach")}
           </AlertDescription>
         </Alert>
 
