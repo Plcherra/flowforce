@@ -4741,6 +4741,7 @@
   "availability": {
     "allowIndividualEmployeesToEditAvailabilityDuringLocked": "Permite que cada persona edite su disponibilidad durante los períodos bloqueados.",
     "anyDayAnyTime": "Cualquier día, cualquier hora",
+    "appliesFrom": "Tu nueva disponibilidad aplica desde {{date}}.",
     "approveToApplyChangesImmediatelyAndGrantA": "Aprueba para aplicar los cambios de inmediato y conceder una excepción temporal. Deniega para avisar a la persona.",
     "auto": "Auto",
     "autoLockingPreviewUpdatesAfterSavingNewSettings": "La vista previa del bloqueo automático se actualiza al guardar la nueva configuración.",
@@ -4788,6 +4789,7 @@
     "satOnly": "Solo sábado",
     "selectDay": "Selecciona el día",
     "selectHour": "Selecciona la hora",
+    "sendAvailability": "Enviar disponibilidad",
     "submitRequest": "Enviar solicitud",
     "submitTimeOffRequest": "Enviar solicitud de ausencia",
     "thisCompanyUsesOpenAvailabilityYouDoNot": "Esta empresa usa disponibilidad abierta. No hace falta completar la cuadrícula de la semana.",

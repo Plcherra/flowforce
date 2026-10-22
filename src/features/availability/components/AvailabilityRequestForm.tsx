@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import {
-  AlertCircle,
-  Calendar,
-  Clock,
-  Lock,
-  Unlock,
-  ArrowRight,
-} from "lucide-react";
+import { AlertCircle, Clock, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,14 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,25 +25,19 @@ import {
   choiceFromPattern,
   type RepeatPattern,
 } from "@/features/scheduling/utils/repeatPattern";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getLockStateForWeek,
-  allowEdit,
   computeAutoLockThreshold,
-  startOfIsoWeek,
 } from "@/features/availability/utils/lockEngine";
 import type { LockEngineDeps } from "@/features/availability/utils/lockEngine";
 import { useToast } from "@/hooks/use-toast";
 import type {
   AvailabilityLockMode,
-  AvailabilityRequest,
   AvailabilityException,
   OrgPrefs,
 } from "@/types/availability";
-import { notifyManagersNewRequest } from "@/notifications/availability";
+import { sendAvailabilityAction } from "@/features/availability/utils/sendAvailabilityAction";
 import { logger } from "@/utils/logger";
 import { clockRangeFromHours } from "@/features/availability/utils/availabilityUtils";
 import {
@@ -81,6 +60,7 @@ export interface AvailabilityRequestFormProps {
   onSaveDirect?: (
     nextAvailability: AvailabilityGrid,
     repeats?: Record<number, RepeatPattern | null>,
+    windowStart?: string,
   ) => Promise<void>;
 }
 
@@ -90,19 +70,10 @@ interface LockInfo {
   nextLock?: Date | null;
   deps: LockEngineDeps;
   availabilityChoice: "open" | "fixed" | null;
+  windowStartWeekday: number | null;
+  windowEndWeekday: number | null;
+  postingWeekday: number | null;
 }
-
-const toISODate = (date: Date | dayjs.Dayjs) => {
-  if (dayjs.isDayjs(date)) {
-    return date.format("YYYY-MM-DD");
-  }
-  return date.toISOString().slice(0, 10);
-};
-
-const getDateForOffset = (weekStart: string, offset: number) => {
-  const base = dayjs(weekStart);
-  return base.add(offset, "day");
-};
 
 const hashGrid = (grid: AvailabilityGrid) =>
   JSON.stringify(grid, Object.keys(grid).sort());
@@ -143,16 +114,9 @@ export function AvailabilityRequestForm({
     editorForPattern(weekStart, 0, null),
   );
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const [editingGrid, setEditingGrid] = useState<AvailabilityGrid>(() =>
     cloneGrid(initialAvailability),
-  );
-  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
-  const [requestReason, setRequestReason] = useState("");
-  const [requestStart, setRequestStart] = useState(weekStart);
-  const [requestEnd, setRequestEnd] = useState(
-    toISODate(getDateForOffset(weekStart, 6)),
   );
 
   const { data: lockInfo, isLoading: _lockInfoLoading, error: _lockInfoError } = useQuery<LockInfo>({
@@ -161,7 +125,7 @@ export function AvailabilityRequestForm({
       const { data: prefData, error: prefError } = await supabase
         .from("org_prefs")
         .select(
-          "id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour, availability_choice",
+          "id, availability_lock_mode, auto_lock_day_of_week, auto_lock_hour, availability_choice, schedule_window_start_weekday, schedule_window_end_weekday, schedule_posting_weekday",
         )
         .eq("id", orgId)
         .maybeSingle();
@@ -270,108 +234,32 @@ export function AvailabilityRequestForm({
         nextLock,
         deps: overrides,
         availabilityChoice,
+        windowStartWeekday: prefData?.schedule_window_start_weekday ?? null,
+        windowEndWeekday: prefData?.schedule_window_end_weekday ?? null,
+        postingWeekday: prefData?.schedule_posting_weekday ?? null,
       };
     },
   });
-
-  const { data: allowMap } = useQuery<Record<string, boolean>>({
-    queryKey: ["availability-allow-edit", orgId, employeeId, weekStart],
-    enabled: Boolean(lockInfo),
-    queryFn: async () => {
-      if (!lockInfo) return {};
-      const dates = DAY_LABELS.map((_, index) =>
-        getDateForOffset(weekStart, index).format("YYYY-MM-DD"),
-      );
-      const entries = await Promise.all(
-        dates.map(async (date) => {
-          const result = await allowEdit({
-            orgId,
-            employeeId,
-            date,
-            deps: lockInfo.deps,
-          });
-          return [date, result] as const;
-        }),
-      );
-      return Object.fromEntries(entries);
-    },
-  });
-
-  const { data: lastRequest, error: lastRequestError } = useQuery<
-    AvailabilityRequest | null
-  >({
-    queryKey: ["availability-last-request", employeeId],
-    queryFn: async () => {
-      // TODO: Regenerate Supabase types to include availability_request table
-      const { data, error } = await supabase
-        .from("availability_request" as any)
-        .select(
-          "id, created_at, status, week_start, manager_id, decision_note, payload",
-        )
-        .eq("employee_id", employeeId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        throw error;
-      }
-      if (!data) return null;
-
-      // Type assertion for data since table is not in generated types
-      const requestData = data as {
-        id: string;
-        created_at: string;
-        manager_id: string | null;
-        decision_note: string | null;
-        payload: Record<string, unknown> | null;
-        status: "pending" | "approved" | "denied";
-        week_start: string;
-      };
-
-      return {
-        id: requestData.id,
-        createdAt: requestData.created_at,
-        managerId: requestData.manager_id,
-        decisionNote: requestData.decision_note,
-        payload: requestData.payload ?? {},
-        status: requestData.status,
-        weekStart: requestData.week_start,
-        employeeId,
-        updatedAt: requestData.created_at,
-      };
-    },
-  });
-
-  useEffect(() => {
-    if (lastRequestError) {
-      logger.error("Error loading last request", {
-        error: lastRequestError,
-        tags: ["error"],
-      });
-    }
-  }, [lastRequestError]);
 
   const availabilityIsOpen = lockInfo?.availabilityChoice === "open";
 
-  const directEditAllowed = useMemo(() => {
-    if (!lockInfo) return false;
-    if (lockInfo.state === "open") return true;
-    if (!allowMap) return false;
-    return Object.values(allowMap).some(Boolean);
-  }, [lockInfo, allowMap]);
-
-  const _locked = useMemo(() => {
-    if (!lockInfo) return false;
-    if (lockInfo.state === "open") return false;
-    if (lockInfo.state === "locked") return true;
-    return lockInfo.state.mode !== "open-with-exceptions";
+  const sendAction = useMemo(() => {
+    const start = lockInfo?.windowStartWeekday;
+    const end = lockInfo?.windowEndWeekday;
+    const posting = lockInfo?.postingWeekday;
+    if (start == null || end == null || posting == null) return null;
+    return sendAvailabilityAction(
+      {
+        sendDate: new Date().toISOString().slice(0, 10),
+        postingWeekday: posting,
+        windowStartWeekday: start,
+        windowEndWeekday: end,
+      },
+      lockInfo?.state !== "open",
+    );
   }, [lockInfo]);
 
-  const dayIsEditable = (dayIndex: number) => {
-    const date = getDateForOffset(weekStart, dayIndex).format("YYYY-MM-DD");
-    return directEditAllowed && !(allowMap && allowMap[date] === false);
-  };
+  const dayIsEditable = (_dayIndex: number) => true;
 
   const setDayHours = (dayIndex: number, hours: number[]) => {
     if (!dayIsEditable(dayIndex)) return;
@@ -436,152 +324,29 @@ export function AvailabilityRequestForm({
     );
   };
 
-  const diffSummary = useMemo(() => {
-    const diff: { day: string; added: number[]; removed: number[] }[] = [];
-    DAY_LABELS.forEach((label, index) => {
-      const original = new Set(initialAvailability[index] ?? []);
-      const updated = new Set(editingGrid[index] ?? []);
-      const added = Array.from(updated).filter((hour) => !original.has(hour));
-      const removed = Array.from(original).filter((hour) => !updated.has(hour));
-      if (added.length || removed.length) {
-        diff.push({ day: label, added, removed });
-      }
-    });
-    return diff;
-  }, [editingGrid, initialAvailability]);
-
-  const sendFixedAvailability = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("availability_request").insert({
-        employee_id: employeeId,
-        company_id: orgId,
-        week_start: weekStart,
-        status: "pending",
-        payload: {
-          source: "my-availability",
-          desiredAvailability: editingGrid,
-        },
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Fixed availability sent",
-        description: "The posted window is unchanged until a manager approves a later window.",
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["availability-last-request", employeeId],
-      });
-    },
-    onError: (error) => {
-      logger.error("Error sending fixed availability", { error, tags: ["error"] });
-      toast({
-        title: "Unable to send fixed availability",
-        description:
-          error instanceof Error ? error.message : "Please try again later.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const directSave = useMutation({
     mutationFn: async () => {
-      if (!onSaveDirect) {
-        throw new Error("Direct save handler not provided");
+      if (!onSaveDirect || !sendAction) {
+        throw new Error("Next availability window is not set");
       }
-      await onSaveDirect(editingGrid, patterns);
+      await onSaveDirect(editingGrid, patterns, sendAction.windowStart);
     },
     onSuccess: () => {
       toast({
-        title: "Availability saved",
-        description: "Your availability updates have been saved.",
+        title: "Availability sent",
+        description: sendAction?.helper,
       });
-      queryClient.invalidateQueries({ queryKey: ["availability-last-request", employeeId] });
     },
     onError: (error) => {
-      logger.error("Error saving availability", { error, tags: ["error"] });
+      logger.error("Error sending availability", { error, tags: ["error"] });
       toast({
-        title: "Unable to save",
+        title: "Unable to send availability",
         description:
           error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
     },
   });
-
-  const submitRequest = useMutation({
-    mutationFn: async () => {
-      const payload = {
-        employee_id: employeeId,
-        week_start: weekStart,
-        payload: {
-          requestedRange: { start: requestStart, end: requestEnd },
-          reason: requestReason,
-          desiredAvailability: editingGrid,
-          repeats: patterns,
-        },
-        status: "pending",
-      };
-
-      // TODO: Regenerate Supabase types to include availability_request table
-      const { data, error } = await supabase
-        .from("availability_request" as any)
-        .insert(payload)
-        .select()
-        .single();
-      if (error || !data) throw error ?? new Error("Unable to create request");
-      // Type assertion for data since table is not in generated types
-      const _insertData = data as { id: string };
-
-      // TODO: Regenerate Supabase types to include audit_log table
-      await supabase.from("audit_log" as any).insert({
-        actorid: employeeId,
-        action: "availability.request.submitted",
-        entity: "availability_request",
-        entityid: payload.employee_id,
-        meta: payload.payload,
-      });
-
-      await notifyManagersNewRequest(data.id);
-
-      return data;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Request submitted",
-        description: "Managers have been notified of your request.",
-      });
-      setRequestDialogOpen(false);
-      setRequestReason("");
-      queryClient.invalidateQueries({ queryKey: ["availability-last-request", employeeId] });
-    },
-    onError: (error) => {
-      logger.error("Error submitting availability request", {
-        error,
-        tags: ["error"],
-      });
-      toast({
-        title: "Unable to submit request",
-        description:
-          error instanceof Error ? error.message : "Please try again later.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const applyPreset = (preset: "sat" | "weekend" | "custom") => {
-    if (preset === "sat") {
-      const saturday = getDateForOffset(weekStart, 5).format("YYYY-MM-DD");
-      setRequestStart(saturday);
-      setRequestEnd(saturday);
-    } else if (preset === "weekend") {
-      setRequestStart(getDateForOffset(weekStart, 5).format("YYYY-MM-DD"));
-      setRequestEnd(getDateForOffset(weekStart, 6).format("YYYY-MM-DD"));
-    } else {
-      setRequestStart(weekStart);
-      setRequestEnd(getDateForOffset(weekStart, 6).format("YYYY-MM-DD"));
-    }
-  };
 
   const lockLabel = useMemo(() => {
     if (!lockInfo) return "Loading...";
@@ -600,17 +365,6 @@ export function AvailabilityRequestForm({
     return dayjs(lockInfo.nextLock).format("ddd h:mm A");
   }, [lockInfo]);
 
-  const statusBadge = useMemo(() => {
-    if (!lastRequest) return null;
-    const variant =
-      lastRequest.status === "approved"
-        ? "default"
-        : lastRequest.status === "denied"
-          ? "destructive"
-          : "secondary";
-    return <Badge variant={variant}>Last request: {lastRequest.status}</Badge>;
-  }, [lastRequest]);
-
   return (
     <Card className="border bg-background shadow-sm">
       <CardHeader>
@@ -624,7 +378,6 @@ export function AvailabilityRequestForm({
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {statusBadge}
             <Badge
               variant={lockInfo?.state === "open" ? "default" : "outline"}
               className="flex items-center gap-1"
@@ -646,20 +399,9 @@ export function AvailabilityRequestForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div
-          className={cn(
-            "rounded-lg border",
-            directEditAllowed
-              ? "border-border"
-              : "border-dashed border-destructive/50 bg-destructive/5",
-          )}
-        >
+        <div className="rounded-lg border border-border">
           <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <span>Week of {dayjs(weekStart).format("MMM D, YYYY")}</span>
-            {!directEditAllowed && (
-              <span className="flex items-center gap-1 text-destructive">
-                <Lock className="h-3 w-3" />{t("availability.lockedSubmitARequestToChangeAvailability")}</span>
-            )}
           </div>
           {availabilityIsOpen ? (
             <div className="space-y-2 p-4" data-testid="availability-open-notice">
@@ -802,11 +544,11 @@ export function AvailabilityRequestForm({
             <AlertCircle className="h-4 w-4 text-warning" />
             {availabilityIsOpen
               ? "Open availability does not require the weekday grid."
-              : directEditAllowed
-                ? "Changes save instantly for unlocked days."
-                : "Week is locked. Submit a request to update availability."}
+              : sendAction
+                ? t("availability.appliesFrom", { date: sendAction.windowStart })
+                : null}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {availabilityIsOpen ? null : (
               <>
             <Button
@@ -822,135 +564,14 @@ export function AvailabilityRequestForm({
             <RepeatPatternEditor
               value={editor}
               onChange={updateEditor}
-              disabled={!directEditAllowed}
             />
             <Button
+              data-testid="availability-send"
               onClick={() => directSave.mutate()}
-              disabled={!directEditAllowed || (!hasChanges && !repeatDirty)}
-            >{t("forms.saveChanges")}</Button>
-            {lockInfo?.availabilityChoice === "fixed" ? (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => sendFixedAvailability.mutate()}
-                disabled={sendFixedAvailability.isPending}
-              >{t("onboarding.sendFixedAvailability")}</Button>
-            ) : null}
+              disabled={!sendAction || directSave.isPending}
+            >{t("availability.sendAvailability")}</Button>
               </>
             )}
-            <Dialog
-              open={requestDialogOpen}
-              onOpenChange={setRequestDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button variant="default" className="gap-2">{t("availability.requestChange")}</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-xl">
-                <DialogHeader>
-                  <DialogTitle>{t("availability.requestAvailabilityChange")}</DialogTitle>
-                  <DialogDescription>{t("availability.provideTheTimeframeAndReasonForYourChange")}</DialogDescription>
-                </DialogHeader>
-                <Tabs defaultValue="custom" className="space-y-4">
-                  <TabsList>
-                    <TabsTrigger value="sat" onClick={() => applyPreset("sat")}>{t("availability.satOnly")}</TabsTrigger>
-                    <TabsTrigger
-                      value="weekend"
-                      onClick={() => applyPreset("weekend")}
-                    >{t("availability.weekend")}</TabsTrigger>
-                    <TabsTrigger
-                      value="custom"
-                      onClick={() => applyPreset("custom")}
-                    >{t("common.custom")}</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="sat" className="space-y-3">
-                    <RequestRangeInputs
-                      start={requestStart}
-                      end={requestEnd}
-                      onChange={(next) => {
-                        setRequestStart(next.start);
-                        setRequestEnd(next.end);
-                      }}
-                    />
-                  </TabsContent>
-                  <TabsContent value="weekend" className="space-y-3">
-                    <RequestRangeInputs
-                      start={requestStart}
-                      end={requestEnd}
-                      onChange={(next) => {
-                        setRequestStart(next.start);
-                        setRequestEnd(next.end);
-                      }}
-                    />
-                  </TabsContent>
-                  <TabsContent value="custom" className="space-y-3">
-                    <RequestRangeInputs
-                      start={requestStart}
-                      end={requestEnd}
-                      onChange={(next) => {
-                        setRequestStart(next.start);
-                        setRequestEnd(next.end);
-                      }}
-                    />
-                  </TabsContent>
-                </Tabs>
-                <div className="space-y-2">
-                  <Label htmlFor="request-reason">{t("schedule.reason")}</Label>
-                  <Textarea
-                    id="request-reason"
-                    placeholder={t("availability.explainWhyYouNeedTheChange")}
-                    value={requestReason}
-                    onChange={(event) => setRequestReason(event.target.value)}
-                    rows={4}
-                  />
-                </div>
-                <div className="space-y-2 rounded-lg border bg-muted/40 p-3 text-sm">
-                  <p className="flex items-center gap-2 font-medium">
-                    <ArrowRight className="h-4 w-4 text-primary" />{t("availability.changesPreview")}</p>
-                  {diffSummary.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">{t("availability.noChangesSelectedYet")}</p>
-                  ) : (
-                    <ul className="space-y-1 text-xs">
-                      {diffSummary.map((entry) => (
-                        <li key={entry.day}>
-                          <span className="font-semibold">{entry.day}:</span>{" "}
-                          {entry.added.length > 0 && (
-                            <span className="text-success">
-                              +{" "}
-                              {entry.added
-                                .map((hour) => dayjs().hour(hour).format("h A"))
-                                .join(", ")}
-                            </span>
-                          )}
-                          {entry.added.length > 0 &&
-                            entry.removed.length > 0 && <span> · </span>}
-                          {entry.removed.length > 0 && (
-                            <span className="text-destructive">
-                              −{" "}
-                              {entry.removed
-                                .map((hour) => dayjs().hour(hour).format("h A"))
-                                .join(", ")}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setRequestDialogOpen(false)}
-                  >{t("common.cancel")}</Button>
-                  <Button
-                    onClick={() => submitRequest.mutate()}
-                    disabled={
-                      requestReason.trim().length === 0 ||
-                      diffSummary.length === 0
-                    }
-                  >{t("availability.submitRequest")}</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
       </CardContent>
@@ -958,45 +579,5 @@ export function AvailabilityRequestForm({
   );
 }
 
-interface RequestRangeInputsProps {
-  start: string;
-  end: string;
-  onChange: (next: { start: string; end: string }) => void;
-}
-
-function RequestRangeInputs({ start, end, onChange }: RequestRangeInputsProps) {
-  const { t } = useTranslation();
-  return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <div className="space-y-1.5">
-        <Label
-          htmlFor="request-start"
-          className="flex items-center gap-1 text-xs text-muted-foreground"
-        >
-          <Calendar className="h-3 w-3" />{t("schedule.startDate")}</Label>
-        <Input
-          id="request-start"
-          type="date"
-          value={start}
-          onChange={(event) => onChange({ start: event.target.value, end })}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label
-          htmlFor="request-end"
-          className="flex items-center gap-1 text-xs text-muted-foreground"
-        >
-          <Calendar className="h-3 w-3" />{t("schedule.endDate")}</Label>
-        <Input
-          id="request-end"
-          type="date"
-          value={end}
-          min={start}
-          onChange={(event) => onChange({ start, end: event.target.value })}
-        />
-      </div>
-    </div>
-  );
-}
 
 export default AvailabilityRequestForm;

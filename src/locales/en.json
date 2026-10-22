@@ -4741,6 +4741,7 @@
   "availability": {
     "allowIndividualEmployeesToEditAvailabilityDuringLocked": "Allow individual employees to edit availability during locked periods.",
     "anyDayAnyTime": "Any day, any time",
+    "appliesFrom": "Your new availability applies from {{date}}.",
     "approveToApplyChangesImmediatelyAndGrantA": "Approve to apply changes immediately and grant a temporary exception. Deny to notify the employee.",
     "auto": "Auto",
     "autoLockingPreviewUpdatesAfterSavingNewSettings": "Auto locking preview updates after saving new settings.",
@@ -4788,6 +4789,7 @@
     "satOnly": "Sat only",
     "selectDay": "Select day",
     "selectHour": "Select hour",
+    "sendAvailability": "Send availability",
     "submitRequest": "Submit request",
     "submitTimeOffRequest": "Submit time off request",
     "thisCompanyUsesOpenAvailabilityYouDoNot": "This company uses open availability. You do not need to fill in the weekday grid.",

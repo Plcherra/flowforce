@@ -30,6 +30,9 @@ const { runScheduleGridGroupsTests } = importTs(
 const { runDayAvailabilityStateTests } = importTs(
   "../src/features/availability/utils/dayAvailabilityState.test.ts",
 );
+const { runSendAvailabilityActionTests } = importTs(
+  "../src/features/availability/utils/sendAvailabilityAction.test.ts",
+);
 
 runScheduleAvailabilityEngineTests();
 console.log("scheduleAvailabilityEngine tests passed");
@@ -45,3 +48,5 @@ runScheduleGridGroupsTests();
 console.log("scheduleGridGroups tests passed");
 runDayAvailabilityStateTests();
 console.log("dayAvailabilityState tests passed");
+runSendAvailabilityActionTests();
+console.log("sendAvailabilityAction tests passed");

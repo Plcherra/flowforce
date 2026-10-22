@@ -105,7 +105,7 @@ Prove: Extend `src/features/scheduling/utils/repeatPattern.test.ts`. Every 2 wee
 
 ### Phase 3 — Send availability
 
-- [ ] Replace Save changes and Request change with one Send availability button. Availability changes need no approval.
+- [x] Replace Save changes and Request change with one Send availability button. Availability changes need no approval.
 
 Rules:
 
@@ -311,6 +311,22 @@ Phone steps for Pedro:
 2. Each day shows its own repeat choice. Check only Sunday and set Repeats to Every 15 days. The preview under the control lists that Sunday and the next two dates, 15 and 30 days later. Monday still says Does not repeat.
 3. Open the repeat list. Every 2 weeks (14 days) and Every 15 days are both there. Choose Custom, set N to 10 and Days, and set a start date. The preview shows that start date, 10 days later, and 20 days later.
 4. Open Add unavailability. The same list, the custom fields, and the three-date preview are there. Saving still creates one unavailability entry.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 3 Send availability
+
+Shipped: My Availability has one button, Send availability, and Reset. Save changes, Request change, and Send fixed availability are gone from this screen. The helper names the next window start from `approvedFixedAvailabilityWindow`. A locked week uses the same button and the same helper. Sending writes the grid on that next window and does not write an availability request. The posted window stays as it is.
+
+Proven: `src/features/availability/utils/sendAvailabilityAction.test.ts` passed through `node scripts/test-schedule-availability-engine.mjs`. The label is Send availability. The window start matches `approvedFixedAvailabilityWindow`. The result does not include Save changes, Request change, or Send for approval. A locked week returns the same result. `npm run check:i18n` printed 4601 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the TypeScript files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open My Availability. The company availability choice needs a posting weekday and a window start and end. Those live on the availability choice settings.
+2. On an unlocked week, the screen shows Send availability and a line that names the next window start date. It does not show Save changes, Request change, or Send fixed availability. Reset is still there.
+3. On a locked week, the same button and the same next-window line are there. There is no request dialog and no line that says the change is waiting for approval.
+4. Send availability. The week already being posted does not change. The grid is stored on the next window named in the helper.
 
 Blockers: none. No migration.
 

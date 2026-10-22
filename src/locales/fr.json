@@ -4741,6 +4741,7 @@
   "availability": {
     "allowIndividualEmployeesToEditAvailabilityDuringLocked": "Autorisez chaque personne à modifier sa disponibilité pendant les périodes verrouillées.",
     "anyDayAnyTime": "N'importe quel jour, n'importe quelle heure",
+    "appliesFrom": "Votre nouvelle disponibilité s'applique à partir du {{date}}.",
     "approveToApplyChangesImmediatelyAndGrantA": "Approuvez pour appliquer les changements tout de suite et accorder une exception temporaire. Refusez pour prévenir la personne.",
     "auto": "Auto",
     "autoLockingPreviewUpdatesAfterSavingNewSettings": "L'aperçu du verrouillage automatique se met à jour après l'enregistrement des nouveaux paramètres.",
@@ -4788,6 +4789,7 @@
     "satOnly": "Samedi seulement",
     "selectDay": "Sélectionnez le jour",
     "selectHour": "Sélectionnez l'heure",
+    "sendAvailability": "Envoyer la disponibilité",
     "submitRequest": "Envoyer la demande",
     "submitTimeOffRequest": "Envoyer la demande d'absence",
     "thisCompanyUsesOpenAvailabilityYouDoNot": "Cette entreprise utilise la disponibilité ouverte. Vous n'avez pas à remplir la grille de la semaine.",

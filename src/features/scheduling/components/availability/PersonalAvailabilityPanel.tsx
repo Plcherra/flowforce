@@ -101,9 +101,13 @@ export function PersonalAvailabilityPanel({
     async (
       nextGrid: AvailabilityGrid,
       repeats?: Record<number, RepeatPattern | null>,
+      windowStart?: string,
     ) => {
       if (!employeeId) {
         throw new Error("We need your profile details to save availability.");
+      }
+      if (!windowStart) {
+        throw new Error("Next availability window is not set.");
       }
       const ranges = rangesFromGrid(nextGrid);
 
@@ -111,7 +115,7 @@ export function PersonalAvailabilityPanel({
         .from("staff_availability")
         .delete()
         .eq("user_id", employeeId)
-        .eq("week_start_date", weekStart);
+        .eq("week_start_date", windowStart);
       if (deleteResult.error) {
         throw new Error(
           deleteResult.error.message ||
@@ -124,16 +128,16 @@ export function PersonalAvailabilityPanel({
         user_id: employeeId,
         day_of_week: range.dayOfWeek,
         start_time: availabilityTimestamp(
-          weekStart,
+          windowStart,
           range.dayOfWeek,
           range.startTime,
         ),
         end_time: availabilityTimestamp(
-          weekStart,
+          windowStart,
           range.dayOfWeek,
           range.endTime,
         ),
-        week_start_date: weekStart,
+        week_start_date: windowStart,
         is_preferred: true,
         recurrence: repeats?.[range.dayOfWeek] ?? null,
       }));
@@ -145,7 +149,7 @@ export function PersonalAvailabilityPanel({
           day_of_week: day,
           start_time: null,
           end_time: null,
-          week_start_date: weekStart,
+          week_start_date: windowStart,
           is_preferred: false,
           recurrence: pattern,
         });

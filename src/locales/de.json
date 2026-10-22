@@ -4741,6 +4741,7 @@
   "availability": {
     "allowIndividualEmployeesToEditAvailabilityDuringLocked": "Erlaube einzelnen Personen, die Verfügbarkeit in gesperrten Zeiträumen zu ändern.",
     "anyDayAnyTime": "Jeder Tag, jede Zeit",
+    "appliesFrom": "Deine neue Verfügbarkeit gilt ab {{date}}.",
     "approveToApplyChangesImmediatelyAndGrantA": "Genehmige, um die Änderungen sofort anzuwenden und eine vorübergehende Ausnahme zu geben. Lehne ab, um die Person zu benachrichtigen.",
     "auto": "Auto",
     "autoLockingPreviewUpdatesAfterSavingNewSettings": "Die Vorschau der automatischen Sperre aktualisiert sich nach dem Speichern.",
@@ -4788,6 +4789,7 @@
     "satOnly": "Nur Samstag",
     "selectDay": "Tag wählen",
     "selectHour": "Stunde wählen",
+    "sendAvailability": "Verfügbarkeit senden",
     "submitRequest": "Anfrage senden",
     "submitTimeOffRequest": "Abwesenheitsantrag senden",
     "thisCompanyUsesOpenAvailabilityYouDoNot": "Dieses Unternehmen nutzt offene Verfügbarkeit. Du musst das Wochenraster nicht ausfüllen.",
