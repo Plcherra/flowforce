@@ -125,3 +125,25 @@ export function taskPublishLabel(
   if (state === "scheduled") return "Scheduled";
   return null;
 }
+
+export function readTaskPoints(links: unknown): number | null {
+  if (!isLinkRecord(links)) return null;
+  const value = links.points;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+    return null;
+  }
+  return value;
+}
+
+export function withTaskPoints(
+  links: unknown,
+  points: number | null,
+): Record<string, unknown> {
+  const base = isLinkRecord(links) ? { ...links } : {};
+  if (points == null) {
+    const next = { ...base };
+    delete next.points;
+    return next;
+  }
+  return { ...base, points };
+}

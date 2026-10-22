@@ -1,4 +1,5 @@
 import dayjs, { type Dayjs } from "dayjs";
+import { readTaskPoints } from "@/features/tasks/utils/taskSchedule";
 import type {
   LeaderboardAchievement,
   LeaderboardBadgeTier,
@@ -13,6 +14,22 @@ export const TASK_PRIORITY_XP: Record<string, number> = {
   medium: 80,
   high: 120,
 };
+
+export function taskCompletionXp(task: {
+  priority?: string | null;
+  estimated_hours?: number | null;
+  links?: unknown;
+}): number {
+  const points = readTaskPoints(task.links);
+  if (points != null) return points;
+  const priorityKey = (task.priority ?? "").toString().toLowerCase();
+  const baseXp = TASK_PRIORITY_XP[priorityKey] ?? 60;
+  const estimateBonus =
+    task.estimated_hours != null
+      ? Math.max(0, Math.round(task.estimated_hours * 10))
+      : 0;
+  return baseXp + estimateBonus;
+}
 
 export const GOAL_COMPLETION_XP = 260;
 export const RECOGNITION_XP = 110;

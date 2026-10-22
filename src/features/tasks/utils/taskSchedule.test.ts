@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
+import { taskCompletionXp } from "@/features/gamification/leaderboard/calculations";
 import {
   dueDateFromWindowEnd,
   formatTaskWindow,
   isTaskListedForViewer,
   mergeTaskSchedule,
   readPublishState,
+  readTaskPoints,
+  withTaskPoints,
 } from "./taskSchedule";
 
 export function runTaskScheduleTests() {
@@ -64,5 +67,50 @@ export function runTaskScheduleTests() {
   assert.equal(
     isTaskListedForViewer({ created_by: creator, links: null }, other, before),
     true,
+  );
+
+  assert.equal(readTaskPoints({ points: 12 }), 12);
+  assert.equal(readTaskPoints({ points: 0 }), 0);
+  assert.equal(readTaskPoints({ points: 1.5 }), null);
+  assert.equal(readTaskPoints({ points: -3 }), null);
+  assert.equal(readTaskPoints(null), null);
+  const withPoints = withTaskPoints(
+    { schedule_id: "sched-1", publish_state: "published" },
+    25,
+  );
+  assert.equal(withPoints.schedule_id, "sched-1");
+  assert.equal(withPoints.points, 25);
+
+  assert.equal(
+    taskCompletionXp({
+      priority: "high",
+      estimated_hours: 2,
+      links: { points: 40 },
+    }),
+    40,
+  );
+  assert.equal(
+    taskCompletionXp({
+      priority: "high",
+      estimated_hours: 2,
+      links: { points: 0 },
+    }),
+    0,
+  );
+  assert.equal(
+    taskCompletionXp({
+      priority: "high",
+      estimated_hours: 2,
+      links: {},
+    }),
+    140,
+  );
+  assert.equal(
+    taskCompletionXp({ priority: "low", estimated_hours: null, links: null }),
+    50,
+  );
+  assert.equal(
+    taskCompletionXp({ priority: "urgent", estimated_hours: null }),
+    60,
   );
 }

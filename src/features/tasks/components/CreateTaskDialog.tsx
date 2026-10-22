@@ -29,6 +29,7 @@ import {
   dueDateFromWindowEnd,
   fromDatetimeLocalValue,
   mergeTaskSchedule,
+  withTaskPoints,
   type TaskPublishState,
 } from "@/features/tasks/utils/taskSchedule";
 
@@ -63,6 +64,7 @@ export function CreateTaskDialog({
     starts_at: "",
     ends_at: "",
     publish_state: "published" as TaskPublishState,
+    points: "",
     assigned_to: "",
     goal_id: "",
   });
@@ -100,6 +102,7 @@ export function CreateTaskDialog({
       starts_at: "",
       ends_at: "",
       publish_state: "published",
+      points: "",
       assigned_to: "",
       goal_id: "",
     });
@@ -111,6 +114,9 @@ export function CreateTaskDialog({
     const nextErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
       nextErrors.title = "A title is required.";
+    }
+    if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
+      nextErrors.points = "Points must be a whole number.";
     }
     if (formData.starts_at || formData.ends_at) {
       const startsAt = fromDatetimeLocalValue(formData.starts_at);
@@ -145,6 +151,8 @@ export function CreateTaskDialog({
     try {
       const startsAt = fromDatetimeLocalValue(formData.starts_at);
       const endsAt = fromDatetimeLocalValue(formData.ends_at);
+      const points =
+        formData.points.trim() === "" ? null : Number(formData.points);
       const taskData = {
         title: formData.title,
         description: formData.description || null,
@@ -152,11 +160,14 @@ export function CreateTaskDialog({
         priority: formData.priority as any,
         created_by: user.id,
         due_date: dueDateFromWindowEnd(endsAt),
-        links: mergeTaskSchedule(null, {
-          startsAt,
-          endsAt,
-          publishState: formData.publish_state,
-        }),
+        links: withTaskPoints(
+          mergeTaskSchedule(null, {
+            startsAt,
+            endsAt,
+            publishState: formData.publish_state,
+          }),
+          points,
+        ),
         assigned_to:
           createLevel === "self"
             ? user.id
@@ -397,6 +408,31 @@ export function CreateTaskDialog({
           <p className="text-sm text-muted-foreground">
             The window is when the task is open. It is not how long the work takes.
           </p>
+
+          <div className="space-y-2">
+            <Label htmlFor="points">Points</Label>
+            <Input
+              id="points"
+              type="number"
+              min={0}
+              step={1}
+              placeholder="Optional"
+              value={formData.points}
+              onChange={(e) => handleFieldChange("points", e.target.value)}
+              aria-invalid={Boolean(errors.points)}
+              aria-describedby={
+                errors.points ? "create-task-points-error" : undefined
+              }
+            />
+            <p className="text-sm text-muted-foreground">
+              Whole points. On completion, the leaderboard uses this number as the task XP.
+            </p>
+            {errors.points && (
+              <p className="text-sm text-destructive" id="create-task-points-error">
+                {errors.points}
+              </p>
+            )}
+          </div>
 
           {/* Reminder Option */}
           <div className="flex items-center space-x-2">

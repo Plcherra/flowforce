@@ -386,7 +386,7 @@ Prove: Unit test `src/features/tasks/utils/taskSchedule.test.ts` covers the wind
 
 ### Phase 18 — Points on the leaderboard
 
-- [ ] Store points on a task and use them as that task's leaderboard XP.
+- [x] Store points on a task and use them as that task's leaderboard XP.
 
 Rules:
 
@@ -652,6 +652,22 @@ Phone steps for Pedro:
 3. Choose Schedule for the start and create the task. The card should show that window and Scheduled.
 4. Create another task as Draft. You should see it. Ask someone else in the company to open Tasks. They should not see the draft, or a scheduled task before its start.
 5. Open a task. Execution controls should save a start, an end, and a publish choice, not estimated hours.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 18 Points on the leaderboard
+
+Shipped: Create can set a whole number of points, stored on `links.points`. The card shows that number. A completed task with points contributes that number to leaderboard task XP. A completed task without points keeps the priority and estimated-hours XP. `staff_performance` is not written.
+
+Proven: `src/features/tasks/utils/taskSchedule.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers a whole-number points value, zero points, a fractional value, and the old high-priority plus estimated-hours XP. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks. Create a custom task with Points set to 40.
+2. The card should show 40 points.
+3. Create another task and leave Points empty. That card should not show a points count.
+4. Completing the 40-point task counts 40 toward leaderboard task XP. A completed task with no points still uses the old priority and estimated-hours XP.
 
 Blockers: none for this phase.
 

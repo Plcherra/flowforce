@@ -23,6 +23,7 @@ import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
 import { readTaskKind, TASK_KIND_LABELS } from "../utils/taskKind";
 import {
   formatTaskWindow,
+  readTaskPoints,
   readTaskSchedule,
   taskPublishLabel,
 } from "../utils/taskSchedule";
@@ -46,6 +47,7 @@ export function TaskCard({
   const schedule = readTaskSchedule(task.links);
   const windowLabel = formatTaskWindow(schedule.startsAt, schedule.endsAt);
   const publishLabel = taskPublishLabel(schedule.publishState);
+  const points = readTaskPoints(task.links);
 
   return (
     <Card
@@ -112,6 +114,13 @@ export function TaskCard({
                 </span>
               </div>
             )}
+            {points != null ? (
+              <div className="flex items-center gap-1" data-testid="task-points">
+                <span>
+                  {points} {points === 1 ? "point" : "points"}
+                </span>
+              </div>
+            ) : null}
             {windowLabel ? (
               <div className="flex items-center gap-1" data-testid="task-window">
                 <Calendar className="h-4 w-4" />

@@ -8,7 +8,7 @@ import {
   BASE_TRAINING_XP,
   GOAL_COMPLETION_XP,
   RECOGNITION_XP,
-  TASK_PRIORITY_XP,
+  taskCompletionXp,
   buildAchievements,
   buildInsights,
   emptyMetrics,
@@ -101,7 +101,7 @@ async function collectTaskMetrics(employeeIds: string[], range: PeriodRange) {
 
   let query = supabase
     .from("tasks")
-    .select("id, assigned_to, completed_at, priority, estimated_hours")
+    .select("id, assigned_to, completed_at, priority, estimated_hours, links")
     .eq("status", "completed")
     .in("assigned_to", employeeIds);
 
@@ -121,12 +121,7 @@ async function collectTaskMetrics(employeeIds: string[], range: PeriodRange) {
     if (!employeeId) return;
     const entry = ensureMetrics(metrics, employeeId);
     const priorityKey = (task.priority ?? "").toString().toLowerCase();
-    const baseXp = TASK_PRIORITY_XP[priorityKey] ?? 60;
-    const estimateBonus =
-      task.estimated_hours != null
-        ? Math.max(0, Math.round(task.estimated_hours * 10))
-        : 0;
-    entry.xpTasks += baseXp + estimateBonus;
+    entry.xpTasks += taskCompletionXp(task);
     entry.taskCount += 1;
     if (priorityKey === "high") {
       entry.highPriorityTaskCount += 1;
