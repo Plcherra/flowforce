@@ -267,8 +267,19 @@ serve(async (req) => {
     }
 
     const analysisData = await buildAnalysisData(supabase, companyId, body.type);
+    // A second client that shares the default auth storage would send the user
+    // JWT. Usage recording only accepts the service role.
     const usageClient = createClient(supabaseUrl!, supabaseServiceKey!, {
-      auth: { persistSession: false, autoRefreshToken: false },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        storageKey: "sb-ai-insights-usage",
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${supabaseServiceKey}`,
+        },
+      },
     });
     const grok = readGrokRuntimeConfig((name) => Deno.env.get(name) ?? undefined);
 

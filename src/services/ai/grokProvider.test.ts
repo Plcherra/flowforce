@@ -296,6 +296,8 @@ export async function runGrokProviderTests() {
   }
   assert.equal(insights.includes("runMeteredGrokChat"), true);
   assert.equal(insights.includes("edgeCorsHeaders"), true);
+  assert.equal(insights.includes("sb-ai-insights-usage"), true);
+  assert.equal(insights.includes("Authorization: `Bearer ${supabaseServiceKey}`"), true);
   const cors = read("supabase/functions/_shared/cors.ts");
   for (const origin of [
     "http://localhost:3000",
