@@ -107,10 +107,10 @@ export const PRODUCT_ROLE_LABELS = PRODUCT_ROLE_DEFINITIONS.reduce<
 );
 
 export const PRODUCT_ROLE_ACCENTS: Record<ProductRoleKey, string> = {
-  owner: "bg-purple-100 text-purple-800 border-purple-200",
-  admin: "bg-rose-100 text-rose-800 border-rose-200",
-  manager: "bg-blue-100 text-blue-800 border-blue-200",
-  staff: "bg-gray-100 text-gray-800 border-gray-200",
+  owner: "bg-secondary/10 text-secondary border-secondary/40",
+  admin: "bg-accent text-accent-foreground border-accent/40",
+  manager: "bg-primary/10 text-primary border-primary/40",
+  staff: "bg-muted text-foreground border-border",
 };
 
 export const PRODUCT_ROLE_HIERARCHY = PRODUCT_ROLE_DEFINITIONS.reduce<

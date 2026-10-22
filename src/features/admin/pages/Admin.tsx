@@ -31,21 +31,21 @@ export default function Admin() {
       permission="manageUsers"
       fallback={
         <div className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             {t("admin.accessDenied")}
           </h1>
-          <p className="text-gray-600">{t("admin.noPermission")}</p>
+          <p className="text-muted-foreground">{t("admin.noPermission")}</p>
         </div>
       }
     >
       <div className={`${isMobile ? "p-4" : "p-8"}`}>
         <div className={`${isMobile ? "mb-4" : "mb-8"}`}>
           <h1
-            className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold text-gray-900 mb-2`}
+            className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold text-foreground mb-2`}
           >
             {t("admin.title")}
           </h1>
-          <p className="text-gray-600">{t("admin.description")}</p>
+          <p className="text-muted-foreground">{t("admin.description")}</p>
         </div>
 
         <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />

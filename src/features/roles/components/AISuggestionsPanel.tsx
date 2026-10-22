@@ -99,7 +99,7 @@ export function AISuggestionsPanel({
                       {(suggestion.confidence * 100).toFixed(0)}% confidence
                     </Badge>
                   </div>
-                  <p className="mt-2 text-sm text-gray-800">
+                  <p className="mt-2 text-sm text-foreground">
                     {suggestion.reason}
                   </p>
                 </div>

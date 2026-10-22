@@ -166,8 +166,8 @@ export function PermissionExamples() {
               <p className="text-muted-foreground">You cannot manage users</p>
             }
           >
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-800">✓ You can manage users!</p>
+            <div className="p-4 bg-success-muted border border-success/40 rounded-lg">
+              <p className="text-success">✓ You can manage users!</p>
             </div>
           </PermissionGuard>
 
@@ -180,8 +180,8 @@ export function PermissionExamples() {
               </p>
             }
           >
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-800">
+            <div className="p-4 bg-primary/10 border border-primary/40 rounded-lg">
+              <p className="text-primary">
                 ✓ You can work with team profiles!
               </p>
             </div>
@@ -196,8 +196,8 @@ export function PermissionExamples() {
               </p>
             }
           >
-            <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-              <p className="text-purple-800">✓ You have full admin access!</p>
+            <div className="p-4 bg-secondary/10 border border-secondary/40 rounded-lg">
+              <p className="text-secondary">✓ You have full admin access!</p>
             </div>
           </MultiPermissionGuard>
         </CardContent>
@@ -259,7 +259,7 @@ const BaseProtectedComponent: React.FC<any> = ({
   canCheck,
 }) => (
   <div
-    className={`p-4 border rounded-lg ${hasPermission ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+    className={`p-4 border rounded-lg ${hasPermission ? "bg-success-muted border-success/40" : "bg-destructive/10 border-destructive/40"}`}
   >
     <h4 className="font-semibold">Protected Component</h4>
     <p>Permission Status: {hasPermission ? "✓ Allowed" : "✗ Denied"}</p>
@@ -277,7 +277,7 @@ const ProtectedComponent = withPermission({
 })(BaseProtectedComponent);
 
 const BaseConditionalComponent: React.FC<any> = () => (
-  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+  <div className="p-4 bg-primary/10 border border-primary/40 rounded-lg">
     <h4 className="font-semibold">Conditional Component</h4>
     <p>This only shows when you have systemSettings permission</p>
   </div>

@@ -45,7 +45,7 @@ export function CopilotInsightsPanel({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <Sparkles className="h-5 w-5 text-secondary" />
             AI Co-Pilot insights
           </CardTitle>
           <CardDescription>
@@ -66,7 +66,7 @@ export function CopilotInsightsPanel({
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
+            <Sparkles className="h-5 w-5 text-secondary" />
             AI Co-Pilot insights
           </CardTitle>
           <CardDescription>
@@ -95,16 +95,16 @@ export function CopilotInsightsPanel({
         ) : (
           <div className="space-y-3">
             {insights.map((insight) => {
-              let icon = <Sparkles className="h-4 w-4 text-purple-500" />;
-              let badgeClass = "bg-purple-50 text-purple-600 border-purple-100";
+              let icon = <Sparkles className="h-4 w-4 text-secondary" />;
+              let badgeClass = "bg-secondary/10 text-secondary border-secondary/40";
               let badgeLabel = "Insight";
               let action: React.ReactNode | null = null;
 
               switch (insight.type) {
                 case "promotion":
-                  icon = <TrendingUp className="h-4 w-4 text-emerald-500" />;
+                  icon = <TrendingUp className="h-4 w-4 text-success" />;
                   badgeClass =
-                    "bg-emerald-50 text-emerald-600 border-emerald-100";
+                    "bg-success-muted text-success border-success/40";
                   badgeLabel = "Promotion";
                   if (insight.employeeId) {
                     action = (
@@ -121,8 +121,8 @@ export function CopilotInsightsPanel({
                   }
                   break;
                 case "coaching":
-                  icon = <MessageCircle className="h-4 w-4 text-amber-500" />;
-                  badgeClass = "bg-amber-50 text-amber-600 border-amber-100";
+                  icon = <MessageCircle className="h-4 w-4 text-warning" />;
+                  badgeClass = "bg-warning-muted text-warning border-warning/40";
                   badgeLabel = "Coaching";
                   if (insight.employeeId) {
                     action = (
@@ -139,8 +139,8 @@ export function CopilotInsightsPanel({
                   }
                   break;
                 case "roleGap":
-                  icon = <AlertTriangle className="h-4 w-4 text-rose-500" />;
-                  badgeClass = "bg-rose-50 text-rose-600 border-rose-100";
+                  icon = <AlertTriangle className="h-4 w-4 text-accent-foreground" />;
+                  badgeClass = "bg-accent/60 text-accent-foreground border-accent/40";
                   badgeLabel = "Coverage gap";
                   action = (
                     <Button
@@ -153,8 +153,8 @@ export function CopilotInsightsPanel({
                   );
                   break;
                 case "inactive":
-                  icon = <UserX className="h-4 w-4 text-sky-500" />;
-                  badgeClass = "bg-sky-50 text-sky-600 border-sky-100";
+                  icon = <UserX className="h-4 w-4 text-primary" />;
+                  badgeClass = "bg-primary/10 text-primary border-primary/40";
                   badgeLabel = "Inactive";
                   action = insight.employeeId ? (
                     <div className="flex gap-2">

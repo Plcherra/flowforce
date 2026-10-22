@@ -76,7 +76,7 @@ export function RoleMatrixTable({
               <div className="flex items-start gap-3">
                 <module.icon className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
-                  <div className="font-medium text-gray-900">
+                  <div className="font-medium text-foreground">
                     {module.label}
                   </div>
                   <div className="text-xs text-muted-foreground">

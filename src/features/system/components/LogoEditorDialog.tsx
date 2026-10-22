@@ -199,7 +199,7 @@ export function LogoEditorDialog({
                 }}
               />
             ) : null}
-            <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-white/80 shadow-[0_0_0_999px_rgba(0,0,0,0.18)]" />
+            <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-primary-foreground/80 shadow-[0_0_0_999px_rgba(0,0,0,0.18)]" />
             <div className="pointer-events-none absolute inset-x-3 top-1/2 h-px -translate-y-1/2 bg-primary/70" />
             <div className="pointer-events-none absolute inset-y-3 left-1/2 w-px -translate-x-1/2 bg-primary/70" />
           </div>

@@ -148,7 +148,7 @@ export default function RoleManager({
   return (
     <div className="flex items-center space-x-4">
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-600">Current Role:</span>
+        <span className="text-sm text-muted-foreground">Current Role:</span>
         {getRoleBadge(currentRole)}
       </div>
 

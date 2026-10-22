@@ -61,10 +61,10 @@ const ROLE_LABELS: Record<RoleKey, string> = {
 };
 
 const ROLE_BADGE_CLASSES: Record<RoleKey, string> = {
-  staff: "bg-gray-100 text-gray-800",
-  supervisor: "bg-green-100 text-green-800",
-  manager: "bg-blue-100 text-blue-800",
-  admin: "bg-red-100 text-red-800",
+  staff: "bg-muted text-foreground",
+  supervisor: "bg-success-muted text-success",
+  manager: "bg-primary/10 text-primary",
+  admin: "bg-destructive/10 text-destructive",
 };
 
 interface RoleAccessSummary {
@@ -89,7 +89,7 @@ type ShiftTemplateRecord = ReturnType<
 >["templates"][number];
 
 const getRoleBadgeClass = (role: RoleKey) =>
-  ROLE_BADGE_CLASSES[role] || "bg-gray-100 text-gray-800";
+  ROLE_BADGE_CLASSES[role] || "bg-muted text-foreground";
 
 const formatPermissionKey = (key: string) =>
   key
@@ -393,10 +393,10 @@ export default function PositionManagement() {
       permission="manageUsers"
       fallback={
         <div className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Access Denied
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             You do not have permission to manage positions.
           </p>
         </div>
@@ -405,7 +405,7 @@ export default function PositionManagement() {
       <div className="space-y-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               Team Management
             </h1>
             <p className="text-muted-foreground">
@@ -574,7 +574,7 @@ export default function PositionManagement() {
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className="border-amber-200 text-amber-600"
+                                  className="border-warning/40 text-warning"
                                 >
                                   Link needed
                                 </Badge>
@@ -602,7 +602,7 @@ export default function PositionManagement() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-purple-500" />
+                      <Sparkles className="h-5 w-5 text-secondary" />
                       Co-Pilot Suggestions
                     </CardTitle>
                     <CardDescription>
@@ -727,7 +727,7 @@ export default function PositionManagement() {
                           <Badge className={getRoleBadgeClass(role)}>
                             {label}
                           </Badge>
-                          <span className="text-base font-medium text-gray-900">
+                          <span className="text-base font-medium text-foreground">
                             {label} Positions
                           </span>
                         </CardTitle>
@@ -759,7 +759,7 @@ export default function PositionManagement() {
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div>
-                                  <div className="text-sm font-semibold text-gray-900">
+                                  <div className="text-sm font-semibold text-foreground">
                                     {position.name}
                                   </div>
                                   <div className="text-xs text-muted-foreground">
@@ -916,7 +916,7 @@ export default function PositionManagement() {
                           }}
                         >
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium text-foreground">
                               {summary.name}
                             </span>
                             <Badge variant="secondary" className="text-xs">

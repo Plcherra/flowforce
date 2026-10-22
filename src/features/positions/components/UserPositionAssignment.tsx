@@ -174,7 +174,7 @@ export function UserPositionAssignment({
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-auto p-0 ml-1 text-white hover:text-white hover:bg-white/20"
+                                className="h-auto p-0 ml-1 text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/20"
                                 onClick={() =>
                                   handleRemovePosition(user.id, position.id)
                                 }

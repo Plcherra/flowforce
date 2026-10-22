@@ -105,11 +105,11 @@ export default function RoleConfigurationTab() {
   if (!can("systemSettings")) {
     return (
       <div className="text-center py-12">
-        <AlertTriangle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium text-foreground mb-2">
           Access Denied
         </h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           You don&apos;t have permission to manage roles.
         </p>
       </div>
@@ -144,7 +144,7 @@ export default function RoleConfigurationTab() {
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h4 className="font-medium text-gray-900">{role.name}</h4>
+                  <h4 className="font-medium text-foreground">{role.name}</h4>
                   <Badge
                     style={{
                       backgroundColor: role.color + "20",
@@ -161,7 +161,7 @@ export default function RoleConfigurationTab() {
                     <Badge variant="outline">Archived</Badge>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {role.description || "No description provided"}
                 </p>
                 <ClassJobBoxList
@@ -193,7 +193,7 @@ export default function RoleConfigurationTab() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleDeleteRole(role)}
-                  className="text-red-600 hover:text-red-700"
+                  className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
                   Archive
@@ -211,7 +211,7 @@ export default function RoleConfigurationTab() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Role Configuration</h3>
-          <p className="text-gray-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Plant classes on a locked level, then give or take See, Edit, and
             Create / delete. Archive Admin, Manager, or Staff to hide them.
             Owner stays.
@@ -257,11 +257,11 @@ export default function RoleConfigurationTab() {
 
       {rolesArray.length === 0 && (
         <div className="text-center py-12">
-          <Shield className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Shield className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">
             No roles found
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             Create your first class to get started
           </p>
           <Button onClick={handleCreateRole}>

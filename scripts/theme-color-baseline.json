@@ -76,53 +76,6 @@
     "#dc2626",
     "#f59e0b"
   ],
-  "src/features/admin/components/AuditLog.tsx": [
-    "bg-blue-100",
-    "bg-gray-100",
-    "bg-gray-50",
-    "bg-red-100",
-    "bg-yellow-100",
-    "text-blue-600",
-    "text-blue-800",
-    "text-gray-400",
-    "text-gray-500",
-    "text-gray-600",
-    "text-gray-700",
-    "text-gray-800",
-    "text-red-400",
-    "text-red-600",
-    "text-red-800",
-    "text-yellow-800"
-  ],
-  "src/features/admin/components/CopilotInsightsPanel.tsx": [
-    "bg-amber-50",
-    "bg-emerald-50",
-    "bg-purple-50",
-    "bg-rose-50",
-    "bg-sky-50",
-    "border-amber-100",
-    "border-emerald-100",
-    "border-purple-100",
-    "border-rose-100",
-    "border-sky-100",
-    "text-amber-500",
-    "text-amber-600",
-    "text-emerald-500",
-    "text-emerald-600",
-    "text-purple-500",
-    "text-purple-600",
-    "text-rose-500",
-    "text-rose-600",
-    "text-sky-500",
-    "text-sky-600"
-  ],
-  "src/features/admin/components/UserManagement.tsx": [
-    "text-gray-900"
-  ],
-  "src/features/admin/pages/Admin.tsx": [
-    "text-gray-600",
-    "text-gray-900"
-  ],
   "src/features/availability/components/AvailabilityRequestForm.tsx": [
     "text-amber-500",
     "text-emerald-600"
@@ -734,34 +687,8 @@
     "to-purple-50",
     "via-blue-50"
   ],
-  "src/features/permissions/components/PermissionExamples.tsx": [
-    "bg-blue-50",
-    "bg-green-50",
-    "bg-purple-50",
-    "bg-red-50",
-    "border-blue-200",
-    "border-green-200",
-    "border-purple-200",
-    "border-red-200",
-    "text-blue-800",
-    "text-green-800",
-    "text-purple-800"
-  ],
   "src/features/positions/components/PositionManagement.tsx": [
-    "#6366f1",
-    "bg-blue-100",
-    "bg-gray-100",
-    "bg-green-100",
-    "bg-red-100",
-    "border-amber-200",
-    "text-amber-600",
-    "text-blue-800",
-    "text-gray-600",
-    "text-gray-800",
-    "text-gray-900",
-    "text-green-800",
-    "text-purple-500",
-    "text-red-800"
+    "#6366f1"
   ],
   "src/features/positions/components/PositionManagementDialog.tsx": [
     "#06b6d4",
@@ -777,51 +704,11 @@
     "#f59e0b",
     "#f97316"
   ],
-  "src/features/positions/components/UserPositionAssignment.tsx": [
-    "hover:bg-white/20",
-    "hover:text-white",
-    "text-white"
-  ],
-  "src/features/roles/components/AISuggestionsPanel.tsx": [
-    "text-gray-800"
-  ],
-  "src/features/roles/components/PropagationSummary.tsx": [
-    "text-gray-800",
-    "text-gray-900"
-  ],
-  "src/features/roles/components/RoleConfigurationTab.tsx": [
-    "hover:text-red-700",
-    "text-gray-400",
-    "text-gray-500",
-    "text-gray-600",
-    "text-gray-900",
-    "text-red-600"
-  ],
-  "src/features/roles/components/RoleManager.tsx": [
-    "text-gray-600"
-  ],
-  "src/features/roles/components/RoleMatrixTable.tsx": [
-    "text-gray-900"
-  ],
   "src/features/roles/constants/productRoleContract.json": [
     "#111827",
     "#16a34a",
     "#2563eb",
     "#6b7280"
-  ],
-  "src/features/roles/constants/productRoles.ts": [
-    "bg-blue-100",
-    "bg-gray-100",
-    "bg-purple-100",
-    "bg-rose-100",
-    "border-blue-200",
-    "border-gray-200",
-    "border-purple-200",
-    "border-rose-200",
-    "text-blue-800",
-    "text-gray-800",
-    "text-purple-800",
-    "text-rose-800"
   ],
   "src/features/scheduling/components/DayView.tsx": [
     "#6366f1"
@@ -874,8 +761,7 @@
     "#3b82f6"
   ],
   "src/features/system/components/LogoEditorDialog.tsx": [
-    "#ffffff",
-    "border-white/80"
+    "#ffffff"
   ],
   "src/features/system/hooks/useAdminSettings.ts": [
     "#6b7280"

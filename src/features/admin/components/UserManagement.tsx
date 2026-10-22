@@ -204,7 +204,7 @@ export default function UserManagement() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Team Management</h2>
+          <h2 className="text-3xl font-bold text-foreground">Team Management</h2>
           <p className="text-muted-foreground">
             Search, filter, and manage your entire team from one dashboard.
             Invite new hires, adjust roles, and keep permissions aligned.

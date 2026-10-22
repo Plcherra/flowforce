@@ -19,11 +19,11 @@ export default function AuditLog() {
     return (
       <Card>
         <CardContent className="p-8 text-center">
-          <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-600 mb-2">
+          <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-muted-foreground mb-2">
             Audit Logs Disabled
           </h3>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Enable the audit logs feature to track administrative actions in
             this view.
           </p>
@@ -44,11 +44,11 @@ export default function AuditLog() {
     return (
       <Card>
         <CardContent className="p-8 text-center">
-          <Activity className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-red-600 mb-2">
+          <Activity className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-destructive mb-2">
             Error Loading Audit Log
           </h3>
-          <p className="text-gray-500">
+          <p className="text-muted-foreground">
             Failed to load audit log data. Please try again.
           </p>
         </CardContent>
@@ -58,12 +58,12 @@ export default function AuditLog() {
 
   const getSeverityBadgeColor = (severity?: string) => {
     const colors = {
-      critical: "bg-red-100 text-red-800",
-      warning: "bg-yellow-100 text-yellow-800",
-      info: "bg-blue-100 text-blue-800",
+      critical: "bg-destructive/10 text-destructive",
+      warning: "bg-warning-muted text-warning-foreground",
+      info: "bg-primary/10 text-primary",
     };
     return (
-      colors[severity as keyof typeof colors] || "bg-gray-100 text-gray-800"
+      colors[severity as keyof typeof colors] || "bg-muted text-foreground"
     );
   };
 
@@ -100,7 +100,7 @@ export default function AuditLog() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Activity Audit Log</h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Track privileged user, permission, settings, invite, and automation
           actions.
         </p>
@@ -109,11 +109,11 @@ export default function AuditLog() {
       {auditLogs.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+            <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
               No Audit Entries
             </h3>
-            <p className="text-gray-500">
+            <p className="text-muted-foreground">
               No sensitive actions have been recorded yet. When admins change
               roles, permissions, settings, invites, or automation controls,
               they will appear here.
@@ -131,23 +131,23 @@ export default function AuditLog() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Activity className="h-5 w-5 text-blue-600" />
+                      <Activity className="h-5 w-5 text-primary" />
                       <div>
                         <CardTitle className="text-base">
                           {formatAction(log.action)}
                         </CardTitle>
-                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <User className="h-4 w-4" />
                           <span>
                             {log.userprofile?.first_name}{" "}
                             {log.userprofile?.last_name}
                           </span>
-                          <span className="text-gray-400">ΓÇó</span>
+                          <span className="text-muted-foreground">ΓÇó</span>
                           <span>{log.userprofile?.email}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
                       <span>
                         {format(new Date(log.created_at), "MMM d, yyyy h:mm a")}
@@ -164,12 +164,12 @@ export default function AuditLog() {
                       </Badge>
                       <Badge variant="secondary">{log.table_name}</Badge>
                     </div>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-foreground">
                       {describeChange(log)}
                     </p>
 
                     {log.performed_byprofile && (
-                      <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                      <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
                         <strong>Changed by:</strong>{" "}
                         {log.performed_byprofile.first_name}{" "}
                         {log.performed_byprofile.last_name} (

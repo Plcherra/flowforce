@@ -332,7 +332,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 17 — Roles, admin, and settings chrome
 
-- [ ] Move hard-coded colors on roles, admin, permissions, and settings chrome onto the tokens.
+- [x] Move hard-coded colors on roles, admin, permissions, and settings chrome onto the tokens.
 
 Rules:
 
@@ -695,6 +695,23 @@ Phone steps for Pedro:
 2. Open the team or employees screen. A ready row should read as green, a watch row as amber, and a fix row as red.
 3. Open profile security and the delete-account dialog. The warning copy and the delete button should be red. A finished deletion should read as green.
 4. Switch to Dark. Resource cards, readiness rows, and the delete dialog should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 17 Roles, admin, and settings chrome
+
+Shipped: Roles, admin, permissions, and settings chrome now use the theme tokens. Role badges use secondary, accent, primary, success, destructive, or muted. Co-Pilot insight chips use the same status tokens. The position color picker is unchanged, and a position still stores its own color. The product role contract colors stay, because they match the colors planted in the database. The logo editor still defaults the plate to white.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Roles or Permissions. Owner, admin, manager, and staff badges should follow the theme: purple, lavender, blue, and muted.
+2. Open the audit log or admin tools. A denied or error row should read as red, a warning as amber, and a healthy row as green.
+3. Open position management. Create or edit a position and confirm the color swatches are still there. Saving a position should keep the color you picked.
+4. Open the logo editor. The crop frame should stay visible on the photo, and the plate behind a logo should stay white.
+5. Switch to Dark. Badges and the position dialog should stay readable, and the saved position color should not change.
 
 Blockers: none. No migration.
 

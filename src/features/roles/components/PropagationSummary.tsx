@@ -40,7 +40,7 @@ export function PropagationSummary({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Positions impacted
           </p>
-          <p className="mt-1 text-lg font-semibold text-gray-900">
+          <p className="mt-1 text-lg font-semibold text-foreground">
             {positions.length}
           </p>
           {positions.length > 0 && (
@@ -59,7 +59,7 @@ export function PropagationSummary({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Employees affected
           </p>
-          <p className="mt-1 text-lg font-semibold text-gray-900">
+          <p className="mt-1 text-lg font-semibold text-foreground">
             {employees.length}
           </p>
           {employees.length > 0 && (
@@ -78,7 +78,7 @@ export function PropagationSummary({
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Propagation mode
           </p>
-          <p className="mt-1 text-sm text-gray-800">
+          <p className="mt-1 text-sm text-foreground">
             Changes publish instantly through Position Management so team
             members stay aligned with their role.
           </p>
