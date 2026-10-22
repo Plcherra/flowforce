@@ -82,7 +82,7 @@ export function MonthView({
           {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
             <div
               key={index}
-              className="p-2 text-center text-xs font-medium text-gray-500"
+              className="p-2 text-center text-xs font-medium text-muted-foreground"
             >
               {day}
             </div>
@@ -96,9 +96,9 @@ export function MonthView({
             return (
               <div
                 key={day.toISOString()}
-                className="min-h-[80px] border border-gray-200 p-1 bg-white hover:bg-gray-50"
+                className="min-h-[80px] border border-border p-1 bg-background hover:bg-muted"
               >
-                <div className="text-xs font-medium text-gray-900 mb-1">
+                <div className="text-xs font-medium text-foreground mb-1">
                   {format(day, "d")}
                 </div>
 
@@ -119,7 +119,7 @@ export function MonthView({
                     </div>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="text-[10px] text-gray-500">
+                    <div className="text-[10px] text-muted-foreground">
                       +{dayEvents.length - 2} sessions
                     </div>
                   )}
@@ -140,7 +140,7 @@ export function MonthView({
                   ))}
 
                   {dayShifts.length > 2 && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       +{dayShifts.length - 2}
                     </div>
                   )}
@@ -171,7 +171,7 @@ export function MonthView({
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div
             key={day}
-            className="p-2 text-center text-sm font-medium text-gray-500"
+            className="p-2 text-center text-sm font-medium text-muted-foreground"
           >
             {day}
           </div>
@@ -185,9 +185,9 @@ export function MonthView({
           return (
             <div
               key={day.toISOString()}
-              className="min-h-[120px] border border-gray-200 p-2 bg-white hover:bg-gray-50"
+              className="min-h-[120px] border border-border p-2 bg-background hover:bg-muted"
             >
-              <div className="text-sm font-medium text-gray-900 mb-2">
+              <div className="text-sm font-medium text-foreground mb-2">
                 {format(day, "d")}
               </div>
 
@@ -220,7 +220,7 @@ export function MonthView({
                 ))}
 
                 {dayEvents.length > 3 && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     +{dayEvents.length - 3} more sessions
                   </div>
                 )}
@@ -245,7 +245,7 @@ export function MonthView({
                 ))}
 
                 {dayShifts.length > 3 && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     +{dayShifts.length - 3} more
                   </div>
                 )}

@@ -24,10 +24,10 @@ export function NotesTab({ notes, onNotesChange }: NotesTabProps) {
 
       <div>
         <Label>Attachments</Label>
-        <div className="mt-2 border-2 border-dashed border-gray-200 rounded-lg p-4">
+        <div className="mt-2 border-2 border-dashed border-border rounded-lg p-4">
           <div className="text-center">
-            <Paperclip className="mx-auto h-8 w-8 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">
+            <Paperclip className="mx-auto h-8 w-8 text-muted-foreground" />
+            <p className="mt-2 text-sm text-muted-foreground">
               Drag and drop files here, or click to select
             </p>
             <Button type="button" variant="outline" size="sm" className="mt-2">

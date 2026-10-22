@@ -738,7 +738,7 @@ export function ShiftDetailsPanel({
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-500">Shift not found</p>
+          <p className="text-sm text-muted-foreground">Shift not found</p>
         </CardContent>
       </Card>
     );
@@ -812,14 +812,14 @@ export function ShiftDetailsPanel({
                 </div>
               )}
               {conflictWarnings.length > 0 && (
-                <div className="space-y-2 rounded-lg border border-red-200 bg-red-50/60 p-4">
+                <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/60 p-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-red-800">
+                    <span className="text-sm font-semibold text-destructive">
                       Conflict Warnings
                     </span>
                     <Badge
                       variant="outline"
-                      className="border-red-200 bg-red-50 text-red-700"
+                      className="border-destructive/40 bg-destructive/10 text-destructive"
                     >
                       {conflictWarnings.length}
                     </Badge>
@@ -828,7 +828,7 @@ export function ShiftDetailsPanel({
                     {conflictWarnings.map((warning) => (
                       <div
                         key={warning.id}
-                        className="rounded-md border border-red-200 bg-background p-2 text-sm text-muted-foreground"
+                        className="rounded-md border border-destructive/40 bg-background p-2 text-sm text-muted-foreground"
                       >
                         {warning.message}
                       </div>
@@ -856,7 +856,7 @@ export function ShiftDetailsPanel({
                           className="flex items-start gap-2 rounded border border-muted-foreground/30 bg-background p-2"
                         >
                           <ShieldAlert
-                            className={`mt-1 h-4 w-4 ${warning.severity === "hard" ? "text-destructive" : "text-amber-500"}`}
+                            className={`mt-1 h-4 w-4 ${warning.severity === "hard" ? "text-destructive" : "text-warning"}`}
                           />
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

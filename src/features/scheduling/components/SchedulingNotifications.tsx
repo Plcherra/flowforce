@@ -64,21 +64,21 @@ export function SchedulingNotifications() {
       <CardContent className="space-y-6">
         {/* Permission Request */}
         {"Notification" in window && Notification.permission !== "granted" && (
-          <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <div className="p-4 bg-warning-muted border border-warning/40 rounded-lg">
             <div className="flex items-start gap-3">
-              <Bell className="h-5 w-5 text-amber-600 mt-0.5" />
+              <Bell className="h-5 w-5 text-warning mt-0.5" />
               <div className="flex-1">
-                <h4 className="font-medium text-sm text-amber-800 dark:text-amber-200 mb-1">
+                <h4 className="font-medium text-sm text-warning-foreground mb-1">
                   Enable Browser Notifications
                 </h4>
-                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                <p className="text-sm text-warning-foreground mb-3">
                   Get reminders even when the app is closed
                 </p>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handlePermissionRequest}
-                  className="border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
+                  className="border-warning/40 text-warning-foreground hover:bg-warning-muted"
                 >
                   Enable Notifications
                 </Button>

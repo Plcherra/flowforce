@@ -42,7 +42,7 @@ export function ScheduleHeader({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">{heading}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{heading}</h1>
           {filtersEnabled && (
             <Button
               variant={filtersActive ? "default" : "outline"}
@@ -82,7 +82,7 @@ export function ScheduleHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-4">
-        <h1 className="text-3xl font-bold text-gray-900">{heading}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{heading}</h1>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={onPrevDate}>
             <ChevronLeft className="h-4 w-4" />

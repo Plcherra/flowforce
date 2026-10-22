@@ -8,8 +8,8 @@ interface WeekGridFooterProps {
 }
 
 function coverageTone(ratio: number): string {
-  if (ratio >= 1) return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
-  if (ratio >= 0.5) return "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+  if (ratio >= 1) return "bg-success/15 text-success";
+  if (ratio >= 0.5) return "bg-warning/15 text-warning-foreground";
   return "bg-destructive/15 text-destructive";
 }
 

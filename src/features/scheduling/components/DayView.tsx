@@ -63,17 +63,17 @@ export function DayView({
     <div className={`p-${isMobile ? "4" : "6"}`}>
       <div className={`mb-${isMobile ? "4" : "6"}`}>
         <h2
-          className={`${isMobile ? "text-xl" : "text-2xl"} font-bold text-gray-900`}
+          className={`${isMobile ? "text-xl" : "text-2xl"} font-bold text-foreground`}
         >
           {format(selectedDate, isMobile ? "EEE, MMM d" : "EEEE, MMMM d, yyyy")}
         </h2>
-        <p className="text-gray-600">{dayShifts.length} shifts scheduled</p>
+        <p className="text-muted-foreground">{dayShifts.length} shifts scheduled</p>
       </div>
 
       <div className="mb-6 space-y-2">
         <div className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Meetings & events
           </h3>
         </div>
@@ -96,7 +96,7 @@ export function DayView({
                 onClick={() => handleEventClick(event.id)}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-foreground">
                     {event.title || "Untitled session"}
                   </div>
                   {event.type && (
@@ -172,9 +172,9 @@ export function DayView({
               return (
                 <div
                   key={hour}
-                  className="flex items-start border-l-2 border-gray-200 pl-4 min-h-[60px]"
+                  className="flex items-start border-l-2 border-border pl-4 min-h-[60px]"
                 >
-                  <div className="w-16 text-sm text-gray-500 font-medium">
+                  <div className="w-16 text-sm text-muted-foreground font-medium">
                     {format(new Date().setHours(hour, 0, 0, 0), "HH:mm")}
                   </div>
                   <div className="flex-1 ml-4">
@@ -183,14 +183,14 @@ export function DayView({
                         {userList.map((userName, index) => (
                           <div
                             key={index}
-                            className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
+                            className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
                           >
                             {userName}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-xs text-gray-400 italic">
+                      <div className="text-xs text-muted-foreground italic">
                         No staff scheduled
                       </div>
                     )}
@@ -205,14 +205,14 @@ export function DayView({
         <div>
           <h3 className="text-lg font-semibold mb-4">All Shifts</h3>
           {dayShifts.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="text-center py-12 text-muted-foreground">
+              <Clock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h4 className="text-lg font-medium text-foreground mb-2">
                 No events scheduled
               </h4>
               {!hideShiftActions && (
                 <>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-muted-foreground mb-4">
                     Add shifts for {format(selectedDate, "MMMM d")} to get
                     started
                   </p>
@@ -232,7 +232,7 @@ export function DayView({
                   onClick={() => onSelectShift(shift.id)}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-gray-900">
+                    <h4 className="font-medium text-foreground">
                       {shift.title || shift.job_position?.name || "Shift"}
                     </h4>
                     <Badge
@@ -246,7 +246,7 @@ export function DayView({
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-3">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       <div className="flex items-center mb-1">
                         <Clock className="h-4 w-4 mr-1" />
                         <span className="font-medium">Time:</span>
@@ -256,13 +256,13 @@ export function DayView({
                         {format(new Date(shift.end_time), "HH:mm")}
                       </div>
                       {shift.location && (
-                        <div className="ml-5 text-gray-500">
+                        <div className="ml-5 text-muted-foreground">
                           📍 {shift.location}
                         </div>
                       )}
                     </div>
 
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       <div className="flex items-center mb-1">
                         <Users className="h-4 w-4 mr-1" />
                         <span className="font-medium">
@@ -277,7 +277,7 @@ export function DayView({
                             .map((assignment: AssignmentWithUser) => (
                               <Avatar
                                 key={assignment.id}
-                                className="h-6 w-6 border-2 border-white"
+                                className="h-6 w-6 border-2 border-border"
                               >
                                 <AvatarImage
                                   src={assignment.user?.avatar_url}
@@ -289,13 +289,13 @@ export function DayView({
                               </Avatar>
                             ))}
                           {shift.assignments.length > 5 && (
-                            <div className="h-6 w-6 rounded-full bg-gray-200 border-2 border-white text-xs flex items-center justify-center">
+                            <div className="h-6 w-6 rounded-full bg-muted border-2 border-border text-xs flex items-center justify-center">
                               +{shift.assignments.length - 5}
                             </div>
                           )}
                         </div>
                       ) : (
-                        <div className="ml-5 text-gray-400 italic">
+                        <div className="ml-5 text-muted-foreground italic">
                           No staff assigned
                         </div>
                       )}

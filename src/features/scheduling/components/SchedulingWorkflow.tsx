@@ -42,7 +42,7 @@ export function SchedulingWorkflow() {
         title: "Send Availability Reminder",
         description: "Notify staff to update their availability",
         actions: ["Send reminder to all staff", "Set deadline for tonight"],
-        color: "bg-blue-500",
+        color: "bg-primary",
         isToday: isSameDay(today, thursday),
       },
       {
@@ -56,7 +56,7 @@ export function SchedulingWorkflow() {
           "Build draft schedule",
           "Review conflicts",
         ],
-        color: "bg-orange-500",
+        color: "bg-warning",
         isToday: isSameDay(today, friday),
       },
       {
@@ -70,7 +70,7 @@ export function SchedulingWorkflow() {
           "Finalize schedule",
           "Post to channels (afternoon)",
         ],
-        color: "bg-green-500",
+        color: "bg-success",
         isToday: isSameDay(today, saturday),
       },
       {
@@ -80,7 +80,7 @@ export function SchedulingWorkflow() {
         title: "Schedule Reminder",
         description: "Final reminder before week starts",
         actions: ["Send schedule reminder", "Confirm all shifts covered"],
-        color: "bg-purple-500",
+        color: "bg-secondary",
         isToday: isSameDay(today, sunday),
       },
     ];
@@ -126,7 +126,7 @@ export function SchedulingWorkflow() {
               <div className="flex items-start gap-4">
                 {/* Day indicator */}
                 <div className="flex flex-col items-center">
-                  <div className={`p-2 rounded-full text-white ${step.color}`}>
+                  <div className={`p-2 rounded-full text-primary-foreground ${step.color}`}>
                     {step.icon}
                   </div>
                   <div className="mt-2 text-center">

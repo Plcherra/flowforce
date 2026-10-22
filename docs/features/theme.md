@@ -189,7 +189,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 7 — Schedule
 
-- [ ] Move hard-coded colors on Schedule onto the tokens.
+- [x] Move hard-coded colors on Schedule onto the tokens.
 
 Rules:
 
@@ -532,6 +532,22 @@ Phone steps for Pedro:
 1. Open https://www.flowforce.uk/auth signed out. The page should use the FlowForce blue tint, not a separate indigo wash.
 2. Sign in and open the dashboard. Healthy rows should read as green, warning rows as amber, and critical rows as red.
 3. Switch to Dark. Those status colors should stay readable on the dark surface.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 7 Schedule
+
+Shipped: Schedule classes now use the theme tokens. Gray text and surfaces use foreground, muted, or border. Blue is primary, purple is secondary, rose is accent, red is destructive, green and emerald are success, and amber, yellow, and orange are warning. Light status washes use success-muted, warning-muted, or a translucent destructive tint. `dark:` palette classes in these files are gone. Shift chips still paint `schedules.color`. The vendor list in `src/features/scheduling/constants/templates.ts` is unchanged. Fallback shift colors and the `#6366f1` event border stay stored hex. The baseline keeps only those hexes.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `src/features/scheduling` baseline entries are the stored hex colors only. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Schedule.
+2. Shift chips should still show their saved colors. The vendor list colors should be unchanged.
+3. Ready, watch, and fix pills should read as green, amber, and red. Open a shift with a conflict and confirm the warning is red or amber, not a flat blue.
+4. Switch to Dark in Settings, then General. The schedule text should stay readable, and the shift chips should keep their saved colors.
 
 Blockers: none. No migration.
 

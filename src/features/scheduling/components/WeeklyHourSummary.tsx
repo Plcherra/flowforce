@@ -102,15 +102,15 @@ export function WeeklyHourSummary({
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
               <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="h-2 w-2 rounded-full bg-success" />
                 Filled&nbsp;({hoursSummary.filledCount})
               </span>
               <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span className="h-2 w-2 rounded-full bg-warning" />
                 Partial&nbsp;({hoursSummary.partialCount})
               </span>
               <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span className="h-2 w-2 rounded-full bg-accent" />
                 Open&nbsp;({hoursSummary.unfilledCount})
               </span>
             </div>
@@ -118,15 +118,15 @@ export function WeeklyHourSummary({
           <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-muted">
             <div className="flex h-full w-full">
               <div
-                className="h-full bg-emerald-500 transition-all"
+                className="h-full bg-success transition-all"
                 style={{ width: `${coveragePercentages.filledPct}%` }}
               />
               <div
-                className="h-full bg-amber-500 transition-all"
+                className="h-full bg-warning transition-all"
                 style={{ width: `${coveragePercentages.partialPct}%` }}
               />
               <div
-                className="h-full bg-rose-500 transition-all"
+                className="h-full bg-accent transition-all"
                 style={{ width: `${coveragePercentages.openPct}%` }}
               />
             </div>

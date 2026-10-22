@@ -60,7 +60,7 @@ export function ScheduleMoreMenu({
         >
           <MoreHorizontal className="h-4 w-4" />
           {conflicts.length > 0 ? (
-            <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-red-500" />
+            <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-destructive" />
           ) : null}
         </Button>
       </DropdownMenuTrigger>
@@ -117,8 +117,8 @@ export function ScheduleMoreMenu({
                     variant="outline"
                     className={
                       conflict.severity === "blocking"
-                        ? "border-red-200 bg-red-50 text-red-700"
-                        : "border-amber-200 bg-amber-50 text-amber-800"
+                        ? "border-destructive/40 bg-destructive/10 text-destructive"
+                        : "border-warning/40 bg-warning-muted text-warning-foreground"
                     }
                   >
                     {conflict.type.replace(/_/g, " ")}

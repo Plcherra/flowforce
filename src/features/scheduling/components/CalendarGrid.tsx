@@ -67,7 +67,7 @@ export function CalendarGrid({
           <div className="flex items-center justify-center h-96">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              <p className="text-sm text-gray-500 mt-2">Loading schedule...</p>
+              <p className="text-sm text-muted-foreground mt-2">Loading schedule...</p>
             </div>
           </div>
         ) : (

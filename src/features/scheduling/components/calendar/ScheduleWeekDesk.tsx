@@ -310,15 +310,15 @@ export function ScheduleWeekDesk({
             {!readOnly ? (
               <div className="flex flex-wrap gap-3 px-2 text-[11px] text-muted-foreground sm:col-span-2">
                 <span className="inline-flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-sm bg-green-500" />
+                  <span className="h-2 w-2 rounded-sm bg-success" />
                   Published
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-sm bg-yellow-500" />
+                  <span className="h-2 w-2 rounded-sm bg-warning" />
                   Draft
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-sm bg-red-500" />
+                  <span className="h-2 w-2 rounded-sm bg-destructive" />
                   Understaffed
                 </span>
               </div>

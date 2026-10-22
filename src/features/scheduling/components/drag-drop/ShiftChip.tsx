@@ -92,7 +92,7 @@ export function ShiftChip({
       data-opaque={isAssigned ? "true" : "false"}
       className={cn(
         "relative z-20 rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 border text-left",
-        isAssigned ? "text-white" : "bg-background border-border shadow-sm",
+        isAssigned ? "text-primary-foreground" : "bg-background border-border shadow-sm",
         isDragging && "opacity-40",
         draggable && "touch-none",
       )}
@@ -105,7 +105,7 @@ export function ShiftChip({
         className="font-medium truncate flex items-center gap-1"
       >
         {hasConflict ? (
-          <AlertTriangle className="h-3 w-3 text-amber-600 shrink-0" />
+          <AlertTriangle className="h-3 w-3 text-warning shrink-0" />
         ) : null}
         {schedule.title ?? schedule.job_position?.name ?? "Shift"}
       </div>
@@ -123,7 +123,7 @@ export function ShiftChip({
             data-testid="shift-chip-duration"
             className={cn(
               "text-[10px]",
-              isAssigned ? "text-white/80" : "text-muted-foreground",
+              isAssigned ? "text-primary-foreground/80" : "text-muted-foreground",
             )}
           >
             {formatShiftDuration(schedule)}
@@ -161,7 +161,7 @@ export function ShiftChipOverlay({
 }) {
   return (
     <div
-      className="rounded px-2 py-1 text-[11px] border text-white shadow-lg cursor-grabbing"
+      className="rounded px-2 py-1 text-[11px] border text-primary-foreground shadow-lg cursor-grabbing"
       style={{
         backgroundColor: schedule.color ?? "#3b82f6",
         borderLeft: `3px solid ${schedule.color ?? "#3b82f6"}`,
@@ -169,7 +169,7 @@ export function ShiftChipOverlay({
     >
       <div className="font-medium truncate flex items-center gap-1">
         {hasConflict ? (
-          <AlertTriangle className="h-3 w-3 text-amber-600 shrink-0" />
+          <AlertTriangle className="h-3 w-3 text-warning shrink-0" />
         ) : null}
         {schedule.title ?? schedule.job_position?.name ?? "Shift"}
       </div>

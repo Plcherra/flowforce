@@ -102,7 +102,7 @@ export function UsersTab({
                   {filteredCandidates().map((employee) => (
                     <div
                       key={employee.id}
-                      className="flex items-center justify-between p-2 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-2 border rounded-lg hover:bg-muted"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
@@ -197,11 +197,11 @@ export function UsersTab({
                     return (
                       <div
                         key={userId}
-                        className="flex items-center justify-between p-2 border rounded-lg bg-blue-50"
+                        className="flex items-center justify-between p-2 border rounded-lg bg-primary/10"
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-blue-700">
+                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-medium text-primary">
                               {employee.first_name[0]}
                               {employee.last_name[0]}
                             </span>

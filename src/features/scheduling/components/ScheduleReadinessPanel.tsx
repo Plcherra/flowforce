@@ -20,21 +20,21 @@ const toneStyles: Record<
   { pill: string; badge: string; label: string }
 > = {
   steady: {
-    pill: "border-emerald-200/80 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/30",
+    pill: "border-success/80 bg-success/40",
     badge:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+      "border-success/40 bg-success-muted text-success",
     label: "Ready",
   },
   watch: {
-    pill: "border-amber-200/80 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/30",
+    pill: "border-warning/80 bg-warning/50",
     badge:
-      "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
+      "border-warning/40 bg-warning-muted text-warning-foreground",
     label: "Watch",
   },
   urgent: {
-    pill: "border-red-200/80 bg-red-50/50 dark:border-red-900 dark:bg-red-950/30",
+    pill: "border-destructive/80 bg-destructive/50",
     badge:
-      "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
+      "border-destructive/40 bg-destructive/10 text-destructive",
     label: "Fix",
   },
 };

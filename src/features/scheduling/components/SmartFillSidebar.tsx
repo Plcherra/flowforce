@@ -238,14 +238,14 @@ export function SmartFillSidebar({
                 <>
                   <Separator className="my-4" />
                   <SectionHeader
-                    icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}
+                    icon={<AlertTriangle className="h-4 w-4 text-warning" />}
                     title="Remaining gaps"
                   />
                   <ul className="space-y-2">
                     {scheduler.coverageGaps.map((gap) => (
                       <li
                         key={`${gap.templateId}:${gap.scheduleDate}`}
-                        className="rounded-lg border border-amber-200/70 bg-amber-50/40 p-3 dark:border-amber-900 dark:bg-amber-950/20"
+                        className="rounded-lg border border-warning/70 bg-warning/40 p-3"
                       >
                         <p className="text-sm font-medium">{gap.role}</p>
                         <p className="text-xs text-muted-foreground">
@@ -336,7 +336,7 @@ export function SmartFillSidebar({
         "flex h-full max-h-full flex-col overflow-hidden",
         !open && "hidden",
         showProminent && needsAttention > 0
-          ? "border-amber-300 shadow-sm dark:border-amber-800"
+          ? "border-warning/40 shadow-sm"
           : undefined,
       )}
     >
@@ -369,7 +369,7 @@ function CompactStatus({
         className={cn(
           "text-sm",
           needsAttention > 0
-            ? "font-medium text-amber-700 dark:text-amber-300"
+            ? "font-medium text-warning-foreground"
             : "text-muted-foreground",
         )}
       >
@@ -406,9 +406,9 @@ function MetricPill({
 }) {
   const toneClass =
     tone === "warning"
-      ? "text-amber-500"
+      ? "text-warning"
       : tone === "success"
-        ? "text-emerald-500"
+        ? "text-success"
         : "text-foreground";
 
   return (

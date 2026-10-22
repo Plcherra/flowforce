@@ -80,11 +80,11 @@ function AvailabilityLegend() {
         Off / Unavailable
       </span>
       <span className="inline-flex items-center gap-1">
-        <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30" />
+        <span className="h-2.5 w-2.5 rounded-sm bg-success/15 border border-success/30" />
         Partial
       </span>
       <span className="inline-flex items-center gap-1">
-        <span className="h-2.5 w-2.5 rounded-sm border-2 border-amber-500/70 bg-amber-500/10" />
+        <span className="h-2.5 w-2.5 rounded-sm border-2 border-warning/70 bg-warning/10" />
         PTO pending
       </span>
     </div>
@@ -128,18 +128,18 @@ function AvailabilityCellOverlay({
   return (
     <>
       {cell.status === "partial" ? (
-        <div className="absolute inset-0 pointer-events-none z-[5] bg-emerald-500/5 border border-emerald-500/20" />
+        <div className="absolute inset-0 pointer-events-none z-[5] bg-success/5 border border-success/20" />
       ) : null}
       {pendingPto ? (
-        <div className="absolute inset-0 pointer-events-none z-[5] border-2 border-amber-500/60 rounded-sm" />
+        <div className="absolute inset-0 pointer-events-none z-[5] border-2 border-warning/60 rounded-sm" />
       ) : null}
       {(cell.hint || pendingPto) && (
         <div
           className={cn(
             "absolute bottom-0 left-0 right-0 z-[6] pointer-events-none px-1 py-0.5 text-[9px] font-medium truncate",
             pendingPto && !cell.hint?.match(/until/i)
-              ? "text-amber-700 dark:text-amber-300"
-              : "text-emerald-700 dark:text-emerald-300",
+              ? "text-warning-foreground"
+              : "text-success",
           )}
           data-testid="schedule-cell-availability-hint"
         >
@@ -224,7 +224,7 @@ function GridCellComponent({
       ) : null}
       {requestedOff ? (
         <div
-          className="pointer-events-none absolute left-1 top-1 z-[7] rounded bg-amber-100 px-1 text-[10px] font-medium text-amber-950"
+          className="pointer-events-none absolute left-1 top-1 z-[7] rounded bg-warning-muted px-1 text-[10px] font-medium text-warning-foreground"
           data-testid="schedule-requested-off"
         >
           Requested off

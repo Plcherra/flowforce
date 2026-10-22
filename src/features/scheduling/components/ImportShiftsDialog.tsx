@@ -130,23 +130,23 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
               </div>
 
               {selectedFile && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="bg-success-muted border border-success/40 rounded-lg p-3">
                   <div className="flex items-center">
-                    <FileSpreadsheet className="h-4 w-4 text-green-600 mr-2" />
-                    <span className="text-sm font-medium text-green-800">
+                    <FileSpreadsheet className="h-4 w-4 text-success mr-2" />
+                    <span className="text-sm font-medium text-success">
                       {selectedFile.name}
                     </span>
                   </div>
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-xs text-success mt-1">
                     Ready to import • {Math.round(selectedFile.size / 1024)} KB
                   </p>
                 </div>
               )}
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <div className="bg-warning-muted border border-warning/40 rounded-lg p-3">
                 <div className="flex items-start">
-                  <AlertCircle className="h-4 w-4 text-yellow-600 mr-2 mt-0.5" />
-                  <div className="text-sm text-yellow-800">
+                  <AlertCircle className="h-4 w-4 text-warning mr-2 mt-0.5" />
+                  <div className="text-sm text-warning-foreground">
                     <p className="font-medium">Important Notes:</p>
                     <ul className="mt-1 list-disc list-inside space-y-1 text-xs">
                       <li>Dates should be in YYYY-MM-DD format</li>

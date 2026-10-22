@@ -259,7 +259,7 @@ export function AutoScheduleDialog({
                           className="flex items-start gap-2 rounded border border-muted-foreground/20 p-2"
                         >
                           <ShieldAlert
-                            className={`h-4 w-4 mt-0.5 ${warning.severity === "hard" ? "text-destructive" : "text-amber-500"}`}
+                            className={`h-4 w-4 mt-0.5 ${warning.severity === "hard" ? "text-destructive" : "text-warning"}`}
                           />
                           <div>
                             <p className="font-medium text-sm">

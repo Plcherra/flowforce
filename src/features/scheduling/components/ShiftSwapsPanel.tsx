@@ -52,11 +52,11 @@ function getInitials(user?: {
 function getSwapTypeIcon(type: string) {
   switch (type) {
     case "swap":
-      return <ArrowRightLeft className="h-4 w-4 text-blue-500" />;
+      return <ArrowRightLeft className="h-4 w-4 text-primary" />;
     case "claim":
-      return <Plus className="h-4 w-4 text-green-500" />;
+      return <Plus className="h-4 w-4 text-success" />;
     case "give_away":
-      return <Users className="h-4 w-4 text-orange-500" />;
+      return <Users className="h-4 w-4 text-warning" />;
     default:
       return <Clock className="h-4 w-4" />;
   }
@@ -65,11 +65,11 @@ function getSwapTypeIcon(type: string) {
 function getStatusIcon(status: string) {
   switch (status) {
     case "approved":
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
+      return <CheckCircle className="h-4 w-4 text-success" />;
     case "rejected":
-      return <XCircle className="h-4 w-4 text-red-500" />;
+      return <XCircle className="h-4 w-4 text-destructive" />;
     default:
-      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      return <AlertCircle className="h-4 w-4 text-warning" />;
   }
 }
 

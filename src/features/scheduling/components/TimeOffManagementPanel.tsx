@@ -55,12 +55,12 @@ function getInitials(user?: {
 function getStatusIcon(status: string) {
   switch (status) {
     case "approved":
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
+      return <CheckCircle className="h-4 w-4 text-success" />;
     case "denied":
     case "rejected":
-      return <XCircle className="h-4 w-4 text-red-500" />;
+      return <XCircle className="h-4 w-4 text-destructive" />;
     default:
-      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      return <AlertCircle className="h-4 w-4 text-warning" />;
   }
 }
 

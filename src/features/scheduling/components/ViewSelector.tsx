@@ -48,17 +48,17 @@ export function ViewSelector({
         </div>
 
         {isScheduling && (
-          <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
+          <div className="flex items-center justify-center space-x-4 text-xs text-muted-foreground">
             <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-success rounded-full"></div>
               <span>Published</span>
             </div>
             <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-warning rounded-full"></div>
               <span>Draft</span>
             </div>
             <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-destructive rounded-full"></div>
               <span>Understaffed</span>
             </div>
           </div>
@@ -103,17 +103,17 @@ export function ViewSelector({
       </div>
 
       {isScheduling && (
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-green-500 rounded"></div>
+            <div className="w-3 h-3 bg-success rounded"></div>
             <span>Published</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+            <div className="w-3 h-3 bg-warning rounded"></div>
             <span>Draft</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-red-500 rounded"></div>
+            <div className="w-3 h-3 bg-destructive rounded"></div>
             <span>Understaffed</span>
           </div>
         </div>

@@ -1828,224 +1828,29 @@
     "text-purple-800",
     "text-rose-800"
   ],
-  "src/features/scheduling/components/AutoScheduleDialog.tsx": [
-    "text-amber-500"
-  ],
-  "src/features/scheduling/components/calendar/ScheduleWeekDesk.tsx": [
-    "bg-green-500",
-    "bg-red-500",
-    "bg-yellow-500"
-  ],
-  "src/features/scheduling/components/CalendarGrid.tsx": [
-    "text-gray-500"
-  ],
   "src/features/scheduling/components/DayView.tsx": [
-    "#6366f1",
-    "bg-blue-100",
-    "bg-gray-200",
-    "border-gray-200",
-    "border-white",
-    "text-blue-800",
-    "text-gray-400",
-    "text-gray-500",
-    "text-gray-600",
-    "text-gray-900"
+    "#6366f1"
   ],
   "src/features/scheduling/components/drag-drop/ScheduleTemplatesPanel.tsx": [
     "#fff"
   ],
   "src/features/scheduling/components/drag-drop/ShiftChip.tsx": [
-    "#3b82f6",
-    "text-amber-600",
-    "text-white",
-    "text-white/80"
-  ],
-  "src/features/scheduling/components/drag-drop/WeekGrid.tsx": [
-    "bg-amber-100",
-    "bg-amber-500/10",
-    "bg-emerald-500/15",
-    "bg-emerald-500/5",
-    "border-amber-500/60",
-    "border-amber-500/70",
-    "border-emerald-500/20",
-    "border-emerald-500/30",
-    "dark:text-amber-300",
-    "dark:text-emerald-300",
-    "text-amber-700",
-    "text-amber-950",
-    "text-emerald-700"
-  ],
-  "src/features/scheduling/components/drag-drop/WeekGridFooter.tsx": [
-    "bg-amber-500/15",
-    "bg-emerald-500/15",
-    "dark:text-amber-300",
-    "dark:text-emerald-300",
-    "text-amber-700",
-    "text-emerald-700"
+    "#3b82f6"
   ],
   "src/features/scheduling/components/DragDropScheduleCalendar.tsx": [
     "#3b82f6"
   ],
-  "src/features/scheduling/components/EmployeeSelector.tsx": [
-    "text-red-500"
-  ],
-  "src/features/scheduling/components/ImportShiftsDialog.tsx": [
-    "bg-green-50",
-    "bg-yellow-50",
-    "border-green-200",
-    "border-yellow-200",
-    "text-green-600",
-    "text-green-800",
-    "text-yellow-600",
-    "text-yellow-800"
-  ],
   "src/features/scheduling/components/MonthView.tsx": [
-    "#3b82f6",
-    "bg-white",
-    "border-gray-200",
-    "hover:bg-gray-50",
-    "text-gray-500",
-    "text-gray-900"
-  ],
-  "src/features/scheduling/components/ScheduleHeader.tsx": [
-    "text-gray-900"
-  ],
-  "src/features/scheduling/components/ScheduleMoreMenu.tsx": [
-    "bg-amber-50",
-    "bg-red-50",
-    "bg-red-500",
-    "border-amber-200",
-    "border-red-200",
-    "text-amber-800",
-    "text-red-700"
-  ],
-  "src/features/scheduling/components/ScheduleReadinessPanel.tsx": [
-    "bg-amber-50",
-    "bg-amber-50/50",
-    "bg-emerald-50",
-    "bg-emerald-50/40",
-    "bg-red-50",
-    "bg-red-50/50",
-    "border-amber-200",
-    "border-amber-200/80",
-    "border-emerald-200",
-    "border-emerald-200/80",
-    "border-red-200",
-    "border-red-200/80",
-    "dark:bg-amber-950",
-    "dark:bg-amber-950/30",
-    "dark:bg-emerald-950",
-    "dark:bg-emerald-950/30",
-    "dark:bg-red-950",
-    "dark:bg-red-950/30",
-    "dark:border-amber-900",
-    "dark:border-emerald-900",
-    "dark:border-red-900",
-    "dark:text-amber-300",
-    "dark:text-emerald-300",
-    "dark:text-red-300",
-    "text-amber-800",
-    "text-emerald-700",
-    "text-red-700"
-  ],
-  "src/features/scheduling/components/SchedulingNotifications.tsx": [
-    "bg-amber-50",
-    "border-amber-200",
-    "border-amber-300",
-    "dark:bg-amber-950/20",
-    "dark:border-amber-700",
-    "dark:border-amber-800",
-    "dark:hover:bg-amber-900/20",
-    "dark:text-amber-200",
-    "dark:text-amber-300",
-    "hover:bg-amber-100",
-    "text-amber-600",
-    "text-amber-700",
-    "text-amber-800"
-  ],
-  "src/features/scheduling/components/SchedulingWorkflow.tsx": [
-    "bg-blue-500",
-    "bg-green-500",
-    "bg-orange-500",
-    "bg-purple-500",
-    "text-white"
-  ],
-  "src/features/scheduling/components/shift-wizard/NotesTab.tsx": [
-    "border-gray-200",
-    "text-gray-400",
-    "text-gray-600"
-  ],
-  "src/features/scheduling/components/shift-wizard/UsersTab.tsx": [
-    "bg-blue-200",
-    "bg-blue-50",
-    "hover:bg-gray-50",
-    "text-blue-700"
+    "#3b82f6"
   ],
   "src/features/scheduling/components/ShiftDetailsPanel.tsx": [
-    "#3b82f6",
-    "bg-red-50",
-    "bg-red-50/60",
-    "border-red-200",
-    "text-amber-500",
-    "text-gray-500",
-    "text-red-700",
-    "text-red-800"
-  ],
-  "src/features/scheduling/components/ShiftSwapsPanel.tsx": [
-    "text-blue-500",
-    "text-green-500",
-    "text-orange-500",
-    "text-red-500",
-    "text-yellow-500"
+    "#3b82f6"
   ],
   "src/features/scheduling/components/ShiftWizardDialog.tsx": [
     "#3b82f6"
   ],
-  "src/features/scheduling/components/SmartFillSidebar.tsx": [
-    "bg-amber-50/40",
-    "border-amber-200/70",
-    "border-amber-300",
-    "dark:bg-amber-950/20",
-    "dark:border-amber-800",
-    "dark:border-amber-900",
-    "dark:text-amber-300",
-    "text-amber-500",
-    "text-amber-700",
-    "text-emerald-500"
-  ],
-  "src/features/scheduling/components/TimeOffManagementPanel.tsx": [
-    "text-green-500",
-    "text-red-500",
-    "text-yellow-500"
-  ],
-  "src/features/scheduling/components/ViewSelector.tsx": [
-    "bg-green-500",
-    "bg-red-500",
-    "bg-yellow-500",
-    "text-gray-600"
-  ],
-  "src/features/scheduling/components/WeeklyHourSummary.tsx": [
-    "bg-amber-500",
-    "bg-emerald-500",
-    "bg-rose-500"
-  ],
   "src/features/scheduling/components/WeekView.tsx": [
-    "#6366f1",
-    "bg-gray-200",
-    "bg-white",
-    "bg-white/10",
-    "bg-white/20",
-    "border-gray-100",
-    "border-white",
-    "border-white/50",
-    "hover:border-white",
-    "text-gray-500",
-    "text-gray-600",
-    "text-gray-900",
-    "text-green-600",
-    "text-red-600",
-    "text-white",
-    "text-yellow-600"
+    "#6366f1"
   ],
   "src/features/scheduling/constants/templates.ts": [
     "#0ea5e9",

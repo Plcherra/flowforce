@@ -95,7 +95,7 @@ export function EmployeeSelector({
 
   if (error) {
     return (
-      <div className="text-sm text-red-500">
+      <div className="text-sm text-destructive">
         Error loading employees: {error}
       </div>
     );

@@ -123,26 +123,26 @@ export function WeekView({
               return (
                 <div
                   key={day.toISOString()}
-                  className="flex-1 min-w-[90px] p-3 border rounded-lg bg-white"
+                  className="flex-1 min-w-[90px] p-3 border rounded-lg bg-background"
                 >
                   <div className="text-center">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-foreground">
                       {format(day, "EEE")}
                     </div>
-                    <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-lg font-semibold text-foreground">
                       {format(day, "d")}
                     </div>
                     <div className="mt-1">
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-muted-foreground">
                         {stats.totalHours}h
                       </div>
                       <div
                         className={`text-xs font-medium ${
                           stats.coverageRatio >= 1
-                            ? "text-green-600"
+                            ? "text-success"
                             : stats.coverageRatio >= 0.75
-                              ? "text-yellow-600"
-                              : "text-red-600"
+                              ? "text-warning"
+                              : "text-destructive"
                         }`}
                       >
                         {stats.totalHeadcount}/{stats.requiredHeadcount}
@@ -161,7 +161,7 @@ export function WeekView({
             const dayShifts = getShiftsForDay(day);
             return (
               <div key={day.toISOString()} className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-900">
+                <h3 className="text-sm font-medium text-foreground">
                   {format(day, "EEEE, MMM d")}
                 </h3>
                 {dayShifts.length === 0 && (
@@ -181,10 +181,10 @@ export function WeekView({
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium text-gray-900 text-sm">
+                        <div className="font-medium text-foreground text-sm">
                           {shift.title || shift.job_position?.name || "Shift"}
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-muted-foreground">
                           {format(new Date(shift.start_time), "HH:mm")} -
                           {format(new Date(shift.end_time), "HH:mm")}
                         </div>
@@ -205,7 +205,7 @@ export function WeekView({
                             .map((assignment: AssignmentWithUser) => (
                               <Avatar
                                 key={assignment.id}
-                                className="h-6 w-6 border-2 border-white"
+                                className="h-6 w-6 border-2 border-border"
                               >
                                 <AvatarImage
                                   src={assignment.user?.avatar_url}
@@ -217,12 +217,12 @@ export function WeekView({
                               </Avatar>
                             ))}
                           {shift.assignments.length > 3 && (
-                            <div className="h-6 w-6 rounded-full bg-gray-200 border-2 border-white text-xs flex items-center justify-center">
+                            <div className="h-6 w-6 rounded-full bg-muted border-2 border-border text-xs flex items-center justify-center">
                               +{shift.assignments.length - 3}
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {shift.assignments.length} assigned
                         </span>
                       </div>
@@ -254,23 +254,23 @@ export function WeekView({
           return (
             <div key={day.toISOString()} className="p-4 border-r">
               <div className="text-center">
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-foreground">
                   {format(day, "EEE")}
                 </div>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-lg font-semibold text-foreground">
                   {format(day, "d")}
                 </div>
                 <div className="mt-2 space-y-1">
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     {stats.totalHours}h scheduled
                   </div>
                   <div
                     className={`text-xs font-medium ${
                       stats.coverageRatio >= 1
-                        ? "text-green-600"
+                        ? "text-success"
                         : stats.coverageRatio >= 0.75
-                          ? "text-yellow-600"
-                          : "text-red-600"
+                          ? "text-warning"
+                          : "text-destructive"
                     }`}
                   >
                     {stats.totalHeadcount}/{stats.requiredHeadcount} staff
@@ -444,7 +444,7 @@ export function WeekView({
                       return (
                         <div
                           key={`cell-${day.toISOString()}-${employee.id}`}
-                          className="border-r border-b border-gray-100 p-1"
+                          className="border-r border-b border-border p-1"
                         >
                           {employeeShifts.length === 0 ? (
                             <div className="h-16" />
@@ -455,7 +455,7 @@ export function WeekView({
                               return (
                                 <div
                                   key={shift.id}
-                                  className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-white text-xs"
+                                  className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-primary-foreground text-xs"
                                   style={{
                                     backgroundColor: getShiftColor(shift),
                                     opacity: shift.is_published ? 1 : 0.9,
@@ -505,8 +505,8 @@ export function WeekView({
                                             }}
                                             className={`rounded-full border px-2 py-0.5 text-[10px] transition ${
                                               isSelected
-                                                ? "border-white bg-white/20 text-white"
-                                                : "border-white/50 bg-white/10 text-white hover:border-white"
+                                                ? "border-border bg-background/20 text-primary-foreground"
+                                                : "border-border/50 bg-background/10 text-primary-foreground hover:border-border"
                                             }`}
                                           >
                                             {timeLabel}
