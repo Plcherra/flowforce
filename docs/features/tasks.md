@@ -525,7 +525,7 @@ Prove: Unit test `src/features/tasks/utils/taskCreateAccess.test.ts`, run with `
 
 ### Phase 22 — Insert a Checklist task per list issue
 
-- [ ] Insert the phase 8 drafts once each, for the person on that shift.
+- [x] Insert the phase 8 drafts once each, for the person on that shift.
 
 Rules:
 
@@ -913,3 +913,19 @@ Phone steps for Pedro:
 2. All, To Do, In Progress, In Review, Blocked, Done, and Cancelled should sit side by side in the View row.
 3. There should be no More button, and no empty stretch with one button at the far end.
 4. Hover All. The hint should still say Every task on this page, once.
+
+### 2026-10-22 — Phase 22 Insert a Checklist task per list issue
+
+Shipped: Submitting a form inserts one Checklist task for each required item left blank and each item flagged on the review step. The Tasks page also inserts a missed-form task when a shift has ended and its `requirements.list_form_ids` form was not submitted by the person on that shift during the shift. The same issue key is not inserted twice. A failed task insert leaves the form submission saved.
+
+Proven: Unit test `src/features/tasks/utils/listIssueInsert.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the two field issues and a second pass that inserts nothing. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open a form. On the last step, flag one item as an issue and submit.
+2. Open Tasks. That flag should be its own Checklist task assigned to you. A required item left blank should be another Checklist task.
+3. Submit the same result again. It should not add a second copy of those tasks.
+4. To try a missed list, put the form id in the shift's requirements under `list_form_ids`, schedule yourself, let the shift end, and open Tasks. The missed list should be a Checklist task for you.
+
+Blockers: none for this phase. No migration.
+
+Questions: none.
