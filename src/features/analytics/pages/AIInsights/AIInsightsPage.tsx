@@ -417,7 +417,7 @@ export function AIInsightsPage() {
       </div>
 
       <Suspense fallback={<PanelFallback />}>
-        <AIChatAssistant className="w-full" />
+        <AIChatAssistant />
       </Suspense>
     </div>
   );

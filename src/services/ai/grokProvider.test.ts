@@ -282,6 +282,8 @@ export async function runGrokProviderTests() {
   ]) {
     assert.equal(cors.includes(origin), true);
   }
+  assert.equal(cors.includes("apikey"), true);
+  assert.equal(cors.includes("api_key"), false);
   assert.equal(
     read("supabase/functions/ai-scheduling-assistant/index.ts").includes("edgeCorsHeaders"),
     true,

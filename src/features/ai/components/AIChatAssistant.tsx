@@ -27,12 +27,10 @@ interface Message {
 
 interface AIChatAssistantProps {
   context?: string;
-  className?: string;
 }
 
 export default function AIChatAssistant({
   context,
-  className = "",
 }: AIChatAssistantProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
@@ -115,13 +113,17 @@ export default function AIChatAssistant({
     [handleSendMessage],
   );
 
+  const shell =
+    "above-bottom-icon-nav fixed z-50 max-h-[calc(100dvh-var(--bottom-nav-stack,5.85rem)-0.75rem)]";
+
   if (!isOpen) {
     return (
-      <div className={`above-bottom-icon-nav fixed right-6 z-50 ${className}`}>
+      <div className={`${shell} right-4 md:right-6`}>
         <Button
           onClick={() => setIsOpen(true)}
           className="rounded-full w-14 h-14 shadow-lg bg-blue-600 hover:bg-blue-700"
           size="icon"
+          aria-label="Open FlowForce AI"
         >
           <MessageCircle className="h-6 w-6" />
         </Button>
@@ -130,10 +132,12 @@ export default function AIChatAssistant({
   }
 
   return (
-    <div className={`above-bottom-icon-nav fixed right-6 z-50 ${className}`}>
-      <Card
-        className={`w-96 shadow-2xl ${isMinimized ? "h-auto" : "h-[500px]"} flex flex-col`}
-      >
+    <div
+      className={`${shell} inset-x-3 flex w-auto flex-col md:inset-x-auto md:right-6 md:w-96 ${
+        isMinimized ? "h-auto" : "h-[min(32rem,calc(100dvh-var(--bottom-nav-stack,5.85rem)-0.75rem))]"
+      }`}
+    >
+      <Card className="flex h-full min-h-0 w-full flex-col overflow-hidden shadow-2xl">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -164,8 +168,8 @@ export default function AIChatAssistant({
         </CardHeader>
 
         {!isMinimized && (
-          <CardContent className="flex-1 flex flex-col gap-4 p-4">
-            <ScrollArea className="flex-1 pr-4" aria-live="polite">
+          <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
+            <ScrollArea className="min-h-0 flex-1 pr-3" aria-live="polite">
               <div
                 className="space-y-4"
                 role="log"
@@ -244,13 +248,13 @@ export default function AIChatAssistant({
             </ScrollArea>
 
             {errorMessage && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="shrink-0">
                 <AlertTitle>AI assistant unavailable</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
