@@ -1,4 +1,5 @@
 import React, { ComponentType } from "react";
+import { useTranslation } from "react-i18next";
 import { useCan } from "@/hooks/useCan";
 import { type PermissionKey } from "@/hooks/useUserPermissions";
 
@@ -155,6 +156,7 @@ export function RouteGuard({
   fallbackComponent: FallbackComponent,
   children,
 }: RouteGuardProps) {
+  const { t } = useTranslation();
   const { can, isLoading } = useCan();
 
   if (isLoading) {
@@ -178,11 +180,9 @@ export function RouteGuard({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-foreground mb-2">
-            Access Denied
+            {t("common.accessDenied")}
           </h2>
-          <p className="text-muted-foreground">
-            You don&apos;t have permission to access this page.
-          </p>
+          <p className="text-muted-foreground">{t("common.noPagePermission")}</p>
         </div>
       </div>
     );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "@/lib/router-adapter";
@@ -11,6 +12,7 @@ export function BackButton({
   className = "",
   fallbackHref = "/",
 }: BackButtonProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -29,7 +31,7 @@ export function BackButton({
       className={`text-muted-foreground hover:text-foreground hover:bg-muted ${className}`}
     >
       <ArrowLeft className="h-4 w-4 mr-2" />
-      Back
+      {t("common.back")}
     </Button>
   );
 }

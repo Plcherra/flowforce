@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ function FeatureErrorFallback({
   icon,
   returnPath,
 }: FeatureErrorFallbackProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleReturn = () => {
@@ -42,10 +44,13 @@ function FeatureErrorFallback({
           <div className="mb-4 flex justify-center text-destructive">
             {icon}
           </div>
-          <CardTitle className="text-xl">{featureName} Error</CardTitle>
+          <CardTitle className="text-xl">
+            {t("common.featureErrorTitle", { feature: featureName })}
+          </CardTitle>
           <CardDescription>
-            Something went wrong in the {featureName.toLowerCase()} workspace.
-            You can try again or return to the dashboard.
+            {t("common.featureWorkspaceError", {
+              feature: featureName.toLowerCase(),
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -57,10 +62,10 @@ function FeatureErrorFallback({
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button onClick={resetErrorBoundary} className="flex-1">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              {t("common.tryAgain")}
             </Button>
             <Button variant="outline" onClick={handleReturn} className="flex-1">
-              Return to Dashboard
+              {t("common.returnToDashboard")}
             </Button>
           </div>
         </CardContent>
@@ -70,10 +75,11 @@ function FeatureErrorFallback({
 }
 
 export function MessagesErrorFallback(props: ErrorBoundaryRenderProps) {
+  const { t } = useTranslation();
   return (
     <FeatureErrorFallback
       {...props}
-      featureName="Messages"
+      featureName={t("common.messages")}
       icon={<MessageCircle className="h-12 w-12" />}
       returnPath="/app/dashboard"
     />
@@ -81,10 +87,11 @@ export function MessagesErrorFallback(props: ErrorBoundaryRenderProps) {
 }
 
 export function SchedulingErrorFallback(props: ErrorBoundaryRenderProps) {
+  const { t } = useTranslation();
   return (
     <FeatureErrorFallback
       {...props}
-      featureName="Scheduling"
+      featureName={t("common.scheduling")}
       icon={<Calendar className="h-12 w-12" />}
       returnPath="/app/dashboard"
     />
@@ -92,10 +99,11 @@ export function SchedulingErrorFallback(props: ErrorBoundaryRenderProps) {
 }
 
 export function FormsErrorFallback(props: ErrorBoundaryRenderProps) {
+  const { t } = useTranslation();
   return (
     <FeatureErrorFallback
       {...props}
-      featureName="Forms Builder"
+      featureName={t("common.formsBuilder")}
       icon={<FileText className="h-12 w-12" />}
       returnPath="/app/forms"
     />

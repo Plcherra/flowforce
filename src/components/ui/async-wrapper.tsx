@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { LoadingSpinner, PageLoading } from "./loading-states";
 import {
   Card,
@@ -34,16 +35,22 @@ export function AsyncWrapper({
   errorComponent,
   emptyState,
   isEmpty = false,
-  loadingText = "Loading...",
-  errorTitle = "Something went wrong",
-  errorDescription = "An error occurred while loading the data.",
+  loadingText,
+  errorTitle,
+  errorDescription,
 }: AsyncWrapperProps) {
+  const { t } = useTranslation();
+  const resolvedLoadingText = loadingText ?? t("common.loading");
+  const resolvedErrorTitle = errorTitle ?? t("common.somethingWentWrong");
+  const resolvedErrorDescription =
+    errorDescription ?? t("common.loadingDataError");
+
   // Loading state
   if (isLoading) {
     if (loadingComponent) {
       return <>{loadingComponent}</>;
     }
-    return <LoadingSpinner text={loadingText} className="py-8" />;
+    return <LoadingSpinner text={resolvedLoadingText} className="py-8" />;
   }
 
   // Error state
@@ -60,8 +67,8 @@ export function AsyncWrapper({
           <div className="flex justify-center mb-2">
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
-          <CardTitle className="text-lg">{errorTitle}</CardTitle>
-          <CardDescription>{errorDescription}</CardDescription>
+          <CardTitle className="text-lg">{resolvedErrorTitle}</CardTitle>
+          <CardDescription>{resolvedErrorDescription}</CardDescription>
           {errorMessage && (
             <p className="text-sm text-destructive mt-2">{errorMessage}</p>
           )}
@@ -70,7 +77,7 @@ export function AsyncWrapper({
           <CardContent className="text-center">
             <Button onClick={onRetry} variant="outline">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              {t("common.tryAgain")}
             </Button>
           </CardContent>
         )}
@@ -94,9 +101,9 @@ export function DataListWrapper({
   error,
   onRetry,
   data,
-  emptyTitle = "No data found",
-  emptyDescription = "There is no data to display at the moment.",
-  loadingText = "Loading data...",
+  emptyTitle,
+  emptyDescription,
+  loadingText,
 }: {
   children: ReactNode;
   isLoading: boolean;
@@ -107,17 +114,22 @@ export function DataListWrapper({
   emptyDescription?: string;
   loadingText?: string;
 }) {
+  const { t } = useTranslation();
   const isEmpty = !data || data.length === 0;
+  const resolvedEmptyTitle = emptyTitle ?? t("common.noDataFound");
+  const resolvedEmptyDescription =
+    emptyDescription ?? t("common.noDataToDisplay");
+  const resolvedLoadingText = loadingText ?? t("common.loadingData");
 
   const emptyState = (
     <Card className="w-full">
       <CardContent className="text-center py-8">
-        <h3 className="text-lg font-semibold mb-2">{emptyTitle}</h3>
-        <p className="text-muted-foreground mb-4">{emptyDescription}</p>
+        <h3 className="text-lg font-semibold mb-2">{resolvedEmptyTitle}</h3>
+        <p className="text-muted-foreground mb-4">{resolvedEmptyDescription}</p>
         {onRetry && (
           <Button onClick={onRetry} variant="outline">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh
+            {t("common.refresh")}
           </Button>
         )}
       </CardContent>
@@ -131,7 +143,7 @@ export function DataListWrapper({
       onRetry={onRetry}
       isEmpty={isEmpty}
       emptyState={emptyState}
-      loadingText={loadingText}
+      loadingText={resolvedLoadingText}
     >
       {children}
     </AsyncWrapper>
@@ -144,7 +156,7 @@ export function PageAsyncWrapper({
   isLoading,
   error,
   onRetry,
-  loadingTitle = "Loading...",
+  loadingTitle,
   loadingDescription,
 }: {
   children: ReactNode;
@@ -154,8 +166,12 @@ export function PageAsyncWrapper({
   loadingTitle?: string;
   loadingDescription?: string;
 }) {
+  const { t } = useTranslation();
   const loadingComponent = (
-    <PageLoading title={loadingTitle} description={loadingDescription} />
+    <PageLoading
+      title={loadingTitle ?? t("common.loading")}
+      description={loadingDescription}
+    />
   );
 
   return (

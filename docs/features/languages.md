@@ -191,7 +191,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 7 — Shared component strings
 
-- [ ] Move shared component chrome into the six locales.
+- [x] Move shared component chrome into the six locales.
 
 Rules:
 
@@ -850,6 +850,22 @@ Phone steps for Pedro:
 2. Set your language to Português. The bottom nav and the notifications bell should use Portuguese labels. The name FlowForce stays FlowForce.
 3. Open search and type a page name. The empty result should be Portuguese.
 4. Switch back to English.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 7 Shared component strings
+
+Shipped: Shared chrome under `src/components` now uses `useTranslation` and the `common` namespace. The same strings are in en, es, pt, fr, it, and de. Buttons, loading text, dialog and sheet close labels, pagination, the sidebar toggle, breadcrumbs, and the shared error screens follow the viewer's language. The directory is off the hard-coded baseline. Type intersections that the checker read as text are named types so the code stays code.
+
+Proven: `npm run check:i18n` printed 1247 keys for each locale and `hard-coded strings 3806`, then exited 0. `npm run typecheck:src` passed. ESLint passed on the component files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk on a phone.
+2. Set your language to Español on Settings, then Region. Open a dialog. The close control for a screen reader should be "Cerrar". The sidebar control should be "Alternar barra lateral".
+3. Open a list that has pages, such as employees or inventory. Previous and Next should be "Anterior" and "Siguiente".
+4. Switch to Deutsch and use a Back button. It should say "Zurück". Switch back to English. Back, Close, and Previous should read as they did before this deploy.
 
 Blockers: none. No migration.
 

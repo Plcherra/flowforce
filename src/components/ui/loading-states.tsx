@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Loader2, RefreshCw } from "lucide-react";
@@ -38,18 +39,21 @@ export function LoadingSpinner({
 
 // Page-level loading state
 export function PageLoading({
-  title = "Loading...",
+  title,
   description,
 }: {
   title?: string;
   description?: string;
 }) {
+  const { t } = useTranslation();
+  const heading = title ?? t("common.loading");
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <LoadingSpinner size="lg" />
-          <h2 className="text-lg font-semibold mt-4">{title}</h2>
+          <h2 className="text-lg font-semibold mt-4">{heading}</h2>
           {description && (
             <p className="text-sm text-muted-foreground">{description}</p>
           )}
@@ -159,13 +163,16 @@ export function StatsLoadingSkeleton() {
 export function LoadingButton({
   children,
   isLoading,
-  loadingText = "Loading...",
+  loadingText,
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   isLoading: boolean;
   loadingText?: string;
 }) {
+  const { t } = useTranslation();
+  const label = loadingText ?? t("common.loading");
+
   return (
     <button
       className={cn("inline-flex items-center", className)}
@@ -173,7 +180,7 @@ export function LoadingButton({
       {...props}
     >
       {isLoading && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-      {isLoading ? loadingText : children}
+      {isLoading ? label : children}
     </button>
   );
 }
@@ -200,11 +207,12 @@ export function ListLoadingSkeleton({ count = 5 }: { count?: number }) {
 }
 
 // Inline loading with text
-export function InlineLoading({ text = "Loading..." }: { text?: string }) {
+export function InlineLoading({ text }: { text?: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 text-sm text-muted-foreground">
       <Loader2 className="h-4 w-4 animate-spin" />
-      <span>{text}</span>
+      <span>{text ?? t("common.loading")}</span>
     </div>
   );
 }
@@ -212,14 +220,16 @@ export function InlineLoading({ text = "Loading..." }: { text?: string }) {
 // Full screen loading overlay
 export function LoadingOverlay({
   isVisible,
-  text = "Loading...",
+  text,
   description,
 }: {
   isVisible: boolean;
   text?: string;
   description?: string;
 }) {
+  const { t } = useTranslation();
   if (!isVisible) return null;
+  const label = text ?? t("common.loading");
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -228,7 +238,7 @@ export function LoadingOverlay({
           <div className="flex flex-col items-center text-center space-y-4">
             <LoadingSpinner size="lg" />
             <div>
-              <h3 className="font-semibold">{text}</h3>
+              <h3 className="font-semibold">{label}</h3>
               {description && (
                 <p className="text-sm text-muted-foreground mt-1">
                   {description}

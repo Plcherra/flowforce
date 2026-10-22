@@ -1,4 +1,5 @@
 import React, { Component, ComponentType, ErrorInfo, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@/lib/router-adapter";
 import {
   Card,
@@ -120,6 +121,7 @@ function DefaultErrorFallback({
   resetErrorBoundary,
   showDetails = false,
 }: DefaultFallbackProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleGoHome = () => {
@@ -133,26 +135,24 @@ function DefaultErrorFallback({
           <div className="mb-4 flex justify-center">
             <AlertTriangle className="h-12 w-12 text-destructive" />
           </div>
-          <CardTitle className="text-xl">Something went wrong</CardTitle>
-          <CardDescription>
-            An unexpected error occurred. Please try again.
-          </CardDescription>
+          <CardTitle className="text-xl">{t("common.somethingWentWrong")}</CardTitle>
+          <CardDescription>{t("common.unexpectedError")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button onClick={resetErrorBoundary} className="flex-1">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              {t("common.tryAgain")}
             </Button>
             <Button variant="outline" onClick={handleGoHome} className="flex-1">
               <Home className="mr-2 h-4 w-4" />
-              Go Home
+              {t("common.goHome")}
             </Button>
           </div>
           {showDetails && (
             <details className="mt-4">
               <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
-                Error Details
+                {t("common.errorDetails")}
               </summary>
               <div className="mt-2 space-y-2 rounded-md bg-muted p-3">
                 <p className="text-sm font-mono text-destructive">
