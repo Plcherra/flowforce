@@ -9,6 +9,7 @@ import {
   PERMISSION_KEYS,
   type PermissionKey,
 } from "@/lib/permissions/registry";
+import { isTaskCreatePermissionKey } from "./taskCreateKeys";
 
 export const OPERATOR_VERBS = ["see", "edit", "create_delete"] as const;
 
@@ -99,7 +100,10 @@ export function grantableVerbKeys(
   verb: OperatorVerb,
   level: ProductLevel,
 ): PermissionKey[] {
-  return area.verbs[verb].filter((key) => permissionAllowedAtLevel(level, key));
+  return area.verbs[verb].filter(
+    (key) =>
+      !isTaskCreatePermissionKey(key) && permissionAllowedAtLevel(level, key),
+  );
 }
 
 export function isVerbAvailable(

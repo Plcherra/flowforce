@@ -18,6 +18,13 @@ import { useProfile } from "@/hooks/useProfile";
 import { useUserPermissionOverrides } from "@/hooks/useUserPermissions";
 import { saveEmployeeAccess } from "@/features/employees/utils/saveEmployeeAccess";
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
+import { TaskCreateAccessSection } from "./TaskCreateAccessSection";
+import {
+  diffsForTaskCreateLevel,
+  retainTaskCreateDiffs,
+} from "@/features/tasks/utils/taskCreateAccess";
+import type { TaskCreateKind } from "@/features/roles/constants/taskCreateKeys";
+import type { TaskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import {
   applyPermissionDiffsToClassPermissions,
   operatorVerbsToPermissionDiffs,
@@ -168,7 +175,16 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
       ? Array.from(new Set([...current, selection]))
       : current.filter((key) => key !== selection);
 
-    setDiffs(operatorVerbsToPermissionDiffs(level, classPermissions, next));
+    setDiffs({
+      ...operatorVerbsToPermissionDiffs(level, classPermissions, next),
+      ...retainTaskCreateDiffs(diffs),
+    });
+    setHasChanges(true);
+  };
+
+  const handleTaskCreateChange = (kind: TaskCreateKind, nextLevel: TaskCreateLevel) => {
+    if (!canEditAccess) return;
+    setDiffs(diffsForTaskCreateLevel(classPermissions, diffs, kind, nextLevel));
     setHasChanges(true);
   };
 
@@ -271,6 +287,14 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
           <CardTitle>Access</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {selectedRole ? (
+            <TaskCreateAccessSection
+              classPermissions={classPermissions}
+              diffs={diffs}
+              disabled={!canEditAccess}
+              onChange={handleTaskCreateChange}
+            />
+          ) : null}
           {selectedRole ? (
             <OperatorAccessGrid
               level={level}

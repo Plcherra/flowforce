@@ -27,6 +27,7 @@ import {
 } from "@/features/tasks/utils/readinessFilters";
 import { useCan } from "@/hooks/useCan";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
+import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
 import { isTaskListedForViewer } from "@/features/tasks/utils/taskSchedule";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
@@ -62,11 +63,12 @@ type TaskListItem = TaskWithRelations & { id: string };
 
 export default function Tasks() {
   const isMobile = useIsMobile();
-  const { can, isLoading: permissionsLoading } = useCan();
+  const { can, getSource, isLoading: permissionsLoading } = useCan();
   const customCreateLevel = taskCreateLevel({
     createOthers: can("tasks.custom.create_others"),
     createSelf: can("tasks.custom.create_self"),
     legacyEdit: can("editTasks"),
+    keysSet: taskCreateKeysAreSet("custom", getSource),
   });
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
   const { user } = useAuth();

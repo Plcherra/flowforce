@@ -38,4 +38,13 @@ export function runTaskCreateLevelTests() {
     taskCreateLevel({ createOthers: true, createSelf: true }),
     "others",
   );
+  assert.equal(
+    taskCreateLevel({
+      createOthers: false,
+      createSelf: false,
+      legacyEdit: true,
+      keysSet: true,
+    }),
+    "none",
+  );
 }

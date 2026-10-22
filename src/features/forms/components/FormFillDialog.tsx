@@ -30,6 +30,7 @@ import {
 import { HandoverNotesField } from "./HandoverNotesField";
 import { handoverTaskDraft } from "../utils/handoverTask";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
+import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
 import type {
   FormFieldDataLocal,
   ValidationRules,
@@ -55,11 +56,12 @@ export default function FormFillDialog({
   const { createTask } = useTasks();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { can, isLoading: permissionsLoading } = useCan();
+  const { can, getSource, isLoading: permissionsLoading } = useCan();
   const checklistLevel = taskCreateLevel({
     createOthers: can("tasks.checklist.create_others"),
     createSelf: can("tasks.checklist.create_self"),
     legacyEdit: can("editTasks"),
+    keysSet: taskCreateKeysAreSet("checklist", getSource),
   });
   const canMakeHandoverTask = permissionsLoading || checklistLevel !== "none";
 

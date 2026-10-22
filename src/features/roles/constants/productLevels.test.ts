@@ -74,6 +74,13 @@ export function runProductLevelTests() {
     "schedule.grant",
     "schedule.reminders.assign",
     "schedule.reminders.grant_deactivate",
+  ] as const) {
+    assert.equal(permissionAllowedAtLevel("owner", key), true);
+    assert.equal(permissionAllowedAtLevel("admin", key), true);
+    assert.equal(permissionAllowedAtLevel("manager", key), true);
+    assert.equal(permissionAllowedAtLevel("staff", key), false);
+  }
+  for (const key of [
     "tasks.shift.create_self",
     "tasks.shift.create_others",
     "tasks.checklist.create_self",
@@ -84,7 +91,7 @@ export function runProductLevelTests() {
     assert.equal(permissionAllowedAtLevel("owner", key), true);
     assert.equal(permissionAllowedAtLevel("admin", key), true);
     assert.equal(permissionAllowedAtLevel("manager", key), true);
-    assert.equal(permissionAllowedAtLevel("staff", key), false);
+    assert.equal(permissionAllowedAtLevel("staff", key), true);
   }
   assert.equal(permissionAllowedAtLevel("staff", "approveTimeOff"), false);
   assert.equal(permissionAllowedAtLevel("staff", "billing.manage"), false);

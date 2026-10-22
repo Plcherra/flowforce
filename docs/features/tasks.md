@@ -434,7 +434,7 @@ Prove: Unit test `src/features/scheduling/utils/tomorrowShift.test.ts`. Run it w
 
 ### Phase 21 — Task levels on the employee card
 
-- [ ] Edit None, For myself, and For others on the employee card.
+- [x] Edit None, For myself, and For others on the employee card.
 
 Rules:
 
@@ -737,6 +737,23 @@ Proven: Unit test `src/features/scheduling/utils/tomorrowShift.test.ts`, run wit
 Phone steps for Pedro:
 1. This phase does not change a screen yet. The form's Make a task for tomorrow still assigns the task to the person who wrote the note.
 2. The next time a form is attached to a closing shift, that task should go to whoever is scheduled tomorrow on that shift.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 21 Task levels on the employee card
+
+Shipped: The employee directory card has a Tasks section. Shift, Checklist, and Custom are each None, For myself, or For others. Saving one type does not change the others, and it does not turn Run lists Edit off. A saved None stays none even when the person can still edit tasks. A person whose role never received the new keys still falls back to that edit permission. A staff person can be granted one of the keys. Their class still starts without them.
+
+Proven: Unit test `src/features/tasks/utils/taskCreateAccess.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers Checklist as For myself while Shift and Custom stay For others, and a staff allow for Checklist. It passed. `npm run test:product-roles` passed. `npm run check:roles` passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as an owner. Open the employee directory and open one person's card, then Access.
+2. A Tasks section should sit above the access boxes, with Shift, Checklist, and Custom.
+3. Set Checklist to For myself and save. Shift and Custom should stay as they were.
+4. Set Checklist to None and save. Open a form as that person. Additional information should stay, and Make a task for tomorrow should be hidden.
+5. Set Custom to None and save. The Tasks page should hide the + button for that person.
 
 Blockers: none for this phase.
 
