@@ -144,7 +144,6 @@ export function buildGrokChatRequest(input: {
     model: resolveGrokModel(input.model),
     messages: input.messages,
     temperature: input.temperature ?? 0.7,
-    search_parameters: { mode: "off" },
   };
 
   if (typeof input.maxCompletionTokens === "number") {
@@ -228,8 +227,15 @@ export function parseModelJson(text: string) {
 
 async function readErrorMessage(response: Response) {
   try {
-    const payload = (await response.json()) as { error?: { message?: string } };
-    const message = payload.error?.message?.trim();
+    const payload = (await response.json()) as {
+      error?: { message?: string } | string;
+      message?: string;
+    };
+    const nested = payload.error;
+    const message =
+      typeof nested === "string"
+        ? nested.trim()
+        : nested?.message?.trim() || payload.message?.trim();
     if (message) return message.slice(0, 300);
   } catch {
     // The provider returned a non-JSON error body.

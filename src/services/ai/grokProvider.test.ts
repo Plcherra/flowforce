@@ -99,14 +99,14 @@ export async function runGrokProviderTests() {
       },
     ],
   }) as {
-    search_parameters: { mode: string };
+    search_parameters?: { mode: string };
     response_format: { type: string };
     tools: unknown[];
     reasoning_effort: string;
     max_completion_tokens: number;
     max_tokens?: number;
   };
-  assert.equal(request.search_parameters.mode, "off");
+  assert.equal(request.search_parameters, undefined);
   assert.equal(request.response_format.type, "json_object");
   assert.equal(request.tools.length, 1);
   assert.equal(request.reasoning_effort, "low");
@@ -197,7 +197,7 @@ export async function runGrokProviderTests() {
       assert.equal(headers.get("Authorization"), "Bearer test-key");
       const body = JSON.parse(String(init?.body));
       assert.equal(body.model, "grok-4.3");
-      assert.equal(body.search_parameters.mode, "off");
+      assert.equal(body.search_parameters, undefined);
       return new Response(
         JSON.stringify({
           model: "grok-4.3",
@@ -211,6 +211,29 @@ export async function runGrokProviderTests() {
   assert.equal(fetched, true);
   assert.equal(completion.content, "Coverage is short on Friday.");
   assert.equal(completion.inputTokens, 12);
+
+  await assert.rejects(
+    () =>
+      createGrokChatCompletion({
+        apiKey: "test-key",
+        model: "grok-4.3",
+        messages: [{ role: "user", content: "Hello" }],
+        maxRetries: 0,
+        fetchImpl: async () =>
+          new Response(
+            JSON.stringify({
+              error: "Live search is deprecated. Please switch to the Agent Tools API.",
+            }),
+            { status: 410 },
+          ),
+      }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /Live search is deprecated/);
+      assert.equal(error.message.includes("test-key"), false);
+      return true;
+    },
+  );
 
   const metered = await runMeteredGrokChat({
     client: open.client,
