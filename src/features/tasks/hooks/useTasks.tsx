@@ -225,7 +225,12 @@ export function useTasks() {
     if (!user) return { data: null, error: "User not authenticated" };
 
     try {
-      const data = await insertTaskComment(taskId, user.id, comment);
+      const data = await insertTaskComment(
+        taskId,
+        user.id,
+        comment,
+        companyId ? { companyId, sourceLocale } : undefined,
+      );
       return { data, error: null };
     } catch (error) {
       logger.error("Error adding comment:", { error, tags: ["error"] });

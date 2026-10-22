@@ -28,6 +28,9 @@ export const TRANSLATABLE_FIELDS: Record<
     title: {},
     description: {},
   },
+  task_comments: {
+    comment: {},
+  },
 };
 
 export function translatableFieldRule(

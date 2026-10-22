@@ -62,6 +62,8 @@ import { logger } from "@/utils/logger";
 import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
 import { readTaskKind, TASK_KIND_LABELS } from "@/features/tasks/utils/taskKind";
 import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
+import { TaskCommentBody } from "@/features/tasks/components/TaskCommentBody";
+import { useTaskCommentTranslations } from "@/features/tasks/hooks/useTaskCommentTranslations";
 import type { TaskContentTranslation } from "@/features/tasks/taskContentFields";
 
 type ButtonVariant = "default" | "secondary" | "outline";
@@ -157,6 +159,7 @@ export function TaskDetailsDialog({
   const [deletingTask, setDeletingTask] = useState(false);
   const { comments, loadingComments, addingComment, submitComment } =
     useTaskComments(currentTask, open);
+  const commentTranslations = useTaskCommentTranslations(comments);
   const display = useFormContentDisplay({
     recordId: currentTask?.id,
     title: currentTask?.title ?? "",
@@ -956,7 +959,10 @@ export function TaskDetailsDialog({
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <p className="text-sm">{comment.comment}</p>
+                      <TaskCommentBody
+                        comment={comment.comment}
+                        translation={commentTranslations.get(comment.id) ?? null}
+                      />
                     </CardContent>
                   </Card>
                 ))

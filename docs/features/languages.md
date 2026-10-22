@@ -608,7 +608,7 @@ Prove: Unit test the two field paths and an edit that changes the hash. Run it w
 
 ### Phase 34 — Task comments
 
-- [ ] Translate a task comment.
+- [x] Translate a task comment.
 
 Rules:
 
@@ -1276,6 +1276,23 @@ Phone steps for Pedro:
 3. Set your language to Español and reload Tasks. The card title and description should be Spanish, with Traducido de English and a control to see the original.
 4. Open the task. The dialog title and description should be Spanish, with the same line. See the original, then the translation again. A comment stays in the language it was written.
 5. Set the language back to English. The list and the dialog should show the English title and description you typed, with no translated-from line.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 34 Task comments
+
+Shipped: A task comment keeps the words that were typed. The cache path is `comment` on `task_comments`. The save returns before the model runs. The task dialog shows the translation, with one see-original line when the viewer's language differs. The author's language has no line.
+
+Proven: `src/features/tasks/taskCommentTranslation.test.ts` passed through the jiti runner. The field path is `comment`. A Spanish viewer sees the translation and `Traducido de English. Ver original`. An English viewer sees the original sentence and no line. A second read does not call the model again. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open a task and add an English comment. The comment should appear without waiting.
+3. Set your language to Español and open the same task. The comment should be Spanish, with Traducido de English and a control to see the original.
+4. See the original, then the translation again.
+5. Set the language back to English and open the task. The comment should be the English sentence you typed, with no translated-from line.
 
 Blockers: none. No new migration.
 

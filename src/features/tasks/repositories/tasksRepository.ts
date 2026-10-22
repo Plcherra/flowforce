@@ -8,6 +8,7 @@ import type {
 } from "@/integrations/supabase/public-types";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { retrySupabaseQuery } from "@/utils/retry";
+import { scheduleTaskCommentTranslation } from "@/features/tasks/scheduleTaskComment";
 import { scheduleTaskContentTranslation } from "@/features/tasks/scheduleTaskContent";
 import {
   taskContentTouches,
@@ -323,6 +324,7 @@ export async function insertTaskComment(
   taskId: string,
   userId: string,
   comment: string,
+  source?: { companyId: string; sourceLocale: AppLanguage },
 ): Promise<TaskCommentRow> {
   const { data, error } = await supabase
     .from("task_comments")
@@ -338,7 +340,16 @@ export async function insertTaskComment(
     throw error;
   }
 
-  return taskCommentSchema.parse(data);
+  const created = taskCommentSchema.parse(data);
+  if (source && comment.trim()) {
+    scheduleTaskCommentTranslation({
+      companyId: source.companyId,
+      sourceId: created.id,
+      sourceLocale: source.sourceLocale,
+      comment,
+    });
+  }
+  return created;
 }
 
 export async function fetchTaskComments(
