@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -92,6 +93,7 @@ export default function InventoryItemForm({
   open: controlledOpen,
   onOpenChange,
 }: InventoryItemFormProps) {
+  const { t } = useTranslation();
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
@@ -635,8 +637,7 @@ export default function InventoryItemForm({
           {children || (
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
+              {t("inventory.addItem")} </Button>
           )}
         </DialogTrigger>
       )}
@@ -646,13 +647,12 @@ export default function InventoryItemForm({
             {editItem ? "Edit Inventory Item" : "Add New Inventory Item"}
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Click on field labels to enable/disable them
-          </p>
+            {t("inventory.clickOnFieldLabelsToEnableDisableThem")} </p>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("schedule.name")}</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -670,8 +670,7 @@ export default function InventoryItemForm({
                   setFieldConfig({ ...fieldConfig, sku: !fieldConfig.sku })
                 }
               >
-                SKU
-              </ClickableLabel>
+                {t("inventory.sku2")} </ClickableLabel>
               {fieldConfig.sku && (
                 <Input
                   id="sku"
@@ -693,8 +692,7 @@ export default function InventoryItemForm({
                   })
                 }
               >
-                Barcode
-              </ClickableLabel>
+                {t("inventory.barcode")} </ClickableLabel>
               {fieldConfig.barcode && (
                 <Input
                   id="barcode"
@@ -702,7 +700,7 @@ export default function InventoryItemForm({
                   onChange={(e) =>
                     setFormData({ ...formData, barcode: e.target.value })
                   }
-                  placeholder="UPC / EAN / internal code"
+                  placeholder={t("inventory.upcEanInternalCode")}
                 />
               )}
             </div>
@@ -719,8 +717,7 @@ export default function InventoryItemForm({
                 })
               }
             >
-              Description
-            </ClickableLabel>
+              {t("tasks.description")} </ClickableLabel>
             {fieldConfig.description && (
               <Textarea
                 id="description"
@@ -744,8 +741,7 @@ export default function InventoryItemForm({
                 })
               }
             >
-              Supplier
-            </ClickableLabel>
+              {t("inventory.supplier")} </ClickableLabel>
             {fieldConfig.supplier && (
               <div className="relative" ref={supplierRef}>
                 <div className="relative">
@@ -768,7 +764,7 @@ export default function InventoryItemForm({
                       }
                     }}
                     onFocus={() => setShowSupplierSuggestions(true)}
-                    placeholder="Enter or select supplier"
+                    placeholder={t("inventory.enterOrSelectSupplier")}
                     className="pr-10 bg-background border z-50"
                   />
                   {supplierInput && !supplierExists && (
@@ -803,7 +799,7 @@ export default function InventoryItemForm({
           </div>
 
           <div className="relative" ref={categoryRef}>
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">{t("dashboard.category")}</Label>
             <div className="relative">
               <Input
                 id="category"
@@ -827,7 +823,7 @@ export default function InventoryItemForm({
                   }
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                placeholder="Enter or select category"
+                placeholder={t("inventory.enterOrSelectCategory")}
                 className="pr-10"
               />
               {categoryInput && !categoryExists && (
@@ -884,8 +880,7 @@ export default function InventoryItemForm({
                 })
               }
             >
-              Units Configuration
-            </ClickableLabel>
+              {t("inventory.unitsConfiguration")} </ClickableLabel>
             {fieldConfig.unitTypeSize && (
               <div className="mt-4 space-y-6">
                 {unitLevels.map((unit, index) => (
@@ -901,12 +896,11 @@ export default function InventoryItemForm({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-lg font-semibold text-foreground">
-                          Unit {index + 1}
+                          {t("schedule.unit")} {index + 1}
                         </span>
                         {index === 0 && (
                           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
-                            Base Unit
-                          </span>
+                            {t("inventory.baseUnit")} </span>
                         )}
                       </div>
                       {unitLevels.length > 1 && index > 0 && (
@@ -942,8 +936,7 @@ export default function InventoryItemForm({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
-                          Unit
-                        </Label>
+                          {t("schedule.unit")} </Label>
                         <Select
                           value={unit.unitid || ""}
                           onValueChange={(value) => {
@@ -962,7 +955,7 @@ export default function InventoryItemForm({
                           }}
                         >
                           <SelectTrigger className="h-10">
-                            <SelectValue placeholder="Select unit" />
+                            <SelectValue placeholder={t("inventory.selectUnit")} />
                           </SelectTrigger>
                           <SelectContent className="bg-background border z-50 max-h-56 overflow-auto">
                             {units?.map((availableUnit) => (
@@ -1013,7 +1006,7 @@ export default function InventoryItemForm({
 
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
-                          Cost per Unit{" "}
+                          {t("inventory.costPerUnit")}{" "}
                           {index > 0 &&
                             unit.conversion_factor &&
                             unitLevels[0].cost_per_unit && (
@@ -1095,8 +1088,7 @@ export default function InventoryItemForm({
                   className="w-full h-12 border-dashed border-2 hover:border-primary/50 hover:bg-primary/5 transition-colors"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Another Unit
-                </Button>
+                  {t("inventory.addAnotherUnit")} </Button>
               </div>
             )}
           </div>
@@ -1113,8 +1105,7 @@ export default function InventoryItemForm({
                   })
                 }
               >
-                Default Location
-              </ClickableLabel>
+                {t("inventory.defaultLocation")} </ClickableLabel>
               {fieldConfig.location && (
                 <div className="relative" ref={locationRef}>
                   <div className="relative">
@@ -1140,7 +1131,7 @@ export default function InventoryItemForm({
                         }
                       }}
                       onFocus={() => setShowLocationSuggestions(true)}
-                      placeholder="Enter or select location"
+                      placeholder={t("inventory.enterOrSelectLocation")}
                       className="pr-10"
                     />
                     {locationInput && !locationExists && (
@@ -1201,8 +1192,7 @@ export default function InventoryItemForm({
                   })
                 }
               >
-                Expiration Period
-              </ClickableLabel>
+                {t("inventory.expirationPeriod")} </ClickableLabel>
               {fieldConfig.shelfLife && (
                 <div className="relative">
                   <Input
@@ -1218,8 +1208,7 @@ export default function InventoryItemForm({
                     className="pr-12"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-                    day(s)
-                  </span>
+                    {t("inventory.dayS")} </span>
                 </div>
               )}
             </div>
@@ -1227,8 +1216,7 @@ export default function InventoryItemForm({
 
           <div>
             <Label className="text-sm font-medium text-muted-foreground">
-              Recipe Yield (optional)
-            </Label>
+              {t("inventory.recipeYieldOptional")} </Label>
             <div className="mt-2 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-center">
               <Input
                 id="recipe_yield_quantity"
@@ -1250,7 +1238,7 @@ export default function InventoryItemForm({
                 }
               >
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Select unit" />
+                  <SelectValue placeholder={t("inventory.selectUnit")} />
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50 max-h-56 overflow-auto">
                   {units?.map((availableUnit) => (
@@ -1262,8 +1250,7 @@ export default function InventoryItemForm({
               </Select>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Used to calculate cost per finished item when linking recipes.
-            </p>
+              {t("inventory.usedToCalculateCostPerFinishedItemWhenLinkingRecipes")} </p>
           </div>
 
           <div>
@@ -1277,12 +1264,11 @@ export default function InventoryItemForm({
                 })
               }
             >
-              Stock Levels
-            </ClickableLabel>
+              {t("inventory.stockLevels")} </ClickableLabel>
             {fieldConfig.stockLevels && (
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div>
-                  <Label htmlFor="min_stock_level">Minimum Stock Level</Label>
+                  <Label htmlFor="min_stock_level">{t("inventory.minimumStockLevel")}</Label>
                   <Input
                     id="min_stock_level"
                     type="number"
@@ -1296,7 +1282,7 @@ export default function InventoryItemForm({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="max_stock_level">Maximum Stock Level</Label>
+                  <Label htmlFor="max_stock_level">{t("inventory.maximumStockLevel")}</Label>
                   <Input
                     id="max_stock_level"
                     type="number"
@@ -1319,8 +1305,7 @@ export default function InventoryItemForm({
               variant="outline"
               onClick={() => setOpen(false)}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button
               type="submit"
               disabled={createItem.isPending || updateItem.isPending}

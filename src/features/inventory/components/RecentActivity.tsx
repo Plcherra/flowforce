@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { RecentActivity as RecentActivityType } from "@/features/inventory/hooks/useInventoryDashboard";
@@ -7,19 +8,18 @@ interface RecentActivityProps {
 }
 
 export function RecentActivity({ activities }: RecentActivityProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Recent Activity</CardTitle>
+        <CardTitle>{t("tasks.recentActivity")}</CardTitle>
         <Button variant="outline" size="sm">
-          View All
-        </Button>
+          {t("inventory.viewAll")} </Button>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">
-            No recent activity
-          </p>
+            {t("tasks.noRecentActivity")} </p>
         ) : (
           <div className="space-y-3">
             {activities.slice(0, 4).map((activity, index) => (

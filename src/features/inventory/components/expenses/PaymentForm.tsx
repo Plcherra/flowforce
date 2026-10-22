@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import { Plus } from "lucide-react";
 import { logger } from "@/utils/logger";
 
 export default function PaymentForm() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     payment_type: "",
@@ -78,17 +80,16 @@ export default function PaymentForm() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
-          New Payment
-        </Button>
+          {t("inventory.newPayment")} </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Payment</DialogTitle>
+          <DialogTitle>{t("inventory.createNewPayment")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="payment_type">Payment Type</Label>
+              <Label htmlFor="payment_type">{t("inventory.paymentType")}</Label>
               <Select
                 value={formData.payment_type}
                 onValueChange={(value) =>
@@ -96,20 +97,19 @@ export default function PaymentForm() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("messages.selectType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="wage">Employee Wage</SelectItem>
-                  <SelectItem value="vendor">Vendor Payment</SelectItem>
+                  <SelectItem value="wage">{t("inventory.employeeWage")}</SelectItem>
+                  <SelectItem value="vendor">{t("inventory.vendorPayment")}</SelectItem>
                   <SelectItem value="expense_reimbursement">
-                    Expense Reimbursement
-                  </SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                    {t("inventory.expenseReimbursement")} </SelectItem>
+                  <SelectItem value="other">{t("schedule.other")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="recipient_type">Recipient Type</Label>
+              <Label htmlFor="recipient_type">{t("inventory.recipientType")}</Label>
               <Select
                 value={formData.recipient_type}
                 onValueChange={(value) =>
@@ -117,19 +117,19 @@ export default function PaymentForm() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("messages.selectType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="employee">Employee</SelectItem>
-                  <SelectItem value="vendor">Vendor</SelectItem>
-                  <SelectItem value="contractor">Contractor</SelectItem>
+                  <SelectItem value="employee">{t("schedule.employee")}</SelectItem>
+                  <SelectItem value="vendor">{t("schedule.vendor")}</SelectItem>
+                  <SelectItem value="contractor">{t("inventory.contractor")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="recipient_name">Recipient Name</Label>
+            <Label htmlFor="recipient_name">{t("inventory.recipientName")}</Label>
             <Input
               id="recipient_name"
               value={formData.recipient_name}
@@ -142,7 +142,7 @@ export default function PaymentForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">{t("inventory.amount")}</Label>
               <Input
                 id="amount"
                 type="number"
@@ -155,7 +155,7 @@ export default function PaymentForm() {
               />
             </div>
             <div>
-              <Label htmlFor="payment_method">Payment Method</Label>
+              <Label htmlFor="payment_method">{t("inventory.paymentMethod")}</Label>
               <Select
                 value={formData.payment_method}
                 onValueChange={(value) =>
@@ -163,13 +163,13 @@ export default function PaymentForm() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select method" />
+                  <SelectValue placeholder={t("inventory.selectMethod")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                  <SelectItem value="check">Check</SelectItem>
-                  <SelectItem value="cash">Cash</SelectItem>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
+                  <SelectItem value="bank_transfer">{t("inventory.bankTransfer")}</SelectItem>
+                  <SelectItem value="check">{t("inventory.check")}</SelectItem>
+                  <SelectItem value="cash">{t("inventory.cash")}</SelectItem>
+                  <SelectItem value="credit_card">{t("inventory.creditCard")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -177,18 +177,18 @@ export default function PaymentForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="reference_number">Reference Number</Label>
+              <Label htmlFor="reference_number">{t("inventory.referenceNumber")}</Label>
               <Input
                 id="reference_number"
                 value={formData.reference_number}
                 onChange={(e) =>
                   setFormData({ ...formData, reference_number: e.target.value })
                 }
-                placeholder="Invoice #, PO #, etc."
+                placeholder={t("inventory.invoicePoEtc")}
               />
             </div>
             <div>
-              <Label htmlFor="due_date">Due Date</Label>
+              <Label htmlFor="due_date">{t("forms.dueDate")}</Label>
               <Input
                 id="due_date"
                 type="date"
@@ -201,7 +201,7 @@ export default function PaymentForm() {
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Input
               id="description"
               value={formData.description}
@@ -213,7 +213,7 @@ export default function PaymentForm() {
           </div>
 
           <div>
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">{t("schedule.notes")}</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -221,7 +221,7 @@ export default function PaymentForm() {
                 setFormData({ ...formData, notes: e.target.value })
               }
               rows={3}
-              placeholder="Additional notes..."
+              placeholder={t("schedule.additionalNotes")}
             />
           </div>
 
@@ -231,8 +231,7 @@ export default function PaymentForm() {
               variant="outline"
               onClick={() => setOpen(false)}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={createPayment.isPending}>
               {createPayment.isPending ? "Creating..." : "Create Payment"}
             </Button>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Card,
@@ -25,6 +26,7 @@ import { format } from "date-fns";
 import { logger } from "@/utils/logger";
 
 export default function PaymentsOverview() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -117,15 +119,15 @@ export default function PaymentsOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Payments
-            </CardTitle>
+              {t("inventory.totalPayments")} </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalAmount.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
-              {filteredPayments.length} payment
-              {filteredPayments.length !== 1 ? "s" : ""}
+              {filteredPayments.length === 1
+                ? t("inventory.onePayment", { count: filteredPayments.length })
+                : t("inventory.manyPayments", { count: filteredPayments.length })}
             </p>
           </CardContent>
         </Card>
@@ -133,8 +135,7 @@ export default function PaymentsOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Approval
-            </CardTitle>
+              {t("inventory.pendingApproval")} </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -143,14 +144,13 @@ export default function PaymentsOverview() {
             </div>
             <p className="text-xs text-muted-foreground">
               {filteredPayments.filter((p) => p.status === "pending").length}{" "}
-              pending
-            </p>
+              {t("inventory.pending")} </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.thisMonth")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -164,7 +164,7 @@ export default function PaymentsOverview() {
                 .reduce((sum, p) => sum + Number(p.amount || 0), 0)
                 .toFixed(2)}
             </div>
-            <p className="text-xs text-muted-foreground">Current month</p>
+            <p className="text-xs text-muted-foreground">{t("inventory.currentMonth")}</p>
           </CardContent>
         </Card>
       </div>
@@ -177,14 +177,14 @@ export default function PaymentsOverview() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filter Payments</CardTitle>
+          <CardTitle>{t("inventory.filterPayments")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search payments..."
+                placeholder={t("inventory.searchPayments")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
@@ -192,28 +192,27 @@ export default function PaymentsOverview() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder={t("inventory.filterByStatus")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="all">{t("schedule.allStatuses")}</SelectItem>
+                <SelectItem value="pending">{t("inventory.pending2")}</SelectItem>
+                <SelectItem value="approved">{t("inventory.approved2")}</SelectItem>
+                <SelectItem value="rejected">{t("inventory.rejected")}</SelectItem>
+                <SelectItem value="paid">{t("schedule.paid")}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder={t("tasks.filterByType")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="wage">Employee Wage</SelectItem>
-                <SelectItem value="vendor">Vendor Payment</SelectItem>
+                <SelectItem value="all">{t("inventory.allTypes")}</SelectItem>
+                <SelectItem value="wage">{t("inventory.employeeWage")}</SelectItem>
+                <SelectItem value="vendor">{t("inventory.vendorPayment")}</SelectItem>
                 <SelectItem value="expense_reimbursement">
-                  Expense Reimbursement
-                </SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                  {t("inventory.expenseReimbursement")} </SelectItem>
+                <SelectItem value="other">{t("schedule.other")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -223,11 +222,13 @@ export default function PaymentsOverview() {
       {/* Payments List */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment Records</CardTitle>
+          <CardTitle>{t("inventory.paymentRecords")}</CardTitle>
           <CardDescription>
-            {filteredPayments.length > 0
-              ? `Showing ${filteredPayments.length} payment${filteredPayments.length !== 1 ? "s" : ""}`
-              : "No payments found"}
+            {filteredPayments.length === 0
+              ? t("inventory.noPaymentsFound")
+              : filteredPayments.length === 1
+                ? t("inventory.showingOnePayment", { count: filteredPayments.length })
+                : t("inventory.showingManyPayments", { count: filteredPayments.length })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -235,11 +236,9 @@ export default function PaymentsOverview() {
             <div className="text-center py-12">
               <DollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-medium text-foreground">
-                No payments
-              </h3>
+                {t("inventory.noPayments")} </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Get started by creating a new payment.
-              </p>
+                {t("inventory.getStartedByCreatingANewPayment")} </p>
             </div>
           ) : (
             <div className="space-y-4">

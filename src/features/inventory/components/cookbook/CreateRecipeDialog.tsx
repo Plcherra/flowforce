@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import {
   Dialog,
@@ -54,6 +55,7 @@ export function CreateRecipeDialog({
   inventoryItems,
   onCreate,
 }: CreateRecipeDialogProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const [selectedItemId, setSelectedItemId] = useState<string>("");
@@ -159,20 +161,18 @@ export function CreateRecipeDialog({
     >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Recipe</DialogTitle>
+          <DialogTitle>{t("inventory.createNewRecipe")}</DialogTitle>
           <DialogDescription>
-            Link an Items &amp; Setup product with its ingredient inventory
-            items for live costing.
-          </DialogDescription>
+            {t("inventory.linkAnItemsSetupProductWithItsIngredientInventoryItemsForLiveCosting")} </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="recipe-item">Recipe Output *</Label>
+              <Label htmlFor="recipe-item">{t("inventory.recipeOutput")}</Label>
               <Select value={selectedItemId} onValueChange={setSelectedItemId}>
                 <SelectTrigger id="recipe-item">
-                  <SelectValue placeholder="Select prep item" />
+                  <SelectValue placeholder={t("inventory.selectPrepItem")} />
                 </SelectTrigger>
                 <SelectContent>
                   {recipeCandidates.map((item) => (
@@ -183,12 +183,11 @@ export function CreateRecipeDialog({
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-1">
-                Only inventory items marked as prep items appear here.
-              </p>
+                {t("inventory.onlyInventoryItemsMarkedAsPrepItemsAppearHere")} </p>
             </div>
 
             <div>
-              <Label htmlFor="yield">Batch Yield</Label>
+              <Label htmlFor="yield">{t("inventory.batchYield")}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="yield"
@@ -208,7 +207,7 @@ export function CreateRecipeDialog({
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Ingredients *</Label>
+              <Label>{t("inventory.ingredients2")}</Label>
               <Button
                 type="button"
                 size="sm"
@@ -216,8 +215,7 @@ export function CreateRecipeDialog({
                 onClick={addIngredientRow}
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Add ingredient
-              </Button>
+                {t("inventory.addIngredient2")} </Button>
             </div>
             <div className="space-y-3">
               {ingredients.map((row, index) => {
@@ -237,7 +235,7 @@ export function CreateRecipeDialog({
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select inventory item" />
+                          <SelectValue placeholder={t("inventory.selectInventoryItem")} />
                         </SelectTrigger>
                         <SelectContent>
                           {ingredientCandidates.map((item) => (
@@ -259,7 +257,7 @@ export function CreateRecipeDialog({
                             quantity: Number(event.target.value),
                           })
                         }
-                        placeholder="Qty"
+                        placeholder={t("inventory.qty")}
                       />
                     </div>
                     <div className="md:col-span-2 text-sm text-muted-foreground">
@@ -287,20 +285,20 @@ export function CreateRecipeDialog({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="notes">Prep Notes</Label>
+              <Label htmlFor="notes">{t("inventory.prepNotes")}</Label>
               <Textarea
                 id="notes"
-                placeholder="Batch instructions, hold times, allergen notes…"
+                placeholder={t("inventory.batchInstructionsHoldTimesAllergenNotes")}
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 rows={4}
               />
             </div>
             <div className="space-y-2">
-              <Label>Nutrition (optional)</Label>
+              <Label>{t("inventory.nutritionOptional")}</Label>
               <Input
                 type="number"
-                placeholder="Calories"
+                placeholder={t("inventory.calories")}
                 value={nutrition.calories || ""}
                 onChange={(event) =>
                   setNutrition((prev) => ({
@@ -312,7 +310,7 @@ export function CreateRecipeDialog({
               <div className="grid grid-cols-3 gap-2">
                 <Input
                   type="number"
-                  placeholder="Protein g"
+                  placeholder={t("inventory.proteinG")}
                   value={nutrition.protein || ""}
                   onChange={(event) =>
                     setNutrition((prev) => ({
@@ -323,7 +321,7 @@ export function CreateRecipeDialog({
                 />
                 <Input
                   type="number"
-                  placeholder="Carbs g"
+                  placeholder={t("inventory.carbsG")}
                   value={nutrition.carbs || ""}
                   onChange={(event) =>
                     setNutrition((prev) => ({
@@ -334,7 +332,7 @@ export function CreateRecipeDialog({
                 />
                 <Input
                   type="number"
-                  placeholder="Fat g"
+                  placeholder={t("inventory.fatG")}
                   value={nutrition.fat || ""}
                   onChange={(event) =>
                     setNutrition((prev) => ({
@@ -345,9 +343,7 @@ export function CreateRecipeDialog({
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Nutrition values sync to the recipe detail view and export
-                sheets.
-              </p>
+                {t("inventory.nutritionValuesSyncToTheRecipeDetailViewAndExportSheets")} </p>
             </div>
           </div>
 
@@ -357,8 +353,7 @@ export function CreateRecipeDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={saving}>
               {saving ? "Saving…" : "Create recipe"}
             </Button>

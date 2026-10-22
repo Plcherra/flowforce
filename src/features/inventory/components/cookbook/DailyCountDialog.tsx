@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -16,6 +17,7 @@ interface DailyCountDialogProps {
 }
 
 export function DailyCountDialog({ items }: DailyCountDialogProps) {
+  const { t } = useTranslation();
   const { createCount } = useCookbook();
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState<Record<string, number>>({});
@@ -42,14 +44,13 @@ export function DailyCountDialog({ items }: DailyCountDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Daily Count</Button>
+        <Button>{t("inventory.dailyCount")}</Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Daily Inventory Count</DialogTitle>
+          <DialogTitle>{t("inventory.dailyInventoryCount")}</DialogTitle>
           <DialogDescription>
-            Enter current on-hand quantities
-          </DialogDescription>
+            {t("inventory.enterCurrentOnHandQuantities")} </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 max-h-96 overflow-y-auto">
           {items.map((item) => (
@@ -76,8 +77,7 @@ export function DailyCountDialog({ items }: DailyCountDialogProps) {
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
+            {t("common.cancel")} </Button>
           <Button onClick={submit} disabled={saving}>
             {saving ? "Saving..." : "Save Count"}
           </Button>

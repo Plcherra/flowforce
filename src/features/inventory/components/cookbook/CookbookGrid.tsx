@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
   Card,
@@ -28,6 +29,7 @@ export function CookbookGrid({
   onExportRecipe,
   loading,
 }: CookbookGridProps) {
+  const { t } = useTranslation();
   const sortedRecipes = useMemo(
     () =>
       [...recipes].sort((a, b) => {
@@ -40,7 +42,7 @@ export function CookbookGrid({
 
   if (loading) {
     return (
-      <div className="text-sm text-muted-foreground">Loading recipes…</div>
+      <div className="text-sm text-muted-foreground">{t("inventory.loadingRecipes")}</div>
     );
   }
 
@@ -48,9 +50,7 @@ export function CookbookGrid({
     return (
       <Card>
         <CardContent className="p-6 text-center text-sm text-muted-foreground">
-          No recipes linked yet. Use “New Recipe” to connect Items &amp; Setup
-          ingredients.
-        </CardContent>
+          {t("inventory.noRecipesLinkedYetUseNewRecipeToConnectItemsSetupIngredients")} </CardContent>
       </Card>
     );
   }
@@ -90,19 +90,18 @@ export function CookbookGrid({
               </div>
               <div className="flex flex-wrap gap-2 text-xs">
                 <Badge variant="secondary">
-                  {recipe.yieldQuantity} {primaryUnit} yield
+                  {recipe.yieldQuantity} {primaryUnit} {t("inventory.yield3")} </Badge>
+                <Badge variant="outline">
+                  ${recipe.costPerUnit.toFixed(2)} {t("inventory.per")} {primaryUnit}
                 </Badge>
                 <Badge variant="outline">
-                  ${recipe.costPerUnit.toFixed(2)} per {primaryUnit}
-                </Badge>
-                <Badge variant="outline">
-                  Total cost ${recipe.totalCost.toFixed(2)}
+                  {t("inventory.totalCost4")}{recipe.totalCost.toFixed(2)}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 space-y-4 text-sm">
               <div>
-                <p className="text-muted-foreground mb-1">Key ingredients</p>
+                <p className="text-muted-foreground mb-1">{t("inventory.keyIngredients")}</p>
                 <ul className="space-y-1">
                   {topIngredients.map((line) => (
                     <li key={line.id} className="flex justify-between gap-4">
@@ -117,8 +116,7 @@ export function CookbookGrid({
                   ))}
                   {recipe.lines.length > 3 && (
                     <li className="text-xs text-muted-foreground">
-                      +{recipe.lines.length - 3} more ingredients
-                    </li>
+                      +{recipe.lines.length - 3} {t("inventory.moreIngredients")} </li>
                   )}
                 </ul>
               </div>
@@ -127,14 +125,12 @@ export function CookbookGrid({
                   {recipe.nutrition.calories && (
                     <span className="flex items-center gap-1">
                       <Leaf className="h-3 w-3" /> {recipe.nutrition.calories}{" "}
-                      cal
-                    </span>
+                      {t("inventory.cal")} </span>
                   )}
                   {recipe.nutrition.protein && (
                     <span className="flex items-center gap-1">
                       <Scissors className="h-3 w-3" />{" "}
-                      {recipe.nutrition.protein}g protein
-                    </span>
+                      {recipe.nutrition.protein}{t("inventory.gProtein")} </span>
                   )}
                 </div>
               )}
@@ -145,17 +141,15 @@ export function CookbookGrid({
                 onClick={() => onSelect(recipe)}
                 className="flex-1"
               >
-                View Recipe
-              </Button>
+                {t("inventory.viewRecipe")} </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => onExportRecipe(recipe.item.id)}
-                aria-label="Export recipe sheet"
+                aria-label={t("inventory.exportRecipeSheet")}
               >
                 <FileDown className="h-4 w-4 mr-1" />
-                Export
-              </Button>
+                {t("schedule.export")} </Button>
             </CardFooter>
           </Card>
         );

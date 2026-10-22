@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Card,
@@ -60,34 +61,31 @@ export function OrderHistoryTab({
   onViewOrder,
   suppliers,
 }: OrderHistoryTabProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <HistoryIcon className="h-4 w-4" />
-            Purchase Order History
-          </CardTitle>
+            {t("inventory.purchaseOrderHistory")} </CardTitle>
           <CardDescription>
-            Audit trail for every purchase order, including approvals,
-            receiving, and invoices.
-          </CardDescription>
+            {t("inventory.auditTrailForEveryPurchaseOrderIncludingApprovalsReceivingAndInvoices")} </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div>
               <Label className="text-xs uppercase text-muted-foreground">
-                Status
-              </Label>
+                {t("schedule.status")} </Label>
               <Select
                 value={filter.status}
                 onValueChange={(value) => onFilterChange({ status: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder={t("schedule.allStatuses2")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="all">{t("schedule.allStatuses2")}</SelectItem>
                   {Object.entries(STATUS_LABELS).map(([value, label]) => (
                     <SelectItem key={value} value={value}>
                       {label}
@@ -98,17 +96,16 @@ export function OrderHistoryTab({
             </div>
             <div>
               <Label className="text-xs uppercase text-muted-foreground">
-                Supplier
-              </Label>
+                {t("inventory.supplier")} </Label>
               <Select
                 value={filter.supplier}
                 onValueChange={(value) => onFilterChange({ supplier: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All suppliers" />
+                  <SelectValue placeholder={t("inventory.allSuppliers")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All suppliers</SelectItem>
+                  <SelectItem value="all">{t("inventory.allSuppliers")}</SelectItem>
                   {suppliers.map((supplier) => (
                     <SelectItem key={supplier} value={supplier}>
                       {supplier}
@@ -119,8 +116,7 @@ export function OrderHistoryTab({
             </div>
             <div>
               <Label className="text-xs uppercase text-muted-foreground">
-                Order date from
-              </Label>
+                {t("inventory.orderDateFrom")} </Label>
               <Input
                 type="date"
                 value={filter.from}
@@ -131,8 +127,7 @@ export function OrderHistoryTab({
             </div>
             <div>
               <Label className="text-xs uppercase text-muted-foreground">
-                Order date to
-              </Label>
+                {t("inventory.orderDateTo")} </Label>
               <Input
                 type="date"
                 value={filter.to}
@@ -141,10 +136,9 @@ export function OrderHistoryTab({
             </div>
             <div className="md:col-span-2">
               <Label className="text-xs uppercase text-muted-foreground">
-                Search
-              </Label>
+                {t("nav.search")} </Label>
               <Input
-                placeholder="Search by PO number or supplier"
+                placeholder={t("inventory.searchByPoNumberOrSupplier")}
                 value={filter.search}
                 onChange={(event) =>
                   onFilterChange({ search: event.target.value })
@@ -158,13 +152,13 @@ export function OrderHistoryTab({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>PO</TableHead>
-                    <TableHead>Supplier</TableHead>
-                    <TableHead>Ordered</TableHead>
-                    <TableHead>Expected</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("inventory.po")}</TableHead>
+                    <TableHead>{t("inventory.supplier")}</TableHead>
+                    <TableHead>{t("inventory.ordered")}</TableHead>
+                    <TableHead>{t("inventory.expected")}</TableHead>
+                    <TableHead className="text-right">{t("inventory.total")}</TableHead>
+                    <TableHead>{t("schedule.status")}</TableHead>
+                    <TableHead className="text-right">{t("inventory.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -174,8 +168,7 @@ export function OrderHistoryTab({
                         colSpan={7}
                         className="h-24 text-center text-sm text-muted-foreground"
                       >
-                        No purchase orders match your filters.
-                      </TableCell>
+                        {t("inventory.noPurchaseOrdersMatchYourFilters")} </TableCell>
                     </TableRow>
                   ) : (
                     filteredOrders.map((po) => {
@@ -209,8 +202,7 @@ export function OrderHistoryTab({
                               size="sm"
                               onClick={() => onViewOrder(po.id)}
                             >
-                              View
-                            </Button>
+                              {t("tasks.view")} </Button>
                           </TableCell>
                         </TableRow>
                       );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Card,
@@ -60,37 +61,32 @@ export function ReceiveOrdersTab({
   onReceive,
   isReceiving,
 }: ReceiveOrdersTabProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Truck className="h-4 w-4" />
-            Receiving Station
-          </CardTitle>
+            {t("inventory.receivingStation")} </CardTitle>
           <CardDescription>
-            Log deliveries, capture cost adjustments, and update on-hand
-            inventory.
-          </CardDescription>
+            {t("inventory.logDeliveriesCaptureCostAdjustmentsAndUpdateOnHandInventory")} </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
           <div className="space-y-3">
             <div className="rounded-lg border">
               <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-3">
                 <div>
-                  <p className="font-medium">Receiving Queue</p>
+                  <p className="font-medium">{t("inventory.receivingQueue")}</p>
                   <p className="text-xs text-muted-foreground">
-                    {receivingCandidates.length} purchase orders awaiting
-                    receiving.
-                  </p>
+                    {receivingCandidates.length} {t("inventory.purchaseOrdersAwaitingReceiving")} </p>
                 </div>
               </div>
               <ScrollArea className="h-[360px]">
                 <div className="space-y-1 p-2">
                   {receivingCandidates.length === 0 ? (
                     <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
-                      No open purchase orders with quantity remaining.
-                    </div>
+                      {t("inventory.noOpenPurchaseOrdersWithQuantityRemaining")} </div>
                   ) : (
                     receivingCandidates.map((po) => {
                       const StatusIcon = getStatusIcon(po.status);
@@ -110,7 +106,7 @@ export function ReceiveOrdersTab({
                             <div>
                               <p className="font-medium">{po.po_number}</p>
                               <p className="text-xs text-muted-foreground">
-                                {po.supplier_name} · Expected{" "}
+                                {po.supplier_name} {t("inventory.expected2")}{" "}
                                 {formatDate(po.expected_delivery_date)}
                               </p>
                             </div>
@@ -128,10 +124,9 @@ export function ReceiveOrdersTab({
                                 ?.map((item) => item.quantity)
                                 .reduce((sum, qty) => sum + (qty || 0), 0) ??
                                 0}{" "}
-                              units ordered
-                            </span>
+                              {t("inventory.unitsOrdered")} </span>
                             <span>
-                              Outstanding {formatCurrency(outstanding)}
+                              {t("inventory.outstanding")} {formatCurrency(outstanding)}
                             </span>
                           </div>
                         </button>
@@ -166,32 +161,27 @@ export function ReceiveOrdersTab({
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {selectedReceivingPo.supplier_name} · Ordered{" "}
+                    {selectedReceivingPo.supplier_name} {t("inventory.ordered2")}{" "}
                     {formatDate(selectedReceivingPo.order_date)}
                   </p>
                 </div>
 
                 <div className="rounded-lg border">
                   <div className="border-b bg-muted/40 px-4 py-2 text-sm font-medium">
-                    Receive Line Items
-                  </div>
+                    {t("inventory.receiveLineItems")} </div>
                   <ScrollArea className="h-[280px]">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Item</TableHead>
+                          <TableHead>{t("inventory.item")}</TableHead>
                           <TableHead className="w-[80px] text-right">
-                            Ordered
-                          </TableHead>
+                            {t("inventory.ordered")} </TableHead>
                           <TableHead className="w-[80px] text-right">
-                            Received
-                          </TableHead>
+                            {t("inventory.received")} </TableHead>
                           <TableHead className="w-[80px] text-right">
-                            Remaining
-                          </TableHead>
+                            {t("inventory.remaining")} </TableHead>
                           <TableHead className="w-[120px] text-right">
-                            Receive Now
-                          </TableHead>
+                            {t("inventory.receiveNow")} </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -210,8 +200,7 @@ export function ReceiveOrdersTab({
                                       {line.item_name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                      {formatCurrency(line.unit_price)} per unit
-                                    </p>
+                                      {formatCurrency(line.unit_price)} {t("inventory.perUnit")} </p>
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -255,33 +244,30 @@ export function ReceiveOrdersTab({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium">
-                        Close purchase order after receiving
-                      </p>
+                        {t("inventory.closePurchaseOrderAfterReceiving")} </p>
                       <p className="text-xs text-muted-foreground">
-                        Automatically marks the order as received and timestamps
-                        the delivery.
-                      </p>
+                        {t("inventory.automaticallyMarksTheOrderAsReceivedAndTimestampsTheDelivery")} </p>
                     </div>
                     <Switch
                       checked={closeReceiving}
                       onCheckedChange={onCloseReceivingChange}
-                      aria-label="Close purchase order after receiving"
+                      aria-label={t("inventory.closePurchaseOrderAfterReceiving")}
                     />
                   </div>
                   <div className="space-y-1 text-sm">
-                    <Label htmlFor="receiving-notes">Receiving Notes</Label>
+                    <Label htmlFor="receiving-notes">{t("inventory.receivingNotes")}</Label>
                     <Textarea
                       id="receiving-notes"
                       value={receivingNotes}
                       onChange={(event) =>
                         onReceivingNotesChange(event.target.value)
                       }
-                      placeholder="Log any discrepancies, substitutions, or credits."
+                      placeholder={t("inventory.logAnyDiscrepanciesSubstitutionsOrCredits")}
                       rows={3}
                     />
                   </div>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Outstanding balance</span>
+                    <span>{t("inventory.outstandingBalance")}</span>
                     <span>
                       {formatCurrency(
                         outstandingByPo.get(selectedReceivingPo.id) ?? 0,
@@ -300,9 +286,7 @@ export function ReceiveOrdersTab({
               </div>
             ) : (
               <div className="flex h-full items-center justify-center rounded-lg border border-dashed p-12 text-center text-sm text-muted-foreground">
-                Select a purchase order from the queue to record receiving
-                activity.
-              </div>
+                {t("inventory.selectAPurchaseOrderFromTheQueueToRecordReceivingActivity")} </div>
             )}
           </div>
         </CardContent>

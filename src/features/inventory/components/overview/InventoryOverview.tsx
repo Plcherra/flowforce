@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,6 +15,7 @@ import InventoryTransactionForm from "@/features/inventory/components/InventoryT
 import { useCan } from "@/hooks/useCan";
 
 export default function InventoryOverview() {
+  const { t } = useTranslation();
   const { data: items = [], isLoading: itemsLoading } = useInventoryItems();
   const { data: transactions = [], isLoading: transactionsLoading } =
     useInventoryTransactions();
@@ -45,35 +47,32 @@ export default function InventoryOverview() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.totalItems")}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{items.length}</div>
             <p className="text-xs text-muted-foreground">
-              Active inventory items
-            </p>
+              {t("inventory.activeInventoryItems")} </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Value</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.totalValue")}</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalValue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
-              Current inventory value
-            </p>
+              {t("inventory.currentInventoryValue")} </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Low Stock Alerts
-            </CardTitle>
+              {t("inventory.lowStockAlerts")} </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -81,8 +80,7 @@ export default function InventoryOverview() {
               {lowStockItems.length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Items below minimum level
-            </p>
+              {t("inventory.itemsBelowMinimumLevel")} </p>
           </CardContent>
         </Card>
       </div>
@@ -101,8 +99,7 @@ export default function InventoryOverview() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <AlertTriangle className="h-5 w-5 text-destructive mr-2" />
-              Low Stock Items
-            </CardTitle>
+              {t("inventory.lowStockItems")} </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -115,8 +112,7 @@ export default function InventoryOverview() {
                   <div className="flex items-center gap-2">
                     <Badge variant="destructive">
                       {item.min_stock_level || 0} / {item.max_stock_level || 0}{" "}
-                      units
-                    </Badge>
+                      {t("inventory.units3")} </Badge>
                   </div>
                 </div>
               ))}
@@ -128,11 +124,11 @@ export default function InventoryOverview() {
       {/* Recent Transactions */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>{t("inventory.recentTransactions")}</CardTitle>
         </CardHeader>
         <CardContent>
           {recentTransactions.length === 0 ? (
-            <p className="text-muted-foreground">No transactions yet</p>
+            <p className="text-muted-foreground">{t("inventory.noTransactionsYet")}</p>
           ) : (
             <div className="space-y-2">
               {recentTransactions.map((transaction) => (
@@ -165,8 +161,7 @@ export default function InventoryOverview() {
                         transaction.transaction_type === "return"
                           ? "+"
                           : "-"}
-                        {transaction.quantity} units
-                      </Badge>
+                        {transaction.quantity} {t("inventory.units3")} </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {new Date(transaction.created_at).toLocaleDateString()}

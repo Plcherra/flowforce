@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Dialog,
@@ -34,13 +35,14 @@ export function PurchaseOrderDetailsDialog({
   purchaseOrder,
   outstandingAmount,
 }: PurchaseOrderDetailsDialogProps) {
+  const { t } = useTranslation();
   if (!purchaseOrder) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Purchase Order Details</DialogTitle>
+          <DialogTitle>{t("inventory.purchaseOrderDetails")}</DialogTitle>
           <DialogDescription>
             {purchaseOrder.po_number} · {purchaseOrder.supplier_name}
           </DialogDescription>
@@ -48,26 +50,26 @@ export function PurchaseOrderDetailsDialog({
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-              <p className="font-medium">Summary</p>
+              <p className="font-medium">{t("inventory.summary")}</p>
               <div className="mt-2 space-y-1 text-muted-foreground">
-                <p>Order date: {formatDate(purchaseOrder.order_date)}</p>
+                <p>{t("inventory.orderDate2")} {formatDate(purchaseOrder.order_date)}</p>
                 <p>
-                  Expected delivery:{" "}
+                  {t("inventory.expectedDelivery2")}{" "}
                   {formatDate(purchaseOrder.expected_delivery_date)}
                 </p>
                 <p>
-                  Actual delivery:{" "}
+                  {t("inventory.actualDelivery")}{" "}
                   {formatDate(purchaseOrder.actual_delivery_date)}
                 </p>
               </div>
             </div>
             <div className="rounded-lg border bg-muted/30 p-3 text-sm">
-              <p className="font-medium">Financials</p>
+              <p className="font-medium">{t("inventory.financials")}</p>
               <div className="mt-2 space-y-1 text-muted-foreground">
-                <p>Total: {formatCurrency(purchaseOrder.total_amount)}</p>
-                <p>Outstanding: {formatCurrency(outstandingAmount)}</p>
+                <p>{t("inventory.total2")} {formatCurrency(purchaseOrder.total_amount)}</p>
+                <p>{t("inventory.outstanding2")} {formatCurrency(outstandingAmount)}</p>
                 <p>
-                  Status:{" "}
+                  {t("inventory.status")}{" "}
                   {STATUS_LABELS[purchaseOrder.status] ?? purchaseOrder.status}
                 </p>
               </div>
@@ -75,22 +77,18 @@ export function PurchaseOrderDetailsDialog({
           </div>
           <div className="space-y-2 rounded-lg border">
             <div className="border-b bg-muted/40 px-4 py-2 text-sm font-medium">
-              Line Items
-            </div>
+              {t("inventory.lineItems")} </div>
             <ScrollArea className="h-64">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Item</TableHead>
+                    <TableHead>{t("inventory.item")}</TableHead>
                     <TableHead className="w-[90px] text-right">
-                      Quantity
-                    </TableHead>
+                      {t("inventory.quantity")} </TableHead>
                     <TableHead className="w-[90px] text-right">
-                      Unit Cost
-                    </TableHead>
+                      {t("inventory.unitCost")} </TableHead>
                     <TableHead className="w-[100px] text-right">
-                      Received
-                    </TableHead>
+                      {t("inventory.received")} </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -100,7 +98,7 @@ export function PurchaseOrderDetailsDialog({
                         <div>
                           <p className="font-medium">{item.item_name}</p>
                           <p className="text-xs text-muted-foreground">
-                            Line value{" "}
+                            {t("inventory.lineValue")}{" "}
                             {formatCurrency(item.unit_price * item.quantity)}
                           </p>
                         </div>
@@ -127,8 +125,7 @@ export function PurchaseOrderDetailsDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Close
-          </Button>
+            {t("common.close")} </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

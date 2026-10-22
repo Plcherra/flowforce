@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Outlet } from "@/lib/router-adapter";
 import { Package } from "lucide-react";
@@ -8,6 +9,7 @@ interface InventoryLayoutProps {
 }
 
 export function InventoryLayout({ children }: InventoryLayoutProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-full w-full flex-col bg-background">
       <div className="border-b bg-card">
@@ -18,11 +20,9 @@ export function InventoryLayout({ children }: InventoryLayoutProps) {
             </div>
             <div>
               <h1 className="text-lg font-semibold tracking-tight">
-                Inventory
-              </h1>
+                {t("common.inventory")} </h1>
               <p className="text-sm text-muted-foreground">
-                Items, counts, prep, purchasing, waste, and cost visibility
-              </p>
+                {t("inventory.itemsCountsPrepPurchasingWasteAndCostVisibility")} </p>
             </div>
           </div>
 

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +89,7 @@ const unitLabel = (unit?: InventoryUnit | null) => {
 };
 
 export function ProductionEventForm() {
+  const { t } = useTranslation();
   const [form, setForm] = useState<FormState>(defaultFormState);
   const [submissionWarnings, setSubmissionWarnings] = useState<string[]>([]);
 
@@ -261,7 +263,7 @@ export function ProductionEventForm() {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label>Item *</Label>
+          <Label>{t("inventory.item3")}</Label>
           <Select
             disabled={itemsLoading}
             value={form.item_id}
@@ -283,7 +285,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Production Type *</Label>
+          <Label>{t("inventory.productionType")}</Label>
           <Select
             value={form.production_type}
             onValueChange={(value) =>
@@ -294,7 +296,7 @@ export function ProductionEventForm() {
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Production type" />
+              <SelectValue placeholder={t("inventory.productionType2")} />
             </SelectTrigger>
             <SelectContent>
               {PRODUCTION_TYPES.map((option) => (
@@ -307,7 +309,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Produced Quantity *</Label>
+          <Label>{t("inventory.producedQuantity")}</Label>
           <Input
             type="number"
             min="0"
@@ -324,7 +326,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Produced Unit *</Label>
+          <Label>{t("inventory.producedUnit")}</Label>
           <Select
             disabled={unitsLoading}
             value={form.produced_unitid}
@@ -348,7 +350,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Batch / Reference</Label>
+          <Label>{t("inventory.batchReference")}</Label>
           <Input
             value={form.batch_reference}
             onChange={(event) =>
@@ -357,12 +359,12 @@ export function ProductionEventForm() {
                 batch_reference: event.target.value,
               }))
             }
-            placeholder="Optional batch identifier"
+            placeholder={t("inventory.optionalBatchIdentifier")}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Production Date &amp; Time</Label>
+          <Label>{t("inventory.productionDateTime")}</Label>
           <Input
             type="datetime-local"
             value={form.produced_at}
@@ -377,7 +379,7 @@ export function ProductionEventForm() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="space-y-2">
-          <Label>Labor Cost</Label>
+          <Label>{t("inventory.laborCost")}</Label>
           <Input
             type="number"
             step="0.01"
@@ -390,7 +392,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Overhead Cost</Label>
+          <Label>{t("inventory.overheadCost")}</Label>
           <Input
             type="number"
             step="0.01"
@@ -406,7 +408,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Yield Quantity</Label>
+          <Label>{t("inventory.yieldQuantity")}</Label>
           <Input
             type="number"
             step="0.01"
@@ -417,12 +419,12 @@ export function ProductionEventForm() {
                 yield_quantity: event.target.value,
               }))
             }
-            placeholder="Optional actual yield"
+            placeholder={t("inventory.optionalActualYield")}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Yield Unit</Label>
+          <Label>{t("inventory.yieldUnit")}</Label>
           <Select
             value={form.yield_unitid}
             onValueChange={(value) =>
@@ -430,7 +432,7 @@ export function ProductionEventForm() {
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select yield unit" />
+              <SelectValue placeholder={t("inventory.selectYieldUnit")} />
             </SelectTrigger>
             <SelectContent>
               {unitsForSelect.map((unit) => (
@@ -443,7 +445,7 @@ export function ProductionEventForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Waste Quantity</Label>
+          <Label>{t("inventory.wasteQuantity")}</Label>
           <Input
             type="number"
             step="0.01"
@@ -454,12 +456,12 @@ export function ProductionEventForm() {
                 waste_quantity: event.target.value,
               }))
             }
-            placeholder="Optional waste"
+            placeholder={t("inventory.optionalWaste")}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>Waste Unit</Label>
+          <Label>{t("inventory.wasteUnit")}</Label>
           <Select
             value={form.waste_unitid}
             onValueChange={(value) =>
@@ -467,7 +469,7 @@ export function ProductionEventForm() {
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select waste unit" />
+              <SelectValue placeholder={t("inventory.selectWasteUnit")} />
             </SelectTrigger>
             <SelectContent>
               {unitsForSelect.map((unit) => (
@@ -484,18 +486,18 @@ export function ProductionEventForm() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label>Internal Notes</Label>
+          <Label>{t("inventory.internalNotes")}</Label>
           <Textarea
             rows={4}
             value={form.notes}
             onChange={(event) =>
               setForm((prev) => ({ ...prev, notes: event.target.value }))
             }
-            placeholder="Notes about this production run..."
+            placeholder={t("inventory.notesAboutThisProductionRun")}
           />
         </div>
         <div className="space-y-2">
-          <Label>Submission Note (for approvers)</Label>
+          <Label>{t("inventory.submissionNoteForApprovers")}</Label>
           <Textarea
             rows={4}
             value={form.submission_note}
@@ -505,7 +507,7 @@ export function ProductionEventForm() {
                 submission_note: event.target.value,
               }))
             }
-            placeholder="Optional note for approvers"
+            placeholder={t("inventory.optionalNoteForApprovers")}
           />
         </div>
       </div>
@@ -514,16 +516,13 @@ export function ProductionEventForm() {
         <div className="space-y-4 rounded-md border p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h4 className="text-lg font-semibold">Production Summary</h4>
+              <h4 className="text-lg font-semibold">{t("inventory.productionSummary")}</h4>
               <p className="text-sm text-muted-foreground">
-                Yield estimates and costs update automatically as you change
-                quantities.
-              </p>
+                {t("inventory.yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities")} </p>
             </div>
             <div className="flex flex-col items-end gap-1 text-right">
               <span className="text-sm text-muted-foreground">
-                Total Material Cost
-              </span>
+                {t("inventory.totalMaterialCost")} </span>
               <span className="text-xl font-semibold">
                 {currencyFormatter.format(materialCost || 0)}
               </span>
@@ -532,7 +531,7 @@ export function ProductionEventForm() {
 
           <div className="grid gap-4 md:grid-cols-4">
             <div className="rounded-md border p-3">
-              <p className="text-xs uppercase text-muted-foreground">Yield</p>
+              <p className="text-xs uppercase text-muted-foreground">{t("inventory.yield2")}</p>
               <p className="text-lg font-semibold">
                 {preview.producedQuantityInItemUnit.toLocaleString(undefined, {
                   maximumFractionDigits: 2,
@@ -541,7 +540,7 @@ export function ProductionEventForm() {
               </p>
             </div>
             <div className="rounded-md border p-3">
-              <p className="text-xs uppercase text-muted-foreground">Labor</p>
+              <p className="text-xs uppercase text-muted-foreground">{t("dashboard.labor")}</p>
               <p className="text-lg font-semibold">
                 {currencyFormatter.format(
                   Number.isFinite(laborCost) ? laborCost : 0,
@@ -550,8 +549,7 @@ export function ProductionEventForm() {
             </div>
             <div className="rounded-md border p-3">
               <p className="text-xs uppercase text-muted-foreground">
-                Overhead
-              </p>
+                {t("inventory.overhead")} </p>
               <p className="text-lg font-semibold">
                 {currencyFormatter.format(
                   Number.isFinite(overheadCost) ? overheadCost : 0,
@@ -560,8 +558,7 @@ export function ProductionEventForm() {
             </div>
             <div className="rounded-md border p-3">
               <p className="text-xs uppercase text-muted-foreground">
-                Cost per Unit
-              </p>
+                {t("inventory.costPerUnit")} </p>
               <p className="text-lg font-semibold">
                 {currencyFormatter.format(costPerUnit || 0)}
               </p>
@@ -571,7 +568,7 @@ export function ProductionEventForm() {
           {preview.warnings.length > 0 && (
             <Alert variant="warning">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Conversion warnings</AlertTitle>
+              <AlertTitle>{t("inventory.conversionWarnings")}</AlertTitle>
               <AlertDescription>
                 <ul className="list-disc space-y-1 pl-6">
                   {preview.warnings.map((warning, index) => (
@@ -587,7 +584,7 @@ export function ProductionEventForm() {
           {preview.blockingIssues.length > 0 && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Production cannot be recorded yet</AlertTitle>
+              <AlertTitle>{t("inventory.productionCannotBeRecordedYet")}</AlertTitle>
               <AlertDescription>
                 <ul className="list-disc space-y-1 pl-6">
                   {preview.blockingIssues.map((issue, index) => (
@@ -604,11 +601,11 @@ export function ProductionEventForm() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Ingredient</TableHead>
-                  <TableHead className="text-right">Required Qty</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead className="text-right">Unit Cost</TableHead>
-                  <TableHead className="text-right">Total Cost</TableHead>
+                  <TableHead>{t("inventory.ingredient")}</TableHead>
+                  <TableHead className="text-right">{t("inventory.requiredQty")}</TableHead>
+                  <TableHead>{t("schedule.unit")}</TableHead>
+                  <TableHead className="text-right">{t("inventory.unitCost")}</TableHead>
+                  <TableHead className="text-right">{t("inventory.totalCost2")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -618,8 +615,7 @@ export function ProductionEventForm() {
                       colSpan={5}
                       className="text-center text-sm text-muted-foreground"
                     >
-                      No recipe lines configured for this item.
-                    </TableCell>
+                      {t("inventory.noRecipeLinesConfiguredForThisItem")} </TableCell>
                   </TableRow>
                 ) : (
                   materialRows.map((material) => (
@@ -666,7 +662,7 @@ export function ProductionEventForm() {
       {submissionWarnings.length > 0 && (
         <Alert variant="warning">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Recorded with warnings</AlertTitle>
+          <AlertTitle>{t("inventory.recordedWithWarnings")}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc space-y-1 pl-6">
               {submissionWarnings.map((warning, index) => (
@@ -686,14 +682,12 @@ export function ProductionEventForm() {
           onClick={resetForm}
           disabled={createProductionEvent.isPending}
         >
-          Clear
-        </Button>
+          {t("shell.clear")} </Button>
         <Button type="submit" disabled={disableSubmit}>
           {createProductionEvent.isPending && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Record Production
-        </Button>
+          {t("inventory.recordProduction")} </Button>
       </div>
     </form>
   );

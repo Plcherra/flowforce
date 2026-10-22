@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
 import {
   Dialog,
@@ -48,6 +49,7 @@ export function InventoryRecipeDialog({
   onOpenChange,
   trigger,
 }: InventoryRecipeDialogProps) {
+  const { t } = useTranslation();
   const { data: recipeLines = [], isLoading } = useInventoryRecipes(item?.id);
   const upsertLine = useUpsertRecipeLine(item?.id);
   const deleteLine = useDeleteRecipeLine(item?.id);
@@ -109,27 +111,24 @@ export function InventoryRecipeDialog({
       {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Recipe Breakdown</DialogTitle>
+          <DialogTitle>{t("inventory.recipeBreakdown")}</DialogTitle>
           <DialogDescription>
-            Link ingredients to{" "}
-            <span className="font-semibold">{item.name}</span> to calculate
-            dynamic costs and automate production usage.
-          </DialogDescription>
+            {t("inventory.linkIngredientsTo")}{" "}
+            <span className="font-semibold">{item.name}</span> {t("inventory.toCalculateDynamicCostsAndAutomateProductionUsage")} </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Ingredients
-            </h3>
+              {t("inventory.ingredients")} </h3>
             <ScrollArea className="max-h-64 rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Ingredient</TableHead>
-                    <TableHead className="w-24 text-right">Quantity</TableHead>
-                    <TableHead className="w-24">Unit</TableHead>
-                    <TableHead className="w-24 text-right">Cost</TableHead>
+                    <TableHead>{t("inventory.ingredient")}</TableHead>
+                    <TableHead className="w-24 text-right">{t("inventory.quantity")}</TableHead>
+                    <TableHead className="w-24">{t("schedule.unit")}</TableHead>
+                    <TableHead className="w-24 text-right">{t("inventory.cost")}</TableHead>
                     <TableHead className="w-16" />
                   </TableRow>
                 </TableHeader>
@@ -140,8 +139,7 @@ export function InventoryRecipeDialog({
                         colSpan={5}
                         className="text-center text-sm text-muted-foreground py-6"
                       >
-                        Loading ingredients...
-                      </TableCell>
+                        {t("inventory.loadingIngredients")} </TableCell>
                     </TableRow>
                   ) : recipeLines.length === 0 ? (
                     <TableRow>
@@ -149,8 +147,7 @@ export function InventoryRecipeDialog({
                         colSpan={5}
                         className="text-center text-sm text-muted-foreground py-6"
                       >
-                        No ingredients linked yet.
-                      </TableCell>
+                        {t("inventory.noIngredientsLinkedYet")} </TableCell>
                     </TableRow>
                   ) : (
                     recipeLines.map((line) => {
@@ -175,7 +172,7 @@ export function InventoryRecipeDialog({
                               </span>
                               {ingredient && 'sku' in ingredient && ingredient.sku && (
                                 <span className="text-xs text-muted-foreground">
-                                  SKU: {ingredient.sku as string}
+                                  {t("inventory.sku")} {ingredient.sku as string}
                                 </span>
                               )}
                             </div>
@@ -210,13 +207,11 @@ export function InventoryRecipeDialog({
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Add Ingredient
-            </h3>
+              {t("inventory.addIngredient")} </h3>
             <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_auto] gap-3 items-end">
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1">
-                  Ingredient Item
-                </label>
+                  {t("inventory.ingredientItem")} </label>
                 <Select
                   value={formState.ingredientid}
                   onValueChange={(value) =>
@@ -224,7 +219,7 @@ export function InventoryRecipeDialog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select ingredient" />
+                    <SelectValue placeholder={t("inventory.selectIngredient")} />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {ingredientOptions.map((option) => (
@@ -237,12 +232,11 @@ export function InventoryRecipeDialog({
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1">
-                  Quantity
-                </label>
+                  {t("inventory.quantity")} </label>
                 <Input
                   type="number"
                   step="0.01"
-                  placeholder="e.g. 0.5"
+                  placeholder={t("inventory.eG05")}
                   value={formState.quantity_needed}
                   onChange={(e) =>
                     setFormState((prev) => ({
@@ -254,8 +248,7 @@ export function InventoryRecipeDialog({
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground block mb-1">
-                  Unit
-                </label>
+                  {t("schedule.unit")} </label>
                 <Select
                   value={formState.unitid}
                   onValueChange={(value) =>
@@ -263,7 +256,7 @@ export function InventoryRecipeDialog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select unit" />
+                    <SelectValue placeholder={t("inventory.selectUnit")} />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {unitOptions.map((unit) => (
@@ -287,16 +280,16 @@ export function InventoryRecipeDialog({
           </div>
 
           <div className="rounded-md border p-4 bg-muted/30 text-xs text-muted-foreground space-y-1">
-            <p>Primary unit cost: {formatCurrency(item.cost_per_unit)}</p>
+            <p>{t("inventory.primaryUnitCost")} {formatCurrency(item.cost_per_unit)}</p>
             <p>
-              Recipe-calculated cost:{" "}
+              {t("inventory.recipeCalculatedCost")}{" "}
               {formatCurrency(
                 item.recipe_cost_per_unit ?? item.calculated_cost_per_unit,
               )}
             </p>
             {item.recipe_yield_quantity && (
               <p>
-                Yield: {item.recipe_yield_quantity}{" "}
+                {t("inventory.yield")} {item.recipe_yield_quantity}{" "}
                 {item.recipe_yield_unit?.abbreviation ||
                   item.recipe_yield_unit?.name ||
                   item.unit?.abbreviation ||

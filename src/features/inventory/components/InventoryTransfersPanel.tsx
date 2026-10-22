@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import {
@@ -121,6 +122,7 @@ const formatDate = (value?: string | null) =>
   value ? dayjs(value).format("MMM D, YYYY") : "Not scheduled";
 
 export function InventoryTransfersPanel() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
   const currentUserId = profile?.userId ?? profile?.id ?? "";
@@ -533,18 +535,15 @@ export function InventoryTransfersPanel() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ArrowRightLeft className="h-5 w-5 text-primary" />
-            Create Transfer
-          </CardTitle>
+            {t("inventory.createTransfer")} </CardTitle>
           <CardDescription>
-            Coordinate stock movement between locations with cost tracking and
-            approvals.
-          </CardDescription>
+            {t("inventory.coordinateStockMovementBetweenLocationsWithCostTrackingAndApprovals")} </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="from-location">From location</Label>
+                <Label htmlFor="from-location">{t("inventory.fromLocation")}</Label>
                 <Select
                   value={form.fromLocationId}
                   onValueChange={(value) =>
@@ -573,7 +572,7 @@ export function InventoryTransfersPanel() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="to-location">To location</Label>
+                <Label htmlFor="to-location">{t("inventory.toLocation")}</Label>
                 <Select
                   value={form.toLocationId}
                   onValueChange={(value) =>
@@ -604,7 +603,7 @@ export function InventoryTransfersPanel() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="fulfiller">Fulfiller</Label>
+                <Label htmlFor="fulfiller">{t("inventory.fulfiller")}</Label>
                 <Select
                   value={form.fulfillerId}
                   onValueChange={(value) =>
@@ -636,7 +635,7 @@ export function InventoryTransfersPanel() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="recipient">Recipient</Label>
+                <Label htmlFor="recipient">{t("inventory.recipient")}</Label>
                 <Select
                   value={form.recipientId}
                   onValueChange={(value) =>
@@ -670,7 +669,7 @@ export function InventoryTransfersPanel() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="delivery-date">Target delivery date</Label>
+                <Label htmlFor="delivery-date">{t("inventory.targetDeliveryDate")}</Label>
                 <Input
                   id="delivery-date"
                   type="date"
@@ -684,10 +683,10 @@ export function InventoryTransfersPanel() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="comments">Comments</Label>
+                <Label htmlFor="comments">{t("tasks.comments")}</Label>
                 <Textarea
                   id="comments"
-                  placeholder="Add context for the fulfiller..."
+                  placeholder={t("inventory.addContextForTheFulfiller")}
                   value={form.comments}
                   onChange={(event) =>
                     setForm((prev) => ({
@@ -702,7 +701,7 @@ export function InventoryTransfersPanel() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-base font-medium">Transfer items</Label>
+                <Label className="text-base font-medium">{t("inventory.transferItems")}</Label>
                 <Button
                   type="button"
                   variant="outline"
@@ -710,8 +709,7 @@ export function InventoryTransfersPanel() {
                   onClick={handleAddLineItem}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Add item
-                </Button>
+                  {t("forms.addItem")} </Button>
               </div>
 
               <div className="space-y-4">
@@ -741,7 +739,7 @@ export function InventoryTransfersPanel() {
                       className="grid gap-4 rounded-lg border p-4 md:grid-cols-12 md:items-end"
                     >
                       <div className="md:col-span-4 space-y-2">
-                        <Label>Item</Label>
+                        <Label>{t("inventory.item")}</Label>
                         <Select
                           value={row.itemId}
                           onValueChange={(value) =>
@@ -772,7 +770,7 @@ export function InventoryTransfersPanel() {
                       </div>
 
                       <div className="md:col-span-3 space-y-2">
-                        <Label>Unit</Label>
+                        <Label>{t("schedule.unit")}</Label>
                         <Select
                           value={row.unitId}
                           onValueChange={(value) =>
@@ -794,8 +792,7 @@ export function InventoryTransfersPanel() {
                           <SelectContent>
                             {!item ? (
                               <SelectItem value="" disabled>
-                                Select an item first
-                              </SelectItem>
+                                {t("inventory.selectAnItemFirst")} </SelectItem>
                             ) : hasUnitChoices ? (
                               <>
                                 {unitOptions.map((unit) => (
@@ -823,8 +820,7 @@ export function InventoryTransfersPanel() {
                               </>
                             ) : (
                               <SelectItem value="" disabled>
-                                No units configured
-                              </SelectItem>
+                                {t("inventory.noUnitsConfigured")} </SelectItem>
                             )}
                           </SelectContent>
                         </Select>
@@ -836,7 +832,7 @@ export function InventoryTransfersPanel() {
                       </div>
 
                       <div className="md:col-span-2 space-y-2">
-                        <Label>Quantity</Label>
+                        <Label>{t("inventory.quantity")}</Label>
                         <div className="flex items-center gap-2">
                           <Input
                             type="number"
@@ -854,7 +850,7 @@ export function InventoryTransfersPanel() {
                       </div>
 
                       <div className="md:col-span-2 space-y-2">
-                        <Label>Cost per unit</Label>
+                        <Label>{t("inventory.costPerUnit2")}</Label>
                         <Input
                           type="number"
                           min="0"
@@ -880,7 +876,7 @@ export function InventoryTransfersPanel() {
                           disabled={lineItems.length === 1}
                         >
                           <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove item</span>
+                          <span className="sr-only">{t("inventory.removeItem")}</span>
                         </Button>
                       </div>
                     </div>
@@ -889,7 +885,7 @@ export function InventoryTransfersPanel() {
               </div>
 
               <div className="flex items-center justify-between rounded-md bg-muted px-4 py-3 text-sm">
-                <span className="text-muted-foreground">Estimated total</span>
+                <span className="text-muted-foreground">{t("inventory.estimatedTotal")}</span>
                 <span className="font-medium">
                   {currencyFormatter.format(estimatedTotal || 0)}
                 </span>
@@ -903,8 +899,7 @@ export function InventoryTransfersPanel() {
                 onClick={resetForm}
                 disabled={createTransfer.isPending}
               >
-                Clear
-              </Button>
+                {t("shell.clear")} </Button>
               <Button type="submit" disabled={createTransfer.isPending}>
                 {createTransfer.isPending ? "Submitting..." : "Submit transfer"}
               </Button>
@@ -917,23 +912,17 @@ export function InventoryTransfersPanel() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            Transfer Activity
-          </CardTitle>
+            {t("inventory.transferActivity")} </CardTitle>
           <CardDescription>
-            Track requested, in-transit, and received transfers across your
-            locations.
-          </CardDescription>
+            {t("inventory.trackRequestedInTransitAndReceivedTransfersAcrossYourLocations")} </CardDescription>
         </CardHeader>
         <CardContent>
           {transfersLoading ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              Loading transfers…
-            </div>
+              {t("inventory.loadingTransfers")} </div>
           ) : transfersList.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No transfers have been created yet. Submit a transfer above to get
-              started.
-            </div>
+              {t("inventory.noTransfersHaveBeenCreatedYetSubmitATransferAboveToGetStarted")} </div>
           ) : (
             <div className="space-y-4">
               {transfersList.map((transfer) => {
@@ -967,16 +956,16 @@ export function InventoryTransfersPanel() {
                           </Badge>
                         </div>
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          <span>Requested by {requesterName}</span>
-                          <span>Fulfiller: {fulfillerName}</span>
-                          <span>Recipient: {recipientName}</span>
+                          <span>{t("inventory.requestedBy")} {requesterName}</span>
+                          <span>{t("inventory.fulfiller2")} {fulfillerName}</span>
+                          <span>{t("inventory.recipient2")} {recipientName}</span>
                         </div>
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                           <span>
-                            Requested {formatTimestamp(transfer.requested_at)}
+                            {t("inventory.requested")} {formatTimestamp(transfer.requested_at)}
                           </span>
                           <span>
-                            Target delivery {formatDate(transfer.delivery_date)}
+                            {t("inventory.targetDelivery")} {formatDate(transfer.delivery_date)}
                           </span>
                         </div>
                         {transfer.status_note && (
@@ -987,8 +976,7 @@ export function InventoryTransfersPanel() {
                       </div>
                       <div className="rounded-md border px-4 py-2 text-right">
                         <div className="text-xs uppercase text-muted-foreground">
-                          Total cost
-                        </div>
+                          {t("inventory.totalCost")} </div>
                         <div className="text-lg font-semibold">
                           {currencyFormatter.format(transfer.total_cost ?? 0)}
                         </div>
@@ -1005,17 +993,13 @@ export function InventoryTransfersPanel() {
                         <thead className="bg-muted/50">
                           <tr>
                             <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                              Item
-                            </th>
+                              {t("inventory.item")} </th>
                             <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                              Quantity
-                            </th>
+                              {t("inventory.quantity")} </th>
                             <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                              Cost / unit
-                            </th>
+                              {t("inventory.costUnit")} </th>
                             <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                              Line total
-                            </th>
+                              {t("inventory.lineTotal")} </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -1062,11 +1046,10 @@ export function InventoryTransfersPanel() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2 font-medium">
                           <CircleCheck className="h-4 w-4 text-primary" />
-                          Audit trail
-                        </div>
+                          {t("inventory.auditTrail")} </div>
                         <div className="space-y-1 text-muted-foreground">
                           {(transfer.audit ?? []).length === 0 ? (
-                            <p className="text-xs">No events recorded yet.</p>
+                            <p className="text-xs">{t("inventory.noEventsRecordedYet")}</p>
                           ) : (
                             (transfer.audit ?? []).map((entry) => {
                               const actor = formatEmployeeName(
@@ -1079,7 +1062,7 @@ export function InventoryTransfersPanel() {
                                     {formatTimestamp(entry.created_at)}
                                   </span>{" "}
                                   — {actionLabels[entry.action] || entry.action}{" "}
-                                  by {actor}
+                                  {t("inventory.by")} {actor}
                                   {entry.note ? ` · ${entry.note}` : ""}
                                 </div>
                               );
@@ -1095,8 +1078,7 @@ export function InventoryTransfersPanel() {
                             onClick={() => openStatusDialog(transfer, "sent")}
                             disabled={updateTransferStatus.isPending}
                           >
-                            Mark as sent
-                          </Button>
+                            {t("inventory.markAsSent")} </Button>
                         )}
                         {canMarkAsReceived(transfer) && (
                           <Button
@@ -1105,8 +1087,7 @@ export function InventoryTransfersPanel() {
                             }
                             disabled={updateTransferStatus.isPending}
                           >
-                            Mark as received
-                          </Button>
+                            {t("inventory.markAsReceived")} </Button>
                         )}
                         {canReject(transfer) && (
                           <Button
@@ -1117,8 +1098,7 @@ export function InventoryTransfersPanel() {
                             disabled={updateTransferStatus.isPending}
                           >
                             <XCircle className="mr-2 h-4 w-4" />
-                            Reject transfer
-                          </Button>
+                            {t("inventory.rejectTransfer")} </Button>
                         )}
                       </div>
                     </div>
@@ -1159,20 +1139,19 @@ export function InventoryTransfersPanel() {
                 : ""}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="status-note">Note (optional)</Label>
+              <Label htmlFor="status-note">{t("inventory.noteOptional")}</Label>
               <Textarea
                 id="status-note"
                 value={statusNote}
                 onChange={(event) => setStatusNote(event.target.value)}
                 rows={3}
-                placeholder="Add an optional note for recipients"
+                placeholder={t("inventory.addAnOptionalNoteForRecipients")}
               />
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={closeStatusDialog}>
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button
               onClick={handleStatusSubmit}
               disabled={updateTransferStatus.isPending}

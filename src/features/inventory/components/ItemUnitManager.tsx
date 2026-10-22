@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -34,6 +35,7 @@ export function ItemUnitManager({
   open,
   onOpenChange,
 }: ItemUnitManagerProps) {
+  const { t } = useTranslation();
   const { units: itemUnits, isLoading } = useItemUnits(itemId);
   const { data: availableUnits } = useInventoryUnits();
   const createItemUnit = useCreateItemUnit();
@@ -128,18 +130,17 @@ export function ItemUnitManager({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Unit Configuration - {itemName}
+            {t("inventory.unitConfiguration")} {itemName}
           </DialogTitle>
           <DialogDescription>
-            Configure multi-level unit hierarchy for this item
-          </DialogDescription>
+            {t("inventory.configureMultiLevelUnitHierarchyForThisItem")} </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Example Display */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Item Display Preview</CardTitle>
+              <CardTitle className="text-sm">{t("inventory.itemDisplayPreview")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="font-mono text-lg bg-muted p-3 rounded">
@@ -152,24 +153,21 @@ export function ItemUnitManager({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                Current Unit Configuration
-                <Button
+                {t("inventory.currentUnitConfiguration")} <Button
                   size="sm"
                   onClick={() => setIsAddingUnit(true)}
                   disabled={isAddingUnit}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Unit Level
-                </Button>
+                  {t("inventory.addUnitLevel")} </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div>Loading units...</div>
+                <div>{t("inventory.loadingUnits")}</div>
               ) : sortedUnits.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No units configured. Add your first unit level to get started.
-                </div>
+                  {t("inventory.noUnitsConfiguredAddYourFirstUnitLevelToGetStarted")} </div>
               ) : (
                 <div className="space-y-4">
                   {sortedUnits.map((unit, _index) => (
@@ -178,7 +176,7 @@ export function ItemUnitManager({
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div className="flex items-center space-x-4">
-                        <Badge variant="outline">Level {unit.unit_level}</Badge>
+                        <Badge variant="outline">{t("inventory.level")} {unit.unit_level}</Badge>
                         <div>
                           <div className="font-medium">
                             {formatUnitDisplay(unit)}
@@ -189,7 +187,7 @@ export function ItemUnitManager({
                           </div>
                           {unit.cost_per_unit && (
                             <div className="text-sm text-muted-foreground">
-                              Cost: ${unit.cost_per_unit.toFixed(2)} per{" "}
+                              {t("inventory.cost2")}{unit.cost_per_unit.toFixed(2)} {t("inventory.per")}{" "}
                               {unit.unit?.abbreviation}
                             </div>
                           )}
@@ -197,9 +195,9 @@ export function ItemUnitManager({
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        {unit.is_primary && <Badge>Primary</Badge>}
+                        {unit.is_primary && <Badge>{t("inventory.primary")}</Badge>}
                         {unit.is_countable && (
-                          <Badge variant="outline">Countable</Badge>
+                          <Badge variant="outline">{t("inventory.countable")}</Badge>
                         )}
                         <Button
                           size="sm"
@@ -220,12 +218,12 @@ export function ItemUnitManager({
           {isAddingUnit && (
             <Card>
               <CardHeader>
-                <CardTitle>Add New Unit Level</CardTitle>
+                <CardTitle>{t("inventory.addNewUnitLevel")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="unit-type">Unit Type</Label>
+                    <Label htmlFor="unit-type">{t("inventory.unitType")}</Label>
                     <select
                       id="unit-type"
                       value={newUnitData.unitid}
@@ -237,7 +235,7 @@ export function ItemUnitManager({
                       }
                       className="w-full px-3 py-2 border rounded-md"
                     >
-                      <option value="">Select unit type...</option>
+                      <option value="">{t("inventory.selectUnitType")}</option>
                       {availableUnits
                         ?.filter(
                           (unit) =>
@@ -252,7 +250,7 @@ export function ItemUnitManager({
                   </div>
 
                   <div>
-                    <Label htmlFor="unit-level">Unit Level</Label>
+                    <Label htmlFor="unit-level">{t("inventory.unitLevel")}</Label>
                     <Input
                       id="unit-level"
                       type="number"
@@ -269,14 +267,12 @@ export function ItemUnitManager({
 
                   <div>
                     <Label htmlFor="conversion-factor">
-                      Conversion Factor
-                      <div className="text-xs text-muted-foreground">
-                        How many{" "}
+                      {t("inventory.conversionFactor")} <div className="text-xs text-muted-foreground">
+                        {t("inventory.howMany")}{" "}
                         {sortedUnits.length > 0
                           ? "of the previous level"
                           : "base units"}{" "}
-                        this contains
-                      </div>
+                        {t("inventory.thisContains")} </div>
                     </Label>
                     <Input
                       id="conversion-factor"
@@ -295,8 +291,7 @@ export function ItemUnitManager({
 
                   <div>
                     <Label htmlFor="cost-per-unit">
-                      Cost Per Unit (Optional)
-                    </Label>
+                      {t("inventory.costPerUnitOptional")} </Label>
                     <Input
                       id="cost-per-unit"
                       type="number"
@@ -326,7 +321,7 @@ export function ItemUnitManager({
                         }))
                       }
                     />
-                    <span className="text-sm">Set as primary unit</span>
+                    <span className="text-sm">{t("inventory.setAsPrimaryUnit")}</span>
                   </label>
 
                   <label className="flex items-center space-x-2 cursor-pointer">
@@ -340,7 +335,7 @@ export function ItemUnitManager({
                         }))
                       }
                     />
-                    <span className="text-sm">Countable in inventory</span>
+                    <span className="text-sm">{t("inventory.countableInInventory")}</span>
                   </label>
                 </div>
 
@@ -349,14 +344,12 @@ export function ItemUnitManager({
                     variant="outline"
                     onClick={() => setIsAddingUnit(false)}
                   >
-                    Cancel
-                  </Button>
+                    {t("common.cancel")} </Button>
                   <Button
                     onClick={handleAddUnit}
                     disabled={!newUnitData.unitid || createItemUnit.isPending}
                   >
-                    Add Unit Level
-                  </Button>
+                    {t("inventory.addUnitLevel")} </Button>
                 </div>
               </CardContent>
             </Card>
@@ -366,22 +359,17 @@ export function ItemUnitManager({
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">
-                Example: Hot 16oz Cup Lid
-              </CardTitle>
+                {t("inventory.exampleHot16ozCupLid")} </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                <div>• Level 1: EA (Each) - Base unit</div>
+                <div>{t("inventory.level1EaEachBaseUnit")}</div>
                 <div>
-                  • Level 2: PK (Pack of 50 EA) - Contains 50 individual lids
-                </div>
+                  {t("inventory.level2PkPackOf50EaContains50IndividualLids")} </div>
                 <div>
-                  • Level 3: CS (Case of 20 packs) - Contains 1,000 EA (20 × 50)
-                </div>
+                  {t("inventory.level3CsCaseOf20PacksContains1000Ea2050")} </div>
                 <div className="text-muted-foreground mt-3">
-                  This creates the hierarchy: EA → Pack of 50 → Case (20 × 50
-                  EA)
-                </div>
+                  {t("inventory.thisCreatesTheHierarchyEaPackOf50Case2050Ea")} </div>
               </div>
             </CardContent>
           </Card>

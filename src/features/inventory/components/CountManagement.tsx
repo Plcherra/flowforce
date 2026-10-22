@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -103,6 +104,7 @@ const formatCountStatus = (status?: string | null) => {
 };
 
 export function CountManagement({ onViewCount }: CountManagementProps) {
+  const { t } = useTranslation();
   const { counts, loading, deleteCount } = useInventoryCounts();
   const { toast } = useToast();
 
@@ -127,7 +129,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
   };
 
   if (loading) {
-    return <div>Loading counts...</div>;
+    return <div>{t("inventory.loadingCounts")}</div>;
   }
 
   const groupedCounts = counts.reduce<
@@ -169,10 +171,9 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
         <Card>
           <CardContent className="p-8 text-center">
             <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold mb-2">No Counts Yet</h3>
+            <h3 className="font-semibold mb-2">{t("inventory.noCountsYet")}</h3>
             <p className="text-muted-foreground">
-              Create your first inventory count to get started
-            </p>
+              {t("inventory.createYourFirstInventoryCountToGetStarted")} </p>
           </CardContent>
         </Card>
       ) : (
@@ -201,8 +202,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                     (total, section) => total + section.counts.length,
                     0,
                   )}{" "}
-                  counts
-                </span>
+                  {t("inventory.counts")} </span>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
@@ -242,7 +242,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                   </Badge>
                                 </div>
                                 <p className="text-xs text-muted-foreground">
-                                  Created{" "}
+                                  {t("forms.created")}{" "}
                                   {new Date(count.created_at).toLocaleString()}
                                 </p>
                               </div>
@@ -253,8 +253,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                   className="flex items-center gap-2"
                                 >
                                   <Edit className="h-3 w-3" />
-                                  Open
-                                </Button>
+                                  {t("shell.open")} </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -267,16 +266,14 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                   className="flex items-center gap-2"
                                 >
                                   <Trash className="h-3 w-3" />
-                                  Delete
-                                </Button>
+                                  {t("common.delete")} </Button>
                               </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 bg-muted/30 rounded-lg p-3 text-xs">
                               <div>
                                 <div className="text-muted-foreground">
-                                  Count date
-                                </div>
+                                  {t("inventory.countDate")} </div>
                                 <div className="font-medium">
                                   {new Date(
                                     count.count_date,
@@ -286,8 +283,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                               </div>
                               <div>
                                 <div className="text-muted-foreground">
-                                  Done
-                                </div>
+                                  {t("inventory.done")} </div>
                                 <div>
                                   {count.completed_at
                                     ? new Date(
@@ -311,7 +307,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                             {count.description && (
                               <div className="text-sm">
                                 <span className="font-medium">
-                                  Description:{" "}
+                                  {t("inventory.description2")}{" "}
                                 </span>
                                 <span className="text-muted-foreground">
                                   {count.description}
@@ -321,7 +317,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
 
                             {count.notes && (
                               <div className="text-sm">
-                                <span className="font-medium">Notes: </span>
+                                <span className="font-medium">{t("inventory.notes")} </span>
                                 <span className="text-muted-foreground">
                                   {count.notes}
                                 </span>

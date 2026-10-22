@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Dialog,
@@ -38,20 +39,19 @@ export function IntegrationDialog({
   onSubmit,
   isSubmitting,
 }: IntegrationDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <form onSubmit={onSubmit} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Link Supplier Integration</DialogTitle>
+            <DialogTitle>{t("inventory.linkSupplierIntegration")}</DialogTitle>
             <DialogDescription>
-              Connect supplier APIs to sync catalogs, pricing, and order
-              statuses automatically.
-            </DialogDescription>
+              {t("inventory.connectSupplierApisToSyncCatalogsPricingAndOrderStatusesAutomatically")} </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="integration-provider">Provider</Label>
+              <Label htmlFor="integration-provider">{t("inventory.provider")}</Label>
               <Select
                 value={form.provider ?? ""}
                 onValueChange={(value) =>
@@ -78,29 +78,29 @@ export function IntegrationDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="integration-account">Account Identifier</Label>
+              <Label htmlFor="integration-account">{t("inventory.accountIdentifier")}</Label>
               <Input
                 id="integration-account"
                 value={form.account_id}
                 onChange={(event) =>
                   onFormChange({ account_id: event.target.value })
                 }
-                placeholder="e.g. MarketMan store ID or vendor account number"
+                placeholder={t("inventory.eGMarketmanStoreIdOrVendorAccountNumber")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="integration-key">API Key / Secret</Label>
+              <Label htmlFor="integration-key">{t("inventory.apiKeySecret")}</Label>
               <Input
                 id="integration-key"
                 value={form.api_key}
                 onChange={(event) =>
                   onFormChange({ api_key: event.target.value })
                 }
-                placeholder="Secure credential (stored encrypted)"
+                placeholder={t("inventory.secureCredentialStoredEncrypted")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="integration-notes">Integration Notes</Label>
+              <Label htmlFor="integration-notes">{t("inventory.integrationNotes")}</Label>
               <Textarea
                 id="integration-notes"
                 rows={3}
@@ -108,7 +108,7 @@ export function IntegrationDialog({
                 onChange={(event) =>
                   onFormChange({ notes: event.target.value })
                 }
-                placeholder="Connection details, sync cadence, or contacts."
+                placeholder={t("inventory.connectionDetailsSyncCadenceOrContacts")}
               />
             </div>
           </div>
@@ -118,8 +118,7 @@ export function IntegrationDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Linking..." : "Save Integration"}
             </Button>

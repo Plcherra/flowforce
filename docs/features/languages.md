@@ -266,7 +266,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 12 — Inventory component strings
 
-- [ ] Move Inventory component chrome into the six locales.
+- [x] Move Inventory component chrome into the six locales.
 
 Rules:
 
@@ -932,6 +932,22 @@ Phone steps for Pedro:
 3. Open a chat if you have one. Send, and the empty-chat line, should follow the language. Switch to Deutsch and open a group’s settings if you can. Delete group and the privacy label should be German.
 4. Search messages with at least two letters. The result count should be a full phrase in the current language.
 5. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 12 Inventory component strings
+
+Shipped: Inventory component chrome under `src/features/inventory/components` now uses `useTranslation` and the `inventory` namespace. The same strings are in en, es, pt, fr, it, and de. The ten inventory keys that already existed stay, including the page description. New labels that shared a key name use a separate key. Item names, counts, and supplier data stay as stored text. Counts that sit next to a word are one phrase. Screen names Toast, QuickBooks, MarketMan, and Items & Setup stay as written. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 2581 keys for each locale and `hard-coded strings 2359`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/inventory/components`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Inventory.
+2. Set your language to Español on Settings, then Region. Reload. The item list, counts, and purchasing tabs should be in Spanish. An item name someone typed stays as they wrote it.
+3. Open a purchase order or a count if you have one. The column headers and empty states should follow the language. Switch to Deutsch and check a low-stock line. The current and minimum labels should be German, and the numbers stay numbers.
+4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
 

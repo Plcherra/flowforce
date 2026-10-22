@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ const createInitialFormState = (): ExpenseFormState => ({
 });
 
 export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<ExpenseFormState>(
     createInitialFormState(),
   );
@@ -132,23 +134,23 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div>
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="category">{t("dashboard.category")}</Label>
         <Select value={formData.category} onValueChange={handleCategoryChange}>
           <SelectTrigger
             id="category"
             aria-invalid={Boolean(errors.category)}
             aria-describedby={errors.category ? "category-error" : undefined}
           >
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder={t("inventory.selectCategory")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="travel">Travel</SelectItem>
-            <SelectItem value="meals">Meals</SelectItem>
-            <SelectItem value="office">Office Supplies</SelectItem>
-            <SelectItem value="equipment">Equipment</SelectItem>
-            <SelectItem value="software">Software</SelectItem>
-            <SelectItem value="utilities">Utilities</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
+            <SelectItem value="travel">{t("inventory.travel")}</SelectItem>
+            <SelectItem value="meals">{t("inventory.meals")}</SelectItem>
+            <SelectItem value="office">{t("inventory.officeSupplies")}</SelectItem>
+            <SelectItem value="equipment">{t("inventory.equipment")}</SelectItem>
+            <SelectItem value="software">{t("inventory.software")}</SelectItem>
+            <SelectItem value="utilities">{t("inventory.utilities")}</SelectItem>
+            <SelectItem value="other">{t("schedule.other")}</SelectItem>
           </SelectContent>
         </Select>
         {errors.category ? (
@@ -159,7 +161,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("tasks.description")}</Label>
         <Input
           id="description"
           value={formData.description}
@@ -174,7 +176,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="amount">Amount</Label>
+        <Label htmlFor="amount">{t("inventory.amount")}</Label>
         <Input
           id="amount"
           type="number"
@@ -194,7 +196,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="expense_date">Expense Date</Label>
+        <Label htmlFor="expense_date">{t("inventory.expenseDate")}</Label>
         <Input
           id="expense_date"
           type="date"
@@ -210,7 +212,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t("schedule.notes")}</Label>
         <Textarea
           id="notes"
           value={formData.notes}
@@ -223,8 +225,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
 
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
+          {t("common.cancel")} </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create Expense"}
         </Button>

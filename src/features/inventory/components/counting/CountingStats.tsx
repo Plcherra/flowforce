@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -26,6 +27,7 @@ export function CountingStats({
   editStats,
   formatTime,
 }: CountingStatsProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       {/* Summary Stats */}
@@ -33,25 +35,25 @@ export function CountingStats({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">{itemsCompleted}</div>
-            <div className="text-sm text-muted-foreground">Items Completed</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.itemsCompleted")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">{itemsCounted}</div>
-            <div className="text-sm text-muted-foreground">Items Counted</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.itemsCounted")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">{itemsRemaining}</div>
-            <div className="text-sm text-muted-foreground">Remaining</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.remaining")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">${totalAmount.toFixed(2)}</div>
-            <div className="text-sm text-muted-foreground">Total Amount</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.totalAmount")}</div>
           </CardContent>
         </Card>
         <Card>
@@ -60,8 +62,7 @@ export function CountingStats({
               {significantVariances}
             </div>
             <div className="text-sm text-muted-foreground">
-              Significant Variances
-            </div>
+              {t("inventory.significantVariances")} </div>
           </CardContent>
         </Card>
       </div>
@@ -73,28 +74,25 @@ export function CountingStats({
             <div className="flex items-center gap-3 mb-4">
               <CheckCircle2 className="h-6 w-6 text-success" />
               <h3 className="text-lg font-semibold text-success">
-                Counting Completed
-              </h3>
+                {t("inventory.countingCompleted")} </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="font-medium text-success">Time Spent:</span>
+                <span className="font-medium text-success">{t("inventory.timeSpent")}</span>
                 <p className="text-success text-lg font-bold">
                   {formatTime(countingStats.totalTimeSpent)}
                 </p>
               </div>
               <div>
                 <span className="font-medium text-success">
-                  Items Counted:
-                </span>
+                  {t("inventory.itemsCounted2")} </span>
                 <p className="text-success text-lg font-bold">
                   {countingStats.itemsCounted}
                 </p>
               </div>
               <div>
                 <span className="font-medium text-success">
-                  Items per Minute:
-                </span>
+                  {t("inventory.itemsPerMinute")} </span>
                 <p className="text-success text-lg font-bold">
                   {countingStats.itemsPerMinute}
                 </p>
@@ -111,20 +109,18 @@ export function CountingStats({
             <div className="flex items-center gap-3 mb-4">
               <Clock className="h-6 w-6 text-warning" />
               <h3 className="text-lg font-semibold text-warning-foreground">
-                Edit Session Completed
-              </h3>
+                {t("inventory.editSessionCompleted")} </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-warning-foreground">Edit Time:</span>
+                <span className="font-medium text-warning-foreground">{t("inventory.editTime")}</span>
                 <p className="text-warning-foreground text-lg font-bold">
                   {formatTime(editStats.editTimeSpent)}
                 </p>
               </div>
               <div>
                 <span className="font-medium text-warning-foreground">
-                  Items Edited:
-                </span>
+                  {t("inventory.itemsEdited")} </span>
                 <p className="text-warning-foreground text-lg font-bold">
                   {editStats.itemsEdited}
                 </p>

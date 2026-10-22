@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Clock, Edit, Play, Pause } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export function CountingTimers({
   onStartEditTimer,
   onStopEditTimer,
 }: CountingTimersProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex gap-4 items-center">
       {/* Counting Timer */}
@@ -36,7 +38,7 @@ export function CountingTimers({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Counting Time</span>
+              <span className="text-sm font-medium">{t("inventory.countingTime")}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-mono font-bold text-primary">
@@ -66,7 +68,7 @@ export function CountingTimers({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Edit className="h-4 w-4 text-warning" />
-                <span className="text-sm font-medium">Edit Time</span>
+                <span className="text-sm font-medium">{t("inventory.editTime2")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-mono font-bold text-warning">
@@ -96,8 +98,7 @@ export function CountingTimers({
       {isEditMode && (
         <Badge variant="secondary" className="h-12 px-4">
           <Edit className="h-4 w-4 mr-2" />
-          Edit Mode
-        </Badge>
+          {t("inventory.editMode")} </Badge>
       )}
     </div>
   );

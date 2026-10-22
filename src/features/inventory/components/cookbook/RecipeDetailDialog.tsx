@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ export function RecipeDetailDialog({
   onExport,
   isFavorite,
 }: RecipeDetailDialogProps) {
+  const { t } = useTranslation();
   if (!recipe) return null;
 
   const yieldUnit =
@@ -46,17 +48,17 @@ export function RecipeDetailDialog({
               <UtensilsCrossed className="h-5 w-5 text-primary" />
               {recipe.item.name}
             </span>
-            {isFavorite && <Badge variant="secondary">Favorite</Badge>}
+            {isFavorite && <Badge variant="secondary">{t("inventory.favorite")}</Badge>}
           </DialogTitle>
           <DialogDescription className="flex flex-wrap items-center gap-2 text-sm">
             <Badge variant="outline">
-              Yield: {recipe.yieldQuantity} {yieldUnit}
+              {t("inventory.yield")} {recipe.yieldQuantity} {yieldUnit}
             </Badge>
             <Badge variant="outline">
-              Total cost ${recipe.totalCost.toFixed(2)}
+              {t("inventory.totalCost4")}{recipe.totalCost.toFixed(2)}
             </Badge>
             <Badge variant="outline">
-              Cost per {yieldUnit} ${recipe.costPerUnit.toFixed(2)}
+              {t("inventory.costPer")} {yieldUnit} ${recipe.costPerUnit.toFixed(2)}
             </Badge>
           </DialogDescription>
         </DialogHeader>
@@ -65,7 +67,7 @@ export function RecipeDetailDialog({
           <div className="grid gap-6 pb-10">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Ingredient Breakdown</CardTitle>
+                <CardTitle>{t("inventory.ingredientBreakdown")}</CardTitle>
                 {onExport && (
                   <Button
                     size="sm"
@@ -73,17 +75,16 @@ export function RecipeDetailDialog({
                     onClick={() => onExport(recipe.item.id)}
                   >
                     <FileDown className="h-4 w-4 mr-2" />
-                    Export Sheet
-                  </Button>
+                    {t("inventory.exportSheet")} </Button>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-12 text-xs font-medium uppercase text-muted-foreground">
-                  <span className="col-span-4">Inventory Item</span>
-                  <span className="col-span-2 text-right">Qty Needed</span>
-                  <span className="col-span-2 text-right">Unit</span>
-                  <span className="col-span-2 text-right">Unit Cost</span>
-                  <span className="col-span-2 text-right">Line Cost</span>
+                  <span className="col-span-4">{t("inventory.inventoryItem")}</span>
+                  <span className="col-span-2 text-right">{t("inventory.qtyNeeded")}</span>
+                  <span className="col-span-2 text-right">{t("schedule.unit")}</span>
+                  <span className="col-span-2 text-right">{t("inventory.unitCost")}</span>
+                  <span className="col-span-2 text-right">{t("inventory.lineCost")}</span>
                 </div>
                 <Separator />
                 <div className="space-y-3 text-sm">
@@ -119,12 +120,10 @@ export function RecipeDetailDialog({
                 <Separator />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>
-                    {recipe.lines.length} ingredients •{" "}
-                    {formatNumber(totalIngredients)} units total
-                  </span>
+                    {recipe.lines.length} {t("inventory.ingredients3")}{" "}
+                    {formatNumber(totalIngredients)} {t("inventory.unitsTotal")} </span>
                   <span>
-                    Live costs sourced from Items &amp; Setup inventory records
-                  </span>
+                    {t("inventory.liveCostsSourcedFromItemsSetupInventoryRecords")} </span>
                 </div>
               </CardContent>
             </Card>
@@ -132,44 +131,44 @@ export function RecipeDetailDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Nutrition</CardTitle>
+                  <CardTitle>{t("inventory.nutrition")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {recipe.nutrition ? (
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       {recipe.nutrition.calories && (
                         <NutritionStat
-                          label="Calories"
+                          label={t("inventory.calories")}
                           value={`${formatNumber(recipe.nutrition.calories)} kcal`}
                         />
                       )}
                       {recipe.nutrition.protein && (
                         <NutritionStat
-                          label="Protein"
+                          label={t("inventory.protein")}
                           value={`${formatNumber(recipe.nutrition.protein)} g`}
                         />
                       )}
                       {recipe.nutrition.carbs && (
                         <NutritionStat
-                          label="Carbs"
+                          label={t("inventory.carbs")}
                           value={`${formatNumber(recipe.nutrition.carbs)} g`}
                         />
                       )}
                       {recipe.nutrition.fat && (
                         <NutritionStat
-                          label="Fat"
+                          label={t("inventory.fat")}
                           value={`${formatNumber(recipe.nutrition.fat)} g`}
                         />
                       )}
                       {recipe.nutrition.sodium && (
                         <NutritionStat
-                          label="Sodium"
+                          label={t("inventory.sodium")}
                           value={`${formatNumber(recipe.nutrition.sodium)} mg`}
                         />
                       )}
                       {recipe.nutrition.fiber && (
                         <NutritionStat
-                          label="Fiber"
+                          label={t("inventory.fiber")}
                           value={`${formatNumber(recipe.nutrition.fiber)} g`}
                         />
                       )}
@@ -186,19 +185,17 @@ export function RecipeDetailDialog({
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Inventory Link</CardTitle>
+                  <CardTitle>{t("inventory.inventoryLink")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <div>
                     <span className="text-muted-foreground block">
-                      Inventory Item ID
-                    </span>
+                      {t("inventory.inventoryItemId")} </span>
                     <span className="font-medium">{recipe.item.id}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground block">
-                      Unit of Measure
-                    </span>
+                      {t("inventory.unitOfMeasure")} </span>
                     <span className="font-medium">
                       {recipe.item.unit?.name} ({recipe.item.unit?.abbreviation}
                       )
@@ -207,8 +204,7 @@ export function RecipeDetailDialog({
                   <Button asChild variant="outline" size="sm" className="gap-2">
                     <a href="/app/inventory/items" target="_blank" rel="noreferrer">
                       <LinkIcon className="h-4 w-4" />
-                      Open in Items &amp; Setup
-                    </a>
+                      {t("inventory.openInItemsSetup")} </a>
                   </Button>
                 </CardContent>
               </Card>

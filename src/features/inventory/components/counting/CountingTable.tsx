@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Save, CheckCircle2, Package, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -40,14 +41,14 @@ export function CountingTable({
   calculateVariance: _calculateVariance,
   getVarianceStatus: _getVarianceStatus,
 }: CountingTableProps) {
+  const { t } = useTranslation();
   if (items.length === 0) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
           <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">
-            No items match your current filters.
-          </p>
+            {t("inventory.noItemsMatchYourCurrentFilters")} </p>
         </CardContent>
       </Card>
     );
@@ -61,18 +62,15 @@ export function CountingTable({
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold w-48">
-                  Item Details
-                </TableHead>
-                <TableHead className="font-semibold w-32">Category</TableHead>
-                <TableHead className="font-semibold w-32">Location</TableHead>
-                <TableHead className="font-semibold w-24">Min/Max</TableHead>
-                <TableHead className="font-semibold w-24">Shelf Life</TableHead>
+                  {t("inventory.itemDetails")} </TableHead>
+                <TableHead className="font-semibold w-32">{t("dashboard.category")}</TableHead>
+                <TableHead className="font-semibold w-32">{t("schedule.location")}</TableHead>
+                <TableHead className="font-semibold w-24">{t("inventory.minMax")}</TableHead>
+                <TableHead className="font-semibold w-24">{t("inventory.shelfLife")}</TableHead>
                 <TableHead className="text-center font-semibold">
-                  Units to Count
-                </TableHead>
+                  {t("inventory.unitsToCount")} </TableHead>
                 <TableHead className="text-center font-semibold w-24">
-                  Total Price
-                </TableHead>
+                  {t("inventory.totalPrice")} </TableHead>
                 <TableHead className="w-24"></TableHead>
               </TableRow>
             </TableHeader>
@@ -119,13 +117,12 @@ export function CountingTable({
                         )}
                         {item.sku && (
                           <div className="text-xs text-muted-foreground">
-                            SKU: {item.sku}
+                            {t("inventory.sku")} {item.sku}
                           </div>
                         )}
                         {item.isprep_item && (
                           <Badge variant="secondary" className="text-xs">
-                            Prep Item
-                          </Badge>
+                            {t("inventory.prepItem")} </Badge>
                         )}
                       </div>
                     </TableCell>
@@ -154,12 +151,12 @@ export function CountingTable({
                       <div className="text-xs space-y-1">
                         {item.min_stock_level && (
                           <div className="text-success">
-                            Min: {item.min_stock_level}
+                            {t("inventory.min2")} {item.min_stock_level}
                           </div>
                         )}
                         {item.max_stock_level && (
                           <div className="text-destructive">
-                            Max: {item.max_stock_level}
+                            {t("inventory.max")} {item.max_stock_level}
                           </div>
                         )}
                         {!item.min_stock_level && !item.max_stock_level && (

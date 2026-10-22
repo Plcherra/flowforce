@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Dialog,
@@ -37,31 +38,31 @@ export function VendorInvoiceDialog({
   onSubmit,
   isSubmitting,
 }: VendorInvoiceDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <form onSubmit={onSubmit} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Log Vendor Invoice</DialogTitle>
+            <DialogTitle>{t("inventory.logVendorInvoice")}</DialogTitle>
             <DialogDescription>
-              Capture invoice details to reconcile against the purchase order.
-            </DialogDescription>
+              {t("inventory.captureInvoiceDetailsToReconcileAgainstThePurchaseOrder")} </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="invoice-number">Invoice Number</Label>
+                <Label htmlFor="invoice-number">{t("inventory.invoiceNumber")}</Label>
                 <Input
                   id="invoice-number"
                   value={form.invoiceNumber}
                   onChange={(event) =>
                     onFormChange({ invoiceNumber: event.target.value })
                   }
-                  placeholder="Invoice #"
+                  placeholder={t("inventory.invoice2")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="invoice-amount">Amount</Label>
+                <Label htmlFor="invoice-amount">{t("inventory.amount")}</Label>
                 <Input
                   id="invoice-amount"
                   type="number"
@@ -74,7 +75,7 @@ export function VendorInvoiceDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="invoice-due">Due Date</Label>
+                <Label htmlFor="invoice-due">{t("forms.dueDate")}</Label>
                 <Input
                   id="invoice-due"
                   type="date"
@@ -85,7 +86,7 @@ export function VendorInvoiceDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="payment-method">Payment Method</Label>
+                <Label htmlFor="payment-method">{t("inventory.paymentMethod")}</Label>
                 <Select
                   value={form.paymentMethod}
                   onValueChange={(value) =>
@@ -97,18 +98,17 @@ export function VendorInvoiceDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="bank_transfer">
-                      Bank transfer / ACH
-                    </SelectItem>
-                    <SelectItem value="check">Check</SelectItem>
-                    <SelectItem value="credit_card">Credit card</SelectItem>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                      {t("inventory.bankTransferAch")} </SelectItem>
+                    <SelectItem value="check">{t("inventory.check")}</SelectItem>
+                    <SelectItem value="credit_card">{t("inventory.creditCard2")}</SelectItem>
+                    <SelectItem value="cash">{t("inventory.cash")}</SelectItem>
+                    <SelectItem value="other">{t("schedule.other")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="invoice-notes">Notes</Label>
+              <Label htmlFor="invoice-notes">{t("schedule.notes")}</Label>
               <Textarea
                 id="invoice-notes"
                 rows={3}
@@ -116,7 +116,7 @@ export function VendorInvoiceDialog({
                 onChange={(event) =>
                   onFormChange({ notes: event.target.value })
                 }
-                placeholder="Add memo or reconciliation details."
+                placeholder={t("inventory.addMemoOrReconciliationDetails")}
               />
             </div>
           </div>
@@ -126,8 +126,7 @@ export function VendorInvoiceDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Invoice"}
             </Button>

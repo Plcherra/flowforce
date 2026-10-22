@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -28,6 +29,7 @@ export function ItemSelector({
   onItemsSelected,
   excludeIds = [],
 }: ItemSelectorProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const { data: items, isLoading } = useInventoryItems();
@@ -77,12 +79,9 @@ export function ItemSelector({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Select Items for Count
-          </DialogTitle>
+            {t("inventory.selectItemsForCount")} </DialogTitle>
           <DialogDescription>
-            Choose catalog items to include. Expected quantity comes from
-            current on-hand, not a typed guess.
-          </DialogDescription>
+            {t("inventory.chooseCatalogItemsToIncludeExpectedQuantityComesFromCurrentOnHandNotATypedGuess")} </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -90,7 +89,7 @@ export function ItemSelector({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search items..."
+              placeholder={t("inventory.searchItems")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -100,11 +99,10 @@ export function ItemSelector({
           {/* Items List */}
           <div className="max-h-96 overflow-y-auto space-y-2">
             {isLoading ? (
-              <div className="text-center py-8">Loading items...</div>
+              <div className="text-center py-8">{t("inventory.loadingItems")}</div>
             ) : filteredItems.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No items found
-              </div>
+                {t("inventory.noItemsFound")} </div>
             ) : (
               filteredItems.map((item) => (
                 <Card
@@ -123,7 +121,7 @@ export function ItemSelector({
                         <h4 className="font-medium">{item.name}</h4>
                         {item.sku && (
                           <p className="text-xs text-muted-foreground">
-                            SKU: {item.sku}
+                            {t("inventory.sku")} {item.sku}
                           </p>
                         )}
                         {item.description && (
@@ -156,24 +154,25 @@ export function ItemSelector({
           {selectedItems.size > 0 && (
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm font-medium">
-                {selectedItems.size} item{selectedItems.size !== 1 ? "s" : ""}{" "}
-                selected
-              </p>
+                {selectedItems.size === 1
+                  ? t("inventory.oneItemSelected", { count: selectedItems.size })
+                  : t("inventory.manyItemsSelected", { count: selectedItems.size })} </p>
             </div>
           )}
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
-          </Button>
+            {t("common.cancel")} </Button>
           <Button
             onClick={handleConfirm}
             disabled={selectedItems.size === 0}
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Add {selectedItems.size} Item{selectedItems.size !== 1 ? "s" : ""}
+            {selectedItems.size === 1
+              ? t("inventory.addOneItem", { count: selectedItems.size })
+              : t("inventory.addManyItems", { count: selectedItems.size })}
           </Button>
         </div>
       </DialogContent>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Card,
@@ -66,6 +67,7 @@ export function VendorInvoicesTab({
   onLogInvoice,
   outstandingByPo,
 }: VendorInvoicesTabProps) {
+  const { t } = useTranslation();
   const openInvoices = vendorInvoices.filter(
     (invoice) => invoice.status === "pending" || invoice.status === "approved",
   ).length;
@@ -80,12 +82,9 @@ export function VendorInvoicesTab({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Vendor Invoices
-          </CardTitle>
+            {t("inventory.vendorInvoices")} </CardTitle>
           <CardDescription>
-            Track invoices, payment status, and outstanding balances for each
-            purchase order.
-          </CardDescription>
+            {t("inventory.trackInvoicesPaymentStatusAndOutstandingBalancesForEachPurchaseOrder")} </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -93,15 +92,14 @@ export function VendorInvoicesTab({
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label className="text-xs uppercase text-muted-foreground">
-                    Purchase Order
-                  </Label>
+                    {t("inventory.purchaseOrder")} </Label>
                   <Select
                     value={selectedInvoicePoId}
                     onValueChange={onInvoicePoChange}
                     disabled={ordersLoading}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select purchase order" />
+                      <SelectValue placeholder={t("inventory.selectPurchaseOrder")} />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
                       {purchaseOrders.map((po) => (
@@ -119,8 +117,7 @@ export function VendorInvoicesTab({
                   disabled={!selectedInvoicePo}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Log Invoice
-                </Button>
+                  {t("inventory.logInvoice")} </Button>
               </div>
               {selectedInvoicePo && (
                 <div className="rounded-md border bg-muted/40 p-3 text-sm">
@@ -137,23 +134,23 @@ export function VendorInvoicesTab({
                     </Badge>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span>Ordered</span>
+                    <span>{t("inventory.ordered")}</span>
                     <span className="text-right">
                       {formatDate(selectedInvoicePo.order_date)}
                     </span>
-                    <span>Expected Delivery</span>
+                    <span>{t("inventory.expectedDelivery")}</span>
                     <span className="text-right">
                       {formatDate(selectedInvoicePo.expected_delivery_date)}
                     </span>
-                    <span>Total Value</span>
+                    <span>{t("inventory.totalValue")}</span>
                     <span className="text-right">
                       {formatCurrency(selectedInvoicePo.total_amount)}
                     </span>
-                    <span>Outstanding</span>
+                    <span>{t("inventory.outstanding")}</span>
                     <span className="text-right">
                       {formatCurrency(outstandingForSelectedPo)}
                     </span>
-                    <span>Invoices Logged</span>
+                    <span>{t("inventory.invoicesLogged")}</span>
                     <span className="text-right">
                       {invoicesForSelectedPo.length}
                     </span>
@@ -163,22 +160,22 @@ export function VendorInvoicesTab({
             </div>
 
             <div className="space-y-2 rounded-lg border p-4 text-sm">
-              <p className="font-medium">Invoice Metrics</p>
+              <p className="font-medium">{t("inventory.invoiceMetrics")}</p>
               <div className="flex items-center justify-between">
-                <span>Total invoices logged</span>
+                <span>{t("inventory.totalInvoicesLogged")}</span>
                 <span>{vendorInvoices.length}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Open invoices</span>
+                <span>{t("inventory.openInvoices")}</span>
                 <span>{openInvoices}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Paid invoices</span>
+                <span>{t("inventory.paidInvoices")}</span>
                 <span>{paidInvoices}</span>
               </div>
               <Separator />
               <div className="flex items-center justify-between font-medium">
-                <span>Total outstanding</span>
+                <span>{t("inventory.totalOutstanding")}</span>
                 <span>{formatCurrency(totalOutstandingValue)}</span>
               </div>
             </div>
@@ -189,12 +186,12 @@ export function VendorInvoicesTab({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Invoice</TableHead>
-                    <TableHead>PO</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Due</TableHead>
-                    <TableHead className="text-right">Logged</TableHead>
+                    <TableHead>{t("inventory.invoice")}</TableHead>
+                    <TableHead>{t("inventory.po")}</TableHead>
+                    <TableHead>{t("inventory.amount")}</TableHead>
+                    <TableHead>{t("schedule.status")}</TableHead>
+                    <TableHead>{t("inventory.due")}</TableHead>
+                    <TableHead className="text-right">{t("inventory.logged")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -217,8 +214,7 @@ export function VendorInvoicesTab({
                         colSpan={6}
                         className="h-24 text-center text-sm text-muted-foreground"
                       >
-                        No invoices recorded yet.
-                      </TableCell>
+                        {t("inventory.noInvoicesRecordedYet")} </TableCell>
                     </TableRow>
                   ) : (
                     vendorInvoices.map((invoice: VendorInvoiceRecord) => {

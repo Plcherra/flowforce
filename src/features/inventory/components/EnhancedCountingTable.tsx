@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ export function EnhancedCountingTable({
   countId,
   onCountUpdate,
 }: EnhancedCountingTableProps) {
+  const { t } = useTranslation();
   const { items, isLoading } = useEnhancedInventoryItems();
   const [searchTerm, setSearchTerm] = useState("");
   const [showUncountedOnly, setShowUncountedOnly] = useState(false);
@@ -176,7 +178,7 @@ export function EnhancedCountingTable({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-8">Loading inventory items...</div>
+      <div className="flex justify-center p-8">{t("inventory.loadingInventoryItems")}</div>
     );
   }
 
@@ -187,8 +189,7 @@ export function EnhancedCountingTable({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Inventory Count - MarketMan Style
-          </CardTitle>
+            {t("inventory.inventoryCountMarketmanStyle")} </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-center">
@@ -196,7 +197,7 @@ export function EnhancedCountingTable({
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search items by name or SKU..."
+                  placeholder={t("inventory.searchItemsByNameOrSku")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -209,7 +210,7 @@ export function EnhancedCountingTable({
               onChange={(e) => setSelectedGroup(e.target.value)}
               className="px-3 py-2 border rounded-md"
             >
-              <option value="all">All Categories</option>
+              <option value="all">{t("inventory.allCategories")}</option>
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -232,8 +233,7 @@ export function EnhancedCountingTable({
                 ) : (
                   <Eye className="h-4 w-4" />
                 )}
-                Uncounted Only
-              </label>
+                {t("inventory.uncountedOnly")} </label>
             </div>
           </div>
         </CardContent>
@@ -246,34 +246,25 @@ export function EnhancedCountingTable({
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="w-80 font-semibold">Item</TableHead>
+                  <TableHead className="w-80 font-semibold">{t("inventory.item")}</TableHead>
                   <TableHead className="text-center font-semibold">
-                    UNIT 1
-                  </TableHead>
+                    {t("inventory.unit1")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    UNIT 2
-                  </TableHead>
+                    {t("inventory.unit2")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    UNIT 3
-                  </TableHead>
+                    {t("inventory.unit3")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    UNIT 4
-                  </TableHead>
+                    {t("inventory.unit4")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    Value
-                  </TableHead>
+                    {t("inventory.value")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    On Hand
-                  </TableHead>
+                    {t("inventory.onHand")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    Variance
-                  </TableHead>
+                    {t("inventory.variance")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    Status
-                  </TableHead>
+                    {t("schedule.status")} </TableHead>
                   <TableHead className="text-center font-semibold">
-                    Actions
-                  </TableHead>
+                    {t("inventory.actions")} </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -304,19 +295,19 @@ export function EnhancedCountingTable({
                           <div className="font-medium">{item.name}</div>
                           {item.sku && (
                             <div className="text-xs text-muted-foreground">
-                              SKU: {item.sku}
+                              {t("inventory.sku")} {item.sku}
                             </div>
                           )}
                           <div className="text-xs text-muted-foreground">
-                            Category: {item.category || "Uncategorized"}
+                            {t("updates.category")} {item.category || "Uncategorized"}
                           </div>
                           {item.location && (
                             <div className="text-xs text-muted-foreground">
-                              Location: {item.location.name}
+                              {t("messages.location")} {item.location.name}
                             </div>
                           )}
                           <div className="text-xs font-mono text-primary">
-                            Units:{" "}
+                            {t("inventory.units")}{" "}
                             {item.units
                               .map((u) => u.unit?.abbreviation)
                               .join(" → ")}
@@ -427,7 +418,7 @@ export function EnhancedCountingTable({
         <Card>
           <CardContent className="p-4">
             <div className="text-2xl font-bold">{savedItems.size}</div>
-            <div className="text-sm text-muted-foreground">Items Completed</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.itemsCompleted")}</div>
           </CardContent>
         </Card>
         <Card>
@@ -435,7 +426,7 @@ export function EnhancedCountingTable({
             <div className="text-2xl font-bold">
               {filteredItems.length - savedItems.size}
             </div>
-            <div className="text-sm text-muted-foreground">Remaining</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.remaining")}</div>
           </CardContent>
         </Card>
         <Card>
@@ -449,7 +440,7 @@ export function EnhancedCountingTable({
                 }, 0)
                 .toFixed(2)}
             </div>
-            <div className="text-sm text-muted-foreground">Total Value</div>
+            <div className="text-sm text-muted-foreground">{t("inventory.totalValue")}</div>
           </CardContent>
         </Card>
         <Card>
@@ -463,8 +454,7 @@ export function EnhancedCountingTable({
               }
             </div>
             <div className="text-sm text-muted-foreground">
-              Significant Variances
-            </div>
+              {t("inventory.significantVariances")} </div>
           </CardContent>
         </Card>
       </div>

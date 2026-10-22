@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Search, Filter, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -36,12 +37,13 @@ export function CountingFilters({
   onLocationChange,
   onUncountedOnlyChange,
 }: CountingFiltersProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center gap-2 mb-4">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Filters</span>
+          <span className="text-sm font-medium">{t("schedule.filters")}</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -49,7 +51,7 @@ export function CountingFilters({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 text-muted-foreground transform -translate-y-1/2" />
             <Input
-              placeholder="Search items..."
+              placeholder={t("inventory.searchItems")}
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10"
@@ -59,10 +61,10 @@ export function CountingFilters({
           {/* Category Filter */}
           <Select value={selectedCategory} onValueChange={onCategoryChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t("inventory.allCategories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="">{t("inventory.allCategories")}</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.name}>
                   {category.name}
@@ -74,10 +76,10 @@ export function CountingFilters({
           {/* Location Filter */}
           <Select value={selectedLocation} onValueChange={onLocationChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Locations" />
+              <SelectValue placeholder={t("inventory.allLocations")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Locations</SelectItem>
+              <SelectItem value="">{t("inventory.allLocations")}</SelectItem>
               {locations.map((location) => (
                 <SelectItem key={location.id} value={location.name}>
                   {location.name} ({location.location_type})
@@ -102,8 +104,7 @@ export function CountingFilters({
               ) : (
                 <Eye className="h-4 w-4" />
               )}
-              Uncounted Only
-            </label>
+              {t("inventory.uncountedOnly")} </label>
           </div>
         </div>
       </CardContent>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { NavLink, useLocation } from "@/lib/router-adapter";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ const navItems = [
 ];
 
 export function InventoryNav() {
+  const { t } = useTranslation();
   const location = useLocation();
   const featureFlags = useFeatureFlags();
 
@@ -76,7 +78,7 @@ export function InventoryNav() {
 
   return (
     <nav
-      aria-label="Inventory sections"
+      aria-label={t("inventory.inventorySections")}
       className="flex w-full gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {visibleItems.map((item) => {

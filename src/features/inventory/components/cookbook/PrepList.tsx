@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ export function PrepList({
   onLogWaste,
   onViewRecipe,
 }: PrepListProps) {
+  const { t } = useTranslation();
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const prioritized = useMemo(() => {
@@ -86,9 +88,7 @@ export function PrepList({
     return (
       <Card>
         <CardContent className="p-6 text-center text-sm text-muted-foreground">
-          No prep items found. Flag inventory items as prep-ready to populate
-          this planner.
-        </CardContent>
+          {t("inventory.noPrepItemsFoundFlagInventoryItemsAsPrepReadyToPopulateThisPlanner")} </CardContent>
       </Card>
     );
   }
@@ -116,26 +116,26 @@ export function PrepList({
               </CardTitle>
               {recipe && (
                 <p className="text-xs text-muted-foreground">
-                  Linked recipe cost ${recipe.costPerUnit.toFixed(2)} /{" "}
+                  {t("inventory.linkedRecipeCost")}{recipe.costPerUnit.toFixed(2)} /{" "}
                   {item.uom}
                 </p>
               )}
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">PAR</span>
+                <span className="text-muted-foreground">{t("inventory.par")}</span>
                 <span>
                   {item.par_min} – {item.par_max} {item.uom}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">On hand</span>
+                <span className="text-muted-foreground">{t("inventory.onHand2")}</span>
                 <span>
                   {onHand} {item.uom}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Suggested</span>
+                <span className="text-muted-foreground">{t("inventory.suggested")}</span>
                 <span>
                   {recommendedQty} {item.uom}
                 </span>
@@ -143,8 +143,7 @@ export function PrepList({
               {recipe && (
                 <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
                   <p className="font-medium text-foreground mb-1">
-                    Ingredient forecast
-                  </p>
+                    {t("inventory.ingredientForecast")} </p>
                   <ul className="space-y-1">
                     {recipe.lines.map((line) => (
                       <li
@@ -174,8 +173,7 @@ export function PrepList({
                 className="px-0"
                 onClick={() => onViewRecipe(item.id)}
               >
-                View recipe
-              </Button>
+                {t("inventory.viewRecipe2")} </Button>
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
@@ -188,8 +186,7 @@ export function PrepList({
                   ) : (
                     <Trash2 className="h-4 w-4 mr-1" />
                   )}
-                  Waste
-                </Button>
+                  {t("dashboard.waste")} </Button>
                 <Button
                   size="sm"
                   onClick={() => handleProduction(item, recommendedQty || 1)}
@@ -200,8 +197,7 @@ export function PrepList({
                   ) : (
                     <Plus className="h-4 w-4 mr-1" />
                   )}
-                  Log prep
-                </Button>
+                  {t("inventory.logPrep")} </Button>
               </div>
             </CardFooter>
           </Card>

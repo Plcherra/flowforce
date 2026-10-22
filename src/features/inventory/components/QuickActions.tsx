@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 export function QuickActions() {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const handleQuickAction = (action: string) => {
@@ -18,29 +20,25 @@ export function QuickActions() {
         className="bg-primary text-primary-foreground"
         onClick={() => handleQuickAction("Count Now")}
       >
-        Count Now
-      </Button>
+        {t("inventory.countNow")} </Button>
       <Button
         size="sm"
         variant="outline"
         onClick={() => handleQuickAction("Receive")}
       >
-        Receive
-      </Button>
+        {t("inventory.receive")} </Button>
       <Button
         size="sm"
         variant="outline"
         onClick={() => handleQuickAction("Log Waste")}
       >
-        Log Waste
-      </Button>
+        {t("inventory.logWaste")} </Button>
       <Button
         size="sm"
         variant="outline"
         onClick={() => handleQuickAction("Prep Today")}
       >
-        Prep Today
-      </Button>
+        {t("inventory.prepToday")} </Button>
     </div>
   );
 }

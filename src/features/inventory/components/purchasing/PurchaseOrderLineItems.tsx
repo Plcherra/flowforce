@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,14 +48,14 @@ export function PurchaseOrderLineItems({
   onAddLineItem,
   currency = "USD",
 }: PurchaseOrderLineItemsProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3 rounded-lg border">
       <div className="flex items-center justify-between px-4 py-3">
         <div>
-          <p className="font-medium">Line Items</p>
+          <p className="font-medium">{t("inventory.lineItems")}</p>
           <p className="text-sm text-muted-foreground">
-            Search items from Items & Setup to inherit category and pricing.
-          </p>
+            {t("inventory.searchItemsFromItemsSetupToInheritCategoryAndPricing")} </p>
         </div>
         <Button
           type="button"
@@ -63,17 +64,16 @@ export function PurchaseOrderLineItems({
           onClick={onAddLineItem}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Item
-        </Button>
+          {t("inventory.addItem")} </Button>
       </div>
       <ScrollArea className="h-auto max-h-[420px]">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead className="w-[110px]">Quantity</TableHead>
-              <TableHead className="w-[140px]">Unit Cost</TableHead>
-              <TableHead className="w-[120px] text-right">Line Total</TableHead>
+              <TableHead>{t("inventory.item")}</TableHead>
+              <TableHead className="w-[110px]">{t("inventory.quantity")}</TableHead>
+              <TableHead className="w-[140px]">{t("inventory.unitCost")}</TableHead>
+              <TableHead className="w-[120px] text-right">{t("inventory.lineTotal2")}</TableHead>
               <TableHead className="w-[44px]" />
             </TableRow>
           </TableHeader>
@@ -90,7 +90,7 @@ export function PurchaseOrderLineItems({
                       disabled={itemsLoading}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Search items" />
+                        <SelectValue placeholder={t("inventory.searchItems2")} />
                       </SelectTrigger>
                       <SelectContent className="max-h-80">
                         {inventoryItems.map((item: InventoryItem) => (
@@ -113,7 +113,7 @@ export function PurchaseOrderLineItems({
                       onChange={(event) =>
                         onLineItemName(line.id, event.target.value)
                       }
-                      placeholder="Custom item name"
+                      placeholder={t("inventory.customItemName")}
                     />
                   </div>
                 </TableCell>

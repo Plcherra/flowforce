@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Card,
@@ -127,6 +128,7 @@ export function PlaceOrdersTab({
   isUpdating,
   outstandingByPo,
 }: PlaceOrdersTabProps) {
+  const { t } = useTranslation();
   const outstandingBalance = selectedSupplier
     ? pendingOrders
         .filter((po) => po.supplier_name === selectedSupplier.name)
@@ -140,26 +142,23 @@ export function PlaceOrdersTab({
           <CardHeader className="border-b bg-muted/30">
             <CardTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              Create Purchase Order
-            </CardTitle>
+              {t("inventory.createPurchaseOrder")} </CardTitle>
             <CardDescription>
-              Build a new purchase order using live catalog pricing from Items &
-              Setup.
-            </CardDescription>
+              {t("inventory.buildANewPurchaseOrderUsingLiveCatalogPricingFromItemsSetup")} </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
             <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
               <div className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="supplier">Supplier</Label>
+                    <Label htmlFor="supplier">{t("inventory.supplier")}</Label>
                     <Select
                       value={selectedSupplierId}
                       onValueChange={onSupplierChange}
                       disabled={suppliersLoading}
                     >
                       <SelectTrigger id="supplier">
-                        <SelectValue placeholder="Select supplier" />
+                        <SelectValue placeholder={t("inventory.selectSupplier")} />
                       </SelectTrigger>
                       <SelectContent>
                         {suppliers.map((supplier) => (
@@ -171,7 +170,7 @@ export function PlaceOrdersTab({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="order-date">Order Date</Label>
+                    <Label htmlFor="order-date">{t("inventory.orderDate")}</Label>
                     <Input
                       id="order-date"
                       type="date"
@@ -182,7 +181,7 @@ export function PlaceOrdersTab({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="expected-date">Expected Delivery</Label>
+                    <Label htmlFor="expected-date">{t("inventory.expectedDelivery")}</Label>
                     <Input
                       id="expected-date"
                       type="date"
@@ -193,7 +192,7 @@ export function PlaceOrdersTab({
                     />
                   </div>
                   <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="notes">Internal Notes</Label>
+                    <Label htmlFor="notes">{t("inventory.internalNotes")}</Label>
                     <Textarea
                       id="notes"
                       value={orderNotes}
@@ -201,7 +200,7 @@ export function PlaceOrdersTab({
                       onChange={(event) =>
                         onOrderNotesChange(event.target.value)
                       }
-                      placeholder="Share ordering instructions, substitutions, or approval context."
+                      placeholder={t("inventory.shareOrderingInstructionsSubstitutionsOrApprovalContext")}
                     />
                   </div>
                 </div>
@@ -233,9 +232,7 @@ export function PlaceOrdersTab({
           </CardContent>
           <CardFooter className="flex items-center justify-between border-t bg-muted/20 py-4">
             <div className="text-sm text-muted-foreground">
-              Need recurring orders? Create templates from the Order History
-              tab.
-            </div>
+              {t("inventory.needRecurringOrdersCreateTemplatesFromTheOrderHistoryTab")} </div>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Create Purchase Order"}
             </Button>
@@ -247,11 +244,9 @@ export function PlaceOrdersTab({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <HistoryIcon className="h-4 w-4" />
-            Pending Approvals
-          </CardTitle>
+            {t("inventory.pendingApprovals")} </CardTitle>
           <CardDescription>
-            Approve and release draft purchase orders to vendors.
-          </CardDescription>
+            {t("inventory.approveAndReleaseDraftPurchaseOrdersToVendors")} </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {ordersLoading ? (
@@ -265,8 +260,7 @@ export function PlaceOrdersTab({
             </div>
           ) : pendingOrders.length === 0 ? (
             <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-              No purchase orders are waiting for approval.
-            </div>
+              {t("inventory.noPurchaseOrdersAreWaitingForApproval")} </div>
           ) : (
             <div className="space-y-2">
               {pendingOrders.map((po) => {
@@ -288,7 +282,7 @@ export function PlaceOrdersTab({
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {po.supplier_name} · Ordered {formatDate(po.order_date)}{" "}
+                        {po.supplier_name} {t("inventory.ordered2")} {formatDate(po.order_date)}{" "}
                         · {formatCurrency(po.total_amount)}
                       </p>
                     </div>
@@ -300,23 +294,21 @@ export function PlaceOrdersTab({
                         onClick={() => onViewOrder(po.id)}
                       >
                         <ExternalLink className="mr-2 h-4 w-4" />
-                        Review
-                      </Button>
+                        {t("inventory.review")} </Button>
                       <Button
                         type="button"
                         size="sm"
                         onClick={() => onApproveOrder(po)}
                         disabled={isUpdating}
                       >
-                        Approve & Send
-                      </Button>
+                        {t("inventory.approveSend")} </Button>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         onClick={() => onCancelOrder(po)}
                         disabled={isUpdating}
-                        aria-label="Cancel purchase order"
+                        aria-label={t("inventory.cancelPurchaseOrder")}
                       >
                         <AlertTriangle className="h-4 w-4" />
                       </Button>

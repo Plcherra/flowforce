@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export function CatalogCrudPanel({
   onDelete,
   isPending,
 }: CatalogCrudPanelProps) {
+  const { t } = useTranslation();
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -98,7 +100,7 @@ export function CatalogCrudPanel({
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">{t("inventory.loading")}</p>
         ) : items.length === 0 ? (
           <p className="py-4 text-center text-muted-foreground">{emptyLabel}</p>
         ) : (
@@ -182,14 +184,12 @@ export function CatalogCrudPanel({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {deleteTarget?.name}?</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.delete")} {deleteTarget?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes it from the catalog. Items still using it may need a
-              new assignment.
-            </AlertDialogDescription>
+              {t("inventory.thisRemovesItFromTheCatalogItemsStillUsingItMayNeedANewAssignment")} </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
                 if (!deleteTarget) return;
@@ -197,8 +197,7 @@ export function CatalogCrudPanel({
                 setDeleteTarget(null);
               }}
             >
-              Delete
-            </AlertDialogAction>
+              {t("common.delete")} </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import {
   Card,
@@ -120,6 +121,7 @@ const getUuid = () =>
     : `tmp-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 
 export function ManagerFinancialOverview() {
+  const { t } = useTranslation();
   const metrics = useManagerFinancialMetrics();
   const system = useSystemSettings();
   const {
@@ -344,11 +346,9 @@ export function ManagerFinancialOverview() {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <CardTitle className="text-base font-semibold">
-                Owner Financial Overview
-              </CardTitle>
+                {t("inventory.ownerFinancialOverview")} </CardTitle>
               <CardDescription>
-                Actual, imported, and estimated operating data kept separate
-              </CardDescription>
+                {t("inventory.actualImportedAndEstimatedOperatingDataKeptSeparate")} </CardDescription>
             </div>
             <Button
               variant="outline"
@@ -356,48 +356,42 @@ export function ManagerFinancialOverview() {
               disabled={metrics.refreshing}
             >
               <FileDown className="mr-2 h-4 w-4" />
-              Export summary
-            </Button>
+              {t("inventory.exportSummary")} </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-5">
             <div className="rounded-lg border p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Actual revenue
-              </p>
+                {t("inventory.actualRevenue")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 ${ownerSummary.actualRevenue.toFixed(2)}
               </p>
             </div>
             <div className="rounded-lg border p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Actual cost
-              </p>
+                {t("inventory.actualCost")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 ${ownerActualCost.toFixed(2)}
               </p>
             </div>
             <div className="rounded-lg border p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Imported cost
-              </p>
+                {t("inventory.importedCost")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 ${ownerSummary.importedCost.toFixed(2)}
               </p>
             </div>
             <div className="rounded-lg border p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Estimated cost
-              </p>
+                {t("inventory.estimatedCost")} </p>
               <p className="mt-2 text-2xl font-semibold">
                 ${ownerSummary.estimatedCost.toFixed(2)}
               </p>
             </div>
             <div className="rounded-lg border p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">
-                Net position
-              </p>
+                {t("inventory.netPosition")} </p>
               <p
                 className={`mt-2 text-2xl font-semibold ${
                   ownerSummary.netOperatingPosition >= 0
@@ -411,25 +405,25 @@ export function ManagerFinancialOverview() {
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             <div className="rounded-lg bg-muted/40 p-3 text-sm">
-              <span className="font-medium">Labor estimate</span>
+              <span className="font-medium">{t("inventory.laborEstimate")}</span>
               <span className="float-right">
                 ${ownerSummary.estimatedLaborCost.toFixed(2)}
               </span>
             </div>
             <div className="rounded-lg bg-muted/40 p-3 text-sm">
-              <span className="font-medium">Production estimate</span>
+              <span className="font-medium">{t("inventory.productionEstimate")}</span>
               <span className="float-right">
                 ${ownerSummary.estimatedProductionCost.toFixed(2)}
               </span>
             </div>
             <div className="rounded-lg bg-muted/40 p-3 text-sm">
-              <span className="font-medium">Waste estimate</span>
+              <span className="font-medium">{t("inventory.wasteEstimate")}</span>
               <span className="float-right">
                 ${ownerSummary.estimatedWasteCost.toFixed(2)}
               </span>
             </div>
             <div className="rounded-lg bg-muted/40 p-3 text-sm">
-              <span className="font-medium">Purchasing estimate</span>
+              <span className="font-medium">{t("inventory.purchasingEstimate")}</span>
               <span className="float-right">
                 ${ownerSummary.estimatedPurchasingCost.toFixed(2)}
               </span>
@@ -438,8 +432,7 @@ export function ManagerFinancialOverview() {
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="secondary">{ownerRange}</Badge>
             <Badge variant="outline">
-              {ownerSummary.exportRowCount} export rows
-            </Badge>
+              {ownerSummary.exportRowCount} {t("inventory.exportRows")} </Badge>
             {qualityFlags.map(([key]) => (
               <Badge key={key} variant="outline">
                 {formatCategoryLabel(key)}
@@ -455,12 +448,11 @@ export function ManagerFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <Briefcase className="h-4 w-4 text-primary" />
-                Payroll (30 days)
-              </CardTitle>
-              <CardDescription>Gross compensation processed</CardDescription>
+                {t("inventory.payroll30Days")} </CardTitle>
+              <CardDescription>{t("inventory.grossCompensationProcessed")}</CardDescription>
             </div>
             <Badge variant="outline" className="text-xs">
-              Forecast ${metrics.profitForecastNextMonth.toFixed(0)}
+              {t("inventory.forecast")}{metrics.profitForecastNextMonth.toFixed(0)}
             </Badge>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -469,7 +461,7 @@ export function ManagerFinancialOverview() {
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-success" />
-              Approved ${metrics.payrollApproved.toFixed(2)}
+              {t("inventory.approved")}{metrics.payrollApproved.toFixed(2)}
             </div>
           </CardContent>
         </Card>
@@ -479,11 +471,9 @@ export function ManagerFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <Building2 className="h-4 w-4 text-primary" />
-                Operating Spend
-              </CardTitle>
+                {t("inventory.operatingSpend")} </CardTitle>
               <CardDescription>
-                Expenses & reimbursements (30 days)
-              </CardDescription>
+                {t("inventory.expensesReimbursements30Days")} </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -491,11 +481,11 @@ export function ManagerFinancialOverview() {
               ${metrics.operatingExpenses30d.toFixed(2)}
             </div>
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Vendor payments</span>
+              <span>{t("inventory.vendorPayments")}</span>
               <span>${metrics.vendorSpending30d.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Reimbursements</span>
+              <span>{t("inventory.reimbursements")}</span>
               <span>${metrics.reimbursementVolume30d.toFixed(2)}</span>
             </div>
           </CardContent>
@@ -506,11 +496,9 @@ export function ManagerFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <Factory className="h-4 w-4 text-primary" />
-                Labor & Waste
-              </CardTitle>
+                {t("inventory.laborWaste")} </CardTitle>
               <CardDescription>
-                Labor cost this week & waste impact
-              </CardDescription>
+                {t("inventory.laborCostThisWeekWasteImpact")} </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -519,12 +507,11 @@ export function ManagerFinancialOverview() {
                 ${metrics.laborCostThisWeek.toFixed(2)}
               </span>
               <Badge variant="secondary" className="text-xs">
-                Waste ${metrics.wasteCost30d.toFixed(2)}
+                {t("inventory.waste")}{metrics.wasteCost30d.toFixed(2)}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              Waste data combines MarketMan and internal inventory adjustments.
-            </p>
+              {t("inventory.wasteDataCombinesMarketmanAndInternalInventoryAdjustments")} </p>
           </CardContent>
         </Card>
 
@@ -533,11 +520,9 @@ export function ManagerFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <Store className="h-4 w-4 text-primary" />
-                Sales vs Purchasing
-              </CardTitle>
+                {t("inventory.salesVsPurchasing")} </CardTitle>
               <CardDescription>
-                Inventory transactions (30 days)
-              </CardDescription>
+                {t("inventory.inventoryTransactions30Days")} </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -554,12 +539,12 @@ export function ManagerFinancialOverview() {
                 ) : (
                   <TrendingDown className="mr-1 h-3 w-3" />
                 )}
-                Net {inventoryTrendPositive ? "+" : ""}
+                {t("inventory.net")} {inventoryTrendPositive ? "+" : ""}
                 {netInventory.toFixed(2)}
               </Badge>
             </div>
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Purchases</span>
+              <span>{t("inventory.purchases")}</span>
               <span>${metrics.inventoryPurchase30d.toFixed(2)}</span>
             </div>
           </CardContent>
@@ -571,14 +556,12 @@ export function ManagerFinancialOverview() {
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <CardTitle className="text-base font-semibold">
-                Profit & Loss Overview
-              </CardTitle>
+                {t("inventory.profitLossOverview")} </CardTitle>
               <CardDescription>
-                Combines revenue, labor, operating, and waste costs
-              </CardDescription>
+                {t("inventory.combinesRevenueLaborOperatingAndWasteCosts")} </CardDescription>
             </div>
             <Badge variant="secondary" className="text-xs">
-              Forecast next month ${metrics.profitForecastNextMonth.toFixed(2)}
+              {t("inventory.forecastNextMonth")}{metrics.profitForecastNextMonth.toFixed(2)}
             </Badge>
           </div>
         </CardHeader>
@@ -623,11 +606,9 @@ export function ManagerFinancialOverview() {
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">
-              Expense Breakdown
-            </CardTitle>
+              {t("inventory.expenseBreakdown")} </CardTitle>
             <CardDescription>
-              Shipping, utilities, purchasing, and other tracked categories
-            </CardDescription>
+              {t("inventory.shippingUtilitiesPurchasingAndOtherTrackedCategories")} </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {metrics.expenseBreakdown.slice(0, 6).map((item) => {
@@ -647,8 +628,7 @@ export function ManagerFinancialOverview() {
             })}
             {metrics.expenseBreakdown.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No expense activity recorded in the last 30 days.
-              </p>
+                {t("inventory.noExpenseActivityRecordedInTheLast30Days")} </p>
             ) : null}
           </CardContent>
         </Card>
@@ -656,42 +636,34 @@ export function ManagerFinancialOverview() {
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">
-              Approvals Queue
-            </CardTitle>
+              {t("inventory.approvalsQueue")} </CardTitle>
             <CardDescription>
-              Manage expense and payroll approvals for your team
-            </CardDescription>
+              {t("inventory.manageExpenseAndPayrollApprovalsForYourTeam")} </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border border-dashed border-muted p-3">
               <div>
-                <p className="text-sm font-medium">Payment Approvals</p>
+                <p className="text-sm font-medium">{t("inventory.paymentApprovals")}</p>
                 <p className="text-sm text-muted-foreground">
-                  ${metrics.pendingPaymentTotal.toFixed(2)} awaiting review
-                </p>
+                  ${metrics.pendingPaymentTotal.toFixed(2)} {t("inventory.awaitingReview")} </p>
               </div>
               <Badge variant="secondary" className="text-xs">
-                {metrics.pendingPaymentCount} items
-              </Badge>
+                {metrics.pendingPaymentCount} {t("inventory.items")} </Badge>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-dashed border-muted p-3">
               <div>
-                <p className="text-sm font-medium">Expense Approvals</p>
+                <p className="text-sm font-medium">{t("inventory.expenseApprovals")}</p>
                 <p className="text-sm text-muted-foreground">
-                  ${metrics.pendingExpenseTotal.toFixed(2)} pending
-                  reimbursement
-                </p>
+                  ${metrics.pendingExpenseTotal.toFixed(2)} {t("inventory.pendingReimbursement")} </p>
               </div>
               <Badge variant="secondary" className="text-xs">
-                {metrics.pendingExpenseCount} items
-              </Badge>
+                {metrics.pendingExpenseCount} {t("inventory.items")} </Badge>
             </div>
             <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
               <div>
-                <p className="text-sm font-medium">Total Pending</p>
+                <p className="text-sm font-medium">{t("inventory.totalPending")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Expenses and payments that need owner or manager action
-                </p>
+                  {t("inventory.expensesAndPaymentsThatNeedOwnerOrManagerAction")} </p>
               </div>
               <Badge variant="outline" className="text-xs">
                 ${metrics.ownerFinancialOverview.pendingApprovalTotal.toFixed(2)}
@@ -701,13 +673,11 @@ export function ManagerFinancialOverview() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="outline" className="w-full justify-between">
-                    Open approval workspace
-                    <ArrowRight className="h-4 w-4" />
+                    {t("inventory.openApprovalWorkspace")} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  Navigate to Payments and Expenses tabs to approve items.
-                </TooltipContent>
+                  {t("inventory.navigateToPaymentsAndExpensesTabsToApproveItems")} </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </CardContent>
@@ -719,11 +689,9 @@ export function ManagerFinancialOverview() {
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <CardTitle className="text-base font-semibold">
-                External Integrations
-              </CardTitle>
+                {t("inventory.externalIntegrations")} </CardTitle>
               <CardDescription>
-                Automate synchronization with Toast, QuickBooks, and MarketMan
-              </CardDescription>
+                {t("inventory.automateSynchronizationWithToastQuickbooksAndMarketman")} </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -761,8 +729,7 @@ export function ManagerFinancialOverview() {
                 <div className="flex flex-col gap-3 md:w-56">
                   <div className="flex items-center justify-between rounded-md border px-3 py-2">
                     <span className="text-xs font-medium text-muted-foreground">
-                      Auto-sync
-                    </span>
+                      {t("inventory.autoSync")} </span>
                     <Switch
                       checked={integration.autoSync}
                       onCheckedChange={(value) =>
@@ -790,8 +757,7 @@ export function ManagerFinancialOverview() {
                     ) : (
                       <RefreshCw className="mr-2 h-4 w-4" />
                     )}
-                    Sync now
-                  </Button>
+                    {t("inventory.syncNow")} </Button>
                 </div>
               </div>
             );

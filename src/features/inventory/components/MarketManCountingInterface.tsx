@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ export function MarketManCountingInterface({
   onRemoveLine,
   readOnly = false,
 }: MarketManCountingInterfaceProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const barcodeEnabled = useFeatureFlag("inventory.barcodeScanning");
   const [searchTerm, setSearchTerm] = useState("");
@@ -161,14 +163,14 @@ export function MarketManCountingInterface({
 
   const renderStatusBadge = (line: InventoryCountLine, isDirty: boolean) => {
     if (isDirty) {
-      return <Badge variant="secondary">Pending Save</Badge>;
+      return <Badge variant="secondary">{t("inventory.pendingSave")}</Badge>;
     }
 
     if (line.counted_at) {
-      return <Badge variant="default">Saved</Badge>;
+      return <Badge variant="default">{t("inventory.saved")}</Badge>;
     }
 
-    return <Badge variant="outline">Not Counted</Badge>;
+    return <Badge variant="outline">{t("inventory.notCounted")}</Badge>;
   };
 
   const renderLineCard = (line: InventoryCountLine, compact = false) => {
@@ -195,10 +197,10 @@ export function MarketManCountingInterface({
             <div className="flex flex-wrap justify-end gap-2">
               {renderStatusBadge(line, isDirty)}
               {!line.counted_at && !isDirty ? (
-                <Badge variant="outline">Missing</Badge>
+                <Badge variant="outline">{t("inventory.missing")}</Badge>
               ) : null}
               {Math.abs(variance) > 0.0001 ? (
-                <Badge variant="secondary">Variance</Badge>
+                <Badge variant="secondary">{t("inventory.variance")}</Badge>
               ) : null}
             </div>
           </div>
@@ -206,14 +208,12 @@ export function MarketManCountingInterface({
           <div className="grid grid-cols-3 gap-3 text-center">
             <div>
               <p className="text-xs uppercase text-muted-foreground">
-                Expected
-              </p>
+                {t("inventory.expected")} </p>
               <p className="font-mono text-lg">{expectedQuantity}</p>
             </div>
             <div>
               <p className="text-xs uppercase text-muted-foreground">
-                Counted
-              </p>
+                {t("inventory.counted")} </p>
               <Input
                 type="number"
                 min={0}
@@ -229,8 +229,7 @@ export function MarketManCountingInterface({
             </div>
             <div>
               <p className="text-xs uppercase text-muted-foreground">
-                Variance
-              </p>
+                {t("inventory.variance")} </p>
               <p
                 className={`font-mono text-lg ${variance > 0 ? "text-success" : variance < 0 ? "text-destructive" : ""}`}
               >
@@ -258,16 +257,14 @@ export function MarketManCountingInterface({
                   });
                 }}
               />
-              This delivery is a different pack
-            </label>
+              {t("inventory.thisDeliveryIsADifferentPack")} </label>
           )}
 
           {usingCustomPack && !readOnly && (
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-xs uppercase text-muted-foreground">
-                  Packs on hand
-                </p>
+                  {t("inventory.packsOnHand")} </p>
                 <Input
                   type="number"
                   min={0}
@@ -302,7 +299,7 @@ export function MarketManCountingInterface({
                 />
               </div>
               <p className="col-span-2 text-xs text-muted-foreground">
-                Counted as {currentQuantity} {unitLabel}. The item name stays
+                {t("inventory.countedAs")} {currentQuantity} {unitLabel}. The item name stays
                 the same; update brand or pack on the item later if this
                 delivery should become the new standard.
               </p>
@@ -318,8 +315,7 @@ export function MarketManCountingInterface({
                   onClick={() => handleBarcodeLog(line)}
                 >
                   <Barcode className="mr-2 h-4 w-4" />
-                  Scan
-                </Button>
+                  {t("inventory.scan")} </Button>
               )}
               {onRemoveLine && (
                 <Button
@@ -328,8 +324,7 @@ export function MarketManCountingInterface({
                   onClick={() => onRemoveLine(line.id)}
                 >
                   <Trash className="mr-2 h-4 w-4" />
-                  Remove
-                </Button>
+                  {t("forms.remove")} </Button>
               )}
             </div>
           )}
@@ -342,7 +337,7 @@ export function MarketManCountingInterface({
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <Input
-          placeholder="Search items or units..."
+          placeholder={t("inventory.searchItemsOrUnits")}
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
         />
@@ -352,7 +347,7 @@ export function MarketManCountingInterface({
           onChange={(event) => setCategoryFilter(event.target.value)}
           className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
         >
-          <option value="all">All categories</option>
+          <option value="all">{t("inventory.allCategories2")}</option>
           {categories.map((category) => (
             <option key={category} value={category}>
               {category}
@@ -365,14 +360,12 @@ export function MarketManCountingInterface({
             checked={showUnsavedOnly}
             onCheckedChange={(checked) => setShowUnsavedOnly(Boolean(checked))}
           />
-          Show unsaved only
-        </label>
+          {t("inventory.showUnsavedOnly")} </label>
       </div>
 
       {filteredLines.length === 0 ? (
         <div className="rounded-md border py-8 text-center text-sm text-muted-foreground">
-          No count lines match your filters.
-        </div>
+          {t("inventory.noCountLinesMatchYourFilters")} </div>
       ) : (
         <>
           <div className="space-y-3 md:hidden">
@@ -386,10 +379,9 @@ export function MarketManCountingInterface({
                   onClick={() => setFocusIndex((index) => Math.max(0, index - 1))}
                 >
                   <ChevronLeft className="mr-1 h-4 w-4" />
-                  Previous
-                </Button>
+                  {t("common.previous")} </Button>
                 <span className="text-sm text-muted-foreground">
-                  {Math.min(focusIndex + 1, filteredLines.length)} of{" "}
+                  {Math.min(focusIndex + 1, filteredLines.length)} {t("updates.of")}{" "}
                   {filteredLines.length}
                 </span>
                 <Button
@@ -402,8 +394,7 @@ export function MarketManCountingInterface({
                     )
                   }
                 >
-                  Next
-                  <ChevronRight className="ml-1 h-4 w-4" />
+                  {t("common.next")} <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -417,22 +408,22 @@ export function MarketManCountingInterface({
 
       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
         <span>
-          Total items: <strong>{lines.length}</strong>
+          {t("inventory.totalItems2")} <strong>{lines.length}</strong>
         </span>
         <span>
-          Counted items: <strong>{summary.countedLines}</strong>
+          {t("inventory.countedItems")} <strong>{summary.countedLines}</strong>
         </span>
         <span>
-          Unsaved changes: <strong>{unsavedCount}</strong>
+          {t("inventory.unsavedChanges")} <strong>{unsavedCount}</strong>
         </span>
         <span>
-          Missing: <strong>{summary.missingLines}</strong>
+          {t("inventory.missing2")} <strong>{summary.missingLines}</strong>
         </span>
         <span>
-          Variance lines: <strong>{summary.varianceLines}</strong>
+          {t("inventory.varianceLines")} <strong>{summary.varianceLines}</strong>
         </span>
         <span>
-          Net variance: <strong>{summary.netVariance.toFixed(2)}</strong>
+          {t("inventory.netVariance")} <strong>{summary.netVariance.toFixed(2)}</strong>
         </span>
       </div>
     </div>

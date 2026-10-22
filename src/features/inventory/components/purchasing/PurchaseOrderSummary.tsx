@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Card,
@@ -49,17 +50,16 @@ export function PurchaseOrderSummary({
   outstandingBalance,
   currency = "USD",
 }: PurchaseOrderSummaryProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <BadgeCheck className="h-4 w-4" />
-            Supplier Snapshot
-          </CardTitle>
+            {t("inventory.supplierSnapshot")} </CardTitle>
           <CardDescription>
-            Contact and integration details from Items & Setup.
-          </CardDescription>
+            {t("inventory.contactAndIntegrationDetailsFromItemsSetup")} </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {selectedSupplier ? (
@@ -78,8 +78,7 @@ export function PurchaseOrderSummary({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    Integration Status
-                  </span>
+                    {t("inventory.integrationStatus")} </span>
                   {selectedSupplierIntegration ? (
                     <Badge variant="default" className="gap-1">
                       <Link2 className="h-3 w-3" />
@@ -88,8 +87,7 @@ export function PurchaseOrderSummary({
                   ) : (
                     <Badge variant="outline" className="gap-1">
                       <Link2 className="h-3 w-3" />
-                      Not linked
-                    </Badge>
+                      {t("inventory.notLinked")} </Badge>
                   )}
                 </div>
                 <Button
@@ -99,14 +97,12 @@ export function PurchaseOrderSummary({
                   onClick={onLinkIntegration}
                 >
                   <Link2 className="mr-2 h-4 w-4" />
-                  Link Integration
-                </Button>
+                  {t("inventory.linkIntegration")} </Button>
               </div>
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Select a supplier to view contact and integration details.
-            </p>
+              {t("inventory.selectASupplierToViewContactAndIntegrationDetails")} </p>
           )}
         </CardContent>
       </Card>
@@ -115,39 +111,37 @@ export function PurchaseOrderSummary({
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <TrendingUp className="h-4 w-4" />
-            Order Summary
-          </CardTitle>
+            {t("inventory.orderSummary")} </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
-            <span>Line Items</span>
+            <span>{t("inventory.lineItems")}</span>
             <span className="font-medium">{lineItems.length}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Estimated Total</span>
+            <span>{t("inventory.estimatedTotal2")}</span>
             <span className="font-medium">
               {formatCurrency(orderTotal, currency)}
             </span>
           </div>
           {outstandingBalance !== undefined && (
             <div className="flex items-center justify-between text-muted-foreground">
-              <span>Open Balance with Supplier</span>
+              <span>{t("inventory.openBalanceWithSupplier")}</span>
               <span>{formatCurrency(outstandingBalance, currency)}</span>
             </div>
           )}
           <Separator />
           <div className="flex items-center justify-between">
-            <span className="font-medium">Auto-approve order</span>
+            <span className="font-medium">{t("inventory.autoApproveOrder")}</span>
             <Switch
               checked={autoApprove}
               onCheckedChange={onAutoApproveChange}
-              aria-label="Auto approve purchase order"
+              aria-label={t("inventory.autoApprovePurchaseOrder")}
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Enable to move this purchase order directly to{" "}
-            <strong>Ordered</strong> without manager approval.
-          </p>
+            {t("inventory.enableToMoveThisPurchaseOrderDirectlyTo")}{" "}
+            <strong>{t("inventory.ordered")}</strong> {t("inventory.withoutManagerApproval")} </p>
         </CardContent>
       </Card>
     </div>

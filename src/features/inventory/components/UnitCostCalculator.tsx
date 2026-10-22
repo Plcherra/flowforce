@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCurrency } from "@/hooks/useCurrency";
 
 interface UnitLevel {
@@ -20,6 +21,7 @@ export function UnitCostCalculator({
   countedQuantities,
   className,
 }: UnitCostCalculatorProps) {
+  const { t } = useTranslation();
   const { symbol: currencySymbol } = useCurrency();
 
   // Calculate totals
@@ -53,7 +55,7 @@ export function UnitCostCalculator({
 
   return (
     <div className={`bg-muted/50 rounded-lg p-4 space-y-3 ${className}`}>
-      <h4 className="font-medium text-sm">Cost Calculation</h4>
+      <h4 className="font-medium text-sm">{t("inventory.costCalculation")}</h4>
 
       {calculations.map(
         (calc) =>
@@ -61,8 +63,7 @@ export function UnitCostCalculator({
             <div key={calc.unit_level} className="flex justify-between text-sm">
               <span>
                 {calc.counted_quantity} × {calc.unit_name} ({currencySymbol}
-                {calc.unit_cost.toFixed(2)} ea)
-              </span>
+                {calc.unit_cost.toFixed(2)} {t("inventory.ea")} </span>
               <span className="font-medium">
                 {currencySymbol}
                 {calc.total_cost.toFixed(2)}
@@ -75,14 +76,14 @@ export function UnitCostCalculator({
         <>
           <div className="border-t pt-2 mt-2">
             <div className="flex justify-between text-sm font-medium">
-              <span>Total Cost:</span>
+              <span>{t("inventory.totalCost3")}</span>
               <span>
                 {currencySymbol}
                 {grandTotalCost.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Total Base Units:</span>
+              <span>{t("inventory.totalBaseUnits")}</span>
               <span>{grandTotalBaseUnits.toFixed(2)}</span>
             </div>
           </div>

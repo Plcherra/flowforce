@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -38,6 +39,7 @@ export function computeInventoryTransactionTotals(
 }
 
 export default function InventoryTransactionForm() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     item_id: "",
@@ -209,29 +211,26 @@ export default function InventoryTransactionForm() {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Plus className="h-4 w-4 mr-2" />
-          Record Transaction
-        </Button>
+          {t("inventory.recordTransaction")} </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Record Inventory Transaction</DialogTitle>
+          <DialogTitle>{t("inventory.recordInventoryTransaction")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {itemsLoading && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading inventory items…
-            </div>
+              {t("inventory.loadingInventoryItems2")} </div>
           )}
           {profileLoading && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Loading your profile…
-            </div>
+              {t("inventory.loadingYourProfile")} </div>
           )}
           {itemsError && (
             <Alert variant="destructive">
-              <AlertTitle>Unable to load inventory items</AlertTitle>
+              <AlertTitle>{t("inventory.unableToLoadInventoryItems")}</AlertTitle>
               <AlertDescription>
                 {itemsError?.message || "Please refresh and try again."}
               </AlertDescription>
@@ -239,28 +238,26 @@ export default function InventoryTransactionForm() {
           )}
           {!itemsLoading && noItemsAvailable && (
             <Alert>
-              <AlertTitle>No items available</AlertTitle>
+              <AlertTitle>{t("inventory.noItemsAvailable")}</AlertTitle>
               <AlertDescription>
-                Create an inventory item before recording manual transactions.
-              </AlertDescription>
+                {t("inventory.createAnInventoryItemBeforeRecordingManualTransactions")} </AlertDescription>
             </Alert>
           )}
           {formError && (
             <Alert variant="destructive">
-              <AlertTitle>Submission blocked</AlertTitle>
+              <AlertTitle>{t("inventory.submissionBlocked")}</AlertTitle>
               <AlertDescription>{formError}</AlertDescription>
             </Alert>
           )}
           {!profile && !profileLoading && (
             <Alert variant="destructive">
-              <AlertTitle>Profile required</AlertTitle>
+              <AlertTitle>{t("inventory.profileRequired")}</AlertTitle>
               <AlertDescription>
-                Sign in again to record transactions.
-              </AlertDescription>
+                {t("inventory.signInAgainToRecordTransactions")} </AlertDescription>
             </Alert>
           )}
           <div>
-            <Label htmlFor="item">Item</Label>
+            <Label htmlFor="item">{t("inventory.item")}</Label>
             <Select
               value={formData.item_id}
               disabled={
@@ -305,8 +302,7 @@ export default function InventoryTransactionForm() {
                 {items.length > 0 ? (
                   items.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
-                      {item.name} (Stock: {item.min_stock_level || 0} units)
-                    </SelectItem>
+                      {item.name} (Stock: {item.min_stock_level || 0} {t("inventory.units2")} </SelectItem>
                   ))
                 ) : (
                   <SelectItem value="" disabled>
@@ -318,7 +314,7 @@ export default function InventoryTransactionForm() {
           </div>
 
           <div>
-            <Label htmlFor="transaction_type">Transaction Type</Label>
+            <Label htmlFor="transaction_type">{t("inventory.transactionType")}</Label>
             <Select
               value={formData.transaction_type}
               onValueChange={(value) =>
@@ -327,21 +323,21 @@ export default function InventoryTransactionForm() {
               disabled={submitInFlight || profileLoading || !profile}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select transaction type" />
+                <SelectValue placeholder={t("inventory.selectTransactionType")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="purchase">Purchase</SelectItem>
-                <SelectItem value="sale">Sale</SelectItem>
-                <SelectItem value="adjustment">Adjustment</SelectItem>
-                <SelectItem value="transfer">Transfer</SelectItem>
-                <SelectItem value="return">Return</SelectItem>
+                <SelectItem value="purchase">{t("inventory.purchase")}</SelectItem>
+                <SelectItem value="sale">{t("inventory.sale")}</SelectItem>
+                <SelectItem value="adjustment">{t("inventory.adjustment")}</SelectItem>
+                <SelectItem value="transfer">{t("inventory.transfer")}</SelectItem>
+                <SelectItem value="return">{t("inventory.return")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="quantity">Quantity</Label>
+              <Label htmlFor="quantity">{t("inventory.quantity")}</Label>
               <Input
                 id="quantity"
                 type="number"
@@ -358,12 +354,11 @@ export default function InventoryTransactionForm() {
               />
               {quantityInvalid && formData.quantity && (
                 <p className="mt-1 text-xs text-destructive">
-                  Enter a quantity greater than zero.
-                </p>
+                  {t("inventory.enterAQuantityGreaterThanZero")} </p>
               )}
             </div>
             <div>
-              <Label htmlFor="unit">Unit</Label>
+              <Label htmlFor="unit">{t("schedule.unit")}</Label>
               <Select
                 value={formData.unitid}
                 onValueChange={(value) => {
@@ -419,14 +414,13 @@ export default function InventoryTransactionForm() {
                     )
                   ) : (
                     <SelectItem value="" disabled>
-                      Select an item first
-                    </SelectItem>
+                      {t("inventory.selectAnItemFirst")} </SelectItem>
                   )}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="unit_price">Unit Price</Label>
+              <Label htmlFor="unit_price">{t("inventory.unitPrice")}</Label>
               <Input
                 id="unit_price"
                 type="number"
@@ -458,7 +452,7 @@ export default function InventoryTransactionForm() {
             )}
 
           <div>
-            <Label htmlFor="reference_number">Reference Number</Label>
+            <Label htmlFor="reference_number">{t("inventory.referenceNumber")}</Label>
             <Input
               id="reference_number"
               value={formData.reference_number}
@@ -468,13 +462,13 @@ export default function InventoryTransactionForm() {
                   reference_number: e.target.value,
                 }))
               }
-              placeholder="PO#, Invoice#, etc."
+              placeholder={t("inventory.poInvoiceEtc")}
               disabled={submitInFlight}
             />
           </div>
 
           <div>
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">{t("schedule.notes")}</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -482,7 +476,7 @@ export default function InventoryTransactionForm() {
                 setFormData((prev) => ({ ...prev, notes: e.target.value }))
               }
               rows={3}
-              placeholder="Additional notes..."
+              placeholder={t("schedule.additionalNotes")}
               disabled={submitInFlight}
             />
           </div>
@@ -494,8 +488,7 @@ export default function InventoryTransactionForm() {
               onClick={() => setOpen(false)}
               disabled={submitInFlight}
             >
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={isSubmitDisabled}>
               {submitInFlight ? "Recording..." : "Record Transaction"}
             </Button>

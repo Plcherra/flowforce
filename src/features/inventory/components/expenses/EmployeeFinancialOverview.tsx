@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
   Card,
@@ -46,6 +47,7 @@ const loadingSkeleton = (
 );
 
 export function EmployeeFinancialOverview() {
+  const { t } = useTranslation();
   const metrics = useEmployeeFinancialMetrics();
 
   const hoursDelta = useMemo(
@@ -75,23 +77,19 @@ export function EmployeeFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <Clock className="h-4 w-4 text-primary" />
-                Hours This Week
-              </CardTitle>
+                {t("inventory.hoursThisWeek")} </CardTitle>
               <CardDescription>
-                Tracked via connected time entries
-              </CardDescription>
+                {t("inventory.trackedViaConnectedTimeEntries")} </CardDescription>
             </div>
             {metrics.clockedInToday ? (
               <Badge variant="secondary" className="text-xs">
-                Clocked in now
-              </Badge>
+                {t("inventory.clockedInNow")} </Badge>
             ) : null}
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-semibold">
-                {metrics.hoursThisWeek.toFixed(1)}h
-              </span>
+                {metrics.hoursThisWeek.toFixed(1)}{t("inventory.h")} </span>
               <span
                 className={`flex items-center text-sm ${
                   hoursDelta >= 0 ? "text-success" : "text-accent"
@@ -103,13 +101,11 @@ export function EmployeeFinancialOverview() {
                   <TrendingDown className="mr-1 h-4 w-4" />
                 )}
                 {hoursDelta >= 0 ? "+" : ""}
-                {hoursDelta.toFixed(1)} vs last week
-              </span>
+                {hoursDelta.toFixed(1)} {t("inventory.vsLastWeek")} </span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Timer className="h-4 w-4" />
-              Avg shift {metrics.averageShiftLength.toFixed(1)}h
-            </div>
+              {t("inventory.avgShift")} {metrics.averageShiftLength.toFixed(1)}{t("inventory.h")} </div>
           </CardContent>
         </Card>
 
@@ -118,9 +114,8 @@ export function EmployeeFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <DollarSign className="h-4 w-4 text-primary" />
-                Earnings (30 days)
-              </CardTitle>
-              <CardDescription>Approved and paid payouts</CardDescription>
+                {t("inventory.earnings30Days")} </CardTitle>
+              <CardDescription>{t("inventory.approvedAndPaidPayouts")}</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -128,7 +123,7 @@ export function EmployeeFinancialOverview() {
               ${metrics.totalEarnings30d.toFixed(2)}
             </div>
             <div className="text-sm text-muted-foreground">
-              Last payment {lastPaymentLabel}
+              {t("inventory.lastPayment")} {lastPaymentLabel}
             </div>
           </CardContent>
         </Card>
@@ -138,9 +133,8 @@ export function EmployeeFinancialOverview() {
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <PiggyBank className="h-4 w-4 text-primary" />
-                Pending Reimbursements
-              </CardTitle>
-              <CardDescription>Awaiting manager approval</CardDescription>
+                {t("inventory.pendingReimbursements")} </CardTitle>
+              <CardDescription>{t("inventory.awaitingManagerApproval")}</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -148,8 +142,7 @@ export function EmployeeFinancialOverview() {
               ${metrics.pendingEarnings.toFixed(2)}
             </div>
             <div className="text-sm text-muted-foreground">
-              Track expense receipts to accelerate approvals
-            </div>
+              {t("inventory.trackExpenseReceiptsToAccelerateApprovals")} </div>
           </CardContent>
         </Card>
       </div>
@@ -158,11 +151,9 @@ export function EmployeeFinancialOverview() {
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">
-              Weekly Hour Trend
-            </CardTitle>
+              {t("inventory.weeklyHourTrend")} </CardTitle>
             <CardDescription>
-              Automatic sync from the Toast labor feed
-            </CardDescription>
+              {t("inventory.automaticSyncFromTheToastLaborFeed")} </CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -185,11 +176,9 @@ export function EmployeeFinancialOverview() {
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">
-              Earnings History
-            </CardTitle>
+              {t("inventory.earningsHistory")} </CardTitle>
             <CardDescription>
-              Payouts from payroll and reimbursements
-            </CardDescription>
+              {t("inventory.payoutsFromPayrollAndReimbursements")} </CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -222,12 +211,9 @@ export function EmployeeFinancialOverview() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold">
-            AI Financial Tips
-          </CardTitle>
+            {t("inventory.aiFinancialTips")} </CardTitle>
           <CardDescription>
-            Personalized suggestions generated from your logged hours and
-            payouts
-          </CardDescription>
+            {t("inventory.personalizedSuggestionsGeneratedFromYourLoggedHoursAndPayouts")} </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {metrics.financialTips.map((tip, index) => (
@@ -236,7 +222,7 @@ export function EmployeeFinancialOverview() {
               className="flex items-start gap-3 rounded-lg border border-muted p-3"
             >
               <Badge variant="outline" className="mt-0.5 text-xs">
-                Tip {index + 1}
+                {t("inventory.tip")} {index + 1}
               </Badge>
               <p className="text-sm text-muted-foreground">{tip}</p>
             </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -69,6 +70,7 @@ const SummarySkeleton = () => (
 );
 
 export function ProductionEventList() {
+  const { t } = useTranslation();
   const { data: events = [], isLoading } = useInventoryProductionEvents();
 
   if (isLoading) {
@@ -80,12 +82,9 @@ export function ProductionEventList() {
       <div className="flex flex-col items-center justify-center rounded-md border border-dashed p-8 text-center">
         <AlertCircle className="mb-2 h-6 w-6 text-muted-foreground" />
         <p className="mb-1 text-sm font-medium">
-          No production events recorded yet
-        </p>
+          {t("inventory.noProductionEventsRecordedYet")} </p>
         <p className="text-xs text-muted-foreground">
-          Record your first production run to see material usage, yield, and
-          cost summaries here.
-        </p>
+          {t("inventory.recordYourFirstProductionRunToSeeMaterialUsageYieldAndCostSummariesHere")} </p>
       </div>
     );
   }
@@ -110,7 +109,7 @@ export function ProductionEventList() {
                   </Badge>
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Recorded on{" "}
+                  {t("inventory.recordedOn")}{" "}
                   {event.produced_at
                     ? dateFormatter.format(new Date(event.produced_at))
                     : "N/A"}
@@ -118,8 +117,7 @@ export function ProductionEventList() {
               </div>
               <div className="flex flex-col items-end text-right">
                 <span className="text-xs uppercase text-muted-foreground">
-                  Total Output Cost
-                </span>
+                  {t("inventory.totalOutputCost")} </span>
                 <span className="text-lg font-semibold">
                   {currencyFormatter.format(totalCost)}
                 </span>
@@ -129,8 +127,7 @@ export function ProductionEventList() {
               <div className="grid gap-4 md:grid-cols-4">
                 <div>
                   <p className="text-xs uppercase text-muted-foreground">
-                    Output
-                  </p>
+                    {t("inventory.output")} </p>
                   <p className="text-sm font-semibold">
                     {producedQuantity.toLocaleString(undefined, {
                       maximumFractionDigits: 2,
@@ -140,24 +137,21 @@ export function ProductionEventList() {
                 </div>
                 <div>
                   <p className="text-xs uppercase text-muted-foreground">
-                    Material Cost
-                  </p>
+                    {t("inventory.materialCost")} </p>
                   <p className="text-sm font-semibold">
                     {currencyFormatter.format(totalMaterialCost)}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs uppercase text-muted-foreground">
-                    Labor
-                  </p>
+                    {t("dashboard.labor")} </p>
                   <p className="text-sm font-semibold">
                     {currencyFormatter.format(event.labor_cost ?? 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs uppercase text-muted-foreground">
-                    Cost per Unit
-                  </p>
+                    {t("inventory.costPerUnit")} </p>
                   <p className="text-sm font-semibold">
                     {currencyFormatter.format(event.unit_output_cost ?? 0)}
                   </p>
@@ -169,12 +163,11 @@ export function ProductionEventList() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Ingredient</TableHead>
+                        <TableHead>{t("inventory.ingredient")}</TableHead>
                         <TableHead className="text-right">
-                          Quantity Used
-                        </TableHead>
-                        <TableHead>Unit</TableHead>
-                        <TableHead className="text-right">Cost</TableHead>
+                          {t("inventory.quantityUsed")} </TableHead>
+                        <TableHead>{t("schedule.unit")}</TableHead>
+                        <TableHead className="text-right">{t("inventory.cost")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -201,13 +194,12 @@ export function ProductionEventList() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No material usage recorded for this production event.
-                </p>
+                  {t("inventory.noMaterialUsageRecordedForThisProductionEvent")} </p>
               )}
 
               {event.notes && (
                 <div className="rounded-md border bg-muted/40 p-3 text-sm">
-                  <p className="font-medium">Notes</p>
+                  <p className="font-medium">{t("schedule.notes")}</p>
                   <p className="text-muted-foreground">{event.notes}</p>
                 </div>
               )}

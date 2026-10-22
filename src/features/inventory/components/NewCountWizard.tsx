@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@/lib/router-adapter";
 import {
@@ -35,6 +36,7 @@ const DESCRIPTION_LIMIT = 150;
 const toDateInputValue = (date: Date) => format(date, "yyyy-MM-dd");
 
 export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { createCount } = useInventoryCounts();
   const { data: locations } = useInventoryLocations();
@@ -104,11 +106,9 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>New count</DialogTitle>
+          <DialogTitle>{t("inventory.newCount")}</DialogTitle>
           <DialogDescription>
-            Pick the day part, date, and room. Expected quantities come from
-            on-hand.
-          </DialogDescription>
+            {t("inventory.pickTheDayPartDateAndRoomExpectedQuantitiesComeFromOnHand")} </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
@@ -118,19 +118,17 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
               variant={period === "day_start" ? "default" : "outline"}
               onClick={() => setPeriod("day_start")}
             >
-              Day Start
-            </Button>
+              {t("inventory.dayStart")} </Button>
             <Button
               type="button"
               variant={period === "day_end" ? "default" : "outline"}
               onClick={() => setPeriod("day_end")}
             >
-              Day End
-            </Button>
+              {t("inventory.dayEnd")} </Button>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="count-date">Count date</Label>
+            <Label htmlFor="count-date">{t("inventory.countDate")}</Label>
             <Input
               id="count-date"
               type="date"
@@ -138,28 +136,26 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
               onChange={(event) => setCountDate(event.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              The date this count is registered, not a running timer.
-            </p>
+              {t("inventory.theDateThisCountIsRegisteredNotARunningTimer")} </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Storage area</Label>
+            <Label>{t("inventory.storageArea")}</Label>
             {(locations ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No rooms yet.{" "}
+                {t("inventory.noRoomsYet")}{" "}
                 <Link
                   to="/app/inventory/items"
                   className="underline"
                   onClick={() => onOpenChange(false)}
                 >
-                  Add a room in Items & Setup
-                </Link>
+                  {t("inventory.addARoomInItemsSetup")} </Link>
                 .
               </p>
             ) : (
               <Select value={locationId} onValueChange={setLocationId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a room" />
+                  <SelectValue placeholder={t("inventory.chooseARoom")} />
                 </SelectTrigger>
                 <SelectContent>
                   {locations?.map((location) => (
@@ -180,13 +176,13 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="count-description">Description</Label>
+            <Label htmlFor="count-description">{t("tasks.description")}</Label>
             <Textarea
               id="count-description"
               maxLength={DESCRIPTION_LIMIT}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Optional note for this count"
+              placeholder={t("inventory.optionalNoteForThisCount")}
               rows={3}
             />
             <p className="text-right text-xs text-muted-foreground">
@@ -196,8 +192,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={resetAndClose}>
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button
               type="button"
               onClick={() => void handleStart()}
