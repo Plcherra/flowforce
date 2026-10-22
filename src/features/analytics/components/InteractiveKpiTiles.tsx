@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { useNavigate } from "@/lib/router-adapter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { KpiTile, TileDetailPanel } from "@/features/analytics/components/kpi";
 import type { TileId } from "@/features/analytics/types/kpi";
 
 export default function InteractiveKpiTiles() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -115,8 +117,7 @@ export default function InteractiveKpiTiles() {
                   {activeTileDescriptor?.title ?? "Interactive insight"}
                 </SheetTitle>
                 <SheetDescription>
-                  Powered by Co-Pilot. Drill into realtime metrics and trigger
-                  the right next action.
+                  {t("analytics.poweredByCoPilotDrillIntoRealtimeMetricsAndTriggerTheRightNextAction")}
                 </SheetDescription>
               </SheetHeader>
 

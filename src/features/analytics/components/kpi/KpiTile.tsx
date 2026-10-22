@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Individual KPI tile component
  */
@@ -14,6 +15,7 @@ interface KpiTileProps {
 }
 
 export function KpiTile({ tile, onClick }: KpiTileProps) {
+  const { t } = useTranslation();
   const TrendIcon = TREND_LABEL[tile.trend].icon;
 
   return (
@@ -60,7 +62,7 @@ export function KpiTile({ tile, onClick }: KpiTileProps) {
           <div className="flex items-center gap-2 text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Co-Pilot Insight
+              {t("analytics.coPilotInsight")}
             </span>
           </div>
           <p className="mt-2 leading-relaxed">{tile.suggestion}</p>

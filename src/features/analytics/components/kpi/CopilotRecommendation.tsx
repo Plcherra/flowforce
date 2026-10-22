@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Co-Pilot recommendation section component
  */
@@ -18,11 +19,12 @@ export function CopilotRecommendation({
   message,
   actions,
 }: CopilotRecommendationProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-primary">
         <Sparkles className="h-4 w-4" />
-        Co-Pilot Recommendation
+        {t("analytics.coPilotRecommendation")}
       </div>
       <p className="text-sm leading-relaxed text-muted-foreground">{message}</p>
       <div className="flex flex-wrap gap-2">

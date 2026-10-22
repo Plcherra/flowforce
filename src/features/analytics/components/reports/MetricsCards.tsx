@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Metrics cards component for ReportsAnalyzer
  */
@@ -18,12 +19,13 @@ export function MetricsCards({
   accuracyScore,
   followUpActions,
 }: MetricsCardsProps) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Completion rate
+            {t("inventory.completionRate")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -32,7 +34,7 @@ export function MetricsCards({
             <TrendingUp className="h-5 w-5 text-success" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Combined forms and reports completed this window.
+            {t("analytics.combinedFormsAndReportsCompletedThisWindow")}
           </p>
         </CardContent>
       </Card>
@@ -40,7 +42,7 @@ export function MetricsCards({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Engagement
+            {t("updates.engagement2")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -51,7 +53,7 @@ export function MetricsCards({
             <Activity className="h-5 w-5 text-primary" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Reports analyzed vs intake, factoring follow-up actions.
+            {t("analytics.reportsAnalyzedVsIntakeFactoringFollowUpActions")}
           </p>
         </CardContent>
       </Card>
@@ -59,7 +61,7 @@ export function MetricsCards({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Accuracy
+            {t("analytics.accuracy")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -68,7 +70,7 @@ export function MetricsCards({
             <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Percent of reports that finished processing successfully.
+            {t("analytics.percentOfReportsThatFinishedProcessingSuccessfully")}
           </p>
         </CardContent>
       </Card>
@@ -76,7 +78,7 @@ export function MetricsCards({
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Follow-up actions
+            {t("analytics.followUpActions")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -85,7 +87,7 @@ export function MetricsCards({
             <Workflow className="h-5 w-5 text-secondary" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Tasks spawned from AI insights and report reviews.
+            {t("analytics.tasksSpawnedFromAiInsightsAndReportReviews")}
           </p>
         </CardContent>
       </Card>

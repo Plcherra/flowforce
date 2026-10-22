@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ export default function FormInsights({
   completionRate,
   fieldData = [],
 }: FormInsightsProps) {
+  const { t } = useTranslation();
   const generateInsights = (): Insight[] => {
     const insights: Insight[] = [];
 
@@ -156,7 +158,7 @@ export default function FormInsights({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lightbulb className="h-5 w-5 text-warning" />
-          Smart Insights
+          {t("analytics.smartInsights")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -164,13 +166,13 @@ export default function FormInsights({
           <div className="text-center py-8 text-muted-foreground">
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>
-              No insights available yet. Submit more data to get
-              recommendations.
+              {t("analytics.noInsightsAvailableYetSubmitMoreDataToGetRecommendations")}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {insights.map((insight) => (
+            {insights.map((insight) => {
+              return (
               <div key={insight.id} className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
@@ -181,10 +183,10 @@ export default function FormInsights({
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={getImpactColor(insight.impact)}>
-                      {insight.impact} impact
+                      {insight.impact} {t("analytics.impact")}
                     </Badge>
                     {insight.actionable && (
-                      <Badge variant="outline">Actionable</Badge>
+                      <Badge variant="outline">{t("analytics.actionable")}</Badge>
                     )}
                   </div>
                 </div>
@@ -196,7 +198,7 @@ export default function FormInsights({
                 {insight.type === "improvement" && insight.actionable && (
                   <div className="pt-2">
                     <div className="text-xs text-muted-foreground mb-1">
-                      Implementation Priority
+                      {t("analytics.implementationPriority")}
                     </div>
                     <Progress
                       value={
@@ -211,24 +213,25 @@ export default function FormInsights({
                   </div>
                 )}
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
 
         <div className="mt-6 p-4 bg-muted/50 rounded-lg">
           <h5 className="font-medium mb-2 flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-success" />
-            Overall Form Health
+            {t("analytics.overallFormHealth")}
           </h5>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Completion Rate</span>
+              <span>{t("analytics.completionRate")}</span>
               <span className="font-medium">{completionRate}%</span>
             </div>
             <Progress value={completionRate} className="h-2" />
 
             <div className="flex justify-between text-sm">
-              <span>Engagement Score</span>
+              <span>{t("analytics.engagementScore")}</span>
               <span className="font-medium">
                 {submissionCount > 50
                   ? "85%"

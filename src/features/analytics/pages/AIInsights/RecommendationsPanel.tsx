@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -28,12 +29,13 @@ export function RecommendationsPanel({
   recommendations,
   loading,
 }: RecommendationsPanelProps) {
+  const { t } = useTranslation();
   if (loading && recommendations.length === 0) {
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Recommendations</CardTitle>
-          <CardDescription>AI is evaluating recent reviews…</CardDescription>
+          <CardTitle>{t("analytics.recommendations")}</CardTitle>
+          <CardDescription>{t("analytics.aiIsEvaluatingRecentReviews")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -57,10 +59,10 @@ export function RecommendationsPanel({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            Recommendations
+            {t("analytics.recommendations")}
           </CardTitle>
           <CardDescription>
-            Connect your goals workspace to unlock AI coaching tips.
+            {t("analytics.connectYourGoalsWorkspaceToUnlockAiCoachingTips")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -72,14 +74,15 @@ export function RecommendationsPanel({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          AI Recommendations
+          {t("analytics.aiRecommendations")}
         </CardTitle>
         <CardDescription>
-          Prioritized actions based on recent reviews.
+          {t("analytics.prioritizedActionsBasedOnRecentReviews")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {recommendations.map((recommendation) => (
+        {recommendations.map((recommendation) => {
+          return (
           <div
             key={recommendation.id}
             className="space-y-1 rounded-2xl border bg-muted/40 p-4"
@@ -97,16 +100,17 @@ export function RecommendationsPanel({
             </div>
             <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
               <span>
-                Estimated XP impact:{" "}
-                {recommendation.xpSnapshot.toLocaleString()} XP
+                {t("analytics.estimatedXpImpact")}{" "}
+                {recommendation.xpSnapshot.toLocaleString()} {t("analytics.xp")}
               </span>
               <span>
-                Updated{" "}
+                {t("analytics.updated")}{" "}
                 {new Date(recommendation.createdAt).toLocaleDateString()}
               </span>
             </div>
           </div>
-        ))}
+        );
+        })}
       </CardContent>
     </Card>
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ interface ReportViewerProps {
 }
 
 export default function ReportViewer({ report, onBack }: ReportViewerProps) {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<"table" | "chart">("table");
   const [filters, _setFilters] = useState({});
 
@@ -117,7 +119,7 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={onBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t("common.back")}
             </Button>
             <div>
               <CardTitle>{report.name}</CardTitle>
@@ -146,24 +148,24 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="table">Table</SelectItem>
-                <SelectItem value="chart">Chart</SelectItem>
+                <SelectItem value="table">{t("analytics.table")}</SelectItem>
+                <SelectItem value="chart">{t("analytics.chart")}</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
-              Filters
+              {t("schedule.filters")}
             </Button>
           </div>
 
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={exportToCSV}>
               <FileSpreadsheet className="h-4 w-4 mr-2" />
-              CSV
+              {t("analytics.csv")}
             </Button>
             <Button variant="outline" size="sm" onClick={exportToPDF}>
               <FileText className="h-4 w-4 mr-2" />
-              PDF
+              {t("analytics.pdf")}
             </Button>
           </div>
         </div>
@@ -199,7 +201,7 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
 
         {reportData?.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
-            No data available for this report.
+            {t("analytics.noDataAvailableForThisReport")}
           </div>
         )}
       </CardContent>

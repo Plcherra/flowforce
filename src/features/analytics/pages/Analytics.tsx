@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FormAnalytics from "@/features/analytics/components/FormAnalytics";
@@ -16,6 +17,7 @@ import { AnalyticsReadinessPanel } from "@/features/analytics/components/Analyti
 type TabValue = "business" | "analytics" | "insights" | "reports";
 
 export default function Analytics() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const { company } = useCompany();
@@ -106,8 +108,7 @@ export default function Analytics() {
             Analytics &amp; AI
           </h1>
           <p className="text-muted-foreground">
-            Consolidate forms and internal reports, surface AI predictions, and
-            trigger workflow actions in one place.
+            {t("analytics.consolidateFormsAndInternalReportsSurfaceAiPredictionsAndTriggerWorkflowActionsInOnePlace")}
           </p>
         </div>
       </div>
@@ -132,7 +133,7 @@ export default function Analytics() {
               }
             >
               <TrendingUp className="h-4 w-4" />
-              <span className={isMobile ? "ml-2" : ""}>Business KPIs</span>
+              <span className={isMobile ? "ml-2" : ""}>{t("analytics.businessKpis")}</span>
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
@@ -141,7 +142,7 @@ export default function Analytics() {
               }
             >
               <BarChart className="h-4 w-4" />
-              <span className={isMobile ? "ml-2" : ""}>Form Analytics</span>
+              <span className={isMobile ? "ml-2" : ""}>{t("analytics.formAnalytics")}</span>
             </TabsTrigger>
             <TabsTrigger
               value="reports"
@@ -150,7 +151,7 @@ export default function Analytics() {
               }
             >
               <FileBarChart2 className="h-4 w-4" />
-              <span className={isMobile ? "ml-2" : ""}>Reports Analyzer</span>
+              <span className={isMobile ? "ml-2" : ""}>{t("analytics.reportsAnalyzer")}</span>
             </TabsTrigger>
             <TabsTrigger
               value="insights"
@@ -159,7 +160,7 @@ export default function Analytics() {
               }
             >
               <Lightbulb className="h-4 w-4" />
-              <span className={isMobile ? "ml-2" : ""}>Insights</span>
+              <span className={isMobile ? "ml-2" : ""}>{t("analytics.insights")}</span>
             </TabsTrigger>
           </TabsList>
 

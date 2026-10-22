@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Tasks tile detail panel component
  */
@@ -23,22 +24,23 @@ export function TasksTileDetail({
   onCreateTask,
   onNavigateToTasks,
 }: TasksTileDetailProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3">
-        <MetricBlock label="Open queue" value={metrics.open} />
+        <MetricBlock label={t("analytics.openQueue")} value={metrics.open} />
         <MetricBlock
-          label="Completion rate"
+          label={t("inventory.completionRate")}
           value={`${metrics.completionRate}%`}
           tone={metrics.completionRate >= 70 ? "success" : "default"}
         />
         <MetricBlock
-          label="Due soon (≤3d)"
+          label={t("analytics.dueSoon3d")}
           value={metrics.dueSoon}
           tone={metrics.dueSoon > 0 ? "warning" : "default"}
         />
         <MetricBlock
-          label="High priority"
+          label={t("analytics.highPriority")}
           value={metrics.highPriority}
           tone={metrics.highPriority > 0 ? "warning" : "default"}
         />
@@ -46,16 +48,16 @@ export function TasksTileDetail({
 
       <div>
         <h3 className="text-sm font-semibold text-foreground">
-          Overdue spotlight
+          {t("analytics.overdueSpotlight")}
         </h3>
         <div className="mt-3 space-y-3">
           {metrics.overdueList.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              No overdue tasks at the moment. Co-Pilot recommends capturing
-              process improvements while the board is clear.
+              {t("analytics.noOverdueTasksAtTheMomentCoPilotRecommendsCapturingProcessImprovementsWhileTheBoardIsClear")}
             </p>
           ) : (
-            metrics.overdueList.map((task, index) => (
+            metrics.overdueList.map((task, index) => {
+              return (
               <div
                 key={task.id ?? `task-${index}`}
                 className="rounded-lg border border-destructive/30 bg-destructive/5 p-3"
@@ -69,12 +71,13 @@ export function TasksTileDetail({
                       variant="destructive"
                       className="text-[11px] uppercase"
                     >
-                      Due {format(new Date(task.due_date), "MMM d")}
+                      {t("inventory.due")} {format(new Date(task.due_date), "MMM d")}
                     </Badge>
                   )}
                 </div>
               </div>
-            ))
+            );
+            })
           )}
         </div>
       </div>

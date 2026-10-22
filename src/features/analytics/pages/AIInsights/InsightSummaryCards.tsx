@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -29,6 +30,7 @@ export function InsightSummaryCards({
   metrics,
   loading,
 }: InsightSummaryCardsProps) {
+  const { t } = useTranslation();
   if (loading && metrics.length === 0) {
     return (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -50,12 +52,11 @@ export function InsightSummaryCards({
       <Card className="border-dashed bg-muted/20">
         <CardHeader>
           <CardTitle className="text-base font-semibold">
-            No performance data available
+            {t("analytics.noPerformanceDataAvailable")}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Connect performance reviews and goals to unlock AI summaries and XP
-          forecasts.
+          {t("analytics.connectPerformanceReviewsAndGoalsToUnlockAiSummariesAndXpForecasts")}
         </CardContent>
       </Card>
     );

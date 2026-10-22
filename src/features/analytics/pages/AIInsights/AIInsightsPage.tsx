@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Suspense, lazy } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -81,12 +82,13 @@ function PredictionTable({
   rows: PredictionRow[];
   loading: boolean;
 }) {
+  const { t } = useTranslation();
   if (loading && rows.length === 0) {
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>Forecasted Goals</CardTitle>
-          <CardDescription>Crunching review history…</CardDescription>
+          <CardTitle>{t("analytics.forecastedGoals")}</CardTitle>
+          <CardDescription>{t("analytics.crunchingReviewHistory")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -108,12 +110,11 @@ function PredictionTable({
     return (
       <Card className="h-full border-dashed">
         <CardHeader>
-          <CardTitle>Forecasted Goals</CardTitle>
-          <CardDescription>No goal reviews are available yet.</CardDescription>
+          <CardTitle>{t("analytics.forecastedGoals")}</CardTitle>
+          <CardDescription>{t("analytics.noGoalReviewsAreAvailableYet")}</CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Once performance reviews sync from Supabase, AI will highlight
-          potential risks and trajectory guidance here.
+          {t("analytics.oncePerformanceReviewsSyncFromSupabaseAiWillHighlightPotentialRisksAndTrajectoryGuidanceHere")}
         </CardContent>
       </Card>
     );
@@ -122,21 +123,21 @@ function PredictionTable({
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Forecasted Goals</CardTitle>
+        <CardTitle>{t("analytics.forecastedGoals")}</CardTitle>
         <CardDescription>
-          Top opportunities identified by AI this week.
+          {t("analytics.topOpportunitiesIdentifiedByAiThisWeek")}
         </CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Goal</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Progress</TableHead>
-              <TableHead>Forecast</TableHead>
-              <TableHead>Confidence</TableHead>
-              <TableHead>Reviewed</TableHead>
+              <TableHead>{t("analytics.goal")}</TableHead>
+              <TableHead>{t("schedule.status")}</TableHead>
+              <TableHead>{t("onboarding.sidebar.progress")}</TableHead>
+              <TableHead>{t("analytics.forecast")}</TableHead>
+              <TableHead>{t("analytics.confidence")}</TableHead>
+              <TableHead>{t("analytics.reviewed")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -343,6 +344,7 @@ const lastReviewLabel = (
 };
 
 export function AIInsightsPage() {
+  const { t } = useTranslation();
   const {
     dataset,
     radar = [],
@@ -367,10 +369,9 @@ export function AIInsightsPage() {
 
       {error && (
         <Alert>
-          <AlertTitle>Performance insights limited</AlertTitle>
+          <AlertTitle>{t("analytics.performanceInsightsLimited")}</AlertTitle>
           <AlertDescription>
-            Some review data could not be loaded. Charts below use available
-            tenant records only.
+            {t("analytics.someReviewDataCouldNotBeLoadedChartsBelowUseAvailableTenantRecordsOnly")}
           </AlertDescription>
         </Alert>
       )}
@@ -400,7 +401,7 @@ export function AIInsightsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Suspense fallback={<PanelFallback />}>
-          <PerformanceRadarChart data={radar} title="Performance vs Target" />
+          <PerformanceRadarChart data={radar} title={t("analytics.performanceVsTarget")} />
         </Suspense>
         <Suspense fallback={<PanelFallback />}>
           <EngagementOverview />

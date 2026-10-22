@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -57,6 +58,7 @@ const severityLabels: Record<number, string> = {
 };
 
 export function ReportInbox() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -228,13 +230,13 @@ export function ReportInbox() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Plus className="h-5 w-5 text-primary" />
-            New report
+            {t("analytics.newReport")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1">
             <label className="text-sm font-semibold text-muted-foreground">
-              Employee
+              {t("schedule.employee")}
             </label>
             <Select
               value={formValues.employeeId}
@@ -243,7 +245,7 @@ export function ReportInbox() {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select employee" />
+                <SelectValue placeholder={t("analytics.selectEmployee")} />
               </SelectTrigger>
               <SelectContent>
                 {(employeesQuery.data ?? []).map((employee) => (
@@ -258,7 +260,7 @@ export function ReportInbox() {
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
               <label className="text-sm font-semibold text-muted-foreground">
-                Category
+                {t("dashboard.category")}
               </label>
               <Select
                 value={formValues.category}
@@ -283,7 +285,7 @@ export function ReportInbox() {
             </div>
             <div className="space-y-1">
               <label className="text-sm font-semibold text-muted-foreground">
-                Severity
+                {t("analytics.severity")}
               </label>
               <Select
                 value={String(formValues.severity)}
@@ -311,7 +313,7 @@ export function ReportInbox() {
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
               <label className="text-sm font-semibold text-muted-foreground">
-                Date
+                {t("schedule.date")}
               </label>
               <Input
                 type="date"
@@ -326,7 +328,7 @@ export function ReportInbox() {
             </div>
             <div className="space-y-1">
               <label className="text-sm font-semibold text-muted-foreground">
-                Attachment
+                {t("analytics.attachment")}
               </label>
               <Input
                 type="file"
@@ -343,11 +345,11 @@ export function ReportInbox() {
 
           <div className="space-y-1">
             <label className="text-sm font-semibold text-muted-foreground">
-              Notes
+              {t("schedule.notes")}
             </label>
             <Textarea
               rows={5}
-              placeholder="Describe the observation, context, or feedback..."
+              placeholder={t("analytics.describeTheObservationContextOrFeedback")}
               value={formValues.notes}
               onChange={(event) =>
                 setFormValues((prev) => ({
@@ -370,7 +372,7 @@ export function ReportInbox() {
             {createReportMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Submit report
+            {t("analytics.submitReport")}
           </Button>
         </CardContent>
       </Card>
@@ -379,13 +381,13 @@ export function ReportInbox() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <FileText className="h-5 w-5 text-primary" />
-            Recent reports
+            {t("analytics.recentReports")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-muted-foreground">
-              Weekly summaries
+              {t("analytics.weeklySummaries")}
             </h3>
             <Button
               size="sm"
@@ -402,28 +404,30 @@ export function ReportInbox() {
               {generateSummaryMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Generate summary
+              {t("analytics.generateSummary")}
             </Button>
           </div>
           <div className="space-y-3">
-            {(summariesQuery.data ?? []).map((summary) => (
+            {(summariesQuery.data ?? []).map((summary) => {
+              return (
               <div
                 key={`${summary.employee_id}-${summary.week_start}`}
                 className="rounded-lg border p-3"
               >
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
-                    Week of {dayjs(summary.week_start).format("MMM D, YYYY")}
+                    {t("analytics.weekOf")} {dayjs(summary.week_start).format("MMM D, YYYY")}
                   </span>
-                  <span>Generated {dayjs(summary.generated_at).fromNow()}</span>
+                  <span>{t("analytics.generated")} {dayjs(summary.generated_at).fromNow()}</span>
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-foreground">
                   {summary.summary_text}
                 </p>
               </div>
-            ))}
+            );
+            })}
             {summariesQuery.data?.length === 0 && (
-              <p className="text-sm text-muted-foreground">No summaries yet.</p>
+              <p className="text-sm text-muted-foreground">{t("analytics.noSummariesYet")}</p>
             )}
           </div>
 
@@ -445,7 +449,7 @@ export function ReportInbox() {
                           report.severity >= 4 ? "destructive" : "secondary"
                         }
                       >
-                        Severity {report.severity}
+                        {t("analytics.severity")} {report.severity}
                       </Badge>
                       <span>{dayjs(report.date).format("MMM D, YYYY")}</span>
                     </div>
@@ -474,7 +478,7 @@ export function ReportInbox() {
               <div className="flex flex-col items-center gap-2 rounded border border-dashed py-10 text-muted-foreground">
                 <AlertTriangle className="h-6 w-6" />
                 <span className="text-sm">
-                  No reports yet. Submit a report to populate this inbox.
+                  {t("analytics.noReportsYetSubmitAReportToPopulateThisInbox")}
                 </span>
               </div>
             )}
@@ -503,7 +507,9 @@ async function generateWeeklySummary(
   }
 
   const positives = reports.filter((report) => report.severity >= 4);
-  const negatives = reports.filter((report) => report.severity <= 2);
+  const negatives = reports.filter((report) => {
+    return report.severity <= 2;
+  });
   const attendanceIssues = reports.filter(
     (report) => report.category === "attendance",
   ).length;

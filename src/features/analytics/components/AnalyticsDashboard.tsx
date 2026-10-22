@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import {
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--secondary))"];
 
 export default function AnalyticsDashboard() {
+  const { t } = useTranslation();
   const { data: analytics, isLoading } = useAnalytics();
   const { data: performance } = useEmployeePerformance();
 
@@ -71,7 +73,7 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Total Employees
+                  {t("dashboard.stats.totalEmployees")}
                 </p>
                 <p className="text-2xl font-bold">
                   {analytics?.totalEmployees || 0}
@@ -82,7 +84,7 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center mt-2">
               <TrendingUp className="h-4 w-4 text-success mr-1" />
               <span className="text-sm text-success">
-                +12% from last month
+                {t("analytics.12FromLastMonth")}
               </span>
             </div>
           </CardContent>
@@ -93,7 +95,7 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Active Employees
+                  {t("analytics.activeEmployees")}
                 </p>
                 <p className="text-2xl font-bold">
                   {analytics?.activeEmployees || 0}
@@ -109,7 +111,7 @@ export default function AnalyticsDashboard() {
                         100,
                     )
                   : 0}
-                % Active
+                {t("analytics.active")}
               </Badge>
             </div>
           </CardContent>
@@ -120,7 +122,7 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Pending Requests
+                  {t("dashboard.stats.pendingRequests")}
                 </p>
                 <p className="text-2xl font-bold">
                   {analytics?.pendingTimeOffRequests || 0}
@@ -149,7 +151,7 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Overdue Tasks
+                  {t("analytics.overdueTasks")}
                 </p>
                 <p className="text-2xl font-bold">
                   {analytics?.overdueTasks || 0}
@@ -179,7 +181,7 @@ export default function AnalyticsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Trends</CardTitle>
+            <CardTitle>{t("analytics.monthlyTrends")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -213,7 +215,7 @@ export default function AnalyticsDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Employee Performance</CardTitle>
+            <CardTitle>{t("analytics.employeePerformance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -242,7 +244,7 @@ export default function AnalyticsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>System Status Overview</CardTitle>
+            <CardTitle>{t("analytics.systemStatusOverview")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -271,34 +273,34 @@ export default function AnalyticsDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
+            <CardTitle>{t("analytics.quickStats")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="flex items-center">
                 <FileText className="h-4 w-4 mr-2 text-primary" />
-                Total Forms
+                {t("analytics.totalForms")}
               </span>
               <Badge variant="outline">{analytics?.totalForms || 0}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center">
                 <CheckSquare className="h-4 w-4 mr-2 text-success" />
-                Form Submissions
+                {t("forms.formSubmissions")}
               </span>
               <Badge variant="outline">{analytics?.formSubmissions || 0}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center">
                 <Clock className="h-4 w-4 mr-2 text-warning" />
-                Completed Tasks
+                {t("analytics.completedTasks")}
               </span>
               <Badge variant="outline">{analytics?.completedTasks || 0}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center">
                 <Users className="h-4 w-4 mr-2 text-secondary" />
-                Task Completion Rate
+                {t("analytics.taskCompletionRate")}
               </span>
               <Badge variant="outline">
                 {analytics?.completedTasks && analytics?.overdueTasks

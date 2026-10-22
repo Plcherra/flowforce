@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Performance tile detail panel component
  */
@@ -23,11 +24,12 @@ export function PerformanceTileDetail({
   onNavigateToPerformance,
   onNavigateToRecognition,
 }: PerformanceTileDetailProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3">
         <MetricBlock
-          label="Average completion"
+          label={t("analytics.averageCompletion")}
           value={
             metrics.averageCompletionRate > 0
               ? `${metrics.averageCompletionRate}%`
@@ -35,7 +37,7 @@ export function PerformanceTileDetail({
           }
         />
         <MetricBlock
-          label="Top performer"
+          label={t("analytics.topPerformer")}
           value={
             metrics.topPerformer
               ? `${metrics.topPerformer.first_name ?? ""} ${metrics.topPerformer.last_name ?? ""}`.trim() ||
@@ -44,7 +46,7 @@ export function PerformanceTileDetail({
           }
         />
         <MetricBlock
-          label="Contributors tracked"
+          label={t("analytics.contributorsTracked")}
           value={metrics.topContributors.length}
           tone={metrics.topContributors.length > 0 ? "success" : "default"}
         />
@@ -52,13 +54,12 @@ export function PerformanceTileDetail({
 
       <div>
         <h3 className="text-sm font-semibold text-foreground">
-          Standout performers
+          {t("analytics.standoutPerformers")}
         </h3>
         <div className="mt-3 space-y-3">
           {metrics.topContributors.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              Co-Pilot needs fresh performance data to highlight coaching
-              moments. Sync your latest reviews to continue.
+              {t("analytics.coPilotNeedsFreshPerformanceDataToHighlightCoachingMomentsSyncYourLatestReviewsToContinue")}
             </p>
           ) : (
             metrics.topContributors.map((entry, index) => (

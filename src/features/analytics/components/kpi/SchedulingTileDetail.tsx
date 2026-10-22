@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Scheduling tile detail panel component
  */
@@ -21,16 +22,17 @@ export function SchedulingTileDetail({
   onNavigateToScheduling,
   onNavigateToTimeOff,
 }: SchedulingTileDetailProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3">
         <MetricBlock
-          label="Coverage"
+          label={t("analytics.coverage2")}
           value={metrics.coverage > 0 ? `${metrics.coverage}%` : "—"}
           tone={metrics.hasCapacityGap ? "warning" : "success"}
         />
         <MetricBlock
-          label="Hours utilisation"
+          label={t("analytics.hoursUtilisation")}
           value={
             metrics.hoursUtilization > 0 ? `${metrics.hoursUtilization}%` : "—"
           }
@@ -43,14 +45,14 @@ export function SchedulingTileDetail({
           }
         />
         <MetricBlock
-          label="Task completion"
+          label={t("analytics.taskCompletion")}
           value={
             metrics.taskCompletion > 0 ? `${metrics.taskCompletion}%` : "—"
           }
           tone={metrics.tasksBehind ? "warning" : "success"}
         />
         <MetricBlock
-          label="Pending PTO"
+          label={t("analytics.pendingPto")}
           value={metrics.pendingTimeOff}
           tone={metrics.pendingTimeOff > 4 ? "warning" : "default"}
         />

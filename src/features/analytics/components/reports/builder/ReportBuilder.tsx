@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,7 @@ export default function ReportBuilder({
   onSuccess,
   onBack,
 }: ReportBuilderProps) {
+  const { t } = useTranslation();
   const [_open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: report?.name || "",
@@ -137,7 +139,7 @@ export default function ReportBuilder({
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {t("common.back")}
           </Button>
           <CardTitle>{report ? "Edit Report" : "Create New Report"}</CardTitle>
         </div>
@@ -146,7 +148,7 @@ export default function ReportBuilder({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Report Name</Label>
+              <Label htmlFor="name">{t("analytics.reportName")}</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -158,7 +160,7 @@ export default function ReportBuilder({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="report_type">Report Type</Label>
+              <Label htmlFor="report_type">{t("analytics.reportType")}</Label>
               <Select
                 value={formData.report_type}
                 onValueChange={(value) =>
@@ -184,7 +186,7 @@ export default function ReportBuilder({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -199,7 +201,7 @@ export default function ReportBuilder({
           </div>
 
           <div className="space-y-3">
-            <Label>Select Columns to Include</Label>
+            <Label>{t("analytics.selectColumnsToInclude")}</Label>
             <div className="grid grid-cols-2 gap-2">
               {availableColumns.map((column) => (
                 <div key={column.id} className="flex items-center space-x-2">
@@ -229,12 +231,12 @@ export default function ReportBuilder({
                 }))
               }
             />
-            <Label htmlFor="is_public">Make this report public</Label>
+            <Label htmlFor="is_public">{t("analytics.makeThisReportPublic")}</Label>
           </div>
 
           <div className="flex justify-end space-x-3">
             <Button type="button" variant="outline" onClick={onBack}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect } from "react";
 import {
   RefreshCw,
@@ -43,6 +44,7 @@ export function BusinessAnalyticsBoard({
   onContextChange,
   className,
 }: BusinessAnalyticsBoardProps) {
+  const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useBusinessAnalytics({
     companyId,
     horizonDays: 28,
@@ -138,15 +140,14 @@ export function BusinessAnalyticsBoard({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">
-            Business-level analytics
+            {t("analytics.businessLevelAnalytics")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Consolidated KPIs across scheduling, tasks, goals, and revenue to
-            guide planning decisions.
+            {t("analytics.consolidatedKpisAcrossSchedulingTasksGoalsAndRevenueToGuidePlanningDecisions")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {data?.isFallback && <Badge variant="outline">Demo dataset</Badge>}
+          {data?.isFallback && <Badge variant="outline">{t("analytics.demoDataset")}</Badge>}
           <Button
             variant="outline"
             size="sm"
@@ -154,23 +155,23 @@ export function BusinessAnalyticsBoard({
             className="gap-1.5"
           >
             <RefreshCw className="h-4 w-4" />
-            Refresh
+            {t("common.refresh")}
           </Button>
         </div>
       </div>
 
       {data?.notice && !data.isFallback && (
         <Alert variant="default">
-          <AlertTitle>Analytics status</AlertTitle>
+          <AlertTitle>{t("analytics.analyticsStatus")}</AlertTitle>
           <AlertDescription>{data.notice}</AlertDescription>
         </Alert>
       )}
 
       {isError && (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load analytics</AlertTitle>
+          <AlertTitle>{t("analytics.unableToLoadAnalytics")}</AlertTitle>
           <AlertDescription>
-            Refresh the panel or check your connection.
+            {t("analytics.refreshThePanelOrCheckYourConnection")}
           </AlertDescription>
         </Alert>
       )}
@@ -183,16 +184,16 @@ export function BusinessAnalyticsBoard({
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Goal velocity
+                  {t("analytics.goalVelocity")}
                 </CardTitle>
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
-                  {metrics.goalVelocity.toFixed(1)} pts/wk
+                  {metrics.goalVelocity.toFixed(1)} {t("analytics.ptsWk")}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {breakdown?.goals.active ?? 0} active goals · avg progress{" "}
+                  {breakdown?.goals.active ?? 0} {t("analytics.activeGoalsAvgProgress")}{" "}
                   {percent(breakdown?.goals.avgProgress ?? 0)}
                 </p>
               </CardContent>
@@ -201,17 +202,16 @@ export function BusinessAnalyticsBoard({
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Labor efficiency vs revenue
+                  {t("analytics.laborEfficiencyVsRevenue")}
                 </CardTitle>
                 <Gauge className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
-                  {metrics.laborEfficiencyIndex.toFixed(0)} index
+                  {metrics.laborEfficiencyIndex.toFixed(0)} {t("analytics.index")}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formatAmount(metrics.revenuePerLaborHour)} revenue per labor
-                  hour
+                  {formatAmount(metrics.revenuePerLaborHour)} {t("analytics.revenuePerLaborHour")}
                 </p>
               </CardContent>
             </Card>
@@ -219,7 +219,7 @@ export function BusinessAnalyticsBoard({
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Forecast confidence
+                  {t("analytics.forecastConfidence")}
                 </CardTitle>
                 <ShieldCheck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -228,7 +228,7 @@ export function BusinessAnalyticsBoard({
                   {percent(metrics.forecastConfidence)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Margin {percent(metrics.marginRate * 100, 0)} · coverage{" "}
+                  {t("analytics.margin")} {percent(metrics.marginRate * 100, 0)} {t("analytics.coverage")}{" "}
                   {percent(metrics.scheduleCoverage * 100, 0)}
                 </p>
               </CardContent>
@@ -239,7 +239,7 @@ export function BusinessAnalyticsBoard({
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                Highlights
+                {t("analytics.highlights")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -248,7 +248,7 @@ export function BusinessAnalyticsBoard({
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Focus areas</h3>
+                  <h3 className="text-sm font-medium mb-2">{t("analytics.focusAreas")}</h3>
                   <ul className="space-y-2">
                     {focusAreas.map((item, index) => (
                       <li key={index} className="text-sm leading-relaxed">
@@ -258,7 +258,7 @@ export function BusinessAnalyticsBoard({
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Positive signals</h3>
+                  <h3 className="text-sm font-medium mb-2">{t("analytics.positiveSignals")}</h3>
                   <ul className="space-y-2">
                     {positiveSignals.length ? (
                       positiveSignals.map((item, index) => (
@@ -271,7 +271,7 @@ export function BusinessAnalyticsBoard({
                       ))
                     ) : (
                       <li className="text-sm text-muted-foreground">
-                        No major positive signals detected this cycle.
+                        {t("analytics.noMajorPositiveSignalsDetectedThisCycle")}
                       </li>
                     )}
                   </ul>
@@ -285,22 +285,21 @@ export function BusinessAnalyticsBoard({
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Activity className="h-4 w-4 text-muted-foreground" />
-                  Operational breakdown
+                  {t("analytics.operationalBreakdown")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm text-muted-foreground">
                 <div>
-                  <div className="font-medium text-foreground">Scheduling</div>
+                  <div className="font-medium text-foreground">{t("common.scheduling")}</div>
                   <div>
-                    Coverage{" "}
+                    {t("analytics.coverage2")}{" "}
                     {percent(
                       (breakdown?.scheduling.coverageRate ?? 0) * 100,
                       0,
                     )}
                   </div>
                   <div>
-                    {breakdown?.scheduling.openShifts ?? 0} open shifts ·
-                    overtime risk{" "}
+                    {breakdown?.scheduling.openShifts ?? 0} {t("analytics.openShiftsOvertimeRisk")}{" "}
                     {percent(
                       (breakdown?.scheduling.overtimeRisk ?? 0) * 100,
                       0,
@@ -308,34 +307,34 @@ export function BusinessAnalyticsBoard({
                   </div>
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Tasks</div>
+                  <div className="font-medium text-foreground">{t("common.tasks")}</div>
                   <div>
-                    {breakdown?.tasks.backlog ?? 0} backlog ·{" "}
-                    {breakdown?.tasks.overdue ?? 0} overdue
+                    {breakdown?.tasks.backlog ?? 0} {t("analytics.backlog")}{" "}
+                    {breakdown?.tasks.overdue ?? 0} {t("analytics.overdue")}
                   </div>
                   <div>
                     {percent((metrics?.taskThroughputRatio ?? 0) * 100, 0)}{" "}
-                    throughput vs intake
+                    {t("analytics.throughputVsIntake")}
                   </div>
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Goals</div>
+                  <div className="font-medium text-foreground">{t("common.goals")}</div>
                   <div>
-                    {breakdown?.goals.total ?? 0} total ·{" "}
-                    {breakdown?.goals.atRisk ?? 0} at risk
+                    {breakdown?.goals.total ?? 0} {t("analytics.total")}{" "}
+                    {breakdown?.goals.atRisk ?? 0} {t("analytics.atRisk")}
                   </div>
                   <div>
-                    Velocity {metrics?.goalVelocity.toFixed(1)} pts/week
+                    {t("analytics.velocity")} {metrics?.goalVelocity.toFixed(1)} {t("analytics.ptsWeek")}
                   </div>
                 </div>
                 <div>
-                  <div className="font-medium text-foreground">Finance</div>
+                  <div className="font-medium text-foreground">{t("onboarding.userInfo.industries.finance")}</div>
                   <div>
-                    Trailing revenue{" "}
+                    {t("analytics.trailingRevenue")}{" "}
                     {formatAmount(breakdown?.revenue.trailing30 ?? 0)}
                   </div>
                   <div>
-                    Forecast next 30d{" "}
+                    {t("analytics.forecastNext30d")}{" "}
                     {formatAmount(breakdown?.revenue.forecastNext30 ?? 0)}
                   </div>
                 </div>
@@ -346,11 +345,12 @@ export function BusinessAnalyticsBoard({
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                  Predictions
+                  {t("analytics.predictions")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {snapshot.predictions.map((prediction, index) => (
+                {snapshot.predictions.map((prediction, index) => {
+                  return (
                   <div key={index} className="border rounded-lg p-3">
                     <div className="flex items-center justify-between">
                       <div className="font-medium text-sm">
@@ -372,10 +372,11 @@ export function BusinessAnalyticsBoard({
                       {prediction.description}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Confidence {percent(prediction.confidence)}
+                      {t("analytics.confidence")} {percent(prediction.confidence)}
                     </p>
                   </div>
-                ))}
+                );
+                })}
               </CardContent>
             </Card>
           </div>

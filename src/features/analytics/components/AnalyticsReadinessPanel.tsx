@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -38,6 +39,7 @@ const reviewTone: Record<string, string> = {
 };
 
 export function AnalyticsReadinessPanel() {
+  const { t } = useTranslation();
   const { company } = useCompany();
   const { profile } = useProfile();
   const companyId = company?.id ?? profile?.companyId ?? profile?.company_id ?? null;
@@ -95,10 +97,10 @@ export function AnalyticsReadinessPanel() {
           <div>
             <CardTitle className="flex items-center gap-2 text-xl">
               <FileBarChart2 className="h-5 w-5 text-primary" />
-              Analytics Readiness
+              {t("analytics.analyticsReadiness")}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Real module summaries, owner/manager views, exports, cost signals, and AI context.
+              {t("analytics.realModuleSummariesOwnerManagerViewsExportsCostSignalsAndAiContext")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -123,7 +125,7 @@ export function AnalyticsReadinessPanel() {
               onClick={() => exportAnalyticsReadiness(summary)}
             >
               <Download className="h-4 w-4" />
-              Export
+              {t("schedule.export")}
             </Button>
           </div>
         </div>
@@ -175,7 +177,7 @@ export function AnalyticsReadinessPanel() {
         {summary.reviewItems.length > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Reporting review needed</AlertTitle>
+            <AlertTitle>{t("analytics.reportingReviewNeeded")}</AlertTitle>
             <AlertDescription>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {summary.reviewItems.map((item) => (
@@ -197,7 +199,7 @@ export function AnalyticsReadinessPanel() {
           </Alert>
         ) : (
           <div className="rounded-lg border border-success/40 bg-success-muted p-3 text-sm text-success">
-            Analytics is using tenant data with exports, cost signals, and AI context available.
+            {t("analytics.analyticsIsUsingTenantDataWithExportsCostSignalsAndAiContextAvailable")}
           </div>
         )}
       </CardContent>

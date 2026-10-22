@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
@@ -98,6 +99,7 @@ function summarizeText(text?: string | null) {
 }
 
 export default function ReportsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -249,10 +251,9 @@ export default function ReportsPage() {
         <Card>
           <CardContent className="py-16 text-center space-y-3">
             <AlertCircle className="mx-auto h-10 w-10 text-warning" />
-            <h2 className="text-xl font-semibold">Access restricted</h2>
+            <h2 className="text-xl font-semibold">{t("analytics.accessRestricted")}</h2>
             <p className="text-muted-foreground">
-              You do not have permission to view reporting data. Contact an
-              administrator for access.
+              {t("analytics.youDoNotHavePermissionToViewReportingDataContactAnAdministratorForAccess")}
             </p>
           </CardContent>
         </Card>
@@ -266,11 +267,10 @@ export default function ReportsPage() {
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold flex items-center gap-2">
             <FileText className="h-7 w-7 text-primary" />
-            Report Inbox
+            {t("analytics.reportInbox")}
           </h1>
           <p className="text-muted-foreground">
-            Upload daily PDFs, review extracted insights, and launch follow-up
-            actions in minutes.
+            {t("analytics.uploadDailyPdfsReviewExtractedInsightsAndLaunchFollowUpActionsInMinutes")}
           </p>
         </div>
 
@@ -278,7 +278,7 @@ export default function ReportsPage() {
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by title, source, or filename"
+              placeholder={t("analytics.searchByTitleSourceOrFilename")}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="w-64 pl-9"
@@ -298,7 +298,7 @@ export default function ReportsPage() {
             className="gap-2"
           >
             <ArrowDownToLine className="h-4 w-4" />
-            Export CSV
+            {t("forms.exportCsv")}
           </Button>
           <Button
             onClick={() => uploadInputRef.current?.click()}
@@ -310,7 +310,7 @@ export default function ReportsPage() {
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            Upload report
+            {t("analytics.uploadReport")}
           </Button>
         </div>
       </div>
@@ -318,7 +318,7 @@ export default function ReportsPage() {
       {uploadMutation.isError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Upload failed</AlertTitle>
+          <AlertTitle>{t("analytics.uploadFailed")}</AlertTitle>
           <AlertDescription>
             {(uploadMutation.error as Error)?.message ??
               "An unexpected error occurred while uploading the file."}
@@ -330,7 +330,7 @@ export default function ReportsPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs font-medium uppercase text-muted-foreground">
-              Ready
+              {t("analytics.ready")}
             </p>
             <p className="mt-2 text-2xl font-semibold">
               {reportSummary.ready}
@@ -340,7 +340,7 @@ export default function ReportsPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs font-medium uppercase text-muted-foreground">
-              Processing
+              {t("analytics.processing")}
             </p>
             <p className="mt-2 text-2xl font-semibold">
               {reportSummary.processing}
@@ -350,7 +350,7 @@ export default function ReportsPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs font-medium uppercase text-muted-foreground">
-              Errors
+              {t("analytics.errors")}
             </p>
             <p className="mt-2 text-2xl font-semibold">
               {reportSummary.errors}
@@ -360,7 +360,7 @@ export default function ReportsPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs font-medium uppercase text-muted-foreground">
-              Critical events
+              {t("analytics.criticalEvents")}
             </p>
             <p className="mt-2 text-2xl font-semibold">
               {reportSummary.criticalEvents}
@@ -371,7 +371,7 @@ export default function ReportsPage() {
           <CardContent className="p-4">
             <p className="flex items-center gap-1 text-xs font-medium uppercase text-muted-foreground">
               <ClipboardList className="h-3.5 w-3.5" />
-              Follow-ups
+              {t("analytics.followUps2")}
             </p>
             <p className="mt-2 text-2xl font-semibold">
               {reportSummary.followUps}
@@ -383,7 +383,7 @@ export default function ReportsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Recent uploads</CardTitle>
+            <CardTitle>{t("analytics.recentUploads")}</CardTitle>
             <CardDescription>
               {isFetching
                 ? "Refreshing…"
@@ -403,11 +403,10 @@ export default function ReportsPage() {
               <FileText className="h-10 w-10" />
               <div className="text-center space-y-1">
                 <p className="text-sm font-medium text-foreground">
-                  No reports yet
+                  {t("analytics.noReportsYet")}
                 </p>
                 <p className="text-sm">
-                  Upload your first daily report to kick off automatic event
-                  extraction.
+                  {t("analytics.uploadYourFirstDailyReportToKickOffAutomaticEventExtraction")}
                 </p>
               </div>
             </div>
@@ -415,11 +414,11 @@ export default function ReportsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Report</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Events</TableHead>
-                  <TableHead>Uploaded</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("analytics.report")}</TableHead>
+                  <TableHead>{t("schedule.status")}</TableHead>
+                  <TableHead>{t("common.events")}</TableHead>
+                  <TableHead>{t("analytics.uploaded")}</TableHead>
+                  <TableHead className="text-right">{t("inventory.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -463,14 +462,14 @@ export default function ReportsPage() {
                             variant="outline"
                             className="bg-success-muted text-success border-success/40"
                           >
-                            {doc.events.length} tracked
+                            {doc.events.length} {t("analytics.tracked")}
                           </Badge>
                         ) : (
                           <Badge
                             variant="outline"
                             className="text-muted-foreground"
                           >
-                            No events
+                            {t("analytics.noEvents")}
                           </Badge>
                         )}
                       </TableCell>
@@ -488,7 +487,7 @@ export default function ReportsPage() {
                           size="sm"
                           onClick={() => handleOpenDetails(doc.id)}
                         >
-                          Review
+                          {t("inventory.review")}
                         </Button>
                         <Button
                           variant="secondary"
@@ -496,7 +495,7 @@ export default function ReportsPage() {
                           onClick={() => handleCreateTask(doc)}
                           disabled={processingState !== "ready"}
                         >
-                          Create task
+                          {t("analytics.createTask")}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -523,7 +522,7 @@ export default function ReportsPage() {
                     "Report details"}
                 </SheetTitle>
                 <SheetDescription>
-                  Source: {selectedDocument.source ?? "Uploaded"} · Status:{" "}
+                  {t("analytics.source")} {selectedDocument.source ?? "Uploaded"} {t("analytics.status")}{" "}
                   {
                     STATUS_META[selectedDocument.processing_state ?? "ready"]
                       .label
@@ -535,7 +534,7 @@ export default function ReportsPage() {
                 selectedDocument.processing_error && (
                   <Alert variant="destructive" className="mt-4">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Extraction failed</AlertTitle>
+                    <AlertTitle>{t("analytics.extractionFailed")}</AlertTitle>
                     <AlertDescription>
                       {selectedDocument.processing_error}
                     </AlertDescription>
@@ -546,10 +545,10 @@ export default function ReportsPage() {
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base">
-                      Document summary
+                      {t("analytics.documentSummary")}
                     </CardTitle>
                     <CardDescription>
-                      Uploaded{" "}
+                      {t("analytics.uploaded")}{" "}
                       {selectedDocument.file?.uploaded_at
                         ? format(
                             new Date(selectedDocument.file.uploaded_at),
@@ -560,12 +559,12 @@ export default function ReportsPage() {
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm text-muted-foreground">
                     <p>
-                      <strong className="text-foreground">Language:</strong>{" "}
+                      <strong className="text-foreground">{t("analytics.language")}</strong>{" "}
                       {selectedDocument.language ?? "Not detected"}
                     </p>
                     <p>
                       <strong className="text-foreground">
-                        Document date:
+                        {t("analytics.documentDate")}
                       </strong>{" "}
                       {selectedDocument.doc_date
                         ? format(new Date(selectedDocument.doc_date), "PPP")
@@ -581,7 +580,7 @@ export default function ReportsPage() {
                         }
                       >
                         <ArrowDownToLine className="h-4 w-4" />
-                        Download original
+                        {t("analytics.downloadOriginal")}
                       </Button>
                     )}
                   </CardContent>
@@ -589,9 +588,9 @@ export default function ReportsPage() {
 
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Extracted text</CardTitle>
+                    <CardTitle className="text-base">{t("analytics.extractedText")}</CardTitle>
                     <CardDescription>
-                      Top of document content (first 600 characters)
+                      {t("analytics.topOfDocumentContentFirst600Characters")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -605,7 +604,7 @@ export default function ReportsPage() {
                   <CardHeader className="pb-3 flex flex-row items-center justify-between gap-2">
                     <div>
                       <CardTitle className="text-base">
-                        Detected events
+                        {t("analytics.detectedEvents")}
                       </CardTitle>
                       <CardDescription>
                         {selectedDocument.events.length > 0
@@ -617,12 +616,12 @@ export default function ReportsPage() {
                   <CardContent>
                     {selectedDocument.events.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
-                        No structured events recorded. Once processing
-                        completes, rules will surface key incidents here.
+                        {t("analytics.noStructuredEventsRecordedOnceProcessingCompletesRulesWillSurfaceKeyIncidentsHere")}
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {selectedDocument.events.map((event) => (
+                        {selectedDocument.events.map((event) => {
+                          return (
                           <div key={event.id} className="rounded-md border p-3">
                             <div className="flex items-center justify-between gap-3">
                               <div className="font-medium text-sm text-foreground">
@@ -636,10 +635,10 @@ export default function ReportsPage() {
                               </Badge>
                             </div>
                             <div className="mt-2 text-xs text-muted-foreground space-y-1">
-                              <p>Severity: {event.severity}</p>
+                              <p>{t("analytics.severity2")} {event.severity}</p>
                               {event.occurred_at && (
                                 <p>
-                                  Occurred:{" "}
+                                  {t("analytics.occurred")}{" "}
                                   {format(
                                     new Date(event.occurred_at),
                                     "PPP h:mm a",
@@ -661,7 +660,8 @@ export default function ReportsPage() {
                               ) : null}
                             </div>
                           </div>
-                        ))}
+                        );
+                        })}
                       </div>
                     )}
                   </CardContent>
@@ -674,14 +674,14 @@ export default function ReportsPage() {
                   className="flex-1"
                   onClick={() => setSelectedDocumentId(null)}
                 >
-                  Close
+                  {t("common.close")}
                 </Button>
                 <Button
                   className="flex-1"
                   onClick={() => handleCreateTask(selectedDocument)}
                   disabled={selectedDocument.processing_state !== "ready"}
                 >
-                  Create follow-up task
+                  {t("analytics.createFollowUpTask")}
                 </Button>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
   Dialog,
@@ -50,6 +51,7 @@ export function CreateDocumentTaskDialog({
   open,
   onClose,
 }: CreateDocumentTaskDialogProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { createTask } = useTasks();
   const { toast } = useToast();
@@ -144,15 +146,15 @@ export function CreateDocumentTaskDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create Follow-Up Task</DialogTitle>
+          <DialogTitle>{t("analytics.createFollowUpTask2")}</DialogTitle>
           <DialogDescription>
-            Convert report findings into a trackable action item for your team.
+            {t("analytics.convertReportFindingsIntoATrackableActionItemForYourTeam")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="task-title">Title</Label>
+            <Label htmlFor="task-title">{t("schedule.title")}</Label>
             <Input
               id="task-title"
               placeholder={suggestedTitle}
@@ -162,10 +164,10 @@ export function CreateDocumentTaskDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="task-description">Description</Label>
+            <Label htmlFor="task-description">{t("tasks.description")}</Label>
             <Textarea
               id="task-description"
-              placeholder="Outline the follow-up steps or context for this task."
+              placeholder={t("analytics.outlineTheFollowUpStepsOrContextForThisTask")}
               rows={4}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
@@ -174,7 +176,7 @@ export function CreateDocumentTaskDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Priority</Label>
+              <Label>{t("tasks.priority")}</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue />
@@ -190,7 +192,7 @@ export function CreateDocumentTaskDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Due date</Label>
+              <Label>{t("analytics.dueDate")}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -220,7 +222,7 @@ export function CreateDocumentTaskDialog({
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={loading || !document}>
               {loading ? "Creating…" : "Create Task"}

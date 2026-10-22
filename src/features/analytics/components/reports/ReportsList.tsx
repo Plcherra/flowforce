@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 /**
  * Reports list component for ReportsAnalyzer
  */
@@ -25,6 +26,7 @@ export function ReportsList({
   followUpActions: _followUpActions,
   filteredDocumentsLength: _filteredDocumentsLength,
 }: ReportsListProps) {
+  const { t } = useTranslation();
   return (
     <ScrollArea className="max-h-[360px]">
       <div className="space-y-3">
@@ -67,13 +69,13 @@ export function ReportsList({
                 </span>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                <span>Follow-ups: {tasks}</span>
+                <span>{t("analytics.followUps3")} {tasks}</span>
                 <Separator orientation="vertical" className="h-3" />
-                <span>Source: {document.source ?? "N/A"}</span>
+                <span>{t("analytics.source")} {document.source ?? "N/A"}</span>
                 {accuracy !== null && (
                   <>
                     <Separator orientation="vertical" className="h-3" />
-                    <span>Accuracy: {accuracy}%</span>
+                    <span>{t("analytics.accuracy2")} {accuracy}%</span>
                   </>
                 )}
               </div>
@@ -83,7 +85,7 @@ export function ReportsList({
 
         {documents.length === 0 && (
           <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-            No reports processed during this window.
+            {t("analytics.noReportsProcessedDuringThisWindow")}
           </div>
         )}
       </div>

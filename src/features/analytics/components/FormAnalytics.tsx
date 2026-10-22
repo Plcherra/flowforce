@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -72,6 +73,7 @@ export default function FormAnalytics({
   onFormSelect,
   onSummaryChange,
 }: FormAnalyticsProps) {
+  const { t } = useTranslation();
   const { forms, getFormSubmissions, getFormFields } = useForms();
   const [selectedForm, setSelectedForm] = useState(formId || "");
   const [timeRange, setTimeRange] = useState("7d");
@@ -306,7 +308,9 @@ export default function FormAnalytics({
     }
 
     const lowCompletionFields = analyticsData.fieldAnalysis.filter(
-      (field) => field.completion < 70,
+      (field) => {
+        return field.completion < 70;
+      },
     );
     const averageFieldCompletion = analyticsData.fieldAnalysis.length
       ? Math.round(
@@ -421,9 +425,9 @@ export default function FormAnalytics({
       <Card>
         <CardContent className="py-8 text-center">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Forms Available</h3>
+          <h3 className="text-lg font-semibold mb-2">{t("analytics.noFormsAvailable")}</h3>
           <p className="text-muted-foreground">
-            Create a form first to view analytics
+            {t("analytics.createAFormFirstToViewAnalytics")}
           </p>
         </CardContent>
       </Card>
@@ -436,7 +440,7 @@ export default function FormAnalytics({
         <div className="flex items-center gap-4">
           <Select value={selectedForm} onValueChange={setSelectedForm}>
             <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Select a form" />
+              <SelectValue placeholder={t("analytics.selectAForm")} />
             </SelectTrigger>
             <SelectContent>
               {Array.isArray(forms) ? forms.map((form) => (
@@ -452,9 +456,9 @@ export default function FormAnalytics({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7d">7 days</SelectItem>
-              <SelectItem value="30d">30 days</SelectItem>
-              <SelectItem value="90d">90 days</SelectItem>
+              <SelectItem value="7d">{t("analytics.7Days")}</SelectItem>
+              <SelectItem value="30d">{t("analytics.30Days")}</SelectItem>
+              <SelectItem value="90d">{t("analytics.90Days")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -462,7 +466,7 @@ export default function FormAnalytics({
         {analyticsData && (
           <Button onClick={exportData} variant="outline">
             <Download className="h-4 w-4 mr-2" />
-            Export
+            {t("schedule.export")}
           </Button>
         )}
       </div>
@@ -471,16 +475,16 @@ export default function FormAnalytics({
         <Card>
           <CardContent className="py-8 text-center">
             <Activity className="h-8 w-8 animate-pulse mx-auto text-muted-foreground mb-4" />
-            <p>Loading analytics...</p>
+            <p>{t("analytics.loadingAnalytics")}</p>
           </CardContent>
         </Card>
       ) : analyticsData ? (
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="fields">Field Analysis</TabsTrigger>
-            <TabsTrigger value="devices">Device Breakdown</TabsTrigger>
+            <TabsTrigger value="overview">{t("analytics.overview")}</TabsTrigger>
+            <TabsTrigger value="performance">{t("common.performance")}</TabsTrigger>
+            <TabsTrigger value="fields">{t("analytics.fieldAnalysis")}</TabsTrigger>
+            <TabsTrigger value="devices">{t("analytics.deviceBreakdown")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -488,7 +492,7 @@ export default function FormAnalytics({
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Submissions
+                    {t("analytics.totalSubmissions")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -504,7 +508,7 @@ export default function FormAnalytics({
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Completion Rate
+                    {t("analytics.completionRate")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -520,14 +524,14 @@ export default function FormAnalytics({
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Avg. Time
+                    {t("analytics.avgTime")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <div className="text-2xl font-bold">
-                      {Math.floor(analyticsData.averageTime / 60)}m{" "}
-                      {analyticsData.averageTime % 60}s
+                      {Math.floor(analyticsData.averageTime / 60)}{t("analytics.m")}{" "}
+                      {analyticsData.averageTime % 60}{t("analytics.s")}
                     </div>
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                   </div>
@@ -537,7 +541,7 @@ export default function FormAnalytics({
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Status
+                    {t("schedule.status")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -556,7 +560,7 @@ export default function FormAnalytics({
 
             <Card>
               <CardHeader>
-                <CardTitle>Submissions Over Time</CardTitle>
+                <CardTitle>{t("analytics.submissionsOverTime")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -580,7 +584,7 @@ export default function FormAnalytics({
           <TabsContent value="performance" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Field Interactions</CardTitle>
+                <CardTitle>{t("analytics.fieldInteractions")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -599,11 +603,12 @@ export default function FormAnalytics({
           <TabsContent value="fields" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Field Completion Analysis</CardTitle>
+                <CardTitle>{t("analytics.fieldCompletionAnalysis")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analyticsData.fieldAnalysis.map((field, index) => (
+                  {analyticsData.fieldAnalysis.map((field, index) => {
+                    return (
                     <div
                       key={index}
                       className="flex items-center justify-between p-3 border rounded"
@@ -611,20 +616,21 @@ export default function FormAnalytics({
                       <div className="font-medium">{field.field}</div>
                       <div className="flex items-center gap-4">
                         <div className="text-sm text-muted-foreground">
-                          Completion:{" "}
+                          {t("analytics.completion")}{" "}
                           <span className="font-medium text-success">
                             {field.completion}%
                           </span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Drop-off:{" "}
+                          {t("analytics.dropOff")}{" "}
                           <span className="font-medium text-destructive">
                             {field.dropoff}%
                           </span>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -633,7 +639,7 @@ export default function FormAnalytics({
           <TabsContent value="devices" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Device Breakdown</CardTitle>
+                <CardTitle>{t("analytics.deviceBreakdown")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -690,7 +696,7 @@ export default function FormAnalytics({
         <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground">
-              Select a form to view analytics
+              {t("analytics.selectAFormToViewAnalytics")}
             </p>
           </CardContent>
         </Card>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ interface ReportsAnalyzerProps {
 }
 
 export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
+  const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
   const [compareMetric, setCompareMetric] = useState<CompareMetric>("volume");
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
@@ -117,11 +119,10 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <FileBarChart2 className="h-6 w-6 text-primary" />
-            Reports Analyzer
+            {t("analytics.reportsAnalyzer")}
           </h2>
           <p className="text-muted-foreground">
-            Consolidated insight across forms and internal reports with AI
-            powered predictions.
+            {t("analytics.consolidatedInsightAcrossFormsAndInternalReportsWithAiPoweredPredictions")}
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -133,9 +134,9 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="end">
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="7d">{t("analytics.last7Days")}</SelectItem>
+              <SelectItem value="30d">{t("analytics.last30Days")}</SelectItem>
+              <SelectItem value="90d">{t("analytics.last90Days")}</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -143,17 +144,17 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
             onValueChange={(value: CompareMetric) => setCompareMetric(value)}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Compare by" />
+              <SelectValue placeholder={t("analytics.compareBy")} />
             </SelectTrigger>
             <SelectContent align="end">
-              <SelectItem value="volume">Compare volume</SelectItem>
-              <SelectItem value="completion">Compare completion</SelectItem>
-              <SelectItem value="engagement">Compare engagement</SelectItem>
+              <SelectItem value="volume">{t("analytics.compareVolume")}</SelectItem>
+              <SelectItem value="completion">{t("analytics.compareCompletion")}</SelectItem>
+              <SelectItem value="engagement">{t("analytics.compareEngagement")}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={handleExport} className="gap-2">
             <Download className="h-4 w-4" />
-            Export
+            {t("schedule.export")}
           </Button>
         </div>
       </div>
@@ -180,7 +181,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Volume trend</CardTitle>
+                <CardTitle>{t("analytics.volumeTrend")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <VolumeTrendChart data={metrics.timelineData} />
@@ -189,7 +190,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Comparison</CardTitle>
+                <CardTitle>{t("analytics.comparison")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ComparisonBarChart data={metrics.comparisonData} />
@@ -200,7 +201,7 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Status mix</CardTitle>
+                <CardTitle>{t("analytics.statusMix")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <StatusPieChart data={metrics.statusBreakdown} />
@@ -210,27 +211,29 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
             <Card className="lg:col-span-3">
               <CardHeader className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <CardTitle>AI predictions & tips</CardTitle>
+                  <CardTitle>{t("analytics.aiPredictionsTips")}</CardTitle>
                   <p className="text-muted-foreground text-sm">
-                    Live guidance generated from current analytics.
+                    {t("analytics.liveGuidanceGeneratedFromCurrentAnalytics")}
                   </p>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {activeContext.insights.map((insight) => (
+                {activeContext.insights.map((insight) => {
+                  return (
                   <div key={insight.title} className="rounded-lg border p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4 text-primary" />
                         <h4 className="font-medium">{insight.title}</h4>
                       </div>
-                      <Badge variant="secondary">AI insight</Badge>
+                      <Badge variant="secondary">{t("analytics.aiInsight")}</Badge>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       {insight.detail}
                     </p>
                   </div>
-                ))}
+                );
+                })}
               </CardContent>
             </Card>
           </div>
@@ -238,14 +241,14 @@ export function ReportsAnalyzer({ onContextChange }: ReportsAnalyzerProps) {
           <Card>
             <CardHeader className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <CardTitle>Recent reports</CardTitle>
+                <CardTitle>{t("analytics.recentReports")}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Click a report to spotlight context in the AI assistant.
+                  {t("analytics.clickAReportToSpotlightContextInTheAiAssistant")}
                 </p>
               </div>
               <Badge variant="outline">
-                {metrics.filteredDocuments.length} reports •{" "}
-                {metrics.followUpActions} follow-ups
+                {metrics.filteredDocuments.length} {t("analytics.reports")}{" "}
+                {metrics.followUpActions} {t("analytics.followUps")}
               </Badge>
             </CardHeader>
             <CardContent>

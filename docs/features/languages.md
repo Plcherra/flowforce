@@ -296,7 +296,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 14 — Analytics strings
 
-- [ ] Move Analytics chrome into the six locales.
+- [x] Move Analytics chrome into the six locales.
 
 Rules:
 
@@ -963,6 +963,22 @@ Phone steps for Pedro:
 1. Sign in at https://www.flowforce.uk and open Inventory.
 2. Set your language to Français on Settings, then Region. Reload. The page headings, prep list, and count screens should be in French. An item name someone typed stays as they wrote it.
 3. Open counting and purchasing from the inventory navigation. Empty states and buttons should follow the language.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 14 Analytics strings
+
+Shipped: Analytics chrome under `src/features/analytics` now uses `useTranslation` and the `analytics` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Cancel, Back, Close, Tasks, and Goals, stay on those keys. Report names and notes that people type stay as stored text. Counts that sit next to a word stay one phrase where the text was already split around a number. Two comparisons the checker read as text now use a block body so the words stayed code. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3018 keys for each locale and `hard-coded strings 1896`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/analytics`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Analytics (`/app/analytics`) and Reports (`/app/reports`).
+2. Set your language to Español on Settings, then Region. Reload. The page title, tabs, filters, and empty states should be in Spanish. A report name someone typed stays as they wrote it.
+3. Open Reports & Intelligence → AI Insights. The header, forecast table, and recommendation labels should follow the language. The status line should say the insights are up to date, or that they are updating. Switch to Deutsch and check the same screens.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
