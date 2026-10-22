@@ -120,6 +120,75 @@ export function isMoreNavActive(moreSections: ProcessedNavigationSection[]): boo
   return moreSections.some((section) => section.items.some((item) => item.isActive));
 }
 
+export interface BottomNavGroup {
+  id: string;
+  title: string;
+  translationKey?: string;
+  items: ProcessedNavigationItem[];
+}
+
+const BOTTOM_NAV_SHORT_LABELS: Record<string, string> = {
+  dailyOperations: "Ops",
+  inventory: "Inventory",
+  analyticsReports: "Reports",
+  team: "Team",
+  adminSetup: "Admin",
+};
+
+export function bottomNavGroupName(
+  t: LabelTranslator,
+  group: { title: string; translationKey?: string },
+): string {
+  const key = group.translationKey ?? "";
+  const short = BOTTOM_NAV_SHORT_LABELS[key];
+  if (short) return short;
+  return navSectionLabel(t, group);
+}
+
+/** Icons in section order, with Dashboard at the front of Ops. */
+export function groupWideBottomNav(
+  sections: ProcessedNavigationSection[],
+  dashboardActive: boolean,
+): BottomNavGroup[] {
+  const seen = new Set<string>();
+  const groups: BottomNavGroup[] = [];
+
+  for (const section of sections) {
+    const items: ProcessedNavigationItem[] = [];
+    for (const item of section.items ?? []) {
+      const key = item.id || bottomNavKey(item.href);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push(item);
+    }
+    if (items.length === 0) continue;
+    groups.push({
+      id: section.id || section.translationKey || section.title,
+      title: section.title,
+      translationKey: section.translationKey,
+      items,
+    });
+  }
+
+  const dashboard = createDashboardNavItem(dashboardActive);
+  const ops = groups.find(
+    (group) =>
+      group.translationKey === "dailyOperations" || group.id === "dailyOperations",
+  );
+  if (ops) {
+    ops.items.unshift(dashboard);
+  } else {
+    groups.unshift({
+      id: "dailyOperations",
+      title: "Daily Operations",
+      translationKey: "dailyOperations",
+      items: [dashboard],
+    });
+  }
+
+  return groups;
+}
+
 /** Every visible page, in sidebar order, for the wide icon row. */
 export function wideBottomNavItems(
   primary: ProcessedNavigationItem[],

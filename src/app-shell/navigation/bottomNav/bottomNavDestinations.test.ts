@@ -3,6 +3,8 @@ import { navigationSections } from "@/data/navigationData";
 import type { ProcessedNavigationSection } from "@/hooks/useNavigationData";
 import {
   bottomNavKey,
+  bottomNavGroupName,
+  groupWideBottomNav,
   isMoreNavActive,
   navItemLabel,
   partitionBottomNavigation,
@@ -139,4 +141,25 @@ export function runBottomNavDestinationTests() {
     "Employees",
   );
   assert.equal(navItemLabel(translate, { name: "Custom board" }), "Custom board");
+
+  const groups = groupWideBottomNav(asProcessed(), false);
+  assert.deepEqual(
+    groups.map((group) => bottomNavGroupName((key) => key, group)),
+    ["Ops", "Inventory", "Reports", "Team", "Admin"],
+  );
+  assert.equal(groups[0]?.items[0]?.name, "Dashboard");
+  assert.equal(
+    groups[0]?.items.some((item) => item.name === "Team Directory"),
+    false,
+  );
+  assert.equal(
+    groups.find((group) => group.translationKey === "team")?.items[0]?.name,
+    "Team Directory",
+  );
+  assert.deepEqual(
+    groups
+      .find((group) => group.translationKey === "inventory")
+      ?.items.map((item) => item.name),
+    ["Inventory", "Expenses"],
+  );
 }

@@ -7,11 +7,12 @@ import { useNavigationData } from "@/hooks/useNavigationData";
 import { BottomIconButton } from "./BottomIconButton";
 import { BottomNavMoreSheet } from "./BottomNavMoreSheet";
 import {
+  bottomNavGroupName,
+  groupWideBottomNav,
   isMoreNavActive,
   navItemLabel,
   partitionBottomNavigation,
   shouldShowMoreNav,
-  wideBottomNavItems,
 } from "./bottomNavDestinations";
 import { NavGlyph } from "./NavGlyph";
 
@@ -46,25 +47,47 @@ export function BottomIconNav() {
   const moreActive = isMoreNavActive(moreSections);
   const moreLabel = t("navigation.more", { defaultValue: "More" });
   const addLabel = t("navigation.addNew", { defaultValue: "Add new" });
-  const wideItems = wideBottomNavItems(primary, moreSections);
+  const groups = groupWideBottomNav(sections, isActive("/dashboard") || isActive("/app/dashboard"));
   const primaryIds = new Set(primary.map((item) => item.id));
 
   return (
     <TooltipProvider delayDuration={300}>
       <nav aria-label="Main" data-bottom-icon-nav="true" className="bottom-icon-nav">
         <div className="bottom-icon-nav-icons border-0 bg-transparent shadow-none backdrop-blur-none">
-          {wideItems.map((item) => {
-            const label = navItemLabel(t, item);
+          {groups.map((group) => {
+            const visibleOnPhone = group.items.some((item) =>
+              primaryIds.has(item.id),
+            );
             return (
-              <BottomIconButton
-                key={item.id}
-                label={label}
-                active={item.isActive}
-                className={primaryIds.has(item.id) ? undefined : "hidden lg:flex"}
-                onClick={() => navigate(item.href)}
+              <div
+                key={group.id}
+                className={
+                  visibleOnPhone
+                    ? "bottom-icon-nav-group"
+                    : "bottom-icon-nav-group hidden lg:flex"
+                }
               >
-                <NavGlyph icon={item.icon} />
-              </BottomIconButton>
+                <span className="bottom-icon-nav-label">
+                  {bottomNavGroupName(t, group)}
+                </span>
+                <span className="bottom-icon-nav-rule" aria-hidden="true" />
+                {group.items.map((item) => {
+                  const label = navItemLabel(t, item);
+                  return (
+                    <BottomIconButton
+                      key={item.id}
+                      label={label}
+                      active={item.isActive}
+                      className={
+                        primaryIds.has(item.id) ? undefined : "hidden lg:flex"
+                      }
+                      onClick={() => navigate(item.href)}
+                    >
+                      <NavGlyph icon={item.icon} />
+                    </BottomIconButton>
+                  );
+                })}
+              </div>
             );
           })}
           {canManageSections ? (
