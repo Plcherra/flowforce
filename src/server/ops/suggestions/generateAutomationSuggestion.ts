@@ -1,4 +1,3 @@
-import OpenAI from "openai";
 import { supabase } from "@/integrations/supabase/client";
 import { OPERATIONS_AUTOMATION_SYSTEM_PROMPT } from "@/server/automation/prompts/operations";
 import { serializeAutomationContext } from "@/server/automation/prompts/automationCommon";
@@ -7,14 +6,16 @@ import {
   type AutomationScript,
 } from "@/server/automation/validateScript";
 import { serverEnv } from "@/lib/env";
+import {
+  createGrokChatCompletion,
+  parseModelJson,
+  readGrokRuntimeConfig,
+} from "@/services/ai/grokProvider";
 import { logger } from "@/utils/logger";
 
-const apiKey = serverEnv.OPENAI_API_KEY;
-const openai = apiKey
-  ? new OpenAI({
-      apiKey,
-    })
-  : null;
+const grok = readGrokRuntimeConfig((name) =>
+  name === "XAI_API_KEY" ? serverEnv.XAI_API_KEY : process.env[name],
+);
 
 type SupabaseLikeClient = {
   from: (table: string) => any;
@@ -31,8 +32,8 @@ export async function generateAutomationSuggestion({
   orgId,
   client = supabase,
 }: GenerateAutomationSuggestionInput) {
-  if (!openai) {
-    throw new Error("OpenAI key missing");
+  if (!grok.apiKey) {
+    throw new Error("xAI key missing");
   }
 
   const { data: issue, error } = await client
@@ -53,8 +54,12 @@ export async function generateAutomationSuggestion({
     kpiKey: issue.kpi_key,
   });
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const completion = await createGrokChatCompletion({
+    apiKey: grok.apiKey,
+    model: grok.model,
+    reasoningEffort: grok.reasoningEffort,
+    temperature: 0.2,
+    responseFormat: { type: "json_object" },
     messages: [
       {
         role: "system",
@@ -67,10 +72,10 @@ export async function generateAutomationSuggestion({
     ],
   });
 
-  const text = completion.choices[0]?.message?.content ?? "{}";
+  const text = completion.content || "{}";
   let parsed: AutomationScript | null = null;
   try {
-    parsed = JSON.parse(text) as AutomationScript;
+    parsed = parseModelJson(text) as AutomationScript;
   } catch (parseError) {
     logger.error("[generateAutomationSuggestion] invalid JSON", {
       error: parseError,

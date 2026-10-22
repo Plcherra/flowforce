@@ -122,8 +122,13 @@ const automationGenerator = readText(
 );
 assertIncludes(
   automationGenerator,
-  "serverEnv.OPENAI_API_KEY",
-  "automation generator must use server-only OpenAI key",
+  "serverEnv.XAI_API_KEY",
+  "automation generator must use the server-only xAI key",
+);
+assertIncludes(
+  readText("src/lib/env.ts"),
+  "OPENAI_API_KEY: process.env.OPENAI_API_KEY",
+  "OpenAI key stays server-only for translations",
 );
 
 const supabaseCheck = readText("scripts/check-supabase-contract.mjs");

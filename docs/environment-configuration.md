@@ -42,6 +42,8 @@ Optional by feature:
 
 ```bash
 OPENAI_API_KEY=
+XAI_API_KEY=
+XAI_MODEL=grok-4.3
 CRON_SECRET=
 LOG_INGEST_TOKEN=
 LOG_LEVEL=info

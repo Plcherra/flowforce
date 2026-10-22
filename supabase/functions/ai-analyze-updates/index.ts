@@ -1,14 +1,14 @@
-import OpenAI from 'openai';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { readGrokRuntimeConfig } from '../_shared/grokProvider.ts';
+import {
+  AI_BUDGET_FALLBACK,
+  runMeteredGrokChat,
+} from '../_shared/grokUsage.ts';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
-
-const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY') ?? '',
-});
 
 type CompanyUpdateRow = {
   id: string;
@@ -22,6 +22,7 @@ type CompanyUpdateRow = {
 
 Deno.serve(async () => {
   const since = new Date(Date.now() - 86_400_000).toISOString();
+  const grok = readGrokRuntimeConfig((name) => Deno.env.get(name) ?? undefined);
 
   const { data: updates, error } = await supabase
     .from('company_updates')
@@ -31,11 +32,11 @@ Deno.serve(async () => {
 
   if (error) {
     console.error('Failed to fetch company updates', error);
-    return new Response('❌ Unable to fetch company updates', { status: 500 });
+    return new Response('Unable to fetch company updates', { status: 500 });
   }
 
   if (!updates?.length) {
-    return new Response('✅ No updates to analyze');
+    return new Response('No updates to analyze');
   }
 
   for (const update of updates as CompanyUpdateRow[]) {
@@ -43,7 +44,6 @@ Deno.serve(async () => {
     const comments = update.comments_count ?? 0;
     const views = update.views_count ?? 0;
     const engagementScore = (likes * 2 + comments * 3 + views * 0.5) / 10;
-
     const prompt = `
     Analyze internal engagement quality.
     Title: ${update.title}
@@ -54,12 +54,30 @@ Deno.serve(async () => {
     Provide a concise AI summary and improvement advice.
     `;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: prompt }],
-    });
-
-    const summary = completion.choices[0]?.message?.content ?? '';
+    let summary = '';
+    if (!update.company_id) {
+      summary = 'Skipped AI summary because the update has no company.';
+    } else {
+      try {
+        const completion = await runMeteredGrokChat({
+          client: supabase,
+          companyId: update.company_id,
+          promptKey: 'manager_briefing',
+          surface: 'company_update_engagement',
+          metadata: { update_id: update.id },
+          apiKey: grok.apiKey,
+          model: grok.model,
+          reasoningEffort: grok.reasoningEffort,
+          temperature: 0.7,
+          maxCompletionTokens: 400,
+          messages: [{ role: 'system', content: prompt }],
+        });
+        summary = completion.blocked ? AI_BUDGET_FALLBACK : completion.content;
+      } catch (analysisError) {
+        console.error('Failed to analyze company update', analysisError);
+        summary = 'AI summary was not generated.';
+      }
+    }
 
     const { error: upsertError } = await supabase.from('company_update_engagement').upsert({
       update_id: update.id,
@@ -78,5 +96,5 @@ Deno.serve(async () => {
     }
   }
 
-  return new Response('✅ Engagement analysis complete');
+  return new Response('Engagement analysis complete');
 });

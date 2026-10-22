@@ -4,8 +4,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import { readGrokRuntimeConfig } from "../_shared/grokProvider.ts";
+import {
+  promptKeyForInsightType,
+  runMeteredGrokChat,
+} from "../_shared/grokUsage.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -283,6 +287,10 @@ serve(async (req) => {
     }
 
     const analysisData = await buildAnalysisData(supabase, companyId, body.type);
+    const usageClient = createClient(supabaseUrl!, supabaseServiceKey!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const grok = readGrokRuntimeConfig((name) => Deno.env.get(name) ?? undefined);
 
     let systemPrompt = '';
     switch (body.type) {
@@ -305,28 +313,27 @@ serve(async (req) => {
         systemPrompt = 'You are an AI analyst.';
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: body.query || `Please analyze this data and provide insights: ${JSON.stringify(analysisData).slice(0, 8000)}` 
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      }),
+    const completion = await runMeteredGrokChat({
+      client: usageClient,
+      companyId,
+      userId: userData.user.id,
+      promptKey: promptKeyForInsightType(body.type),
+      surface: "ai-insights",
+      metadata: { insight_type: body.type },
+      apiKey: grok.apiKey,
+      model: grok.model,
+      reasoningEffort: grok.reasoningEffort,
+      temperature: 0.7,
+      maxCompletionTokens: 500,
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: body.query || `Please analyze this data and provide insights: ${JSON.stringify(analysisData).slice(0, 8000)}`,
+        },
+      ],
     });
-
-    const aiResponse = await response.json();
-    const insights = aiResponse.choices[0].message.content;
+    const insights = completion.content;
 
     // Don't return raw data - only return insights to prevent data exfiltration
     return new Response(JSON.stringify({ insights }), {

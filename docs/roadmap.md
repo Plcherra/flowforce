@@ -42,3 +42,9 @@ Leave these closed. Theme and Languages stay written, and they are not the featu
 | --- | --- | --- |
 | Theme | later | [docs/features/theme.md](features/theme.md) |
 | Languages | later, after Theme | [docs/features/languages.md](features/languages.md) |
+
+## AI providers
+
+Checked 2026-10-22. Product AI runs on xAI Grok. The default model is `grok-4.3` (fast, low-cost; override with `XAI_MODEL`). Translations stay on OpenAI `gpt-4o-mini` with `OPENAI_API_KEY`, including the planned user-content translation in `docs/features/languages.md`. `ai-insights` and `ai-analyze-updates` call Grok and record provider `xai`, the model, and the existing monthly cap in `ai_usage_events`. Co-Pilot dispatch, the scheduling assistant edge function, and employee evaluation do not call a model.
+
+Phone check after the production deploy finishes: sign in at https://www.flowforce.uk, open Reports & Intelligence → AI Insights, and confirm the insight text loads. On that page, open the chat, ask a short question, and confirm a reply. The floating Co-Pilot still answers from the screen in front of you.

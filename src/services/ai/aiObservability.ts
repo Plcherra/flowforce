@@ -1,4 +1,5 @@
 import type { AIPromptContractKey } from "./aiPromptContracts";
+import { estimateGrokCostUsd } from "./grokProvider";
 
 export type AIUsageStatus = "succeeded" | "failed" | "timeout" | "budget_blocked" | "fallback";
 
@@ -6,7 +7,7 @@ export interface AIUsageEventInput {
   companyId: string;
   promptKey: AIPromptContractKey;
   model: string;
-  provider?: "openai" | "other";
+  provider?: "openai" | "xai" | "other";
   status: AIUsageStatus;
   inputTokens?: number;
   outputTokens?: number;
@@ -56,12 +57,19 @@ export const aiModelCostPer1KTokensUsd: Record<string, { input: number; output: 
   "gpt-4o-mini": { input: 0.00015, output: 0.0006 },
   "gpt-4o": { input: 0.005, output: 0.015 },
   "gpt-4.1-mini": { input: 0.0004, output: 0.0016 },
+  "grok-4.3": { input: 0.00125, output: 0.0025 },
+  "grok-4.5": { input: 0.002, output: 0.006 },
+  "grok-4.6": { input: 0.002, output: 0.006 },
+  "grok-4.7": { input: 0.002, output: 0.006 },
 };
 
 const finiteNumber = (value: number | undefined, fallback = 0) =>
   typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : fallback;
 
 export function estimateAIUsageCostUsd(model: string, inputTokens = 0, outputTokens = 0) {
+  const grokCost = estimateGrokCostUsd(model, inputTokens, outputTokens);
+  if (grokCost !== null) return grokCost;
+
   const pricing = aiModelCostPer1KTokensUsd[model] ?? aiModelCostPer1KTokensUsd["gpt-4o-mini"];
   return Number(
     (
@@ -69,6 +77,11 @@ export function estimateAIUsageCostUsd(model: string, inputTokens = 0, outputTok
       (finiteNumber(outputTokens) / 1000) * pricing.output
     ).toFixed(6),
   );
+}
+
+export function aiUsageProviderForModel(model: string, provider?: AIUsageEventInput["provider"]) {
+  if (provider) return provider;
+  return model.trim().toLowerCase().startsWith("grok") ? "xai" : "openai";
 }
 
 export function buildAIUsageEvent(input: AIUsageEventInput) {
@@ -82,7 +95,7 @@ export function buildAIUsageEvent(input: AIUsageEventInput) {
   return {
     company_id: input.companyId,
     prompt_key: input.promptKey,
-    provider: input.provider ?? "openai",
+    provider: aiUsageProviderForModel(input.model, input.provider),
     model: input.model,
     status: input.status,
     input_tokens: inputTokens,

@@ -282,6 +282,103 @@ select throws_ok(
   'Tenant B cannot manage Tenant A AI budgets'
 );
 
+set local role service_role;
+select set_config('request.jwt.claim.role', 'service_role', true);
+select set_config('request.jwt.claim.sub', '', true);
+
+select is(
+  (public.record_ai_usage_event(
+    '8b000000-0000-4000-8000-000000000001',
+    'manager_briefing',
+    'grok-4.3',
+    'succeeded',
+    1000000,
+    1000000,
+    100,
+    0,
+    15000,
+    null,
+    null,
+    null,
+    '{"provider":"xai","user_id":"8b100000-0000-4000-8000-000000000001"}'::jsonb
+  )->>'provider'),
+  'xai',
+  'grok usage records the xAI provider'
+);
+
+select is(
+  (
+    select cost_usd
+    from public.ai_usage_events
+    where company_id = '8b000000-0000-4000-8000-000000000001'
+      and model = 'grok-4.3'
+  ),
+  7.5::numeric,
+  'grok-4.3 long-context pricing is applied'
+);
+
+select is(
+  (
+    select status
+    from public.ai_usage_events
+    where company_id = '8b000000-0000-4000-8000-000000000001'
+      and model = 'grok-4.3'
+  ),
+  'budget_blocked',
+  'the monthly token cap still blocks a Grok call'
+);
+
+select is(
+  (public.record_ai_usage_event(
+    '8b000000-0000-4000-8000-000000000001',
+    'manager_briefing',
+    'grok-4.3-latest',
+    'succeeded',
+    1000,
+    1000,
+    10,
+    0,
+    15000,
+    null,
+    null,
+    null,
+    '{"user_id":"8b100000-0000-4000-8000-000000000001"}'::jsonb
+  )->>'provider'),
+  'xai',
+  'grok model ids default the provider to xAI'
+);
+
+select is(
+  (public.record_ai_usage_event(
+    '8b000000-0000-4000-8000-000000000001',
+    'scheduling_assistant',
+    'grok-4.3-latest',
+    'succeeded',
+    1000,
+    1000,
+    10,
+    0,
+    15000,
+    null,
+    null,
+    null,
+    '{"user_id":"8b100000-0000-4000-8000-000000000001"}'::jsonb
+  )->>'cost_usd')::numeric,
+  0.00375::numeric,
+  'grok-4.3 rates apply when the caller omits cost'
+);
+
+select ok(
+  exists (
+    select 1
+    from public.ai_usage_events
+    where company_id = '8b000000-0000-4000-8000-000000000001'
+      and model = 'gpt-4o-mini'
+      and provider = 'openai'
+  ),
+  'OpenAI translation usage stays on the openai provider'
+);
+
 select * from finish();
 
 rollback;

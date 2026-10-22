@@ -36,6 +36,8 @@ Server-only variables are runtime inputs through `.env.production.local` or the 
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
+XAI_API_KEY=
+XAI_MODEL=grok-4.3
 CRON_SECRET=
 LOG_INGEST_TOKEN=
 LOG_LEVEL=info
@@ -44,7 +46,7 @@ LOG_PERSISTENCE=true
 SUPPORT_ADMIN_TOKEN=
 ```
 
-Do not bake `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `CRON_SECRET`, `LOG_INGEST_TOKEN`, or `SUPPORT_ADMIN_TOKEN` into the image.
+Do not bake `SUPABASE_SERVICE_ROLE_KEY`, `OPENAI_API_KEY`, `XAI_API_KEY`, `CRON_SECRET`, `LOG_INGEST_TOKEN`, or `SUPPORT_ADMIN_TOKEN` into the image.
 
 ## Colima Local Production Run
 

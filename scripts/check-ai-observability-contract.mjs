@@ -198,6 +198,27 @@ if (usageEvent.cost_usd <= 0) {
   throw new Error("AI usage event did not estimate cost");
 }
 
+if (usageEvent.provider !== "openai") {
+  throw new Error("OpenAI usage event did not keep the openai provider");
+}
+
+const grokEvent = observability.buildAIUsageEvent({
+  companyId: "sample-company",
+  promptKey: "manager_briefing",
+  model: "grok-4.3",
+  status: "succeeded",
+  inputTokens: 1_000,
+  outputTokens: 1_000,
+});
+
+if (grokEvent.provider !== "xai") {
+  throw new Error("Grok usage event did not record the xAI provider");
+}
+
+if (grokEvent.cost_usd !== 0.00375) {
+  throw new Error(`Grok usage event priced ${grokEvent.cost_usd} instead of 0.00375`);
+}
+
 const failedEvent = observability.buildAIUsageEvent({
   companyId: "sample-company",
   promptKey: "manager_briefing",

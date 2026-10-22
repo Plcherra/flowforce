@@ -64,6 +64,8 @@ export const serverEnv = {
   SUPABASE_URL: process.env.SUPABASE_URL ?? appEnv.VITE_SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  XAI_API_KEY: process.env.XAI_API_KEY,
+  XAI_MODEL: process.env.XAI_MODEL,
   CRON_SECRET: process.env.CRON_SECRET,
   LOG_INGEST_TOKEN: process.env.LOG_INGEST_TOKEN,
   LOG_LEVEL: process.env.LOG_LEVEL,
