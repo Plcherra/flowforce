@@ -13,6 +13,9 @@ const importTs = jiti(import.meta.url, {
 const { runStatusTabLayoutTests } = importTs(
   "../src/features/tasks/utils/statusTabLayout.test.ts",
 );
+const { runStatusHintTests } = importTs(
+  "../src/features/tasks/utils/statusHint.test.ts",
+);
 const { runReadinessFilterTests } = importTs(
   "../src/features/tasks/utils/readinessFilters.test.ts",
 );
@@ -27,6 +30,7 @@ const { runHandoverTaskTests } = importTs(
 );
 
 runStatusTabLayoutTests();
+runStatusHintTests();
 runReadinessFilterTests();
 runTaskKindTests();
 runTaskCreateLevelTests();

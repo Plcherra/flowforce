@@ -2,6 +2,7 @@
  * Task status tabs component
  */
 
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -10,12 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { TaskStatusFilter } from "../types/filters";
 import {
   partitionStatusTabs,
@@ -37,70 +32,62 @@ export function TaskStatusTabs({
   const { primary, more } = partitionStatusTabs(statusTabs, statusFilter);
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <Tabs
-        value={statusFilter}
-        onValueChange={(value) => onStatusChange(value as TaskStatusFilter)}
-        className="w-full"
-      >
-        <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1">
-          <TabsList className="flex w-full min-w-max gap-2">
-            {primary.map((tab) => (
-              <Tooltip key={tab.value}>
-                <TooltipTrigger asChild>
-                  <TabsTrigger
-                    value={tab.value}
-                    className="flex items-center gap-2 whitespace-nowrap"
-                    data-testid={`tasks-status-${tab.value}`}
-                  >
-                    <span>{tab.label}</span>
-                    <Badge
-                      variant="outline"
-                      className="border-transparent bg-muted px-2 py-0 text-xs font-medium"
-                    >
-                      {tab.count}
-                    </Badge>
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent>{statusDefinition(tab.value)}</TooltipContent>
-              </Tooltip>
-            ))}
-          </TabsList>
-          {more.length > 0 ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex h-9 shrink-0 items-center rounded-md border border-input bg-background px-3 text-sm font-medium"
-                  data-testid="tasks-status-more"
+    <Tabs
+      value={statusFilter}
+      onValueChange={(value) => onStatusChange(value as TaskStatusFilter)}
+      className="w-full"
+    >
+      <div className="flex items-center gap-2 overflow-x-auto">
+        <TabsList className="flex h-auto w-full min-w-max justify-start gap-1 bg-transparent p-0">
+          {primary.map((tab) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              title={statusDefinition(tab.value)}
+              className="flex items-center gap-2 whitespace-nowrap rounded-full border border-transparent px-3 py-1 data-[state=active]:border-border data-[state=active]:bg-background"
+              data-testid={`tasks-status-${tab.value}`}
+            >
+              <span>{tab.label}</span>
+              <Badge
+                variant="outline"
+                className="border-transparent bg-muted px-2 py-0 text-xs font-medium"
+              >
+                {tab.count}
+              </Badge>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {more.length > 0 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-8 shrink-0 items-center rounded-full border border-input bg-background px-3 text-sm"
+                data-testid="tasks-status-more"
+              >
+                More
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {more.map((tab) => (
+                <DropdownMenuItem
+                  key={tab.value}
+                  title={statusDefinition(tab.value)}
+                  onSelect={() => onStatusChange(tab.value)}
+                  data-testid={`tasks-status-more-${tab.value}`}
                 >
-                  More
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {more.map((tab) => (
-                  <Tooltip key={tab.value}>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuItem
-                        onSelect={() => onStatusChange(tab.value)}
-                        data-testid={`tasks-status-more-${tab.value}`}
-                      >
-                        <span className="flex w-full items-center justify-between gap-4">
-                          <span>{tab.label}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {tab.count}
-                          </span>
-                        </span>
-                      </DropdownMenuItem>
-                    </TooltipTrigger>
-                    <TooltipContent>{statusDefinition(tab.value)}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : null}
-        </div>
-      </Tabs>
-    </TooltipProvider>
+                  <span className="flex w-full items-center justify-between gap-4">
+                    <span>{tab.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {tab.count}
+                    </span>
+                  </span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
+      </div>
+    </Tabs>
   );
 }

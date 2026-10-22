@@ -263,6 +263,149 @@ Prove: Skip. Do not add a test until the Open question "AI draft tasks from form
 
 Prove: Skip. Do not add a test until the Open question "Where the task-type level is edited" is answered.
 
+## Follow-up
+
+Do not edit this section. That includes editing it to pass a check.
+
+We can optimize almost everything.
+
+All
+2
+Every task on this page. Every task on this page.
+
+To Do
+2
+
+Can have in progress, in review, blocked, cancelled, the search box, and view filters. It seems we have a lot of buttons and functions all spread along the page without organization or a section.
+
+Big chunks of cards for simple alerts of tasks. Imagine 5 or 10 roles, and each of them has 1 warning alert or any issue. We need to make this visually greater and more pleasant for users to use.
+
+Reminders and activity, for example, take the right side only, leaving the screen on the left empty. The layout is bad in spacing each thing.
+
+Let's change the "estimate time" for a starting time and an end time. For example, this task will start Thursday 22 at 7am and finish Friday at 7am. The task can be published now, scheduled to be published tomorrow at the starting time, or even draft only.
+
+That means, independently, if the task is meant to take only 1 hour, it has a window of 1 day, or the employee will have from x day and time until that day and time.
+
+Tasks will have points to act on recognition, the leaderboard, and/or performance.
+
+## Follow-up decisions
+
+These are locked for the phases below. Do not edit this section while implementing one of those phases.
+
+12. A status or readiness definition is a `title` hint only. It must not be rendered as visible text. The focused tab must not leave the sentence on the page, and the sentence must not appear twice.
+13. One View section holds the status choices, including In Progress, In Review, Blocked, and Cancelled, plus search, type, and priority. A zero-count status still sits under More, inside that section. Overdue, Unassigned, and Due are small counts in that same section. The separate metric cards are not on the page.
+14. Each warning is one compact row: the reason and the task title. Rows stack in one list. There is no large card per warning, and no empty "no blockers" banner.
+15. The task list uses the full width. Reminders and activity sit under the list, side by side on a wide screen and stacked on a narrow one. They are not a rail beside an empty list.
+16. Estimated hours is not on the create form or the task details form. Those forms ask for a start and an end, each a date and a time. The window is when the task is open. It is not how long the work takes. Store `starts_at` and `ends_at` on the existing `links` object. Set `due_date` from the end, in local calendar date, so overdue and due still work. Do not add a column.
+17. The create form has Publish now, Schedule for the start, and Draft. Store `links.publish_state` as `published`, `scheduled`, or `draft`. A missing value means published, so older tasks stay visible. A draft is listed only for its creator. A scheduled task is listed for other people only once the start time has passed. The creator always sees it. The card shows Draft or Scheduled when that applies.
+18. Points are a whole number on `links.points`. The create form and the card show them. When a completed task has points, the existing leaderboard task XP for that task is that number. When it does not, the leaderboard keeps the priority and estimated-hours XP it already uses. Do not add a points table. Do not write `staff_performance`.
+
+### Phase 13 — Definitions stay off the page
+
+- [x] Keep each status and readiness definition as a hover hint, not as text on the page.
+
+Rules:
+
+- Files: `src/features/tasks/components/TaskStatusTabs.tsx`, `src/features/tasks/components/TaskExecutionReadinessPanel.tsx`.
+- Follow Follow-up decision 12. Do not use the tooltip component for these hints. A focused tab must not show the sentence.
+- The definition strings stay the ones in decision 2.
+
+Done when:
+
+- All shows its label and count, and "Every task on this page." is not visible text under it.
+- Hovering All still offers that sentence once.
+
+Prove: Unit test `src/features/tasks/utils/statusHint.test.ts` renders the status tabs and asserts the definition is the `title` and is not a text node. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 14 — One View section
+
+- [ ] Group status, search, and filters into one section, and drop the metric cards.
+
+Rules:
+
+- Files: `src/features/tasks/pages/Tasks.tsx`, `src/features/tasks/components/TaskFilters.tsx`, `src/features/tasks/components/TaskStatusTabs.tsx`, `src/features/tasks/components/TaskExecutionReadinessPanel.tsx`, and a new `src/features/tasks/components/TaskViewSection.tsx` if the page would otherwise grow past the point of the change.
+- Follow Follow-up decision 13. Do not delete `TaskMetricsCards.tsx`. Stop rendering it on the Tasks page.
+
+Done when:
+
+- Search, type, priority, the status choices, and the three readiness counts are in one View section.
+- The metric cards are not on the page.
+
+Prove: The status-tab unit test still passes. Phone steps for Pedro are in the Progress log. This phase is layout.
+
+### Phase 15 — Compact warnings
+
+- [ ] Turn each warning into one row.
+
+Rules:
+
+- Files: `src/features/tasks/components/TaskExecutionReadinessPanel.tsx`.
+- Follow Follow-up decision 14.
+
+Done when:
+
+- Ten warnings are ten rows in one list, not ten large cards.
+- A page with no warnings does not show a banner.
+
+Prove: Phone steps for Pedro are in the Progress log. This phase is layout.
+
+### Phase 16 — List, then reminders and activity
+
+- [ ] Give the list the full width, and place reminders and activity underneath.
+
+Rules:
+
+- Files: `src/features/tasks/pages/Tasks.tsx`.
+- Follow Follow-up decision 15. Do not change what reminders or activity load.
+
+Done when:
+
+- On a wide screen the task list is not a left column beside a right rail.
+- Reminders and activity are two columns under the list.
+
+Prove: Phone steps for Pedro are in the Progress log. This phase is layout.
+
+### Phase 17 — Start, end, and publish
+
+- [ ] Replace estimated hours with a window, and add publish, schedule, and draft.
+
+Rules:
+
+- Files: a new `src/features/tasks/utils/taskSchedule.ts` with `src/features/tasks/utils/taskSchedule.test.ts`, `src/features/tasks/components/CreateTaskDialog.tsx`, `src/features/tasks/components/TaskDetailsDialog.tsx`, `src/features/tasks/components/TaskCard.tsx`, `src/features/tasks/pages/Tasks.tsx`.
+- Follow Follow-up decisions 16 and 17. Do not add a migration. Keep other keys already stored on `links`.
+- The Tasks page list and its counts use the viewer rule. The creator is `created_by`.
+
+Done when:
+
+- Create and details ask for a start and an end, not estimated hours.
+- Publish now, Schedule for the start, and Draft save on the task.
+- Another person does not see a draft, or a scheduled task before its start. The creator does.
+- The card shows the window, and Draft or Scheduled when that applies.
+
+Prove: Unit test `src/features/tasks/utils/taskSchedule.test.ts` covers the window, the local due date, draft visibility, and scheduled visibility. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 18 — Points on the leaderboard
+
+- [ ] Store points on a task and use them as that task's leaderboard XP.
+
+Rules:
+
+- Files: `src/features/tasks/utils/taskSchedule.ts`, `src/features/tasks/utils/taskSchedule.test.ts`, `src/features/gamification/leaderboard/calculations.ts`, `src/features/gamification/leaderboard/syncLeaderboard.ts`, `src/features/tasks/components/CreateTaskDialog.tsx`, `src/features/tasks/components/TaskCard.tsx`.
+- Follow Follow-up decision 18. Do not write `staff_performance`.
+
+Done when:
+
+- Create can set a whole number of points, and the card shows it.
+- A completed task with points contributes that number to task XP. A completed task without points keeps the old priority and estimated-hours XP.
+
+Prove: Extend `taskSchedule.test.ts`, or add the XP cases beside `taskCompletionXp` if that function lives in `calculations.ts`, and run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 19 — Points and performance
+
+- [ ] Blocked by Open question "Task points and performance". Skip this phase. Do not write a performance score from task points.
+
+Prove: Skip. Do not add a test until the Open question "Task points and performance" is answered.
+
 ## Open questions
 
 Do not answer these in a phase. Skip the phase that names the question.
@@ -286,6 +429,10 @@ The AI action should help forms and reports by turning additional-information no
 ### Where the task-type level is edited
 
 Each person should be able to create a task type for others, for themselves, or not at all. The access grid turns a whole verb on or off, so it cannot store Others, Self, and None separately per type. Which existing screen edits that choice for one person?
+
+### Task points and performance
+
+A task can have points that act on recognition, the leaderboard, and/or performance. The leaderboard already turns completed tasks into task XP. How should those points change `staff_performance`, and is that the same number as the leaderboard XP?
 
 ## Progress log
 
@@ -428,3 +575,19 @@ Questions: The phase needs the Open question "AI draft tasks from form notes" an
 Skipped. Blocked by Open question "Where the task-type level is edited". No second permission screen was added. No test was added.
 
 Questions: The phase needs the Open question "Where the task-type level is edited" answered.
+
+### 2026-10-22 — Phase 13 Definitions stay off the page
+
+Shipped: Each status and readiness definition is a `title` hint. The sentence is not rendered as text under the tab. A focused tab does not leave the sentence on the page, and it is not shown twice.
+
+Proven: Unit test `src/features/tasks/utils/statusHint.test.ts`, run with `node scripts/test-tasks-page.mjs`, renders the status tabs and asserts "Every task on this page." is the `title` and is not a text node. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. All should show the word All and its count. The sentence "Every task on this page." should not sit under the tab.
+3. Hover All. That sentence should appear once, as a hint.
+4. Hover Overdue. The hint should say the due date is before today, and the task is not done or cancelled.
+
+Blockers: none for this phase.
+
+Questions: none.

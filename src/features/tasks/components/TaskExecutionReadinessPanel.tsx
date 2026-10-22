@@ -3,12 +3,6 @@ import { AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { buildTaskExecutionSummary } from "@/features/tasks/utils/taskExecutionReadiness";
@@ -63,40 +57,35 @@ export function TaskExecutionReadinessPanel({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <TooltipProvider delayDuration={200}>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {readinessItems.map((item) => {
-              const pressed = readinessFilter === item.key;
-              return (
-                <Tooltip key={item.key}>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      aria-pressed={pressed}
-                      data-testid={`tasks-readiness-${item.key}`}
-                      className={`rounded-lg border p-3 text-left ${
-                        pressed
-                          ? "border-primary bg-primary/10"
-                          : "border-border/70 bg-muted/30"
-                      }`}
-                      onClick={() =>
-                        onReadinessFilterChange(pressed ? null : item.key)
-                      }
-                    >
-                      <p className="text-xs font-medium uppercase text-muted-foreground">
-                        {item.label}
-                      </p>
-                      <p className="mt-2 text-2xl font-semibold text-foreground">
-                        {counts[item.key]}
-                      </p>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>{READINESS_DEFINITIONS[item.key]}</TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
-        </TooltipProvider>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {readinessItems.map((item) => {
+            const pressed = readinessFilter === item.key;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                title={READINESS_DEFINITIONS[item.key]}
+                aria-pressed={pressed}
+                data-testid={`tasks-readiness-${item.key}`}
+                className={`rounded-lg border p-3 text-left ${
+                  pressed
+                    ? "border-primary bg-primary/10"
+                    : "border-border/70 bg-muted/30"
+                }`}
+                onClick={() =>
+                  onReadinessFilterChange(pressed ? null : item.key)
+                }
+              >
+                <p className="text-xs font-medium uppercase text-muted-foreground">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-foreground">
+                  {counts[item.key]}
+                </p>
+              </button>
+            );
+          })}
+        </div>
 
         {summary.issues.length > 0 ? (
           <Alert>
