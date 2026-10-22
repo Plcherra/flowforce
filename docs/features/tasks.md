@@ -233,11 +233,25 @@ Done when:
 
 Prove: Unit test `src/features/forms/utils/handoverTask.test.ts` covers the title, the next local day, the form link, and the blank note. Run it with the same jiti style as `scripts/test-schedule-task-link.mjs`.
 
-### Phase 8 — Missed form, missed item, or reported issue
+### Phase 8 — What counts as one list issue
 
-- [x] Blocked by Open question "Missed form, missed item, or reported issue". Skip this phase. Do not add a detector and do not insert checklist tasks from a form result.
+- [x] Turn the three attention cases into one Checklist task draft each.
 
-Prove: Skip. Do not add a test until the Open question "Missed form, missed item, or reported issue" is answered.
+Rules:
+
+- Files: a new `src/features/tasks/utils/listIssues.ts` with `src/features/tasks/utils/listIssues.test.ts`.
+- Follow Owner answer 24. Do not insert a row in this phase.
+- A list or form is not done when the shift has ended and the person scheduled on that shift has no submission for that form during the shift. The form ids live on `schedules.requirements.list_form_ids`.
+- A required item is missing when the submission's answer for that field is blank. An item is flagged when the answer is the word issue, or an object with `flagged` or `issue` set true.
+- One field is one issue. A flagged field is not also a missing-item issue.
+- The draft is `source` `form`, status todo, assignee the person on that shift, due the shift's local end date. `links` stores `form_id`, `list_issue_key`, `list_issue_kind`, and the shift id and field id when they exist.
+
+Done when:
+
+- A missed form, a blank required item, and a flagged item are three Checklist drafts, each assigned to the person on that shift.
+- A form submitted with every required item answered, and nothing flagged, adds no draft.
+
+Prove: Unit test `src/features/tasks/utils/listIssues.test.ts`. Run it with `node scripts/test-tasks-page.mjs`.
 
 ### Phase 9 — Link a handover task to the next opening
 
@@ -402,9 +416,20 @@ Prove: Extend `taskSchedule.test.ts`, or add the XP cases beside `taskCompletion
 
 ### Phase 19 — Points and performance
 
-- [x] Blocked by Open question "Task points and performance". Skip this phase. Do not write a performance score from task points.
+- [ ] Show leaderboard task XP as the performance task-points total.
 
-Prove: Skip. Do not add a test until the Open question "Task points and performance" is answered.
+Rules:
+
+- Files: a new `src/features/performance/utils/taskPointsTotal.ts` with `src/features/performance/utils/taskPointsTotal.test.ts`, and `src/features/performance/pages/Performance/PerformancePage.tsx`.
+- Follow Owner answer 25. Do not write `staff_performance`. Do not add a second score.
+- The number is the sum of leaderboard `xp.tasks` already loaded for the page. The label is Task points. The description says it is the leaderboard task XP.
+
+Done when:
+
+- Performance shows one Task points total, and that total is the leaderboard task XP already on the page.
+- Completing a task does not write a different number to `staff_performance`.
+
+Prove: Unit test `src/features/performance/utils/taskPointsTotal.test.ts`. Run it with `node scripts/test-tasks-page.mjs`.
 
 ## Shift answers
 
@@ -415,6 +440,55 @@ These are locked for the phases below. Do not edit this section while implementi
 21. A task or form stays on the shift it was attached to. It is not copied onto later shifts.
 22. The owner receives the day's list information. The owner can grant that access to another person. The grant can let them act, or only read. A day needs that person when the lists have two or more issues, or when the lists are clean and a supervisor recorded something the lists did not catch. Do not call a model until Open question "What counts as one list issue" is answered.
 23. The employee directory card is where one person's task create level is edited. Shift, Checklist, and Custom are each None, For myself, or For others. Those six keys are stored on that person. Turning a whole access box on or off does not reset them. A staff person can be granted one of those keys. Their class still starts without them.
+
+## Owner answers
+
+These are locked for the phases below. Do not edit this section while implementing one of those phases.
+
+24. One list issue is anything that needs attention. That is a list or form not done by its shift, a form submitted with a required item missing or unanswered, or an item flagged as an issue. Each issue becomes its own Checklist task for the person scheduled on that shift. The assignee is that shift's person, the same shift-owner rule as shift answer 19. A closing handover still follows shift answer 20 when that path creates the note. This answers "What counts as one list issue".
+25. Task points are one number. They are the existing leaderboard task XP. Performance shows that same total. There is no second score, and `staff_performance` is not a second points store.
+26. Each permission gets only the access types it needs. The set is decided per permission. Schedule is read, plus create, edit, and delete for shifts. Forms are read, meaning read other people's submitted forms, and create, edit, and delete, meaning create, edit, or delete a form template. The employee card access grid shows those types where a plain on or off is not enough. A grant that is already on stays on. The type set for the registry is:
+
+| Permission | Types on the grid | Stored keys, existing grants stay equivalent |
+| --- | --- | --- |
+| Own profile | Read, Edit | `viewOwnProfile`, `editOwnProfile` |
+| Team profiles | Read, Edit | `viewTeamProfiles`, `editTeamProfiles` |
+| Own schedule | Read | `viewOwnSchedules` |
+| Team schedule | Read | `viewTeamSchedules` and `schedule.view` move together |
+| Shifts | Create, Edit, Delete | `schedule.create`; `schedule.edit` and `editSchedules`; `schedule.delete` |
+| Grant schedule access | Grant | `schedule.grant` |
+| Assign a reminder | Assign | `schedule.reminders.assign` |
+| Let someone turn a reminder off | Grant | `schedule.reminders.grant_deactivate` |
+| Own tasks | Read | `viewOwnTasks` |
+| Team tasks | Read, Edit | `viewTeamTasks`, `editTasks` |
+| Shift, Checklist, and Custom create | None, For myself, For others | The six task create keys stay in their own section |
+| List issues | None, Read, Act | `tasks.list_issues.read`, `tasks.list_issues.act`. The class starts without them. The owner can grant them. |
+| Own expenses | Read | `viewOwnExpenses` |
+| Team expenses | Read | `viewTeamExpenses` |
+| Approve expenses | Approve | `approveExpenses` |
+| Approve time off | Approve | `approveTimeOff` |
+| Submitted forms | Read | `forms.submissions.read`. Owner, admin, manager, and staff start with it on, because the forms page already lists team forms. Turning it off hides other people's submitted forms. |
+| Form templates | Create, Edit, Delete | `createForms` is create. `manageForms` is edit and delete together, so those two switches stay aligned and an existing manage grant still means both. |
+| Inventory items | Read, Create, Edit, Delete | `inventory.view`; `inventory.create`; `inventory.edit` and `manageInventory`; `inventory.delete` |
+| Inventory adjust | Edit | `inventory.adjust` |
+| Inventory import | Create | `inventory.import` |
+| Inventory export | Export | `inventory.export` |
+| Purchasing | Read, Manage | `inventory.purchasing.view`, `inventory.purchasing.manage` |
+| Counts | Read, Create, Edit, Approve | `inventory.counts.view`, `inventory.counts.create`, `inventory.counts.edit`, `inventory.counts.approve` |
+| Waste | Read, Create | `inventory.waste.view`, `inventory.waste.create` |
+| Prep | Read, Edit | `inventory.prep.view`, `inventory.prep.edit` |
+| Reports | Read, Export | `reports.view`, `reports.export` |
+| AI insights | Read | `viewAIInsights` and `ai.insights.view` |
+| AI suggestions | Suggest | `ai.actions.suggest` |
+| AI approval | Approve | `ai.actions.approve` |
+| AI audit | Read | `ai.audit.view` |
+| AI automation | Automate | `ai.actions.automate` |
+| AI governance | Manage | `ai.governance.manage` |
+| Directory | Read, Edit | `directory.view`, `directory.manage` |
+| Positions and classes | Edit | `managePositions`, `admin.roles`, `admin.permissions` |
+| People | Create / delete | `manageUsers` is one key, so create and delete stay one switch |
+| Billing | Read, Manage | `billing.view`, `billing.manage` |
+| Company settings | Edit | `systemSettings`, `admin.settings`, `managePayments` |
 
 ### Phase 20 — Tomorrow's person on that shift
 
@@ -449,39 +523,64 @@ Done when:
 
 Prove: Unit test `src/features/tasks/utils/taskCreateAccess.test.ts`, run with `node scripts/test-tasks-page.mjs`. Also run `npm run test:product-roles` and `npm run check:roles`.
 
-### Phase 22 — Missed item inside a list
+### Phase 22 — Insert a Checklist task per list issue
 
-- [x] Blocked by Open question "What counts as one list issue". Skip this phase. Do not insert a task from an unanswered list item.
+- [ ] Insert the phase 8 drafts once each, for the person on that shift.
 
-Prove: Skip. Do not add a test until the Open question "What counts as one list issue" is answered.
+Rules:
+
+- Files: a new `src/features/tasks/utils/listIssueInsert.ts` with `src/features/tasks/utils/listIssueInsert.test.ts`, a new `src/features/tasks/repositories/listIssueSync.ts`, `src/features/forms/components/FormFillDialog.tsx`, and a new `src/features/tasks/components/ListIssueSync.tsx` mounted from `src/features/tasks/pages/Tasks.tsx`.
+- Follow Owner answer 24. Reuse `collectListIssues`. Do not add a migration. Form ids stay on `schedules.requirements.list_form_ids`.
+- A draft whose `list_issue_key` is already on a task is not inserted again.
+- Submitting a form inserts the missing-required and flagged drafts for that submission. The Tasks page inserts missed-form drafts for shifts that have already ended.
+- If an insert fails, the form submission stays saved.
+
+Done when:
+
+- Each new issue becomes one Checklist task for the person scheduled on that shift.
+- Saving the same result again does not add a second task.
+
+Prove: Unit test `src/features/tasks/utils/listIssueInsert.test.ts`. Run it with `node scripts/test-tasks-page.mjs`.
 
 ### Phase 23 — Copilot gather
 
-- [x] Blocked by Open question "What counts as one list issue". Skip this phase. Do not call a model.
+- [ ] Gather the list issues for the owner, and for a person the owner grants act or read.
 
-Prove: Skip. Do not add a test until the Open question "What counts as one list issue" is answered.
+Rules:
 
-### Phase 24 — Read, create, edit, and delete
+- Files: a new `src/features/tasks/utils/listIssueGather.ts` with `src/features/tasks/utils/listIssueGather.test.ts`, a new `src/features/tasks/components/ListIssueGather.tsx`, `src/features/tasks/pages/Tasks.tsx`, `src/lib/permissions/registry.ts`, `src/features/roles/constants/productRoleContract.json`, `src/features/roles/constants/operatorBoxes.ts`, `src/features/roles/constants/productLevels.test.ts`, and a new `src/features/employees/components/users/ListIssueAccessSection.tsx` used from `UserPermissionsTab.tsx`.
+- Follow Owner answer 24. Do not call a model. The gather is the list of Checklist tasks whose `links.list_issue_kind` is set.
+- The owner sees them. `tasks.list_issues.read` sees them. `tasks.list_issues.act` sees them and can mark one done. Nobody else sees the gather. The person on the shift still sees their own task in the normal list.
+- Owner, admin, and manager classes start without the two keys, except the owner wildcard. A staff person can be granted one. Turning a whole access box on or off does not reset them.
 
-- [x] Blocked by Open question "Which permissions use read, create, edit, and delete". Skip this phase. Do not replace the access boxes.
+Done when:
 
-Prove: Skip. Do not add a test until the Open question "Which permissions use read, create, edit, and delete" is answered.
+- The owner, and a person granted read or act, sees the gathered issues. A person without that grant does not.
+- Act can mark a gathered issue done. Read cannot.
+
+Prove: Unit test `src/features/tasks/utils/listIssueGather.test.ts`. Run it with `node scripts/test-tasks-page.mjs`. Also run `npm run check:roles` and `npm run test:product-roles`.
+
+### Phase 24 — Access types on the employee card
+
+- [ ] Replace plain on or off with the types each permission needs.
+
+Rules:
+
+- Files: a new `src/features/roles/constants/permissionAccessTypes.ts` with `src/features/roles/constants/permissionAccessTypes.test.ts`, `src/features/roles/components/OperatorAccessGrid.tsx`, `src/features/employees/components/users/UserPermissionsTab.tsx`, `src/features/employees/components/invites/InvitePersonCard.tsx`, `src/features/roles/components/RoleManagementDialog.tsx`, `src/lib/permissions/registry.ts`, and `src/features/roles/constants/productRoleContract.json`.
+- Follow Owner answer 26. Do not add a second permission list. Add `forms.submissions.read` only. Staff, manager, admin, and the owner wildcard include it.
+- The grid shows the types in the decision table. Task create levels and list-issue None / Read / Act stay their own sections.
+- Saving a card without a change keeps the same keys. A manager who already has shift edit still has shift edit.
+
+Done when:
+
+- The employee card shows Read, Create, Edit, and Delete, or the smaller set that permission needs, instead of one on or off where the table lists more than one type.
+- An existing manager grant round-trips to the same keys.
+
+Prove: Unit test `src/features/roles/constants/permissionAccessTypes.test.ts`. Run it with `npm run test:product-roles`. Also run `npm run check:roles`.
 
 ## Open questions
 
-Do not answer these in a phase. Skip the phase that names the question.
-
-### What counts as one list issue
-
-A scheduled person is responsible for the lists attached to their shift. Which unanswered item, missed form, or supervisor note counts as one issue, and when does that issue become its own task?
-
-### Which permissions use read, create, edit, and delete
-
-The employee card now edits task create levels. Which other permissions should offer read, create, edit, and delete, instead of on or off?
-
-### Task points and performance
-
-A task can have points that act on recognition, the leaderboard, and/or performance. The leaderboard already turns completed tasks into task XP. How should those points change `staff_performance`, and is that the same number as the leaderboard XP?
+None. Owner answers 24, 25, and 26 record the three questions that were here.
 
 ## Progress log
 
@@ -776,6 +875,16 @@ Questions: The phase needs the Open question "What counts as one list issue" ans
 Skipped. Blocked by Open question "Which permissions use read, create, edit, and delete". The access boxes stay on or off. Task create levels are the section added on the employee card. No test was added.
 
 Questions: The phase needs the Open question "Which permissions use read, create, edit, and delete" answered.
+
+### 2026-10-22 — Phase 8 What counts as one list issue
+
+Shipped: A missed list, a required item left blank, and an item flagged as an issue are each one Checklist task draft. The draft is assigned to the person scheduled on that shift. A form that was submitted during the shift with every required item answered, and nothing flagged, adds no draft. Nothing is inserted yet.
+
+Proven: Unit test `src/features/tasks/utils/listIssues.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the missed form, the blank required item, the flagged item, a clean submission, and a shift that has not ended. It passed. ESLint passed on the files this phase changed.
+
+Blockers: none for this phase.
+
+Questions: none. Phone steps: none. This phase is the draft rules. The next phase inserts the tasks.
 
 ### 2026-10-22 — Status buttons in one row
 

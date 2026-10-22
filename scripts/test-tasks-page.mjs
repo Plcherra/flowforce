@@ -37,6 +37,9 @@ const { runTomorrowShiftTests } = importTs(
 const { runTaskCreateAccessTests } = importTs(
   "../src/features/tasks/utils/taskCreateAccess.test.ts",
 );
+const { runListIssueTests } = importTs(
+  "../src/features/tasks/utils/listIssues.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -47,4 +50,5 @@ runHandoverTaskTests();
 runTaskScheduleTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
+runListIssueTests();
 console.log("tasks page tests passed");

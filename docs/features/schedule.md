@@ -132,6 +132,14 @@ These are locked for the auto run. Implement them. Do not edit this section whil
 8. Schedule reminders stay reminders. Do not merge them into tasks.
 9. Ship each implemented phase with the Ship-To-Main rule: one commit on `main`, then push `main`. Do not open a pull request for that phase.
 
+## Owner answers
+
+These are locked for the phases below. Do not edit this section while implementing one of those phases.
+
+10. A time off policy has a name and an allowance in hours, days, or minutes. The allowance can be a cap per week, per month, and per year at the same time. The policy maker also sets the eligible weekdays, the notice period in days, and which roles or people it applies to. An empty roles-and-people choice means everyone. One policy says what used to need several. Weekend policy means Saturday and Sunday only, at most 2 days in a month, and about 24 days in a year. Weekday policy means Monday through Friday, 7 days of notice, and 90 days in a year. Employees and managers see the remaining balance of each policy that applies. A request must fit the policy chosen: only eligible weekdays, the notice period, and every cap that policy has. A date-only request counts one eligible day as one day, or as 8 hours (480 minutes) when the unit is hours or minutes. This answers "Time off policies".
+11. An availability row and an unavailability entry can repeat daily, weekly, monthly, or on a custom interval such as every 2 weeks or every 15 days. Unavailable this Sunday, repeating every 2 weeks, means that Sunday is off and the next Sunday is not, then the one after is off again. The week grid and the conflict check use those occurrences. A row with no repeat stays a single entry. This answers "Repeating weekday patterns".
+12. Leadership features use the existing level system. Hierarchy level 2 is manager, level 3 is admin, and the owner level above them. Level 2 or 3 and above sees schedule modifications, forms insights, leadership insights, and the employee directory. A lower level does not see them. A staff class stays a lower level even when its stored hierarchy number is outside 2, 3, or 4. Seeded users at different levels are how this is tested. For 25, 50, 100, and 500 people, the week grid groups rows by store and then by role. Each group is a collapsible section. This answers "Who sees the leadership schedule".
+
 ## Phases
 
 Auto run: start at the first unchecked phase that is not blocked and does not depend on an unapplied migration. After that phase is green, continue to the next such phase in the same run if time allows. Each phase is its own commit on `main`. Append the Progress log as you go. Skip a blocked phase and log the skip.
@@ -523,37 +531,62 @@ Prove: Playwright test using `tests/playwright/helpers/schedulingPlaywrightTenan
 
 ### Phase 23 — Time off policies
 
-- [x] Blocked by Open question "Time off policies". Skip this phase. Do not invent allowance math or a policy tab.
+- [ ] One policy carries the allowance, the weekdays, the notice, and who it applies to.
 
-Prove: Skip. Do not add a test until the Open question "Time off policies" is answered.
+Rules:
 
-### Phase 24 — Repeating weekday patterns
+- Files: a new migration, `src/integrations/supabase/types.ts`, a new `src/features/scheduling/utils/timeOffPolicy.ts` with `src/features/scheduling/utils/timeOffPolicy.test.ts`, a new `src/features/scheduling/components/TimeOffPoliciesSection.tsx`, `src/features/scheduling/components/TimeOffManagementPanel.tsx`, `src/features/availability/components/TimeOffRequestPanel.tsx`, and `src/features/scheduling/hooks/useTimeOffMutations.ts`.
+- Follow Owner answer 10. Commit the migration and the generated types. If the Supabase API can reach the linked project, apply the migration. Otherwise log `needs owner: supabase db push <migration>`.
+- Weekend and weekday are data, not hardcoded policies. The maker can save both examples.
+- Remaining balance is shown per policy. A request that misses the weekdays, the notice, or a cap is not saved.
 
-- [x] Blocked by Open question "Repeating weekday patterns". Skip this phase. Do not store "2 Sundays in the month" or alternating Saturdays.
+Done when:
 
-Prove: Skip. Do not add a test until the Open question "Repeating weekday patterns" is answered.
+- Weekend policy can be Saturday and Sunday, 2 days a month, and 24 days a year. Weekday policy can be the weekdays, 7 days of notice, and 90 days a year.
+- A person sees the remaining balance for each policy that applies to them.
+- A request outside the chosen policy is rejected. A request inside it is stored with that policy.
 
-### Phase 25 — Who sees the leadership schedule
+Prove: Unit test `src/features/scheduling/utils/timeOffPolicy.test.ts` covers both example policies, the remaining balance, and a request that does not fit. Run it with `node scripts/test-schedule-task-link.mjs` or the tasks page runner if that script already loads scheduling tests. Add the test to the runner it uses.
 
-- [x] Blocked by Open question "Who sees the leadership schedule" (business type and scale). Skip this phase. Do not add a coffee-shop mode, an office mode, or a large-grid layout.
+### Phase 24 — Repeating patterns
 
-Prove: Skip. Do not add a test for business type or grid scale until the Open question "Who sees the leadership schedule" is answered.
+- [ ] Availability and unavailability can repeat, and the grid honors the repeat.
+
+Rules:
+
+- Files: a new `src/features/scheduling/utils/repeatPattern.ts` with `src/features/scheduling/utils/repeatPattern.test.ts`, `src/features/scheduling/services/availability/scheduleAvailabilityEngine.ts`, `src/features/scheduling/components/dialogs/AddUnavailabilityDialog.tsx`, `src/features/scheduling/hooks/useTimeOffMutations.ts`, `src/features/availability/components/AvailabilityRequestForm.tsx`, and a migration only if `staff_availability` needs a `recurrence` column.
+- Follow Owner answer 11. Daily, weekly, monthly, every 2 weeks, and every 15 days are the choices. An entry with no repeat stays one entry.
+- Unavailability uses the existing `recurring_pattern` column. Availability uses `staff_availability.recurrence` when that column is added.
+- The conflict check uses the same occurrence rule as the grid.
+
+Done when:
+
+- Unavailable this Sunday, repeating every 2 weeks, blocks that Sunday and the Sunday two weeks later, and does not block the Sunday in between.
+- A weekly availability row applies on that weekday in a later week. A row with no repeat still applies only to its saved week.
+
+Prove: Unit test `src/features/scheduling/utils/repeatPattern.test.ts`, plus the engine case in `scheduleAvailabilityEngine.test.ts` if that file already runs. Run the test with the scheduling test runner.
+
+### Phase 25 — Leadership schedule and a grouped grid
+
+- [ ] Level 2 and above sees leadership schedule tools. The grid groups by store and role.
+
+Rules:
+
+- Files: a new `src/features/scheduling/utils/leadershipLevel.ts` with `src/features/scheduling/utils/leadershipLevel.test.ts`, a new `src/features/scheduling/utils/scheduleGridGroups.ts` with `src/features/scheduling/utils/scheduleGridGroups.test.ts`, `src/features/scheduling/hooks/useSchedulingRole.ts`, `src/features/scheduling/components/drag-drop/WeekGrid.tsx`, `src/features/scheduling/hooks/useScheduleBoard.ts`, `src/features/forms/pages/Forms.tsx`, `src/hooks/useNavigationStructure.tsx`, and `src/features/employees/pages/Employees.tsx`.
+- Follow Owner answer 12. Do not add a coffee-shop mode or an office mode.
+- Schedule modifications, the forms insights panel, the manager schedule readiness, and the employee directory stay hidden below leadership level.
+- The week grid sections are store, then role, and each section collapses. The grouper is what 25, 50, 100, and 500 people use.
+
+Done when:
+
+- A staff level does not see schedule modifications, forms insights, or the employee directory. A level 2 manager and a level 3 admin do.
+- Twenty-five or more people render as collapsible store and role sections, not one flat list.
+
+Prove: Unit tests `leadershipLevel.test.ts` and `scheduleGridGroups.test.ts` cover staff, level 2, level 3, owner, and groups for 25, 50, 100, and 500 people. Run them with the scheduling test runner. Playwright coverage uses the seeded manager and staff users when `SUPABASE_SERVICE_ROLE_KEY` is present.
 
 ## Open questions
 
-Do not answer these in a phase. Skip the phase that names the question.
-
-### Time off policies
-
-My time off correlates with a policy tab. That tab is a different feature. How do several policies combine into one allowance, such as 1 weekend day per month and x hours per year? Is the notice period a company number, and where is it edited?
-
-### Repeating weekday patterns
-
-Is there a way to record availability for someone who can work "2 Sundays in the month" or "1 Saturday yes and the other not"?
-
-### Who sees the leadership schedule
-
-How does the schedule differ for a coffee shop or an office that should not see the leadership insights? How do we test that while there are no other users? How does the grid work for 25, 50, 100, and 500 people, with multiple roles and stores?
+None. Owner answers 10, 11, and 12 record the three questions that were here.
 
 ## Progress log
 
