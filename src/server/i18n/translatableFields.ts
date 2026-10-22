@@ -31,6 +31,10 @@ export const TRANSLATABLE_FIELDS: Record<
   task_comments: {
     comment: {},
   },
+  reminders: {
+    title: {},
+    description: {},
+  },
 };
 
 export function translatableFieldRule(

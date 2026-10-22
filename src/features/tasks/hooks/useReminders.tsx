@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { logger } from "@/utils/logger";
 import {
   createReminderRecord,
@@ -13,6 +16,10 @@ import {
 
 export function useReminders() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const { toast } = useToast();
   const [reminders, setReminders] = useState<ReminderRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,10 +89,13 @@ export function useReminders() {
     if (!user) return;
 
     try {
-      await createReminderRecord({
-        ...reminderData,
-        user_id: user.id,
-      });
+      await createReminderRecord(
+        {
+          ...reminderData,
+          user_id: user.id,
+        },
+        companyId ? { companyId, sourceLocale } : undefined,
+      );
 
       await fetchReminders();
       await invalidatePerformanceDataset();
@@ -100,7 +110,11 @@ export function useReminders() {
     updates: Partial<ReminderRecord>,
   ) => {
     try {
-      await updateReminderRecord(id, updates);
+      await updateReminderRecord(
+        id,
+        updates,
+        companyId ? { companyId, sourceLocale } : undefined,
+      );
       await fetchReminders();
       await invalidatePerformanceDataset();
     } catch (error) {
@@ -147,7 +161,10 @@ export function useReminders() {
     }
   };
 
-  const triggerReminder = async (id: string) => {
+  const triggerReminder = async (
+    id: string,
+    copy?: { title: string; description: string | null } | null,
+  ) => {
     try {
       const reminder = reminders.find((r) => r.id === id);
       if (!reminder) return;
@@ -155,8 +172,8 @@ export function useReminders() {
       // Simulate notification trigger based on methods
       if (reminder.notification_methods.includes("browser")) {
         if ("Notification" in window && Notification.permission === "granted") {
-          new Notification(reminder.title, {
-            body: reminder.description || "Reminder notification",
+          new Notification(copy?.title ?? reminder.title, {
+            body: (copy?.description ?? reminder.description) || "Reminder notification",
             icon: "/favicon.ico",
           });
         }

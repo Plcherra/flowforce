@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,7 +24,9 @@ import {
   isPast,
 } from "date-fns";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
+import { useReminderContentTranslations } from "@/features/tasks/hooks/useReminderContentTranslations";
 import { CreateReminderDialog } from "./CreateReminderDialog";
+import { ReminderCopy } from "./ReminderCopy";
 import { useToast } from "@/hooks/use-toast";
 import { ReminderListSkeleton } from "@/components/loading/TaskSkeletons";
 
@@ -38,6 +40,19 @@ export function RemindersPanel() {
     snoozeReminder,
     triggerReminder,
   } = useReminders();
+  const reminderSources = useMemo(
+    () =>
+      reminders.map((reminder) => ({
+        id: typeof reminder.id === "string" ? reminder.id : undefined,
+        title: typeof reminder.title === "string" ? reminder.title : null,
+        description:
+          typeof reminder.description === "string" ? reminder.description : null,
+        updated_at:
+          typeof reminder.updated_at === "string" ? reminder.updated_at : null,
+      })),
+    [reminders],
+  );
+  const translations = useReminderContentTranslations(reminderSources);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
 
@@ -132,7 +147,7 @@ export function RemindersPanel() {
 
   const handleTestReminder = async (reminderId: string) => {
     try {
-      await triggerReminder(reminderId);
+      await triggerReminder(reminderId, translations.get(reminderId) ?? null);
       toast({
         title: "Test Notification",
         description: "Test reminder notification sent!",
@@ -186,22 +201,19 @@ export function RemindersPanel() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <p className="text-sm font-medium text-foreground">
-                              {reminder.title}
-                            </p>
+                          <ReminderCopy
+                            reminderId={reminder.id}
+                            title={reminder.title}
+                            description={reminder.description}
+                            translation={translations.get(reminder.id) ?? null}
+                          >
                             {reminder.sound_enabled && (
                               <Volume2 className="h-3 w-3 text-muted-foreground" />
                             )}
                             {reminder.repeat_enabled && (
                               <Repeat className="h-3 w-3 text-muted-foreground" />
                             )}
-                          </div>
-                          {reminder.description && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {reminder.description}
-                            </p>
-                          )}
+                          </ReminderCopy>
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center space-x-2">
                               {getReminderBadge(reminder.remind_at)}
@@ -276,22 +288,19 @@ export function RemindersPanel() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <p className="text-sm font-medium text-foreground">
-                              {reminder.title}
-                            </p>
+                          <ReminderCopy
+                            reminderId={reminder.id}
+                            title={reminder.title}
+                            description={reminder.description}
+                            translation={translations.get(reminder.id) ?? null}
+                          >
                             {reminder.sound_enabled && (
                               <Volume2 className="h-3 w-3 text-muted-foreground" />
                             )}
                             {reminder.repeat_enabled && (
                               <Repeat className="h-3 w-3 text-muted-foreground" />
                             )}
-                          </div>
-                          {reminder.description && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {reminder.description}
-                            </p>
-                          )}
+                          </ReminderCopy>
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center space-x-2">
                               {getReminderBadge(reminder.remind_at)}

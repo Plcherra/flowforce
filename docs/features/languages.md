@@ -622,7 +622,7 @@ Prove: Unit test the comment field path. Run it with the jiti runner.
 
 ### Phase 35 — Reminders
 
-- [ ] Translate reminder title and description.
+- [x] Translate reminder title and description.
 
 Rules:
 
@@ -1293,6 +1293,23 @@ Phone steps for Pedro:
 3. Set your language to Español and open the same task. The comment should be Spanish, with Traducido de English and a control to see the original.
 4. See the original, then the translation again.
 5. Set the language back to English and open the task. The comment should be the English sentence you typed, with no translated-from line.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 35 Reminders
+
+Shipped: A reminder keeps the title and description that were typed. The cache paths are `title` and `description` on `reminders`. The save returns before the model runs. The reminders panel shows the translation, with one see-original line when the viewer's language differs. A test notification uses the cached text. If the cache is empty, or the stored hash no longer matches, the notification uses the original words.
+
+Proven: `src/features/tasks/reminderContentTranslation.test.ts` passed through the jiti runner. Title and description are translated. An empty cache returns the original title and description. A stale description hash returns the new original description and keeps the cached title. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Tasks and add a reminder with an English title and description. It should appear without waiting.
+3. Set your language to Español and reload Tasks. The reminder title and description should be Spanish, with Traducido de English and a control to see the original.
+4. If the translation has not arrived yet, the reminder still shows the English words you typed. After it arrives, the Spanish text replaces them.
+5. Set the language back to English. The reminder should show the English title and description, with no translated-from line.
 
 Blockers: none. No new migration.
 

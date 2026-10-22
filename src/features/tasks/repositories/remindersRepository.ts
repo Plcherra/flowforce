@@ -2,6 +2,9 @@ import { z } from "zod";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/public-types";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
+import { scheduleReminderContentTranslation } from "@/features/tasks/scheduleReminderContent";
+import { reminderContentTouches } from "@/features/tasks/reminderContentFields";
 
 type ReminderRow = Tables<"reminders">;
 
@@ -87,17 +90,33 @@ export type NewReminderInput = Omit<
 
 export async function createReminderRecord(
   input: NewReminderInput,
+  source?: { companyId: string; sourceLocale: AppLanguage },
 ): Promise<void> {
-  const { error } = await supabase.from("reminders").insert(input);
+  const { data, error } = await supabase
+    .from("reminders")
+    .insert(input)
+    .select("id")
+    .single();
 
   if (error) {
     throw error;
+  }
+
+  if (source && data?.id && reminderContentTouches(input)) {
+    scheduleReminderContentTranslation({
+      companyId: source.companyId,
+      sourceId: data.id,
+      sourceLocale: source.sourceLocale,
+      title: input.title,
+      description: input.description,
+    });
   }
 }
 
 export async function updateReminderRecord(
   id: string,
   updates: Partial<ReminderRow>,
+  source?: { companyId: string; sourceLocale: AppLanguage },
 ): Promise<void> {
   const { error } = await supabase
     .from("reminders")
@@ -106,6 +125,16 @@ export async function updateReminderRecord(
 
   if (error) {
     throw error;
+  }
+
+  if (source && reminderContentTouches(updates)) {
+    scheduleReminderContentTranslation({
+      companyId: source.companyId,
+      sourceId: id,
+      sourceLocale: source.sourceLocale,
+      title: typeof updates.title === "string" ? updates.title : null,
+      description: typeof updates.description === "string" ? updates.description : null,
+    });
   }
 }
 
