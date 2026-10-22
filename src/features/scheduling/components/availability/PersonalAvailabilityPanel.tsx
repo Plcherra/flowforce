@@ -82,7 +82,15 @@ export function PersonalAvailabilityPanel({
   }, [availabilityQuery.data]);
 
   const handleDirectSave = useCallback(
-    async (nextGrid: AvailabilityGrid) => {
+    async (
+      nextGrid: AvailabilityGrid,
+      repeat?: {
+        frequency: "daily" | "weekly" | "monthly" | "custom";
+        interval: number;
+        unit: "days" | "weeks";
+        anchor: string;
+      } | null,
+    ) => {
       if (!employeeId) {
         throw new Error("We need your profile details to save availability.");
       }
@@ -116,6 +124,7 @@ export function PersonalAvailabilityPanel({
           ),
           week_start_date: weekStart,
           is_preferred: true,
+          recurrence: repeat ?? null,
         }));
         const insertResult = await supabase
           .from("staff_availability")

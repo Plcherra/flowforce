@@ -5530,6 +5530,7 @@ export type Database = {
           id: string
           is_preferred: boolean | null
           start_time: string | null
+          recurrence: Json | null
           updated_at: string | null
           user_id: string | null
           week_start_date: string | null
@@ -5540,6 +5541,7 @@ export type Database = {
           end_time?: string | null
           id?: string
           is_preferred?: boolean | null
+          recurrence?: Json | null
           start_time?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -5551,6 +5553,7 @@ export type Database = {
           end_time?: string | null
           id?: string
           is_preferred?: boolean | null
+          recurrence?: Json | null
           start_time?: string | null
           updated_at?: string | null
           user_id?: string | null

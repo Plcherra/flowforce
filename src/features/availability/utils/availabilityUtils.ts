@@ -7,6 +7,7 @@ export interface StaffAvailabilityRow {
   start_time: string;
   end_time: string;
   week_start_date: string | null;
+  recurrence?: unknown;
 }
 
 export const cloneGrid = (grid: AvailabilityGrid): AvailabilityGrid => {

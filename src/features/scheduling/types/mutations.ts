@@ -60,6 +60,7 @@ export interface SchedulingMutations {
     start: string;
     end: string;
     reason?: string | null;
+    repeat?: import("@/features/scheduling/utils/repeatPattern").RepeatPattern | null;
   }) => Promise<boolean>;
   requestTimeOff: (payload: {
     userId: string;

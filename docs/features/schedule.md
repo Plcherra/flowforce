@@ -550,7 +550,7 @@ Prove: Unit test `src/features/scheduling/utils/timeOffPolicy.test.ts` covers bo
 
 ### Phase 24 — Repeating patterns
 
-- [ ] Availability and unavailability can repeat, and the grid honors the repeat.
+- [x] Availability and unavailability can repeat, and the grid honors the repeat.
 
 Rules:
 
@@ -974,5 +974,21 @@ Phone steps for Pedro:
 7. Sign in as an employee. The same balances for policies that apply to them should show on time off, and they should not see the policy editor.
 
 Blockers: none for this phase. Migration `20261022014849_time_off_policies.sql` was applied to the linked project.
+
+Questions: none.
+
+### 2026-10-22 — Phase 24 Repeating patterns
+
+Shipped: Availability and unavailability can repeat daily, weekly, monthly, every 2 weeks, or every 15 days. An entry with no repeat stays one entry. Unavailability stores the pattern on the existing `recurring_pattern` column. Availability stores it on `staff_availability.recurrence`. The week grid and the assignment conflict check use the same occurrence rule. Unavailable this Sunday, every 2 weeks, blocks that Sunday and the Sunday two weeks later, and does not block the Sunday in between. A weekly availability row applies on that weekday in a later week.
+
+Proven: Unit test `src/features/scheduling/utils/repeatPattern.test.ts` and the engine cases in `src/features/scheduling/services/availability/scheduleAvailabilityEngine.test.ts`, run with `node scripts/test-schedule-availability-engine.mjs`. They passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. Playwright was not run: this environment has no `SUPABASE_SERVICE_ROLE_KEY`.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can edit the schedule. Open Schedule, then Add shift, then the menu, then Add unavailability.
+2. Pick a person, set this Sunday, and set Repeats to Every 2 weeks. Save.
+3. This Sunday and the Sunday two weeks later should show that person as unavailable. The Sunday in between should not.
+4. Open availability for yourself, set a weekday, set Repeats to Weekly, and save. Open a later week. That weekday should still be available. Set Repeats to Does not repeat and save. A later week should not keep that row.
+
+Blockers: none for this phase. Migration `20261022015446_staff_availability_recurrence.sql` was applied to the linked project.
 
 Questions: none.

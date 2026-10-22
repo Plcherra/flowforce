@@ -27,8 +27,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  REPEAT_CHOICES,
+  patternFromChoice,
+  type RepeatChoice,
+} from "@/features/scheduling/utils/repeatPattern";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +76,10 @@ export interface AvailabilityRequestFormProps {
   employeeId: string;
   weekStart: string; // ISO string (Monday)
   initialAvailability: AvailabilityGrid;
-  onSaveDirect?: (nextAvailability: AvailabilityGrid) => Promise<void>;
+  onSaveDirect?: (
+    nextAvailability: AvailabilityGrid,
+    repeat?: ReturnType<typeof patternFromChoice>,
+  ) => Promise<void>;
 }
 
 interface LockInfo {
@@ -105,6 +120,7 @@ export function AvailabilityRequestForm({
   initialAvailability,
   onSaveDirect,
 }: AvailabilityRequestFormProps) {
+  const [repeatChoice, setRepeatChoice] = useState<RepeatChoice>("none");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -403,7 +419,10 @@ export function AvailabilityRequestForm({
       if (!onSaveDirect) {
         throw new Error("Direct save handler not provided");
       }
-      await onSaveDirect(editingGrid);
+      await onSaveDirect(
+        editingGrid,
+        patternFromChoice(repeatChoice, weekStart),
+      );
     },
     onSuccess: () => {
       toast({
@@ -432,6 +451,7 @@ export function AvailabilityRequestForm({
           requestedRange: { start: requestStart, end: requestEnd },
           reason: requestReason,
           desiredAvailability: editingGrid,
+          repeat: patternFromChoice(repeatChoice, weekStart),
         },
         status: "pending",
       };
@@ -700,9 +720,27 @@ export function AvailabilityRequestForm({
             >
               Reset
             </Button>
+            <div className="grid gap-1">
+              <Label>Repeats</Label>
+              <Select
+                value={repeatChoice}
+                onValueChange={(value) => setRepeatChoice(value as RepeatChoice)}
+              >
+                <SelectTrigger className="h-8 w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {REPEAT_CHOICES.map((choice) => (
+                    <SelectItem key={choice.id} value={choice.id}>
+                      {choice.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button
               onClick={() => directSave.mutate()}
-              disabled={!directEditAllowed || !hasChanges}
+              disabled={!directEditAllowed || (!hasChanges && repeatChoice === "none")}
             >
               Save changes
             </Button>

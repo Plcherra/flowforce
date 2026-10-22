@@ -9,6 +9,11 @@ import type {
   GridCellAvailability,
 } from "@/types/platform";
 import {
+  availabilityAnchorDate,
+  occursOn,
+  parseRepeatPattern,
+} from "@/features/scheduling/utils/repeatPattern";
+import {
   TERMINAL_TIME_OFF_STATUSES,
   SCHEDULE_DAY_END_MINUTES,
   SCHEDULE_DAY_START_MINUTES,
@@ -47,12 +52,13 @@ function preferenceWindowsForDay(
   const dayIndex = dayOfWeekIndex(day);
 
   return staffAvailability
-    .filter(
-      (row) =>
-        row.user_id === userId &&
-        row.week_start_date === weekStart &&
-        row.day_of_week === dayIndex,
-    )
+    .filter((row) => {
+      if (row.user_id !== userId || row.day_of_week !== dayIndex) return false;
+      const pattern = parseRepeatPattern(row.recurrence);
+      if (!pattern) return row.week_start_date === weekStart;
+      const anchor = availabilityAnchorDate(row.week_start_date, row.day_of_week);
+      return anchor ? occursOn(pattern, anchor, toIsoDate(day)) : false;
+    })
     .map((row) => ({
       start: minutesToHHmm(parseTimeToMinutes(row.start_time)),
       end: minutesToHHmm(parseTimeToMinutes(row.end_time)),
@@ -158,9 +164,11 @@ export function resolveEmployeeDayWindows(
     const dayStart = dateOnlyStart(toIsoDate(day));
     const dayEnd = dateOnlyEnd(toIsoDate(day));
     if (!dayStart || !dayEnd) continue;
-    if (!rangesOverlap(dayStart, dayEnd, unavailableStart, unavailableEnd)) {
-      continue;
-    }
+    const pattern = parseRepeatPattern(entry.recurring_pattern);
+    const hits = pattern
+      ? occursOn(pattern, toIsoDate(unavailableStart), toIsoDate(day))
+      : rangesOverlap(dayStart, dayEnd, unavailableStart, unavailableEnd);
+    if (!hits) continue;
 
     const blockStartMinutes = Math.max(
       parseTimeToMinutes(

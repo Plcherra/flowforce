@@ -37,6 +37,12 @@ export function useTimeOffMutations({
       start: string;
       end: string;
       reason?: string | null;
+      repeat?: {
+        frequency: "daily" | "weekly" | "monthly" | "custom";
+        interval: number;
+        unit: "days" | "weeks";
+        anchor: string;
+      } | null;
     }) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
@@ -64,6 +70,8 @@ export function useTimeOffMutations({
             start_time: payload.start,
             end_time: payload.end,
             reason: payload.reason ?? null,
+            is_recurring: Boolean(payload.repeat),
+            recurring_pattern: payload.repeat ?? null,
           });
         if (insertError) throw insertError;
         await refetchAll();

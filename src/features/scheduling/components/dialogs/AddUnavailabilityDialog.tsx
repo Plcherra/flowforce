@@ -2,6 +2,7 @@
  * Add unavailability dialog component
  */
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +11,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  REPEAT_CHOICES,
+  patternFromChoice,
+  type RepeatChoice,
+} from "@/features/scheduling/utils/repeatPattern";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -42,6 +48,7 @@ interface AddUnavailabilityDialogProps {
     start: string;
     end: string;
     reason?: string | null;
+    repeat?: ReturnType<typeof patternFromChoice>;
   }) => Promise<boolean>;
 }
 
@@ -59,13 +66,16 @@ export function AddUnavailabilityDialog({
   onReasonChange,
   onSubmit,
 }: AddUnavailabilityDialogProps) {
+  const [repeat, setRepeat] = useState<RepeatChoice>("none");
   const handleSubmit = async () => {
     if (!userId || !start || !end) return;
+    const anchor = start.slice(0, 10);
     const success = await onSubmit({
       userId,
       start: new Date(start).toISOString(),
       end: new Date(end).toISOString(),
       reason: reason || null,
+      repeat: patternFromChoice(repeat, anchor),
     });
     if (success) {
       onOpenChange(false);
@@ -73,6 +83,7 @@ export function AddUnavailabilityDialog({
       onStartChange("");
       onEndChange("");
       onReasonChange("");
+      setRepeat("none");
     }
   };
 
@@ -115,6 +126,21 @@ export function AddUnavailabilityDialog({
                 onChange={(e) => onEndChange(e.target.value)}
               />
             </div>
+          </div>
+          <div>
+            <Label>Repeats</Label>
+            <Select value={repeat} onValueChange={(value) => setRepeat(value as RepeatChoice)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="z-50 bg-background border shadow-lg">
+                {REPEAT_CHOICES.map((choice) => (
+                  <SelectItem key={choice.id} value={choice.id}>
+                    {choice.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label>Reason</Label>

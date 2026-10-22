@@ -18,6 +18,9 @@ const { runCopilotSchedulerPlanTests } = importTs(
 const { runScheduleReadinessTests } = importTs(
   "../src/features/scheduling/utils/scheduleReadiness.test.ts",
 );
+const { runRepeatPatternTests } = importTs(
+  "../src/features/scheduling/utils/repeatPattern.test.ts",
+);
 
 runScheduleAvailabilityEngineTests();
 console.log("scheduleAvailabilityEngine tests passed");
@@ -25,3 +28,5 @@ runCopilotSchedulerPlanTests();
 console.log("copilotSchedulerPlan tests passed");
 runScheduleReadinessTests();
 console.log("scheduleReadiness tests passed");
+runRepeatPatternTests();
+console.log("repeatPattern tests passed");

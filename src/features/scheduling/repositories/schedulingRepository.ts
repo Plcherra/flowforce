@@ -313,18 +313,20 @@ export async function fetchSchedulingWeek(params: {
           .in("user_id", memberIds)
           // Phase 4: Add date range filter to only fetch unavailability in the week range
           // Include entries that overlap with the week range
-          .lte("start_time", endIso) // Unavailability starting before or during the week
-          .or(`end_time.gte.${startIso},end_time.is.null`) // Ending during/after the week, or no end time
+          .lte("start_time", endIso)
+          .or(`end_time.gte.${startIso},end_time.is.null,is_recurring.eq.true`)
           .order("start_time", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
     memberIds.length && weekStartDates.length
       ? supabase
           .from("staff_availability")
           .select(
-            "id, user_id, day_of_week, start_time, end_time, week_start_date, is_preferred",
+            "id, user_id, day_of_week, start_time, end_time, week_start_date, is_preferred, recurrence",
           )
           .in("user_id", memberIds)
-          .in("week_start_date", weekStartDates)
+          .or(
+            `week_start_date.in.(${weekStartDates.join(",")}),recurrence.not.is.null`,
+          )
       : Promise.resolve({ data: [], error: null }),
   ]);
 

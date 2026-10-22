@@ -336,6 +336,9 @@ export function useAvailabilityManagement({
           ),
           week_start_date: request.weekStart,
           is_preferred: true,
+          recurrence:
+            (request.payload as { repeat?: unknown } | null | undefined)?.repeat ??
+            null,
         }));
         const insertResult = await supabase
           .from("staff_availability")

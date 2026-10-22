@@ -218,4 +218,75 @@ export function runScheduleAvailabilityEngineTests() {
     }).allowed,
     true,
   );
+
+  const everyTwoWeeks = {
+    frequency: "custom" as const,
+    interval: 2,
+    unit: "weeks" as const,
+    anchor: "2026-10-11",
+  };
+  const weekly = {
+    frequency: "weekly" as const,
+    interval: 1,
+    unit: "weeks" as const,
+    anchor: "2026-10-11",
+  };
+  const sunday = new Date(2026, 9, 11, 12);
+  const inBetween = new Date(2026, 9, 18, 12);
+  const twoWeeks = new Date(2026, 9, 25, 12);
+  const availability = {
+    id: "pref-repeat",
+    user_id: USER,
+    day_of_week: 6,
+    start_time: "06:00",
+    end_time: "21:00",
+    week_start_date: "2026-10-05",
+    recurrence: weekly,
+  };
+  const unavailable = {
+    id: "off-repeat",
+    user_id: USER,
+    start_time: "2026-10-11T00:00:00",
+    end_time: "2026-10-11T23:59:00",
+    recurring_pattern: everyTwoWeeks,
+  };
+  assert.equal(
+    resolveEmployeeDayWindows({
+      userId: USER,
+      day: sunday,
+      staffAvailability: [availability],
+      timeOff: [],
+      unavailability: [unavailable],
+    }).windows.length,
+    0,
+  );
+  assert.ok(
+    resolveEmployeeDayWindows({
+      userId: USER,
+      day: inBetween,
+      staffAvailability: [availability],
+      timeOff: [],
+      unavailability: [unavailable],
+    }).windows.length > 0,
+  );
+  assert.equal(
+    resolveEmployeeDayWindows({
+      userId: USER,
+      day: twoWeeks,
+      staffAvailability: [availability],
+      timeOff: [],
+      unavailability: [unavailable],
+    }).windows.length,
+    0,
+  );
+  assert.equal(
+    resolveEmployeeDayWindows({
+      userId: USER,
+      day: inBetween,
+      staffAvailability: [{ ...availability, recurrence: null }],
+      timeOff: [],
+      unavailability: [],
+    }).windows.length,
+    0,
+  );
 }
