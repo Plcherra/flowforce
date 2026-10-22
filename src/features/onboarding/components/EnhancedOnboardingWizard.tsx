@@ -104,7 +104,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
     phone: "",
   });
 
-  const [branding, setBranding] = useState<Branding>({
+  const [branding] = useState<Branding>({
     logo: null,
     primaryColor: customTemplate.branding?.primaryColor || "#3b82f6",
     secondaryColor: customTemplate.branding?.secondaryColor || "#1e40af",
@@ -225,15 +225,6 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
   const handleCustomTemplateChange = useCallback(
     (template: Partial<CustomTemplate>) => {
       setCustomTemplate(template);
-      // Update branding when custom template changes
-      if (template.branding) {
-        setBranding((prev) => ({
-          ...prev,
-          primaryColor: template.branding?.primaryColor || prev.primaryColor,
-          secondaryColor:
-            template.branding?.secondaryColor || prev.secondaryColor,
-        }));
-      }
     },
     [],
   );

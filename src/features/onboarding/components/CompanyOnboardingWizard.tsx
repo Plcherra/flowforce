@@ -193,7 +193,7 @@ export default function CompanyOnboardingWizard({
     website: "",
     phone: "",
   });
-  const [branding, setBranding] = useState<Branding>({
+  const [branding] = useState<Branding>({
     logo: null,
     primaryColor: "#3b82f6",
     secondaryColor: "#1e40af",
@@ -414,62 +414,6 @@ export default function CompanyOnboardingWizard({
                             </p>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="primary-color">Primary Color</Label>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="color"
-                          id="primary-color"
-                          value={branding.primaryColor}
-                          onChange={(e) =>
-                            setBranding((prev) => ({
-                              ...prev,
-                              primaryColor: e.target.value,
-                            }))
-                          }
-                          className="w-12 h-10 rounded border border-gray-300"
-                        />
-                        <Input
-                          value={branding.primaryColor}
-                          onChange={(e) =>
-                            setBranding((prev) => ({
-                              ...prev,
-                              primaryColor: e.target.value,
-                            }))
-                          }
-                          placeholder="#3b82f6"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="secondary-color">Secondary Color</Label>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="color"
-                          id="secondary-color"
-                          value={branding.secondaryColor}
-                          onChange={(e) =>
-                            setBranding((prev) => ({
-                              ...prev,
-                              secondaryColor: e.target.value,
-                            }))
-                          }
-                          className="w-12 h-10 rounded border border-gray-300"
-                        />
-                        <Input
-                          value={branding.secondaryColor}
-                          onChange={(e) =>
-                            setBranding((prev) => ({
-                              ...prev,
-                              secondaryColor: e.target.value,
-                            }))
-                          }
-                          placeholder="#1e40af"
-                        />
                       </div>
                     </div>
                   </div>

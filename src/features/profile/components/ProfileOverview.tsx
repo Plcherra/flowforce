@@ -20,8 +20,6 @@ type Profile = Tables<"profiles"> & {
   company?: {
     id: string;
     name: string;
-    primary_color?: string;
-    secondary_color?: string;
   };
 };
 

@@ -25,17 +25,6 @@ export const normalizeSystemSettingsRow = (
   appearance: {
     ...DEFAULT_APPEARANCE,
     ...(row.appearance as SystemSettingsModel["appearance"]),
-    primaryColor:
-      company?.primary_color ??
-      (row.appearance as SystemSettingsModel["appearance"])?.primaryColor ??
-      DEFAULT_APPEARANCE.primaryColor,
-    secondaryColor:
-      company?.secondary_color ??
-      (row.appearance as SystemSettingsModel["appearance"])?.secondaryColor ??
-      DEFAULT_APPEARANCE.secondaryColor,
-    logoBackgroundColor:
-      (row.appearance as SystemSettingsModel["appearance"])
-        ?.logoBackgroundColor ?? DEFAULT_APPEARANCE.logoBackgroundColor,
   },
   adminConfig: normalizeAdminConfig(row.admin_config, company),
   createdAt: row.created_at,

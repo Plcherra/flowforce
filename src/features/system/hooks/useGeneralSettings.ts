@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type {
-  AppearanceSettings,
-  GeneralSettings,
-} from "@/types/system-settings";
+import type { GeneralSettings } from "@/types/system-settings";
 import { showErrorToast, showSuccessToast } from "@/utils/errorHandler";
 import { setCompanyBrand } from "@/lib/theme/companyTheme";
+import {
+  buildGeneralAppearanceSave,
+  buildGeneralCompanyUpdate,
+} from "@/lib/theme/companySavePayload";
 import type { SystemSettingsHook } from "./useSystemSettings";
 
 type GeneralFormState = {
@@ -15,24 +16,15 @@ type GeneralFormState = {
   website: string;
   companyDescription: string;
   address: string;
-  primaryColor: string;
-  secondaryColor: string;
-  logoBackgroundColor: string;
 };
 
-const toFormState = (
-  general: GeneralSettings,
-  appearance?: AppearanceSettings,
-): GeneralFormState => ({
+const toFormState = (general: GeneralSettings): GeneralFormState => ({
   companyName: general.companyName ?? "",
   contactEmail: general.contactEmail ?? "",
   contactPhone: general.contactPhone ?? "",
   website: general.website ?? "",
   companyDescription: general.companyDescription ?? "",
   address: general.address ?? "",
-  primaryColor: appearance?.primaryColor ?? "#3b82f6",
-  secondaryColor: appearance?.secondaryColor ?? "#1e40af",
-  logoBackgroundColor: appearance?.logoBackgroundColor ?? "#ffffff",
 });
 
 export function useGeneralSettings(source: SystemSettingsHook) {
@@ -46,11 +38,10 @@ export function useGeneralSettings(source: SystemSettingsHook) {
     refresh,
   } = source;
   const general = settings?.general;
-  const appearance = settings?.appearance;
 
   const [state, setState] = useState<GeneralFormState>(
     general
-      ? toFormState(general, appearance)
+      ? toFormState(general)
       : toFormState({
           companyName: "",
           contactEmail: null,
@@ -70,19 +61,19 @@ export function useGeneralSettings(source: SystemSettingsHook) {
 
   useEffect(() => {
     if (!general) return;
-    setState(toFormState(general, appearance));
+    setState(toFormState(general));
     if (!logoFile) {
       setLogoUrl(general.logoUrl);
     }
-  }, [general, appearance, logoFile]);
+  }, [general, logoFile]);
 
   const dirty = useMemo(() => {
     if (!general) return false;
     return (
-      JSON.stringify(state) !==
-        JSON.stringify(toFormState(general, appearance)) || logoFile !== null
+      JSON.stringify(state) !== JSON.stringify(toFormState(general)) ||
+      logoFile !== null
     );
-  }, [general, appearance, state, logoFile]);
+  }, [general, state, logoFile]);
 
   const uploadLogo = useCallback(
     async (file: File): Promise<string> => {
@@ -140,15 +131,15 @@ export function useGeneralSettings(source: SystemSettingsHook) {
 
       const { error: companyError } = await supabase
         .from("companies")
-        .update({
-          name: payload.companyName,
-          description: payload.companyDescription,
-          website: payload.website,
-          phone: payload.contactPhone,
-          logo_url: payload.logoUrl,
-          primary_color: state.primaryColor,
-          secondary_color: state.secondaryColor,
-        })
+        .update(
+          buildGeneralCompanyUpdate({
+            name: payload.companyName,
+            description: payload.companyDescription,
+            website: payload.website,
+            phone: payload.contactPhone,
+            logoUrl: payload.logoUrl,
+          }),
+        )
         .eq("id", company.id);
 
       if (companyError) throw companyError;
@@ -159,17 +150,9 @@ export function useGeneralSettings(source: SystemSettingsHook) {
           ...settings?.localization,
           timezone: company.timezone ?? settings?.localization.timezone,
         },
-        appearance: {
-          ...settings?.appearance,
-          primaryColor: state.primaryColor,
-          secondaryColor: state.secondaryColor,
-          logoBackgroundColor: state.logoBackgroundColor,
-        },
+        appearance: buildGeneralAppearanceSave(settings?.appearance),
       });
       setCompanyBrand({
-        primary: state.primaryColor,
-        secondary: state.secondaryColor,
-        logoBackground: state.logoBackgroundColor,
         logoUrl: payload.logoUrl,
       });
       setLogoUrl(payload.logoUrl);
@@ -198,18 +181,14 @@ export function useGeneralSettings(source: SystemSettingsHook) {
 
   const reset = useCallback(() => {
     if (!general) return;
-    const next = toFormState(general, appearance);
-    setState(next);
+    setState(toFormState(general));
     setLogoUrl(general.logoUrl);
     setLogoFile(null);
     setSaveError(null);
     setCompanyBrand({
-      primary: next.primaryColor,
-      secondary: next.secondaryColor,
-      logoBackground: next.logoBackgroundColor,
       logoUrl: general.logoUrl,
     });
-  }, [general, appearance]);
+  }, [general]);
 
   return {
     loading,

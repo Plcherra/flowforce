@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -18,26 +17,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Palette, Type, Layout, Code } from "lucide-react";
+import { Upload, Type, Layout, Code } from "lucide-react";
 import { CustomBranding } from "@/types/customTemplate";
 
 interface BrandingCustomizerProps {
   branding: CustomBranding;
   onBrandingChange: (branding: CustomBranding) => void;
 }
-
-const predefinedColors = [
-  "#3b82f6",
-  "#ef4444",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#84cc16",
-  "#f97316",
-  "#ec4899",
-  "#6366f1",
-];
 
 const fontFamilies = [
   "Inter, sans-serif",
@@ -53,16 +39,6 @@ export default function BrandingCustomizer({
   onBrandingChange,
 }: BrandingCustomizerProps) {
   const [_logoFile, setLogoFile] = useState<File | null>(null);
-
-  const handleColorChange = (
-    colorType: "primaryColor" | "secondaryColor" | "accentColor",
-    color: string,
-  ) => {
-    onBrandingChange({
-      ...branding,
-      [colorType]: color,
-    });
-  };
 
   const handleStyleChange = (property: keyof CustomBranding, value: any) => {
     onBrandingChange({
@@ -93,10 +69,9 @@ export default function BrandingCustomizer({
         </p>
       </div>
 
-      <Tabs defaultValue="colors" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="logo" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="logo">Logo</TabsTrigger>
-          <TabsTrigger value="colors">Colors</TabsTrigger>
           <TabsTrigger value="typography">Typography</TabsTrigger>
           <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
@@ -146,101 +121,6 @@ export default function BrandingCustomizer({
                     accept="image/*"
                     onChange={handleLogoUpload}
                     className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="colors" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Color Scheme
-              </CardTitle>
-              <CardDescription>
-                Define your brand colors that will be used throughout the
-                application
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Primary Color */}
-              <div className="space-y-3">
-                <Label>Primary Color</Label>
-                <div className="flex items-center space-x-3">
-                  <Input
-                    type="color"
-                    value={branding.primaryColor}
-                    onChange={(e) =>
-                      handleColorChange("primaryColor", e.target.value)
-                    }
-                    className="w-16 h-10"
-                  />
-                  <Input
-                    value={branding.primaryColor}
-                    onChange={(e) =>
-                      handleColorChange("primaryColor", e.target.value)
-                    }
-                    placeholder="#3b82f6"
-                    className="flex-1"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  {predefinedColors.map((color) => (
-                    <button
-                      key={color}
-                      className="w-8 h-8 rounded border-2 border-gray-200"
-                      style={{ backgroundColor: color }}
-                      onClick={() => handleColorChange("primaryColor", color)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Secondary Color */}
-              <div className="space-y-3">
-                <Label>Secondary Color</Label>
-                <div className="flex items-center space-x-3">
-                  <Input
-                    type="color"
-                    value={branding.secondaryColor}
-                    onChange={(e) =>
-                      handleColorChange("secondaryColor", e.target.value)
-                    }
-                    className="w-16 h-10"
-                  />
-                  <Input
-                    value={branding.secondaryColor}
-                    onChange={(e) =>
-                      handleColorChange("secondaryColor", e.target.value)
-                    }
-                    placeholder="#1e40af"
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-
-              {/* Accent Color */}
-              <div className="space-y-3">
-                <Label>Accent Color</Label>
-                <div className="flex items-center space-x-3">
-                  <Input
-                    type="color"
-                    value={branding.accentColor}
-                    onChange={(e) =>
-                      handleColorChange("accentColor", e.target.value)
-                    }
-                    className="w-16 h-10"
-                  />
-                  <Input
-                    value={branding.accentColor}
-                    onChange={(e) =>
-                      handleColorChange("accentColor", e.target.value)
-                    }
-                    placeholder="#10b981"
-                    className="flex-1"
                   />
                 </div>
               </div>

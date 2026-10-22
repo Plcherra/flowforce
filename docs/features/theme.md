@@ -118,7 +118,7 @@ Prove: Unit test `src/lib/theme/applyTheme.test.ts` covers the three names, an u
 
 ### Phase 3 — Remove color choice
 
-- [ ] Stop company colors from painting the app, and remove the pickers.
+- [x] Stop company colors from painting the app, and remove the pickers.
 
 Rules:
 
@@ -473,5 +473,21 @@ Phone steps for Pedro:
 6. Open the public marketing page. The footer should have no moon button and no Dark mode label.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 3 Remove color choice
+
+Shipped: Signing in no longer paints company colors. `applyCompanyTheme` and the hex-to-HSL override are gone. `CompanyThemeSync` passes the logo URL only. General settings keeps the theme switch and the logo upload, and the primary, secondary, accent, and logo-background inputs are gone. Company save, demo company create, and onboarding complete no longer send `primary_color`, `secondary_color`, `primaryColor`, or `secondaryColor`. The columns stay. Position color, shift color, rich-text color, and post gradients are unchanged. `CustomTemplateBuilder` still stores the branding object its type requires; the color inputs it used to show lived in `BrandingCustomizer` and are removed.
+
+Proven: Unit test `src/lib/theme/companySavePayload.test.ts` asserts the general save, the appearance save, the onboarding payload, and the create-company payload have none of those keys. Run with jiti the same way as `scripts/test-tasks-page.mjs`. It passed. `npm run typecheck:src` and `npm run typecheck:app` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk. Buttons and links should stay the FlowForce blue. They should not switch to a company-picked color.
+2. Open Settings, then General. The theme switch is at the top. There should be no primary color, secondary color, accent, or logo background field. Logo upload should still be there.
+3. Change the company name and save. Reload. The name should stick, and the blue should be unchanged.
+4. Start creating a company. The branding step should not ask for a primary or secondary color.
+
+Blockers: none. No migration. The color columns are still in the database.
 
 Questions: none.

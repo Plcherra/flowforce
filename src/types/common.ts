@@ -177,8 +177,6 @@ export interface CompanyConfig {
   template_name?: string;
   enabled_sections: string[];
   custom_branding?: {
-    primary_color: string;
-    secondary_color: string;
     logo_url?: string;
   };
   [key: string]: unknown; // Allow additional dynamic properties for JSON storage

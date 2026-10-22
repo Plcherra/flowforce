@@ -7,6 +7,7 @@ import type { SystemSettings as SystemSettingsModel } from "@/types/system-setti
 import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
 import { handleError } from "@/utils/errorHandler";
+import { buildCreateCompanyData } from "@/lib/theme/companySavePayload";
 import {
   DEFAULT_ADMIN_CONFIG,
   DEFAULT_APPEARANCE,
@@ -301,20 +302,18 @@ export function useSystemSettings(
         const { data: created, error: createError } = await supabase.rpc(
           "create_company_with_setup",
           {
-            company_data: {
+            company_data: buildCreateCompanyData({
               name: "Demo Workspace",
               industry: null,
               size: null,
               description: "Automatically generated workspace",
               website: null,
               phone: null,
-              primary_color: "#3b82f6",
-              secondary_color: "#1e40af",
-              template_id: null,
-              template_name: null,
-              enabled_sections: [],
-              template_config: JSON.stringify({}),
-            },
+              templateId: null,
+              templateName: null,
+              enabledSections: [],
+              templateConfig: JSON.stringify({}),
+            }),
             custom_roles: [],
             positions_data: [],
             owner_user_id: user.id,

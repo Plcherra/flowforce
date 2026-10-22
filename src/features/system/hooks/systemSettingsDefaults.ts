@@ -180,10 +180,6 @@ export function seedSystemSettings(company: Company | null) {
     integrations: DEFAULT_INTEGRATIONS,
     appearance: {
       ...DEFAULT_APPEARANCE,
-      primaryColor: company?.primary_color ?? DEFAULT_APPEARANCE.primaryColor,
-      secondaryColor:
-        company?.secondary_color ?? DEFAULT_APPEARANCE.secondaryColor,
-      logoBackgroundColor: DEFAULT_APPEARANCE.logoBackgroundColor,
     },
     admin_config: DEFAULT_ADMIN_CONFIG,
   };

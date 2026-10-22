@@ -10,6 +10,7 @@ import {
   CompanySettings,
 } from "@/types/common";
 import { handleError } from "@/utils/errorHandler";
+import { buildCreateCompanyData } from "@/lib/theme/companySavePayload";
 import { logger } from "@/utils/logger";
 
 type CompanyRow = Tables<"companies">;
@@ -271,8 +272,6 @@ export function useCompany() {
     description?: string;
     website?: string;
     phone?: string;
-    primary_color?: string;
-    secondary_color?: string;
     template_id?: string;
     template_name?: string;
     enabled_sections?: string[];
@@ -316,20 +315,18 @@ export function useCompany() {
 
       // Use the improved database function to create company with setup
       const { data, error } = await supabase.rpc("create_company_with_setup", {
-        company_data: {
+        company_data: buildCreateCompanyData({
           name: companyData.name,
           industry: companyData.industry,
           size: companyData.size,
           description: companyData.description,
           website: companyData.website,
           phone: companyData.phone,
-          primary_color: companyData.primary_color || "#3b82f6",
-          secondary_color: companyData.secondary_color || "#1e40af",
-          template_id: companyData.template_id,
-          template_name: companyData.template_name,
-          enabled_sections: companyData.enabled_sections || [],
-          template_config: JSON.stringify(companyData.template_config || {}),
-        },
+          templateId: companyData.template_id,
+          templateName: companyData.template_name,
+          enabledSections: companyData.enabled_sections || [],
+          templateConfig: JSON.stringify(companyData.template_config || {}),
+        }),
         custom_roles: formattedRoles,
         positions_data: formattedPositions,
         owner_user_id: user.id,

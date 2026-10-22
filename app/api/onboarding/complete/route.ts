@@ -11,6 +11,7 @@ import {
 } from "@/features/roles/constants/productLevels";
 import { supabaseAdmin } from "../../_server/supabaseAdmin";
 import { createServerLogger } from "../../_server/utils/logger";
+import { buildOnboardingCompanyPayload } from "@/lib/theme/companySavePayload";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -134,7 +135,6 @@ export async function POST(request: Request) {
     const userId = readString(body, "userId");
     const userInfo = readObject(body.userInfo);
     const companyInfo = readObject(body.companyInfo);
-    const branding = readObject(body.branding);
     const template = readObject(body.template);
     const enabledSections = Array.isArray(body.enabledSections)
       ? body.enabledSections
@@ -196,41 +196,30 @@ export async function POST(request: Request) {
     const templateId = readString(template, "id");
     const ownerPhone =
       normalizeText(userInfo.phone) ?? normalizeText(companyInfo.phone);
-    const companyPayload = {
+    const companyPayload = buildOnboardingCompanyPayload({
       name: companyName,
       website: normalizeWebsite(companyInfo.website),
       phone: normalizeText(companyInfo.phone),
       industry: normalizeText(companyIndustry),
       size: normalizeText(companySize),
       description: normalizeText(companyInfo.description),
-      logo_url: null,
-      primary_color: readString(branding, "primaryColor") || "#3b82f6",
-      secondary_color: readString(branding, "secondaryColor") || "#1e40af",
-      template_id: null,
-      template_name: templateName || null,
-      enabled_sections: enabledSections,
-      template_config: {
-        templateId,
-        templateName,
-        industry: readString(template, "industry"),
-        defaultRoles: Array.isArray(template.defaultRoles)
-          ? template.defaultRoles
-          : [],
-        customFields: readObject(template.customFields),
-        suggestedPositions: readObject(template.suggestedPositions),
-      },
-      custom_roles: customRoles,
+      templateName,
+      templateId,
+      templateIndustry: readString(template, "industry"),
+      defaultRoles: Array.isArray(template.defaultRoles)
+        ? template.defaultRoles
+        : [],
+      customFields: readObject(template.customFields),
+      suggestedPositions: readObject(template.suggestedPositions),
+      enabledSections,
+      customRoles,
       positions,
-      registration_complete: true,
-      created_by: userId,
-      owner_id: userId,
-      owner_profile: {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        phone: ownerPhone,
-      },
-    };
+      userId,
+      firstName,
+      lastName,
+      email,
+      ownerPhone,
+    });
 
     const { data: companyId, error: setupError } = await supabaseAdmin.rpc(
       "create_company_with_setup",

@@ -14,7 +14,6 @@ import { Loader2, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
 import { LogoEditorDialog } from "./LogoEditorDialog";
-import { setCompanyBrand } from "@/lib/theme/companyTheme";
 import {
   applyTheme,
   resolveThemeName,
@@ -76,11 +75,6 @@ export function GeneralSettingsPanel() {
   const handleEditorConfirm = (file: File, previewUrl: string) => {
     setLogoFile(file);
     setLogoUrl(previewUrl);
-  };
-
-  const handleLogoBackgroundChange = (logoBackgroundColor: string) => {
-    setState((prev) => ({ ...prev, logoBackgroundColor }));
-    setCompanyBrand({ logoBackground: logoBackgroundColor });
   };
 
   return (
@@ -208,87 +202,8 @@ export function GeneralSettingsPanel() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[1fr_220px]">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="primaryColor">Primary color</Label>
-              <p className="text-xs text-muted-foreground">
-                Save button, links, and sidebar highlights.
-              </p>
-              <div className="flex gap-2">
-                <Input
-                  id="primaryColor"
-                  type="color"
-                  value={state.primaryColor}
-                  onChange={(event) =>
-                    setState((prev) => ({
-                      ...prev,
-                      primaryColor: event.target.value,
-                    }))
-                  }
-                  disabled={!canEdit || loading}
-                  className="h-10 w-14 p-1"
-                />
-                <Input
-                  value={state.primaryColor}
-                  onChange={(event) =>
-                    setState((prev) => ({
-                      ...prev,
-                      primaryColor: event.target.value,
-                    }))
-                  }
-                  disabled={!canEdit || loading}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="secondaryColor">Secondary color</Label>
-              <p className="text-xs text-muted-foreground">
-                Discard button and secondary actions.
-              </p>
-              <div className="flex gap-2">
-                <Input
-                  id="secondaryColor"
-                  type="color"
-                  value={state.secondaryColor}
-                  onChange={(event) =>
-                    setState((prev) => ({
-                      ...prev,
-                      secondaryColor: event.target.value,
-                    }))
-                  }
-                  disabled={!canEdit || loading}
-                  className="h-10 w-14 p-1"
-                />
-                <Input
-                  value={state.secondaryColor}
-                  onChange={(event) =>
-                    setState((prev) => ({
-                      ...prev,
-                      secondaryColor: event.target.value,
-                    }))
-                  }
-                  disabled={!canEdit || loading}
-                />
-              </div>
-            </div>
-          </div>
-          <div
-            className="flex min-h-28 flex-col justify-between rounded-lg border p-4 text-white"
-            style={{
-              background: `linear-gradient(135deg, ${state.primaryColor}, ${state.secondaryColor})`,
-            }}
-          >
-            <div className="text-sm font-medium">{state.companyName}</div>
-            <div className="text-xs opacity-80">Brand preview</div>
-          </div>
-        </div>
-
         <div className="flex flex-col gap-3 md:flex-row md:items-start">
-          <div
-            className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border"
-            style={{ backgroundColor: state.logoBackgroundColor }}
-          >
+          <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border bg-logo-background">
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -304,31 +219,9 @@ export function GeneralSettingsPanel() {
           <div className="flex-1 space-y-2">
             <Label>Company logo</Label>
             <p className="text-sm text-muted-foreground">
-              Upload a PNG, JPEG, or SVG (max 2MB). Crop, center, and set a
-              logo plate color that stays separate from the app theme.
+              Upload a PNG, JPEG, or SVG (max 2MB). Crop and center it on the
+              white logo plate.
             </p>
-            <div className="space-y-2">
-              <Label htmlFor="logoBackgroundColor">Logo background</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="logoBackgroundColor"
-                  type="color"
-                  value={state.logoBackgroundColor}
-                  onChange={(event) =>
-                    handleLogoBackgroundChange(event.target.value)
-                  }
-                  disabled={!canEdit || loading}
-                  className="h-10 w-14 p-1"
-                />
-                <Input
-                  value={state.logoBackgroundColor}
-                  onChange={(event) =>
-                    handleLogoBackgroundChange(event.target.value)
-                  }
-                  disabled={!canEdit || loading}
-                />
-              </div>
-            </div>
             <div className="flex flex-wrap items-center gap-2">
               <label
                 className={cn(
@@ -369,7 +262,6 @@ export function GeneralSettingsPanel() {
         <LogoEditorDialog
           open={editorOpen}
           sourceUrl={editorSource}
-          backgroundColor={state.logoBackgroundColor}
           onOpenChange={setEditorOpen}
           onConfirm={handleEditorConfirm}
         />
