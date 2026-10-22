@@ -1378,3 +1378,19 @@ Phone steps for Pedro:
 Blockers: none. No new migration.
 
 Questions: none.
+
+### 2026-10-22 — Phase 40 Goals
+
+Shipped: A goal keeps the title and description that were typed. The cache paths are `title` and `description` on `goals`. The save returns before the model runs. Goal progress on the performance page shows the translated title, with one see-original line when the viewer's language differs. Progress percentages stay numbers.
+
+Proven: `src/features/gamification/goalTranslation.test.ts` passed through the jiti runner. Title and description are translated. A second read of the title does not call the model again. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Create a goal with an English title and description. It should save without waiting.
+3. Set your language to Español and open Performance, then goal progress. The goal title should be Spanish, with Traducido de English. The progress percentage should stay the same number.
+4. Set the language back to English. The goal title should be the English words you typed, with no translated-from line.
+
+Blockers: none. No new migration.
+
+Questions: none.
