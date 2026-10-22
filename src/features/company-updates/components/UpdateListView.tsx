@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 import { getTypeColor } from "@/features/company-updates/utils";
 
@@ -35,7 +36,9 @@ export function UpdateListView({ updates }: UpdateListViewProps) {
           <TableBody>
             {updates.map((update) => (
               <TableRow key={update.id}>
-                <TableCell className="font-medium">{update.title}</TableCell>
+                <TableCell className="font-medium">
+                  <CompanyUpdateBody update={update} variant="compact" />
+                </TableCell>
                 <TableCell>
                   <Badge className={`text-xs ${getTypeColor(update.type)}`}>
                     {update.type}

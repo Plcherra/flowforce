@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { PageLoader } from "@/components/common/PageLoader";
 import { CompanyUpdatesFeedSection } from "@/features/company-updates/components/CompanyUpdatesFeedSection";
+import { EditUpdateDialog } from "@/features/company-updates/components/EditUpdateDialog";
 import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
 import {
   CompanyUpdatesPagination,
@@ -67,6 +68,7 @@ export default function CompanyUpdates() {
     Record<string, boolean>
   >({});
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
+  const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(null);
 
   const { updates, loading, error, pagination } = useCompanyUpdates({
     page,
@@ -319,6 +321,7 @@ export default function CompanyUpdates() {
               onLike={handleLike}
               onArchive={handleArchive}
               onDelete={handleDelete}
+              onEdit={setEditingUpdate}
               onView={(updateId) => markAsViewed({ updateId })}
             />
           )}
@@ -338,6 +341,14 @@ export default function CompanyUpdates() {
           )}
         </div>
       </div>
+
+      <EditUpdateDialog
+        open={Boolean(editingUpdate)}
+        onOpenChange={(open) => {
+          if (!open) setEditingUpdate(null);
+        }}
+        update={editingUpdate}
+      />
 
       <div id="company-updates-wizard">
         <Suspense fallback={<WizardFallback />}>

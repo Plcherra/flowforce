@@ -516,7 +516,7 @@ Prove: Unit test `src/features/i18n/translatedText.test.ts` covers both viewers.
 
 ### Phase 28 — Company update content
 
-- [ ] Translate company update title, body, and rich content.
+- [x] Translate company update title, body, and rich content.
 
 Rules:
 
@@ -1181,5 +1181,21 @@ Proven: `src/features/i18n/translatedText.test.ts` passed through the jiti runne
 Phone steps for Pedro: none. No screen renders this control yet.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 28 Company update content
+
+Shipped: Company update title, body, and rich content translate through the content cache. The author's language at save time is stored with the update. The save writes the original text and returns before the model runs. A viewer in another language sees the cached translation, with one Translated from line for the whole update. Choosing it shows the original. Rich content keeps its tags. If a translation would change the tags, that result is not cached and the original HTML is shown. Comments are unchanged. A new update is stored as published so it appears in the feed.
+
+Proven: `src/features/company-updates/companyUpdateTranslation.test.ts` passed through the jiti runner. An English update is shown in Spanish from the cache. Editing the body replaces the cached body and leaves the title hash in place. The save resolves when the model is still running and when the model throws. A rich-text result that changes the tags is not cached. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English on Settings, then Region.
+2. Open Company updates and publish an update with an English title and a sentence in the body. You can also add rich text. The update should appear without waiting.
+3. Set your language to Español and reload Company updates. The title and body should be Spanish. Under the update, the line should read Traducido de English. Ver original. Tap it to see the English text. Tap Ver traducción to see Spanish again.
+4. Switch back to English. On the update, open the menu and choose Edit. Change the body and save. Switch to Español and reload. The new body should be the new Spanish text. The title should stay the earlier Spanish title. A comment stays in the language it was typed.
+
+Blockers: none. No new migration. Translation calls OpenAI `gpt-4o-mini` with `OPENAI_API_KEY` on the server.
 
 Questions: none.

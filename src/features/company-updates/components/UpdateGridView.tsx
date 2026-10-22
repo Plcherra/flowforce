@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pin } from "lucide-react";
+import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 import {
   getBackgroundCss,
@@ -30,12 +31,7 @@ export function UpdateGridView({ updates }: UpdateGridViewProps) {
               </Badge>
               {update.isPinned && <Pin className="h-3 w-3 text-primary" />}
             </div>
-            <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-              {update.title}
-            </h3>
-            <p className="text-xs text-muted-foreground line-clamp-3">
-              {update.body}
-            </p>
+            <CompanyUpdateBody update={update} variant="compact" />
           </CardContent>
         </Card>
       ))}

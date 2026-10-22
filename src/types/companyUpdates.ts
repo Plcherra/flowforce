@@ -1,8 +1,10 @@
+import type { AppLanguage } from "@/i18n/resolveLanguage";
 import type {
   BackgroundStyle,
   PublishingSettings,
   UpdateRecipient,
 } from "@/types/updateTemplates";
+import type { CompanyUpdateContentTranslation } from "@/features/company-updates/companyUpdateFields";
 
 export type CompanyUpdateRow = {
   id: string;
@@ -75,6 +77,8 @@ export interface CompanyUpdate {
     aiSummary?: string | null;
     lastAnalyzed?: string | null;
   } | null;
+  contentSourceLocale?: AppLanguage | null;
+  contentTranslation?: CompanyUpdateContentTranslation | null;
 }
 
 export type CompanyUpdateCardView = CompanyUpdate & {

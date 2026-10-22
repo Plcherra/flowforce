@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { readContentSourceLocale } from "@/features/company-updates/companyUpdateFields";
+import { useCompanyUpdateContentTranslations } from "@/features/company-updates/hooks/useCompanyUpdateContentTranslations";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 import {
   companyUpdatesRepository,
@@ -76,6 +78,7 @@ const toCompanyUpdate = (
           lastAnalyzed: row.company_update_engagement[0].last_analyzed,
         }
       : null,
+  contentSourceLocale: readContentSourceLocale(row.publishing_settings),
 });
 
 export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
@@ -154,7 +157,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
     return set;
   }, [reactionsQuery.data]);
 
-  const updates = useMemo<CompanyUpdate[]>(() => {
+  const storedUpdates = useMemo<CompanyUpdate[]>(() => {
     const records = updatesQuery.data?.records;
     if (!records || !Array.isArray(records) || records.length === 0) {
       return [];
@@ -164,6 +167,15 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
       toCompanyUpdate(record, viewerLikes, viewerViews),
     );
   }, [updatesQuery.data?.records, viewerLikes, viewerViews]);
+  const translations = useCompanyUpdateContentTranslations(storedUpdates);
+  const updates = useMemo<CompanyUpdate[]>(
+    () =>
+      storedUpdates.map((update) => ({
+        ...update,
+        contentTranslation: translations.get(update.id) ?? null,
+      })),
+    [storedUpdates, translations],
+  );
 
   return {
     updates,

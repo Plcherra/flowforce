@@ -1,6 +1,15 @@
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { CompanyUpdate } from "@/types/companyUpdates";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
+import { requestContentTranslation } from "@/features/i18n/requestContentTranslation";
+import {
+  companyUpdateTouchesContent,
+  companyUpdateTranslationFields,
+  companyUpdateWriteColumns,
+  saveCompanyUpdateWithoutModel,
+  withContentSourceLocale,
+} from "@/features/company-updates/companyUpdateFields";
 
 type ListUpdatesParams = {
   companyId: string;
@@ -31,7 +40,8 @@ type ListCommentsParams = {
 
 type CreateUpdateParams = {
   companyId: string;
-  payload: Record<string, unknown>;
+  payload: object;
+  sourceLocale?: AppLanguage;
 };
 
 type UpdateStatusParams = {
@@ -54,7 +64,8 @@ type DeleteUpdateParams = {
 type UpdateUpdateParams = {
   companyId: string;
   updateId: string;
-  payload: Partial<Record<string, unknown>>;
+  payload: object;
+  sourceLocale?: AppLanguage;
 };
 
 type ReactionMutationParams = {
@@ -289,15 +300,71 @@ const listComments = async ({ companyId, updateIds }: ListCommentsParams) => {
   return parseSupabaseData(z.array(commentRowSchema), data ?? []);
 };
 
-const createUpdate = async ({ companyId, payload }: CreateUpdateParams) => {
-  const { error } = await supabase.from("company_updates").insert({
-    company_id: companyId,
-    ...payload,
+const scheduleCompanyUpdateTranslation = (input: {
+  companyId: string;
+  sourceId: string;
+  sourceLocale: AppLanguage;
+  title: string;
+  body: string;
+  richContent: string | null;
+}) => {
+  const fields = companyUpdateTranslationFields({
+    title: input.title,
+    body: input.body,
+    richContent: input.richContent,
   });
+  if (fields.length === 0) return;
+  void requestContentTranslation({
+    companyId: input.companyId,
+    sourceTable: "company_updates",
+    sourceId: input.sourceId,
+    sourceLocale: input.sourceLocale,
+    viewerLocale: input.sourceLocale,
+    fields: fields.map((field) => ({
+      fieldPath: field.fieldPath,
+      text: field.text,
+    })),
+  }).catch(() => undefined);
+};
 
-  if (error) {
-    throw error;
+const createUpdate = async ({
+  companyId,
+  payload,
+  sourceLocale,
+}: CreateUpdateParams) => {
+  const id = crypto.randomUUID();
+  const columns = companyUpdateWriteColumns(payload);
+  if (sourceLocale) {
+    columns.publishing_settings = withContentSourceLocale(
+      columns.publishing_settings,
+      sourceLocale,
+    );
   }
+  await saveCompanyUpdateWithoutModel({
+    save: async () => {
+      const { error } = await supabase.from("company_updates").insert({
+        id,
+        company_id: companyId,
+        ...columns,
+        status: columns.status ?? "published",
+      });
+      if (error) throw error;
+    },
+    translate: sourceLocale
+      ? async () => {
+          scheduleCompanyUpdateTranslation({
+            companyId,
+            sourceId: id,
+            sourceLocale,
+            title: String(columns.title ?? ""),
+            body: String(columns.body ?? ""),
+            richContent:
+              typeof columns.rich_content === "string" ? columns.rich_content : null,
+          });
+        }
+      : undefined,
+  });
+  return id;
 };
 
 const updateStatus = async ({
@@ -320,19 +387,53 @@ const updateUpdate = async ({
   companyId,
   updateId,
   payload,
+  sourceLocale,
 }: UpdateUpdateParams) => {
-  const { error } = await supabase
-    .from("company_updates")
-    .update({
-      ...payload,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("company_id", companyId)
-    .eq("id", updateId);
-
-  if (error) {
-    throw error;
+  const columns = companyUpdateWriteColumns(payload);
+  const touchesContent = companyUpdateTouchesContent(payload);
+  if (sourceLocale && touchesContent) {
+    let settings = columns.publishing_settings;
+    if (settings === undefined) {
+      const { data, error: readError } = await supabase
+        .from("company_updates")
+        .select("publishing_settings")
+        .eq("company_id", companyId)
+        .eq("id", updateId)
+        .maybeSingle();
+      if (readError) throw readError;
+      settings = data?.publishing_settings;
+    }
+    columns.publishing_settings = withContentSourceLocale(settings, sourceLocale);
   }
+  await saveCompanyUpdateWithoutModel({
+    save: async () => {
+      const { error } = await supabase
+        .from("company_updates")
+        .update({
+          ...columns,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("company_id", companyId)
+        .eq("id", updateId);
+      if (error) throw error;
+    },
+    translate:
+      sourceLocale && touchesContent
+        ? async () => {
+            scheduleCompanyUpdateTranslation({
+              companyId,
+              sourceId: updateId,
+              sourceLocale,
+              title: String(columns.title ?? ""),
+              body: String(columns.body ?? ""),
+              richContent:
+                typeof columns.rich_content === "string"
+                  ? columns.rich_content
+                  : null,
+            });
+          }
+        : undefined,
+  });
 };
 
 const togglePin = async ({

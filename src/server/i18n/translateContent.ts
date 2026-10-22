@@ -48,6 +48,7 @@ export interface ContentModelClient {
     text: string;
     sourceLocale: AppLanguage;
     targetLocale: AppLanguage;
+    instruction?: string;
   }): Promise<{ text: string; inputTokens?: number; outputTokens?: number }>;
 }
 
@@ -72,6 +73,8 @@ export interface TranslateContentInput {
   viewerLocale: AppLanguage;
   text: string;
   fieldKind?: ContentFieldKind;
+  instruction?: string;
+  acceptTranslation?: (translated: string) => boolean;
   cache: ContentTranslationCache;
   model: ContentModelClient;
   budget: ContentBudgetGate;
@@ -213,7 +216,11 @@ export async function translateContent(
         text: original,
         sourceLocale: input.sourceLocale,
         targetLocale: locale,
+        instruction: input.instruction,
       });
+      if (input.acceptTranslation && !input.acceptTranslation(result.text)) {
+        throw new Error("Translation changed protected content");
+      }
       inputTokens += result.inputTokens ?? 0;
       outputTokens += result.outputTokens ?? 0;
       translated.push({ locale, translatedText: result.text });
@@ -249,9 +256,10 @@ export function createOpenAiContentModel(options?: {
   apiKey?: string;
 }): ContentModelClient {
   return {
-    async translate({ text, sourceLocale, targetLocale }) {
+    async translate({ text, sourceLocale, targetLocale, instruction }) {
       const apiKey = options?.apiKey ?? process.env.OPENAI_API_KEY;
       if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
+      const guidance = instruction ? ` ${instruction}` : "";
       const response = await (options?.fetchImpl ?? fetch)(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -266,7 +274,7 @@ export function createOpenAiContentModel(options?: {
             messages: [
               {
                 role: "system",
-                content: `Translate from ${sourceLocale} to ${targetLocale}. Keep names, emails, phone numbers, URLs, SKUs, amounts, dates, numbers, and ids as written. Return only the translation.`,
+                content: `Translate from ${sourceLocale} to ${targetLocale}. Keep names, emails, phone numbers, URLs, SKUs, amounts, dates, numbers, and ids as written. Return only the translation.${guidance}`,
               },
               { role: "user", content: text },
             ],

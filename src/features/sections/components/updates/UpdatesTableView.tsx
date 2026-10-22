@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
+import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -200,11 +201,8 @@ export function UpdatesTableView({
                         {update.isPinned && (
                           <Pin className="h-4 w-4 text-primary" />
                         )}
-                        <div>
-                          <div className="font-medium">{update.title}</div>
-                          <div className="text-sm text-muted-foreground truncate max-w-[300px]">
-                            {update.body}
-                          </div>
+                        <div className="max-w-[300px]">
+                          <CompanyUpdateBody update={update} variant="compact" />
                         </div>
                       </div>
                     </TableCell>

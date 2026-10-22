@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import {
   companyUpdatesRepository,
   type CompanyUpdateRow,
@@ -38,6 +40,7 @@ const clone = <T>(value: T): T => structuredClone(value);
 
 export function useCompanyUpdateMutations() {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const queryClient = useQueryClient();
@@ -64,6 +67,7 @@ export function useCompanyUpdateMutations() {
       await companyUpdatesRepository.createUpdate({
         companyId,
         payload: input,
+        sourceLocale: appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
       });
     },
     onSuccess: () => {
@@ -108,6 +112,7 @@ export function useCompanyUpdateMutations() {
         companyId,
         updateId,
         payload,
+        sourceLocale: appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
       });
     },
     onSuccess: () => {

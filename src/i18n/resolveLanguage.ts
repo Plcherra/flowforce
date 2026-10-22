@@ -17,3 +17,9 @@ export function resolveLanguage(
   if (isAppLanguage(companyLanguage)) return companyLanguage;
   return "en";
 }
+
+export function appLanguageFromTag(tag: unknown): AppLanguage {
+  if (typeof tag !== "string") return "en";
+  const code = tag.toLowerCase().split("-")[0];
+  return isAppLanguage(code) ? code : "en";
+}

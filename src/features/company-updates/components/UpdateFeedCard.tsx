@@ -12,6 +12,7 @@ import {
   Pin,
   MoreHorizontal,
   Archive,
+  Pencil,
   Trash2,
 } from "lucide-react";
 import {
@@ -28,6 +29,7 @@ import {
   getUpdateIcon,
   getEngagementSettings,
 } from "@/features/company-updates/utils";
+import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
 import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 
 interface UpdateFeedCardProps {
@@ -41,6 +43,7 @@ interface UpdateFeedCardProps {
   onLike: (updateId: string) => void;
   onArchive: (updateId: string) => void;
   onDelete: (updateId: string) => void;
+  onEdit?: (update: CompanyUpdate) => void;
   canManage: boolean;
   onView?: (updateId: string) => void;
   viewerHasViewed?: boolean;
@@ -58,6 +61,7 @@ export function UpdateFeedCard({
   onLike,
   onArchive,
   onDelete,
+  onEdit,
   canManage,
   onView,
   viewerHasViewed,
@@ -162,6 +166,12 @@ export function UpdateFeedCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
+                {onEdit ? (
+                  <DropdownMenuItem onClick={() => onEdit(update)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    {t("common.edit")}
+                  </DropdownMenuItem>
+                ) : null}
                 <DropdownMenuItem onClick={() => onArchive(update.id)}>
                   <Archive className="mr-2 h-4 w-4" />
                   {t("updates.archive")} </DropdownMenuItem>
@@ -180,21 +190,7 @@ export function UpdateFeedCard({
 
       <CardContent className="px-4 pb-4">
         <div className="space-y-4">
-          <div>
-            <h2 className="text-lg font-bold mb-2 leading-tight">
-              {update.title}
-            </h2>
-            {update.richContent ? (
-              <div
-                className="prose prose-sm max-w-none dark:prose-invert"
-                dangerouslySetInnerHTML={{ __html: update.richContent }}
-              />
-            ) : (
-              <p className="text-foreground leading-relaxed text-sm">
-                {update.body}
-              </p>
-            )}
-          </div>
+          <CompanyUpdateBody update={update} variant="feed" />
 
           <div className="flex items-center gap-4 text-xs text-muted-foreground py-2 border-t border-border">
             <div className="flex items-center gap-1">

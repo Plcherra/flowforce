@@ -16,6 +16,7 @@ import {
   FileText,
   Globe,
 } from "lucide-react";
+import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
 import { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -225,19 +226,7 @@ export function UpdatesFeedView({
 
             <CardContent className="pt-0">
               <div className="space-y-4">
-                <div>
-                  <h2 className="text-xl font-bold mb-2">{update.title}</h2>
-                  {update.richContent ? (
-                    <div
-                      className="prose prose-sm max-w-none dark:prose-invert"
-                      dangerouslySetInnerHTML={{ __html: update.richContent }}
-                    />
-                  ) : (
-                    <p className="text-foreground leading-relaxed">
-                      {update.body}
-                    </p>
-                  )}
-                </div>
+                <CompanyUpdateBody update={update} variant="feed" />
 
                 {/* Engagement Bar */}
                 <div className="flex items-center justify-between pt-3 border-t border-border">

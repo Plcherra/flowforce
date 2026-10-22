@@ -14,6 +14,7 @@ import { useCan } from "@/hooks/useCan";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "@/lib/router-adapter";
 import CreateUpdateWizard from "@/features/company-updates/wizard/CreateUpdateWizard";
+import { CompanyUpdateBody } from "@/features/company-updates/components/CompanyUpdateBody";
 import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
 import { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
 import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
@@ -101,12 +102,7 @@ export default function CompanyUpdatesCard({
                 >
                   <Pin className="h-4 w-4 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm truncate">
-                      {update.title}
-                    </h4>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {update.body}
-                    </p>
+                    <CompanyUpdateBody update={update} variant="compact" />
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs">
                         {update.type}
@@ -130,12 +126,7 @@ export default function CompanyUpdatesCard({
                     className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50"
                   >
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">
-                        {update.title}
-                      </h4>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {update.body}
-                      </p>
+                      <CompanyUpdateBody update={update} variant="compact" />
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">
                           {update.type}

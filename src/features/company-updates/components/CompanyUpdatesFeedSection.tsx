@@ -29,6 +29,7 @@ interface CompanyUpdatesFeedSectionProps {
   onLike: (updateId: string, currentlyLiked: boolean) => void;
   onArchive: (updateId: string) => void;
   onDelete: (updateId: string) => void;
+  onEdit: (update: CompanyUpdate) => void;
   onView: (updateId: string) => void;
 }
 
@@ -53,6 +54,7 @@ export function CompanyUpdatesFeedSection({
   onLike,
   onArchive,
   onDelete,
+  onEdit,
   onView,
 }: CompanyUpdatesFeedSectionProps) {
   return (
@@ -82,6 +84,7 @@ export function CompanyUpdatesFeedSection({
               onLike={(id) => onLike(id, update.viewerHasLiked)}
               onArchive={onArchive}
               onDelete={onDelete}
+              onEdit={onEdit}
               canManage={canCreateUpdate}
               onView={onView}
               viewerHasViewed={update.viewerHasViewed}
