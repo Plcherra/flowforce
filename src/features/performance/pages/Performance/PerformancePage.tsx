@@ -25,6 +25,7 @@ import {
   type GoalSummaryCard,
 } from "./GoalProgressSection";
 import { XPTrendsSection, type XpTrendEntry } from "./XPTrendsSection";
+import { performanceTaskPoints } from "@/features/performance/utils/taskPointsTotal";
 
 function buildKpis({
   employees,
@@ -194,11 +195,21 @@ export function PerformancePage() {
   } = useLeaderboardData(leaderboardPeriod);
   const lastUpdated = useLeaderboardInsightsStore((state) => state.lastUpdated);
 
-  const kpis = buildKpis({
-    employees,
-    reviews,
-    recognitionsCount: recognitions.length,
-  });
+  const kpis = [
+    ...buildKpis({
+      employees,
+      reviews,
+      recognitionsCount: recognitions.length,
+    }),
+    {
+      id: "task-points",
+      label: "Task points",
+      value: performanceTaskPoints(
+        entries.map((entry) => entry.xp.tasks),
+      ).toLocaleString(),
+      description: "The same total as leaderboard task XP",
+    },
+  ];
   const goalCards = buildGoalCards(goals);
   const xpSnapshot = buildLeaderboardSnapshot(entries);
   const xpBySource = analytics?.xpBySource ?? {

@@ -25,7 +25,7 @@ export function PerformanceKpiGrid({
 }: PerformanceKpiGridProps) {
   if (loading && metrics.length === 0) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {Array.from({ length: 4 }).map((_, index) => (
           <Card key={index} className="border-dashed">
             <CardHeader className="pb-2">
@@ -57,7 +57,7 @@ export function PerformanceKpiGrid({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
       {metrics.map((metric) => (
         <Card key={metric.id} className="shadow-sm">
           <CardHeader className="pb-2">

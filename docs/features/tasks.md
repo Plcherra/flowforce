@@ -416,7 +416,7 @@ Prove: Extend `taskSchedule.test.ts`, or add the XP cases beside `taskCompletion
 
 ### Phase 19 — Points and performance
 
-- [ ] Show leaderboard task XP as the performance task-points total.
+- [x] Show leaderboard task XP as the performance task-points total.
 
 Rules:
 
@@ -875,6 +875,22 @@ Questions: The phase needs the Open question "What counts as one list issue" ans
 Skipped. Blocked by Open question "Which permissions use read, create, edit, and delete". The access boxes stay on or off. Task create levels are the section added on the employee card. No test was added.
 
 Questions: The phase needs the Open question "Which permissions use read, create, edit, and delete" answered.
+
+### 2026-10-22 — Phase 19 Points and performance
+
+Shipped: Performance shows one Task points total. That number is the sum of leaderboard task XP already loaded for the page. It is not written to `staff_performance`, and it is not a second score.
+
+Proven: Unit test `src/features/performance/utils/taskPointsTotal.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers one task's XP, a sum, and a missing value. It passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Performance.
+2. Task points should be one of the totals at the top.
+3. The line under it should say it is the same total as leaderboard task XP.
+4. Open the leaderboard for the month. The task XP across people should add up to that Task points number.
+
+Blockers: none for this phase.
+
+Questions: none.
 
 ### 2026-10-22 — Phase 8 What counts as one list issue
 
