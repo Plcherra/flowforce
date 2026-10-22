@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Suspense, ReactNode } from "react";
 import { useNavigation } from "@/lib/router-adapter";
 import { LoadingSpinner } from "@/components/ui/loading-states";
@@ -14,6 +15,7 @@ export function RouteLoadingBoundary({
   children,
   fallback,
 }: RouteLoadingBoundaryProps) {
+  const { t } = useTranslation();
   // Always call hooks unconditionally - hooks must be called at the top level
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
@@ -30,10 +32,10 @@ export function RouteLoadingBoundary({
     <div className="p-6">
       <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 text-center text-sm text-muted-foreground">
         <p className="font-medium text-foreground">
-          This view is temporarily unavailable.
+          {t("shell.thisViewIsTemporarilyUnavailable")}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Please refresh or try a different section.
+          {t("shell.pleaseRefreshOrTryADifferentSection")}
         </p>
       </div>
     </div>

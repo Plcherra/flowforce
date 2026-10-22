@@ -1418,5 +1418,41 @@
     "windowNeedsStartAndEnd": "Ein Fenster braucht einen Beginn und ein Ende.",
     "workflow": "Arbeitsablauf",
     "youLlSeeTaskUpdatesHere": "Hier sehen Sie Aufgabenaktualisierungen"
+  },
+  "shell": {
+    "accountSetupRequired": "Kontoeinrichtung erforderlich",
+    "clear": "Leeren",
+    "dueToday": "Heute fällig",
+    "dueTomorrow": "Morgen fällig",
+    "flowforce": "FlowForce",
+    "ifRepairIsUnavailableSignOutAndRestart": "Wenn die Reparatur nicht verfügbar ist, melden Sie sich ab und starten Sie die Unternehmenseinrichtung neu.",
+    "markAllRead": "Alle als gelesen markieren",
+    "markRead": "Als gelesen markieren",
+    "noCompanyDetected": "Kein Unternehmen erkannt",
+    "noNotificationsYet": "Noch keine Benachrichtigungen",
+    "notifications": "Benachrichtigungen",
+    "notificationsUnavailable": "Benachrichtigungen nicht verfügbar",
+    "offlineSyncQueue": "Offline-Synchronisierungswarteschlange",
+    "open": "Öffnen",
+    "openQueuedWorkflow": "Workflow in der Warteschlange öffnen",
+    "overdue": "Überfällig",
+    "pleaseRefreshOrTryADifferentSection": "Aktualisieren Sie die Seite oder versuchen Sie einen anderen Bereich.",
+    "repairDidNotComplete": "Die Reparatur wurde nicht abgeschlossen",
+    "retry": "Erneut versuchen",
+    "retryConnection": "Verbindung erneut versuchen",
+    "setup": "Einrichtung",
+    "thisViewIsTemporarilyUnavailable": "Diese Ansicht ist vorübergehend nicht verfügbar.",
+    "workspaceLinkMissing": "Verknüpfung zum Arbeitsbereich fehlt",
+    "yourSignInWorkedButThisAccountIs": "Die Anmeldung hat funktioniert, aber dieses Konto ist noch nicht mit einem Unternehmens-Arbeitsbereich verbunden. FlowForce braucht diese Verknüpfung, bevor es Mandantendaten sicher laden kann."
+  },
+  "nav": {
+    "addNew": "Neu hinzufügen",
+    "dashboard": "Dashboard",
+    "jumpToAPage": "Zu einer Seite springen...",
+    "main": "Hauptbereich",
+    "noMatchingPages": "Keine passenden Seiten.",
+    "profile": "Profil",
+    "search": "Suchen",
+    "signOut": "Abmelden"
   }
 }

@@ -176,7 +176,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 6 — App shell strings
 
-- [ ] Finish the shell strings in all six locales.
+- [x] Finish the shell strings in all six locales.
 
 Rules:
 
@@ -834,6 +834,22 @@ Phone steps for Pedro:
 2. Set your language to Français on Settings, then Region. Reload. Filters, empty states, and the new-task dialog should be in French. A task title someone typed stays as they wrote it.
 3. Open a task and look at comments and reminders. The buttons and placeholders should be French. A comment someone typed stays as they wrote it.
 4. Switch to Italiano and confirm the task list labels follow. Switch back to English.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 6 App shell strings
+
+Shipped: The remaining app-shell chrome uses `useTranslation`. Page names and the bottom-nav label sit in `nav`. Notifications, offline sync, account setup, and the route fallback sit in `shell`. The same strings are in en, es, pt, fr, it, and de. The product name FlowForce stays FlowForce. The bottom nav already called `useTranslation`; its remaining label moved with the rest. `src/app-shell` is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 1220 keys for each locale and `hard-coded strings 3839`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/app-shell`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk on a phone.
+2. Set your language to Português. The bottom nav and the notifications bell should use Portuguese labels. The name FlowForce stays FlowForce.
+3. Open search and type a page name. The empty result should be Portuguese.
+4. Switch back to English.
 
 Blockers: none. No migration.
 

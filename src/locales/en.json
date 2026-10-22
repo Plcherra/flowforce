@@ -1418,5 +1418,41 @@
     "windowNeedsStartAndEnd": "A window needs a start and an end.",
     "workflow": "Workflow",
     "youLlSeeTaskUpdatesHere": "You'll see task updates here"
+  },
+  "shell": {
+    "accountSetupRequired": "Account setup required",
+    "clear": "Clear",
+    "dueToday": "Due Today",
+    "dueTomorrow": "Due Tomorrow",
+    "flowforce": "FlowForce",
+    "ifRepairIsUnavailableSignOutAndRestart": "If repair is unavailable, sign out and restart company setup.",
+    "markAllRead": "Mark all read",
+    "markRead": "Mark read",
+    "noCompanyDetected": "No company detected",
+    "noNotificationsYet": "No notifications yet",
+    "notifications": "Notifications",
+    "notificationsUnavailable": "Notifications unavailable",
+    "offlineSyncQueue": "Offline sync queue",
+    "open": "Open",
+    "openQueuedWorkflow": "Open queued workflow",
+    "overdue": "Overdue",
+    "pleaseRefreshOrTryADifferentSection": "Please refresh or try a different section.",
+    "repairDidNotComplete": "Repair did not complete",
+    "retry": "Retry",
+    "retryConnection": "Retry connection",
+    "setup": "Setup",
+    "thisViewIsTemporarilyUnavailable": "This view is temporarily unavailable.",
+    "workspaceLinkMissing": "Workspace link missing",
+    "yourSignInWorkedButThisAccountIs": "Your sign-in worked, but this account is not connected to a company workspace yet. FlowForce needs that link before it can load tenant data safely."
+  },
+  "nav": {
+    "addNew": "Add new",
+    "dashboard": "Dashboard",
+    "jumpToAPage": "Jump to a page...",
+    "main": "Main",
+    "noMatchingPages": "No matching pages.",
+    "profile": "Profile",
+    "search": "Search",
+    "signOut": "Sign out"
   }
 }

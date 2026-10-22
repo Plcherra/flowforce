@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ export function NotificationsPanel({
   embedded?: boolean;
   onUnreadCount?: (count: number) => void;
 }) {
+  const { t } = useTranslation();
   const {
     notifications,
     unreadCount,
@@ -88,7 +90,7 @@ export function NotificationsPanel({
     if (diffHours < 0) {
       return (
         <Badge variant="destructive" className="text-xs">
-          Overdue
+          {t("shell.overdue")}
         </Badge>
       );
     } else if (diffHours < 24) {
@@ -97,7 +99,7 @@ export function NotificationsPanel({
           variant="secondary"
           className="text-xs bg-warning-muted text-warning-foreground"
         >
-          Due Today
+          {t("shell.dueToday")}
         </Badge>
       );
     } else if (diffHours < 48) {
@@ -106,7 +108,7 @@ export function NotificationsPanel({
           variant="secondary"
           className="text-xs bg-warning-muted text-warning-foreground"
         >
-          Due Tomorrow
+          {t("shell.dueTomorrow")}
         </Badge>
       );
     }
@@ -134,7 +136,7 @@ export function NotificationsPanel({
         <Card className={embedded ? "border-0 shadow-none" : "border-0 shadow-lg"}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Notifications</CardTitle>
+              <CardTitle className="text-lg">{t("shell.notifications")}</CardTitle>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
@@ -142,7 +144,7 @@ export function NotificationsPanel({
                   onClick={() => markAllAsRead()}
                   className="text-xs"
                 >
-                  Mark all read
+                  {t("shell.markAllRead")}
                 </Button>
               )}
             </div>
@@ -152,7 +154,7 @@ export function NotificationsPanel({
               {error && (
                 <div className="px-4">
                   <Alert variant="destructive">
-                    <AlertTitle>Notifications unavailable</AlertTitle>
+                    <AlertTitle>{t("shell.notificationsUnavailable")}</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 </div>
@@ -164,7 +166,7 @@ export function NotificationsPanel({
               ) : notifications.length === 0 ? (
                 <div className="text-center py-8 px-4 text-muted-foreground">
                   <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No notifications yet</p>
+                  <p className="text-sm">{t("shell.noNotificationsYet")}</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -229,7 +231,7 @@ export function NotificationsPanel({
                                   }}
                                 >
                                   <Check className="h-3 w-3 mr-1" />
-                                  Mark read
+                                  {t("shell.markRead")}
                                 </Button>
                               )}
                             </div>
@@ -251,7 +253,7 @@ export function NotificationsPanel({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative" aria-label="Notifications">
+        <Button variant="ghost" size="sm" className="relative" aria-label={t("shell.notifications")}>
           {unreadCount > 0 ? (
             <BellRing className="h-5 w-5" />
           ) : (

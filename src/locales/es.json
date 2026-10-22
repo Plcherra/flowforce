@@ -1418,5 +1418,41 @@
     "windowNeedsStartAndEnd": "Una ventana necesita un inicio y un fin.",
     "workflow": "Flujo de trabajo",
     "youLlSeeTaskUpdatesHere": "Aquí verás las actualizaciones de las tareas"
+  },
+  "shell": {
+    "accountSetupRequired": "Hace falta configurar la cuenta",
+    "clear": "Borrar",
+    "dueToday": "Vence hoy",
+    "dueTomorrow": "Vence mañana",
+    "flowforce": "FlowForce",
+    "ifRepairIsUnavailableSignOutAndRestart": "Si la reparación no está disponible, cierra sesión y vuelve a empezar la configuración de la empresa.",
+    "markAllRead": "Marcar todo como leído",
+    "markRead": "Marcar como leído",
+    "noCompanyDetected": "No se detectó ninguna empresa",
+    "noNotificationsYet": "Aún no hay notificaciones",
+    "notifications": "Notificaciones",
+    "notificationsUnavailable": "Notificaciones no disponibles",
+    "offlineSyncQueue": "Cola de sincronización sin conexión",
+    "open": "Abrir",
+    "openQueuedWorkflow": "Abrir el flujo en cola",
+    "overdue": "Atrasada",
+    "pleaseRefreshOrTryADifferentSection": "Actualiza la página o prueba otra sección.",
+    "repairDidNotComplete": "La reparación no terminó",
+    "retry": "Reintentar",
+    "retryConnection": "Reintentar la conexión",
+    "setup": "Configuración",
+    "thisViewIsTemporarilyUnavailable": "Esta vista no está disponible por ahora.",
+    "workspaceLinkMissing": "Falta el vínculo con el espacio de trabajo",
+    "yourSignInWorkedButThisAccountIs": "El inicio de sesión funcionó, pero esta cuenta aún no está conectada al espacio de una empresa. FlowForce necesita ese vínculo antes de cargar los datos con seguridad."
+  },
+  "nav": {
+    "addNew": "Añadir",
+    "dashboard": "Panel",
+    "jumpToAPage": "Ir a una página...",
+    "main": "Principal",
+    "noMatchingPages": "No hay páginas que coincidan.",
+    "profile": "Perfil",
+    "search": "Buscar",
+    "signOut": "Cerrar sesión"
   }
 }

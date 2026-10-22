@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { LogOut, Settings, User } from "lucide-react";
 import { useNavigate } from "@/lib/router-adapter";
@@ -16,6 +17,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { getRoleBadgeColor, getRoleLabel } from "@/data/navigationData";
 
 export function AccountCluster() {
+  const { t } = useTranslation();
   const { signOut } = useAuth();
   const { profile } = useProfile();
   const { can } = useCan();
@@ -75,7 +77,7 @@ export function AccountCluster() {
             onClick={() => navigate("/app/profile")}
           >
             <User className="h-4 w-4" />
-            Profile
+            {t("nav.profile")}
           </Button>
           <Button
             variant="ghost"
@@ -93,7 +95,7 @@ export function AccountCluster() {
             onClick={() => signOut()}
           >
             <LogOut className="h-4 w-4" />
-            Sign out
+            {t("nav.signOut")}
           </Button>
         </div>
         <NotificationsPanel embedded onUnreadCount={setUnreadCount} />

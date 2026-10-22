@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { useNavigate } from "@/lib/router-adapter";
 
@@ -11,6 +12,7 @@ export function AddNewSectionButton({
   categoryKey,
   onNavigate,
 }: AddNewSectionButtonProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleAddNew = () => {
@@ -27,7 +29,7 @@ export function AddNewSectionButton({
       <span className="grid h-11 w-11 place-items-center rounded-2xl bg-muted">
         <Plus className="h-5 w-5" aria-hidden="true" />
       </span>
-      <span className="text-center text-xs font-medium">Add new</span>
+      <span className="text-center text-xs font-medium">{t("nav.addNew")}</span>
     </button>
   );
 }

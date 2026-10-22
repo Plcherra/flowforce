@@ -51,7 +51,7 @@ export function BottomIconNav() {
 
   return (
     <>
-      <nav aria-label="Main" data-bottom-icon-nav="true" className="bottom-icon-nav">
+      <nav aria-label={t("nav.main")} data-bottom-icon-nav="true" className="bottom-icon-nav">
         <div className="bottom-icon-nav-icons border-0 shadow-none">
           <div className="bottom-icon-nav-row">
           {groups.map((group) => {

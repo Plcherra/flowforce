@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import { useState } from "react";
 import {
   AlertTriangle,
@@ -25,6 +27,7 @@ interface TenantSetupRequiredProps {
 export function TenantSetupRequired({
   profileState,
 }: TenantSetupRequiredProps) {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [repairing, setRepairing] = useState(false);
@@ -112,22 +115,20 @@ export function TenantSetupRequired({
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">
-                  Account setup required
+                  {t("shell.accountSetupRequired")}
                 </p>
                 <h1 className="text-2xl font-semibold leading-tight text-foreground md:text-3xl">
-                  No company detected
+                  {t("shell.noCompanyDetected")}
                 </h1>
                 <p className="text-sm leading-6 text-muted-foreground md:text-base">
-                  Your sign-in worked, but this account is not connected to a
-                  company workspace yet. FlowForce needs that link before it can
-                  load tenant data safely.
+                  {t("shell.yourSignInWorkedButThisAccountIs")}
                 </p>
               </div>
             </div>
 
             <Alert variant="warning">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Workspace link missing</AlertTitle>
+              <AlertTitle>{t("shell.workspaceLinkMissing")}</AlertTitle>
               <AlertDescription>
                 {reason} Reference {supportCode} for support. Account: {email}
               </AlertDescription>
@@ -136,7 +137,7 @@ export function TenantSetupRequired({
             {repairError ? (
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Repair did not complete</AlertTitle>
+                <AlertTitle>{t("shell.repairDidNotComplete")}</AlertTitle>
                 <AlertDescription>{repairError}</AlertDescription>
               </Alert>
             ) : null}
@@ -159,21 +160,21 @@ export function TenantSetupRequired({
                 className="w-full"
               >
                 <RefreshCw className="h-4 w-4" />
-                Retry connection
+                {t("shell.retryConnection")}
               </Button>
             </div>
 
             <div className="flex flex-col gap-3 border-t pt-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
               <span>
-                If repair is unavailable, sign out and restart company setup.
+                {t("shell.ifRepairIsUnavailableSignOutAndRestart")}
               </span>
               <div className="flex gap-2">
                 <Button type="button" variant="ghost" size="sm" asChild>
-                  <Link to="/company-registration">Setup</Link>
+                  <Link to="/company-registration">{t("shell.setup")}</Link>
                 </Button>
                 <Button type="button" variant="ghost" size="sm" onClick={signOut}>
                   <LogOut className="h-4 w-4" />
-                  Sign out
+                  {t("nav.signOut")}
                 </Button>
               </div>
             </div>

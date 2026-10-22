@@ -56,24 +56,24 @@ export function WorkspaceCommandPalette() {
         variant="outline"
         size="sm"
         className="h-9 gap-2 rounded-full px-2.5"
-        aria-label="Search"
+        aria-label={t("nav.search")}
         aria-keyshortcuts="Control+K Meta+K"
         data-testid="workspace-search"
         onClick={() => setOpen(true)}
       >
         <Search className="h-4 w-4" />
-        <span className="hidden text-muted-foreground md:inline">Search</span>
+        <span className="hidden text-muted-foreground md:inline">{t("nav.search")}</span>
         <kbd className="hidden rounded-md border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground md:inline">
           {shortcut}
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Jump to a page..." />
+        <CommandInput placeholder={t("nav.jumpToAPage")} />
         <CommandList>
-          <CommandEmpty>No matching pages.</CommandEmpty>
+          <CommandEmpty>{t("nav.noMatchingPages")}</CommandEmpty>
           <CommandGroup heading="You">
-            <CommandItem onSelect={() => go("/app/dashboard")}>Dashboard</CommandItem>
-            <CommandItem onSelect={() => go("/app/profile")}>Profile</CommandItem>
+            <CommandItem onSelect={() => go("/app/dashboard")}>{t("nav.dashboard")}</CommandItem>
+            <CommandItem onSelect={() => go("/app/profile")}>{t("nav.profile")}</CommandItem>
             <CommandItem onSelect={() => go("/app/settings")}>
               {can("systemSettings") ? "Settings" : "Account"}
             </CommandItem>

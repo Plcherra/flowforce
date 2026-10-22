@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+
 import { AlertTriangle, RefreshCw, WifiOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,7 @@ import { useMobileOfflineQueue } from "@/hooks/useMobileOfflineQueue";
 import { Link } from "@/lib/router-adapter";
 
 export function MobileOfflineQueueStatus() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { online, summary, retryFailed, clearSynced } = useMobileOfflineQueue();
 
@@ -26,7 +29,7 @@ export function MobileOfflineQueueStatus() {
 
   return (
     <section
-      aria-label="Offline sync queue"
+      aria-label={t("shell.offlineSyncQueue")}
       className="border-b border-border bg-background px-3 py-2"
       data-mobile-offline-queue="true"
     >
@@ -69,7 +72,7 @@ export function MobileOfflineQueueStatus() {
             className="min-h-9"
             onClick={retryFailed}
           >
-            Retry
+            {t("shell.retry")}
           </Button>
         ) : summary.synced > 0 ? (
           <Button
@@ -79,12 +82,12 @@ export function MobileOfflineQueueStatus() {
             className="min-h-9"
             onClick={clearSynced}
           >
-            Clear
+            {t("shell.clear")}
           </Button>
         ) : (
           <Button asChild variant="ghost" size="sm" className="min-h-9">
-            <Link to={route} aria-label="Open queued workflow">
-              Open
+            <Link to={route} aria-label={t("shell.openQueuedWorkflow")}>
+              {t("shell.open")}
             </Link>
           </Button>
         )}
