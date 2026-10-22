@@ -20,6 +20,7 @@ When the active file has no unchecked phase left, the same run updates this tabl
 | 6 | Team | queued | Feature file not written yet |
 | 7 | Reports | queued | Feature file not written yet |
 | 8 | Inventory | queued | [docs/features/inventory.md](features/inventory.md) |
+| 9 | Company onboarding | queued | Feature file not written yet |
 
 Only one row is active. Do not start a later row while an earlier one is still open.
 
@@ -47,7 +48,7 @@ Forms, communication (chats), and company updates. The file is [docs/features/fo
 
 ### 6. Team
 
-Recognition, XP, performance, and certifications. The feature file is not written yet. Do not start this row early, and do not invent the file from a Theme, Languages, or Time Off run.
+Recognition, XP, performance, certifications, and user onboarding. Every user goes through user onboarding on their first login. The feature file is not written yet. Do not start this row early, and do not invent the file from a Theme, Languages, or Time Off run.
 
 ### 7. Reports
 
@@ -55,7 +56,11 @@ Reports sit on top of the features above. The feature file is not written yet. [
 
 ### 8. Inventory
 
-Last. [docs/features/inventory.md](features/inventory.md). Do not open it before Reports.
+[docs/features/inventory.md](features/inventory.md). Do not open it before Reports. Company onboarding comes after this row.
+
+### 9. Company onboarding
+
+Review how a company creates its account and gets set up. This is the company account, not the first-login path each user takes in the Team row. The feature file is not written yet. Do not open it before Inventory.
 
 ## AI providers
 
