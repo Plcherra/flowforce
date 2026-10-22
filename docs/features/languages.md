@@ -664,7 +664,7 @@ Prove: Unit test the four field paths. Run it with the jiti runner.
 
 ### Phase 38 — Announcements
 
-- [ ] Translate announcement title and content.
+- [x] Translate announcement title and content.
 
 Rules:
 
@@ -1342,6 +1342,22 @@ Phone steps for Pedro:
 2. Add a shift with an English title and notes. Request time off with an English reason. Both should save without waiting. The shift color and the person's name stay as they are.
 3. Set your language to Español and open the week grid. The shift title and notes should be Spanish, with Traducido de English. Open time off. The reason should be Spanish. The person's name should be unchanged.
 4. Set the language back to English. The title, notes, and reason should be the English words you typed.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 38 Announcements
+
+Shipped: An announcement keeps the title and content that were typed. The cache paths are `title` and `content` on `announcements`. The save returns before the model runs. The announcement banner shows the translation, with one see-original line when the viewer's language differs. The author's name stays as stored.
+
+Proven: `src/features/messages/announcementTranslation.test.ts` passed through the jiti runner. Title and content are translated. A second read of the title does not call the model again. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Create an announcement with an English title and content. It should appear without waiting.
+3. Set your language to Español and reload. The banner title and content should be Spanish, with Traducido de English. The author's name should stay as stored.
+4. Set the language back to English. The banner should show the English title and content you typed, with no translated-from line.
 
 Blockers: none. No new migration.
 
