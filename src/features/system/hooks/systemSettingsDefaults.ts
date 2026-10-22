@@ -95,24 +95,7 @@ export const DEFAULT_INTEGRATIONS: IntegrationsSettings = {
   lastSyncedAt: null,
 };
 
-export const DEFAULT_APPEARANCE: AppearanceSettings = {
-  theme: "light",
-  primaryColor: "#3b82f6",
-  secondaryColor: "#1e40af",
-  logoBackgroundColor: "#ffffff",
-  accentColor: "#0ea5e9",
-  logoPlacement: "sidebar",
-  sidebarBranding: {
-    enabled: true,
-    background: "default",
-  },
-  dashboardLayout: "standard",
-  preview: {
-    isActive: false,
-    expiresAt: null,
-    snapshot: undefined,
-  },
-};
+export const DEFAULT_APPEARANCE: AppearanceSettings = {};
 
 const DEFAULT_BUSINESS_STRUCTURE: BusinessStructureSettings = {
   workingHours: null,

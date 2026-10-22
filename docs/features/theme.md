@@ -139,7 +139,7 @@ Prove: Unit test the save payload builder (extract it if it is inline) and asser
 
 ### Phase 4 — Delete the unused theme model
 
-- [ ] Remove the dead appearance fields, `next-themes`, and freeze the hard-coded color list.
+- [x] Remove the dead appearance fields, `next-themes`, and freeze the hard-coded color list.
 
 Rules:
 
@@ -489,5 +489,20 @@ Phone steps for Pedro:
 4. Start creating a company. The branding step should not ask for a primary or secondary color.
 
 Blockers: none. No migration. The color columns are still in the database.
+
+Questions: none.
+
+### 2026-10-22 — Phase 4 Delete the unused theme model
+
+Shipped: The appearance type no longer has a theme mode, a color field, logo placement, sidebar branding, dashboard layout, or preview. Saving general settings drops those keys. `next-themes` is no longer a dependency. `scripts/check-theme-colors.mjs` freezes the current numbered palette classes, black and white palette classes, and hex colors in `src/`, `app/`, and `tests/`. Semantic tokens are not in the baseline. A new hard-coded color fails the check.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run check:theme-colors` is the same command. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. The company save payload test still passes and now expects the dropped appearance keys to be absent.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Settings, then General.
+2. The theme switch should still be FlowForce, Light, and Dark. There should still be no color picker.
+3. Save a company name change. Reload. The name should stick, and the theme choice in this browser should stick.
+
+Blockers: none. No migration.
 
 Questions: none.

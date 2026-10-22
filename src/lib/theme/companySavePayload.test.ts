@@ -45,9 +45,12 @@ export function runCompanySavePayloadTests() {
     secondary_color: "#1e40af",
     accentColor: "#0ea5e9",
     logoBackgroundColor: "#ffffff",
+    logoPlacement: "sidebar",
+    sidebarBranding: { enabled: true, background: "default" },
+    dashboardLayout: "standard",
+    preview: { isActive: false, expiresAt: null },
   });
-  assert.equal(appearance.theme, "light");
-  assert.equal(appearance.accentColor, "#0ea5e9");
+  assert.deepEqual(appearance, {});
   assertNoCompanyColors(appearance);
 
   const onboarding = buildOnboardingCompanyPayload({

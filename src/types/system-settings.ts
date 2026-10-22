@@ -107,28 +107,7 @@ export interface IntegrationsSettings {
   lastSyncedAt?: string | null;
 }
 
-export type ThemeMode = "light" | "dark" | "system";
-export type LogoPlacement = "sidebar" | "header";
-export type DashboardLayout = "standard" | "compact" | "analytics";
-
-export interface AppearanceSettings {
-  theme: ThemeMode;
-  primaryColor: string;
-  secondaryColor: string;
-  logoBackgroundColor: string;
-  accentColor: string;
-  logoPlacement: LogoPlacement;
-  sidebarBranding: {
-    enabled: boolean;
-    background: "default" | "minimal" | "custom";
-  };
-  dashboardLayout: DashboardLayout;
-  preview: {
-    isActive: boolean;
-    expiresAt: string | null;
-    snapshot?: Record<string, unknown>;
-  };
-}
+export type AppearanceSettings = Record<string, never>;
 
 export interface BusinessStructureSettings {
   workingHours: CompanySettings["working_hours"] | null;

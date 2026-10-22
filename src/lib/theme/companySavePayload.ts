@@ -7,14 +7,16 @@ const COMPANY_COLOR_KEYS = new Set([
   "secondaryColor",
 ]);
 
-export function omitCompanyColorKeys(value: JsonRecord): JsonRecord {
-  const next: JsonRecord = {};
-  for (const [key, child] of Object.entries(value)) {
-    if (COMPANY_COLOR_KEYS.has(key)) continue;
-    next[key] = child;
-  }
-  return next;
-}
+const DROPPED_APPEARANCE_KEYS = new Set([
+  ...COMPANY_COLOR_KEYS,
+  "theme",
+  "accentColor",
+  "logoBackgroundColor",
+  "logoPlacement",
+  "sidebarBranding",
+  "dashboardLayout",
+  "preview",
+]);
 
 export function buildGeneralCompanyUpdate(input: {
   name: string;
@@ -35,7 +37,12 @@ export function buildGeneralCompanyUpdate(input: {
 export function buildGeneralAppearanceSave(
   appearance: object | null | undefined,
 ) {
-  return omitCompanyColorKeys({ ...(appearance ?? {}) });
+  const next: JsonRecord = {};
+  for (const [key, child] of Object.entries({ ...(appearance ?? {}) })) {
+    if (DROPPED_APPEARANCE_KEYS.has(key)) continue;
+    next[key] = child;
+  }
+  return next;
 }
 
 export function buildOnboardingCompanyPayload(input: {
