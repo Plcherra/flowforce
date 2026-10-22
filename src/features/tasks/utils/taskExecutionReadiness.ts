@@ -123,21 +123,21 @@ export function buildTaskExecutionSummary({
   ).length;
 
   const issues: TaskExecutionIssue[] = [
-    ...overdueTasks.slice(0, 4).map((task) => ({
+    ...overdueTasks.map((task) => ({
       id: `overdue-${task.id}`,
       label: "Overdue task",
       detail: taskTitle(task),
       severity: "critical" as const,
       taskId: task.id,
     })),
-    ...blockedTasks.slice(0, 3).map((task) => ({
+    ...blockedTasks.map((task) => ({
       id: `blocked-${task.id}`,
       label: "Blocked task",
       detail: taskTitle(task),
       severity: "warning" as const,
       taskId: task.id,
     })),
-    ...unassignedTasks.slice(0, 3).map((task) => ({
+    ...unassignedTasks.map((task) => ({
       id: `unassigned-${task.id}`,
       label: "Unassigned task",
       detail: taskTitle(task),
@@ -146,7 +146,6 @@ export function buildTaskExecutionSummary({
     })),
     ...activeTasks
       .filter((task) => task.due_date && !taskReminderIds.has(task.id))
-      .slice(0, 3)
       .map((task) => ({
         id: `reminder-${task.id}`,
         label: "Due task without reminder",

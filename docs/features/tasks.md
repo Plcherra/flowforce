@@ -335,7 +335,7 @@ Prove: The status-tab unit test still passes. Phone steps for Pedro are in the P
 
 ### Phase 15 — Compact warnings
 
-- [ ] Turn each warning into one row.
+- [x] Turn each warning into one row.
 
 Rules:
 
@@ -603,6 +603,22 @@ Phone steps for Pedro:
 2. One section labelled View should hold the status chips, the search box, the type and priority filters, and the three small readiness counts.
 3. In Progress, In Review, Blocked, and Cancelled should be in that section. A status with a zero count should be under More.
 4. The old row of metric cards should be gone.
+
+Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 15 Compact warnings
+
+Shipped: Each warning is one row: the reason, then the task title. The rows stack in one list. There is no large card per warning, and a page with no warnings shows nothing in that spot. The summary no longer caps the list at a handful of rows, so ten warnings stay ten rows.
+
+Proven: `npm run typecheck` passed. ESLint passed on the files this phase changed. This phase is layout.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. If a task is overdue, blocked, or unassigned, it should be one short row under Warnings, not a large coloured card.
+3. Several warnings should stack in one list. Open one by tapping its row.
+4. On a page with nothing overdue, blocked, or unassigned, and no due task missing a reminder, Warnings should be absent. There should be no green "no blockers" banner.
 
 Blockers: none for this phase.
 
