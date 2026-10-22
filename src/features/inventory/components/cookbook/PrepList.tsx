@@ -103,7 +103,7 @@ export function PrepList({
         return (
           <Card
             key={item.id}
-            className={priority > 0 ? "border-amber-400" : ""}
+            className={priority > 0 ? "border-warning/40" : ""}
           >
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between gap-2">

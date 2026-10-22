@@ -636,7 +636,7 @@ export function ProductionEventForm() {
                             </span>
                           )}
                           {material.warning && (
-                            <span className="text-xs text-amber-700">
+                            <span className="text-xs text-warning-foreground">
                               {material.warning}
                             </span>
                           )}

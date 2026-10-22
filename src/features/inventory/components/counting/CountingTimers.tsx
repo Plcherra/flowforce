@@ -35,11 +35,11 @@ export function CountingTimers({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-600" />
+              <Clock className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Counting Time</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-mono font-bold text-blue-600">
+              <span className="text-lg font-mono font-bold text-primary">
                 {formatTime(countingTime)}
               </span>
               <Button
@@ -65,11 +65,11 @@ export function CountingTimers({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Edit className="h-4 w-4 text-yellow-600" />
+                <Edit className="h-4 w-4 text-warning" />
                 <span className="text-sm font-medium">Edit Time</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-mono font-bold text-yellow-600">
+                <span className="text-lg font-mono font-bold text-warning">
                   {formatTime(editTime)}
                 </span>
                 <Button

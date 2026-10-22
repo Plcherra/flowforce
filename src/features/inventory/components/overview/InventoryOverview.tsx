@@ -143,9 +143,9 @@ export default function InventoryOverview() {
                   <div className="flex items-center gap-2">
                     {transaction.transaction_type === "purchase" ||
                     transaction.transaction_type === "return" ? (
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendingUp className="h-4 w-4 text-success" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-red-600" />
+                      <TrendingDown className="h-4 w-4 text-destructive" />
                     )}
                     <span className="font-medium">
                       {transaction.item?.name}

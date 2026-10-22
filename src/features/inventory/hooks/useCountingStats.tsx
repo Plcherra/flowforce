@@ -85,10 +85,10 @@ export function useCountingStats(
 
   const getVarianceStatus = (variance: number) => {
     const absVariance = Math.abs(variance);
-    if (absVariance <= 2) return { status: "good", color: "text-green-600" };
+    if (absVariance <= 2) return { status: "good", color: "text-success" };
     if (absVariance <= 5)
-      return { status: "warning", color: "text-yellow-600" };
-    return { status: "error", color: "text-red-600" };
+      return { status: "warning", color: "text-warning" };
+    return { status: "error", color: "text-destructive" };
   };
 
   const stats = useMemo(() => {

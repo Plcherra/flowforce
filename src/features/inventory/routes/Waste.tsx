@@ -23,14 +23,14 @@ import {
 import { useMemo } from "react";
 
 const wasteTypeColors: Record<string, string> = {
-  spoilage: "bg-red-100 text-red-800",
-  prep_error: "bg-orange-100 text-orange-800",
-  accident: "bg-yellow-100 text-yellow-800",
-  theft: "bg-purple-100 text-purple-800",
-  expired: "bg-red-100 text-red-800",
-  damaged: "bg-gray-100 text-gray-800",
-  production: "bg-amber-100 text-amber-800",
-  other: "bg-blue-100 text-blue-800",
+  spoilage: "bg-destructive/10 text-destructive",
+  prep_error: "bg-warning-muted text-warning-foreground",
+  accident: "bg-warning-muted text-warning-foreground",
+  theft: "bg-secondary/10 text-secondary",
+  expired: "bg-destructive/10 text-destructive",
+  damaged: "bg-muted text-foreground",
+  production: "bg-warning-muted text-warning-foreground",
+  other: "bg-primary/10 text-primary",
 };
 
 const wasteTypeLabels: Record<string, string> = {
@@ -59,10 +59,10 @@ export default function WasteTrackingPage() {
     return (
       <InventoryLayout>
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-8 bg-muted rounded w-1/4"></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 bg-muted rounded"></div>
             ))}
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function WasteTrackingPage() {
                   7-Day Trend
                 </CardTitle>
                 {summary.trendDirection === "down" ? (
-                  <TrendingDown className="h-4 w-4 text-emerald-600" />
+                  <TrendingDown className="h-4 w-4 text-success" />
                 ) : (
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 )}

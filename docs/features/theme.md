@@ -262,7 +262,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 12 — Inventory
 
-- [ ] Move hard-coded colors in Inventory onto the tokens.
+- [x] Move hard-coded colors in Inventory onto the tokens.
 
 Rules:
 
@@ -614,6 +614,22 @@ Phone steps for Pedro:
 2. A search match should highlight in amber. Announcement severity should read as red, amber, or green.
 3. Open a dialog from Messages. The scrim should stay dark.
 4. Switch to Dark and open a video call preview if one is available. The call room should stay dark and the names should stay light.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 12 Inventory
+
+Shipped: Inventory classes now use the theme tokens. Count variance uses success for an accurate count, warning for a small gap, and destructive for a large gap. Expense and payment status use the same three. Chart strokes use the primary, success, and warning tokens. `src/features/inventory` has no baseline entries.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Inventory.
+2. On a count, an accurate line should read as green, a small variance as amber, and a large variance as red.
+3. Open expenses. Paid or approved should read as green, pending as amber, and a problem as red. The expense chart should use blue and green, not a separate hex color.
+4. Switch to Dark. Those status colors should stay readable.
 
 Blockers: none. No migration.
 

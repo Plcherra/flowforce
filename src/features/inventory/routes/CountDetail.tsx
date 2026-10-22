@@ -339,7 +339,7 @@ export default function CountDetailPage({
               it anytime, edit, and Save & Done again.
             </p>
             {countSummary.missingLines > 0 && (
-              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+              <p className="rounded-md border border-warning/40 bg-warning-muted px-3 py-2 text-sm text-warning-foreground">
                 {countSummary.missingLines} line
                 {countSummary.missingLines === 1 ? "" : "s"} still missing.
               </p>

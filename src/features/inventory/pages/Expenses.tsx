@@ -107,13 +107,13 @@ function getStatusColor(status: string) {
   switch (status) {
     case "approved":
     case "paid":
-      return "bg-green-100 text-green-800";
+      return "bg-success-muted text-success";
     case "rejected":
-      return "bg-red-100 text-red-800";
+      return "bg-destructive/10 text-destructive";
     case "pending":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-warning-muted text-warning-foreground";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-muted text-foreground";
   }
 }
 
@@ -417,11 +417,11 @@ function ExpenseReportsTab() {
         <CardContent>
           {filteredExpenses.length === 0 ? (
             <div className="py-12 text-center">
-              <FileText className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
+              <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-sm font-medium text-foreground">
                 No expenses
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Submit a new expense report to get started.
               </p>
             </div>
@@ -430,19 +430,19 @@ function ExpenseReportsTab() {
               {filteredExpenses.map((expense) => (
                 <div
                   key={expense.id}
-                  className={`rounded-lg border ${isMobile ? "p-3" : "p-4"} hover:bg-gray-50`}
+                  className={`rounded-lg border ${isMobile ? "p-3" : "p-4"} hover:bg-muted`}
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium text-foreground">
                           {expense.description}
                         </h3>
                         <Badge className={getStatusColor(expense.status)}>
                           {expense.status}
                         </Badge>
                       </div>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <span className="capitalize">{expense.category}</span>
                         <span>${expense.amount}</span>
                         <span>
@@ -453,7 +453,7 @@ function ExpenseReportsTab() {
                         </span>
                       </div>
                       {expense.notes ? (
-                        <p className="text-sm text-gray-600">{expense.notes}</p>
+                        <p className="text-sm text-muted-foreground">{expense.notes}</p>
                       ) : null}
                     </div>
                     {expense.status === "pending" && (
@@ -463,7 +463,7 @@ function ExpenseReportsTab() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleApproveExpense(expense.id)}
-                            className="text-green-600 hover:text-green-700"
+                            className="text-success hover:text-success/80"
                           >
                             <Check className="h-4 w-4" />
                           </Button>
@@ -471,7 +471,7 @@ function ExpenseReportsTab() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleRejectExpense(expense.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-destructive hover:text-destructive/80"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -526,7 +526,7 @@ export default function Expenses() {
         <h1 className={isMobile ? "text-2xl font-bold" : "text-3xl font-bold"}>
           Financial Management
         </h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           Consolidated view of employee earnings, labor spend, and expense
           approvals.
         </p>

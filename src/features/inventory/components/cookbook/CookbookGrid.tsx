@@ -74,7 +74,7 @@ export function CookbookGrid({
                   size="icon"
                   variant="ghost"
                   className={
-                    isFavorite ? "text-amber-500" : "text-muted-foreground"
+                    isFavorite ? "text-warning" : "text-muted-foreground"
                   }
                   onClick={() => onToggleFavorite(recipe.item.id)}
                   aria-label={

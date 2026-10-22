@@ -97,14 +97,14 @@ const statusStyleMap: Record<
 > = {
   connected: {
     label: "Connected",
-    className: "bg-emerald-100 text-emerald-700",
+    className: "bg-success-muted text-success",
   },
-  pending: { label: "Pending", className: "bg-amber-100 text-amber-700" },
+  pending: { label: "Pending", className: "bg-warning-muted text-warning-foreground" },
   disconnected: {
     label: "Disconnected",
-    className: "bg-rose-100 text-rose-700",
+    className: "bg-accent/10 text-accent",
   },
-  error: { label: "Error", className: "bg-rose-100 text-rose-700" },
+  error: { label: "Error", className: "bg-accent/10 text-accent" },
 };
 
 const formatCategoryLabel = (label: string) =>
@@ -401,8 +401,8 @@ export function ManagerFinancialOverview() {
               <p
                 className={`mt-2 text-2xl font-semibold ${
                   ownerSummary.netOperatingPosition >= 0
-                    ? "text-emerald-700"
-                    : "text-rose-700"
+                    ? "text-success"
+                    : "text-accent"
                 }`}
               >
                 ${ownerSummary.netOperatingPosition.toFixed(2)}
@@ -468,7 +468,7 @@ export function ManagerFinancialOverview() {
               ${metrics.payrollTotal30d.toFixed(2)}
             </div>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <ShieldCheck className="h-4 w-4 text-success" />
               Approved ${metrics.payrollApproved.toFixed(2)}
             </div>
           </CardContent>
@@ -547,7 +547,7 @@ export function ManagerFinancialOverview() {
               </span>
               <Badge
                 variant="outline"
-                className={`text-xs ${inventoryTrendPositive ? "text-emerald-600" : "text-rose-600"}`}
+                className={`text-xs ${inventoryTrendPositive ? "text-success" : "text-accent"}`}
               >
                 {inventoryTrendPositive ? (
                   <TrendingUp className="mr-1 h-3 w-3" />
@@ -597,20 +597,20 @@ export function ManagerFinancialOverview() {
               <Area
                 type="monotone"
                 dataKey="revenue"
-                fill="#2563eb22"
-                stroke="#2563eb"
+                fill="hsl(var(--primary) / 0.13)"
+                stroke="hsl(var(--primary))"
                 strokeWidth={2}
               />
               <Bar
                 dataKey="costs"
                 barSize={24}
-                fill="#f97316cc"
+                fill="hsl(var(--warning) / 0.8)"
                 radius={[6, 6, 0, 0]}
               />
               <Line
                 type="monotone"
                 dataKey="profit"
-                stroke="#16a34a"
+                stroke="hsl(var(--success))"
                 strokeWidth={2}
                 dot
               />

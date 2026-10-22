@@ -56,7 +56,7 @@ export function CountingStats({
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-amber-600">
+            <div className="text-2xl font-bold text-warning">
               {significantVariances}
             </div>
             <div className="text-sm text-muted-foreground">
@@ -68,34 +68,34 @@ export function CountingStats({
 
       {/* Counting Completion Statistics */}
       {countingStats && (
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-success-muted border-success/40">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-              <h3 className="text-lg font-semibold text-green-800">
+              <CheckCircle2 className="h-6 w-6 text-success" />
+              <h3 className="text-lg font-semibold text-success">
                 Counting Completed
               </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="font-medium text-green-700">Time Spent:</span>
-                <p className="text-green-800 text-lg font-bold">
+                <span className="font-medium text-success">Time Spent:</span>
+                <p className="text-success text-lg font-bold">
                   {formatTime(countingStats.totalTimeSpent)}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-green-700">
+                <span className="font-medium text-success">
                   Items Counted:
                 </span>
-                <p className="text-green-800 text-lg font-bold">
+                <p className="text-success text-lg font-bold">
                   {countingStats.itemsCounted}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-green-700">
+                <span className="font-medium text-success">
                   Items per Minute:
                 </span>
-                <p className="text-green-800 text-lg font-bold">
+                <p className="text-success text-lg font-bold">
                   {countingStats.itemsPerMinute}
                 </p>
               </div>
@@ -106,26 +106,26 @@ export function CountingStats({
 
       {/* Edit Statistics */}
       {editStats && (
-        <Card className="bg-yellow-50 border-yellow-200">
+        <Card className="bg-warning-muted border-warning/40">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Clock className="h-6 w-6 text-yellow-600" />
-              <h3 className="text-lg font-semibold text-yellow-800">
+              <Clock className="h-6 w-6 text-warning" />
+              <h3 className="text-lg font-semibold text-warning-foreground">
                 Edit Session Completed
               </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium text-yellow-700">Edit Time:</span>
-                <p className="text-yellow-800 text-lg font-bold">
+                <span className="font-medium text-warning-foreground">Edit Time:</span>
+                <p className="text-warning-foreground text-lg font-bold">
                   {formatTime(editStats.editTimeSpent)}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-yellow-700">
+                <span className="font-medium text-warning-foreground">
                   Items Edited:
                 </span>
-                <p className="text-yellow-800 text-lg font-bold">
+                <p className="text-warning-foreground text-lg font-bold">
                   {editStats.itemsEdited}
                 </p>
               </div>

@@ -24,7 +24,7 @@ const ClickableLabel = forwardRef<HTMLLabelElement, ClickableLabelProps>(
           className={cn(
             "text-xs font-semibold",
             enabled
-              ? "text-emerald-600 dark:text-emerald-300"
+              ? "text-success"
               : "text-muted-foreground",
           )}
         >

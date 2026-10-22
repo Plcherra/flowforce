@@ -168,10 +168,10 @@ export function EnhancedCountingTable({
   const getVarianceStatus = (variance: number) => {
     const absVariance = Math.abs(variance);
     if (absVariance === 0)
-      return { status: "accurate", color: "bg-green-100 text-green-800" };
+      return { status: "accurate", color: "bg-success-muted text-success" };
     if (absVariance <= 5)
-      return { status: "minor", color: "bg-yellow-100 text-yellow-800" };
-    return { status: "significant", color: "bg-red-100 text-red-800" };
+      return { status: "minor", color: "bg-warning-muted text-warning-foreground" };
+    return { status: "significant", color: "bg-destructive/10 text-destructive" };
   };
 
   if (isLoading) {
@@ -296,7 +296,7 @@ export function EnhancedCountingTable({
                   return (
                     <TableRow
                       key={item.id}
-                      className={`hover:bg-muted/25 ${isSaved ? "bg-green-50 dark:bg-green-950/20" : ""}`}
+                      className={`hover:bg-muted/25 ${isSaved ? "bg-success-muted" : ""}`}
                     >
                       {/* Item Info */}
                       <TableCell className="p-4">
@@ -315,7 +315,7 @@ export function EnhancedCountingTable({
                               Location: {item.location.name}
                             </div>
                           )}
-                          <div className="text-xs font-mono text-blue-600">
+                          <div className="text-xs font-mono text-primary">
                             Units:{" "}
                             {item.units
                               .map((u) => u.unit?.abbreviation)
@@ -379,7 +379,7 @@ export function EnhancedCountingTable({
                         {variance !== 0 && (
                           <span
                             className={`font-mono text-sm ${
-                              variance > 0 ? "text-green-600" : "text-red-600"
+                              variance > 0 ? "text-success" : "text-destructive"
                             }`}
                           >
                             {variance > 0 ? "+" : ""}
@@ -391,7 +391,7 @@ export function EnhancedCountingTable({
                       {/* Status */}
                       <TableCell className="text-center">
                         {isSaved ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" />
+                          <CheckCircle2 className="h-4 w-4 text-success mx-auto" />
                         ) : (
                           <Badge
                             className={varianceStatus.color}
@@ -454,7 +454,7 @@ export function EnhancedCountingTable({
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-amber-600">
+            <div className="text-2xl font-bold text-warning">
               {
                 Object.values(counts).filter((count) => {
                   const item = items.find((i) => i.id === count.item_id);

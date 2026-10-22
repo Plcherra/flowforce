@@ -932,7 +932,7 @@ export default function InventoryItemForm({
                             }));
                             setUnitLevels(reindexedUnits);
                           }}
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
                         >
                           <Minus className="h-4 w-4" />
                         </Button>

@@ -194,7 +194,7 @@ export default function ItemsSetup() {
     if (!health) return <Badge variant="outline">Setup unknown</Badge>;
 
     if (health.status === "ready") {
-      return <Badge className="bg-emerald-600 text-white">Ready for counts</Badge>;
+      return <Badge className="bg-success text-primary-foreground">Ready for counts</Badge>;
     }
 
     if (health.status === "warning") {
@@ -226,7 +226,7 @@ export default function ItemsSetup() {
           </div>
         </div>
 
-        <Card className={readyForCounts ? "border-emerald-200" : "border-amber-200"}>
+        <Card className={readyForCounts ? "border-success/40" : "border-warning/40"}>
           <CardContent className="p-4">
             <p className="text-xs font-medium uppercase text-muted-foreground">
               Ready for counts
@@ -434,7 +434,7 @@ export default function ItemsSetup() {
                                     stockStatus === "low"
                                       ? "text-destructive"
                                       : stockStatus === "high"
-                                        ? "text-amber-600"
+                                        ? "text-warning"
                                         : ""
                                   }`}
                                 >
@@ -483,7 +483,7 @@ export default function ItemsSetup() {
                               </p>
                             )}
                             {item.setup_health?.issues.length ? (
-                              <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                              <div className="mt-4 rounded-md border border-warning/40 bg-warning-muted p-3 text-sm text-warning-foreground">
                                 <div className="flex items-center gap-2 font-medium">
                                   <ShieldCheck className="h-4 w-4" />
                                   Setup fixes needed

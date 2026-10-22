@@ -106,7 +106,7 @@ export function CountingTable({
                 return (
                   <TableRow
                     key={item.id}
-                    className={isSaved ? "bg-green-50" : ""}
+                    className={isSaved ? "bg-success-muted" : ""}
                   >
                     {/* Item Details */}
                     <TableCell className="p-4">
@@ -153,12 +153,12 @@ export function CountingTable({
                     <TableCell className="p-4">
                       <div className="text-xs space-y-1">
                         {item.min_stock_level && (
-                          <div className="text-green-600">
+                          <div className="text-success">
                             Min: {item.min_stock_level}
                           </div>
                         )}
                         {item.max_stock_level && (
-                          <div className="text-red-600">
+                          <div className="text-destructive">
                             Max: {item.max_stock_level}
                           </div>
                         )}
@@ -209,13 +209,13 @@ export function CountingTable({
                               totalQuantityInBaseUnits > maxStock
                             ) {
                               colorClass =
-                                "text-red-600 border-red-300 focus:border-red-500";
+                                "text-destructive border-destructive/40 focus:border-destructive";
                             } else if (
                               totalQuantityInBaseUnits >= minStock &&
                               totalQuantityInBaseUnits <= maxStock
                             ) {
                               colorClass =
-                                "text-green-600 border-green-300 focus:border-green-500";
+                                "text-success border-success/40 focus:border-success";
                             }
                           }
 

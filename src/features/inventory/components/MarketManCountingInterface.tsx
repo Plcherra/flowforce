@@ -232,7 +232,7 @@ export function MarketManCountingInterface({
                 Variance
               </p>
               <p
-                className={`font-mono text-lg ${variance > 0 ? "text-emerald-600" : variance < 0 ? "text-destructive" : ""}`}
+                className={`font-mono text-lg ${variance > 0 ? "text-success" : variance < 0 ? "text-destructive" : ""}`}
               >
                 {variance.toFixed(2)}
               </p>

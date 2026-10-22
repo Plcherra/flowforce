@@ -78,15 +78,15 @@ export default function PaymentsOverview() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved":
-        return "bg-green-100 text-green-800";
+        return "bg-success-muted text-success";
       case "rejected":
-        return "bg-red-100 text-red-800";
+        return "bg-destructive/10 text-destructive";
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-warning-muted text-warning-foreground";
       case "paid":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary/10 text-primary";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-foreground";
     }
   };
 
@@ -103,7 +103,7 @@ export default function PaymentsOverview() {
       <div className="space-y-4">
         <div className="animate-pulse space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            <div key={i} className="h-32 bg-muted rounded"></div>
           ))}
         </div>
       </div>
@@ -233,11 +233,11 @@ export default function PaymentsOverview() {
         <CardContent>
           {filteredPayments.length === 0 ? (
             <div className="text-center py-12">
-              <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
+              <DollarSign className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-sm font-medium text-foreground">
                 No payments
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Get started by creating a new payment.
               </p>
             </div>
@@ -246,19 +246,19 @@ export default function PaymentsOverview() {
               {filteredPayments.map((payment) => (
                 <div
                   key={payment.id}
-                  className="border rounded-lg p-4 hover:bg-gray-50"
+                  className="border rounded-lg p-4 hover:bg-muted"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium text-foreground">
                           {payment.description}
                         </h3>
                         <Badge className={getStatusColor(payment.status)}>
                           {payment.status}
                         </Badge>
                       </div>
-                      <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="mt-1 flex items-center space-x-4 text-sm text-muted-foreground">
                         <span>{payment.recipient_name}</span>
                         <span>${payment.amount}</span>
                         <span>{payment.payment_type}</span>
@@ -267,7 +267,7 @@ export default function PaymentsOverview() {
                         </span>
                       </div>
                       {payment.notes && (
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {payment.notes}
                         </p>
                       )}
@@ -278,7 +278,7 @@ export default function PaymentsOverview() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleApprovePayment(payment.id)}
-                          className="text-green-600 hover:text-green-700"
+                          className="text-success hover:text-success/80"
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -286,7 +286,7 @@ export default function PaymentsOverview() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleRejectPayment(payment.id)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-destructive hover:text-destructive/80"
                         >
                           <X className="h-4 w-4" />
                         </Button>

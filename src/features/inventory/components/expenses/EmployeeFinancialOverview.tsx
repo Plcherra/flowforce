@@ -94,7 +94,7 @@ export function EmployeeFinancialOverview() {
               </span>
               <span
                 className={`flex items-center text-sm ${
-                  hoursDelta >= 0 ? "text-emerald-600" : "text-rose-600"
+                  hoursDelta >= 0 ? "text-success" : "text-accent"
                 }`}
               >
                 {hoursDelta >= 0 ? (
@@ -174,7 +174,7 @@ export function EmployeeFinancialOverview() {
                 <Line
                   type="monotone"
                   dataKey="hours"
-                  stroke="#2563eb"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2}
                 />
               </LineChart>
@@ -196,8 +196,8 @@ export function EmployeeFinancialOverview() {
               <AreaChart data={metrics.earningsTrend.slice(-30)}>
                 <defs>
                   <linearGradient id="earningsArea" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
+                    <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -209,7 +209,7 @@ export function EmployeeFinancialOverview() {
                 <Area
                   type="monotone"
                   dataKey="amount"
-                  stroke="#16a34a"
+                  stroke="hsl(var(--success))"
                   fill="url(#earningsArea)"
                   strokeWidth={2}
                 />
