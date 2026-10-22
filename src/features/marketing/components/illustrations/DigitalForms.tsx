@@ -2,11 +2,9 @@ import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
-const DigitalFormsSVG = lazy(() =>
-  {
+function DigitalFormsSvg() {
   const { t } = useTranslation();
-  return Promise.resolve({
-    default: () => (
+  return (
       <svg
         viewBox="0 0 300 200"
         className="w-full h-full"
@@ -121,10 +119,11 @@ const DigitalFormsSVG = lazy(() =>
           {t("features.digitalForms.title")}
         </text>
       </svg>
-    ),
-  });
-},
-);
+  );
+}
+
+const DigitalFormsSVG = lazy(() => Promise.resolve({ default: DigitalFormsSvg }));
+
 
 export function DigitalForms() {
   const { t } = useTranslation();

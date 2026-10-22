@@ -2,11 +2,9 @@ import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
-const ShiftSchedulingSVG = lazy(() =>
-  {
+function ShiftSchedulingSvg() {
   const { t } = useTranslation();
-  return Promise.resolve({
-    default: () => (
+  return (
       <svg
         viewBox="0 0 300 200"
         className="w-full h-full"
@@ -140,10 +138,11 @@ const ShiftSchedulingSVG = lazy(() =>
           {t("features.shiftScheduling.title")}
         </text>
       </svg>
-    ),
-  });
-},
-);
+  );
+}
+
+const ShiftSchedulingSVG = lazy(() => Promise.resolve({ default: ShiftSchedulingSvg }));
+
 
 export function ShiftScheduling() {
   const { t } = useTranslation();

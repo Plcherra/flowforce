@@ -2,11 +2,9 @@ import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
-const InternalCommunicationSVG = lazy(() =>
-  {
+function InternalCommunicationSvg() {
   const { t } = useTranslation();
-  return Promise.resolve({
-    default: () => (
+  return (
       <svg
         viewBox="0 0 300 200"
         className="w-full h-full"
@@ -57,10 +55,11 @@ const InternalCommunicationSVG = lazy(() =>
           {t("features.internalCommunication.title")}
         </text>
       </svg>
-    ),
-  });
-},
-);
+  );
+}
+
+const InternalCommunicationSVG = lazy(() => Promise.resolve({ default: InternalCommunicationSvg }));
+
 
 export function InternalCommunication() {
   const { t } = useTranslation();

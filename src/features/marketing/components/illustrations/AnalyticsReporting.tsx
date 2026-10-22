@@ -2,11 +2,9 @@ import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
-const AnalyticsReportingSVG = lazy(() =>
-  {
+function AnalyticsReportingSvg() {
   const { t } = useTranslation();
-  return Promise.resolve({
-    default: () => (
+  return (
       <svg
         viewBox="0 0 300 200"
         className="w-full h-full"
@@ -122,10 +120,11 @@ const AnalyticsReportingSVG = lazy(() =>
           {t("features.analyticsReporting.title")}
         </text>
       </svg>
-    ),
-  });
-},
-);
+  );
+}
+
+const AnalyticsReportingSVG = lazy(() => Promise.resolve({ default: AnalyticsReportingSvg }));
+
 
 export function AnalyticsReporting() {
   const { t } = useTranslation();

@@ -2,11 +2,9 @@ import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 import { IllustrationSkeleton } from "@/components/ui/illustration-skeleton";
 
-const TaskManagementSVG = lazy(() =>
-  {
+function TaskManagementSvg() {
   const { t } = useTranslation();
-  return Promise.resolve({
-    default: () => (
+  return (
       <svg
         viewBox="0 0 300 200"
         className="w-full h-full"
@@ -95,10 +93,11 @@ const TaskManagementSVG = lazy(() =>
           {t("features.taskManagement.title")}
         </text>
       </svg>
-    ),
-  });
-},
-);
+  );
+}
+
+const TaskManagementSVG = lazy(() => Promise.resolve({ default: TaskManagementSvg }));
+
 
 export function TaskManagement() {
   const { t } = useTranslation();

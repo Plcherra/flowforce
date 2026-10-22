@@ -1,11 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { lazy, Suspense } from "react";
 
-const RetailSceneSVG = lazy(() =>
-  {
+function RetailSceneSvg() {
   const { t } = useTranslation();
-  return Promise.resolve({
-    default: () => (
+  return (
       <svg
         viewBox="0 0 400 300"
         className="w-full h-full"
@@ -136,10 +134,11 @@ const RetailSceneSVG = lazy(() =>
         <circle cx="380" cy="40" r="15" fill="hsl(var(--warning))" opacity="0.3" />
         <circle cx="30" cy="60" r="8" fill="hsl(var(--primary))" opacity="0.2" />
       </svg>
-    ),
-  });
-},
-);
+  );
+}
+
+const RetailSceneSVG = lazy(() => Promise.resolve({ default: RetailSceneSvg }));
+
 
 export function RetailScene() {
   return (
