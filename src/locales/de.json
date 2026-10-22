@@ -4854,5 +4854,9 @@
     "recognitionsAwardXpAutomaticallyOnceCopilotDetectsProgress": "Anerkennungen vergeben XP automatisch. Wenn Copilot Fortschritt zu einem Abzeichen erkennt, erscheint er hier.",
     "syncAutomation": "Automatisierung synchronisieren",
     "unableToLoadRecognitions": "Anerkennungen konnten nicht geladen werden"
+  },
+  "i18n": {
+    "translatedFrom": "Übersetzt aus {{language}}. Original anzeigen",
+    "seeTranslation": "Übersetzung anzeigen"
   }
 }

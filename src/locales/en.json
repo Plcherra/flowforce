@@ -4854,5 +4854,9 @@
     "recognitionsAwardXpAutomaticallyOnceCopilotDetectsProgress": "Recognitions award XP automatically. Once Copilot detects progress toward a badge it appears here.",
     "syncAutomation": "Sync automation",
     "unableToLoadRecognitions": "Unable to load recognitions"
+  },
+  "i18n": {
+    "translatedFrom": "Translated from {{language}}. See original",
+    "seeTranslation": "See translation"
   }
 }

@@ -499,7 +499,7 @@ Prove: Unit test `src/server/i18n/translateContent.test.ts`. Run it with the jit
 
 ### Phase 27 — See original
 
-- [ ] Show the translated-from line.
+- [x] Show the translated-from line.
 
 Rules:
 
@@ -1169,5 +1169,17 @@ Proven: `src/server/i18n/translateContent.test.ts` passed through the jiti runne
 Phone steps for Pedro: none. No screen calls this helper yet.
 
 Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 27 See original
+
+Shipped: `TranslatedText` shows one control for a record when the viewer's language is not the source language. The line uses the language name already in the language list. Choosing it shows the original. Choosing it again shows the translation. The source language renders the original and no line. The two strings are in en, es, pt, fr, it, and de.
+
+Proven: `src/features/i18n/translatedText.test.ts` passed through the jiti runner. A Spanish viewer of an English source gets "Traducido de English. Ver original" and the body swaps back to the original. An English viewer gets no line. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro: none. No screen renders this control yet.
+
+Blockers: none. No migration.
 
 Questions: none.

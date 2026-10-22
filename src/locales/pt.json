@@ -4854,5 +4854,9 @@
     "recognitionsAwardXpAutomaticallyOnceCopilotDetectsProgress": "Os reconhecimentos concedem XP automaticamente. Quando o Copilot detecta progresso rumo a um emblema, ele aparece aqui.",
     "syncAutomation": "Sincronizar automação",
     "unableToLoadRecognitions": "Não foi possível carregar os reconhecimentos"
+  },
+  "i18n": {
+    "translatedFrom": "Traduzido de {{language}}. Ver original",
+    "seeTranslation": "Ver tradução"
   }
 }

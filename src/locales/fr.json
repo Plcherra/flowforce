@@ -4854,5 +4854,9 @@
     "recognitionsAwardXpAutomaticallyOnceCopilotDetectsProgress": "Les reconnaissances attribuent de l'XP automatiquement. Quand Copilot détecte un progrès vers un badge, il apparaît ici.",
     "syncAutomation": "Synchroniser l'automatisation",
     "unableToLoadRecognitions": "Impossible de charger les reconnaissances"
+  },
+  "i18n": {
+    "translatedFrom": "Traduit de {{language}}. Voir l'original",
+    "seeTranslation": "Voir la traduction"
   }
 }
