@@ -14,6 +14,10 @@ export const TRANSLATABLE_FIELDS: Record<
   company_update_comments: {
     content: {},
   },
+  forms: {
+    title: {},
+    description: {},
+  },
 };
 
 export function translatableFieldRule(

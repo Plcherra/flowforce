@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForms, type FormFieldRow } from "@/features/forms/hooks/useForms";
+import { updateFormRow } from "@/features/forms/repositories/formsRepository";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useFormSchemaStore, useFormSchema, type FormSchema } from "@/stores/useFormSchemaStore";
 import FormFieldLibrary, {
@@ -24,7 +27,6 @@ import FormFieldLibrary, {
 import FormEditorPanel from "@/features/forms/components/editor/FormEditorPanel";
 import FormLivePreview from "@/features/forms/components/editor/FormLivePreview";
 import type { FormField } from "@/types/forms";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { FormsErrorFallback } from "@/components/ui/feature-error-fallbacks";
@@ -54,8 +56,9 @@ export default function FormBuilderDialog({
   initialTitle = "New Form",
   initialDescription = "",
 }: FormBuilderDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getFormFields, saveFormFields } = useForms();
+  const { profile } = useProfile();
   const { toast } = useToast();
 
   const schema = useFormSchema() as FormSchema | null;
@@ -200,12 +203,23 @@ export default function FormBuilderDialog({
 
     setIsSaving(true);
     try {
-      const updateResult = await supabase
-        .from("forms")
-        .update({ title: formTitle, description: formDescription || null })
-        .eq("id", formId);
+      const companyId = profile?.companyId ?? profile?.company_id ?? null;
+      if (!companyId) {
+        toast({
+          title: "Save failed",
+          description: "Unable to update form details.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const updated = await updateFormRow(
+        companyId,
+        formId,
+        { title: formTitle, description: formDescription || null },
+        appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
+      );
 
-      if (updateResult.error) {
+      if (!updated) {
         toast({
           title: "Save failed",
           description: "Unable to update form details.",

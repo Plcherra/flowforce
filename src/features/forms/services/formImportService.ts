@@ -1,7 +1,10 @@
 // Note: ingestion/api is still in src/services/ingestion/ as it's shared across features
 import { uploadReportFile } from "@/services/ingestion/api";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/public-types";
+import type { Json, Tables } from "@/integrations/supabase/public-types";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
+import { withFormSourceLocale } from "@/features/forms/formContentFields";
+import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
 import { logger } from "@/utils/logger";
 
 export interface FormImportResult {
@@ -45,6 +48,7 @@ export async function importFormFromFile(
   file: File,
   userId: string,
   companyId: string,
+  sourceLocale?: AppLanguage,
 ) {
   const baseName = file.name.replace(/\.[^/.]+$/, "");
   let documentId: string | undefined;
@@ -76,25 +80,42 @@ export async function importFormFromFile(
     );
   }
 
+  const description = extractedSnippet ? `Imported from ${file.name}` : null;
+  const importedSettings = documentId
+    ? {
+        sourceDocumentId: documentId,
+        sourceStoragePath: storagePath,
+      }
+    : {};
+  const settings = sourceLocale
+    ? (withFormSourceLocale(importedSettings, sourceLocale) as Json)
+    : documentId
+      ? importedSettings
+      : undefined;
   const { data: form, error } = await supabase
     .from("forms")
     .insert({
       company_id: companyId,
       title: baseName,
-      description: extractedSnippet ? `Imported from ${file.name}` : undefined,
+      description,
       created_by: userId,
-      settings: documentId
-        ? {
-            sourceDocumentId: documentId,
-            sourceStoragePath: storagePath,
-          }
-        : undefined,
+      settings,
     })
     .select()
     .single();
 
   if (error || !form) {
     throw error ?? new Error("Unable to create form");
+  }
+
+  if (sourceLocale) {
+    scheduleFormContentTranslation({
+      companyId,
+      sourceId: form.id,
+      sourceLocale,
+      title: baseName,
+      description,
+    });
   }
 
   await createDefaultFields(form.id, baseName);

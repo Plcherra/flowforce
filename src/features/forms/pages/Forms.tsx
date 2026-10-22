@@ -14,6 +14,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { submittedFormsHidden } from "@/features/roles/constants/permissionAccessTypes";
 import { useForms } from "@/features/forms/hooks/useForms";
+import { useFormContentTranslations } from "@/features/forms/hooks/useFormContentTranslations";
+import type { FormContentTranslation } from "@/features/forms/formContentFields";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 import { asArray, safeArrayFilter } from "@/utils/reactQueryTypes";
 import ErrorBoundary from "@/components/ui/error-boundary";
@@ -41,9 +43,19 @@ type FormSectionConfig = {
   emptyMessage: string;
 };
 
-const matchesQuery = (form: FormWithMeta, query: string) => {
+const matchesQuery = (
+  form: FormWithMeta,
+  query: string,
+  translation?: FormContentTranslation | null,
+) => {
   if (!query) return true;
-  const searchable = [form.title, form.description, form.department?.name]
+  const searchable = [
+    form.title,
+    form.description,
+    translation?.title,
+    translation?.description,
+    form.department?.name,
+  ]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -66,6 +78,7 @@ export default function Forms() {
     error: formsError,
     refetchForms,
   } = useForms();
+  const translations = useFormContentTranslations(forms);
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -88,7 +101,7 @@ export default function Forms() {
         forms,
         (form) =>
           form.status === "archived" &&
-          matchesQuery(form, trimmedQuery) &&
+          matchesQuery(form, trimmedQuery, translations.get(form.id)) &&
           (!hideOtherSubmissions || form.created_by === user?.id),
       );
       return [
@@ -108,7 +121,7 @@ export default function Forms() {
       if (statusFilter !== "all" && form.status !== statusFilter) {
         return false;
       }
-      return matchesQuery(form, trimmedQuery);
+      return matchesQuery(form, trimmedQuery, translations.get(form.id));
     });
 
     const myForms = safeArrayFilter(
@@ -143,7 +156,7 @@ export default function Forms() {
       const archivedForms = forms.filter(
         (form) =>
           form.status === "archived" &&
-          matchesQuery(form, trimmedQuery) &&
+          matchesQuery(form, trimmedQuery, translations.get(form.id)) &&
           (!hideOtherSubmissions || form.created_by === user?.id),
       );
       activeSections.push({
@@ -155,7 +168,7 @@ export default function Forms() {
     }
 
     return activeSections;
-  }, [forms, statusFilter, query, user?.id, canCreateForms, hideOtherSubmissions]);
+  }, [forms, statusFilter, query, translations, user?.id, canCreateForms, hideOtherSubmissions]);
 
   const builderForm = builderFormId
     ? asArray(forms).find((form) => form.id === builderFormId)
@@ -288,6 +301,7 @@ export default function Forms() {
                       refreshing={isRefreshing}
                       canEdit={canCreateForms}
                       emptyMessage={section.emptyMessage}
+                      translations={translations}
                       onFill={handleOpenFill}
                       onEdit={handleOpenBuilder}
                     />
@@ -354,6 +368,9 @@ export default function Forms() {
                 onOpenChange={handleFillDialogChange}
                 formId={fillFormId}
                 form={activeFillForm ?? undefined}
+                translation={
+                  fillFormId ? translations.get(fillFormId) ?? null : null
+                }
                 onSubmitted={handleFillSubmitted}
               />
             </ErrorBoundary>

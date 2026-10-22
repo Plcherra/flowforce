@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
@@ -114,9 +116,11 @@ const buildMetaFromRow = (
 });
 
 export function useForms() {
+  const { i18n } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { profile } = useProfile();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
@@ -211,12 +215,16 @@ export function useForms() {
 
     try {
       const { departmentid, ...formFields } = formData;
-      const created = await insertFormRow(companyId, {
-        ...formFields,
-        department_id: departmentid ?? null,
-        status: "draft",
-        created_by: user.id,
-      });
+      const created = await insertFormRow(
+        companyId,
+        {
+          ...formFields,
+          department_id: departmentid ?? null,
+          status: "draft",
+          created_by: user.id,
+        },
+        sourceLocale,
+      );
 
       const authorProfile = profile
         ? {
@@ -264,7 +272,7 @@ export function useForms() {
     }
 
     try {
-      const updated = await updateFormRow(companyId, formId, updates);
+      const updated = await updateFormRow(companyId, formId, updates, sourceLocale);
 
       if (updated) {
         updateFormsCache((current) =>

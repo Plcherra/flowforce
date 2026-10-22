@@ -13,6 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FormListTitle } from "@/features/forms/components/FormContentText";
+import type { FormContentTranslation } from "@/features/forms/formContentFields";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 import {
   formatDate,
@@ -28,6 +30,7 @@ interface FormsSectionProps {
   refreshing?: boolean;
   canEdit?: boolean;
   emptyMessage?: string;
+  translations?: Map<string, FormContentTranslation | null>;
   onFill: (formId: string) => void;
   onEdit: (formId: string) => void;
 }
@@ -39,6 +42,7 @@ export function FormsSection({
   refreshing = false,
   canEdit = true,
   emptyMessage = "No forms to display.",
+  translations,
   onFill,
   onEdit,
 }: FormsSectionProps) {
@@ -146,7 +150,13 @@ export function FormsSection({
                     onClick={() => onFill(form.id)}
                     onKeyDown={(event) => handleRowKeyDown(event, form.id)}
                   >
-                    <TableCell className="font-medium">{form.title}</TableCell>
+                    <TableCell>
+                      <FormListTitle
+                        formId={form.id}
+                        title={form.title}
+                        translation={translations?.get(form.id) ?? null}
+                      />
+                    </TableCell>
                     <TableCell>{getTypeLabel(form)}</TableCell>
                     <TableCell>
                       <Badge

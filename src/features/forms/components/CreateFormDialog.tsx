@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
 import type { FormFieldRow } from "@/features/forms/hooks/useForms";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -362,7 +363,7 @@ export default function CreateFormDialog({
   preferredMethod,
   onPreferredMethodHandled,
 }: CreateFormDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { createForm, saveFormFields } = useForms();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -414,6 +415,7 @@ export default function CreateFormDialog({
             uploadedFile,
             user.id,
             companyId,
+            appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
           );
           setUploadedFile(null);
           onFormCreated?.(form.id);
@@ -467,6 +469,7 @@ export default function CreateFormDialog({
     },
     [
       createForm,
+      i18n,
       onFormCreated,
       onOpenChange,
       profile?.companyId,

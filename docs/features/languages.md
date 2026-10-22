@@ -548,7 +548,7 @@ Prove: Unit test the comment field path and the source-language hide. Run it wit
 
 ### Phase 30 — Form titles
 
-- [ ] Translate a form's title and description.
+- [x] Translate a form's title and description.
 
 Rules:
 
@@ -1211,6 +1211,22 @@ Phone steps for Pedro:
 2. Open Company updates, open comments on an update, and post an English sentence. The comment should appear without waiting.
 3. Set your language to Español and reload. Open the same comments. The comment should be Spanish, with Traducido de English. Ver original. Tap it to read the English comment. Tap again for Spanish.
 4. Set the language back to English and reload. The comment should be the English sentence you typed, with no translated-from line. The person's name above the comment stays as it was written.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 30 Form titles
+
+Shipped: A form keeps the title and description that were typed. The author's language is stored on the form settings. The save returns before the model runs. The cache field paths are `title` and `description`. The form list and the fill header use the cache. The author's language shows the original and no translated-from line. A viewer in another language sees the translation and one Translated from line for that form. Questions, options, and answers stay as stored text.
+
+Proven: `src/features/forms/formContentTranslation.test.ts` passed through the jiti runner. The field paths are `title` and `description`. An English form is shown in Spanish from the cache. Editing the description replaces the cached description and leaves the title hash in place. The save resolves while the model is still running. An English viewer gets the original and no request. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Forms and create a form with an English title and a sentence in the description. Save it from the form editor. The form should appear in the list without waiting.
+3. Set your language to Español and reload Forms. The list name should be Spanish. Open the form. The header title and description should be Spanish, with Traducido de English. Ver original. Tap it to read the English title and description. Tap again for Spanish.
+4. Set the language back to English and reload. The list and the form header should be the English text you typed, with no translated-from line. Open Edit. The title and description boxes should still be the English text, so a save does not replace them with a translation.
 
 Blockers: none. No new migration.
 

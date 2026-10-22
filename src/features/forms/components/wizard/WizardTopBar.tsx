@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 interface WizardTopBarProps {
   title: string;
   description?: string;
+  control?: string | null;
+  onToggleOriginal?: () => void;
   currentStepIndex: number;
   totalSteps: number;
   statusLabel: string;
@@ -21,6 +23,8 @@ interface WizardTopBarProps {
 export function WizardTopBar({
   title,
   description,
+  control,
+  onToggleOriginal,
   currentStepIndex,
   totalSteps,
   statusLabel,
@@ -38,6 +42,15 @@ export function WizardTopBar({
               {description}
             </DialogDescription>
           )}
+          {control ? (
+            <button
+              type="button"
+              className="mt-1 text-left text-xs text-muted-foreground underline"
+              onClick={onToggleOriginal}
+            >
+              {control}
+            </button>
+          ) : null}
         </div>
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">

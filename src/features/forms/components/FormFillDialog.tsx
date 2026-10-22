@@ -28,6 +28,8 @@ import {
   StepNavigation,
   WizardFooter,
 } from "./wizard";
+import { useFormContentDisplay } from "./FormContentText";
+import type { FormContentTranslation } from "@/features/forms/formContentFields";
 import { HandoverNotesField } from "./HandoverNotesField";
 import { FlagIssueControls } from "./FlagIssueControls";
 import { handoverTaskDraft } from "../utils/handoverTask";
@@ -45,6 +47,7 @@ interface FormFillDialogProps {
   onOpenChange: (open: boolean) => void;
   formId: string | null;
   form?: FormWithMeta | null;
+  translation?: FormContentTranslation | null;
   onSubmitted?: () => void;
 }
 
@@ -53,6 +56,7 @@ export default function FormFillDialog({
   onOpenChange,
   formId,
   form: initialForm,
+  translation = null,
   onSubmitted,
 }: FormFillDialogProps) {
   const { t } = useTranslation();
@@ -80,6 +84,12 @@ export default function FormFillDialog({
   } = useFormDefinition({
     formId: resolvedFormId ?? undefined,
     initialForm,
+  });
+  const content = useFormContentDisplay({
+    recordId: resolvedFormId ?? undefined,
+    title: hydratedForm?.title ?? "Fill form",
+    description: hydratedForm?.description,
+    translation,
   });
 
   const form = useForm<FormSubmissionData>({
@@ -401,7 +411,7 @@ export default function FormFillDialog({
     const localTime = new Date().toLocaleString();
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return {
-      title: hydratedForm?.title ?? "Form response",
+      title: content.title || "Form response",
       userInitials: initials,
       userName,
       timestamp: localTime,
@@ -409,12 +419,12 @@ export default function FormFillDialog({
       entryId: submissionId ? `#${submissionId.slice(0, 6)}` : "#Draft",
       statusLabel: submissionId ? "Completed" : "Draft",
     };
-  }, [hydratedForm?.title, submissionId, user]);
+  }, [content.title, submissionId, user]);
 
   const handleExport = () => {
     void exportFormResponseToPdf({
-      headerTitle: hydratedForm?.title,
-      headerSubtitle: hydratedForm?.description ?? "Form response preview",
+      headerTitle: content.title,
+      headerSubtitle: content.description ?? "Form response preview",
       meta: metaCardProps,
       sections: reviewSections,
     });
@@ -463,11 +473,11 @@ export default function FormFillDialog({
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-foreground">
-                {hydratedForm?.title ?? "Form response"}
+                {content.title || "Form response"}
               </h3>
-              {hydratedForm?.description && (
+              {content.description && (
                 <p className="text-sm text-muted-foreground">
-                  {hydratedForm.description}
+                  {content.description}
                 </p>
               )}
             </div>
@@ -489,7 +499,7 @@ export default function FormFillDialog({
         return (
           <div className="space-y-6">
             <FormReviewLayout
-              headerTitle={hydratedForm?.title ?? "Form response"}
+              headerTitle={content.title || "Form response"}
               headerSubtitle="Preview your answers before submitting."
               meta={metaCardProps}
               sections={reviewSections}
@@ -528,8 +538,12 @@ export default function FormFillDialog({
       <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none bg-background p-0 shadow-none sm:rounded-none">
         <div className="flex h-full flex-col">
           <WizardTopBar
-            title={hydratedForm?.title ?? "Fill form"}
-            description="Follow the guided steps to complete the form."
+            title={content.title || "Fill form"}
+            description={
+              content.description || "Follow the guided steps to complete the form."
+            }
+            control={content.control}
+            onToggleOriginal={content.toggle}
             currentStepIndex={wizard.currentStepIndex}
             totalSteps={steps.length}
             statusLabel={statusLabel}

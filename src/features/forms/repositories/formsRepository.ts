@@ -6,7 +6,14 @@ import type {
   TablesInsert,
   TablesUpdate,
 } from "@/integrations/supabase/public-types";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { logger } from "@/utils/logger";
+import {
+  formContentTouches,
+  saveFormWithoutModel,
+  withFormSourceLocale,
+} from "@/features/forms/formContentFields";
+import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([
@@ -252,36 +259,97 @@ export async function fetchFormWithRelations(
 export async function insertFormRow(
   companyId: string,
   payload: TablesInsert<"forms">,
+  sourceLocale?: AppLanguage,
 ): Promise<FormRow> {
   await ensureCompanyScope(companyId);
-  const { data, error } = await supabase
-    .from("forms")
-    .insert({ ...payload, company_id: companyId })
-    .select("*")
-    .single();
-  if (error) {
-    throw error;
+  const row: TablesInsert<"forms"> = { ...payload, company_id: companyId };
+  if (sourceLocale) {
+    row.settings = withFormSourceLocale(payload.settings, sourceLocale) as Json;
   }
-  return formRowSchema.parse(data);
+  let created: FormRow | null = null;
+  await saveFormWithoutModel({
+    save: async () => {
+      const { data, error } = await supabase
+        .from("forms")
+        .insert(row)
+        .select("*")
+        .single();
+      if (error) throw error;
+      created = formRowSchema.parse(data);
+    },
+    translate: sourceLocale
+      ? () => {
+          if (!created) return;
+          scheduleFormContentTranslation({
+            companyId,
+            sourceId: created.id,
+            sourceLocale,
+            title: typeof payload.title === "string" ? payload.title : null,
+            description:
+              typeof payload.description === "string" ? payload.description : null,
+          });
+        }
+      : undefined,
+  });
+  if (!created) {
+    throw new Error("Form was not created");
+  }
+  return created;
 }
 
 export async function updateFormRow(
   companyId: string,
   formId: string,
   updates: TablesUpdate<"forms">,
+  sourceLocale?: AppLanguage,
 ): Promise<FormRow | null> {
   await ensureCompanyScope(companyId);
-  const { data, error } = await supabase
-    .from("forms")
-    .update(updates)
-    .eq("id", formId)
-    .eq("company_id", companyId)
-    .select("*")
-    .maybeSingle();
-  if (error) {
-    throw error;
+  const nextUpdates: TablesUpdate<"forms"> = { ...updates };
+  const touchesContent = formContentTouches(updates);
+  if (sourceLocale && touchesContent) {
+    let settings = updates.settings;
+    if (settings === undefined) {
+      const { data, error: readError } = await supabase
+        .from("forms")
+        .select("settings")
+        .eq("id", formId)
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (readError) throw readError;
+      settings = data?.settings ?? null;
+    }
+    nextUpdates.settings = withFormSourceLocale(settings, sourceLocale) as Json;
   }
-  return data ? formRowSchema.parse(data) : null;
+  let updated: FormRow | null = null;
+  await saveFormWithoutModel({
+    save: async () => {
+      const { data, error } = await supabase
+        .from("forms")
+        .update(nextUpdates)
+        .eq("id", formId)
+        .eq("company_id", companyId)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      updated = data ? formRowSchema.parse(data) : null;
+    },
+    translate:
+      sourceLocale && touchesContent
+        ? () => {
+            scheduleFormContentTranslation({
+              companyId,
+              sourceId: formId,
+              sourceLocale,
+              title: typeof nextUpdates.title === "string" ? nextUpdates.title : null,
+              description:
+                typeof nextUpdates.description === "string"
+                  ? nextUpdates.description
+                  : null,
+            });
+          }
+        : undefined,
+  });
+  return updated;
 }
 
 export async function deleteFormRow(
