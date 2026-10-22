@@ -964,3 +964,9 @@ Phone steps for Pedro:
 Blockers: none for this phase. No migration.
 
 Questions: none.
+
+### 2026-10-22 — Phases 9–12 still skipped
+
+Skipped. Time Off is done, so this run opened Tasks. Phases 9–12 are already checked as skipped, and their open questions are still unanswered. No unchecked Tasks phase remains. No product code.
+
+Questions: Phase 9 still needs "Next opening checklist or shift". Phase 10 still needs "Recurring shift tasks". Phase 11 still needs "AI draft tasks from form notes". Phase 12 still needs "Where the task-type level is edited".

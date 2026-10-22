@@ -1,10 +1,10 @@
 # System and Admin rework
 
-Queued. This file is not active. Theme is the active feature. Do not start this file from a Theme, Languages, or Time Off run. Chats, updates, and the later features need the permission-grant plan, so this row comes before Operations.
+Active. The roadmap marks this file for the 6 AM run. Candidate phase 2 is blocked. The next unchecked phase is phase 3.
 
 The first half is a review list. Candidate phase 2 does not change product code until the owner marks keep or drop.
 
-The permission-grant plan is the second half. Those phases wait until the System and Admin row in `docs/roadmap.md` is active. Do not start them from a Theme, Languages, or Time Off run.
+The permission-grant plan is the second half. Those phases start now that this row is active in `docs/roadmap.md`.
 
 Settings the app actually renders live in `src/features/system/pages/SettingsPage.tsx`. The tabs are General, Security, Region, Notifications, AI, Integrations, Billing, and Admin.
 
@@ -63,9 +63,15 @@ Blockers: Phase 2 is blocked until the owner marks which candidates to remove.
 
 Questions: Which candidates to remove?
 
+### 2026-10-22 — Phase 2 Owner marks keep or drop
+
+Skipped. Blocked by Open question "Which candidates to remove". No product code. No candidate was marked keep or drop.
+
+Questions: Which candidates to remove?
+
 ## Permission grant plan
 
-This plan is queued, not active. Do not start these phases while this file is not the active row in `docs/roadmap.md`. Do not change product code from this plan until that row is active.
+This plan is active with the System and Admin row. Candidate phase 2 stays skipped. Phase 3 is the next unchecked phase.
 
 Permissions stay in `src/features/roles` and `src/lib/permissions/registry.ts`. Do not add a second matrix. Levels stay the packs in `src/features/roles/constants/productRoleContract.json`: staff is level 1, manager is level 2, admin is level 3, and owner is level 4.
 

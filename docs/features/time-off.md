@@ -1,6 +1,6 @@
 # Time Off
 
-Active. The 6 AM run starts here. This file has 9 phases. When they are checked, the run opens the remaining Tasks phases in [docs/features/tasks.md](tasks.md). Phases 9–12 there stay skipped until their open questions are answered.
+Done. Every phase in this file is checked. The roadmap marks System and Admin active. Tasks phases 9–12 stay skipped.
 
 Shipped schedule work stays in [docs/features/schedule.md](schedule.md). Do not reopen it. Phases 1–25 there are checked. The base for this file is:
 
