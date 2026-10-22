@@ -61,6 +61,8 @@ import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
 import { logger } from "@/utils/logger";
 import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
 import { readTaskKind, TASK_KIND_LABELS } from "@/features/tasks/utils/taskKind";
+import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
+import type { TaskContentTranslation } from "@/features/tasks/taskContentFields";
 
 type ButtonVariant = "default" | "secondary" | "outline";
 interface TaskDetailsDialogProps {
@@ -68,6 +70,7 @@ interface TaskDetailsDialogProps {
   open: boolean;
   onClose: () => void;
   onTaskUpdate?: (task: TaskWithRelations) => void;
+  translation?: TaskContentTranslation | null;
 }
 
 const getPriorityColor = (priority?: string | null) => {
@@ -121,6 +124,7 @@ export function TaskDetailsDialog({
   open,
   onClose,
   onTaskUpdate,
+  translation = null,
 }: TaskDetailsDialogProps) {
   const { t } = useTranslation();
   const { updateStatus, updateTask, deleteTask } = useTasks();
@@ -153,6 +157,12 @@ export function TaskDetailsDialog({
   const [deletingTask, setDeletingTask] = useState(false);
   const { comments, loadingComments, addingComment, submitComment } =
     useTaskComments(currentTask, open);
+  const display = useFormContentDisplay({
+    recordId: currentTask?.id,
+    title: currentTask?.title ?? "",
+    description: currentTask?.description,
+    translation,
+  });
 
   useEffect(() => {
     setCurrentTask(task);
@@ -525,13 +535,22 @@ export function TaskDetailsDialog({
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <DialogTitle className="text-xl font-semibold">
-                {currentTask.title}
+                {display.title}
               </DialogTitle>
-              {currentTask.description && (
+              {display.description ? (
                 <DialogDescription className="text-base leading-relaxed">
-                  {currentTask.description}
+                  {display.description}
                 </DialogDescription>
-              )}
+              ) : null}
+              {display.control ? (
+                <button
+                  type="button"
+                  className="text-left text-xs text-muted-foreground underline"
+                  onClick={display.toggle}
+                >
+                  {display.control}
+                </button>
+              ) : null}
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <Badge variant="outline">{kindLabel}</Badge>
                 {scheduleLink ? (

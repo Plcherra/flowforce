@@ -16,7 +16,9 @@ import {
   getTaskStatusBadgeClass,
   getTaskStatusLabel,
 } from "@/constants/taskStatus";
+import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
 import type { TaskWithRelations } from "@/hooks/useTasks";
+import type { TaskContentTranslation } from "../taskContentFields";
 import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
 import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
@@ -34,6 +36,7 @@ interface TaskCardProps {
   dueBadge: DueBadge | null;
   highlighted: boolean;
   selectionHandlers: SelectionHandlers;
+  translation?: TaskContentTranslation | null;
 }
 
 export function TaskCard({
@@ -41,7 +44,14 @@ export function TaskCard({
   dueBadge,
   highlighted,
   selectionHandlers,
+  translation = null,
 }: TaskCardProps) {
+  const display = useFormContentDisplay({
+    recordId: task.id,
+    title: task.title,
+    description: task.description,
+    translation,
+  });
   const scheduleLink = readScheduleTaskLink(task);
   const kindLabel = TASK_KIND_LABELS[readTaskKind(task)];
   const schedule = readTaskSchedule(task.links);
@@ -67,12 +77,25 @@ export function TaskCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle className="text-lg">{task.title}</CardTitle>
-            {task.description && (
+            <CardTitle className="text-lg">{display.title}</CardTitle>
+            {display.description ? (
               <CardDescription className="line-clamp-2">
-                {task.description}
+                {display.description}
               </CardDescription>
-            )}
+            ) : null}
+            {display.control ? (
+              <button
+                type="button"
+                className="text-left text-xs text-muted-foreground underline"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  display.toggle();
+                }}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
+                {display.control}
+              </button>
+            ) : null}
           </div>
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-2">

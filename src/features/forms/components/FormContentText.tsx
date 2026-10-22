@@ -2,14 +2,19 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { languageName, translatedTextView } from "@/features/i18n/translatedTextView";
-import type { FormContentTranslation } from "@/features/forms/formContentFields";
-import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { appLanguageFromTag, type AppLanguage } from "@/i18n/resolveLanguage";
+
+export type RecordContentTranslation = {
+  sourceLocale: AppLanguage;
+  title: string;
+  description: string | null;
+};
 
 export function useFormContentDisplay(input: {
   recordId?: string;
   title: string;
   description?: string | null;
-  translation: FormContentTranslation | null;
+  translation: RecordContentTranslation | null;
 }) {
   const { t, i18n } = useTranslation();
   const viewerLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
@@ -55,7 +60,7 @@ export function FormListTitle({
 }: {
   formId: string;
   title: string;
-  translation: FormContentTranslation | null;
+  translation: RecordContentTranslation | null;
 }) {
   const display = useFormContentDisplay({
     recordId: formId,

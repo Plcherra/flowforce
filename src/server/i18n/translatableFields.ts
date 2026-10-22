@@ -24,6 +24,10 @@ export const TRANSLATABLE_FIELDS: Record<
     placeholder: {},
   },
   form_submissions: {},
+  tasks: {
+    title: {},
+    description: {},
+  },
 };
 
 export function translatableFieldRule(

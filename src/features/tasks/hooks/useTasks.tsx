@@ -1,7 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/hooks/useAuth";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 export type { TaskWithRelations } from "@/features/tasks/repositories/tasksRepository";
 import { logger } from "@/utils/logger";
 
@@ -96,6 +98,8 @@ const capitalizeFallback = (value: string) =>
  */
 export function useTasks() {
   const { user } = useAuth();
+  const { i18n } = useTranslation();
+  const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const queryClient = useQueryClient();
   const [tasksError, setTasksError] = useState<string | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
@@ -148,7 +152,7 @@ export function useTasks() {
         company_id: taskData.company_id ?? companyId, // Ensure company_id is set
       };
 
-      const createdTask = await insertTask(normalizedTaskData);
+      const createdTask = await insertTask(normalizedTaskData, sourceLocale);
 
       if (createdTask.goal_id) {
         await ensureGoalTaskLink(createdTask.goal_id, createdTask.id);
@@ -180,7 +184,7 @@ export function useTasks() {
         throw new Error("Company context required to update tasks");
       }
 
-      const updatedTask = await updateTaskRow(id, updates, companyId);
+      const updatedTask = await updateTaskRow(id, updates, companyId, sourceLocale);
 
       const previousGoalId = previousTask?.goal_id ?? null;
       const newGoalId = updatedTask.goal_id ?? null;

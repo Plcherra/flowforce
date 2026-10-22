@@ -594,7 +594,7 @@ Prove: Unit test one answer of each of those kinds. Run it with the jiti runner.
 
 ### Phase 33 — Task content
 
-- [ ] Translate task title and description.
+- [x] Translate task title and description.
 
 Rules:
 
@@ -1259,6 +1259,23 @@ Phone steps for Pedro:
 2. Open a form and answer a paragraph question with an English sentence. Also enter a number, a date, and a choice such as Line if the form has those questions. Submit. The form should finish without waiting.
 3. Set your language to Español and open the form submissions. The paragraph should be Spanish. The number, the date, and the choice Line should stay as you entered them.
 4. Set the language back to English and open the same submission. The paragraph should be the English sentence you typed.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 33 Task content
+
+Shipped: A task keeps the title and description that were typed. The author's language is stored on `tasks.links` as `contentSourceLocale` when that column is an object. An array of links is left unchanged. The cache paths are `title` and `description`. The save returns before the model runs. The task list and the task dialog show the translation, with one see-original line when the viewer's language differs. Comments are not translated in this phase.
+
+Proven: `src/features/tasks/taskContentTranslation.test.ts` passed through the jiti runner. Title and description are translated. An edit of the description changes only that hash and adds five model calls. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Tasks and create a task with an English title and description. The task should appear without waiting.
+3. Set your language to Español and reload Tasks. The card title and description should be Spanish, with Traducido de English and a control to see the original.
+4. Open the task. The dialog title and description should be Spanish, with the same line. See the original, then the translation again. A comment stays in the language it was written.
+5. Set the language back to English. The list and the dialog should show the English title and description you typed, with no translated-from line.
 
 Blockers: none. No new migration.
 

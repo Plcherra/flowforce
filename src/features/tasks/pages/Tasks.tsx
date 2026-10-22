@@ -32,6 +32,7 @@ import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
 import { isTaskListedForViewer } from "@/features/tasks/utils/taskSchedule";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
+import { useTaskContentTranslations } from "@/features/tasks/hooks/useTaskContentTranslations";
 import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
 import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
@@ -78,6 +79,7 @@ export default function Tasks() {
   const { user } = useAuth();
   const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
+  const translations = useTaskContentTranslations(tasks);
   const visibleTasks = useMemo(
     () =>
       tasks.filter((task) =>
@@ -269,6 +271,7 @@ export default function Tasks() {
                   dueBadge={dueBadge}
                   highlighted={highlightedTaskId === task.id}
                   selectionHandlers={selectionHandlers}
+                  translation={translations.get(task.id) ?? null}
                 />
               );
             })}
@@ -305,6 +308,7 @@ export default function Tasks() {
             open={!!selectedTask}
             onClose={closeTask}
             onTaskUpdate={(updatedTask) => openTask(updatedTask.id)}
+            translation={translations.get(selectedTask.id) ?? null}
           />
         </Suspense>
       )}

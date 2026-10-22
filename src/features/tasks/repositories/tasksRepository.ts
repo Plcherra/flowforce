@@ -2,10 +2,17 @@ import { z } from "zod";
 
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  Json,
   Tables,
   TablesInsert,
 } from "@/integrations/supabase/public-types";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { retrySupabaseQuery } from "@/utils/retry";
+import { scheduleTaskContentTranslation } from "@/features/tasks/scheduleTaskContent";
+import {
+  taskContentTouches,
+  withTaskSourceLocale,
+} from "@/features/tasks/taskContentFields";
 
 export type TaskRow = Tables<"tasks">;
 export type TaskInsert = TablesInsert<"tasks">;
@@ -176,31 +183,62 @@ function toTaskInsert(taskData: TaskWriteInput): TaskInsert {
   };
 }
 
-export async function insertTask(taskData: TaskWriteInput): Promise<TaskRow> {
+export async function insertTask(
+  taskData: TaskWriteInput,
+  sourceLocale?: AppLanguage,
+): Promise<TaskRow> {
   // Ensure company_id is set for security
   if (!taskData.company_id) {
     throw new Error("company_id is required when creating a task");
   }
 
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert(toTaskInsert(taskData))
-    .select()
-    .single();
+  const row = toTaskInsert(taskData);
+  if (sourceLocale && taskContentTouches(row)) {
+    row.links = withTaskSourceLocale(row.links, sourceLocale) as Json;
+  }
+
+  const { data, error } = await supabase.from("tasks").insert(row).select().single();
 
   if (error) {
     throw error;
   }
 
-  return taskRowSchema.parse(data);
+  const created = taskRowSchema.parse(data);
+  if (sourceLocale && taskContentTouches(row)) {
+    scheduleTaskContentTranslation({
+      companyId: taskData.company_id,
+      sourceId: created.id,
+      sourceLocale,
+      title: typeof row.title === "string" ? row.title : null,
+      description: typeof row.description === "string" ? row.description : null,
+    });
+  }
+  return created;
 }
 
 export async function updateTaskRow(
   id: string,
   updates: Partial<Omit<TaskRow, "id">>,
   companyId?: string | null,
+  sourceLocale?: AppLanguage,
 ): Promise<TaskRow> {
-  let query = supabase.from("tasks").update(updates).eq("id", id);
+  const nextUpdates = { ...updates };
+  const touchesContent = taskContentTouches(updates);
+  if (sourceLocale && touchesContent && companyId) {
+    let links = updates.links;
+    if (links === undefined) {
+      const { data, error: readError } = await supabase
+        .from("tasks")
+        .select("links")
+        .eq("id", id)
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (readError) throw readError;
+      links = data?.links ?? null;
+    }
+    nextUpdates.links = withTaskSourceLocale(links, sourceLocale) as Json;
+  }
+  let query = supabase.from("tasks").update(nextUpdates).eq("id", id);
 
   // Add company_id filter if provided for security
   if (companyId) {
@@ -215,6 +253,17 @@ export async function updateTaskRow(
 
   if (!data) {
     throw new Error("Task not found or access denied");
+  }
+
+  if (sourceLocale && touchesContent && companyId) {
+    scheduleTaskContentTranslation({
+      companyId,
+      sourceId: id,
+      sourceLocale,
+      title: typeof nextUpdates.title === "string" ? nextUpdates.title : null,
+      description:
+        typeof nextUpdates.description === "string" ? nextUpdates.description : null,
+    });
   }
 
   return taskRowSchema.parse(data);
