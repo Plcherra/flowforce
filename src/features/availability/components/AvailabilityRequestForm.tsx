@@ -28,17 +28,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  RepeatPatternEditor,
+  repeatChoiceKey,
+  type RepeatEditorValue,
+} from "@/features/availability/components/RepeatPatternEditor";
 import {
-  REPEAT_CHOICES,
-  patternFromChoice,
-  type RepeatChoice,
+  applyChoiceToDays,
+  availabilityAnchorDate,
+  choiceFromPattern,
+  type RepeatPattern,
 } from "@/features/scheduling/utils/repeatPattern";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,9 +77,10 @@ export interface AvailabilityRequestFormProps {
   employeeId: string;
   weekStart: string; // ISO string (Monday)
   initialAvailability: AvailabilityGrid;
+  initialRepeats?: Record<number, RepeatPattern | null>;
   onSaveDirect?: (
     nextAvailability: AvailabilityGrid,
-    repeat?: ReturnType<typeof patternFromChoice>,
+    repeats?: Record<number, RepeatPattern | null>,
   ) => Promise<void>;
 }
 
@@ -114,15 +115,33 @@ const cloneGrid = (grid: AvailabilityGrid): AvailabilityGrid => {
   return next;
 };
 
+const editorForPattern = (
+  weekStart: string,
+  day: number,
+  pattern: RepeatPattern | null,
+): RepeatEditorValue => ({
+  choice: choiceFromPattern(pattern),
+  interval: pattern ? String(pattern.interval) : "1",
+  unit: pattern?.unit ?? "days",
+  anchor: pattern?.anchor ?? availabilityAnchorDate(weekStart, day) ?? weekStart,
+});
+
 export function AvailabilityRequestForm({
   orgId,
   employeeId,
   weekStart,
   initialAvailability,
+  initialRepeats,
   onSaveDirect,
 }: AvailabilityRequestFormProps) {
   const { t } = useTranslation();
-  const [repeatChoice, setRepeatChoice] = useState<RepeatChoice>("none");
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const [patterns, setPatterns] = useState<Record<number, RepeatPattern | null>>(
+    () => ({ ...(initialRepeats ?? {}) }),
+  );
+  const [editor, setEditor] = useState<RepeatEditorValue>(() =>
+    editorForPattern(weekStart, 0, null),
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -367,6 +386,55 @@ export function AvailabilityRequestForm({
     () => hashGrid(editingGrid) !== hashGrid(initialAvailability),
     [editingGrid, initialAvailability],
   );
+  const repeatDirty = useMemo(
+    () => JSON.stringify(patterns) !== JSON.stringify(initialRepeats ?? {}),
+    [initialRepeats, patterns],
+  );
+  const updateEditor = (next: RepeatEditorValue) => {
+    setEditor(next);
+    if (selectedDays.length === 0) return;
+    setPatterns((current) =>
+      applyChoiceToDays(
+        current,
+        selectedDays,
+        next.choice,
+        (day) => availabilityAnchorDate(weekStart, day) ?? weekStart,
+        {
+          interval: Math.floor(Number(next.interval)) || 1,
+          unit: next.unit,
+          anchor: next.anchor,
+        },
+      ),
+    );
+  };
+  const toggleRepeatDay = (day: number, checked: boolean) => {
+    setSelectedDays((current) =>
+      checked
+        ? Array.from(new Set([...current, day]))
+        : current.filter((item) => item !== day),
+    );
+    if (!checked) return;
+    if (editor.choice === "none") {
+      setEditor(editorForPattern(weekStart, day, patterns[day] ?? null));
+      return;
+    }
+    setPatterns((current) =>
+      applyChoiceToDays(
+        current,
+        [day],
+        editor.choice,
+        (index) => availabilityAnchorDate(weekStart, index) ?? weekStart,
+        {
+          interval: Math.floor(Number(editor.interval)) || 1,
+          unit: editor.unit,
+          anchor:
+            editor.choice === "custom"
+              ? editor.anchor
+              : availabilityAnchorDate(weekStart, day) ?? weekStart,
+        },
+      ),
+    );
+  };
 
   const diffSummary = useMemo(() => {
     const diff: { day: string; added: number[]; removed: number[] }[] = [];
@@ -421,10 +489,7 @@ export function AvailabilityRequestForm({
       if (!onSaveDirect) {
         throw new Error("Direct save handler not provided");
       }
-      await onSaveDirect(
-        editingGrid,
-        patternFromChoice(repeatChoice, weekStart),
-      );
+      await onSaveDirect(editingGrid, patterns);
     },
     onSuccess: () => {
       toast({
@@ -453,7 +518,7 @@ export function AvailabilityRequestForm({
           requestedRange: { start: requestStart, end: requestEnd },
           reason: requestReason,
           desiredAvailability: editingGrid,
-          repeat: patternFromChoice(repeatChoice, weekStart),
+          repeats: patterns,
         },
         status: "pending",
       };
@@ -624,7 +689,22 @@ export function AvailabilityRequestForm({
                   data-testid={`availability-day-${label.toLowerCase()}`}
                   className="flex flex-col gap-2 rounded-md border px-3 py-2 sm:flex-row sm:items-center"
                 >
+                  <Checkbox
+                    checked={selectedDays.includes(dayIndex)}
+                    disabled={disabled}
+                    data-testid={`availability-repeat-check-${label.toLowerCase()}`}
+                    aria-label={`${label} repeat`}
+                    onCheckedChange={(checked) =>
+                      toggleRepeatDay(dayIndex, checked === true)
+                    }
+                  />
                   <span className="w-12 text-sm font-medium">{label}</span>
+                  <span
+                    className="text-xs text-muted-foreground"
+                    data-testid={`availability-repeat-label-${label.toLowerCase()}`}
+                  >
+                    {t(repeatChoiceKey(choiceFromPattern(patterns[dayIndex] ?? null)))}
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"
@@ -731,30 +811,22 @@ export function AvailabilityRequestForm({
               <>
             <Button
               variant="outline"
-              onClick={() => setEditingGrid(cloneGrid(initialAvailability))}
-              disabled={!hasChanges}
+              onClick={() => {
+                setEditingGrid(cloneGrid(initialAvailability));
+                setPatterns({ ...(initialRepeats ?? {}) });
+                setSelectedDays([]);
+                setEditor(editorForPattern(weekStart, 0, null));
+              }}
+              disabled={!hasChanges && !repeatDirty}
             >{t("forms.reset")}</Button>
-            <div className="grid gap-1">
-              <Label>{t("schedule.repeats")}</Label>
-              <Select
-                value={repeatChoice}
-                onValueChange={(value) => setRepeatChoice(value as RepeatChoice)}
-              >
-                <SelectTrigger className="h-8 w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {REPEAT_CHOICES.map((choice) => (
-                    <SelectItem key={choice.id} value={choice.id}>
-                      {choice.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <RepeatPatternEditor
+              value={editor}
+              onChange={updateEditor}
+              disabled={!directEditAllowed}
+            />
             <Button
               onClick={() => directSave.mutate()}
-              disabled={!directEditAllowed || (!hasChanges && repeatChoice === "none")}
+              disabled={!directEditAllowed || (!hasChanges && !repeatDirty)}
             >{t("forms.saveChanges")}</Button>
             {lockInfo?.availabilityChoice === "fixed" ? (
               <Button

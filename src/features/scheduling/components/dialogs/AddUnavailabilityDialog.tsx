@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
-  REPEAT_CHOICES,
-  patternFromChoice,
-  type RepeatChoice,
-} from "@/features/scheduling/utils/repeatPattern";
+  RepeatPatternEditor,
+  type RepeatEditorValue,
+} from "@/features/availability/components/RepeatPatternEditor";
+import { patternFromChoice } from "@/features/scheduling/utils/repeatPattern";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -68,16 +68,26 @@ export function AddUnavailabilityDialog({
   onSubmit,
 }: AddUnavailabilityDialogProps) {
   const { t } = useTranslation();
-  const [repeat, setRepeat] = useState<RepeatChoice>("none");
+  const [repeat, setRepeat] = useState<RepeatEditorValue>({
+    choice: "none",
+    interval: "1",
+    unit: "days",
+    anchor: start.slice(0, 10),
+  });
   const handleSubmit = async () => {
     if (!userId || !start || !end) return;
-    const anchor = start.slice(0, 10);
+    const anchor = (
+      repeat.choice === "custom" && repeat.anchor ? repeat.anchor : start
+    ).slice(0, 10);
     const success = await onSubmit({
       userId,
       start: new Date(start).toISOString(),
       end: new Date(end).toISOString(),
       reason: reason || null,
-      repeat: patternFromChoice(repeat, anchor),
+      repeat: patternFromChoice(repeat.choice, anchor, {
+        interval: Math.floor(Number(repeat.interval)) || 1,
+        unit: repeat.unit,
+      }),
     });
     if (success) {
       onOpenChange(false);
@@ -85,7 +95,12 @@ export function AddUnavailabilityDialog({
       onStartChange("");
       onEndChange("");
       onReasonChange("");
-      setRepeat("none");
+      setRepeat({
+        choice: "none",
+        interval: "1",
+        unit: "days",
+        anchor: "",
+      });
     }
   };
 
@@ -129,21 +144,7 @@ export function AddUnavailabilityDialog({
               />
             </div>
           </div>
-          <div>
-            <Label>{t("schedule.repeats")}</Label>
-            <Select value={repeat} onValueChange={(value) => setRepeat(value as RepeatChoice)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-background border shadow-lg">
-                {REPEAT_CHOICES.map((choice) => (
-                  <SelectItem key={choice.id} value={choice.id}>
-                    {choice.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <RepeatPatternEditor value={repeat} onChange={setRepeat} />
           <div>
             <Label>{t("schedule.reason")}</Label>
             <Input

@@ -25,6 +25,10 @@ import {
   rangesFromGrid,
   type StaffAvailabilityRow,
 } from "@/features/availability/utils/availabilityUtils";
+import {
+  parseRepeatPattern,
+  type RepeatPattern,
+} from "@/features/scheduling/utils/repeatPattern";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useScheduling } from "@/contexts/SchedulingContext";
@@ -69,7 +73,7 @@ export function PersonalAvailabilityPanel({
       const { data, error } = await supabase
         .from("staff_availability")
         .select(
-          "id, user_id, day_of_week, start_time, end_time, week_start_date",
+          "id, user_id, day_of_week, start_time, end_time, week_start_date, recurrence",
         )
         .eq("user_id", employeeId)
         .eq("week_start_date", weekStart);
@@ -83,15 +87,20 @@ export function PersonalAvailabilityPanel({
     return cloneGrid(gridFromAvailabilityRows(availabilityQuery.data));
   }, [availabilityQuery.data]);
 
+  const initialRepeats = useMemo<Record<number, RepeatPattern | null>>(() => {
+    const repeats: Record<number, RepeatPattern | null> = {};
+    for (const row of availabilityQuery.data ?? []) {
+      if (row.day_of_week == null) continue;
+      const pattern = parseRepeatPattern(row.recurrence);
+      if (pattern) repeats[row.day_of_week] = pattern;
+    }
+    return repeats;
+  }, [availabilityQuery.data]);
+
   const handleDirectSave = useCallback(
     async (
       nextGrid: AvailabilityGrid,
-      repeat?: {
-        frequency: "daily" | "weekly" | "monthly" | "custom";
-        interval: number;
-        unit: "days" | "weeks";
-        anchor: string;
-      } | null,
+      repeats?: Record<number, RepeatPattern | null>,
     ) => {
       if (!employeeId) {
         throw new Error("We need your profile details to save availability.");
@@ -110,24 +119,38 @@ export function PersonalAvailabilityPanel({
         );
       }
 
-      if (ranges.length > 0) {
-        const insertRows = ranges.map((range) => ({
+      const daysWithHours = new Set(ranges.map((range) => range.dayOfWeek));
+      const insertRows = ranges.map((range) => ({
+        user_id: employeeId,
+        day_of_week: range.dayOfWeek,
+        start_time: availabilityTimestamp(
+          weekStart,
+          range.dayOfWeek,
+          range.startTime,
+        ),
+        end_time: availabilityTimestamp(
+          weekStart,
+          range.dayOfWeek,
+          range.endTime,
+        ),
+        week_start_date: weekStart,
+        is_preferred: true,
+        recurrence: repeats?.[range.dayOfWeek] ?? null,
+      }));
+      for (let day = 0; day < 7; day += 1) {
+        const pattern = repeats?.[day];
+        if (!pattern || daysWithHours.has(day)) continue;
+        insertRows.push({
           user_id: employeeId,
-          day_of_week: range.dayOfWeek,
-          start_time: availabilityTimestamp(
-            weekStart,
-            range.dayOfWeek,
-            range.startTime,
-          ),
-          end_time: availabilityTimestamp(
-            weekStart,
-            range.dayOfWeek,
-            range.endTime,
-          ),
+          day_of_week: day,
+          start_time: null,
+          end_time: null,
           week_start_date: weekStart,
-          is_preferred: true,
-          recurrence: repeat ?? null,
-        }));
+          is_preferred: false,
+          recurrence: pattern,
+        });
+      }
+      if (insertRows.length > 0) {
         const insertResult = await supabase
           .from("staff_availability")
           .insert(insertRows);
@@ -264,6 +287,7 @@ export function PersonalAvailabilityPanel({
           employeeId={employeeId}
           weekStart={weekStart}
           initialAvailability={initialGrid}
+          initialRepeats={initialRepeats}
           onSaveDirect={handleDirectSave}
         />
       </CardContent>

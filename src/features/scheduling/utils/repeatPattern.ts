@@ -14,24 +14,47 @@ export type RepeatChoice =
   | "weekly"
   | "monthly"
   | "every-2-weeks"
-  | "every-15-days";
+  | "every-15-days"
+  | "custom";
 
 export const REPEAT_CHOICES: Array<{ id: RepeatChoice; label: string }> = [
   { id: "none", label: "Does not repeat" },
   { id: "daily", label: "Daily" },
   { id: "weekly", label: "Weekly" },
   { id: "monthly", label: "Monthly" },
-  { id: "every-2-weeks", label: "Every 2 weeks" },
+  { id: "every-2-weeks", label: "Every 2 weeks (14 days)" },
   { id: "every-15-days", label: "Every 15 days" },
+  { id: "custom", label: "Custom" },
 ];
 
 const DAY_MS = 86_400_000;
 
+export function customPattern(input: {
+  interval: number;
+  unit: RepeatUnit;
+  anchor: string;
+}): RepeatPattern | null {
+  const interval = Math.floor(Number(input.interval));
+  if (!Number.isFinite(interval) || interval < 1) return null;
+  if (input.unit !== "days" && input.unit !== "weeks") return null;
+  const anchor = input.anchor.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(anchor)) return null;
+  return { frequency: "custom", interval, unit: input.unit, anchor };
+}
+
 export function patternFromChoice(
   choice: RepeatChoice,
   anchor: string,
+  custom?: { interval: number; unit: RepeatUnit },
 ): RepeatPattern | null {
   if (choice === "none") return null;
+  if (choice === "custom") {
+    return customPattern({
+      interval: custom?.interval ?? 1,
+      unit: custom?.unit ?? "days",
+      anchor,
+    });
+  }
   if (choice === "daily") {
     return { frequency: "daily", interval: 1, unit: "days", anchor };
   }
@@ -45,6 +68,63 @@ export function patternFromChoice(
     return { frequency: "custom", interval: 2, unit: "weeks", anchor };
   }
   return { frequency: "custom", interval: 15, unit: "days", anchor };
+}
+
+export function choiceFromPattern(pattern: RepeatPattern | null): RepeatChoice {
+  if (!pattern) return "none";
+  if (pattern.frequency === "daily") return "daily";
+  if (pattern.frequency === "monthly") return "monthly";
+  if (pattern.frequency === "weekly" && pattern.interval === 1) return "weekly";
+  if (pattern.frequency === "custom" && pattern.unit === "weeks" && pattern.interval === 2) {
+    return "every-2-weeks";
+  }
+  if (pattern.frequency === "custom" && pattern.unit === "days" && pattern.interval === 15) {
+    return "every-15-days";
+  }
+  if (pattern.frequency === "custom") return "custom";
+  return "none";
+}
+
+export function applyChoiceToDays(
+  current: Record<number, RepeatPattern | null>,
+  selectedDays: number[],
+  choice: RepeatChoice,
+  dayAnchor: (day: number) => string,
+  custom?: { interval: number; unit: RepeatUnit; anchor: string },
+): Record<number, RepeatPattern | null> {
+  const next = { ...current };
+  for (const day of selectedDays) {
+    if (choice === "none") {
+      next[day] = null;
+      continue;
+    }
+    if (choice === "custom") {
+      next[day] = customPattern({
+        interval: custom?.interval ?? 1,
+        unit: custom?.unit ?? "days",
+        anchor: custom?.anchor || dayAnchor(day),
+      });
+      continue;
+    }
+    next[day] = patternFromChoice(choice, dayAnchor(day));
+  }
+  return next;
+}
+
+export function nextThreeDates(
+  pattern: RepeatPattern | null,
+  start: string,
+): string[] {
+  const anchor = start.slice(0, 10);
+  const dates: string[] = [];
+  const cursor = parseUtcDate(anchor);
+  if (Number.isNaN(cursor.getTime())) return [];
+  for (let step = 0; step < 800 && dates.length < 3; step += 1) {
+    const target = formatUtcDate(cursor);
+    if (occursOn(pattern, anchor, target)) dates.push(target);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return dates;
 }
 
 export function parseRepeatPattern(value: unknown): RepeatPattern | null {

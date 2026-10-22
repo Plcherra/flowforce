@@ -4,8 +4,8 @@ export interface StaffAvailabilityRow {
   id: string;
   user_id: string | null;
   day_of_week: number | null;
-  start_time: string;
-  end_time: string;
+  start_time: string | null;
+  end_time: string | null;
   week_start_date: string | null;
   recurrence?: unknown;
 }
@@ -18,7 +18,8 @@ export const cloneGrid = (grid: AvailabilityGrid): AvailabilityGrid => {
   return next;
 };
 
-const hourFromStoredTime = (value: string) => {
+const hourFromStoredTime = (value: string | null | undefined) => {
+  if (!value) return Number.NaN;
   const isoMatch = value.match(/T(\d{2}):/);
   if (isoMatch) return Number(isoMatch[1]);
   const clockMatch = value.match(/^(\d{1,2}):/);

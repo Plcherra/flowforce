@@ -82,7 +82,7 @@ Prove: `src/features/availability/utils/dayAvailabilityState.test.ts` maps empty
 
 ### Phase 2 — Repeat per day or selection
 
-- [ ] Let a repeat apply to one day or a selection of days, with a custom every-N choice and a three-date preview.
+- [x] Let a repeat apply to one day or a selection of days, with a custom every-N choice and a three-date preview.
 
 Rules:
 
@@ -295,6 +295,22 @@ Phone steps for Pedro:
 2. A legend above the weekday rows says each day is one of three states. Each day has Available all day, Unavailable, and Available at set hours, and only one is selected. There is no All day on button and no Off button.
 3. Set a day to Unavailable, then change From or To. That day should switch to Available at set hours and keep the range you typed.
 4. Available all day should not show From and To. Reset still clears unsaved edits.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 2 Repeat per day or selection
+
+Shipped: Repeat belongs to one day or to the days that are checked, not to the whole week. The choices are Does not repeat, Daily, Weekly, Monthly, Every 2 weeks (14 days), Every 15 days, and Custom. Custom asks for N, days or weeks, and a start date. The preview lists the next 3 dates. Save writes `staff_availability.recurrence` only on the checked days. A day set to Does not repeat stores null. An Unavailable day with a repeat stores one row with that recurrence and no hours. Add unavailability uses the same labels, custom fields, and preview, and still saves one pattern for the entry it creates.
+
+Proven: `src/features/scheduling/utils/repeatPattern.test.ts` passed through `node scripts/test-schedule-availability-engine.mjs`. Every 2 weeks from a Sunday occurs that Sunday and 14 days later, and not 7 days later and not 15 days later. Every 15 days occurs on day 15 and not on day 14. Custom every 10 days occurs on the start date, 10 days later, and 20 days later. The next 3 dates for every 15 days are the start date, plus 15 days, and plus 30 days. A Sunday pattern does not occur on Monday. Applying every 15 days to Sunday leaves Monday as Does not repeat. `npm run check:i18n` printed 4599 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk, set the language to English, and open My Availability on fixed availability.
+2. Each day shows its own repeat choice. Check only Sunday and set Repeats to Every 15 days. The preview under the control lists that Sunday and the next two dates, 15 and 30 days later. Monday still says Does not repeat.
+3. Open the repeat list. Every 2 weeks (14 days) and Every 15 days are both there. Choose Custom, set N to 10 and Days, and set a start date. The preview shows that start date, 10 days later, and 20 days later.
+4. Open Add unavailability. The same list, the custom fields, and the three-date preview are there. Saving still creates one unavailability entry.
 
 Blockers: none. No migration.
 
