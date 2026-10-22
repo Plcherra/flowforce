@@ -239,7 +239,7 @@ Prove: Extend `timeOffPolicy.test.ts` with two people on one policy. Run it with
 
 ### Phase 9 — Edge cases on the existing fit rules
 
-- [ ] Lock the week cap, rejected requests, and who a policy applies to.
+- [x] Lock the week cap, rejected requests, and who a policy applies to.
 
 Rules:
 
@@ -407,6 +407,22 @@ Phone steps for Pedro:
 2. Have two people each request one different Weekend day in the same month, on Weekend.
 3. Open Team requests. Each person's row shows that person's Weekend balance in days. Person A's remaining days do not drop because of person B's request. With one day each, each row shows 1 day left this month.
 4. A request with no policy stays on its row without a policy balance. Your own balance lines stay at the top of Team requests. On My time off, the 25-day allowance still shows when no policy applies to you.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 9 Edge cases on the existing fit rules
+
+Shipped: no product code. The existing `requestFitsPolicy` and `remainingBalances` already cover the week cap, a policy with week, month, and year caps together, denied and rejected usage, pending usage, who a policy applies to, and a range that mixes an eligible day with an ineligible day. Weekend is still Saturday and Sunday, 2 days a month, and 24 days a year. Weekday is still 7 days of notice and 90 days a year.
+
+Proven: `src/features/scheduling/utils/timeOffPolicy.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. A week cap rejects another eligible day in the same Sunday-start week and allows a day in the next week. One policy with a week cap, a month cap, and a year cap rejects the request that breaks any one of them. Denied and rejected usage does not reduce remaining. Pending usage does. `appliesToUserIds` allows the listed person and refuses a different person. Empty roles and people still means everyone. A Sunday-to-Monday range is rejected. `npm run check:i18n` printed 4625 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on `timeOffPolicy.test.ts`. Playwright was not run because `SUPABASE_SERVICE_ROLE_KEY` is not set in this environment.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk as someone who can approve time off. Open Company policies and confirm Weekend is still Saturday and Sunday, 2 days a month, and 24 days a year. Weekday is still Monday through Friday, 7 days of notice, and 90 days a year.
+2. On a policy with a week cap of 1, request one eligible day, then another eligible day in that same week. The second request is refused. A day in the next week is allowed.
+3. Deny or reject a request. That usage does not reduce the remaining balance. A pending request does.
+4. Limit a policy to one person. That person can request it. A different person cannot. Leave roles and people empty and the policy still applies to everyone. A range that includes both an allowed day and a day the policy does not cover is refused.
 
 Blockers: none. No migration.
 

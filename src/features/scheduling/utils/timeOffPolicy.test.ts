@@ -240,4 +240,182 @@ export function runTimeOffPolicyTests() {
     }),
     null,
   );
+
+  assert.deepEqual(weekend.eligibleWeekdays, [0, 6]);
+  assert.equal(weekend.capMonth, 2);
+  assert.equal(weekend.capYear, 24);
+  assert.equal(weekday.noticeDays, 7);
+  assert.equal(weekday.capYear, 90);
+
+  const weekCap: TimeOffPolicy = {
+    ...weekend,
+    id: "week-cap",
+    capWeek: 1,
+    capMonth: null,
+    capYear: null,
+  };
+  const sameWeek = requestFitsPolicy({
+    policy: weekCap,
+    startDate: "2026-10-10",
+    endDate: "2026-10-10",
+    usage: [
+      {
+        policyId: "week-cap",
+        startDate: "2026-10-04",
+        endDate: "2026-10-04",
+        status: "approved",
+      },
+    ],
+    asOf: "2026-10-01",
+  });
+  assert.equal(sameWeek.ok, false);
+  const nextWeek = requestFitsPolicy({
+    policy: weekCap,
+    startDate: "2026-10-11",
+    endDate: "2026-10-11",
+    usage: [
+      {
+        policyId: "week-cap",
+        startDate: "2026-10-04",
+        endDate: "2026-10-04",
+        status: "approved",
+      },
+    ],
+    asOf: "2026-10-01",
+  });
+  assert.equal(nextWeek.ok, true);
+
+  const allCaps: TimeOffPolicy = {
+    id: "all-caps",
+    name: "All caps",
+    unit: "days",
+    capWeek: 1,
+    capMonth: 2,
+    capYear: 3,
+    eligibleWeekdays: [0, 1, 2, 3, 4, 5, 6],
+    noticeDays: 0,
+    appliesToRoleIds: [],
+    appliesToUserIds: [],
+  };
+  const usedDay = (startDate: string): TimeOffUsage => ({
+    policyId: "all-caps",
+    startDate,
+    endDate: startDate,
+    status: "approved",
+  });
+  assert.equal(
+    requestFitsPolicy({
+      policy: allCaps,
+      startDate: "2026-01-05",
+      endDate: "2026-01-05",
+      usage: [usedDay("2026-01-04")],
+      asOf: "2026-01-01",
+    }).ok,
+    false,
+  );
+  assert.equal(
+    requestFitsPolicy({
+      policy: allCaps,
+      startDate: "2026-01-18",
+      endDate: "2026-01-18",
+      usage: [usedDay("2026-01-04"), usedDay("2026-01-11")],
+      asOf: "2026-01-01",
+    }).ok,
+    false,
+  );
+  assert.equal(
+    requestFitsPolicy({
+      policy: allCaps,
+      startDate: "2026-02-08",
+      endDate: "2026-02-08",
+      usage: [usedDay("2026-01-04"), usedDay("2026-01-11"), usedDay("2026-02-01")],
+      asOf: "2026-01-01",
+    }).ok,
+    false,
+  );
+
+  const ignored: TimeOffUsage[] = [
+    {
+      policyId: "weekend",
+      startDate: "2026-10-03",
+      endDate: "2026-10-03",
+      status: "denied",
+    },
+    {
+      policyId: "weekend",
+      startDate: "2026-10-04",
+      endDate: "2026-10-04",
+      status: "rejected",
+    },
+  ];
+  const afterIgnored = remainingBalances({
+    policies: [weekend],
+    usage: ignored,
+    asOf: "2026-10-01",
+  });
+  assert.equal(afterIgnored[0]?.month?.remaining, 2);
+  const afterPending = remainingBalances({
+    policies: [weekend],
+    usage: [
+      {
+        policyId: "weekend",
+        startDate: "2026-10-03",
+        endDate: "2026-10-03",
+        status: "pending",
+      },
+    ],
+    asOf: "2026-10-01",
+  });
+  assert.equal(afterPending[0]?.month?.remaining, 1);
+
+  const listedPeople: TimeOffPolicy = {
+    ...weekend,
+    id: "listed-people",
+    appliesToRoleIds: [],
+    appliesToUserIds: ["person-a"],
+  };
+  assert.equal(policyAppliesTo(listedPeople, "person-a", null), true);
+  assert.equal(policyAppliesTo(listedPeople, "person-b", null), false);
+  assert.equal(
+    requestFitsPolicy({
+      policy: listedPeople,
+      startDate: "2026-10-03",
+      endDate: "2026-10-03",
+      usage: [],
+      userId: "person-a",
+      asOf: "2026-10-01",
+    }).ok,
+    true,
+  );
+  assert.equal(
+    requestFitsPolicy({
+      policy: listedPeople,
+      startDate: "2026-10-03",
+      endDate: "2026-10-03",
+      usage: [],
+      userId: "person-b",
+      asOf: "2026-10-01",
+    }).ok,
+    false,
+  );
+  assert.equal(
+    requestFitsPolicy({
+      policy: weekend,
+      startDate: "2026-10-03",
+      endDate: "2026-10-03",
+      usage: [],
+      userId: "person-b",
+      asOf: "2026-10-01",
+    }).ok,
+    true,
+  );
+
+  const mixedDays = requestFitsPolicy({
+    policy: weekend,
+    startDate: "2026-10-04",
+    endDate: "2026-10-05",
+    usage: [],
+    asOf: "2026-10-01",
+  });
+  assert.equal(mixedDays.ok, false);
 }
