@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Lightbulb, Sparkles } from "lucide-react";
 import {
   Card,
@@ -24,6 +25,7 @@ export function RecommendationsPanel({
   courseById,
   onEnroll,
 }: RecommendationsPanelProps) {
+  const { t } = useTranslation();
   if (recommendations.length === 0) {
     return null;
   }
@@ -33,10 +35,10 @@ export function RecommendationsPanel({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Sparkles className="h-5 w-5 text-primary" />
-          Co-Pilot suggestions
+          {t("learning.coPilotSuggestions")}
         </CardTitle>
         <CardDescription>
-          Courses that strengthen your current growth plan.
+          {t("learning.coursesThatStrengthenYourCurrentGrowthPlan")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -69,7 +71,7 @@ export function RecommendationsPanel({
                 </div>
               </div>
               <Button size="sm" onClick={() => void onEnroll(course.id)}>
-                Enroll
+                {t("learning.enroll")}
               </Button>
             </div>
           );

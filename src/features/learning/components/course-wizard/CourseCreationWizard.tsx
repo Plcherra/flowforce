@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,7 @@ import { StepGeneralInfo } from "./StepGeneralInfo";
 import { StepRolesAndTargets } from "./StepRolesAndTargets";
 import { StepXPRewards } from "./StepXPRewards";
 import { StepSummary } from "./StepSummary";
+import { learningLabel, ROLE_LABEL_KEYS } from "@/features/learning/learningLabels";
 
 const CATEGORY_OPTIONS = [
   "Onboarding",
@@ -95,6 +97,7 @@ export function CourseCreationWizard({
   onCreate,
   loading = false,
 }: CourseCreationWizardProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [step, setStep] = useState<WizardStep>(0);
   const [form, setForm] = useState<WizardFormState>(initialState);
@@ -156,27 +159,27 @@ export function CourseCreationWizard({
   const steps = [
     {
       id: 0,
-      label: "General info",
-      title: "Launch new training",
-      description: "Set the basics for your course.",
+      label: t("learning.generalInfo"),
+      title: t("learning.launchNewTraining"),
+      description: t("learning.setTheBasics"),
     },
     {
       id: 1,
-      label: "Audience",
-      title: "Define audience",
-      description: "Target roles and certification behaviour.",
+      label: t("learning.audience"),
+      title: t("learning.defineAudience"),
+      description: t("learning.targetRolesAndCertification"),
     },
     {
       id: 2,
-      label: "XP & modules",
-      title: "Configure XP rewards",
-      description: "Add modules and XP details.",
+      label: t("learning.xpAndModules"),
+      title: t("learning.configureXpRewards"),
+      description: t("learning.addModulesAndXpDetails"),
     },
     {
       id: 3,
-      label: "Summary",
-      title: "Review and launch",
-      description: "Confirm everything looks right.",
+      label: t("learning.summary"),
+      title: t("learning.reviewAndLaunch"),
+      description: t("learning.confirmEverythingLooksRight"),
     },
   ];
 
@@ -189,8 +192,8 @@ export function CourseCreationWizard({
   const handleAddModule = (module: CourseModuleInput) => {
     if (!module.title.trim()) {
       toast({
-        title: "Module title required",
-        description: "Add a module title before saving it.",
+        title: t("learning.moduleTitleRequired"),
+        description: t("learning.addModuleTitleBeforeSaving"),
         variant: "destructive",
       });
       return;
@@ -228,8 +231,8 @@ export function CourseCreationWizard({
   const handleSubmit = async () => {
     if (form.modules.length === 0) {
       toast({
-        title: "Add at least one module",
-        description: "Courses need at least one module to publish.",
+        title: t("learning.addAtLeastOneModule"),
+        description: t("learning.coursesNeedAtLeastOneModule"),
         variant: "destructive",
       });
       return;
@@ -284,8 +287,14 @@ export function CourseCreationWizard({
               autoScheduleEligible={form.autoScheduleEligible}
               certificationOptions={certificationOptions}
               loadingCertifications={loadingCertifications}
-              roleOptions={ROLE_OPTIONS}
-              unlockOptions={ROLE_UNLOCK_OPTIONS}
+              roleOptions={ROLE_OPTIONS.map((option) => ({
+                ...option,
+                label: learningLabel(t, ROLE_LABEL_KEYS, option.value),
+              }))}
+              unlockOptions={ROLE_UNLOCK_OPTIONS.map((option) => ({
+                ...option,
+                label: learningLabel(t, ROLE_LABEL_KEYS, option.value),
+              }))}
               noCertificationValue={NO_CERTIFICATION_VALUE}
               onChange={(updates) => updateForm(updates)}
             />

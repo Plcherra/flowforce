@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCcw } from "lucide-react";
@@ -15,11 +16,12 @@ export function CertificationsHeader({
   title,
   description,
 }: CertificationsHeaderProps) {
+  const { t } = useTranslation();
   return (
     <header className="flex flex-col gap-4 rounded-2xl border bg-card/80 p-6 shadow-sm md:flex-row md:items-center md:justify-between">
       <div>
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          Certifications
+          {t("common.certifications")}
         </p>
         <h1 className="mt-1 text-3xl font-bold">{title}</h1>
         {description && (
@@ -27,7 +29,9 @@ export function CertificationsHeader({
         )}
       </div>
       <div className="flex items-center gap-3">
-        <Badge variant="outline">{loading ? "Syncing…" : "Live data"}</Badge>
+        <Badge variant="outline">
+          {loading ? t("learning.syncing") : t("learning.liveData")}
+        </Badge>
         <Button
           type="button"
           variant="outline"
@@ -36,7 +40,7 @@ export function CertificationsHeader({
           disabled={loading}
         >
           <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          <span className="sr-only">Refresh</span>
+          <span className="sr-only">{t("common.refresh")}</span>
         </Button>
       </div>
     </header>

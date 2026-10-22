@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ export function EmptyCertificationsState({
   title,
   description,
 }: EmptyCertificationsStateProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border-dashed">
       <CardHeader>
@@ -26,7 +28,7 @@ export function EmptyCertificationsState({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground">
-        Publish requirements or enroll employees to start tracking progress.
+        {t("learning.publishRequirementsOrEnrollEmployeesToStartTrackingProgress")}
       </CardContent>
     </Card>
   );

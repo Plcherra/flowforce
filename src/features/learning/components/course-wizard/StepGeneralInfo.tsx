@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -16,6 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { LearningDeliveryMode } from "@/types/learning";
+import {
+  CATEGORY_LABEL_KEYS,
+  learningLabel,
+} from "@/features/learning/learningLabels";
 
 interface StepGeneralInfoProps {
   title: string;
@@ -41,57 +46,58 @@ export function StepGeneralInfo({
   categories,
   onChange,
 }: StepGeneralInfoProps) {
+  const { t } = useTranslation();
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Course blueprint</CardTitle>
+        <CardTitle>{t("learning.courseBlueprint")}</CardTitle>
         <CardDescription>
-          Define how the course shows up in the catalog.
+          {t("learning.defineHowTheCourseShowsUpInTheCatalog")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="course-title">Title</Label>
+          <Label htmlFor="course-title">{t("schedule.title")}</Label>
           <Input
             id="course-title"
             value={title}
             onChange={(event) => onChange({ title: event.target.value })}
-            placeholder="Operations onboarding"
+            placeholder={t("learning.operationsOnboarding")}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="course-description">Description</Label>
+          <Label htmlFor="course-description">{t("tasks.description")}</Label>
           <Textarea
             id="course-description"
             value={description}
             onChange={(event) => onChange({ description: event.target.value })}
             rows={4}
-            placeholder="Outline the outcomes, prerequisites, or guidance for the learner."
+            placeholder={t("learning.outlineTheOutcomesPrerequisitesOrGuidanceForTheLearner")}
           />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Category</Label>
+            <Label>{t("dashboard.category")}</Label>
             <Select
               value={category}
               onValueChange={(value) => onChange({ category: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder={t("inventory.selectCategory")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option}
+                    {learningLabel(t, CATEGORY_LABEL_KEYS, option)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Delivery mode</Label>
+            <Label>{t("learning.deliveryMode")}</Label>
             <Select
               value={deliveryMode}
               onValueChange={(value) =>
@@ -99,12 +105,12 @@ export function StepGeneralInfo({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select delivery mode" />
+                <SelectValue placeholder={t("learning.selectDeliveryMode")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="self_paced">Self-paced</SelectItem>
-                <SelectItem value="live">Live cohort</SelectItem>
-                <SelectItem value="blended">Blended</SelectItem>
+                <SelectItem value="self_paced">{t("learning.selfPaced")}</SelectItem>
+                <SelectItem value="live">{t("learning.liveCohort")}</SelectItem>
+                <SelectItem value="blended">{t("learning.blended")}</SelectItem>
               </SelectContent>
             </Select>
           </div>

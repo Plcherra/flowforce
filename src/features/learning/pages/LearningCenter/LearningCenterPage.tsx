@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -22,6 +23,7 @@ const deriveTabFromSearch = (search: string): LearningTab | null => {
 };
 
 export function LearningCenterPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const [wizardOpen, setWizardOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<LearningTab>(
@@ -75,7 +77,7 @@ export function LearningCenterPage() {
     <div className="space-y-6 p-6">
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load learning data</AlertTitle>
+          <AlertTitle>{t("learning.unableToLoadLearningData")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

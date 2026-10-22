@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -9,6 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { LearningCatalogRecord } from "@/types/learning";
+import {
+  CATEGORY_LABEL_KEYS,
+  DELIVERY_LABEL_KEYS,
+  learningLabel,
+} from "@/features/learning/learningLabels";
 
 interface LearningCatalogProps {
   courses: LearningCatalogRecord[];
@@ -27,18 +33,19 @@ export function LearningCatalog({
   onCreateCourse,
   canCreateCourse,
 }: LearningCatalogProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold">Catalog</h2>
+          <h2 className="text-2xl font-semibold">{t("learning.catalog")}</h2>
           <p className="text-sm text-muted-foreground">
-            Courses available to enroll right now
+            {t("learning.coursesAvailableToEnrollRightNow")}
           </p>
         </div>
         {canCreateCourse && (
           <Button type="button" onClick={onCreateCourse}>
-            Create course
+            {t("learning.createCourse")}
           </Button>
         )}
       </div>
@@ -62,9 +69,9 @@ export function LearningCatalog({
       ) : courses.length === 0 ? (
         <Card className="border-dashed">
           <CardHeader>
-            <CardTitle>No courses found</CardTitle>
+            <CardTitle>{t("learning.noCoursesFound")}</CardTitle>
             <CardDescription>
-              Add a course to start building your learning catalog.
+              {t("learning.addACourseToStartBuildingYourLearningCatalog")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -77,23 +84,27 @@ export function LearningCatalog({
                 <CardHeader>
                   <CardTitle className="text-xl">{course.title}</CardTitle>
                   <CardDescription>
-                    {course.description ?? "No description provided."}
+                    {course.description ?? t("learning.noDescriptionProvided")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">{course.category}</Badge>
-                    <Badge variant="secondary">
-                      {course.deliveryMode.replace("_", " ")}
+                    <Badge variant="outline">
+                      {learningLabel(t, CATEGORY_LABEL_KEYS, course.category)}
                     </Badge>
-                    {recommended && <Badge>Recommended</Badge>}
+                    <Badge variant="secondary">
+                      {learningLabel(t, DELIVERY_LABEL_KEYS, course.deliveryMode)}
+                    </Badge>
+                    {recommended && <Badge>{t("learning.recommended")}</Badge>}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    XP Reward: {course.xpReward.toLocaleString()} · Estimated
-                    hours: {course.estimatedHours}
+                    {t("learning.xpRewardLine", {
+                      xp: course.xpReward.toLocaleString(),
+                      hours: course.estimatedHours,
+                    })}
                   </p>
                   <Button type="button" onClick={() => onEnroll?.(course.id)}>
-                    Enroll
+                    {t("learning.enroll")}
                   </Button>
                 </CardContent>
               </Card>

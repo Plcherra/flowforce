@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -64,6 +65,7 @@ export function StepRolesAndTargets({
   noCertificationValue,
   onChange,
 }: StepRolesAndTargetsProps) {
+  const { t } = useTranslation();
   const toggleTargetRole = (role: string) => {
     const next = targetRoles.includes(role)
       ? targetRoles.filter((value) => value !== role)
@@ -81,14 +83,14 @@ export function StepRolesAndTargets({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Audience & certifications</CardTitle>
+        <CardTitle>{t("learning.audienceCertifications")}</CardTitle>
         <CardDescription>
-          Target the right roles and connect certification unlocks.
+          {t("learning.targetTheRightRolesAndConnectCertificationUnlocks")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Target roles</Label>
+          <Label>{t("learning.targetRoles")}</Label>
           <div className="flex flex-wrap gap-2">
             {roleOptions.map((option) => (
               <Button
@@ -107,7 +109,7 @@ export function StepRolesAndTargets({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="level-requirement">Level requirement</Label>
+            <Label htmlFor="level-requirement">{t("learning.levelRequirement")}</Label>
             <Input
               id="level-requirement"
               type="number"
@@ -120,7 +122,7 @@ export function StepRolesAndTargets({
             />
           </div>
           <div className="space-y-2">
-            <Label>Auto-schedule eligible</Label>
+            <Label>{t("learning.autoScheduleEligible")}</Label>
             <div className="flex items-center gap-3 rounded-xl border p-3">
               <Switch
                 checked={autoScheduleEligible}
@@ -129,14 +131,14 @@ export function StepRolesAndTargets({
                 }
               />
               <p className="text-sm text-muted-foreground">
-                Allow Copilot to schedule this course automatically.
+                {t("learning.allowCopilotToScheduleThisCourseAutomatically")}
               </p>
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Linked certification</Label>
+          <Label>{t("learning.linkedCertification")}</Label>
           <Select
             value={certificationId ?? noCertificationValue}
             onValueChange={(value) =>
@@ -146,15 +148,15 @@ export function StepRolesAndTargets({
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select certification" />
+              <SelectValue placeholder={t("learning.selectCertification")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={noCertificationValue}>
-                No certification
+                {t("learning.noCertification")}
               </SelectItem>
               {loadingCertifications ? (
                 <SelectItem value="loading" disabled>
-                  Loading…
+                  {t("inventory.loading")}
                 </SelectItem>
               ) : (
                 certificationOptions.map((option) => (
@@ -168,7 +170,7 @@ export function StepRolesAndTargets({
         </div>
 
         <div className="space-y-2">
-          <Label>Role unlocks</Label>
+          <Label>{t("learning.roleUnlocks")}</Label>
           <div className="flex flex-wrap gap-2">
             {unlockOptions.map((option) => (
               <Badge

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -17,16 +18,16 @@ export function LearningAnalytics({
   metrics,
   loading,
 }: LearningAnalyticsProps) {
+  const { t } = useTranslation();
   if (!loading && metrics.length === 0) {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle>Learning analytics</CardTitle>
-          <CardDescription>No analytics to display</CardDescription>
+          <CardTitle>{t("learning.learningAnalytics")}</CardTitle>
+          <CardDescription>{t("learning.noAnalyticsToDisplay")}</CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Once employees enroll in courses, aggregated metrics will show up
-          here.
+          {t("learning.onceEmployeesEnrollInCoursesAggregatedMetricsWillShowUpHere")}
         </CardContent>
       </Card>
     );
@@ -35,8 +36,8 @@ export function LearningAnalytics({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Learning analytics</CardTitle>
-        <CardDescription>Course performance insights</CardDescription>
+        <CardTitle>{t("learning.learningAnalytics")}</CardTitle>
+        <CardDescription>{t("learning.coursePerformanceInsights")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {loading && metrics.length === 0

@@ -12,11 +12,11 @@ import { CertificationsHeader } from "./CertificationsHeader";
 import { CertificationList } from "./CertificationList";
 import { EmptyCertificationsState } from "./EmptyCertificationsState";
 
-const metricIcons: Record<string, string> = {
-  tasks: "Tasks completed",
-  goals: "Goals completed",
-  xp: "XP earned",
-  courses: "Courses finished",
+const metricLabelKeys: Record<string, string> = {
+  tasks: "certifications.requirementLabels.tasks",
+  goals: "certifications.requirementLabels.goals",
+  xp: "certifications.requirementLabels.xp",
+  courses: "learning.coursesFinished",
 };
 
 function MetricsGrid({
@@ -24,22 +24,23 @@ function MetricsGrid({
 }: {
   metrics: ReturnType<typeof useCertifications>["metrics"] | null;
 }) {
+  const { t } = useTranslation();
   if (!metrics) return null;
   const cards = [
     {
       key: "tasks",
-      label: metricIcons.tasks,
+      label: t(metricLabelKeys.tasks),
       value: metrics.completedTasks ?? 0,
     },
     {
       key: "goals",
-      label: metricIcons.goals,
+      label: t(metricLabelKeys.goals),
       value: metrics.completedGoals ?? 0,
     },
-    { key: "xp", label: metricIcons.xp, value: metrics.totalXp ?? 0 },
+    { key: "xp", label: t(metricLabelKeys.xp), value: metrics.totalXp ?? 0 },
     {
       key: "courses",
-      label: metricIcons.courses,
+      label: t(metricLabelKeys.courses),
       value: metrics.completedCourses ?? 0,
     },
   ];
@@ -74,16 +75,13 @@ export function CertificationsPage() {
         loading={loading}
         onRefresh={() => refresh?.()}
         title={t("certifications.title", "Certifications")}
-        description={t(
-          "certifications.description",
-          "Track skill unlocks and XP rewards",
-        )}
+        description={t("learning.trackSkillUnlocks")}
       />
 
       {error && (
         <Alert variant="destructive">
           <AlertTitle>
-            {t("certifications.errorTitle", "Unable to load certifications")}
+            {t("learning.unableToLoadCertifications")}
           </AlertTitle>
           <AlertDescription>
             {t(error, { defaultValue: error })}
@@ -95,14 +93,8 @@ export function CertificationsPage() {
 
       {certifications.length === 0 && !loading ? (
         <EmptyCertificationsState
-          title={t(
-            "certifications.emptyTitle",
-            "No certifications available yet",
-          )}
-          description={t(
-            "certifications.emptyDescription",
-            "Once requirements are published you will see eligible certifications here.",
-          )}
+          title={t("certifications.emptyState")}
+          description={t("learning.eligibleCertifications")}
         />
       ) : (
         <CertificationList certifications={certifications} loading={loading} />

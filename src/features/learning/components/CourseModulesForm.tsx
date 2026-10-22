@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import type { CourseModuleInput } from "@/types/learning";
+import {
+  learningLabel,
+  MODULE_TYPE_LABEL_KEYS,
+} from "@/features/learning/learningLabels";
 
 const MODULE_TYPES = [
   "Text Instruction",
@@ -61,6 +66,7 @@ const generateId = () =>
     : Math.random().toString(36).slice(2);
 
 export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
+  const { t } = useTranslation();
   const [newModule, setNewModule] = useState<ModuleDraft>(DEFAULT_STATE);
 
   const acceptsUpload = useMemo(
@@ -115,20 +121,20 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="module-title">Module title</Label>
+        <Label htmlFor="module-title">{t("learning.moduleTitle")}</Label>
         <Input
           id="module-title"
           value={newModule.title}
           onChange={(event) =>
             setNewModule((prev) => ({ ...prev, title: event.target.value }))
           }
-          placeholder="Example: Espresso calibration checklist"
+          placeholder={t("learning.exampleEspressoCalibrationChecklist")}
         />
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="module-type">Module type</Label>
+          <Label htmlFor="module-type">{t("learning.moduleType")}</Label>
           <Select
             value={newModule.type}
             onValueChange={(value) =>
@@ -139,19 +145,19 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
             }
           >
             <SelectTrigger id="module-type">
-              <SelectValue placeholder="Choose a module type" />
+              <SelectValue placeholder={t("learning.chooseAModuleType")} />
             </SelectTrigger>
             <SelectContent>
               {MODULE_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
-                  {type}
+                  {learningLabel(t, MODULE_TYPE_LABEL_KEYS, type)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="module-duration">Duration (minutes)</Label>
+          <Label htmlFor="module-duration">{t("learning.durationMinutes")}</Label>
           <Input
             id="module-duration"
             type="number"
@@ -166,7 +172,7 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="module-xp">XP reward</Label>
+          <Label htmlFor="module-xp">{t("learning.xpReward")}</Label>
           <Input
             id="module-xp"
             type="number"
@@ -183,7 +189,7 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="module-description">Instructions</Label>
+        <Label htmlFor="module-description">{t("learning.instructions")}</Label>
         <Textarea
           id="module-description"
           rows={4}
@@ -194,22 +200,22 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
               description: event.target.value,
             }))
           }
-          placeholder="Add instructions, prompts, or context for this activity."
+          placeholder={t("learning.addInstructionsPromptsOrContextForThisActivity")}
         />
       </div>
 
       {acceptsUpload && (
         <div className="space-y-2">
-          <Label>Attachments</Label>
+          <Label>{t("schedule.attachments")}</Label>
           <label
             htmlFor="module-assets"
             className="flex cursor-pointer items-center justify-between rounded-md border border-dashed p-4 text-sm text-muted-foreground hover:bg-muted/50"
           >
             <span className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
-              Upload reference files
+              {t("learning.uploadReferenceFiles")}
             </span>
-            <span className="text-xs">PDF, images, videos</span>
+            <span className="text-xs">{t("learning.pdfImagesVideos")}</span>
           </label>
           <input
             id="module-assets"
@@ -232,7 +238,7 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
                   <span>{asset.name}</span>
                   <button type="button" onClick={() => removeAsset(asset.id)}>
                     <Trash2 className="h-3 w-3" />
-                    <span className="sr-only">Remove asset</span>
+                    <span className="sr-only">{t("learning.removeAsset")}</span>
                   </button>
                 </Badge>
               ))}
@@ -242,7 +248,7 @@ export function CourseModulesForm({ onAdd }: CourseModulesFormProps) {
       )}
 
       <Button type="button" className="w-full" onClick={handleAdd}>
-        Add module
+        {t("learning.addModule")}
       </Button>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -7,6 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { CourseModuleInput, LearningDeliveryMode } from "@/types/learning";
+import {
+  CATEGORY_LABEL_KEYS,
+  DELIVERY_LABEL_KEYS,
+  learningLabel,
+  ROLE_LABEL_KEYS,
+} from "@/features/learning/learningLabels";
 
 interface StepSummaryProps {
   title: string;
@@ -31,38 +38,54 @@ export function StepSummary({
   estimatedHours,
   modules,
 }: StepSummaryProps) {
+  const { t } = useTranslation();
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Review and publish</CardTitle>
+        <CardTitle>{t("learning.reviewAndPublish")}</CardTitle>
         <CardDescription>
-          Double-check the experience before deploying
+          {t("learning.doubleCheckTheExperienceBeforeDeploying")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <p className="text-lg font-semibold">{title}</p>
           <p className="text-sm text-muted-foreground">
-            {description || "No description provided."}
+            {description || t("learning.noDescriptionProvided")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-sm">
-          <Badge variant="outline">{category}</Badge>
-          <Badge variant="secondary">{deliveryMode.replace("_", " ")}</Badge>
-          <Badge variant="outline">Level {levelRequirement}+</Badge>
+          <Badge variant="outline">
+            {learningLabel(t, CATEGORY_LABEL_KEYS, category)}
+          </Badge>
+          <Badge variant="secondary">
+            {learningLabel(t, DELIVERY_LABEL_KEYS, deliveryMode)}
+          </Badge>
+          <Badge variant="outline">
+            {t("learning.levelPlus", { level: levelRequirement })}
+          </Badge>
         </div>
         <div className="rounded-xl border bg-muted/20 p-4 text-sm">
           <p className="font-semibold text-foreground">
-            {xpReward.toLocaleString()} XP · {estimatedHours}h estimated
+            {t("learning.xpEstimated", {
+              xp: xpReward.toLocaleString(),
+              hours: estimatedHours,
+            })}
           </p>
           <p className="text-muted-foreground">
-            Target roles:{" "}
-            {targetRoles.length > 0 ? targetRoles.join(", ") : "All employees"}
+            {t("learning.targetRolesLine", {
+              roles:
+                targetRoles.length > 0
+                  ? targetRoles
+                      .map((role) => learningLabel(t, ROLE_LABEL_KEYS, role))
+                      .join(", ")
+                  : t("learning.allEmployees"),
+            })}
           </p>
         </div>
         <div>
           <p className="text-sm font-semibold text-muted-foreground">
-            Modules ({modules.length})
+            {t("learning.modulesWithCount", { count: modules.length })}
           </p>
           <ul className="mt-2 space-y-2 text-sm">
             {modules.map((module, index) => (
@@ -79,7 +102,7 @@ export function StepSummary({
           </ul>
           {modules.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Add at least one module to launch the course.
+              {t("learning.addAtLeastOneModuleToLaunchTheCourse")}
             </p>
           )}
         </div>

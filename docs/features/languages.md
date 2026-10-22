@@ -401,7 +401,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 21 — Learning strings
 
-- [ ] Move Learning chrome into the six locales.
+- [x] Move Learning chrome into the six locales.
 
 Rules:
 
@@ -1077,6 +1077,22 @@ Phone steps for Pedro:
 1. Open https://www.flowforce.uk/resources while signed out, or from the footer. Use the header language switcher and choose Español. The page title, section names, and help cards should be in Spanish. FlowForce stays FlowForce.
 2. Open the Getting Started guide and the User Manual. The steps, table of contents, and page counts should follow the language. Switch to Português and open API Documentation. Endpoint descriptions should be Portuguese. The paths, methods, and `Authorization: Bearer YOUR_API_TOKEN` stay as written.
 3. Open Integration Guides in Français. The guide title, custom-integration bullets, and the start button should be French. Starting an integration should toast in French and keep the product name.
+4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 21 Learning strings
+
+Shipped: Learning chrome under `src/features/learning` now uses `useTranslation` and the `learning` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed stay on those keys. Course titles, module titles, and certification titles stay the stored text. Category, role, module-type, and delivery values saved on a course stay the same codes. The labels around them follow the language. Copilot, Co-Pilot, XP, and Supabase stay as written. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 3965 keys for each locale and `hard-coded strings 806`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/learning`.
+
+Phone steps for Pedro:
+1. Open the Learning Center on https://www.flowforce.uk and switch to Español in Settings, then Region, or with the header switcher if you are signed out of marketing only. The snapshot, catalog filters, and empty states should be Spanish. A course title you already saved stays as you wrote it.
+2. Create a course in Français. The wizard steps, category list, role chips, and module types should be French. The saved category and role codes stay the English values. The title and module title you type stay as written. The espresso example is only the placeholder.
+3. Open Certifications in Deutsch. The header, status badges, and metric cards should be German. A certification name stored in the catalog stays as stored.
 4. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

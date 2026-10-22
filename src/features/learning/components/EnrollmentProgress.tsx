@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Fragment, useState } from "react";
 import {
   Activity,
@@ -45,6 +46,7 @@ export function EnrollmentProgress({
   onCompleteNextModule,
   onLoadMoreProgress,
 }: EnrollmentProgressProps) {
+  const { t } = useTranslation();
   const [loadingMoreIds, setLoadingMoreIds] = useState<Record<string, boolean>>(
     {},
   );
@@ -55,10 +57,10 @@ export function EnrollmentProgress({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <GraduationCap className="h-5 w-5 text-primary" />
-            No enrollments yet
+            {t("learning.noEnrollmentsYet")}
           </CardTitle>
           <CardDescription>
-            Enroll in a course from the catalog to start tracking your progress.
+            {t("learning.enrollInACourseFromTheCatalogToStartTrackingYourProgress")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -108,8 +110,11 @@ export function EnrollmentProgress({
                 <div className="space-y-1">
                   <CardTitle className="text-lg">{course.title}</CardTitle>
                   <CardDescription>
-                    Level {course.levelRequirement}+ · {course.estimatedHours}{" "}
-                    hrs · {course.xpReward} XP
+                    {t("learning.levelLine", {
+                      level: course.levelRequirement,
+                      hours: course.estimatedHours,
+                      xp: course.xpReward,
+                    })}
                   </CardDescription>
                 </div>
                 <Badge
@@ -118,15 +123,15 @@ export function EnrollmentProgress({
                   }
                 >
                   {enrollment.status === "completed"
-                    ? "Completed"
-                    : "In progress"}
+                    ? t("learning.completed")
+                    : t("learning.inProgress")}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span>Progress</span>
+                  <span>{t("onboarding.sidebar.progress")}</span>
                   <span className="font-medium">
                     {enrollment.progressPercent.toFixed(0)}%
                   </span>
@@ -166,7 +171,7 @@ export function EnrollmentProgress({
                         onCompleteNextModule(enrollment.id, nextModuleIndex)
                       }
                     >
-                      Mark complete
+                      {t("learning.markComplete")}
                     </Button>
                   </div>
                 </div>
@@ -174,7 +179,7 @@ export function EnrollmentProgress({
 
               {events.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold">Recent activity</p>
+                  <p className="text-sm font-semibold">{t("learning.recentActivity")}</p>
                   <div className="space-y-2">
                     {events.slice(0, 4).map((event) => (
                       <Fragment key={event.id}>
@@ -202,7 +207,7 @@ export function EnrollmentProgress({
 
               {snapshots.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold">Progress checkpoints</p>
+                  <p className="text-sm font-semibold">{t("learning.progressCheckpoints")}</p>
                   <div className="space-y-2">
                     {snapshots.map((snapshot) => (
                       <div
@@ -242,10 +247,10 @@ export function EnrollmentProgress({
                     {loadingMore ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading
+                        {t("learning.loading")}
                       </>
                     ) : (
-                      "Load more history"
+                      t("learning.loadMoreHistory")
                     )}
                   </Button>
                 </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -29,11 +30,12 @@ export function LearningOverview({
   loading,
   onOpenCatalog,
 }: LearningOverviewProps) {
+  const { t } = useTranslation();
   const stats = snapshot
     ? [
-        { label: "Active courses", value: snapshot.activeEnrollments.length },
-        { label: "Hours logged", value: snapshot.totalHours.toFixed(1) },
-        { label: "XP earned", value: snapshot.totalXpEarned.toLocaleString() },
+        { label: t("learning.activeCourses"), value: snapshot.activeEnrollments.length },
+        { label: t("learning.hoursLogged"), value: snapshot.totalHours.toFixed(1) },
+        { label: t("learning.xpEarned"), value: snapshot.totalXpEarned.toLocaleString() },
       ]
     : [];
 
@@ -42,13 +44,13 @@ export function LearningOverview({
       <Card className="shadow-sm">
         <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle>Learning snapshot</CardTitle>
+            <CardTitle>{t("learning.learningSnapshot")}</CardTitle>
             <CardDescription>
-              Progress across personal enrollments
+              {t("learning.progressAcrossPersonalEnrollments")}
             </CardDescription>
           </div>
           <Button type="button" variant="outline" onClick={onOpenCatalog}>
-            Browse catalog
+            {t("learning.browseCatalog")}
           </Button>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
@@ -73,7 +75,7 @@ export function LearningOverview({
               ))}
           {!loading && stats.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Enroll in your first course to start tracking hours and XP.
+              {t("learning.enrollInYourFirstCourseToStartTrackingHoursAndXp")}
             </p>
           )}
         </CardContent>
@@ -81,8 +83,8 @@ export function LearningOverview({
 
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Active enrollments</CardTitle>
-          <CardDescription>Track progress for each course</CardDescription>
+          <CardTitle>{t("learning.activeEnrollments")}</CardTitle>
+          <CardDescription>{t("learning.trackProgressForEachCourse")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {loading && enrollments.length === 0
@@ -95,7 +97,11 @@ export function LearningOverview({
             : enrollments.slice(0, 4).map((enrollment) => (
                 <div key={enrollment.id}>
                   <div className="flex items-center justify-between text-sm font-medium">
-                    <p>Course #{enrollment.courseId.slice(0, 4)}</p>
+                    <p>
+                      {t("learning.courseNumber", {
+                        id: enrollment.courseId.slice(0, 4),
+                      })}
+                    </p>
                     <span>{Math.round(enrollment.progressPercent)}%</span>
                   </div>
                   <Progress
@@ -106,7 +112,7 @@ export function LearningOverview({
               ))}
           {!loading && enrollments.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              You have no active courses right now.
+              {t("learning.youHaveNoActiveCoursesRightNow")}
             </p>
           )}
         </CardContent>
@@ -114,9 +120,9 @@ export function LearningOverview({
 
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Recommended next steps</CardTitle>
+          <CardTitle>{t("learning.recommendedNextSteps")}</CardTitle>
           <CardDescription>
-            AI suggestions tailored to your XP gaps
+            {t("learning.aiSuggestionsTailoredToYourXpGaps")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -143,8 +149,7 @@ export function LearningOverview({
               ))}
           {!loading && recommendations.length === 0 && (
             <p className="text-sm text-muted-foreground">
-              Complete a course or sync certifications to see personalised
-              recommendations.
+              {t("learning.completeACourseOrSyncCertificationsToSeePersonalisedRecommendations")}
             </p>
           )}
         </CardContent>

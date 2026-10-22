@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -22,15 +23,16 @@ interface LearningAdminProps {
 }
 
 export function LearningAdmin({ enrollments, loading }: LearningAdminProps) {
+  const { t } = useTranslation();
   if (!loading && enrollments.length === 0) {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle>Admin enrollments</CardTitle>
-          <CardDescription>No enrollments found</CardDescription>
+          <CardTitle>{t("learning.adminEnrollments")}</CardTitle>
+          <CardDescription>{t("learning.noEnrollmentsFound")}</CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          As soon as employees enroll, you will see progress and status here.
+          {t("learning.asSoonAsEmployeesEnrollYouWillSeeProgressAndStatusHere")}
         </CardContent>
       </Card>
     );
@@ -39,8 +41,8 @@ export function LearningAdmin({ enrollments, loading }: LearningAdminProps) {
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Admin enrollments</CardTitle>
-        <CardDescription>Company-wide learning progress</CardDescription>
+        <CardTitle>{t("learning.adminEnrollments")}</CardTitle>
+        <CardDescription>{t("learning.companyWideLearningProgress")}</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {loading && enrollments.length === 0 ? (
@@ -53,10 +55,10 @@ export function LearningAdmin({ enrollments, loading }: LearningAdminProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Enrollment</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Hours</TableHead>
+                <TableHead>{t("learning.enrollment")}</TableHead>
+                <TableHead>{t("schedule.status")}</TableHead>
+                <TableHead>{t("onboarding.sidebar.progress")}</TableHead>
+                <TableHead>{t("schedule.hours")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

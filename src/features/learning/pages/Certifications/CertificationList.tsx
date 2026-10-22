@@ -9,18 +9,19 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CertificationViewModel } from "@/hooks/useCertifications";
+import { useTranslation } from "react-i18next";
 
 const statusVariant: Record<
   CertificationViewModel["status"],
   {
-    label: string;
+    labelKey: string;
     variant: "default" | "secondary" | "outline" | "destructive";
   }
 > = {
-  earned: { label: "Earned", variant: "default" },
-  in_progress: { label: "In progress", variant: "secondary" },
-  available: { label: "Available", variant: "outline" },
-  expired: { label: "Expired", variant: "destructive" },
+  earned: { labelKey: "certifications.earned", variant: "default" },
+  in_progress: { labelKey: "learning.inProgress", variant: "secondary" },
+  available: { labelKey: "certifications.available", variant: "outline" },
+  expired: { labelKey: "certifications.expired", variant: "destructive" },
 };
 
 interface CertificationListProps {
@@ -34,6 +35,7 @@ export function CertificationList({
   loading,
   onSelect,
 }: CertificationListProps) {
+  const { t } = useTranslation();
   if (loading && certifications.length === 0) {
     return (
       <div className="space-y-4">
@@ -80,13 +82,15 @@ export function CertificationList({
                   </CardDescription>
                 )}
               </div>
-              <Badge variant={status.variant}>{status.label}</Badge>
+              <Badge variant={status.variant}>{t(status.labelKey)}</Badge>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm font-medium">
-                  {cert.progressPercent}% complete ·{" "}
-                  {cert.requirementDetails.length} requirements
+                  {t("learning.progressRequirements", {
+                    percent: cert.progressPercent,
+                    count: cert.requirementDetails.length,
+                  })}
                 </p>
                 <Progress value={cert.progressPercent} className="mt-2" />
               </div>

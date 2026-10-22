@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 
@@ -20,6 +21,7 @@ export function CourseWizardFooter({
   onNext,
   onSubmit,
 }: CourseWizardFooterProps) {
+  const { t } = useTranslation();
   const isLastStep = currentStep === totalSteps - 1;
 
   return (
@@ -31,7 +33,7 @@ export function CourseWizardFooter({
         disabled={currentStep === 0 || submitting}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        {t("common.back")}
       </Button>
       {isLastStep ? (
         <Button
@@ -42,11 +44,11 @@ export function CourseWizardFooter({
           {submitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating…
+              {t("learning.creating")}
             </>
           ) : (
             <>
-              Create course
+              {t("learning.createCourse")}
               <CheckCircle2 className="ml-2 h-4 w-4" />
             </>
           )}
@@ -57,7 +59,7 @@ export function CourseWizardFooter({
           onClick={onNext}
           disabled={!canContinue || submitting}
         >
-          Next
+          {t("common.next")}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       )}

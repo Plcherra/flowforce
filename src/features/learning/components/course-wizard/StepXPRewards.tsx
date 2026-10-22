@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -29,20 +30,21 @@ export function StepXPRewards({
   onAddModule,
   onRemoveModule,
 }: StepXPRewardsProps) {
+  const { t } = useTranslation();
   const estimatedHours = Math.max(1, Math.round(workloadMinutes / 60));
 
   return (
     <div className="space-y-4">
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>XP rewards</CardTitle>
+          <CardTitle>{t("learning.xpRewards")}</CardTitle>
           <CardDescription>
-            Ensure the XP aligns with course effort.
+            {t("learning.ensureTheXpAlignsWithCourseEffort")}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="manual-xp">Manual XP reward</Label>
+            <Label htmlFor="manual-xp">{t("learning.manualXpReward")}</Label>
             <Input
               id="manual-xp"
               type="number"
@@ -56,7 +58,7 @@ export function StepXPRewards({
             </p>
           </div>
           <div className="space-y-2 rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">
-            <p>Estimated hours based on modules:</p>
+            <p>{t("learning.estimatedHoursBasedOnModules")}</p>
             <p className="text-2xl font-semibold text-foreground">
               {estimatedHours}h
             </p>
@@ -66,9 +68,9 @@ export function StepXPRewards({
 
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Modules</CardTitle>
+          <CardTitle>{t("learning.modules")}</CardTitle>
           <CardDescription>
-            Break the course into lessons with XP awards.
+            {t("learning.breakTheCourseIntoLessonsWithXpAwards")}
           </CardDescription>
         </CardHeader>
         <CardContent>

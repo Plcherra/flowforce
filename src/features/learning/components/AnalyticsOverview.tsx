@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { Activity, BarChart2, Clock, Users } from "lucide-react";
 import {
@@ -21,6 +22,10 @@ import type {
   LearningCourseMetrics,
   LearningEnrollment,
 } from "@/types/learning";
+import {
+  CATEGORY_LABEL_KEYS,
+  learningLabel,
+} from "@/features/learning/learningLabels";
 
 interface TrainingInsightSummary {
   totalCompletions: number;
@@ -50,6 +55,7 @@ export function AnalyticsOverview({
   courseById,
   trainingInsights,
 }: AnalyticsOverviewProps) {
+  const { t } = useTranslation();
   const topCourses = useMemo(() => {
     return [...metrics]
       .sort((a, b) => (b.completions ?? 0) - (a.completions ?? 0))
@@ -81,15 +87,15 @@ export function AnalyticsOverview({
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-semibold">
-              Active courses
+              {t("learning.activeCourses")}
             </CardTitle>
-            <CardDescription>Programs available to the team</CardDescription>
+            <CardDescription>{t("learning.programsAvailableToTheTeam")}</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div>
               <div className="text-2xl font-bold">{totals.totalCourses}</div>
               <p className="text-xs text-muted-foreground">
-                {metrics.length} tracked in Supabase
+                {t("learning.trackedInSupabase", { count: metrics.length })}
               </p>
             </div>
             <BarChart2 className="h-6 w-6 text-primary" />
@@ -99,9 +105,9 @@ export function AnalyticsOverview({
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-semibold">
-              Active learners
+              {t("learning.activeLearners")}
             </CardTitle>
-            <CardDescription>In-progress enrollments</CardDescription>
+            <CardDescription>{t("learning.inProgressEnrollments")}</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div>
@@ -109,7 +115,9 @@ export function AnalyticsOverview({
                 {totals.totalActiveLearners}
               </div>
               <p className="text-xs text-muted-foreground">
-                {adminEnrollments.length} total enrollments
+                {t("learning.totalEnrollments", {
+                  count: adminEnrollments.length,
+                })}
               </p>
             </div>
             <Users className="h-6 w-6 text-primary" />
@@ -119,9 +127,9 @@ export function AnalyticsOverview({
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-semibold">
-              Hours logged
+              {t("learning.hoursLogged")}
             </CardTitle>
-            <CardDescription>Tracked through Supabase events</CardDescription>
+            <CardDescription>{t("learning.trackedThroughSupabaseEvents")}</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div>
@@ -129,7 +137,9 @@ export function AnalyticsOverview({
                 {totals.totalHours.toFixed(1)}
               </div>
               <p className="text-xs text-muted-foreground">
-                Avg progress {totals.averageProgress.toFixed(0)}%
+                {t("learning.avgProgress", {
+                  percent: totals.averageProgress.toFixed(0),
+                })}
               </p>
             </div>
             <Clock className="h-6 w-6 text-primary" />
@@ -138,14 +148,16 @@ export function AnalyticsOverview({
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">XP awarded</CardTitle>
-            <CardDescription>Credits applied to skill matrix</CardDescription>
+            <CardTitle className="text-sm font-semibold">{t("learning.xpAwarded")}</CardTitle>
+            <CardDescription>{t("learning.creditsAppliedToSkillMatrix")}</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
             <div>
               <div className="text-2xl font-bold">{totals.totalXp}</div>
               <p className="text-xs text-muted-foreground">
-                {totals.totalCompletions} completions
+                {t("learning.completionCount", {
+                  count: totals.totalCompletions,
+                })}
               </p>
             </div>
             <Activity className="h-6 w-6 text-primary" />
@@ -157,19 +169,19 @@ export function AnalyticsOverview({
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-semibold">
-              Copilot insights
+              {t("learning.copilotInsights")}
             </CardTitle>
-            <CardDescription>AI summary of recent completions</CardDescription>
+            <CardDescription>{t("learning.aiSummaryOfRecentCompletions")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <span>Total completions</span>
+              <span>{t("learning.totalCompletions")}</span>
               <span className="font-semibold">
                 {trainingInsights.totalCompletions}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Average XP per course</span>
+              <span>{t("learning.averageXpPerCourse")}</span>
               <span className="font-semibold">
                 {trainingInsights.avgXP.toFixed(0)} XP
               </span>
@@ -184,9 +196,9 @@ export function AnalyticsOverview({
       {topCourses.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-semibold">Top courses</CardTitle>
+            <CardTitle className="text-sm font-semibold">{t("learning.topCourses")}</CardTitle>
             <CardDescription>
-              Completion and participation over the last quarter
+              {t("learning.completionAndParticipationOverTheLastQuarter")}
             </CardDescription>
           </CardHeader>
           <CardContent className="h-72">
@@ -206,13 +218,13 @@ export function AnalyticsOverview({
                 <Tooltip />
                 <Bar
                   dataKey="completions"
-                  name="Completions"
+                  name={t("learning.chartCompletions")}
                   fill="hsl(var(--primary))"
                   radius={[4, 4, 0, 0]}
                 />
                 <Bar
                   dataKey="active"
-                  name="Active"
+                  name={t("learning.chartActive")}
                   fill="hsl(var(--secondary))"
                   radius={[4, 4, 0, 0]}
                 />
@@ -226,21 +238,23 @@ export function AnalyticsOverview({
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-semibold">
-              Category performance
+              {t("learning.categoryPerformance")}
             </CardTitle>
             <CardDescription>
-              Where teams are spending their learning hours.
+              {t("learning.whereTeamsAreSpendingTheirLearningHours")}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
             {categorySummary.map((entry) => (
               <div key={entry.category} className="rounded-md border p-4">
-                <p className="text-sm font-semibold">{entry.category}</p>
+                <p className="text-sm font-semibold">
+                  {learningLabel(t, CATEGORY_LABEL_KEYS, entry.category)}
+                </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {entry.completions} completions
+                  {t("learning.completionCount", { count: entry.completions })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {entry.active} active learners
+                  {t("learning.activeLearnersCount", { count: entry.active })}
                 </p>
               </div>
             ))}
