@@ -46,6 +46,7 @@
         "approveTimeOff",
         "manageUsers",
         "systemSettings",
+        "forms.submissions.read",
         "createForms",
         "manageForms",
         "approveFormSubmissions",
@@ -120,6 +121,7 @@
         "viewTeamExpenses",
         "approveExpenses",
         "approveTimeOff",
+        "forms.submissions.read",
         "createForms",
         "approveFormSubmissions",
         "viewAIInsights",
@@ -157,7 +159,8 @@
         "editOwnProfile",
         "viewOwnSchedules",
         "viewOwnTasks",
-        "viewOwnExpenses"
+        "viewOwnExpenses",
+        "forms.submissions.read"
       ]
     }
   ],
@@ -223,7 +226,7 @@
       "min_product_level": "staff",
       "owner_locked_verbs": [],
       "verbs": {
-        "see": ["viewTeamTasks", "tasks.list_issues.read"],
+        "see": ["viewTeamTasks", "tasks.list_issues.read", "forms.submissions.read"],
         "edit": [
           "editTasks",
           "approveFormSubmissions",

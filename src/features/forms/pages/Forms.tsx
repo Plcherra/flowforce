@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
+import { submittedFormsHidden } from "@/features/roles/constants/permissionAccessTypes";
 import { useForms } from "@/features/forms/hooks/useForms";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 import { asArray, safeArrayFilter } from "@/utils/reactQueryTypes";
@@ -48,7 +49,10 @@ const matchesQuery = (form: FormWithMeta, query: string) => {
 
 export default function Forms() {
   const { user } = useAuth();
-  const { can: canUse } = useCan();
+  const { can: canUse, getSource } = useCan();
+  const hideOtherSubmissions = submittedFormsHidden(
+    getSource("forms.submissions.read"),
+  );
   const {
     forms,
     isInitialLoading,
@@ -77,7 +81,9 @@ export default function Forms() {
       const archivedForms = safeArrayFilter(
         forms,
         (form) =>
-          form.status === "archived" && matchesQuery(form, trimmedQuery),
+          form.status === "archived" &&
+          matchesQuery(form, trimmedQuery) &&
+          (!hideOtherSubmissions || form.created_by === user?.id),
       );
       return [
         {
@@ -117,18 +123,22 @@ export default function Forms() {
           ? "You have no forms yet. Create one to get started."
           : "No forms available.",
       },
-      {
+    ];
+    if (!hideOtherSubmissions) {
+      activeSections.push({
         key: "team",
         title: "Team Forms",
         forms: teamForms,
         emptyMessage: "No shared forms yet.",
-      },
-    ];
+      });
+    }
 
     if (statusFilter === "all") {
       const archivedForms = forms.filter(
         (form) =>
-          form.status === "archived" && matchesQuery(form, trimmedQuery),
+          form.status === "archived" &&
+          matchesQuery(form, trimmedQuery) &&
+          (!hideOtherSubmissions || form.created_by === user?.id),
       );
       activeSections.push({
         key: "archived",
@@ -139,7 +149,7 @@ export default function Forms() {
     }
 
     return activeSections;
-  }, [forms, statusFilter, query, user?.id, canCreateForms]);
+  }, [forms, statusFilter, query, user?.id, canCreateForms, hideOtherSubmissions]);
 
   const builderForm = builderFormId
     ? asArray(forms).find((form) => form.id === builderFormId)

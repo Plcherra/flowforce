@@ -21,20 +21,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type CompanyRole, type CreateRoleData } from "@/hooks/useCompanyRoles";
-import {
-  applyOperatorVerbsToPermissions,
-  getVisibleOperatorAreas,
-  isVerbAvailable,
-  isVerbLockedOn,
-  permissionsToOperatorVerbs,
-  verbSelectionKey,
-  type OperatorVerb,
-} from "@/features/roles/constants/operatorBoxes";
+import { findAccessSwitch } from "@/features/roles/constants/permissionAccessTypes";
 import { OperatorAccessGrid } from "./OperatorAccessGrid";
 import {
   CLONEABLE_PRODUCT_LEVELS,
+  clampPermissionsToProductLevel,
   cloneClassFromProductLevel,
   isCloneableProductLevel,
+  permissionAllowedAtLevel,
   resolveProductLevel,
 } from "@/features/roles/constants/productLevels";
 import { PRODUCT_ROLE_LABELS } from "@/features/roles/constants/productRoles";
@@ -84,9 +78,8 @@ export default function RoleManagementDialog({
         icon: role.icon,
         hierarchy_level: role.hierarchy_level,
         product_level: productLevel,
-        permissions: applyOperatorVerbsToPermissions(
+        permissions: clampPermissionsToProductLevel(
           productLevel,
-          permissionsToOperatorVerbs(productLevel, role.permissions || {}),
           role.permissions || {},
         ),
       };
@@ -110,9 +103,8 @@ export default function RoleManagementDialog({
         icon: role.icon,
         hierarchy_level: role.hierarchy_level,
         product_level: productLevel,
-        permissions: applyOperatorVerbsToPermissions(
+        permissions: clampPermissionsToProductLevel(
           productLevel,
-          permissionsToOperatorVerbs(productLevel, role.permissions || {}),
           role.permissions || {},
         ),
       });
@@ -146,43 +138,30 @@ export default function RoleManagementDialog({
     onSave({
       ...formData,
       product_level: productLevel,
-      permissions: applyOperatorVerbsToPermissions(
+      permissions: clampPermissionsToProductLevel(
         productLevel,
-        permissionsToOperatorVerbs(productLevel, formData.permissions),
         formData.permissions,
       ),
     });
   };
 
-  const handleVerbChange = (
-    areaKey: string,
-    verb: OperatorVerb,
+  const handleAccessChange = (
+    rowId: string,
+    switchId: string,
     enabled: boolean,
   ) => {
-    const area = getVisibleOperatorAreas(productLevel).find(
-      (item) => item.key === areaKey,
-    );
-    if (!area || isVerbLockedOn(area, verb, productLevel)) {
-      return;
-    }
-    if (!isVerbAvailable(area, verb, productLevel)) {
-      return;
-    }
-
-    const selection = verbSelectionKey(area.key, verb);
-    const current = permissionsToOperatorVerbs(productLevel, formData.permissions);
-    const next = enabled
-      ? Array.from(new Set([...current, selection]))
-      : current.filter((key) => key !== selection);
-
-    setFormData((prev) => ({
-      ...prev,
-      permissions: applyOperatorVerbsToPermissions(
-        productLevel,
-        next,
-        prev.permissions,
-      ),
-    }));
+    const item = findAccessSwitch(rowId, switchId);
+    if (!item) return;
+    if (productLevel === "owner" && item.ownerLocked) return;
+    setFormData((prev) => {
+      const permissions = { ...(prev.permissions ?? {}) };
+      for (const key of item.keys) {
+        if (permissionAllowedAtLevel(productLevel, key)) {
+          permissions[key] = enabled;
+        }
+      }
+      return { ...prev, permissions };
+    });
   };
 
   const getIconComponent = (iconName: string) => {
@@ -343,14 +322,14 @@ export default function RoleManagementDialog({
 
             <TabsContent value="permissions" className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Each class starts from its level. Give or take See, Edit, and
-                Create / delete. The same grid will apply to one person later.
+                Each class starts from its level. Give or take the access types
+                that permission needs.
               </p>
               <OperatorAccessGrid
                 level={productLevel}
                 permissions={formData.permissions}
                 idPrefix={role?.id ?? "new-class"}
-                onVerbChange={handleVerbChange}
+                onAccessChange={handleAccessChange}
               />
             </TabsContent>
           </Tabs>

@@ -20,29 +20,23 @@ import { saveEmployeeAccess } from "@/features/employees/utils/saveEmployeeAcces
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
 import { TaskCreateAccessSection } from "./TaskCreateAccessSection";
 import { ListIssueAccessSection } from "./ListIssueAccessSection";
-import {
-  diffsForTaskCreateLevel,
-  retainTaskCreateDiffs,
-} from "@/features/tasks/utils/taskCreateAccess";
+import { diffsForTaskCreateLevel } from "@/features/tasks/utils/taskCreateAccess";
 import {
   diffsForListIssueGrant,
-  retainListIssueDiffs,
   type ListIssueGrant,
 } from "@/features/tasks/utils/listIssueGather";
+import { diffsForAccessSwitch } from "@/features/roles/constants/permissionAccessTypes";
 import type { TaskCreateKind } from "@/features/roles/constants/taskCreateKeys";
 import type { TaskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import {
   applyPermissionDiffsToClassPermissions,
-  operatorVerbsToPermissionDiffs,
   permissionDiffsFromRows,
-  permissionDiffsToOperatorVerbs,
   retainAllowedDiffs,
   type PermissionDiffMap,
 } from "@/features/roles/constants/personAccessDiffs";
 import {
   canInviteProductLevel,
   clampPermissionDiffsToInviter,
-  inviterCanGrantVerb,
   parseInviteGrantPolicy,
   resolveInviterLevel,
 } from "@/features/roles/constants/grantCeiling";
@@ -50,13 +44,6 @@ import {
   isInviteableClass,
   resolveProductLevel,
 } from "@/features/roles/constants/productLevels";
-import {
-  getVisibleOperatorAreas,
-  isVerbAvailable,
-  isVerbLockedOn,
-  verbSelectionKey,
-  type OperatorVerb,
-} from "@/features/roles/constants/operatorBoxes";
 import { logger } from "@/utils/logger";
 
 type AccessUser = {
@@ -154,38 +141,15 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
     setHasChanges(true);
   };
 
-  const handleVerbChange = (
-    areaKey: string,
-    verb: OperatorVerb,
+  const handleAccessChange = (
+    rowId: string,
+    switchId: string,
     enabled: boolean,
   ) => {
-    const area = getVisibleOperatorAreas(level).find((item) => item.key === areaKey);
     if (!canEditAccess) return;
-    if (!area || isVerbLockedOn(area, verb, level)) return;
-    if (!isVerbAvailable(area, verb, level)) return;
-    if (
-      !inviterCanGrantVerb(
-        area,
-        verb,
-        level,
-        inviterLevel,
-        inviterPermissions,
-      )
-    ) {
-      return;
-    }
-
-    const current = permissionDiffsToOperatorVerbs(level, classPermissions, diffs);
-    const selection = verbSelectionKey(area.key, verb);
-    const next = enabled
-      ? Array.from(new Set([...current, selection]))
-      : current.filter((key) => key !== selection);
-
-    setDiffs({
-      ...operatorVerbsToPermissionDiffs(level, classPermissions, next),
-      ...retainTaskCreateDiffs(diffs),
-      ...retainListIssueDiffs(diffs),
-    });
+    setDiffs(
+      diffsForAccessSwitch(classPermissions, diffs, rowId, switchId, enabled),
+    );
     setHasChanges(true);
   };
 
@@ -325,7 +289,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
               inviterPermissions={inviterPermissions}
               disabled={!canEditAccess}
               idPrefix={`user-${user.id}`}
-              onVerbChange={handleVerbChange}
+              onAccessChange={handleAccessChange}
             />
           ) : (
             <p className="text-sm text-muted-foreground">

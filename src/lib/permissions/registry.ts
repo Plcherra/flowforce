@@ -234,6 +234,12 @@ export const PERMISSION_DEFINITIONS = [
 
   // Forms
   {
+    key: "forms.submissions.read",
+    label: "Forms: Read submissions",
+    description: "Read other people's submitted forms",
+    category: "Forms",
+  },
+  {
     key: "createForms",
     label: "Create Forms",
     description: "Create custom forms",

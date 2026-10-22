@@ -562,7 +562,7 @@ Prove: Unit test `src/features/tasks/utils/listIssueGather.test.ts`. Run it with
 
 ### Phase 24 — Access types on the employee card
 
-- [ ] Replace plain on or off with the types each permission needs.
+- [x] Replace plain on or off with the types each permission needs.
 
 Rules:
 
@@ -943,5 +943,22 @@ Phone steps for Pedro:
 4. Set it to Act. Mark done should be there, and tapping it should finish that task.
 
 Blockers: none for this phase.
+
+Questions: none.
+
+### 2026-10-22 — Phase 24 Access types on the employee card
+
+Shipped: The employee card, the invite card, and the class editor show the access types from Owner answer 26. Schedule read stays one switch. Shifts are Create, Edit, and Delete. Submitted forms are Read. Form template edit and delete stay on the same `manageForms` grant. Task create levels and list-issue None, Read, and Act stay their own sections. Saving a class no longer folds those types back into See, Edit, and Create / delete. `forms.submissions.read` starts on for staff, manager, admin, and the owner wildcard. An explicit deny hides other people's forms on the Forms page. A role that never received the key still shows them.
+
+Proven: Unit test `src/features/roles/constants/permissionAccessTypes.test.ts`, run with `npm run test:product-roles`, covers the owner, admin, manager, and staff round trip, a manager shift edit that stays on while delete stays off, and a deny that hides submitted forms. It passed. `npm run check:roles` passed. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as the owner. Open the employee directory, open one person, then Access.
+2. Shifts should show Create, Edit, and Delete as separate switches. Team schedule should show Read.
+3. Submitted forms should show Read, already on. Form templates should show Create, Edit, and Delete.
+4. Turn Submitted forms Read off and save. Sign in as that person and open Forms. Team Forms should be hidden. Their own forms should stay.
+5. Turn it back on. Team Forms should return. A manager who could edit shifts should still be able to edit shifts, and still not delete them if that switch was off.
+
+Blockers: none for this phase. No migration.
 
 Questions: none.

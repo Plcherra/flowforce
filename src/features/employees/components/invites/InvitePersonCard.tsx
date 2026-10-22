@@ -12,23 +12,12 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
 import { effectiveInvitePermissions } from "@/features/employees/utils/staffInviteScheduleDefaults";
-import {
-  operatorVerbsToPermissionDiffs,
-  permissionDiffsToOperatorVerbs,
-  retainAllowedDiffs,
-} from "@/features/roles/constants/personAccessDiffs";
+import { retainAllowedDiffs } from "@/features/roles/constants/personAccessDiffs";
 import {
   resolveProductLevel,
   type ProductLevel,
 } from "@/features/roles/constants/productLevels";
-import { inviterCanGrantVerb } from "@/features/roles/constants/grantCeiling";
-import {
-  isVerbAvailable,
-  isVerbLockedOn,
-  verbSelectionKey,
-  type OperatorVerb,
-} from "@/features/roles/constants/operatorBoxes";
-import { getVisibleOperatorAreas } from "@/features/roles/constants/operatorBoxes";
+import { diffsForAccessSwitch } from "@/features/roles/constants/permissionAccessTypes";
 import type { CompanyRole } from "@/hooks/useCompanyRoles";
 import type { InvitePersonCard } from "../../types/invites";
 import type { OrganizationLocation } from "@/hooks/useLocations";
@@ -72,44 +61,19 @@ export function InvitePersonCardForm({
     card.permissionOverrides,
   );
 
-  const handleVerbChange = (
-    areaKey: string,
-    verb: OperatorVerb,
+  const handleAccessChange = (
+    rowId: string,
+    switchId: string,
     enabled: boolean,
   ) => {
-    const area = getVisibleOperatorAreas(level).find(
-      (item) => item.key === areaKey,
-    );
-    if (!area || isVerbLockedOn(area, verb, level)) return;
-    if (!isVerbAvailable(area, verb, level)) return;
-    if (
-      !inviterCanGrantVerb(
-        area,
-        verb,
-        level,
-        inviterLevel,
-        inviterPermissions,
-      )
-    ) {
-      return;
-    }
-
-    const current = permissionDiffsToOperatorVerbs(
-      level,
-      classPermissions,
-      card.permissionOverrides,
-    );
-    const selection = verbSelectionKey(area.key, verb);
-    const next = enabled
-      ? Array.from(new Set([...current, selection]))
-      : current.filter((key) => key !== selection);
-
     onChange({
       ...card,
-      permissionOverrides: operatorVerbsToPermissionDiffs(
-        level,
+      permissionOverrides: diffsForAccessSwitch(
         classPermissions,
-        next,
+        card.permissionOverrides,
+        rowId,
+        switchId,
+        enabled,
       ),
     });
   };
@@ -275,7 +239,7 @@ export function InvitePersonCardForm({
               inviterLevel={inviterLevel}
               inviterPermissions={inviterPermissions}
               idPrefix={card.id}
-              onVerbChange={handleVerbChange}
+              onAccessChange={handleAccessChange}
             />
           </div>
         ) : null}
