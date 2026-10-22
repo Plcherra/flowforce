@@ -38,9 +38,9 @@ interface ScenarioSimulatorProps {
 }
 
 const riskStyles: Record<RiskLevel, string> = {
-  low: "bg-emerald-100 text-emerald-700 border border-emerald-200",
-  moderate: "bg-amber-100 text-amber-700 border border-amber-200",
-  high: "bg-red-100 text-red-700 border border-red-200",
+  low: "bg-success-muted text-success border border-success/40",
+  moderate: "bg-warning-muted text-warning-foreground border border-warning/40",
+  high: "bg-destructive/10 text-destructive border border-destructive/40",
 };
 
 const percent = (value: number, fractionDigits = 1) =>
@@ -192,7 +192,7 @@ export default function ScenarioSimulator({
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                 <span>Staff Coverage</span>
-                <Activity className="h-4 w-4 text-emerald-500" />
+                <Activity className="h-4 w-4 text-success" />
               </div>
               <div className="mt-2 text-2xl font-semibold">{coverage}</div>
               <Progress
@@ -208,7 +208,7 @@ export default function ScenarioSimulator({
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                 <span>Task Backlog</span>
-                <TrendingUp className="h-4 w-4 text-blue-500" />
+                <TrendingUp className="h-4 w-4 text-primary" />
               </div>
               <div className="mt-2 text-2xl font-semibold">{backlogLabel}</div>
               <p className="mt-2 text-xs text-muted-foreground">
@@ -220,7 +220,7 @@ export default function ScenarioSimulator({
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                 <span>Goal Progress</span>
-                <Sparkles className="h-4 w-4 text-purple-500" />
+                <Sparkles className="h-4 w-4 text-secondary" />
               </div>
               <div className="mt-2 text-2xl font-semibold">{goalProgress}</div>
               <p className="mt-2 text-xs text-muted-foreground">
@@ -231,7 +231,7 @@ export default function ScenarioSimulator({
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                 <span>Trailing 30d Revenue</span>
-                <ArrowUpRight className="h-4 w-4 text-amber-500" />
+                <ArrowUpRight className="h-4 w-4 text-warning" />
               </div>
               <div className="mt-2 text-2xl font-semibold">
                 {trailingRevenue}
@@ -368,8 +368,8 @@ export default function ScenarioSimulator({
                     <span
                       className={
                         outcome.deltas.coverageRate >= 0
-                          ? "text-emerald-600"
-                          : "text-red-600"
+                          ? "text-success"
+                          : "text-destructive"
                       }
                     >
                       {formatDeltaPercent(outcome.deltas.coverageRate)}
@@ -386,8 +386,8 @@ export default function ScenarioSimulator({
                     <span
                       className={
                         outcome.deltas.backlog <= 0
-                          ? "text-emerald-600"
-                          : "text-red-600"
+                          ? "text-success"
+                          : "text-destructive"
                       }
                     >
                       {`${outcome.deltas.backlog >= 0 ? "+" : ""}${Math.round(outcome.deltas.backlog)}`}
@@ -404,8 +404,8 @@ export default function ScenarioSimulator({
                     <span
                       className={
                         outcome.deltas.goalConfidence >= 0
-                          ? "text-emerald-600"
-                          : "text-red-600"
+                          ? "text-success"
+                          : "text-destructive"
                       }
                     >
                       {`${outcome.deltas.goalConfidence >= 0 ? "+" : ""}${outcome.deltas.goalConfidence.toFixed(0)} pts`}
@@ -422,8 +422,8 @@ export default function ScenarioSimulator({
                     <span
                       className={
                         outcome.deltas.revenueForecast >= 0
-                          ? "text-emerald-600"
-                          : "text-red-600"
+                          ? "text-success"
+                          : "text-destructive"
                       }
                     >
                       {outcome.deltas.revenueForecast >= 0 ? "+" : "-"}
@@ -534,10 +534,10 @@ export default function ScenarioSimulator({
                         variant="secondary"
                         className={
                           action.impact === "high"
-                            ? "border-red-200 bg-red-100 text-red-700"
+                            ? "border-destructive/40 bg-destructive/10 text-destructive"
                             : action.impact === "medium"
-                              ? "border-amber-200 bg-amber-100 text-amber-700"
-                              : "border-emerald-200 bg-emerald-100 text-emerald-700"
+                              ? "border-warning/40 bg-warning-muted text-warning-foreground"
+                              : "border-success/40 bg-success-muted text-success"
                         }
                       >
                         {action.impact} impact

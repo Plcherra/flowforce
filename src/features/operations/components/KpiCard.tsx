@@ -57,9 +57,9 @@ function useMockKpiSnapshot(kpiKey: KpiKey): KpiSnapshot {
 }
 
 const severityVariants: Record<NonNullable<KpiSnapshot["severity"]>, string> = {
-  normal: "text-emerald-600",
-  warning: "text-amber-600",
-  critical: "text-red-600",
+  normal: "text-success",
+  warning: "text-warning",
+  critical: "text-destructive",
 };
 
 interface KpiCardProps {

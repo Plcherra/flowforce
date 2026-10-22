@@ -96,7 +96,7 @@ export function ClosedLoopSummary({
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <AlertTriangle className="h-4 w-4 text-warning" />
                 Detect
               </header>
               <p className="mt-3 text-sm text-muted-foreground">
@@ -106,13 +106,13 @@ export function ClosedLoopSummary({
                 <Badge variant="outline">High {severity.high ?? 0}</Badge>
                 <Badge
                   variant="outline"
-                  className="border-amber-500/40 text-amber-600"
+                  className="border-warning/40 text-warning"
                 >
                   Medium {severity.medium ?? 0}
                 </Badge>
                 <Badge
                   variant="outline"
-                  className="border-emerald-500/40 text-emerald-600"
+                  className="border-success/40 text-success"
                 >
                   Low {severity.low ?? 0}
                 </Badge>
@@ -146,7 +146,7 @@ export function ClosedLoopSummary({
 
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Layers className="h-4 w-4 text-blue-500" />
+                <Layers className="h-4 w-4 text-primary" />
                 Approve
               </header>
               <div className="mt-3 space-y-2 text-sm">
@@ -179,8 +179,8 @@ export function ClosedLoopSummary({
                 <CheckCircle2
                   className={cn(
                     "h-4 w-4",
-                    guardrailStatus === "allowed" && "text-emerald-500",
-                    guardrailStatus === "warning" && "text-amber-500",
+                    guardrailStatus === "allowed" && "text-success",
+                    guardrailStatus === "warning" && "text-warning",
                     guardrailStatus === "blocked" && "text-destructive",
                   )}
                 />
@@ -191,9 +191,9 @@ export function ClosedLoopSummary({
                 className={cn(
                   "mt-3 w-fit uppercase tracking-wide",
                   guardrailStatus === "allowed" &&
-                    "border-emerald-500/50 text-emerald-600",
+                    "border-success/50 text-success",
                   guardrailStatus === "warning" &&
-                    "border-amber-500/50 text-amber-600",
+                    "border-warning/50 text-warning",
                   guardrailStatus === "blocked" &&
                     "border-destructive/60 text-destructive",
                 )}
@@ -221,7 +221,7 @@ export function ClosedLoopSummary({
 
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <TrendingUp className="h-4 w-4 text-purple-500" />
+                <TrendingUp className="h-4 w-4 text-secondary" />
                 Learn
               </header>
               <p className="mt-3 text-sm text-muted-foreground">

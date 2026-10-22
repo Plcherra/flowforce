@@ -304,7 +304,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 15 — AI and operations
 
-- [ ] Move hard-coded colors in AI and operations onto the tokens.
+- [x] Move hard-coded colors in AI and operations onto the tokens.
 
 Rules:
 
@@ -662,6 +662,23 @@ Phone steps for Pedro:
 2. The main chart series should be blue, green, purple, amber, and red. They should follow the theme, not a separate hex palette.
 3. A healthy metric should read as green, a warning as amber, and a blocked metric as red.
 4. Switch to Dark. The chart lines and the metric text should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 15 AI and operations
+
+Shipped: AI and operations classes now use the theme tokens. Severity rows use destructive, warning, and muted. Source chips use primary, accent, success, or muted. Chat bubbles use primary and muted. The operations KPI bar uses primary. `src/features/ai` and `src/features/operations` have no baseline entries. High and medium both use warning, because Decision 7 maps orange and amber to warning.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open AI Insights or the Co-Pilot.
+2. A critical action should read as red, a high or medium action as amber, and a low action as muted. Task and scheduling chips should be blue, expenses green, and reminders the lavender accent.
+3. Your chat messages should be blue with light text. The assistant bubble should be muted. The round Co-Pilot button should be blue.
+4. Open Operations. An on-track or resolved row should read as green, a warning as amber, and an overdue or critical row as red. The KPI chart bar should be blue.
+5. Switch to Dark. Badges, chat bubbles, and status text should stay readable.
 
 Blockers: none. No migration.
 

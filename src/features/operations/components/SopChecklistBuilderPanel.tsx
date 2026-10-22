@@ -149,7 +149,7 @@ export function SopChecklistBuilderPanel() {
                 </p>
               </div>
               {step.required ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
               ) : null}
             </div>
           ))}
@@ -157,7 +157,7 @@ export function SopChecklistBuilderPanel() {
       </div>
 
       {createdTemplate ? (
-        <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+        <div className="mt-3 rounded-2xl border border-success/40 bg-success-muted p-3 text-sm text-success">
           Published workflow with {createdTemplate.step_count ?? 0} steps.
         </div>
       ) : null}

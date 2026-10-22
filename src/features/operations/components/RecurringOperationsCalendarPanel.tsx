@@ -169,7 +169,7 @@ export function RecurringOperationsCalendarPanel() {
                   {preset.description}
                 </p>
               </div>
-              <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+              <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               Due {preset.dueTime} · {preset.managerWorkloadSignal}
@@ -204,7 +204,7 @@ export function RecurringOperationsCalendarPanel() {
       </div>
 
       {lastRun ? (
-        <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+        <div className="mt-3 rounded-2xl border border-success/40 bg-success-muted p-3 text-sm text-success">
           Generated {lastRun.runs_created ?? 0} runs and{" "}
           {lastRun.step_runs_created ?? 0} step runs.
         </div>

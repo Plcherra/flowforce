@@ -38,16 +38,16 @@ import { logger } from "@/utils/logger";
 
 const severityClasses: Record<IncidentIssueQueueRow["severity"], string> = {
   info: "border-border text-muted-foreground",
-  warning: "border-amber-200 text-amber-700",
-  critical: "border-red-200 text-red-700",
+  warning: "border-warning/40 text-warning-foreground",
+  critical: "border-destructive/40 text-destructive",
 };
 
 const slaClasses: Record<IncidentIssueQueueRow["sla_status"], string> = {
   unscheduled: "border-border text-muted-foreground",
-  on_track: "border-emerald-200 text-emerald-700",
-  due_soon: "border-amber-200 text-amber-700",
-  overdue: "border-red-200 text-red-700",
-  resolved: "border-emerald-200 text-emerald-700",
+  on_track: "border-success/40 text-success",
+  due_soon: "border-warning/40 text-warning-foreground",
+  overdue: "border-destructive/40 text-destructive",
+  resolved: "border-success/40 text-success",
 };
 
 interface AutomationSuggestionResponse {
@@ -396,7 +396,7 @@ export function IssuesStream() {
           </DrawerHeader>
           <div className="space-y-3 px-4 pb-4 text-sm">
             {drawerLoading && <p>Generating automation script...</p>}
-            {drawerError && <p className="text-red-600">{drawerError}</p>}
+            {drawerError && <p className="text-destructive">{drawerError}</p>}
             {drawerResult && (
               <pre className="max-h-64 overflow-auto rounded-xl bg-muted/60 p-3 text-xs">
                 {JSON.stringify(drawerResult.script, null, 2)}

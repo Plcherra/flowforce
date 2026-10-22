@@ -59,7 +59,7 @@ export function KPICharts({
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="value" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (

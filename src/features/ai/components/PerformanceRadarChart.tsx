@@ -71,7 +71,7 @@ export default function PerformanceRadarChart({
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Actual:</span>
               <span
-                className={`font-medium ${actual >= target ? "text-green-600" : "text-orange-600"}`}
+                className={`font-medium ${actual >= target ? "text-success" : "text-warning"}`}
               >
                 {actual}%
               </span>
@@ -79,7 +79,7 @@ export default function PerformanceRadarChart({
             <div className="flex justify-between items-center pt-1 border-t border-border">
               <span className="text-muted-foreground">Performance:</span>
               <span
-                className={`font-medium ${actual >= target ? "text-green-600" : "text-orange-600"}`}
+                className={`font-medium ${actual >= target ? "text-success" : "text-warning"}`}
               >
                 {Math.round((actual / target) * 100)}%
               </span>

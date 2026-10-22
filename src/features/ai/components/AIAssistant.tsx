@@ -378,7 +378,7 @@ What specific aspect would you like to explore?`;
     <Card className={containerClasses}>
       <CardHeader className="pb-3 border-b">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Bot className="h-5 w-5 text-blue-500" />
+          <Bot className="h-5 w-5 text-primary" />
           AI Co-Pilot
           <Badge
             variant="secondary"
@@ -402,7 +402,7 @@ What specific aspect would you like to explore?`;
 
       <CardContent className="flex-1 flex flex-col gap-3 p-4">
         {context && (
-          <div className="rounded-lg border border-dashed border-blue-200 bg-blue-50/40 p-3 text-xs text-blue-900 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-100">
+          <div className="rounded-lg border border-dashed border-primary/40 bg-primary/10 p-3 text-xs text-primary">
             <div className="flex items-center justify-between">
               <span className="font-semibold uppercase tracking-wide text-[0.65rem]">
                 {context.title}
@@ -415,7 +415,7 @@ What specific aspect would you like to explore?`;
               {context.metrics.slice(0, 4).map((metric) => (
                 <div
                   key={metric.label}
-                  className="rounded border border-white/40 bg-white/60 px-2 py-2 shadow-sm dark:border-white/10 dark:bg-white/5"
+                  className="rounded border border-border bg-background/60 px-2 py-2 shadow-sm"
                 >
                   <div className="text-[0.6rem] uppercase text-muted-foreground">
                     {metric.label}
@@ -431,7 +431,7 @@ What specific aspect would you like to explore?`;
             </div>
             {context.insights.length > 0 && (
               <div className="mt-3 flex items-start gap-2 text-[0.7rem] text-muted-foreground">
-                <Lightbulb className="h-3 w-3 mt-0.5 text-amber-500" />
+                <Lightbulb className="h-3 w-3 mt-0.5 text-warning" />
                 <div>
                   <div className="font-semibold text-xs">AI Insight</div>
                   <div>{context.insights[0].detail}</div>
@@ -455,20 +455,20 @@ What specific aspect would you like to explore?`;
                 >
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      message.role === "user" ? "bg-blue-500" : "bg-gray-500"
+                      message.role === "user" ? "bg-primary" : "bg-muted-foreground"
                     }`}
                   >
                     {message.role === "user" ? (
-                      <User className="h-4 w-4 text-white" />
+                      <User className="h-4 w-4 text-primary-foreground" />
                     ) : (
-                      <Bot className="h-4 w-4 text-white" />
+                      <Bot className="h-4 w-4 text-primary-foreground" />
                     )}
                   </div>
                   <div
                     className={`rounded-lg p-3 ${
                       message.role === "user"
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-foreground"
                     }`}
                   >
                     <div className="text-sm whitespace-pre-wrap">
@@ -477,8 +477,8 @@ What specific aspect would you like to explore?`;
                     <div
                       className={`text-xs mt-1 opacity-70 ${
                         message.role === "user"
-                          ? "text-blue-100"
-                          : "text-gray-500"
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground"
                       }`}
                     >
                       {message.timestamp.toLocaleTimeString()}
@@ -490,11 +490,11 @@ What specific aspect would you like to explore?`;
 
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-white" />
+                <div className="w-8 h-8 rounded-full bg-muted-foreground flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                <div className="bg-muted rounded-lg p-3">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 </div>
               </div>
             )}

@@ -59,7 +59,7 @@ export function AssessPanel({
     <section className="space-y-6">
       <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <LineChart className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+          <LineChart className="h-4 w-4 text-success" aria-hidden="true" />
           Assess
         </div>
         <h2 className="text-xl font-semibold text-foreground">
@@ -139,7 +139,7 @@ export function AssessPanel({
                   <span>Change</span>
                   <span
                     className={
-                      metric.delta >= 0 ? "text-emerald-500" : "text-rose-500"
+                      metric.delta >= 0 ? "text-success" : "text-accent-foreground"
                     }
                   >
                     {metric.delta >= 0 ? "+" : ""}

@@ -121,7 +121,7 @@ export default function AIChatAssistant({
       <div className={`${shell} right-4 md:right-6`}>
         <Button
           onClick={() => setIsOpen(true)}
-          className="rounded-full w-14 h-14 shadow-lg bg-blue-600 hover:bg-blue-700"
+          className="rounded-full w-14 h-14 shadow-lg bg-primary hover:bg-primary/90"
           size="icon"
           aria-label="Open FlowForce AI"
         >
@@ -141,7 +141,7 @@ export default function AIChatAssistant({
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Bot className="h-5 w-5 text-blue-500" />
+              <Bot className="h-5 w-5 text-primary" />
               FlowForce AI
             </CardTitle>
             <div className="flex gap-1">
@@ -189,21 +189,21 @@ export default function AIChatAssistant({
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center ${
                           message.role === "user"
-                            ? "bg-blue-500"
-                            : "bg-gray-500"
+                            ? "bg-primary"
+                            : "bg-muted-foreground"
                         }`}
                       >
                         {message.role === "user" ? (
-                          <User className="h-4 w-4 text-white" />
+                          <User className="h-4 w-4 text-primary-foreground" />
                         ) : (
-                          <Bot className="h-4 w-4 text-white" />
+                          <Bot className="h-4 w-4 text-primary-foreground" />
                         )}
                       </div>
                       <div
                         className={`rounded-lg p-3 ${
                           message.role === "user"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100 text-gray-900"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-foreground"
                         }`}
                       >
                         <div className="text-sm whitespace-pre-wrap">
@@ -212,8 +212,8 @@ export default function AIChatAssistant({
                         <div
                           className={`text-xs mt-1 opacity-70 ${
                             message.role === "user"
-                              ? "text-blue-100"
-                              : "text-gray-500"
+                              ? "text-primary-foreground"
+                              : "text-muted-foreground"
                           }`}
                         >
                           {message.timestamp.toLocaleTimeString()}
@@ -225,18 +225,18 @@ export default function AIChatAssistant({
 
                 {isLoading && (
                   <div className="flex gap-3 justify-start">
-                    <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
-                      <Bot className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 rounded-full bg-muted-foreground flex items-center justify-center">
+                      <Bot className="h-4 w-4 text-primary-foreground" />
                     </div>
-                    <div className="bg-gray-100 rounded-lg p-3">
+                    <div className="bg-muted rounded-lg p-3">
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
                         <div
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
                           style={{ animationDelay: "0.1s" }}
                         ></div>
                         <div
-                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
                           style={{ animationDelay: "0.2s" }}
                         ></div>
                       </div>

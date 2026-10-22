@@ -348,19 +348,19 @@ export default function AIInsightsPanel({
 
               <button
                 onClick={() => handleCardClick("efficiency")}
-                className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors cursor-pointer text-left"
+                className="p-3 bg-success-muted border border-success/40 rounded-lg hover:bg-success/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-green-700">
+                  <span className="text-xs font-medium text-success">
                     Efficiency
                   </span>
                   <Badge variant="secondary" className="text-xs">
                     92%
                   </Badge>
                 </div>
-                <div className="mt-2 w-full bg-green-100 rounded-full h-1.5">
+                <div className="mt-2 w-full bg-success-muted rounded-full h-1.5">
                   <div
-                    className="bg-green-500 h-1.5 rounded-full"
+                    className="bg-success h-1.5 rounded-full"
                     style={{ width: "92%" }}
                   ></div>
                 </div>
@@ -368,51 +368,51 @@ export default function AIInsightsPanel({
 
               <button
                 onClick={() => handleCardClick("issues")}
-                className="p-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer text-left"
+                className="p-3 bg-warning-muted border border-warning/40 rounded-lg hover:bg-warning/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-orange-700">
+                  <span className="text-xs font-medium text-warning-foreground">
                     Areas to Improve
                   </span>
                   <Badge variant="outline" className="text-xs">
                     3
                   </Badge>
                 </div>
-                <p className="text-xs text-orange-600 mt-1">Focus needed</p>
+                <p className="text-xs text-warning mt-1">Focus needed</p>
               </button>
 
               <button
                 onClick={() => handleCardClick("trending")}
-                className="p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer text-left"
+                className="p-3 bg-primary/10 border border-primary/40 rounded-lg hover:bg-primary/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-blue-700">
+                  <span className="text-xs font-medium text-primary">
                     Trending
                   </span>
                   <Badge variant="secondary" className="text-xs">
                     ↗ +5%
                   </Badge>
                 </div>
-                <p className="text-xs text-blue-600 mt-1">This week</p>
+                <p className="text-xs text-primary mt-1">This week</p>
               </button>
             </div>
 
             {/* Quick Insights */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-xs">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-success rounded-full"></div>
                 <span className="text-muted-foreground">
                   Schedule adherence is strong
                 </span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-warning rounded-full"></div>
                 <span className="text-muted-foreground">
                   Task completion could improve
                 </span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <span className="text-muted-foreground">
                   Team productivity is on track
                 </span>

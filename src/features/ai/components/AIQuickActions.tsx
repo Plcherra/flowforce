@@ -59,8 +59,8 @@ const toneClassNames: Record<
   string
 > = {
   default: "border-border/70 bg-muted/40 text-foreground",
-  success: "border-emerald-200/70 bg-emerald-50/60 text-emerald-700",
-  warning: "border-amber-200/70 bg-amber-50/60 text-amber-700",
+  success: "border-success/70 bg-success-muted text-success",
+  warning: "border-warning/70 bg-warning-muted text-warning-foreground",
   danger: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
@@ -407,7 +407,7 @@ export function AIQuickActions({ className }: { className?: string }) {
         overdueTasks.length > 0
           ? `Coordinate owners to close ${overdueTasks.length} overdue task${overdueTasks.length === 1 ? "" : "s"}.`
           : "Stay ahead of upcoming deadlines by issuing a quick checkpoint task.",
-      icon: <ClipboardList className="h-5 w-5 text-blue-600" />,
+      icon: <ClipboardList className="h-5 w-5 text-primary" />,
       metrics: metricsSnapshot.tasks,
       primaryLabel: "Create follow-up task",
       secondaryLabel: "Open tasks",
@@ -422,7 +422,7 @@ export function AIQuickActions({ className }: { className?: string }) {
         overdueReminders.length > 0
           ? `There are ${overdueReminders.length} overdue reminder${overdueReminders.length === 1 ? "" : "s"}. Queue a short follow-up.`
           : "Keep the loop tight by setting a quick reminder to review progress.",
-      icon: <AlarmClock className="h-5 w-5 text-rose-600" />,
+      icon: <AlarmClock className="h-5 w-5 text-accent-foreground" />,
       metrics: metricsSnapshot.reminders,
       primaryLabel: "Set reminder",
       secondaryLabel: "View reminders",

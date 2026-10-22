@@ -41,7 +41,7 @@ export function IdentifyPanel({
     <section className="space-y-6">
       <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Lightbulb className="h-4 w-4 text-amber-500" aria-hidden="true" />
+          <Lightbulb className="h-4 w-4 text-warning" aria-hidden="true" />
           Identify
         </div>
         <h2 className="text-xl font-semibold text-foreground">

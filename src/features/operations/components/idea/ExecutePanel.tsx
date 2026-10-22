@@ -209,7 +209,7 @@ export function ExecutePanel({
       <header className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm dark:border-border/40 dark:bg-background/30">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <ClipboardList
-            className="h-4 w-4 text-violet-500"
+            className="h-4 w-4 text-secondary"
             aria-hidden="true"
           />
           Execute

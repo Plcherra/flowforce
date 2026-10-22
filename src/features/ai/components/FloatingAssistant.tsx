@@ -37,7 +37,7 @@ export function FloatingAssistant({
       >
         <Bot className="h-4 w-4" />
         {isOpen ? "Hide Co-Pilot" : "Co-Pilot Live"}
-        <Sparkles className="h-3 w-3 text-yellow-500" />
+        <Sparkles className="h-3 w-3 text-warning" />
       </Button>
     </div>
   );

@@ -51,7 +51,7 @@ export function IdeaMetricCard({
           <p
             className={cn(
               "text-xs font-medium",
-              delta && delta >= 0 ? "text-emerald-500" : "text-rose-500",
+              delta && delta >= 0 ? "text-success" : "text-accent-foreground",
             )}
           >
             {formattedDelta}
