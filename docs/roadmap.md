@@ -4,7 +4,7 @@
 Read this index and open only the feature file marked active.
 `PROJECT-STATUS.md` is the current status of the app.
 
-The 6 AM daily run opens the one row marked active. That row is Languages: [docs/features/languages.md](features/languages.md).
+The 6 AM daily run opens the one row marked active. That row is Time Off: [docs/features/time-off.md](features/time-off.md).
 
 When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. The handoff is Theme, then Languages, then Time Off. Do not skip a row.
 
@@ -13,8 +13,8 @@ When the active file has no unchecked phase left, the same run updates this tabl
 | # | Feature | Status | File |
 | --- | --- | --- | --- |
 | 1 | Theme | done | [docs/features/theme.md](features/theme.md) |
-| 2 | Languages | active | [docs/features/languages.md](features/languages.md) |
-| 3 | Time Off, then remaining Tasks | queued | [docs/features/time-off.md](features/time-off.md), then [docs/features/tasks.md](features/tasks.md) |
+| 2 | Languages | done | [docs/features/languages.md](features/languages.md) |
+| 3 | Time Off, then remaining Tasks | active | [docs/features/time-off.md](features/time-off.md), then [docs/features/tasks.md](features/tasks.md) |
 | 4 | System and Admin | queued | [docs/features/system-admin.md](features/system-admin.md) |
 | 5 | Operations | queued | [docs/features/forms-communication.md](features/forms-communication.md) |
 | 6 | Team | queued | Feature file not written yet |
@@ -28,13 +28,15 @@ Shipped schedule work stays in [docs/features/schedule.md](features/schedule.md)
 
 ### 1. Theme
 
-Done. Every phase in `docs/features/theme.md` is checked. Languages is the active row.
+Done. Every phase in `docs/features/theme.md` is checked.
 
 ### 2. Languages
 
-Active. The 6 AM run starts here. When every phase in `docs/features/languages.md` is checked, mark this row done, mark Time Off active, and open [docs/features/time-off.md](features/time-off.md).
+Done. Every phase in `docs/features/languages.md` is checked. Time Off is the active row.
 
 ### 3. Time Off, then remaining Tasks
+
+Active. The 6 AM run starts here.
 
 Time Off has 9 phases in [docs/features/time-off.md](features/time-off.md). When those 9 are checked, open [docs/features/tasks.md](features/tasks.md) for the remaining phases. Phases 9–12 stay skipped until their open questions are answered. Do not redo the checked Tasks phases. If 9–12 are still blocked, log the skip and move the pointer to System and Admin.
 
