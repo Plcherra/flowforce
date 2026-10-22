@@ -451,7 +451,7 @@ Prove: Unit test `src/features/tasks/utils/taskCreateAccess.test.ts`, run with `
 
 ### Phase 22 — Missed item inside a list
 
-- [ ] Blocked by Open question "What counts as one list issue". Skip this phase. Do not insert a task from an unanswered list item.
+- [x] Blocked by Open question "What counts as one list issue". Skip this phase. Do not insert a task from an unanswered list item.
 
 Prove: Skip. Do not add a test until the Open question "What counts as one list issue" is answered.
 
@@ -758,3 +758,9 @@ Phone steps for Pedro:
 Blockers: none for this phase.
 
 Questions: none.
+
+### 2026-10-22 — Phase 22 Missed item inside a list
+
+Skipped. Blocked by Open question "What counts as one list issue". A person scheduled on a shift is responsible for the lists attached to that shift. No task is inserted from an unanswered item. No test was added.
+
+Questions: The phase needs the Open question "What counts as one list issue" answered.
