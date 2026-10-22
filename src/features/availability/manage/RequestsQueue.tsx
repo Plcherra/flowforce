@@ -227,7 +227,7 @@ function RequestRow({
               <div key={entry.day} className="flex items-center gap-2">
                 <span className="w-16 font-medium">{entry.day}</span>
                 {entry.added.length > 0 && (
-                  <span className="flex items-center gap-1 text-emerald-600">
+                  <span className="flex items-center gap-1 text-success">
                     <CheckCircle2 className="h-3 w-3" />
                     {entry.added
                       .map((hour) => dayjs().hour(hour).format("h A"))
@@ -261,7 +261,7 @@ function RequestRow({
               <dt>Hour delta</dt>
               <dd
                 className={cn(
-                  hoursDiff >= 0 ? "text-emerald-600" : "text-destructive",
+                  hoursDiff >= 0 ? "text-success" : "text-destructive",
                 )}
               >
                 {hoursDiff >= 0 ? "+" : ""}
@@ -306,7 +306,7 @@ function RequestRow({
         <div className="flex items-center justify-between border-t pt-3 text-xs text-muted-foreground">
           <span>
             {request.status === "approved" ? (
-              <span className="flex items-center gap-1 text-emerald-600">
+              <span className="flex items-center gap-1 text-success">
                 <CheckCircle2 className="h-3 w-3" />
                 Approved by {request.managerId ?? "manager"}
               </span>

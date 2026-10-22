@@ -41,9 +41,9 @@ interface GamificationLeaderboardProps {
 }
 
 const rankBadges: Record<number, { label: string; className: string }> = {
-  1: { label: "Gold", className: "border-amber-400 text-amber-700" },
-  2: { label: "Silver", className: "border-slate-300 text-slate-600" },
-  3: { label: "Bronze", className: "border-orange-400 text-orange-700" },
+  1: { label: "Gold", className: "border-warning/40 text-warning-foreground" },
+  2: { label: "Silver", className: "border-border text-muted-foreground" },
+  3: { label: "Bronze", className: "border-warning/40 text-warning-foreground" },
 };
 
 function getInitials(name?: string, email?: string) {

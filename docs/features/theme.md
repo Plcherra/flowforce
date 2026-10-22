@@ -347,7 +347,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 18 — Learning, recognition, and calendar
 
-- [ ] Move hard-coded colors on the remaining people screens onto the tokens.
+- [x] Move hard-coded colors on the remaining people screens onto the tokens.
 
 Rules:
 
@@ -712,6 +712,23 @@ Phone steps for Pedro:
 3. Open position management. Create or edit a position and confirm the color swatches are still there. Saving a position should keep the color you picked.
 4. Open the logo editor. The crop frame should stay visible on the photo, and the plate behind a logo should stay white.
 5. Switch to Dark. Badges and the position dialog should stay readable, and the saved position color should not change.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 18 Learning, recognition, and calendar
+
+Shipped: Learning, recognition, gamification, performance, calendar, and availability classes now use the theme tokens. Time off requested is warning, approved is success, and denied uses accent because the old rose classes map to accent. Vacation is primary, sick is accent, and personal is secondary. Gold and bronze both use warning, because amber and orange both map to warning. Silver is muted. Those directories have no baseline entries. Learning, recognition, and performance had no hard-coded colors left.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Time off or Availability. A requested row should read as amber, an approved row as green, and a denied row as the lavender accent.
+2. Vacation should read as blue, sick as the lavender accent, personal as purple, and other as muted.
+3. Open the leaderboard or XP view. Gold and bronze should both read as amber, and silver as muted. The XP bar should run from blue through purple to the lavender accent. Earned badges should read as green.
+4. Open a calendar event. The event chip should keep its own color, with light text. A finished checklist dot should be green.
+5. Switch to Dark. Status chips, the XP bar, and the event panel should stay readable.
 
 Blockers: none. No migration.
 

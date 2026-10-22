@@ -26,7 +26,7 @@ interface XPBarProps {
 }
 
 const gradientClass =
-  "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-[0_0_20px_rgba(192,132,252,0.55)]";
+  "bg-gradient-to-r from-primary via-secondary to-accent shadow-[0_0_20px_rgba(192,132,252,0.55)]";
 
 export function XPBar({
   currentXP,
@@ -105,7 +105,7 @@ export function XPBar({
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             className="absolute -top-2 flex -translate-x-1/2 items-center"
           >
-            <div className="h-6 w-6 rounded-full border border-white/70 bg-white/90 text-center text-[10px] font-semibold text-primary shadow-lg dark:border-white/20 dark:bg-slate-900">
+            <div className="h-6 w-6 rounded-full border border-border bg-background/90 text-center text-[10px] font-semibold text-primary shadow-lg">
               {Math.round(progress)}
               <span className="text-[8px]">%</span>
             </div>

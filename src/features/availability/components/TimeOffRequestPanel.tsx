@@ -66,16 +66,16 @@ type TimeOffType = "vacation" | "sick" | "personal" | "other";
 type TimeOffStatus = "requested" | "approved" | "denied";
 
 const STATUS_STYLES: Record<TimeOffStatus, string> = {
-  requested: "bg-amber-100 text-amber-800 border-amber-200",
-  approved: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  denied: "bg-rose-100 text-rose-800 border-rose-200",
+  requested: "bg-warning-muted text-warning-foreground border-warning/40",
+  approved: "bg-success-muted text-success border-success/40",
+  denied: "bg-accent text-accent-foreground border-accent/40",
 };
 
 const TYPE_STYLES: Record<TimeOffType, string> = {
-  vacation: "bg-sky-100 text-sky-800 border-sky-200",
-  sick: "bg-rose-100 text-rose-800 border-rose-200",
-  personal: "bg-purple-100 text-purple-800 border-purple-200",
-  other: "bg-slate-100 text-slate-700 border-slate-200",
+  vacation: "bg-primary/10 text-primary border-primary/40",
+  sick: "bg-accent text-accent-foreground border-accent/40",
+  personal: "bg-secondary/10 text-secondary border-secondary/40",
+  other: "bg-muted text-foreground border-border",
 };
 
 const TIME_OFF_TYPE_LABEL: Record<TimeOffType, string> = {
@@ -593,7 +593,7 @@ export function TimeOffRequestPanel({
                         </Badge>
                       </div>
                       {conflicts.length > 0 && (
-                        <div className="mt-3 rounded-md border border-amber-200 bg-amber-50/60 p-3 text-xs text-amber-700">
+                        <div className="mt-3 rounded-md border border-warning/40 bg-warning-muted p-3 text-xs text-warning-foreground">
                           <div className="mb-1 flex items-center gap-1 font-medium">
                             <AlertTriangle className="h-3.5 w-3.5" />
                             Coverage impact
@@ -648,7 +648,7 @@ function SummaryTile({
     <div
       className={cn(
         "rounded-lg border p-3 shadow-sm transition",
-        tone === "warning" ? "border-amber-300 bg-amber-50/60" : "bg-muted/40",
+        tone === "warning" ? "border-warning/40 bg-warning-muted" : "bg-muted/40",
       )}
     >
       <div className="flex items-center justify-between text-xs font-semibold uppercase text-muted-foreground">
@@ -656,7 +656,7 @@ function SummaryTile({
         <Icon
           className={cn(
             "h-4 w-4",
-            tone === "warning" ? "text-amber-600" : "text-muted-foreground",
+            tone === "warning" ? "text-warning" : "text-muted-foreground",
           )}
         />
       </div>

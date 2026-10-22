@@ -61,7 +61,7 @@ export function EventDetailsPanel({
           </div>
           <Badge
             style={{ backgroundColor: event.color ?? undefined }}
-            className="capitalize text-white"
+            className="capitalize text-primary-foreground"
           >
             {TYPE_LABEL[type as keyof typeof TYPE_LABEL] ?? "Event"}
           </Badge>
@@ -149,7 +149,7 @@ export function EventDetailsPanel({
               {event.checklist.map((item) => (
                 <li key={item.id} className="flex items-start gap-2">
                   <span
-                    className={`mt-1 h-2 w-2 rounded-full ${item.done ? "bg-green-500" : "bg-muted-foreground/50"}`}
+                    className={`mt-1 h-2 w-2 rounded-full ${item.done ? "bg-success" : "bg-muted-foreground/50"}`}
                   />
                   <div>
                     <div className="text-foreground">{item.text}</div>

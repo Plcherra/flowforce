@@ -56,7 +56,7 @@ const recognitionDemoFeed = [
     id: "rec-1",
     name: "Jordan Chen",
     badgeLabel: "Goal Milestone",
-    badgeClassName: "bg-blue-100 text-blue-700",
+    badgeClassName: "bg-primary/10 text-primary",
     message: "Closed FY24 Revenue OKR with cross-functional partnership.",
     xpSnapshot: 180,
     createdAt: new Date().toISOString(),
@@ -65,7 +65,7 @@ const recognitionDemoFeed = [
     id: "rec-2",
     name: "Priya Malik",
     badgeLabel: "Training Completed",
-    badgeClassName: "bg-purple-100 text-purple-700",
+    badgeClassName: "bg-secondary/10 text-secondary",
     message: "Completed CX onboarding with a perfect QA score.",
     xpSnapshot: 120,
     createdAt: new Date().toISOString(),
@@ -74,7 +74,7 @@ const recognitionDemoFeed = [
     id: "rec-3",
     name: "Marcus Hall",
     badgeLabel: "Manual Recognition",
-    badgeClassName: "bg-amber-100 text-amber-700",
+    badgeClassName: "bg-warning-muted text-warning-foreground",
     message: "Recognized for mentoring peer coaching group.",
     xpSnapshot: 90,
     createdAt: new Date().toISOString(),
@@ -122,16 +122,16 @@ const leaderboardShowcase = [
 
 export default function HrDevelopment() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-6xl space-y-10 px-6 py-16">
         <div className="space-y-3 text-center">
           <Badge variant="secondary" className="text-primary">
             HR & Development
           </Badge>
-          <h1 className="text-4xl font-bold text-slate-900">
+          <h1 className="text-4xl font-bold text-foreground">
             Unified XP, Recognition, and Growth
           </h1>
-          <p className="text-lg text-slate-600">
+          <p className="text-lg text-muted-foreground">
             Showcase the culture engine for your teams with XP progress, live
             recognitions, and leaderboard insights connected across modules.
           </p>
@@ -157,7 +157,7 @@ export default function HrDevelopment() {
             previousMilestone={{ label: "Momentum Reached", xpRequired: 5000 }}
             className="h-full"
           />
-          <Card className="bg-white">
+          <Card className="bg-background">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -167,7 +167,7 @@ export default function HrDevelopment() {
                 Copilot-ready overview of XP, badges, and workforce momentum.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm text-slate-600">
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>
                 Connect recognition automation, training completions, and goal
                 progress to a single XP graph. HR & Development keeps every win

@@ -703,7 +703,7 @@ export function AvailabilityRequestForm({
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertCircle className="h-4 w-4 text-warning" />
             {availabilityIsOpen
               ? "Open availability does not require the weekday grid."
               : directEditAllowed
@@ -847,7 +847,7 @@ export function AvailabilityRequestForm({
                         <li key={entry.day}>
                           <span className="font-semibold">{entry.day}:</span>{" "}
                           {entry.added.length > 0 && (
-                            <span className="text-emerald-600">
+                            <span className="text-success">
                               +{" "}
                               {entry.added
                                 .map((hour) => dayjs().hour(hour).format("h A"))

@@ -121,7 +121,7 @@ export function BadgesGallery({
                     </p>
                   </div>
                   {earned && badge.earnedAt ? (
-                    <p className="mt-auto text-[11px] uppercase tracking-wide text-emerald-600">
+                    <p className="mt-auto text-[11px] uppercase tracking-wide text-success">
                       Earned{" "}
                       {typeof badge.earnedAt === "string"
                         ? badge.earnedAt
