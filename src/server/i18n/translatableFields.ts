@@ -18,11 +18,22 @@ export const TRANSLATABLE_FIELDS: Record<
     title: {},
     description: {},
   },
+  form_fields: {
+    label: {},
+    description: {},
+    placeholder: {},
+  },
 };
 
 export function translatableFieldRule(
   sourceTable: string,
   fieldPath: string,
 ): TranslatableFieldRule | null {
-  return TRANSLATABLE_FIELDS[sourceTable]?.[fieldPath] ?? null;
+  const table = TRANSLATABLE_FIELDS[sourceTable];
+  if (!table) return null;
+  if (table[fieldPath]) return table[fieldPath];
+  if (sourceTable === "form_fields" && /^options\.\d+$/.test(fieldPath)) {
+    return {};
+  }
+  return null;
 }

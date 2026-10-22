@@ -37,6 +37,7 @@ export interface FormField {
   id: string;
   type: FormFieldType;
   label: string;
+  description?: string;
   placeholder?: string;
   required?: boolean;
   options?: string[];

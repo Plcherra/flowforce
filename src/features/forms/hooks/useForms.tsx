@@ -401,7 +401,7 @@ export function useForms() {
     }
 
     try {
-      await repositoryReplaceFormFields(companyId, formId, fields);
+      await repositoryReplaceFormFields(companyId, formId, fields, sourceLocale);
       toast({
         title: "Success",
         description: "Form fields saved successfully",

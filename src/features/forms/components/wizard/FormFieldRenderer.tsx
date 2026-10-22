@@ -51,16 +51,28 @@ import type {
   ScanData,
 } from "@/types/forms";
 import { getFieldOptions, parseConfig } from "../../utils/formFieldHelpers";
+import {
+  presentFormField,
+  type FormFieldContentTranslation,
+} from "@/features/forms/formFieldContent";
 
 interface FormFieldRendererProps {
   field: FormFieldDataLocal;
   form: UseFormReturn<Record<string, any>>;
+  translation?: FormFieldContentTranslation | null;
 }
 
-export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
+export function FormFieldRenderer({
+  field: storedField,
+  form,
+  translation = null,
+}: FormFieldRendererProps) {
   const { t } = useTranslation();
+  const field = presentFormField(storedField, translation);
   const fieldName = field.id;
-  const options = getFieldOptions(field);
+  const options = getFieldOptions(storedField);
+  const optionLabel = (index: number) =>
+    translation?.optionLabels[index] || options[index] || "";
   const fieldType = field.field_type as FormFieldType;
 
   switch (fieldType) {
@@ -272,7 +284,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                 <SelectContent>
                   {options.map((option, index) => (
                     <SelectItem key={index} value={option}>
-                      {option}
+                      {optionLabel(index)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -319,7 +331,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                         htmlFor={`${fieldName}-${index}`}
                         className="text-sm font-normal"
                       >
-                        {option}
+                        {optionLabel(index)}
                       </label>
                     </div>
                   ))}
@@ -374,7 +386,7 @@ export function FormFieldRenderer({ field, form }: FormFieldRendererProps) {
                         }
                       }}
                     />
-                    <span>{option}</span>
+                    <span>{optionLabel(index)}</span>
                   </div>
                 ))}
               </div>

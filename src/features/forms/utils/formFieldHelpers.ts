@@ -51,6 +51,11 @@ export function getDefaultValue(field: FormFieldDataLocal): unknown {
  * Get field options from field configuration
  */
 export function getFieldOptions(field: FormFieldDataLocal): string[] {
+  if (Array.isArray(field.options)) {
+    return field.options.map((option: unknown) =>
+      typeof option === "string" ? option : String(option),
+    );
+  }
   if (!field.config) return [];
 
   try {

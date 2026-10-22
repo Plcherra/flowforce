@@ -562,7 +562,7 @@ Prove: Unit test those two field paths. Run it with the jiti runner.
 
 ### Phase 31 — Form questions and options
 
-- [ ] Translate labels, help, placeholders, and option labels.
+- [x] Translate labels, help, placeholders, and option labels.
 
 Rules:
 
@@ -1227,6 +1227,22 @@ Phone steps for Pedro:
 2. Open Forms and create a form with an English title and a sentence in the description. Save it from the form editor. The form should appear in the list without waiting.
 3. Set your language to Español and reload Forms. The list name should be Spanish. Open the form. The header title and description should be Spanish, with Traducido de English. Ver original. Tap it to read the English title and description. Tap again for Spanish.
 4. Set the language back to English and reload. The list and the form header should be the English text you typed, with no translated-from line. Open Edit. The title and description boxes should still be the English text, so a save does not replace them with a translation.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 31 Form questions and options
+
+Shipped: A form question keeps the label, description, placeholder, and option list that were saved. Option lists stay the string array the builder already writes. The cache path for an option is `options.0`, `options.1`, and so on, matching that array. The fill screen and the review show the translated label. The choice that is stored is still the original option string. The save returns before the model runs. A question with more than eight texts is sent in batches of eight.
+
+Proven: `src/features/forms/formFieldTranslation.test.ts` passed through the jiti runner. The options JSON is `["Line", "Expo", "Dish", "Prep", "Register"]`. The stored answer stays `Line`. The Spanish label for that answer is `es:Line`. An English viewer gets no translation. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open Forms, edit a form, and add a dropdown or radio question. Type an English label, a placeholder, and options such as Line, Expo, and Dish. Save the form.
+3. Set your language to Español and reload. Open the form and go to the questions. The label, the placeholder, and the option names should be Spanish. Help text is Spanish when that question already has help text stored. Choose Line. Submit the form.
+4. Set the language back to English and open the submission. The stored choice should still be the English word Line, not the Spanish label. The question label should be the English text you typed.
 
 Blockers: none. No new migration.
 

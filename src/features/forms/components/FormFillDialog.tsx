@@ -17,6 +17,13 @@ import { FormSubmissionData } from "@/types/api";
 import { orderFormFields } from "@/features/forms/components/utils/orderFormFields";
 import { FormReviewLayout } from "@/features/forms/components/presentation";
 import { exportFormResponseToPdf } from "@/utils/formExport";
+import { readFormSourceLocale } from "@/features/forms/formContentFields";
+import {
+  displayAnswer,
+  presentFormField,
+  readBuilderOptionLabels,
+} from "@/features/forms/formFieldContent";
+import { useFormFieldTranslations } from "@/features/forms/hooks/useFormFieldTranslations";
 import { groupFieldsByCategory } from "../utils/formFieldHelpers";
 import { buildWizardSteps } from "../utils/wizardSteps";
 import { buildReviewSections } from "../utils/reviewSections";
@@ -105,6 +112,10 @@ export default function FormFillDialog({
   const [flaggedFieldIds, setFlaggedFieldIds] = useState<string[]>([]);
 
   const orderedFields = useMemo(() => orderFormFields(fields), [fields]);
+  const fieldTranslations = useFormFieldTranslations(
+    orderedFields,
+    readFormSourceLocale(hydratedForm?.settings),
+  );
   const buckets = useMemo(
     () => groupFieldsByCategory(orderedFields),
     [orderedFields],
@@ -398,9 +409,34 @@ export default function FormFillDialog({
     }
   });
 
+  const reviewFields = useMemo(
+    () =>
+      orderedFields.map((field) =>
+        presentFormField(field, fieldTranslations.get(field.id) ?? null),
+      ),
+    [fieldTranslations, orderedFields],
+  );
+  const reviewBuckets = useMemo(
+    () => groupFieldsByCategory(reviewFields),
+    [reviewFields],
+  );
+  const reviewValues = useMemo(() => {
+    const next = { ...formValues };
+    for (const field of orderedFields) {
+      if (!field.id) continue;
+      const translation = fieldTranslations.get(field.id);
+      if (!translation) continue;
+      next[field.id] = displayAnswer(
+        next[field.id],
+        readBuilderOptionLabels(field.options),
+        translation.optionLabels,
+      );
+    }
+    return next;
+  }, [fieldTranslations, formValues, orderedFields]);
   const reviewSections = useMemo(
-    () => buildReviewSections(buckets, formValues, visibleFields),
-    [buckets, formValues, visibleFields],
+    () => buildReviewSections(reviewBuckets, reviewValues, visibleFields),
+    [reviewBuckets, reviewValues, visibleFields],
   );
 
   const metaCardProps = useMemo(() => {
@@ -491,7 +527,12 @@ export default function FormFillDialog({
         return (
           <div className="space-y-6">
             {getFieldsForStep(wizard.currentStep.id).map((field) => (
-              <FormFieldRenderer key={field.id} field={field} form={form} />
+              <FormFieldRenderer
+                key={field.id}
+                field={field}
+                form={form}
+                translation={fieldTranslations.get(field.id) ?? null}
+              />
             ))}
           </div>
         );

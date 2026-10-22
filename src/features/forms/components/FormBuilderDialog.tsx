@@ -116,6 +116,7 @@ export default function FormBuilderDialog({
               id: row.id ?? randomId(),
               type: (row.field_type ?? "text") as FormField["type"],
               label: row.label ?? "Untitled field",
+              description: row.description ?? undefined,
               placeholder: row.placeholder ?? undefined,
               required: Boolean(row.is_required),
               options: Array.isArray(row.options)
@@ -237,7 +238,7 @@ export default function FormBuilderDialog({
         field_type: field.type,
         label: field.label,
         placeholder: field.placeholder ?? null,
-        description: null,
+        description: field.description ?? null,
         is_required: field.required ?? false,
         options:
           field.options && field.options.length > 0 ? field.options : null,

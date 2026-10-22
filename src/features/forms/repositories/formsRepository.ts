@@ -14,6 +14,7 @@ import {
   withFormSourceLocale,
 } from "@/features/forms/formContentFields";
 import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
+import { scheduleFormFieldTranslation } from "@/features/forms/scheduleFormField";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([
@@ -395,6 +396,7 @@ export async function replaceFormFields(
   companyId: string,
   formId: string,
   fields: SaveableFormField[],
+  sourceLocale?: AppLanguage,
 ): Promise<void> {
   await ensureCompanyScope(companyId);
   const { error: deleteError } = await supabase
@@ -417,9 +419,25 @@ export async function replaceFormFields(
     field_order: index + 1,
   }));
 
-  const { error } = await supabase.from("form_fields").insert(fieldsToInsert);
+  const { data, error } = await supabase
+    .from("form_fields")
+    .insert(fieldsToInsert)
+    .select("id, label, description, placeholder, options");
   if (error) {
     throw error;
+  }
+  if (!sourceLocale) return;
+  for (const row of data ?? []) {
+    if (!row.id) continue;
+    scheduleFormFieldTranslation({
+      companyId,
+      sourceId: row.id,
+      sourceLocale,
+      label: row.label,
+      description: row.description,
+      placeholder: row.placeholder,
+      options: row.options,
+    });
   }
 }
 
