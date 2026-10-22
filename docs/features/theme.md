@@ -233,7 +233,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 10 — Company updates
 
-- [ ] Move hard-coded colors on Company updates onto the tokens.
+- [x] Move hard-coded colors on Company updates onto the tokens.
 
 Rules:
 
@@ -581,6 +581,23 @@ Phone steps for Pedro:
 3. Edit a form and open the rich-text field. The text color control should still be there.
 4. Open a signature field. The pad should stay white in FlowForce, Light, and Dark, and the ink should stay black.
 5. Switch to Dark and open a form with a video or scanner field. The play mark and the camera well should stay dark.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 10 Company updates
+
+Shipped: Company update chrome now uses the theme tokens. Type chips and readiness rows use primary, secondary, success, warning, or destructive. The rich-text color picker is unchanged. Gradient presets and the post background color fields still store hex. The preview title stays light on the post art, the artwork scrim stays dark, and the phone frame stays dark in Dark.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. The baseline keeps the picker hex and the post background hex. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Company updates.
+2. Announcements should read as blue, news as green, events as purple, and policy as amber.
+3. Start a new update. The gradient presets should still be there, and the rich-text color control should still be there.
+4. Preview the update on the phone frame. The frame should stay dark, the title should stay light on the background, and a chosen gradient should still paint the post.
+5. Switch to Dark and repeat the preview. The phone frame and the title should stay readable.
 
 Blockers: none. No migration.
 

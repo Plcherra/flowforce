@@ -34,15 +34,15 @@ export function CompanyUpdatePreview({
     <>
       <div
         className={cn(
-          "relative text-white",
+          "relative text-primary-foreground",
           isMobile ? "px-5 py-6" : isCompact ? "px-3 py-3" : "px-6 py-6",
           backgroundConfig.patternClass,
         )}
         style={backgroundConfig.style}
       >
-        <div className="absolute inset-0 bg-black/15" />
+        <div className="absolute inset-0 bg-foreground/15 dark:bg-background/15" />
         <div className="relative z-10 space-y-2">
-          <Badge variant="secondary" className="bg-white/20 text-white">
+          <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground">
             {data.type}
           </Badge>
           <h2
@@ -128,15 +128,15 @@ export function CompanyUpdatePreview({
   if (isMobile) {
     return (
       <div className={cn("mx-auto flex h-full w-full max-w-[20rem] flex-col", className)}>
-        <div className="flex h-full min-h-[22rem] flex-col rounded-[2rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-xl">
+        <div className="flex h-full min-h-[22rem] flex-col rounded-[2rem] border-[10px] border-foreground bg-foreground shadow-xl dark:border-background dark:bg-background">
           <div className="flex h-6 shrink-0 items-end justify-center pb-1">
-            <div className="h-1.5 w-16 rounded-full bg-neutral-700" />
+            <div className="h-1.5 w-16 rounded-full bg-primary-foreground/40" />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto rounded-[1.15rem] bg-background">
             {article}
           </div>
           <div className="flex h-5 shrink-0 items-center justify-center">
-            <div className="h-1 w-20 rounded-full bg-neutral-700" />
+            <div className="h-1 w-20 rounded-full bg-primary-foreground/40" />
           </div>
         </div>
       </div>
@@ -157,9 +157,9 @@ export function CompanyUpdatePreview({
           isCompact ? "gap-1.5 px-2 py-1.5" : "gap-2 px-3 py-2",
         )}
       >
-        <span className={cn("rounded-full bg-red-400/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
-        <span className={cn("rounded-full bg-amber-400/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
-        <span className={cn("rounded-full bg-emerald-400/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
+        <span className={cn("rounded-full bg-destructive/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
+        <span className={cn("rounded-full bg-warning/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
+        <span className={cn("rounded-full bg-success/80", isCompact ? "h-2 w-2" : "h-2.5 w-2.5")} />
         <span
           className={cn(
             "ml-1.5 flex-1 truncate rounded-md bg-muted text-muted-foreground",

@@ -36,15 +36,15 @@ const getTypeIcon = (type: string) => {
 const getTypeColor = (type: string) => {
   switch (type) {
     case "announcement":
-      return "bg-blue-500/10 text-blue-600 border-blue-200";
+      return "bg-primary/10 text-primary border-primary/40";
     case "news":
-      return "bg-green-500/10 text-green-600 border-green-200";
+      return "bg-success/10 text-success border-success/40";
     case "event":
-      return "bg-purple-500/10 text-purple-600 border-purple-200";
+      return "bg-secondary/10 text-secondary border-secondary/40";
     case "policy":
-      return "bg-gray-500/10 text-gray-600 border-gray-200";
+      return "bg-foreground/10 text-muted-foreground border-border";
     default:
-      return "bg-blue-500/10 text-blue-600 border-blue-200";
+      return "bg-primary/10 text-primary border-primary/40";
   }
 };
 

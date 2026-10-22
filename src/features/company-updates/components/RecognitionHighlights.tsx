@@ -124,7 +124,7 @@ export function RecognitionHighlights({
             <div key={recognition.id} className="flex items-start gap-3">
               <div
                 className={cn(
-                  "rounded-full p-2 bg-white shadow-sm",
+                  "rounded-full p-2 bg-background shadow-sm",
                   meta.color,
                 )}
               >

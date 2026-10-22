@@ -222,7 +222,7 @@ export function UpdateFeedCard({
                   variant="ghost"
                   size="sm"
                   onClick={() => onLike(update.id)}
-                  className={`h-8 px-3 ${isLiked ? "text-red-600 hover:text-red-700" : ""}`}
+                  className={`h-8 px-3 ${isLiked ? "text-destructive hover:text-destructive/80" : ""}`}
                 >
                   <Heart
                     className={`h-4 w-4 mr-1 ${isLiked ? "fill-current" : ""}`}
