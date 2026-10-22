@@ -150,11 +150,11 @@ function CalendarView({
             <>
               <div
                 key={`label-${h}`}
-                className="bg-white p-2 text-xs text-muted-foreground"
+                className="bg-background p-2 text-xs text-muted-foreground"
               >
                 {String(h).padStart(2, "0")}:00
               </div>
-              <div key={`slot-${h}`} className="bg-white p-2 min-h-[48px]">
+              <div key={`slot-${h}`} className="bg-background p-2 min-h-[48px]">
                 {list
                   .filter((ev) => {
                     const s = parseISO(ev.start);
@@ -191,7 +191,7 @@ function CalendarView({
                           • {ev.location}
                         </div>
                         {ev.description && (
-                          <div className="text-xs mt-1 text-gray-700 truncate">
+                          <div className="text-xs mt-1 text-muted-foreground truncate">
                             {ev.description}
                           </div>
                         )}
@@ -313,19 +313,19 @@ function CalendarView({
           {list.map((ev) => (
             <div
               key={ev.id}
-              className="p-3 border rounded-md shadow-sm bg-white"
+              className="p-3 border rounded-md shadow-sm bg-background"
             >
               <div className="font-semibold">{ev.title}</div>
               <div className="text-sm text-muted-foreground">
                 {new Date(ev.start).toLocaleString()} — {ev.location}
               </div>
-              <div className="text-sm mt-2 truncate text-gray-700">
+              <div className="text-sm mt-2 truncate text-muted-foreground">
                 {ev.description}
               </div>
             </div>
           ))}
           {list.length === 0 && (
-            <div className="text-sm text-gray-600">No events</div>
+            <div className="text-sm text-muted-foreground">No events</div>
           )}
         </div>
       </div>
@@ -345,19 +345,19 @@ function CalendarView({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setView("day")}
-              className={`px-2 py-1 rounded ${view === "day" ? "bg-primary text-white" : "border"}`}
+              className={`px-2 py-1 rounded ${view === "day" ? "bg-primary text-primary-foreground" : "border"}`}
             >
               Day
             </button>
             <button
               onClick={() => setView("week")}
-              className={`px-2 py-1 rounded ${view === "week" ? "bg-primary text-white" : "border"}`}
+              className={`px-2 py-1 rounded ${view === "week" ? "bg-primary text-primary-foreground" : "border"}`}
             >
               Week
             </button>
             <button
               onClick={() => setView("month")}
-              className={`px-2 py-1 rounded ${view === "month" ? "bg-primary text-white" : "border"}`}
+              className={`px-2 py-1 rounded ${view === "month" ? "bg-primary text-primary-foreground" : "border"}`}
             >
               Month
             </button>
@@ -378,7 +378,7 @@ function CalendarView({
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
             <div
               key={d}
-              className="bg-muted/10 text-center text-xs py-2 text-gray-600"
+              className="bg-muted/10 text-center text-xs py-2 text-muted-foreground"
             >
               {d}
             </div>
@@ -393,7 +393,7 @@ function CalendarView({
                 return (
                   <div
                     key={key}
-                    className={`min-h-[110px] p-2 bg-white ${inMonth ? "bg-white" : "bg-gray-50 text-gray-400"}`}
+                    className={`min-h-[110px] p-2 ${inMonth ? "bg-background" : "bg-muted text-muted-foreground"}`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="text-sm font-medium">{day.getDate()}</div>
@@ -419,7 +419,7 @@ function CalendarView({
                           </div>
 
                           <div className="absolute left-0 top-full mt-2 hidden group-hover:block w-72 z-50">
-                            <div className="bg-white border rounded shadow-lg p-3 text-sm">
+                            <div className="bg-background border rounded shadow-lg p-3 text-sm">
                               <div className="font-semibold mb-1">
                                 {ev.title}
                               </div>
@@ -428,7 +428,7 @@ function CalendarView({
                                 {ev.location}
                               </div>
                               {ev.description && (
-                                <div className="mt-2 text-xs text-gray-700 truncate">
+                                <div className="mt-2 text-xs text-muted-foreground truncate">
                                   {ev.description}
                                 </div>
                               )}
@@ -499,7 +499,7 @@ export default function EventsIndex() {
                 <div className="flex items-center gap-3">
                   <div className="text-sm font-medium">&nbsp;</div>
                   <div className="relative w-full max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search events..."
                       className="pl-10"
@@ -529,7 +529,7 @@ export default function EventsIndex() {
 
               {/* Floating Add button */}
               <button
-                className="above-bottom-icon-nav fixed right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105"
+                className="above-bottom-icon-nav fixed right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
                 aria-label="Add Event"
                 onClick={() => {
                   handleQuickAdd();
@@ -615,13 +615,13 @@ function EventForm({
         <Label>Type</Label>
         <div className="flex items-center gap-2 mb-3">
           <button
-            className={`px-2 py-1 rounded ${type === "event" ? "bg-primary text-white" : "border"}`}
+            className={`px-2 py-1 rounded ${type === "event" ? "bg-primary text-primary-foreground" : "border"}`}
             onClick={() => setType("event")}
           >
             Event
           </button>
           <button
-            className={`px-2 py-1 rounded ${type === "meeting" ? "bg-primary text-white" : "border"}`}
+            className={`px-2 py-1 rounded ${type === "meeting" ? "bg-primary text-primary-foreground" : "border"}`}
             onClick={() => setType("meeting")}
           >
             Meeting

@@ -52,18 +52,18 @@ export default function SectionCard({
 
   return (
     <Card
-      className={`transition-all ${isEnabled ? "bg-green-50 border-green-200" : ""}`}
+      className={`transition-all ${isEnabled ? "bg-success-muted border-success/40" : ""}`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3 flex-1">
             <div
-              className={`p-2 rounded-lg ${isEnabled ? "bg-green-100" : "bg-gray-100"}`}
+              className={`p-2 rounded-lg ${isEnabled ? "bg-success-muted" : "bg-muted"}`}
             >
               {isEnabled ? (
-                <Eye className="h-4 w-4 text-green-600" />
+                <Eye className="h-4 w-4 text-success" />
               ) : (
-                <EyeOff className="h-4 w-4 text-gray-400" />
+                <EyeOff className="h-4 w-4 text-muted-foreground" />
               )}
             </div>
             <div className="flex-1">
@@ -72,7 +72,7 @@ export default function SectionCard({
                 {section.isCustom && (
                   <Badge
                     variant="outline"
-                    className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                    className="text-xs bg-secondary/10 text-secondary border-secondary/40"
                   >
                     Custom
                   </Badge>

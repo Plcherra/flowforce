@@ -660,7 +660,7 @@ export function SectionConfigurationWizard({
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : isCompleted
-                        ? "bg-green-500 text-white"
+                        ? "bg-success text-primary-foreground"
                         : "bg-muted text-muted-foreground"
                   }
                 `}
@@ -670,7 +670,7 @@ export function SectionConfigurationWizard({
                 {index < WIZARD_STEPS.length - 1 && (
                   <div
                     className={`w-12 h-0.5 mx-2 ${
-                      isCompleted ? "bg-green-500" : "bg-muted"
+                      isCompleted ? "bg-success" : "bg-muted"
                     }`}
                   />
                 )}

@@ -19,10 +19,10 @@ type Props = {
 };
 
 const catColor: Record<string, string> = {
-  communication: "bg-purple-100 text-purple-800",
-  operations: "bg-green-100 text-green-800",
-  hr: "bg-blue-100 text-blue-800",
-  custom: "bg-gray-100 text-gray-800",
+  communication: "bg-secondary/10 text-secondary",
+  operations: "bg-success-muted text-success",
+  hr: "bg-primary/10 text-primary",
+  custom: "bg-muted text-foreground",
 };
 
 export function FileSectionsManager({ onCreate }: Props) {

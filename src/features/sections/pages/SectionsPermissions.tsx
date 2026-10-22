@@ -52,11 +52,11 @@ export default function SectionsPermissions() {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <Shield className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Shield className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">
             Access Denied
           </h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             You don&apos;t have permission to access sections and permissions
             management.
           </p>
@@ -70,10 +70,10 @@ export default function SectionsPermissions() {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               Sections & Access
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-muted-foreground mt-1">
               Manage business templates, navigation sections, and role-based
               access control
             </p>
@@ -171,14 +171,14 @@ export default function SectionsPermissions() {
                               className={`
                             ${
                               role === "owner"
-                                ? "bg-purple-100 text-purple-800"
+                                ? "bg-secondary/10 text-secondary"
                                 : role === "admin"
-                                  ? "bg-red-100 text-red-800"
+                                  ? "bg-destructive/10 text-destructive"
                                   : role === "manager"
-                                    ? "bg-blue-100 text-blue-800"
+                                    ? "bg-primary/10 text-primary"
                                     : role === "supervisor"
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-gray-100 text-gray-800"
+                                      ? "bg-success-muted text-success"
+                                      : "bg-muted text-foreground"
                             }
                           `}
                             >
@@ -195,10 +195,10 @@ export default function SectionsPermissions() {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                           <div>
-                            <h5 className="font-medium text-gray-900 mb-2">
+                            <h5 className="font-medium text-foreground mb-2">
                               Core Features
                             </h5>
-                            <div className="space-y-1 text-gray-600">
+                            <div className="space-y-1 text-muted-foreground">
                               <div>✓ Dashboard</div>
                               <div>✓ Messages</div>
                               <div>✓ Tasks</div>
@@ -207,10 +207,10 @@ export default function SectionsPermissions() {
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-gray-900 mb-2">
+                            <h5 className="font-medium text-foreground mb-2">
                               Management
                             </h5>
-                            <div className="space-y-1 text-gray-600">
+                            <div className="space-y-1 text-muted-foreground">
                               <div>
                                 {[
                                   "supervisor",
@@ -236,10 +236,10 @@ export default function SectionsPermissions() {
                           </div>
 
                           <div>
-                            <h5 className="font-medium text-gray-900 mb-2">
+                            <h5 className="font-medium text-foreground mb-2">
                               System
                             </h5>
-                            <div className="space-y-1 text-gray-600">
+                            <div className="space-y-1 text-muted-foreground">
                               <div>
                                 {["manager", "admin", "owner"].includes(role)
                                   ? "✓"

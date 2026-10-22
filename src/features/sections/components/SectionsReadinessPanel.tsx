@@ -20,10 +20,10 @@ interface SectionsReadinessPanelProps {
 }
 
 const reviewTone: Record<string, string> = {
-  critical: "border-red-200 bg-red-50 text-red-900 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-100",
+  critical: "border-destructive/40 bg-destructive/10 text-destructive",
   warning:
-    "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100",
-  info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-100",
+    "border-warning/40 bg-warning-muted text-warning-foreground",
+  info: "border-primary/40 bg-primary/10 text-primary",
 };
 
 export function SectionsReadinessPanel({
@@ -135,7 +135,7 @@ export function SectionsReadinessPanel({
             </AlertDescription>
           </Alert>
         ) : (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-100">
+          <div className="rounded-lg border border-success/40 bg-success-muted p-3 text-sm text-success">
             Active custom sections have pages and permission coverage.
           </div>
         )}

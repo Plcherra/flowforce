@@ -276,7 +276,7 @@ Prove: `node scripts/check-theme-colors.mjs`.
 
 ### Phase 13 — Sections
 
-- [ ] Move hard-coded colors in Sections onto the tokens.
+- [x] Move hard-coded colors in Sections onto the tokens.
 
 Rules:
 
@@ -630,6 +630,22 @@ Phone steps for Pedro:
 2. On a count, an accurate line should read as green, a small variance as amber, and a large variance as red.
 3. Open expenses. Paid or approved should read as green, pending as amber, and a problem as red. The expense chart should use blue and green, not a separate hex color.
 4. Switch to Dark. Those status colors should stay readable.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 13 Sections
+
+Shipped: Section and events-calendar classes now use the theme tokens. Readiness rows use destructive, warning, and primary. Category chips use primary, secondary, success, or muted. Days outside the current month use muted. `src/features/sections` and `src/sections` have no baseline entries.
+
+Proven: `node scripts/check-theme-colors.mjs` exited 0. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Sections.
+2. An enabled section should read as green. A readiness warning should read as amber, and a blocker as red.
+3. Open the events calendar. Days in the month should sit on the page background. Days outside the month should be a muted wash. The selected day, week, or month button should be blue with light text.
+4. Switch to Dark. Section titles and the calendar should stay readable.
 
 Blockers: none. No migration.
 

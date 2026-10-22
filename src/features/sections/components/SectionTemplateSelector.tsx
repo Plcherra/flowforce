@@ -45,11 +45,11 @@ const iconMap = {
 };
 
 const categoryColors = {
-  communication: "bg-blue-100 text-blue-800",
-  operations: "bg-green-100 text-green-800",
-  hr: "bg-purple-100 text-purple-800",
-  analytics: "bg-orange-100 text-orange-800",
-  custom: "bg-gray-100 text-gray-800",
+  communication: "bg-primary/10 text-primary",
+  operations: "bg-success-muted text-success",
+  hr: "bg-secondary/10 text-secondary",
+  analytics: "bg-warning-muted text-warning-foreground",
+  custom: "bg-muted text-foreground",
 };
 
 export default function SectionTemplateSelector({
@@ -127,7 +127,7 @@ export default function SectionTemplateSelector({
                         </CardTitle>
                         <Badge
                           variant="secondary"
-                          className={`text-xs mt-1 ${categoryColors[template.category as keyof typeof categoryColors] || "bg-gray-100 text-gray-800"}`}
+                          className={`text-xs mt-1 ${categoryColors[template.category as keyof typeof categoryColors] || "bg-muted text-foreground"}`}
                         >
                           {template.category}
                         </Badge>

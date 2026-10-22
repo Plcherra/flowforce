@@ -102,15 +102,15 @@ export function UpdatesFeedView({
   const getTypeColor = (type: CompanyUpdate["type"]) => {
     switch (type) {
       case "announcement":
-        return "text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400";
+        return "text-primary bg-primary/10";
       case "news":
-        return "text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400";
+        return "text-success bg-success-muted";
       case "event":
-        return "text-purple-600 bg-purple-50 dark:bg-purple-950 dark:text-purple-400";
+        return "text-secondary bg-secondary/10";
       case "policy":
-        return "text-orange-600 bg-orange-50 dark:bg-orange-950 dark:text-orange-400";
+        return "text-warning bg-warning-muted";
       default:
-        return "text-gray-600 bg-gray-50 dark:bg-gray-950 dark:text-gray-400";
+        return "text-muted-foreground bg-background";
     }
   };
 
@@ -261,7 +261,7 @@ export function UpdatesFeedView({
                     variant="ghost"
                     size="sm"
                     onClick={() => handleLike(update.id)}
-                    className={isLiked ? "text-red-600 hover:text-red-700" : ""}
+                    className={isLiked ? "text-destructive hover:text-destructive/80" : ""}
                   >
                     <Heart
                       className={`h-4 w-4 mr-2 ${isLiked ? "fill-current" : ""}`}

@@ -233,8 +233,8 @@ export default function AddSection() {
 
   return (
     <div>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-4">
@@ -247,10 +247,10 @@ export default function AddSection() {
                   <span>Back</span>
                 </Button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="text-2xl font-bold text-foreground">
                     Add New Section
                   </h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     Choose a template or create from scratch
                   </p>
                 </div>
@@ -294,10 +294,10 @@ export default function AddSection() {
                 className="space-y-6"
               >
                 <div className="text-center">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-xl font-semibold text-foreground">
                     {category.label}
                   </h2>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-muted-foreground mt-1">
                     {category.description}
                   </p>
                 </div>
@@ -332,7 +332,7 @@ export default function AddSection() {
                         {template.config.pages &&
                           template.config.pages.length > 0 && (
                             <div className="mt-4">
-                              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              <p className="text-xs font-medium text-muted-foreground mb-2">
                                 Includes:
                               </p>
                               <div className="flex flex-wrap gap-1">
@@ -373,7 +373,7 @@ export default function AddSection() {
 
                 {getTemplatesByCategory(category.key).length === 0 && (
                   <div className="text-center py-12">
-                    <p className="text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground">
                       No templates available for this category yet.
                     </p>
                     <Button

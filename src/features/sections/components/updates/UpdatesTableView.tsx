@@ -72,12 +72,12 @@ export function UpdatesTableView({
   const getTypeBadge = (type: CompanyUpdate["type"]) => {
     const colors = {
       announcement:
-        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-      news: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+        "bg-primary/10 text-primary",
+      news: "bg-success-muted text-success",
       event:
-        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+        "bg-secondary/10 text-secondary",
       policy:
-        "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+        "bg-warning-muted text-warning-foreground",
     };
 
     return <Badge className={`${colors[type]} text-xs`}>{type}</Badge>;
@@ -85,10 +85,10 @@ export function UpdatesTableView({
 
   const getPriorityBadge = (priority: CompanyUpdate["priority"]) => {
     const colors = {
-      high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+      high: "bg-destructive/10 text-destructive",
       medium:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-      low: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+        "bg-warning-muted text-warning-foreground",
+      low: "bg-muted text-foreground",
     };
 
     return <Badge className={`${colors[priority]} text-xs`}>{priority}</Badge>;

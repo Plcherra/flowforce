@@ -53,20 +53,20 @@ export default function CustomSectionCard({
     <Card
       className={`transition-all border-l-4 ${
         isEnabled
-          ? "bg-green-50/50 border-green-200 border-l-green-500"
-          : "bg-gray-50/50 border-gray-200 border-l-gray-400"
+          ? "bg-success/50 border-success/40 border-l-success"
+          : "bg-background/50 border-border border-l-border"
       }`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
             <div
-              className={`p-2 rounded-lg ${isEnabled ? "bg-green-100" : "bg-gray-100"}`}
+              className={`p-2 rounded-lg ${isEnabled ? "bg-success-muted" : "bg-muted"}`}
             >
               {isEnabled ? (
-                <Eye className="h-4 w-4 text-green-600" />
+                <Eye className="h-4 w-4 text-success" />
               ) : (
-                <EyeOff className="h-4 w-4 text-gray-400" />
+                <EyeOff className="h-4 w-4 text-muted-foreground" />
               )}
             </div>
             <div className="flex-1">
@@ -77,7 +77,7 @@ export default function CustomSectionCard({
                 <div className="flex items-center space-x-2">
                   <Badge
                     variant="outline"
-                    className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                    className="text-xs bg-secondary/10 text-secondary border-secondary/40"
                   >
                     Custom
                   </Badge>
@@ -85,12 +85,12 @@ export default function CustomSectionCard({
                     variant="outline"
                     className={`text-xs ${
                       section.category === "core"
-                        ? "bg-blue-50 text-blue-700 border-blue-200"
+                        ? "bg-primary/10 text-primary border-primary/40"
                         : section.category === "industry"
-                          ? "bg-green-50 text-green-700 border-green-200"
+                          ? "bg-success-muted text-success border-success/40"
                           : section.category === "operations"
-                            ? "bg-orange-50 text-orange-700 border-orange-200"
-                            : "bg-gray-50 text-gray-700 border-gray-200"
+                            ? "bg-warning-muted text-warning-foreground border-warning/40"
+                            : "bg-background text-muted-foreground border-border"
                     }`}
                   >
                     {section.category}

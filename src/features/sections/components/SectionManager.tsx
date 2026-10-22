@@ -189,15 +189,15 @@ export default function SectionManager({
   const getSectionBadgeColor = (category: string) => {
     switch (category) {
       case "core":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary/10 text-primary";
       case "industry":
-        return "bg-green-100 text-green-800";
+        return "bg-success-muted text-success";
       case "custom":
-        return "bg-purple-100 text-purple-800";
+        return "bg-secondary/10 text-secondary";
       case "operations":
-        return "bg-orange-100 text-orange-800";
+        return "bg-warning-muted text-warning-foreground";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-foreground";
     }
   };
 
@@ -219,7 +219,7 @@ export default function SectionManager({
           <h3 className="text-lg font-semibold">
             {isOnboarding ? "Choose Your Sections" : "Customize Your Sections"}
           </h3>
-          <p className="text-gray-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             {isOnboarding
               ? "Select the features and sections you want in your workspace"
               : "Enable or disable sections based on your business needs"}
@@ -255,12 +255,12 @@ export default function SectionManager({
         {customSections.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-gray-900">
+              <h4 className="text-lg font-semibold text-foreground">
                 Custom Sections
               </h4>
               <Badge
                 variant="outline"
-                className="bg-purple-50 text-purple-700 border-purple-200"
+                className="bg-secondary/10 text-secondary border-secondary/40"
               >
                 {customSections.length} Custom
               </Badge>
@@ -329,11 +329,11 @@ export default function SectionManager({
 
       {Object.keys(groupedSections).length === 0 && (
         <div className="text-center py-12">
-          <Filter className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">
             No sections found
           </h3>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Try adjusting your search or filter criteria
           </p>
         </div>

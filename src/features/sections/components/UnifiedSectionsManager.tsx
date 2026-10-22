@@ -40,12 +40,12 @@ type UnifiedItem = {
 };
 
 const catClass: Record<string, string> = {
-  core: "bg-gray-100 text-gray-800",
-  industry: "bg-amber-100 text-amber-800",
-  communication: "bg-purple-100 text-purple-800",
-  operations: "bg-green-100 text-green-800",
-  hr: "bg-blue-100 text-blue-800",
-  custom: "bg-gray-100 text-gray-800",
+  core: "bg-muted text-foreground",
+  industry: "bg-warning-muted text-warning-foreground",
+  communication: "bg-secondary/10 text-secondary",
+  operations: "bg-success-muted text-success",
+  hr: "bg-primary/10 text-primary",
+  custom: "bg-muted text-foreground",
 };
 
 const categoryFilters: CategoryFilter[] = [

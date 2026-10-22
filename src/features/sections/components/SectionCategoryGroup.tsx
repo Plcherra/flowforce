@@ -71,14 +71,14 @@ export default function SectionCategoryGroup({
   return (
     <div>
       <div className="mb-4">
-        <h4 className="text-md font-medium text-gray-900 flex items-center">
+        <h4 className="text-md font-medium text-foreground flex items-center">
           <Layers className="h-4 w-4 mr-2" />
           {getCategoryTitle(category)}
           <Badge variant="secondary" className="ml-2">
             {sections.length}
           </Badge>
         </h4>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {getCategoryDescription(category)}
         </p>
       </div>
