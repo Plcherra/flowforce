@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -50,6 +51,7 @@ export function ChannelSettings({
   onChannelUpdated,
   onDeleteChannel,
 }: ChannelSettingsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { updateChannel: updateChannelSettings } = useChannelActions();
   const [loading, setLoading] = useState(false);
@@ -134,37 +136,35 @@ export function ChannelSettings({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Group settings
-          </DialogTitle>
+            {t("messages.groupSettings")} </DialogTitle>
           <DialogDescription>
-            Rename the group, change privacy, or delete it.
-          </DialogDescription>
+            {t("messages.renameTheGroupChangePrivacyOrDeleteIt")} </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Group name *</Label>
+            <Label htmlFor="name">{t("messages.groupName2")}</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              placeholder="e.g. Closing crew"
+              placeholder={t("messages.eGClosingCrew")}
               required
               className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              placeholder="What is this group for?"
+              placeholder={t("messages.whatIsThisGroupFor")}
               rows={3}
               className="rounded-xl"
             />
@@ -178,8 +178,7 @@ export function ChannelSettings({
                 ) : (
                   <Globe className="h-4 w-4 text-muted-foreground" />
                 )}
-                Private group
-              </Label>
+                {t("messages.privateGroup")} </Label>
               <p className="text-xs text-muted-foreground">
                 {formData.is_private
                   ? "Only people in the group can see it"
@@ -203,13 +202,11 @@ export function ChannelSettings({
               disabled={loading || !onDeleteChannel}
               size="sm"
             >
-              Delete group
-            </Button>
+              {t("messages.deleteGroup")} </Button>
 
             <div className="space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
+                {t("common.cancel")} </Button>
               <Button type="submit" disabled={loading || !formData.name.trim()}>
                 {loading ? "Saving..." : "Save Changes"}
               </Button>
@@ -220,21 +217,18 @@ export function ChannelSettings({
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete group</AlertDialogTitle>
+            <AlertDialogTitle>{t("messages.deleteGroup")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {channel?.name}. Messages in this
-              group will be removed and this cannot be undone.
-            </AlertDialogDescription>
+              {t("messages.deleteGroupConfirm", { name: channel?.name ?? "" })} </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading}>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={loading}
               onClick={handleDeleteChannel}
             >
-              Delete
-            </AlertDialogAction>
+              {t("common.delete")} </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

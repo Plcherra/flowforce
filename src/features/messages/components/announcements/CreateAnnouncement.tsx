@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -31,6 +32,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 
+function isBeforeNow(date: Date) {
+  return date.getTime() < Date.now();
+}
+
 interface CreateAnnouncementProps {
   open: boolean;
   onClose: () => void;
@@ -42,6 +47,7 @@ export function CreateAnnouncement({
   onClose,
   onAnnouncementCreated,
 }: CreateAnnouncementProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -114,38 +120,35 @@ export function CreateAnnouncement({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Megaphone className="h-5 w-5" />
-            Create Announcement
-          </DialogTitle>
+            {t("messages.createAnnouncement")} </DialogTitle>
           <DialogDescription>
-            Create a new announcement to share important information with your
-            team.
-          </DialogDescription>
+            {t("messages.createANewAnnouncementToShareImportantInformationWithYourTeam")} </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{t("tasks.title")}</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              placeholder="Announcement title"
+              placeholder={t("messages.announcementTitle")}
               required
               className="rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content *</Label>
+            <Label htmlFor="content">{t("messages.content")}</Label>
             <Textarea
               id="content"
               value={formData.content}
               onChange={(e) =>
                 setFormData({ ...formData, content: e.target.value })
               }
-              placeholder="Write your announcement content here..."
+              placeholder={t("messages.writeYourAnnouncementContentHere")}
               rows={4}
               required
               className="rounded-xl"
@@ -154,7 +157,7 @@ export function CreateAnnouncement({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">{t("tasks.priority")}</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value) =>
@@ -165,16 +168,16 @@ export function CreateAnnouncement({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="low">{t("tasks.low")}</SelectItem>
+                  <SelectItem value="normal">{t("messages.normal")}</SelectItem>
+                  <SelectItem value="high">{t("tasks.high")}</SelectItem>
+                  <SelectItem value="urgent">{t("tasks.urgent")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="audience">Audience</Label>
+              <Label htmlFor="audience">{t("messages.audience")}</Label>
               <Select
                 value={formData.target_audience}
                 onValueChange={(value) =>
@@ -185,17 +188,17 @@ export function CreateAnnouncement({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Everyone</SelectItem>
-                  <SelectItem value="department">Department</SelectItem>
-                  <SelectItem value="role">Role</SelectItem>
-                  <SelectItem value="specific">Specific Users</SelectItem>
+                  <SelectItem value="all">{t("messages.everyone")}</SelectItem>
+                  <SelectItem value="department">{t("messages.department")}</SelectItem>
+                  <SelectItem value="role">{t("messages.role")}</SelectItem>
+                  <SelectItem value="specific">{t("messages.specificUsers")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>Expiration Date (Optional)</Label>
+            <Label>{t("messages.expirationDateOptional")}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -213,7 +216,7 @@ export function CreateAnnouncement({
                   mode="single"
                   selected={expiresAt}
                   onSelect={setExpiresAt}
-                  disabled={(date) => date < new Date()}
+                  disabled={isBeforeNow}
                 />
               </PopoverContent>
             </Popover>
@@ -225,17 +228,15 @@ export function CreateAnnouncement({
                 onClick={() => setExpiresAt(undefined)}
                 className="text-muted-foreground"
               >
-                Clear expiration date
-              </Button>
+                {t("messages.clearExpirationDate")} </Button>
             )}
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="published">Publish Immediately</Label>
+              <Label htmlFor="published">{t("messages.publishImmediately")}</Label>
               <p className="text-xs text-muted-foreground">
-                Make this announcement visible to users right away
-              </p>
+                {t("messages.makeThisAnnouncementVisibleToUsersRightAway")} </p>
             </div>
             <Switch
               id="published"
@@ -248,8 +249,7 @@ export function CreateAnnouncement({
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button
               type="submit"
               disabled={

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -37,6 +38,7 @@ export function MessagesSidebar({
   query,
   onQueryChange,
 }: MessagesSidebarProps) {
+  const { t } = useTranslation();
   const people = channels.filter(isDirectChat);
   const groups = channels.filter((channel) => !isDirectChat(channel));
 
@@ -44,22 +46,20 @@ export function MessagesSidebar({
     <div className="flex h-full min-h-0 flex-col">
       <div className="space-y-3 border-b p-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Chats</h2>
+          <h2 className="text-lg font-semibold">{t("messages.chats")}</h2>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" aria-label="Start a chat">
+              <Button size="sm" aria-label={t("messages.startAChat")}>
                 <Plus className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={onShowDirectMessageDialog}>
                 <MessageSquare className="mr-2 h-4 w-4" />
-                Message someone
-              </DropdownMenuItem>
+                {t("messages.messageSomeone")} </DropdownMenuItem>
               <DropdownMenuItem onClick={onShowCreateDialog}>
                 <Users className="mr-2 h-4 w-4" />
-                New group
-              </DropdownMenuItem>
+                {t("messages.newGroup")} </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -67,11 +67,10 @@ export function MessagesSidebar({
         {typeof onQueryChange === "function" && typeof query === "string" && (
           <div>
             <Label htmlFor="messages-sidebar-search" className="sr-only">
-              Search chats
-            </Label>
+              {t("messages.searchChats")} </Label>
             <Input
               id="messages-sidebar-search"
-              placeholder="Search chats"
+              placeholder={t("messages.searchChats")}
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
             />
@@ -83,25 +82,24 @@ export function MessagesSidebar({
         <div className="space-y-4 p-3">
           {channels.length === 0 ? (
             <div className="px-2 py-10 text-center">
-              <p className="mb-4 text-sm text-muted-foreground">No chats yet</p>
+              <p className="mb-4 text-sm text-muted-foreground">{t("messages.noChatsYet")}</p>
               <div className="flex flex-col gap-2">
                 <Button variant="outline" onClick={onShowDirectMessageDialog}>
-                  Message someone
-                </Button>
-                <Button onClick={onShowCreateDialog}>New group</Button>
+                  {t("messages.messageSomeone")} </Button>
+                <Button onClick={onShowCreateDialog}>{t("messages.newGroup")}</Button>
               </div>
             </div>
           ) : (
             <>
               <ChatSection
-                title="People"
+                title={t("schedule.people")}
                 channels={people}
                 currentChannelId={currentChannelId}
                 onChannelSelect={onChannelSelect}
                 emptyLabel="No direct messages yet"
               />
               <ChatSection
-                title="Groups"
+                title={t("messages.groups")}
                 channels={groups}
                 currentChannelId={currentChannelId}
                 onChannelSelect={onChannelSelect}

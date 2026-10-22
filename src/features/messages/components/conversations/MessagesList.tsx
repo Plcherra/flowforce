@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useRef, useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,6 +45,7 @@ export function MessagesList({
   onUpdateMessage,
   channelMembers = [],
 }: MessagesListProps) {
+  const { t } = useTranslation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messagePendingDelete, setMessagePendingDelete] =
     useState<Message | null>(null);
@@ -77,7 +79,7 @@ export function MessagesList({
     return (
       <ScrollArea
         className="flex-1 p-4"
-        aria-label="Loading conversation messages"
+        aria-label={t("messages.loadingConversationMessages")}
       >
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -101,8 +103,7 @@ export function MessagesList({
         {safeArrayLength(safeMessages) === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
-              No messages yet. Be the first to send one!
-            </p>
+              {t("messages.noMessagesYetBeTheFirstToSendOne")} </p>
           </div>
         ) : (
           safeArrayMap(safeMessages, (message) => {
@@ -170,7 +171,7 @@ export function MessagesList({
                   {message.reply_to_message && (
                     <div className="mt-1 rounded border-l-2 border-border bg-muted/50 p-2">
                       <p className="text-xs text-muted-foreground">
-                        Replying to {replyName}
+                        {t("messages.replyingTo")} {replyName}
                       </p>
                       <p className="truncate text-sm text-foreground/80">
                         {message.reply_to_message.content || "Shared a message"}
@@ -205,8 +206,7 @@ export function MessagesList({
                           disabled={updating || !editContent.trim()}
                         >
                           <Check className="h-3 w-3 mr-1" />
-                          Save
-                        </Button>
+                          {t("common.save")} </Button>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -217,8 +217,7 @@ export function MessagesList({
                           disabled={updating}
                         >
                           <X className="h-3 w-3 mr-1" />
-                          Cancel
-                        </Button>
+                          {t("common.cancel")} </Button>
                       </div>
                     </div>
                   ) : (
@@ -259,7 +258,7 @@ export function MessagesList({
                             <Button
                               variant="ghost"
                               size="sm"
-                              aria-label="Edit message"
+                              aria-label={t("messages.editMessage")}
                               onClick={() => {
                                 setEditingMessageId(message.id);
                                 setEditContent(message.content);
@@ -272,7 +271,7 @@ export function MessagesList({
                           <Button
                             variant="ghost"
                             size="sm"
-                            aria-label="Delete message"
+                            aria-label={t("messages.deleteMessage")}
                             onClick={() => setMessagePendingDelete(message)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -288,8 +287,8 @@ export function MessagesList({
                   {/* Read Receipts */}
                   {readBy.length > 0 && (
                     <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                      <span>Read by {readBy.length}</span>
-                      {unreadCount > 0 && <span>• {unreadCount} unread</span>}
+                      <span>{t("messages.readByCount", { count: readBy.length })}</span>
+                      {unreadCount > 0 && <span>• {t("messages.countUnread", { count: unreadCount })}</span>}
                     </div>
                   )}
                 </div>
@@ -304,14 +303,12 @@ export function MessagesList({
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete message</AlertDialogTitle>
+              <AlertDialogTitle>{t("messages.deleteMessage")}</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete your message. This action cannot be
-                undone.
-              </AlertDialogDescription>
+                {t("messages.thisWillPermanentlyDeleteYourMessageThisActionCannotBeUndone")} </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={deleting}>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 disabled={deleting}
@@ -326,8 +323,7 @@ export function MessagesList({
                   }
                 }}
               >
-                Delete
-              </AlertDialogAction>
+                {t("common.delete")} </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

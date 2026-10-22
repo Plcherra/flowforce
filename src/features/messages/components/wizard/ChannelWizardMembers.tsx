@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,27 +19,23 @@ export function ChannelWizardMembers({
   loadingMembers,
   onToggleMember,
 }: ChannelWizardMembersProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h3 className="text-lg font-semibold text-foreground">
-          Who is in this group?
-        </h3>
+          {t("messages.whoIsInThisGroup")} </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Pick the people who should be in the conversation
-        </p>
+          {t("messages.pickThePeopleWhoShouldBeInTheConversation")} </p>
       </div>
 
       <div className="space-y-3 max-h-64 overflow-y-auto">
         {loadingMembers ? (
           <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-            Loading teammates…
-          </div>
+            {t("messages.loadingTeammates")} </div>
         ) : memberOptions.length === 0 ? (
           <div className="flex items-center justify-center py-10 text-center text-sm text-muted-foreground">
-            No teammates available yet. Invite members from the Team Directory
-            first.
-          </div>
+            {t("messages.noTeammatesAvailableYetInviteMembersFromTheTeamDirectoryFirst")} </div>
         ) : (
           memberOptions.map((user) => {
             const displayName =

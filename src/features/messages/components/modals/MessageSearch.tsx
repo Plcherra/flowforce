@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export function MessageSearch({
   onClose,
   onResultSelect,
 }: MessageSearchProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const [searchQuery, setSearchQuery] = useState("");
@@ -223,7 +225,7 @@ export function MessageSearch({
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search messages and channels..."
+                placeholder={t("messages.searchMessagesAndChannels")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-10 rounded-xl"
@@ -241,8 +243,7 @@ export function MessageSearch({
               )}
             </div>
             <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
+              {t("common.close")} </Button>
           </div>
 
           <ScrollArea className="h-80">
@@ -252,12 +253,11 @@ export function MessageSearch({
               </div>
             ) : results.length === 0 && searchQuery.length >= 2 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No results found for &quot;{searchQuery}&quot;
+                {t("messages.noResultsFoundFor", { query: searchQuery })}
               </div>
             ) : searchQuery.length < 2 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Type at least 2 characters to search
-              </div>
+                {t("messages.typeAtLeast2CharactersToSearch")} </div>
             ) : (
               <div className="space-y-3">
                 {results.map((result) => (
@@ -274,8 +274,7 @@ export function MessageSearch({
                         <div className="flex items-center gap-2">
                           <MessageSquare className="h-4 w-4 text-primary" />
                           <Badge variant="outline" className="text-xs">
-                            Message
-                          </Badge>
+                            {t("messages.message")} </Badge>
                           {result.channel && (
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               {getChannelIcon(
@@ -357,8 +356,7 @@ export function MessageSearch({
                         <div className="flex items-center gap-2">
                           <Hash className="h-4 w-4 text-secondary" />
                           <Badge variant="outline" className="text-xs">
-                            Channel
-                          </Badge>
+                            {t("messages.channel")} </Badge>
                         </div>
 
                         <div>
@@ -382,8 +380,9 @@ export function MessageSearch({
 
           {searchQuery.length >= 2 && (
             <div className="mt-4 text-xs text-muted-foreground text-center">
-              {results.length} result{results.length !== 1 ? "s" : ""} found
-            </div>
+              {results.length === 1
+                ? t("messages.oneResultFound", { count: results.length })
+                : t("messages.manyResultsFound", { count: results.length })} </div>
           )}
         </CardContent>
       </Card>

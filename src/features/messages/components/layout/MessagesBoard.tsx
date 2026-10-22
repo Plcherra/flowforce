@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,32 +27,30 @@ function isChannelAdmin(vm: MessagesViewModel) {
 }
 
 export function MessagesBoard({ vm }: MessagesBoardProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full min-h-0 flex-col bg-muted/40">
       <div className="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
         <div className="mr-auto">
-          <h1 className="text-xl font-semibold">Messages</h1>
+          <h1 className="text-xl font-semibold">{t("common.messages")}</h1>
           <p className="text-sm text-muted-foreground">
-            Chats with people and groups on your team.
-          </p>
+            {t("messages.chatsWithPeopleAndGroupsOnYourTeam")} </p>
         </div>
         <div className="w-full sm:w-56">
           <Label htmlFor="message-roster-search" className="sr-only">
-            Search messages
-          </Label>
+            {t("messages.searchMessages")} </Label>
           <Input
             id="message-roster-search"
             value={vm.query}
             onChange={(event) => vm.setQuery(event.target.value)}
-            placeholder="Search"
+            placeholder={t("nav.search")}
           />
         </div>
         <Button
           variant={vm.showDirectMessageDialog ? "default" : "outline"}
           onClick={() => vm.setShowDirectMessageDialog(true)}
         >
-          New chat
-        </Button>
+          {t("messages.newChat")} </Button>
       </div>
 
       {vm.filteredChannels.length > 0 && (

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { MessagesShell } from "@/features/messages/components/layout";
 import { useMessagesViewModel } from "@/features/messages/hooks/useMessagesViewModel";
@@ -8,6 +9,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { MessagesErrorFallback } from "@/components/ui/feature-error-fallbacks";
 
 export default function Messages() {
+  const { t } = useTranslation();
   const bootstrap = useCommunicationBootstrap();
   const viewModel = useMessagesViewModel();
   const organizationId = bootstrap.organization?.id ?? null;
@@ -24,7 +26,7 @@ export default function Messages() {
     return (
       <div className="p-6">
         <Alert variant="destructive">
-          <AlertTitle>Unable to load workspace data</AlertTitle>
+          <AlertTitle>{t("messages.unableToLoadWorkspaceData")}</AlertTitle>
           <AlertDescription>{bootstrap.error}</AlertDescription>
         </Alert>
       </div>

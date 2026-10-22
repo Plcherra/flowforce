@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ export function NewChatPanel({
   onPickUser,
   onStartGroup,
 }: NewChatPanelProps) {
+  const { t } = useTranslation();
   const { searchQuery, setSearchQuery, loading, filteredUsers } =
     useCompanyPeople(true);
   const [groupMode, setGroupMode] = useState(false);
@@ -69,27 +71,24 @@ export function NewChatPanel({
             </h2>
           </div>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
-          </Button>
+            {t("common.cancel")} </Button>
         </div>
 
         <div className="mt-5 rounded-2xl border bg-muted/20 p-4">
           <Label htmlFor="new-chat-search" className="sr-only">
-            Find a person
-          </Label>
+            {t("messages.findAPerson")} </Label>
           <Input
             id="new-chat-search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Find a person"
+            placeholder={t("messages.findAPerson")}
             autoFocus
           />
 
           <div className="mt-4 grid max-h-[360px] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
             {loading ? (
               <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
-                Loading people…
-              </p>
+                {t("messages.loadingPeople")} </p>
             ) : filteredUsers.length === 0 ? (
               <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
                 {searchQuery
@@ -153,12 +152,12 @@ export function NewChatPanel({
           {groupMode && (
             <div className="flex flex-1 flex-wrap items-end justify-end gap-2">
               <div className="min-w-[180px] flex-1">
-                <Label htmlFor="group-name">Group name</Label>
+                <Label htmlFor="group-name">{t("messages.groupName")}</Label>
                 <Input
                   id="group-name"
                   value={groupName}
                   onChange={(event) => setGroupName(event.target.value)}
-                  placeholder="Closing crew"
+                  placeholder={t("messages.closingCrew")}
                 />
               </div>
               <Button
@@ -167,8 +166,7 @@ export function NewChatPanel({
                   busy || selectedIds.length < 1 || groupName.trim().length === 0
                 }
               >
-                Create group
-              </Button>
+                {t("messages.createGroup")} </Button>
             </div>
           )}
         </div>

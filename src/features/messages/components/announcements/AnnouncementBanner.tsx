@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ interface AnnouncementBannerProps {
 export function AnnouncementBanner({
   className = "",
 }: AnnouncementBannerProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -214,8 +216,7 @@ export function AnnouncementBanner({
                   </Badge>
                   {!announcement.is_read && (
                     <Badge variant="secondary" className="text-xs">
-                      New
-                    </Badge>
+                      {t("messages.new")} </Badge>
                   )}
                 </div>
 
@@ -225,7 +226,7 @@ export function AnnouncementBanner({
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>
-                    By {announcement.creatorprofile.first_name}{" "}
+                    {t("messages.by")} {announcement.creatorprofile.first_name}{" "}
                     {announcement.creatorprofile.last_name} •{" "}
                     {format(
                       new Date(announcement.created_at),
@@ -234,7 +235,7 @@ export function AnnouncementBanner({
                   </span>
                   {announcement.expires_at && (
                     <span>
-                      Expires{" "}
+                      {t("messages.expires")}{" "}
                       {format(
                         new Date(announcement.expires_at),
                         "MMM dd, yyyy",
@@ -252,7 +253,7 @@ export function AnnouncementBanner({
                   size="sm"
                   className="h-8 w-8 p-0"
                   onClick={() => markAsRead(announcement.id)}
-                  title="Mark as read"
+                  title={t("messages.markAsRead")}
                 >
                   <Eye className="h-4 w-4" />
                 </Button>
@@ -263,7 +264,7 @@ export function AnnouncementBanner({
                 size="sm"
                 className="h-8 w-8 p-0"
                 onClick={() => dismissAnnouncement(announcement.id)}
-                title="Dismiss"
+                title={t("auth.dismiss")}
               >
                 <X className="h-4 w-4" />
               </Button>

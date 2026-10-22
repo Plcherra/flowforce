@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
@@ -63,6 +64,7 @@ export function ChannelMembers({
   channelName,
   isAdmin = false,
 }: ChannelMembersProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [members, setMembers] = useState<ChannelMemberDetail[]>([]);
@@ -182,10 +184,9 @@ export function ChannelMembers({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            People
-          </DialogTitle>
+            {t("schedule.people")} </DialogTitle>
           <DialogDescription>
-            People in {channelName}
+            {t("messages.peopleInChannel", { name: channelName })}
           </DialogDescription>
         </DialogHeader>
 
@@ -196,8 +197,7 @@ export function ChannelMembers({
             </div>
           ) : members.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No members found.
-            </div>
+              {t("messages.noMembersFound")} </div>
           ) : (
             <div className="space-y-3">
               {members.map((member, index) => {
@@ -275,8 +275,7 @@ export function ChannelMembers({
                               }
                             >
                               <Crown className="h-4 w-4 mr-2" />
-                              Make Admin
-                            </DropdownMenuItem>
+                              {t("messages.makeAdmin")} </DropdownMenuItem>
                           )}
                           {member.role !== "moderator" &&
                             member.role !== "admin" && (
@@ -286,8 +285,7 @@ export function ChannelMembers({
                                 }
                               >
                                 <Shield className="h-4 w-4 mr-2" />
-                                Make Moderator
-                              </DropdownMenuItem>
+                                {t("messages.makeModerator")} </DropdownMenuItem>
                             )}
                           {(member.role === "admin" ||
                             member.role === "moderator") && (
@@ -297,8 +295,7 @@ export function ChannelMembers({
                               }
                             >
                               <UserIcon className="h-4 w-4 mr-2" />
-                              Make Member
-                            </DropdownMenuItem>
+                              {t("messages.makeMember")} </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
                             onClick={() =>
@@ -306,8 +303,7 @@ export function ChannelMembers({
                             }
                             className="text-destructive"
                           >
-                            Remove
-                          </DropdownMenuItem>
+                            {t("forms.remove")} </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     ) : null}
@@ -320,13 +316,14 @@ export function ChannelMembers({
 
         <div className="flex justify-between items-center pt-4 border-t">
           <p className="text-sm text-muted-foreground">
-            {members.length} member{members.length !== 1 ? "s" : ""}
+            {members.length === 1
+              ? t("messages.oneMember", { count: members.length })
+              : t("messages.manyMembers", { count: members.length })}
           </p>
           {isAdmin && (
             <Button size="sm" variant="outline" className="gap-2">
               <UserPlus className="h-4 w-4" />
-              Add Members
-            </Button>
+              {t("messages.addMembers")} </Button>
           )}
         </div>
       </DialogContent>
@@ -336,19 +333,18 @@ export function ChannelMembers({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove member</AlertDialogTitle>
+            <AlertDialogTitle>{t("messages.removeMember")}</AlertDialogTitle>
             <AlertDialogDescription>
               {`This will remove ${memberPendingRemoval?.name ?? "this person"} from ${channelName}. They will lose access to the group.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleConfirmRemoval}
             >
-              Remove
-            </AlertDialogAction>
+              {t("forms.remove")} </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

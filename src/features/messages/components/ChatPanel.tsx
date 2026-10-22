@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -40,6 +41,7 @@ export function ChatPanel({
   onSendMessage,
   hasTeammates,
 }: ChatPanelProps) {
+  const { t } = useTranslation();
   const renderMessageBubble = (
     message: ChatMessage,
     previous?: ChatMessage,
@@ -133,14 +135,12 @@ export function ChatPanel({
           <div className="space-y-4 py-4">
             {conversation.messages.length === 0 ? (
               <div className="allow-text-selection py-12 text-center text-sm text-muted-foreground">
-                Be the first to say something in this chat.
-              </div>
+                {t("messages.beTheFirstToSaySomethingInThisChat")} </div>
             ) : (
               <ErrorBoundary
                 fallback={
                   <div className="allow-text-selection rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-                    Message unavailable. Some content could not be displayed.
-                  </div>
+                    {t("messages.messageUnavailableSomeContentCouldNotBeDisplayed")} </div>
                 }
               >
                 <>
@@ -159,7 +159,7 @@ export function ChatPanel({
         <div className="border-t pt-4">
           <div className="rounded-2xl border border-border/70 bg-muted/20 p-3">
             <Textarea
-              placeholder="Write a message..."
+              placeholder={t("messages.writeAMessage")}
               value={draftMessage}
               onChange={(event) => onDraftMessageChange(event.target.value)}
               className="min-h-[96px] resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 allow-text-selection"
@@ -170,7 +170,7 @@ export function ChatPanel({
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 rounded-full"
-                  title="Attach file"
+                  title={t("messages.attachFile")}
                 >
                   <Paperclip className="h-4 w-4" />
                 </Button>
@@ -178,7 +178,7 @@ export function ChatPanel({
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 rounded-full"
-                  title="Add image"
+                  title={t("messages.addImage")}
                 >
                   <Image className="h-4 w-4" />
                 </Button>
@@ -186,14 +186,13 @@ export function ChatPanel({
                   variant="ghost"
                   size="icon"
                   className="h-9 w-9 rounded-full"
-                  title="Add emoji"
+                  title={t("messages.addEmoji")}
                 >
                   <Smile className="h-4 w-4" />
                 </Button>
               </div>
               <Button onClick={onSendMessage} disabled={!draftMessage.trim()}>
-                Send
-              </Button>
+                {t("messages.send")} </Button>
             </div>
           </div>
         </div>

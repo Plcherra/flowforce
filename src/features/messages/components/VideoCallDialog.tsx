@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useRef, useEffect } from "react";
 import {
   Dialog,
@@ -36,6 +37,7 @@ export function VideoCallDialog({
   participants,
   callType,
 }: VideoCallDialogProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isVideoEnabled, setIsVideoEnabled] = useState(callType === "video");
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
@@ -154,7 +156,7 @@ export function VideoCallDialog({
             </div>
 
             <div className="flex items-center gap-2 text-sm text-primary-foreground/70">
-              <span>{participants.length} participants</span>
+              <span>{t("messages.participantCount", { count: participants.length })}</span>
             </div>
           </div>
 
@@ -175,15 +177,14 @@ export function VideoCallDialog({
                     <div className="text-center">
                       <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2">
                         <span className="text-xl font-semibold text-primary-foreground">
-                          You
-                        </span>
+                          {t("schedule.you")} </span>
                       </div>
-                      <p className="text-sm text-primary-foreground/70">Camera off</p>
+                      <p className="text-sm text-primary-foreground/70">{t("messages.cameraOff")}</p>
                     </div>
                   </div>
                 )}
                 <div className="absolute bottom-2 left-2 bg-foreground/50 dark:bg-background/50 px-2 py-1 rounded text-xs">
-                  You {!isAudioEnabled && "(muted)"}
+                  {t("schedule.you")} {!isAudioEnabled && "(muted)"}
                 </div>
               </CardContent>
             </Card>

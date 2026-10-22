@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -31,6 +32,7 @@ export function CreateChannelDialog({
   open,
   onClose,
 }: CreateChannelDialogProps) {
+  const { t } = useTranslation();
   const { createChannel } = useMessageChannels();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -84,41 +86,40 @@ export function CreateChannelDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Channel</DialogTitle>
+          <DialogTitle>{t("messages.createChannel")}</DialogTitle>
           <DialogDescription>
-            Create a new channel for team communication.
-          </DialogDescription>
+            {t("messages.createANewChannelForTeamCommunication")} </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Channel Name *</Label>
+            <Label htmlFor="name">{t("messages.channelName")}</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              placeholder="e.g. general, project-updates"
+              placeholder={t("messages.eGGeneralProjectUpdates")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("tasks.description")}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              placeholder="What's this channel about?"
+              placeholder={t("messages.whatSThisChannelAbout")}
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="type">Channel Type</Label>
+            <Label htmlFor="type">{t("messages.channelType")}</Label>
             <Select
               value={formData.type}
               onValueChange={(value) =>
@@ -129,9 +130,9 @@ export function CreateChannelDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="group">Group Channel</SelectItem>
-                <SelectItem value="department">Department Channel</SelectItem>
-                <SelectItem value="direct">Direct Message</SelectItem>
+                <SelectItem value="group">{t("messages.groupChannel")}</SelectItem>
+                <SelectItem value="department">{t("messages.departmentChannel")}</SelectItem>
+                <SelectItem value="direct">{t("messages.directMessage")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -144,13 +145,12 @@ export function CreateChannelDialog({
                 setFormData({ ...formData, is_private: checked })
               }
             />
-            <Label htmlFor="private">Private Channel</Label>
+            <Label htmlFor="private">{t("messages.privateChannel")}</Label>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+              {t("common.cancel")} </Button>
             <Button type="submit" disabled={loading || !formData.name.trim()}>
               {loading ? "Creating..." : "Create Channel"}
             </Button>

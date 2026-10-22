@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -35,6 +36,7 @@ interface UserSelectorProps {
 
 export function useCompanyPeople(enabled: boolean) {
   const { user: currentUser } = useAuth();
+  const currentUserId = currentUser?.id;
   const { profile: currentProfile } = useProfile();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
@@ -46,12 +48,12 @@ export function useCompanyPeople(enabled: boolean) {
     if (!enabled) return;
 
     const fetchUsers = async () => {
-      if (!currentUser) return;
+      if (!currentUserId) return;
 
       setLoading(true);
       const includeSelf = currentProfile?.role === "admin";
       const currentProfileId =
-        currentProfile?.id ?? currentProfile?.userId ?? currentUser.id;
+        currentProfile?.id ?? currentProfile?.userId ?? currentUserId;
       const companyId =
         currentProfile?.companyId ?? currentProfile?.company_id ?? null;
       const selectFields =
@@ -113,7 +115,7 @@ export function useCompanyPeople(enabled: boolean) {
     void fetchUsers();
   }, [
     enabled,
-    currentUser?.id,
+    currentUserId,
     currentProfile?.role,
     currentProfile?.id,
     currentProfile?.userId,
@@ -144,6 +146,7 @@ export function UserSelector({
   onClose,
   onUserSelect,
 }: UserSelectorProps) {
+  const { t } = useTranslation();
   const { searchQuery, setSearchQuery, loading, filteredUsers } =
     useCompanyPeople(open);
 
@@ -164,18 +167,16 @@ export function UserSelector({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            Message someone
-          </DialogTitle>
+            {t("messages.messageSomeone")} </DialogTitle>
           <DialogDescription>
-            Pick a teammate to message.
-          </DialogDescription>
+            {t("messages.pickATeammateToMessage")} </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder={t("messages.searchUsers")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 rounded-xl"

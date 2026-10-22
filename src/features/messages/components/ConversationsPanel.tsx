@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Plus, Users as UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export function ConversationsPanel({
   currentUserId,
   className,
 }: ConversationsPanelProps) {
+  const { t } = useTranslation();
   const renderConversationMeta = (conversation: Conversation) => {
     const counterpartId =
       conversation.type === "direct"
@@ -105,7 +107,7 @@ export function ConversationsPanel({
                 {firstName || "—"}: {lastMessage.content}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">No messages yet</p>
+              <p className="text-xs text-muted-foreground">{t("messages.noMessagesYet")}</p>
             )}
           </div>
           {conversation.unreadCount > 0 && (
@@ -127,10 +129,9 @@ export function ConversationsPanel({
         <CardHeader className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-lg">Conversations</CardTitle>
+              <CardTitle className="text-lg">{t("messages.conversations")}</CardTitle>
               <p className="text-xs text-muted-foreground">
-                Talk with teammates and groups
-              </p>
+                {t("messages.talkWithTeammatesAndGroups")} </p>
             </div>
             <Button
               size="sm"
@@ -143,8 +144,7 @@ export function ConversationsPanel({
               }
             >
               <Plus className="mr-1 h-4 w-4" />
-              New chat
-            </Button>
+              {t("messages.newChat")} </Button>
           </div>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col gap-3 overflow-hidden">
@@ -161,7 +161,7 @@ export function ConversationsPanel({
             <Input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Search"
+              placeholder={t("nav.search")}
               className="h-9 w-full sm:max-w-[240px]"
             />
           </div>
@@ -169,12 +169,9 @@ export function ConversationsPanel({
           {!hasTeammates && (
             <div className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/30 p-4 text-xs text-muted-foreground allow-text-selection">
               <p className="text-sm font-medium text-foreground">
-                You&apos;re the first one here.
-              </p>
+                {t("messages.youReTheFirstOneHere")} </p>
               <p className="mt-1">
-                Invite teammates to the workspace and your conversations will
-                appear once they join.
-              </p>
+                {t("messages.inviteTeammatesToTheWorkspaceAndYourConversationsWillAppearOnceTheyJoin")} </p>
             </div>
           )}
 

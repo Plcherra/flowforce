@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "framer-motion";
 import {
@@ -43,6 +44,7 @@ const shortageList = [
 ];
 
 export function InventorySignalWidget() {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -53,12 +55,10 @@ export function InventorySignalWidget() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-            Inventory
-          </p>
-          <h3 className="text-lg font-semibold">Signals</h3>
+            {t("common.inventory")} </p>
+          <h3 className="text-lg font-semibold">{t("messages.signals")}</h3>
           <p className="text-sm text-muted-foreground">
-            Track shortages without leaving the thread.
-          </p>
+            {t("messages.trackShortagesWithoutLeavingTheThread")} </p>
         </div>
         <Layers className="h-5 w-5 text-muted-foreground" />
       </div>
@@ -92,7 +92,7 @@ export function InventorySignalWidget() {
               <span className="text-muted-foreground">{item.level}</span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Location: {item.location}
+              {t("messages.location")} {item.location}
             </p>
             <Progress
               value={parseInt(item.level, 10)}
@@ -104,8 +104,7 @@ export function InventorySignalWidget() {
 
       <Button asChild className="mt-4 w-full gap-2" variant="outline">
         <Link to="/app/inventory">
-          Open inventory
-          <ArrowUpRight className="h-4 w-4" />
+          {t("messages.openInventory")} <ArrowUpRight className="h-4 w-4" />
         </Link>
       </Button>
     </motion.div>

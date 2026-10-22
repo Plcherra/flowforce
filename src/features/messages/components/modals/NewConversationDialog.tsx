@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -100,6 +101,7 @@ export function NewConversationDialog({
   currentUserId,
   onCreate,
 }: NewConversationDialogProps) {
+  const { t } = useTranslation();
   const form = useForm<ConversationFormValues>({
     resolver: zodResolver(conversationSchema),
     defaultValues: {
@@ -144,10 +146,9 @@ export function NewConversationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Start a conversation</DialogTitle>
+          <DialogTitle>{t("messages.startAConversation")}</DialogTitle>
           <DialogDescription>
-            Choose who you want to talk with and send the first message.
-          </DialogDescription>
+            {t("messages.chooseWhoYouWantToTalkWithAndSendTheFirstMessage")} </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -157,7 +158,7 @@ export function NewConversationDialog({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Conversation type</FormLabel>
+                  <FormLabel>{t("messages.conversationType")}</FormLabel>
                   <FormControl>
                     <Select
                       value={field.value}
@@ -166,11 +167,11 @@ export function NewConversationDialog({
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
+                        <SelectValue placeholder={t("messages.selectType")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="direct">Direct message</SelectItem>
-                        <SelectItem value="team">Team / group</SelectItem>
+                        <SelectItem value="direct">{t("messages.directMessage2")}</SelectItem>
+                        <SelectItem value="team">{t("messages.teamGroup")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -185,9 +186,9 @@ export function NewConversationDialog({
                 name="teamName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Team name</FormLabel>
+                    <FormLabel>{t("messages.teamName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Kitchen Supervisors" {...field} />
+                      <Input placeholder={t("messages.kitchenSupervisors")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -200,7 +201,7 @@ export function NewConversationDialog({
               name="participantIds"
               render={() => (
                 <FormItem>
-                  <FormLabel>Participants</FormLabel>
+                  <FormLabel>{t("messages.participants2")}</FormLabel>
                   <FormControl>
                     <ScrollArea className="h-48 rounded-md border p-2">
                       <div className="space-y-2">
@@ -241,11 +242,9 @@ export function NewConversationDialog({
                           <div className="flex h-36 flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground">
                             <Users className="h-8 w-8" />
                             <div>
-                              <p>No teammates are available yet.</p>
+                              <p>{t("messages.noTeammatesAreAvailableYet")}</p>
                               <p className="text-xs">
-                                New chats unlock automatically as colleagues
-                                join the workspace.
-                              </p>
+                                {t("messages.newChatsUnlockAutomaticallyAsColleaguesJoinTheWorkspace")} </p>
                             </div>
                           </div>
                         )}
@@ -269,10 +268,10 @@ export function NewConversationDialog({
               name="initialMessage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First message</FormLabel>
+                  <FormLabel>{t("messages.firstMessage")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Write the first message..."
+                      placeholder={t("messages.writeTheFirstMessage")}
                       rows={4}
                       {...field}
                     />
@@ -291,9 +290,8 @@ export function NewConversationDialog({
                   onOpenChange(false);
                 }}
               >
-                Cancel
-              </Button>
-              <Button type="submit">Start conversation</Button>
+                {t("common.cancel")} </Button>
+              <Button type="submit">{t("messages.startConversation")}</Button>
             </div>
           </form>
         </Form>

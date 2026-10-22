@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
@@ -8,17 +9,16 @@ interface MessagesWorkspaceHeaderProps {
 }
 
 export function MessagesWorkspaceHeader({ vm }: MessagesWorkspaceHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4 rounded-3xl border bg-background/95 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div>
         <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.4em] text-muted-foreground">
           <Sparkles className="h-3.5 w-3.5" />
-          Flow
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold">Communication Workbench</h1>
+          {t("messages.flow")} </div>
+        <h1 className="mt-2 text-2xl font-semibold">{t("messages.communicationWorkbench")}</h1>
         <p className="text-sm text-muted-foreground">
-          Minimal board for channels, direct messages, and announcements.
-        </p>
+          {t("messages.minimalBoardForChannelsDirectMessagesAndAnnouncements")} </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -26,14 +26,12 @@ export function MessagesWorkspaceHeader({ vm }: MessagesWorkspaceHeaderProps) {
           size={vm.isMobile ? "sm" : "default"}
           onClick={() => vm.setShowDirectMessageDialog(true)}
         >
-          Start DM
-        </Button>
+          {t("messages.startDm")} </Button>
         <Button
           size={vm.isMobile ? "sm" : "default"}
           onClick={() => vm.setShowCreateDialog(true)}
         >
-          New Channel
-        </Button>
+          {t("messages.newChannel")} </Button>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -39,6 +40,7 @@ export function MessageScheduler({
   onScheduleMessage,
   children,
 }: MessageSchedulerProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState("");
@@ -158,18 +160,17 @@ export function MessageScheduler({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Schedule Message
-          </DialogTitle>
+            {t("messages.scheduleMessage")} </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Schedule Form */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="content">Message Content</Label>
+              <Label htmlFor="content">{t("messages.messageContent")}</Label>
               <Textarea
                 id="content"
-                placeholder="Type your message..."
+                placeholder={t("messages.typeYourMessage")}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="min-h-[100px]"
@@ -178,7 +179,7 @@ export function MessageScheduler({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="date">{t("schedule.date")}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -188,7 +189,7 @@ export function MessageScheduler({
                 />
               </div>
               <div>
-                <Label htmlFor="time">Time</Label>
+                <Label htmlFor="time">{t("schedule.time")}</Label>
                 <Input
                   id="time"
                   type="time"
@@ -200,7 +201,7 @@ export function MessageScheduler({
 
             {/* Quick Schedule Options */}
             <div>
-              <Label>Quick Schedule</Label>
+              <Label>{t("messages.quickSchedule")}</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {getQuickScheduleOptions().map((option, index) => (
                   <Button
@@ -217,15 +218,13 @@ export function MessageScheduler({
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsOpen(false)}>
-                Cancel
-              </Button>
+                {t("common.cancel")} </Button>
               <Button
                 onClick={handleSchedule}
                 className="flex items-center gap-2"
               >
                 <Send className="h-4 w-4" />
-                Schedule Message
-              </Button>
+                {t("messages.scheduleMessage")} </Button>
             </div>
           </div>
 
@@ -266,11 +265,11 @@ export function MessageScheduler({
                       </p>
                       <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
                         <span>
-                          Scheduled{" "}
+                          {t("messages.scheduled")}{" "}
                           {format(message.createdAt, "MMM dd, h:mm a")}
                         </span>
                         <span>
-                          Sends in{" "}
+                          {t("messages.sendsIn")}{" "}
                           {format(
                             new Date(
                               message.scheduledFor.getTime() -

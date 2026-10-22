@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
   AlertTriangle,
@@ -37,6 +38,7 @@ export function CommunicationReadinessPanel({
   onCreateChannel,
   onCreateAnnouncement,
 }: CommunicationReadinessPanelProps) {
+  const { t } = useTranslation();
   const summary = useMemo(
     () =>
       buildCommunicationReadinessSummary({
@@ -85,19 +87,16 @@ export function CommunicationReadinessPanel({
       <CardHeader className="space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="text-xl">Communication Readiness</CardTitle>
+            <CardTitle className="text-xl">{t("messages.communicationReadiness")}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Channels, reads, attachments, and announcements are monitored here.
-            </p>
+              {t("messages.channelsReadsAttachmentsAndAnnouncementsAreMonitoredHere")} </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={onCreateAnnouncement}>
               <Megaphone className="mr-2 h-4 w-4" />
-              Announcement
-            </Button>
+              {t("dashboard.announcement")} </Button>
             <Button type="button" onClick={onCreateChannel}>
-              Create Channel
-            </Button>
+              {t("messages.createChannel")} </Button>
           </div>
         </div>
       </CardHeader>
@@ -128,7 +127,7 @@ export function CommunicationReadinessPanel({
         {summary.reviewItems.length > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Communication review needed</AlertTitle>
+            <AlertTitle>{t("messages.communicationReviewNeeded")}</AlertTitle>
             <AlertDescription>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {summary.reviewItems.map((item) => (
@@ -150,8 +149,7 @@ export function CommunicationReadinessPanel({
           </Alert>
         ) : (
           <div className="rounded-lg border border-success/40 bg-success-muted p-3 text-sm text-success">
-            No unread or inactive channel issues detected.
-          </div>
+            {t("messages.noUnreadOrInactiveChannelIssuesDetected")} </div>
         )}
       </CardContent>
     </Card>

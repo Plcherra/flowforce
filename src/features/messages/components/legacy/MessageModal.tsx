@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -26,6 +27,7 @@ export function MessageModal({
   onUpdateStatus,
   onAddReply,
 }: MessageModalProps) {
+  const { t } = useTranslation();
   const [reply, setReply] = useState("");
 
   useEffect(() => {
@@ -67,17 +69,16 @@ export function MessageModal({
             )}
           </DialogTitle>
           <DialogDescription>
-            View message details and respond if needed.
-          </DialogDescription>
+            {t("messages.viewMessageDetailsAndRespondIfNeeded")} </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 text-sm">
-          <div className="text-muted-foreground">From: {message?.sender}</div>
+          <div className="text-muted-foreground">{t("messages.from")} {message?.sender}</div>
           <div>{message?.content}</div>
         </div>
 
         {message?.replies && message.replies.length > 0 && (
           <div className="mt-6 space-y-3 border-t pt-4">
-            <h4 className="text-sm font-medium">Conversation</h4>
+            <h4 className="text-sm font-medium">{t("messages.conversation")}</h4>
             <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
               {message.replies.map((reply) => (
                 <div
@@ -100,18 +101,16 @@ export function MessageModal({
             {onAddReply && (
               <div className="space-y-2">
                 <Textarea
-                  placeholder="Write a reply"
+                  placeholder={t("messages.writeAReply")}
                   value={reply}
                   onChange={(event) => setReply(event.target.value)}
                   rows={3}
                 />
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => onOpenChange(false)}>
-                    Close
-                  </Button>
+                    {t("common.close")} </Button>
                   <Button onClick={handleReply} disabled={!reply.trim()}>
-                    Send Reply
-                  </Button>
+                    {t("messages.sendReply")} </Button>
                 </div>
               </div>
             )}
@@ -122,15 +121,16 @@ export function MessageModal({
                 className="w-full"
                 onClick={handleStatusToggle}
               >
-                Mark as {message?.status === "open" ? "resolved" : "open"}
+                {message?.status === "open"
+                  ? t("messages.markAsResolved")
+                  : t("messages.markAsOpen")}
               </Button>
             )}
 
             {!onAddReply && (
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  Close
-                </Button>
+                  {t("common.close")} </Button>
               </div>
             )}
           </div>

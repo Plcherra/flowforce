@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { MessagesHeader } from "./MessagesHeader";
 import { MessageInput } from "@/features/messages/components/conversations/MessageInput";
@@ -43,14 +44,14 @@ export function MessagesMainArea({
   onDeleteMessage,
   onUpdateMessage,
 }: MessagesMainAreaProps) {
+  const { t } = useTranslation();
   if (!channel) {
     return (
       <div className="flex h-full items-center justify-center px-6 text-center">
         <div>
-          <h3 className="mb-2 text-lg font-semibold">No conversation open</h3>
+          <h3 className="mb-2 text-lg font-semibold">{t("messages.noConversationOpen")}</h3>
           <p className="text-sm text-muted-foreground">
-            Use New chat and choose someone.
-          </p>
+            {t("messages.useNewChatAndChooseSomeone")} </p>
         </div>
       </div>
     );

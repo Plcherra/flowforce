@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MoreVertical, Settings, Users } from "lucide-react";
@@ -26,6 +27,7 @@ export function MessagesHeader({
   isMobile = false,
   onBack,
 }: MessagesHeaderProps) {
+  const { t } = useTranslation();
   const isDirect = (channel.type ?? "").toLowerCase() === "direct";
   const memberCount = channel.channel_members?.length ?? 0;
 
@@ -38,7 +40,7 @@ export function MessagesHeader({
               variant="ghost"
               size="sm"
               onClick={onBack}
-              aria-label="Back to chats"
+              aria-label={t("messages.backToChats")}
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -68,22 +70,21 @@ export function MessagesHeader({
               size="sm"
               variant="ghost"
               onClick={onShowChannelMembers}
-              aria-label="Group members"
+              aria-label={t("messages.groupMembers")}
             >
               <Users className="h-4 w-4" />
             </Button>
             {isChannelAdmin && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="ghost" aria-label="Group options">
+                  <Button size="sm" variant="ghost" aria-label={t("messages.groupOptions")}>
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={onShowChannelSettings}>
                     <Settings className="mr-2 h-4 w-4" />
-                    Group settings
-                  </DropdownMenuItem>
+                    {t("messages.groupSettings")} </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}

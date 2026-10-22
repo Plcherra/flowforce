@@ -251,7 +251,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 11 — Messages strings
 
-- [ ] Move Messages chrome into the six locales.
+- [x] Move Messages chrome into the six locales.
 
 Rules:
 
@@ -914,6 +914,23 @@ Phone steps for Pedro:
 2. Set your language to Español on Settings, then Region. Reload. The page title, filters, and create button should be in Spanish. An update title or body someone typed stays as they wrote it.
 3. Open the create wizard if you can. The steps, preview, and publish settings should follow the language. Switch to Deutsch and check the same wizard.
 4. If the feed is empty because tables are missing, the setup message should follow the language, and the table names `company_updates` and `recognitions` should stay in English.
+5. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 11 Messages strings
+
+Shipped: Messages chrome under `src/features/messages` now uses `useTranslation` and the `messages` namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Cancel, Close, Delete, and Save, stay on those keys. Message bodies stay as stored text. Counts that sit next to a word are one phrase, so the space and the word order stay intact. A calendar check the checker read as the word date was moved into a named function. The directory is off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 2012 keys for each locale and `hard-coded strings 3056`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/messages`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and open Messages.
+2. Set your language to Español on Settings, then Region. Reload. The page title, search, and new chat button should be in Spanish. A message someone typed stays as they wrote it.
+3. Open a chat if you have one. Send, and the empty-chat line, should follow the language. Switch to Deutsch and open a group’s settings if you can. Delete group and the privacy label should be German.
+4. Search messages with at least two letters. The result count should be a full phrase in the current language.
 5. Switch back to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { MessagesBoard } from "./MessagesBoard";
 import { MessagesPortalContent } from "./MessagesPortalContent";
@@ -14,6 +15,7 @@ export function MessagesShell({
   viewModel: vm,
   hideContent = false,
 }: MessagesShellProps) {
+  const { t } = useTranslation();
   if (hideContent) {
     return <MessagesPortalContent vm={vm} />;
   }
@@ -24,8 +26,7 @@ export function MessagesShell({
         <div className="rounded-3xl border bg-background px-6 py-8 text-center shadow-sm">
           <div className="mx-auto h-10 w-10 animate-spin rounded-xl border-2 border-primary border-t-transparent" />
           <p className="mt-4 text-sm text-muted-foreground">
-            Loading your conversations…
-          </p>
+            {t("messages.loadingYourConversations")} </p>
         </div>
       </div>
     );

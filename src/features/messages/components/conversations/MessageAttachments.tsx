@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +31,7 @@ export function MessageAttachments({
   onAttachmentsChange,
   readOnly = false,
 }: MessageAttachmentsProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -234,7 +236,7 @@ export function MessageAttachments({
           <CardContent className="p-3">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Uploading files...</span>
+                <span>{t("messages.uploadingFiles")}</span>
                 <span>{Math.round(uploadProgress)}%</span>
               </div>
               <Progress value={uploadProgress} className="h-2" />

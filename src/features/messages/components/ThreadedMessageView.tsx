@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ export function ThreadedMessageView({
   onSendReply,
   className = "",
 }: ThreadedMessageViewProps) {
+  const { t } = useTranslation();
   const [replyContent, setReplyContent] = useState("");
   const [activeReplyTo, setActiveReplyTo] = useState<string | null>(null);
   const [threadReplies, setThreadReplies] = useState<ThreadMessage[]>([]);
@@ -128,8 +130,7 @@ export function ThreadedMessageView({
             )}
             {level === 0 && (
               <Badge variant="outline" className="text-xs">
-                Original
-              </Badge>
+                {t("messages.original")} </Badge>
             )}
           </div>
 
@@ -145,8 +146,7 @@ export function ThreadedMessageView({
               onClick={() => handleReplyToMessage(msg.id)}
             >
               <Reply className="mr-1 h-3 w-3" />
-              Reply
-            </Button>
+              {t("messages.reply")} </Button>
           )}
         </div>
       </div>
@@ -159,10 +159,8 @@ export function ThreadedMessageView({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <MessageSquare className="h-5 w-5" />
-            Thread
-            <Badge variant="secondary" className="text-xs">
-              {threadReplies.length + 1} messages
-            </Badge>
+            {t("messages.thread")} <Badge variant="secondary" className="text-xs">
+              {t("messages.messageCount", { count: threadReplies.length + 1 })} </Badge>
           </CardTitle>
           <Button
             variant="ghost"
@@ -195,9 +193,9 @@ export function ThreadedMessageView({
             <div className="mb-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
               <div className="flex items-center justify-between">
                 <span>
-                  Replying to{" "}
+                  {t("messages.replyingTo")}{" "}
                   {allReplies.find((r) => r.id === activeReplyTo)?.sender
-                    .name || "message"}
+                    .name || t("messages.message")}
                 </span>
                 <Button
                   variant="ghost"
