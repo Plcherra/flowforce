@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDateTime } from "@/shared/utils";
 import { parseISO, format } from "date-fns";
 import { LinkShiftsPanel } from "./LinkShiftsPanel";
+import { useTranslation } from "react-i18next";
 
 interface EventDetailsDrawerProps {
   event: CalendarEvent | null;
@@ -36,6 +37,7 @@ export function EventDetailsDrawer({
   onOpenChange,
   onRefresh,
 }: EventDetailsDrawerProps) {
+  const { t } = useTranslation();
   const eventId = event?.id ?? null;
   const { deleteEvent } = useEvents();
   const { toast } = useToast();
@@ -135,9 +137,9 @@ export function EventDetailsDrawer({
           >
             <div className="px-6 pt-4">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="participants">Participants</TabsTrigger>
-                <TabsTrigger value="shifts">Linked Shifts</TabsTrigger>
+                <TabsTrigger value="details">{t("schedule.details")}</TabsTrigger>
+                <TabsTrigger value="participants">{t("messages.participants2")}</TabsTrigger>
+                <TabsTrigger value="shifts">{t("calendar.linkedShifts")}</TabsTrigger>
               </TabsList>
             </div>
             <Separator className="mt-2" />
@@ -148,24 +150,20 @@ export function EventDetailsDrawer({
                   {event ? (
                     <>
                       <section>
-                        <h3 className="text-sm font-semibold text-foreground">
-                          Session summary
-                        </h3>
+                        <h3 className="text-sm font-semibold text-foreground">{t("calendar.sessionSummary")}</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {event.description || "No description provided."}
                         </p>
                       </section>
                       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="rounded-md border p-3 text-sm">
-                          <p className="font-semibold text-foreground">
-                            Starts
-                          </p>
+                          <p className="font-semibold text-foreground">{t("tasks.starts")}</p>
                           <p className="text-muted-foreground">
                             {formatDateTime(event.start, "EEE, MMM d · HH:mm")}
                           </p>
                         </div>
                         <div className="rounded-md border p-3 text-sm">
-                          <p className="font-semibold text-foreground">Ends</p>
+                          <p className="font-semibold text-foreground">{t("tasks.ends")}</p>
                           <p className="text-muted-foreground">
                             {formatDateTime(
                               event.end ?? null,
@@ -174,17 +172,13 @@ export function EventDetailsDrawer({
                           </p>
                         </div>
                         <div className="rounded-md border p-3 text-sm">
-                          <p className="font-semibold text-foreground">
-                            Location
-                          </p>
+                          <p className="font-semibold text-foreground">{t("schedule.location")}</p>
                           <p className="text-muted-foreground">
                             {event.location || "Not specified"}
                           </p>
                         </div>
                         <div className="rounded-md border p-3 text-sm">
-                          <p className="font-semibold text-foreground">
-                            Event type
-                          </p>
+                          <p className="font-semibold text-foreground">{t("calendar.eventType")}</p>
                           <p className="capitalize text-muted-foreground">
                             {event.type ?? "event"}
                           </p>
@@ -192,17 +186,13 @@ export function EventDetailsDrawer({
                       </section>
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No event selected.
-                    </p>
+                    <p className="text-sm text-muted-foreground">{t("calendar.noEventSelected")}</p>
                   )}
                 </TabsContent>
 
                 <TabsContent value="participants" className="space-y-3">
                   {participants.length === 0 ? (
-                    <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-                      No participants recorded for this event.
-                    </div>
+                    <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">{t("calendar.noParticipantsRecordedForThisEvent")}</div>
                   ) : (
                     participants.map((participant) => (
                       <div
@@ -242,10 +232,7 @@ export function EventDetailsDrawer({
                     busy={busy || linksLoading}
                   />
                   {!canManageLinks && eventId && (
-                    <div className="rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                      Linked shifts will sync once this event is saved to the
-                      calendar.
-                    </div>
+                    <div className="rounded-md border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground">{t("calendar.linkedShiftsWillSyncOnceThisEventIs")}</div>
                   )}
                   <div className="space-y-2 text-xs text-muted-foreground">
                     {Array.isArray(links) && links.length > 0 &&
@@ -262,9 +249,7 @@ export function EventDetailsDrawer({
                       ))}
                     {links.length === 0 && fallbackShiftIds.length > 0 && (
                       <div className="rounded-md border px-3 py-2">
-                        <p className="font-semibold text-foreground">
-                          Linked shifts
-                        </p>
+                        <p className="font-semibold text-foreground">{t("calendar.linkedShifts2")}</p>
                         <p className="text-xs text-muted-foreground">
                           {fallbackShiftIds.length} shift
                           {fallbackShiftIds.length === 1 ? "" : "s"} linked
@@ -272,7 +257,7 @@ export function EventDetailsDrawer({
                         </p>
                       </div>
                     )}
-                    {linksLoading && <div>Updating linked shifts…</div>}
+                    {linksLoading && <div>{t("calendar.updatingLinkedShifts")}</div>}
                   </div>
                 </TabsContent>
               </ScrollArea>
@@ -293,17 +278,13 @@ export function EventDetailsDrawer({
                 size="sm"
                 onClick={() => onOpenChange(false)}
                 disabled={busy}
-              >
-                Close
-              </Button>
+              >{t("common.close")}</Button>
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={handleDelete}
                 disabled={!eventId || busy}
-              >
-                Delete
-              </Button>
+              >{t("common.delete")}</Button>
             </div>
           </div>
         </div>

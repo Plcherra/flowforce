@@ -6,6 +6,7 @@ import {
   isMissingBackendResourceError,
 } from "@/shared/utils/supabaseErrors";
 import { CalendarDays } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface NetworkStatusBannerProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -23,6 +24,7 @@ export function NetworkStatusBanner({
   className,
   ...rest
 }: NetworkStatusBannerProps) {
+  const { t } = useTranslation();
   if (!errorMessage) {
     return null;
   }
@@ -39,10 +41,7 @@ export function NetworkStatusBanner({
           description={getSupabaseSetupMessage(errorMessage, moduleName)}
           icon={<CalendarDays className="h-5 w-5" />}
           setupDescription={
-            <>
-              Missing calendar database resources. Restore the calendar and
-              scheduling migrations, then refresh this page.
-            </>
+            <>{t("calendar.missingCalendarDatabaseResourcesRestoreTheCalendarAnd")}</>
           }
         />
       </div>

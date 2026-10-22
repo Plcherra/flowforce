@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
+import { useTranslation } from "react-i18next";
 
 type CalendarViewMode = "month" | "week" | "day";
 interface CalendarViewProps {
@@ -103,6 +104,7 @@ export function CalendarView({
   onViewChange,
   onSelectEvent,
 }: CalendarViewProps) {
+  const { t } = useTranslation();
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
     events.forEach((event) => {
@@ -168,7 +170,7 @@ export function CalendarView({
         </div>
         <div className="space-y-2">
           {list.length === 0 && !loading && (
-            <div className="text-[11px] text-muted-foreground">No events</div>
+            <div className="text-[11px] text-muted-foreground">{t("analytics.noEvents")}</div>
           )}
           {list.map((event) => (
             <EventChip
@@ -187,19 +189,13 @@ export function CalendarView({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate("prev")}>
-            Prev
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("prev")}>{t("sections.prev")}</Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => onDateChange(new Date())}
-          >
-            Today
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate("next")}>
-            Next
-          </Button>
+          >{t("schedule.today")}</Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("next")}>{t("common.next")}</Button>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold text-foreground">{header}</h2>
@@ -255,9 +251,7 @@ export function CalendarView({
       {view === "day" && (
         <div className="rounded-md border p-4 space-y-3">
           {currentDayEvents.length === 0 && !loading && (
-            <div className="text-sm text-muted-foreground">
-              No events scheduled for this day.
-            </div>
+            <div className="text-sm text-muted-foreground">{t("calendar.noEventsScheduledForThisDay")}</div>
           )}
           {currentDayEvents.map((event) => (
             <div
@@ -287,9 +281,7 @@ export function CalendarView({
                   size="sm"
                   variant="outline"
                   onClick={() => onSelectEvent?.(event)}
-                >
-                  View
-                </Button>
+                >{t("tasks.view")}</Button>
               </div>
               {event.participants.length > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -308,15 +300,11 @@ export function CalendarView({
       )}
 
       {loading && (
-        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-          Loading calendar…
-        </div>
+        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">{t("calendar.loadingCalendar")}</div>
       )}
 
       {!loading && events.length === 0 && (
-        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-          No events in this window. Create one to get started.
-        </div>
+        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">{t("calendar.noEventsInThisWindowCreateOneTo")}</div>
       )}
     </div>
   );

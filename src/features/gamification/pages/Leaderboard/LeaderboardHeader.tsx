@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCcw } from "lucide-react";
 import type { LeaderboardPeriod } from "@/features/gamification/leaderboard/types";
+import { useTranslation } from "react-i18next";
 
 interface LeaderboardHeaderProps {
   period: LeaderboardPeriod;
@@ -25,17 +26,13 @@ export function LeaderboardHeader({
   loading,
   lastUpdatedLabel,
 }: LeaderboardHeaderProps) {
+  const { t } = useTranslation();
   return (
     <header className="flex flex-col gap-4 rounded-2xl border bg-card/80 p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          Gamification
-        </p>
-        <h1 className="mt-1 text-3xl font-bold">Leaderboard</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Monitor XP totals, badge tiers, and top contributors across your
-          workforce.
-        </p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-primary">{t("gamification.gamification")}</p>
+        <h1 className="mt-1 text-3xl font-bold">{t("common.leaderboard")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("gamification.monitorXpTotalsBadgeTiersAndTopContributors")}</p>
       </div>
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
         <ToggleGroup
@@ -67,9 +64,7 @@ export function LeaderboardHeader({
           >
             <RefreshCcw
               className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
+            />{t("common.refresh")}</Button>
         </div>
       </div>
     </header>

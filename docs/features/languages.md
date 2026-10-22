@@ -431,7 +431,7 @@ Prove: `npm run check:i18n`.
 
 ### Phase 23 — Remaining feature strings
 
-- [ ] Move the smaller screens' chrome into the six locales.
+- [x] Move the smaller screens' chrome into the six locales.
 
 Rules:
 
@@ -1110,6 +1110,23 @@ Phone steps for Pedro:
 2. Set your language to Español on Settings, then Region. Reload. The settings tabs, company profile, security, region, notifications, and billing labels should be in Spanish. The language list stays English, Español, Français, Deutsch, Italiano, and Português. A company name you typed stays as you wrote it.
 3. Open Admin (`/app/admin`) in Français. User management, role configuration, and the audit log should be in French. A person's name stays as it was written. Switch to Deutsch and open role configuration. Class instructions should be German. See, Edit, Create / delete, Admin, Manager, Staff, and Owner stay those words.
 4. Switch back to English. The labels should match the wording from before this deploy.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 23 Remaining feature strings
+
+Shipped: Calendar, gamification, recognition, performance, availability, positions, AI, and permissions chrome now uses `useTranslation`. Each feature has its own namespace. The same strings are in en, es, pt, fr, it, and de. Keys that already existed, including Cancel, Save changes, Manager, Staff, and XP, stay on those keys. FlowForce, FlowForce AI, Copilot, Co-Pilot, Google Calendar, XP, and the permission words `withPermission`, `useCan`, `systemSettings`, and `viewAIInsights` stay as written. Those eight directories are off the hard-coded baseline.
+
+Proven: `npm run check:i18n` printed 4578 keys for each locale and `hard-coded strings 8`, then exited 0. `npm run typecheck:src` passed. ESLint passed on `src/features/calendar`, `src/features/gamification`, `src/features/recognition`, `src/features/performance`, `src/features/availability`, `src/features/positions`, `src/features/ai`, and `src/features/permissions`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set the language to Español.
+2. Open the calendar. Add-event labels, event details, and the empty states should be Spanish. A meeting title you typed stays as you wrote it. Text that switches with the meeting type, such as the title hint, stays English.
+3. Open time off and availability. The request form, the queue, and lock controls should be Spanish. A reason you typed stays as you wrote it.
+4. Open team positions in Français. Create and edit position labels should be French. A position name stays as it was written. Role words such as Manager stay as written.
+5. Open HR and the leaderboard in Deutsch. Badge, recognition, and XP labels should be German. XP stays XP. Switch to English. The labels should match the wording from before this deploy.
 
 Blockers: none. No migration.
 

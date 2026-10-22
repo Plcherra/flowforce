@@ -26,6 +26,7 @@ import {
 } from "./GoalProgressSection";
 import { XPTrendsSection, type XpTrendEntry } from "./XPTrendsSection";
 import { performanceTaskPoints } from "@/features/performance/utils/taskPointsTotal";
+import { useTranslation } from "react-i18next";
 
 function buildKpis({
   employees,
@@ -104,6 +105,7 @@ function LatestReviewsCard({
   reviews: PerformanceReviewEntry[];
   loading: boolean;
 }) {
+  const { t } = useTranslation();
   if (loading && reviews.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -131,8 +133,8 @@ function LatestReviewsCard({
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">Recent reviews</CardTitle>
-          <CardDescription>No review activity recorded.</CardDescription>
+          <CardTitle className="text-base">{t("performance.recentReviews")}</CardTitle>
+          <CardDescription>{t("performance.noReviewActivityRecorded")}</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -141,8 +143,8 @@ function LatestReviewsCard({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">Recent reviews</CardTitle>
-        <CardDescription>Latest submissions across employees</CardDescription>
+        <CardTitle className="text-base">{t("performance.recentReviews")}</CardTitle>
+        <CardDescription>{t("performance.latestSubmissionsAcrossEmployees")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {reviews.slice(0, 5).map((review) => (
@@ -171,6 +173,7 @@ function LatestReviewsCard({
 }
 
 export function PerformancePage() {
+  const { t } = useTranslation();
   const {
     employees,
     goals,
@@ -247,19 +250,15 @@ export function PerformancePage() {
 
       {combinedError && (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load some performance data</AlertTitle>
+          <AlertTitle>{t("performance.unableToLoadSomePerformanceData")}</AlertTitle>
           <AlertDescription>{combinedError}</AlertDescription>
         </Alert>
       )}
 
       {leaderboardWarning && !combinedError && (
         <Alert>
-          <AlertTitle>Leaderboard data unavailable</AlertTitle>
-          <AlertDescription>
-            Performance reviews loaded, but XP leaderboard sync is not ready yet.
-            Apply the latest Supabase migrations or refresh after managers sync
-            the board.
-          </AlertDescription>
+          <AlertTitle>{t("performance.leaderboardDataUnavailable")}</AlertTitle>
+          <AlertDescription>{t("performance.performanceReviewsLoadedButXpLeaderboardSyncIs")}</AlertDescription>
         </Alert>
       )}
 

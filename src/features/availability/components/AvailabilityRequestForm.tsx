@@ -66,6 +66,7 @@ import {
   hoursFromClockRange,
   isFullDayHours,
 } from "@/features/availability/utils/availabilityUtils";
+import { useTranslation } from "react-i18next";
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -120,6 +121,7 @@ export function AvailabilityRequestForm({
   initialAvailability,
   onSaveDirect,
 }: AvailabilityRequestFormProps) {
+  const { t } = useTranslation();
   const [repeatChoice, setRepeatChoice] = useState<RepeatChoice>("none");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -549,9 +551,7 @@ export function AvailabilityRequestForm({
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-lg font-semibold">
-              Availability
-            </CardTitle>
+            <CardTitle className="text-lg font-semibold">{t("schedule.availability")}</CardTitle>
             <CardDescription>
               {availabilityIsOpen
                 ? "Open availability is any day and any time. The weekday grid is not required."
@@ -593,18 +593,13 @@ export function AvailabilityRequestForm({
             <span>Week of {dayjs(weekStart).format("MMM D, YYYY")}</span>
             {!directEditAllowed && (
               <span className="flex items-center gap-1 text-destructive">
-                <Lock className="h-3 w-3" />
-                Locked — submit a request to change availability
-              </span>
+                <Lock className="h-3 w-3" />{t("availability.lockedSubmitARequestToChangeAvailability")}</span>
             )}
           </div>
           {availabilityIsOpen ? (
             <div className="space-y-2 p-4" data-testid="availability-open-notice">
-              <p className="text-sm font-medium">Any day, any time</p>
-              <p className="text-sm text-muted-foreground">
-                This company uses open availability. You do not need to fill in
-                the weekday grid.
-              </p>
+              <p className="text-sm font-medium">{t("availability.anyDayAnyTime")}</p>
+              <p className="text-sm text-muted-foreground">{t("availability.thisCompanyUsesOpenAvailabilityYouDoNot")}</p>
             </div>
           ) : (
           <div className="space-y-2 p-3" data-testid="availability-weekday-rows">
@@ -631,9 +626,7 @@ export function AvailabilityRequestForm({
                       aria-pressed={allDay}
                       disabled={disabled}
                       onClick={() => setDayHours(dayIndex, [...FULL_DAY_HOURS])}
-                    >
-                      All day on
-                    </Button>
+                    >{t("onboarding.allDayOn")}</Button>
                     <Button
                       type="button"
                       size="sm"
@@ -646,18 +639,14 @@ export function AvailabilityRequestForm({
                           hoursFromClockRange(range.fromTime, range.toTime),
                         )
                       }
-                    >
-                      Off
-                    </Button>
+                    >{t("onboarding.off")}</Button>
                   </div>
                   {allDay ? null : (
                     <div className="flex flex-wrap items-center gap-2">
                       <Label
                         htmlFor={`availability-${label}-from`}
                         className="text-xs text-muted-foreground"
-                      >
-                        From
-                      </Label>
+                      >{t("onboarding.from")}</Label>
                       <Input
                         id={`availability-${label}-from`}
                         aria-label={`${label} from`}
@@ -675,9 +664,7 @@ export function AvailabilityRequestForm({
                       <Label
                         htmlFor={`availability-${label}-to`}
                         className="text-xs text-muted-foreground"
-                      >
-                        To
-                      </Label>
+                      >{t("onboarding.to")}</Label>
                       <Input
                         id={`availability-${label}-to`}
                         aria-label={`${label} to`}
@@ -717,11 +704,9 @@ export function AvailabilityRequestForm({
               variant="outline"
               onClick={() => setEditingGrid(cloneGrid(initialAvailability))}
               disabled={!hasChanges}
-            >
-              Reset
-            </Button>
+            >{t("forms.reset")}</Button>
             <div className="grid gap-1">
-              <Label>Repeats</Label>
+              <Label>{t("schedule.repeats")}</Label>
               <Select
                 value={repeatChoice}
                 onValueChange={(value) => setRepeatChoice(value as RepeatChoice)}
@@ -741,18 +726,14 @@ export function AvailabilityRequestForm({
             <Button
               onClick={() => directSave.mutate()}
               disabled={!directEditAllowed || (!hasChanges && repeatChoice === "none")}
-            >
-              Save changes
-            </Button>
+            >{t("forms.saveChanges")}</Button>
             {lockInfo?.availabilityChoice === "fixed" ? (
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => sendFixedAvailability.mutate()}
                 disabled={sendFixedAvailability.isPending}
-              >
-                Send fixed availability
-              </Button>
+              >{t("onboarding.sendFixedAvailability")}</Button>
             ) : null}
               </>
             )}
@@ -761,35 +742,24 @@ export function AvailabilityRequestForm({
               onOpenChange={setRequestDialogOpen}
             >
               <DialogTrigger asChild>
-                <Button variant="default" className="gap-2">
-                  Request change
-                </Button>
+                <Button variant="default" className="gap-2">{t("availability.requestChange")}</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
-                  <DialogTitle>Request availability change</DialogTitle>
-                  <DialogDescription>
-                    Provide the timeframe and reason for your change. Managers
-                    will review and respond.
-                  </DialogDescription>
+                  <DialogTitle>{t("availability.requestAvailabilityChange")}</DialogTitle>
+                  <DialogDescription>{t("availability.provideTheTimeframeAndReasonForYourChange")}</DialogDescription>
                 </DialogHeader>
                 <Tabs defaultValue="custom" className="space-y-4">
                   <TabsList>
-                    <TabsTrigger value="sat" onClick={() => applyPreset("sat")}>
-                      Sat only
-                    </TabsTrigger>
+                    <TabsTrigger value="sat" onClick={() => applyPreset("sat")}>{t("availability.satOnly")}</TabsTrigger>
                     <TabsTrigger
                       value="weekend"
                       onClick={() => applyPreset("weekend")}
-                    >
-                      Weekend
-                    </TabsTrigger>
+                    >{t("availability.weekend")}</TabsTrigger>
                     <TabsTrigger
                       value="custom"
                       onClick={() => applyPreset("custom")}
-                    >
-                      Custom
-                    </TabsTrigger>
+                    >{t("common.custom")}</TabsTrigger>
                   </TabsList>
                   <TabsContent value="sat" className="space-y-3">
                     <RequestRangeInputs
@@ -823,10 +793,10 @@ export function AvailabilityRequestForm({
                   </TabsContent>
                 </Tabs>
                 <div className="space-y-2">
-                  <Label htmlFor="request-reason">Reason</Label>
+                  <Label htmlFor="request-reason">{t("schedule.reason")}</Label>
                   <Textarea
                     id="request-reason"
-                    placeholder="Explain why you need the change..."
+                    placeholder={t("availability.explainWhyYouNeedTheChange")}
                     value={requestReason}
                     onChange={(event) => setRequestReason(event.target.value)}
                     rows={4}
@@ -834,13 +804,9 @@ export function AvailabilityRequestForm({
                 </div>
                 <div className="space-y-2 rounded-lg border bg-muted/40 p-3 text-sm">
                   <p className="flex items-center gap-2 font-medium">
-                    <ArrowRight className="h-4 w-4 text-primary" />
-                    Changes preview
-                  </p>
+                    <ArrowRight className="h-4 w-4 text-primary" />{t("availability.changesPreview")}</p>
                   {diffSummary.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      No changes selected yet.
-                    </p>
+                    <p className="text-xs text-muted-foreground">{t("availability.noChangesSelectedYet")}</p>
                   ) : (
                     <ul className="space-y-1 text-xs">
                       {diffSummary.map((entry) => (
@@ -873,18 +839,14 @@ export function AvailabilityRequestForm({
                   <Button
                     variant="outline"
                     onClick={() => setRequestDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
+                  >{t("common.cancel")}</Button>
                   <Button
                     onClick={() => submitRequest.mutate()}
                     disabled={
                       requestReason.trim().length === 0 ||
                       diffSummary.length === 0
                     }
-                  >
-                    Submit request
-                  </Button>
+                  >{t("availability.submitRequest")}</Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -902,6 +864,7 @@ interface RequestRangeInputsProps {
 }
 
 function RequestRangeInputs({ start, end, onChange }: RequestRangeInputsProps) {
+  const { t } = useTranslation();
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1.5">
@@ -909,9 +872,7 @@ function RequestRangeInputs({ start, end, onChange }: RequestRangeInputsProps) {
           htmlFor="request-start"
           className="flex items-center gap-1 text-xs text-muted-foreground"
         >
-          <Calendar className="h-3 w-3" />
-          Start date
-        </Label>
+          <Calendar className="h-3 w-3" />{t("schedule.startDate")}</Label>
         <Input
           id="request-start"
           type="date"
@@ -924,9 +885,7 @@ function RequestRangeInputs({ start, end, onChange }: RequestRangeInputsProps) {
           htmlFor="request-end"
           className="flex items-center gap-1 text-xs text-muted-foreground"
         >
-          <Calendar className="h-3 w-3" />
-          End date
-        </Label>
+          <Calendar className="h-3 w-3" />{t("schedule.endDate")}</Label>
         <Input
           id="request-end"
           type="date"

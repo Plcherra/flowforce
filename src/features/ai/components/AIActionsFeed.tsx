@@ -32,6 +32,7 @@ import {
   type FeedSeverity,
 } from "@/hooks/useAIActionsFeed";
 import type { TablesInsert } from "@/integrations/supabase/public-types";
+import { useTranslation } from "react-i18next";
 
 const severityStyles: Record<
   FeedSeverity,
@@ -138,6 +139,7 @@ function ActionButton({
 }
 
 export function AIActionsFeed({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -333,13 +335,8 @@ export function AIActionsFeed({ className }: { className?: string }) {
           <Sparkles className="h-6 w-6" />
         </div>
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">
-            No urgent actions detected
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Automations are monitoring your workspace. New recommendations will
-            appear as data changes.
-          </p>
+          <p className="text-sm font-medium text-foreground">{t("ai.noUrgentActionsDetected")}</p>
+          <p className="text-xs text-muted-foreground">{t("ai.automationsAreMonitoringYourWorkspaceNewRecommendationsWill")}</p>
         </div>
         <Button
           variant="outline"
@@ -451,19 +448,12 @@ export function AIActionsFeed({ className }: { className?: string }) {
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-              <Sparkles className="h-5 w-5 text-primary" />
-              AI Actions Feed
-            </CardTitle>
-            <CardDescription>
-              Prioritised alerts across tasks, reminders, scheduling, and
-              spend signals.
-            </CardDescription>
+              <Sparkles className="h-5 w-5 text-primary" />{t("ai.aiActionsFeed")}</CardTitle>
+            <CardDescription>{t("ai.prioritisedAlertsAcrossTasksRemindersSchedulingAndSpend")}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {schedulingFallback && (
-              <Badge variant="outline" className="text-xs">
-                Preview scheduling data
-              </Badge>
+              <Badge variant="outline" className="text-xs">{t("ai.previewSchedulingData")}</Badge>
             )}
             <Button
               size="sm"
@@ -474,9 +464,7 @@ export function AIActionsFeed({ className }: { className?: string }) {
             >
               <RefreshCw
                 className={cn("h-4 w-4", refreshing && "animate-spin")}
-              />
-              Refresh
-            </Button>
+              />{t("common.refresh")}</Button>
           </div>
         </div>
       </CardHeader>

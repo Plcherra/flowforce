@@ -14,6 +14,7 @@ import {
   RecognitionFeed,
   GamificationLeaderboard,
 } from "@/features/gamification/components";
+import { useTranslation } from "react-i18next";
 
 const summaryBadges = [
   {
@@ -121,28 +122,18 @@ const leaderboardShowcase = [
 ];
 
 export default function HrDevelopment() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-muted">
       <div className="mx-auto max-w-6xl space-y-10 px-6 py-16">
         <div className="space-y-3 text-center">
-          <Badge variant="secondary" className="text-primary">
-            HR & Development
-          </Badge>
-          <h1 className="text-4xl font-bold text-foreground">
-            Unified XP, Recognition, and Growth
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Showcase the culture engine for your teams with XP progress, live
-            recognitions, and leaderboard insights connected across modules.
-          </p>
+          <Badge variant="secondary" className="text-primary">{t("navigation.hrDevelopment")}</Badge>
+          <h1 className="text-4xl font-bold text-foreground">{t("gamification.unifiedXpRecognitionAndGrowth")}</h1>
+          <p className="text-lg text-muted-foreground">{t("gamification.showcaseTheCultureEngineForYourTeamsWith")}</p>
           <div className="flex items-center justify-center gap-3">
-            <Button size="lg" className="gap-2">
-              Launch HR Workspace
-              <ArrowRight className="h-4 w-4" />
+            <Button size="lg" className="gap-2">{t("gamification.launchHrWorkspace")}<ArrowRight className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline">
-              See Platform Tour
-            </Button>
+            <Button size="lg" variant="outline">{t("gamification.seePlatformTour")}</Button>
           </div>
         </div>
 
@@ -160,32 +151,15 @@ export default function HrDevelopment() {
           <Card className="bg-background">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                HR & Development Summary
-              </CardTitle>
-              <CardDescription>
-                Copilot-ready overview of XP, badges, and workforce momentum.
-              </CardDescription>
+                <Sparkles className="h-4 w-4 text-primary" />{t("gamification.hrDevelopmentSummary")}</CardTitle>
+              <CardDescription>{t("gamification.copilotReadyOverviewOfXpBadgesAndWorkforce")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <p>
-                Connect recognition automation, training completions, and goal
-                progress to a single XP graph. HR & Development keeps every win
-                visible while surfacing who is ready for the next challenge.
-              </p>
+              <p>{t("gamification.connectRecognitionAutomationTrainingCompletionsAndGoalProgress")}</p>
               <ul className="space-y-2">
-                <li>
-                  • Auto-syncs XP from Goals, Tasks, Learning Center, and Manual
-                  shout-outs.
-                </li>
-                <li>
-                  • Highlights badges earned in the last 30 days with locked
-                  tiers for upcoming challenges.
-                </li>
-                <li>
-                  • Provides leader-ready reports and Copilot recommendations
-                  instantly.
-                </li>
+                <li>{t("gamification.autoSyncsXpFromGoalsTasksLearningCenter")}</li>
+                <li>{t("gamification.highlightsBadgesEarnedInTheLast30Days")}</li>
+                <li>{t("gamification.providesLeaderReadyReportsAndCopilotRecommendationsInstantly")}</li>
               </ul>
             </CardContent>
           </Card>
@@ -195,12 +169,12 @@ export default function HrDevelopment() {
           <BadgesGallery
             badges={summaryBadges}
             columns={2}
-            title="Badge Journey"
+            title={t("gamification.badgeJourney")}
             description="Live snapshot of earned badges plus upcoming tiers."
           />
           <RecognitionFeed
             events={recognitionDemoFeed}
-            title="Live Recognition Feed"
+            title={t("gamification.liveRecognitionFeed")}
             description="Recent milestones and onboarding wins."
             className="h-full"
           />
@@ -208,7 +182,7 @@ export default function HrDevelopment() {
 
         <GamificationLeaderboard
           entries={leaderboardShowcase}
-          title="XP Leaderboard Preview"
+          title={t("gamification.xpLeaderboardPreview")}
           description="Top talent by XP and completed goals for the current quarter."
         />
       </div>

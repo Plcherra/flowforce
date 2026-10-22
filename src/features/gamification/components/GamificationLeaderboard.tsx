@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface LeaderboardDisplayEntry {
   id: string;
@@ -63,10 +64,14 @@ export function GamificationLeaderboard({
   entries,
   loading,
   className,
-  title = "Top XP Leaders",
-  description = "Ranked by XP and goals completed during the selected period.",
-  emptyMessage = "No leaderboard entries. Sync activity or assign tasks to generate rankings.",
+  title,
+  description,
+  emptyMessage,
 }: GamificationLeaderboardProps) {
+  const { t } = useTranslation();
+  const heading = title ?? t("gamification.topXpLeaders");
+  const descriptionText = description ?? t("gamification.rankedByXpAndGoalsCompletedDuringThe");
+  const emptyText = emptyMessage ?? t("gamification.noLeaderboardEntriesSyncActivityOrAssignTasks");
   if (loading) {
     return (
       <Card className={className}>
@@ -88,24 +93,24 @@ export function GamificationLeaderboard({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Trophy className="h-4 w-4 text-primary" />
-          {title}
+          {heading}
         </CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>{descriptionText}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {entries.length === 0 ? (
           <div className="p-6 text-center text-sm text-muted-foreground">
-            {emptyMessage}
+            {emptyText}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-14">Rank</TableHead>
-                  <TableHead>Team Member</TableHead>
-                  <TableHead className="text-right">XP</TableHead>
-                  <TableHead className="text-right">Goals (month)</TableHead>
+                  <TableHead className="w-14">{t("gamification.rank")}</TableHead>
+                  <TableHead>{t("gamification.teamMember")}</TableHead>
+                  <TableHead className="text-right">{t("analytics.xp")}</TableHead>
+                  <TableHead className="text-right">{t("gamification.goalsMonth")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

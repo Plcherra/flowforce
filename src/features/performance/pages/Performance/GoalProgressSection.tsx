@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 export interface GoalSummaryCard {
   id: string;
@@ -25,6 +26,7 @@ export function GoalProgressSection({
   goals,
   loading,
 }: GoalProgressSectionProps) {
+  const { t } = useTranslation();
   if (loading && goals.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -48,12 +50,10 @@ export function GoalProgressSection({
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">Goal progress</CardTitle>
-          <CardDescription>No active goals were found.</CardDescription>
+          <CardTitle className="text-base">{t("performance.goalProgress")}</CardTitle>
+          <CardDescription>{t("performance.noActiveGoalsWereFound")}</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Start tracking goals in Supabase to visualize team progress here.
-        </CardContent>
+        <CardContent className="text-sm text-muted-foreground">{t("performance.startTrackingGoalsInSupabaseToVisualizeTeam")}</CardContent>
       </Card>
     );
   }
@@ -61,10 +61,8 @@ export function GoalProgressSection({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">Goal progress</CardTitle>
-        <CardDescription>
-          Top goals ranked by completion percentage
-        </CardDescription>
+        <CardTitle className="text-base">{t("performance.goalProgress")}</CardTitle>
+        <CardDescription>{t("performance.topGoalsRankedByCompletionPercentage")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {goals.map((goal) => (

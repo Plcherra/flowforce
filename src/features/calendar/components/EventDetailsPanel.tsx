@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { AppEvent, EventAttendee } from "@/hooks/useEvents";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import { useTranslation } from "react-i18next";
 
 const TYPE_LABEL: Record<NonNullable<AppEvent["type"]>, string> = {
   meeting: "Meeting",
@@ -44,6 +45,7 @@ export function EventDetailsPanel({
   onClose,
   onViewShift,
 }: EventDetailsPanelProps) {
+  const { t } = useTranslation();
   const attendees = uniqueAttendees(event.attendees);
   const type = event.type ?? "event";
   return (
@@ -83,13 +85,11 @@ export function EventDetailsPanel({
 
       <CardContent className="space-y-6">
         <section>
-          <h4 className="text-sm font-semibold text-foreground">Attendees</h4>
+          <h4 className="text-sm font-semibold text-foreground">{t("calendar.attendees")}</h4>
           <ScrollArea className="mt-2 max-h-32 rounded-md border">
             <div className="p-2 space-y-1">
               {attendees.length === 0 && (
-                <div className="text-xs text-muted-foreground py-2 px-1">
-                  No attendees recorded.
-                </div>
+                <div className="text-xs text-muted-foreground py-2 px-1">{t("calendar.noAttendeesRecorded")}</div>
               )}
               {attendees.map((attendee) => (
                 <div
@@ -112,9 +112,7 @@ export function EventDetailsPanel({
 
         {relatedShifts.length > 0 && (
           <section>
-            <h4 className="text-sm font-semibold text-foreground">
-              Linked shifts
-            </h4>
+            <h4 className="text-sm font-semibold text-foreground">{t("calendar.linkedShifts2")}</h4>
             <div className="mt-2 space-y-2">
               {relatedShifts.map((shift) => (
                 <div key={shift.id} className="rounded-md border p-2">
@@ -132,9 +130,7 @@ export function EventDetailsPanel({
                       size="sm"
                       className="mt-2 h-7 px-2 text-xs"
                       onClick={() => onViewShift(shift.id)}
-                    >
-                      View shift
-                    </Button>
+                    >{t("calendar.viewShift")}</Button>
                   )}
                 </div>
               ))}
@@ -144,7 +140,7 @@ export function EventDetailsPanel({
 
         {event.checklist && event.checklist.length > 0 && (
           <section>
-            <h4 className="text-sm font-semibold text-foreground">Checklist</h4>
+            <h4 className="text-sm font-semibold text-foreground">{t("employees.taskKindChecklist")}</h4>
             <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
               {event.checklist.map((item) => (
                 <li key={item.id} className="flex items-start gap-2">
@@ -167,9 +163,7 @@ export function EventDetailsPanel({
 
         {onClose && (
           <div className="flex justify-end">
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
+            <Button variant="outline" onClick={onClose}>{t("common.close")}</Button>
           </div>
         )}
       </CardContent>

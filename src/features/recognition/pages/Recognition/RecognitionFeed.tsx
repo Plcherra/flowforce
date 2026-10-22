@@ -8,6 +8,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { RecognitionRecord } from "@/types/recognition";
+import { useTranslation } from "react-i18next";
 
 interface RecognitionFeedProps {
   recognitions: RecognitionRecord[];
@@ -18,6 +19,7 @@ export function RecognitionFeed({
   recognitions,
   loading,
 }: RecognitionFeedProps) {
+  const { t } = useTranslation();
   if (loading && recognitions.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -45,13 +47,10 @@ export function RecognitionFeed({
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">Recognition feed</CardTitle>
-          <CardDescription>No recognitions yet</CardDescription>
+          <CardTitle className="text-base">{t("recognition.recognitionFeed")}</CardTitle>
+          <CardDescription>{t("updates.noRecognitionsYet")}</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Once teammates complete goals, tasks, or training, their shout-outs
-          will be listed here.
-        </CardContent>
+        <CardContent className="text-sm text-muted-foreground">{t("recognition.onceTeammatesCompleteGoalsTasksOrTrainingTheir")}</CardContent>
       </Card>
     );
   }
@@ -59,10 +58,8 @@ export function RecognitionFeed({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">Recognition feed</CardTitle>
-        <CardDescription>
-          Latest shout-outs across the organisation
-        </CardDescription>
+        <CardTitle className="text-base">{t("recognition.recognitionFeed")}</CardTitle>
+        <CardDescription>{t("recognition.latestShoutOutsAcrossTheOrganisation")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {recognitions.slice(0, 12).map((recognition) => {

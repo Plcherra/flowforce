@@ -19,6 +19,7 @@ import { LoadingSpinner } from "@/components/ui/loading-states";
 import { cn } from "@/lib/utils";
 
 import type { AvailabilityEmployee, ManagerAvailabilityRequest } from "./types";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
@@ -41,16 +42,13 @@ export function RequestsQueue({
   mutationPending,
   isLoading,
 }: RequestsQueueProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border bg-background shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ArrowUpRight className="h-5 w-5 text-primary" />
-          Requests queue
-        </CardTitle>
-        <CardDescription>
-          Review and manage availability change requests from employees.
-        </CardDescription>
+          <ArrowUpRight className="h-5 w-5 text-primary" />{t("availability.requestsQueue")}</CardTitle>
+        <CardDescription>{t("availability.reviewAndManageAvailabilityChangeRequestsFromEmployees")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -60,9 +58,9 @@ export function RequestsQueue({
         ) : (
           <Tabs defaultValue="pending" className="space-y-3">
             <TabsList>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="approved">Approved</TabsTrigger>
-              <TabsTrigger value="denied">Denied</TabsTrigger>
+              <TabsTrigger value="pending">{t("inventory.pending2")}</TabsTrigger>
+              <TabsTrigger value="approved">{t("inventory.approved2")}</TabsTrigger>
+              <TabsTrigger value="denied">{t("availability.denied")}</TabsTrigger>
             </TabsList>
             {(["pending", "approved", "denied"] as const).map((tab) => (
               <TabsContent key={tab} value={tab}>
@@ -80,7 +78,7 @@ export function RequestsQueue({
         )}
         {!isLoading && requests.length === 0 && (
           <EmptyState
-            title="No availability requests yet"
+            title={t("availability.noAvailabilityRequestsYet")}
             description="As soon as someone submits a change, it will land here for review."
           />
         )}
@@ -151,6 +149,7 @@ function RequestRow({
   onDeny: (request: ManagerAvailabilityRequest, note: string) => void;
   pending: boolean;
 }) {
+  const { t } = useTranslation();
   const [denialNote, setDenialNote] = useState("");
   const employeeLabel = useMemo(() => {
     const match = employees.find(
@@ -219,9 +218,7 @@ function RequestRow({
 
       <div className="grid gap-4 py-4 lg:grid-cols-[1.5fr_1fr]">
         <div className="rounded-md border bg-muted/40 p-3">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">
-            Requested changes
-          </p>
+          <p className="text-xs font-semibold uppercase text-muted-foreground">{t("availability.requestedChanges")}</p>
           <div className="mt-2 space-y-2 text-xs">
             {diff.map((entry) => (
               <div key={entry.day} className="flex items-center gap-2">
@@ -244,21 +241,21 @@ function RequestRow({
                 )}
               </div>
             ))}
-            {diff.length === 0 && <p>No hour-level changes detected.</p>}
+            {diff.length === 0 && <p>{t("availability.noHourLevelChangesDetected")}</p>}
           </div>
         </div>
         <div className="rounded-md border bg-muted/40 p-3 text-xs">
-          <p className="font-semibold text-muted-foreground">Request details</p>
+          <p className="font-semibold text-muted-foreground">{t("availability.requestDetails")}</p>
           <dl className="mt-2 space-y-2">
             <div className="flex justify-between">
-              <dt>Range</dt>
+              <dt>{t("availability.range")}</dt>
               <dd className="text-muted-foreground">
                 {dayjs(request.requestedRange.start).format("MMM D")} –{" "}
                 {dayjs(request.requestedRange.end).format("MMM D")}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt>Hour delta</dt>
+              <dt>{t("availability.hourDelta")}</dt>
               <dd
                 className={cn(
                   hoursDiff >= 0 ? "text-success" : "text-destructive",
@@ -269,7 +266,7 @@ function RequestRow({
               </dd>
             </div>
             <div>
-              <dt className="font-medium text-muted-foreground">Reason</dt>
+              <dt className="font-medium text-muted-foreground">{t("schedule.reason")}</dt>
               <dd className="text-muted-foreground">{request.reason || "—"}</dd>
             </div>
           </dl>
@@ -279,12 +276,9 @@ function RequestRow({
       {request.status === "pending" ? (
         <div className="flex flex-col gap-3 border-t pt-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-            <p>
-              Approve to apply changes immediately and grant a temporary
-              exception. Deny to notify the employee.
-            </p>
+            <p>{t("availability.approveToApplyChangesImmediatelyAndGrantA")}</p>
             <Textarea
-              placeholder="Optional note when denying..."
+              placeholder={t("availability.optionalNoteWhenDenying")}
               value={denialNote}
               onChange={(event) => setDenialNote(event.target.value)}
             />
@@ -294,12 +288,8 @@ function RequestRow({
               variant="outline"
               onClick={() => onDeny(request, denialNote)}
               disabled={pending}
-            >
-              Deny
-            </Button>
-            <Button onClick={() => onApprove(request)} disabled={pending}>
-              Approve
-            </Button>
+            >{t("availability.deny")}</Button>
+            <Button onClick={() => onApprove(request)} disabled={pending}>{t("schedule.approve")}</Button>
           </div>
         </div>
       ) : (

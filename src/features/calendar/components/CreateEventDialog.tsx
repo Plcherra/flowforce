@@ -24,6 +24,7 @@ import { useEvents, type EventAttendee } from "@/hooks/useEvents";
 import { useProfile } from "@/hooks/useProfile";
 import type { Schedule } from "@/types/common";
 import { useCreateCalendarEvent } from "@/features/calendar/hooks/useCreateCalendarEvent";
+import { useTranslation } from "react-i18next";
 
 type SessionType = "meeting" | "event";
 
@@ -42,6 +43,7 @@ export function CreateEventDialog({
   defaultType = "event",
   onCreated,
 }: CreateEventDialogProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const {
     shifts,
@@ -139,7 +141,18 @@ export function CreateEventDialog({
     if (!start || !end) return [] as Schedule[];
     const startDate = new Date(start);
     const endDate = new Date(end);
-    const overlaps = (a: Date, b: Date, c: Date, d: Date) => a <= d && c <= b;
+    const overlaps = (
+      leftStart: Date,
+      leftEnd: Date,
+      rightStart: Date,
+      rightEnd: Date,
+    ) => {
+      const leftStartMs = leftStart.getTime();
+      const leftEndMs = leftEnd.getTime();
+      const rightStartMs = rightStart.getTime();
+      const rightEndMs = rightEnd.getTime();
+      return leftStartMs <= rightEndMs && rightStartMs <= leftEndMs;
+    };
     return safeShifts
       .filter((shift) => {
         const shiftStart = new Date(shift.start_time);
@@ -286,16 +299,13 @@ export function CreateEventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Add to calendar</DialogTitle>
-          <DialogDescription>
-            Choose meeting or event, then add details, invite teammates, and
-            optionally link related shifts.
-          </DialogDescription>
+          <DialogTitle>{t("calendar.addToCalendar")}</DialogTitle>
+          <DialogDescription>{t("calendar.chooseMeetingOrEventThenAddDetailsInvite")}</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="session-title">Title</Label>
+            <Label htmlFor="session-title">{t("dashboard.title")}</Label>
             <Input
               id="session-title"
               value={title}
@@ -308,7 +318,7 @@ export function CreateEventDialog({
             />
           </div>
           <div>
-            <Label>Type</Label>
+            <Label>{t("resources.details.type")}</Label>
             <Select
               value={sessionType}
               onValueChange={(value) => setSessionType(value as SessionType)}
@@ -317,13 +327,13 @@ export function CreateEventDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="meeting">Meeting</SelectItem>
-                <SelectItem value="event">Event</SelectItem>
+                <SelectItem value="meeting">{t("sections.meeting")}</SelectItem>
+                <SelectItem value="event">{t("dashboard.event")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label htmlFor="session-start">Start</Label>
+            <Label htmlFor="session-start">{t("schedule.start")}</Label>
             <Input
               id="session-start"
               type="datetime-local"
@@ -332,7 +342,7 @@ export function CreateEventDialog({
             />
           </div>
           <div>
-            <Label htmlFor="session-end">End</Label>
+            <Label htmlFor="session-end">{t("schedule.end")}</Label>
             <Input
               id="session-end"
               type="datetime-local"
@@ -341,22 +351,22 @@ export function CreateEventDialog({
             />
           </div>
           <div>
-            <Label htmlFor="session-location">Location</Label>
+            <Label htmlFor="session-location">{t("schedule.location")}</Label>
             <Input
               id="session-location"
               value={location}
               onChange={(event) => setLocation(event.target.value)}
-              placeholder="Conference room, on-site, virtual link…"
+              placeholder={t("calendar.conferenceRoomOnSiteVirtualLink")}
             />
           </div>
           <div className="md:col-span-2">
-            <Label htmlFor="session-description">Description</Label>
+            <Label htmlFor="session-description">{t("registration.companyInfo.description")}</Label>
             <Textarea
               id="session-description"
               rows={3}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Agenda, dial-in details, goals…"
+              placeholder={t("calendar.agendaDialInDetailsGoals")}
             />
           </div>
         </div>
@@ -364,24 +374,19 @@ export function CreateEventDialog({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-md p-4">
           <div>
             <div className="flex items-center justify-between">
-              <Label>Invite participants</Label>
+              <Label>{t("calendar.inviteParticipants")}</Label>
               <Input
                 value={participantQuery}
                 onChange={(event) => setParticipantQuery(event.target.value)}
-                placeholder="Search team"
+                placeholder={t("calendar.searchTeam")}
                 className="h-8 w-40"
               />
             </div>
             <div className="mt-2 max-h-48 overflow-auto space-y-2 pr-2">
               {employeesLoading ? (
-                <div className="text-xs text-muted-foreground px-1 py-2">
-                  Loading team directory…
-                </div>
+                <div className="text-xs text-muted-foreground px-1 py-2">{t("calendar.loadingTeamDirectory")}</div>
               ) : filteredAttendees.length === 0 ? (
-                <div className="text-xs text-muted-foreground px-1 py-2">
-                  No matching people found. Update your directory or adjust the
-                  search to invite teammates.
-                </div>
+                <div className="text-xs text-muted-foreground px-1 py-2">{t("calendar.noMatchingPeopleFoundUpdateYourDirectoryOr")}</div>
               ) : (
                 filteredAttendees.map((attendee) => (
                   <label
@@ -414,17 +419,11 @@ export function CreateEventDialog({
           </div>
 
           <div>
-            <Label>Link to scheduled shifts (optional)</Label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Select the shifts this session supports. Linked shifts will
-              surface the meeting to assigned staff.
-            </p>
+            <Label>{t("calendar.linkToScheduledShiftsOptional")}</Label>
+            <p className="text-xs text-muted-foreground mb-2">{t("calendar.selectTheShiftsThisSessionSupportsLinkedShifts")}</p>
             <div className="max-h-48 overflow-auto space-y-2 pr-2 border rounded-md p-2">
               {shiftSuggestions.length === 0 && (
-                <div className="text-xs text-muted-foreground px-1 py-2">
-                  No overlapping shifts found for the selected time window. You
-                  can still create the event without linking.
-                </div>
+                <div className="text-xs text-muted-foreground px-1 py-2">{t("calendar.noOverlappingShiftsFoundForTheSelectedTime")}</div>
               )}
               {shiftSuggestions.map((shift) => (
                 <label
@@ -461,10 +460,8 @@ export function CreateEventDialog({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleCreate}>Save to calendar</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+          <Button onClick={handleCreate}>{t("calendar.saveToCalendar")}</Button>
         </div>
       </DialogContent>
     </Dialog>

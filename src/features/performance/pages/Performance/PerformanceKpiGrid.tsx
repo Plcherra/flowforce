@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 export interface PerformanceKpi {
   id: string;
@@ -23,6 +24,7 @@ export function PerformanceKpiGrid({
   metrics,
   loading,
 }: PerformanceKpiGridProps) {
+  const { t } = useTranslation();
   if (loading && metrics.length === 0) {
     return (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -45,12 +47,8 @@ export function PerformanceKpiGrid({
     return (
       <Card className="border-dashed bg-muted/20">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">
-            No KPIs available
-          </CardTitle>
-          <CardDescription>
-            Connect performance reviews to populate KPIs.
-          </CardDescription>
+          <CardTitle className="text-base font-semibold">{t("performance.noKpisAvailable")}</CardTitle>
+          <CardDescription>{t("performance.connectPerformanceReviewsToPopulateKpis")}</CardDescription>
         </CardHeader>
       </Card>
     );

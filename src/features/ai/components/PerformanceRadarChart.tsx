@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 interface PerformanceData {
   metric: string;
@@ -35,9 +36,11 @@ const defaultData: PerformanceData[] = [
 
 export default function PerformanceRadarChart({
   data = defaultData,
-  title = "Performance vs Target",
+  title,
   className,
 }: PerformanceRadarChartProps) {
+  const { t } = useTranslation();
+  const heading = title ?? t("analytics.performanceVsTarget");
   const overallPerformance =
     data.reduce((sum, item) => sum + item.actual / item.target, 0) /
     data.length;
@@ -45,12 +48,12 @@ export default function PerformanceRadarChart({
 
   const getPerformanceBadge = () => {
     if (performancePercentage >= 95)
-      return { variant: "default" as const, label: "Excellent" };
+      return { variant: "default" as const, label: t("ai.excellent") };
     if (performancePercentage >= 85)
-      return { variant: "secondary" as const, label: "Good" };
+      return { variant: "secondary" as const, label: t("ai.good") };
     if (performancePercentage >= 75)
-      return { variant: "outline" as const, label: "Fair" };
-    return { variant: "destructive" as const, label: "Needs Improvement" };
+      return { variant: "outline" as const, label: t("ai.fair") };
+    return { variant: "destructive" as const, label: t("ai.needsImprovement") };
   };
 
   const badge = getPerformanceBadge();
@@ -65,11 +68,11 @@ export default function PerformanceRadarChart({
           <p className="font-medium text-sm mb-2">{label}</p>
           <div className="space-y-1 text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Target:</span>
+              <span className="text-muted-foreground">{t("ai.target")}</span>
               <span className="font-medium">{target}%</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Actual:</span>
+              <span className="text-muted-foreground">{t("ai.actual")}</span>
               <span
                 className={`font-medium ${actual >= target ? "text-success" : "text-warning"}`}
               >
@@ -77,7 +80,7 @@ export default function PerformanceRadarChart({
               </span>
             </div>
             <div className="flex justify-between items-center pt-1 border-t border-border">
-              <span className="text-muted-foreground">Performance:</span>
+              <span className="text-muted-foreground">{t("ai.performance")}</span>
               <span
                 className={`font-medium ${actual >= target ? "text-success" : "text-warning"}`}
               >
@@ -95,7 +98,7 @@ export default function PerformanceRadarChart({
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{title}</CardTitle>
+          <CardTitle className="text-lg">{heading}</CardTitle>
           <Badge variant={badge.variant}>
             {badge.label} ({performancePercentage}%)
           </Badge>

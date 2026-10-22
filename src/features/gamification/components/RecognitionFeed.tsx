@@ -12,6 +12,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface RecognitionFeedItem {
   id: string;
@@ -40,10 +41,14 @@ export function RecognitionFeed({
   loading,
   maxItems = 6,
   className,
-  title = "Recent Recognition",
-  description = "Live activity from automations, milestones, and shout-outs.",
-  emptyMessage = "No recognition activity yet. Launch automations or celebrate a teammate to populate this feed.",
+  title,
+  description,
+  emptyMessage,
 }: RecognitionFeedProps) {
+  const { t } = useTranslation();
+  const heading = title ?? t("gamification.recentRecognition");
+  const descriptionText = description ?? t("gamification.liveActivityFromAutomationsMilestonesAndShoutOuts");
+  const emptyText = emptyMessage ?? t("gamification.noRecognitionActivityYetLaunchAutomationsOrCelebrate");
   const items = events.slice(0, maxItems);
 
   if (loading) {
@@ -70,14 +75,14 @@ export function RecognitionFeed({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Award className="h-4 w-4 text-primary" />
-          {title}
+          {heading}
         </CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>{descriptionText}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {items.length === 0 ? (
           <div className="p-6 text-center text-sm text-muted-foreground">
-            {emptyMessage}
+            {emptyText}
           </div>
         ) : (
           <ScrollArea className="h-[320px]">

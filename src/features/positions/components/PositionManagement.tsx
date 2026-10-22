@@ -49,6 +49,7 @@ import EditPositionDialog from "@/features/positions/components/EditPositionDial
 import { PositionManagementDialog } from "@/features/positions/components/PositionManagementDialog";
 import { UserPositionAssignment } from "@/features/positions/components/UserPositionAssignment";
 import { AVAILABLE_SECTIONS } from "@/data/availableSections";
+import { useTranslation } from "react-i18next";
 
 const ROLE_ORDER = ["staff", "supervisor", "manager", "admin"] as const;
 type RoleKey = (typeof ROLE_ORDER)[number];
@@ -216,6 +217,7 @@ const generateCopilotSuggestions = (
 };
 
 export default function PositionManagement() {
+  const { t } = useTranslation();
   const { positions, assignments, loading, deletePosition } = usePositions();
   const { roles, loading: rolesLoading } = useCompanyRoles();
   const { templates: shiftTemplates, loading: templatesLoading } =
@@ -393,48 +395,31 @@ export default function PositionManagement() {
       permission="manageUsers"
       fallback={
         <div className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            Access Denied
-          </h1>
-          <p className="text-muted-foreground">
-            You do not have permission to manage positions.
-          </p>
+          <h1 className="text-2xl font-bold text-foreground mb-4">{t("common.accessDenied")}</h1>
+          <p className="text-muted-foreground">{t("positions.youDoNotHavePermissionToManagePositions")}</p>
         </div>
       }
     >
       <div className="space-y-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Team Management
-            </h1>
-            <p className="text-muted-foreground">
-              Keep positions, scheduling templates, and access control moving
-              together.
-            </p>
+            <h1 className="text-3xl font-bold text-foreground">{t("common.positionManagement")}</h1>
+            <p className="text-muted-foreground">{t("positions.keepPositionsSchedulingTemplatesAndAccessControlMoving")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Position
-            </Button>
+              <Plus className="mr-2 h-4 w-4" />{t("positions.createPosition")}</Button>
             <PositionManagementDialog>
               <Button variant="outline">
-                <UserCog className="mr-2 h-4 w-4" />
-                Quick Manage
-              </Button>
+                <UserCog className="mr-2 h-4 w-4" />{t("positions.quickManage")}</Button>
             </PositionManagementDialog>
             <UserPositionAssignment>
               <Button variant="outline">
-                <Users className="mr-2 h-4 w-4" />
-                Assign Team Members
-              </Button>
+                <Users className="mr-2 h-4 w-4" />{t("positions.assignTeamMembers")}</Button>
             </UserPositionAssignment>
             <Button variant="outline" asChild>
               <Link to="/sections-permissions">
-                <Link2 className="mr-2 h-4 w-4" />
-                Sections & Access
-              </Link>
+                <Link2 className="mr-2 h-4 w-4" />{t("sections.sectionsAccess")}</Link>
             </Button>
           </div>
         </div>
@@ -458,9 +443,9 @@ export default function PositionManagement() {
             }
           >
             <TabsList>
-              <TabsTrigger value="overview">Team Dashboard</TabsTrigger>
-              <TabsTrigger value="positions">Positions</TabsTrigger>
-              <TabsTrigger value="permissions">Permissions</TabsTrigger>
+              <TabsTrigger value="overview">{t("positions.teamDashboard")}</TabsTrigger>
+              <TabsTrigger value="positions">{t("onboarding.review.positions")}</TabsTrigger>
+              <TabsTrigger value="permissions">{t("registration.roles.permissions")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -489,58 +474,37 @@ export default function PositionManagement() {
                 <Card className="xl:col-span-2">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <CalendarRange className="h-5 w-5" />
-                      Scheduling Linkage
-                    </CardTitle>
-                    <CardDescription>
-                      Connect position templates to recurring shifts so the
-                      schedule stays in sync.
-                    </CardDescription>
+                      <CalendarRange className="h-5 w-5" />{t("positions.schedulingLinkage")}</CardTitle>
+                    <CardDescription>{t("positions.connectPositionTemplatesToRecurringShiftsSoThe")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="rounded-lg border p-4">
-                        <div className="text-xs font-medium uppercase text-muted-foreground">
-                          Linked templates
-                        </div>
+                        <div className="text-xs font-medium uppercase text-muted-foreground">{t("positions.linkedTemplates")}</div>
                         <div className="mt-2 text-2xl font-semibold">
                           {linkedShiftTemplateCount}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Shift templates mapped to a position
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t("positions.shiftTemplatesMappedToAPosition")}</p>
                       </div>
                       <div className="rounded-lg border p-4">
-                        <div className="text-xs font-medium uppercase text-muted-foreground">
-                          Needs mapping
-                        </div>
+                        <div className="text-xs font-medium uppercase text-muted-foreground">{t("positions.needsMapping")}</div>
                         <div className="mt-2 text-2xl font-semibold">
                           {Math.max(unlinkedShiftTemplateCount, 0)}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Templates waiting for a position link
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t("positions.templatesWaitingForAPositionLink")}</p>
                       </div>
                     </div>
 
                     {unlinkedShiftTemplateCount > 0 && (
                       <Alert>
                         <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          Co-Pilot spotted shift templates without a position.
-                          Link them so assignments inherit the right
-                          permissions.
-                        </AlertDescription>
+                        <AlertDescription>{t("positions.coPilotSpottedShiftTemplatesWithoutAPosition")}</AlertDescription>
                       </Alert>
                     )}
 
                     <div className="space-y-3">
                       {shiftTemplates.length === 0 ? (
-                        <div className="text-sm text-muted-foreground">
-                          No shift templates yet. Create a template from
-                          Enhanced Scheduling to jump-start staffing
-                          suggestions.
-                        </div>
+                        <div className="text-sm text-muted-foreground">{t("positions.noShiftTemplatesYetCreateATemplateFrom")}</div>
                       ) : (
                         shiftTemplates.slice(0, 5).map((template) => {
                           const linkedRole = template.job_position?.role as
@@ -575,9 +539,7 @@ export default function PositionManagement() {
                                 <Badge
                                   variant="outline"
                                   className="border-warning/40 text-warning"
-                                >
-                                  Link needed
-                                </Badge>
+                                >{t("positions.linkNeeded")}</Badge>
                               )}
                             </div>
                           );
@@ -592,9 +554,7 @@ export default function PositionManagement() {
                   </CardContent>
                   <CardFooter className="flex justify-end">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to="/app/enhanced-scheduling">
-                        Open Enhanced Scheduling
-                      </Link>
+                      <Link to="/app/enhanced-scheduling">{t("positions.openEnhancedScheduling")}</Link>
                     </Button>
                   </CardFooter>
                 </Card>
@@ -602,13 +562,8 @@ export default function PositionManagement() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-secondary" />
-                      Co-Pilot Suggestions
-                    </CardTitle>
-                    <CardDescription>
-                      AI recommendations based on positions, scheduling, and
-                      permissions.
-                    </CardDescription>
+                      <Sparkles className="h-5 w-5 text-secondary" />{t("positions.coPilotSuggestions")}</CardTitle>
+                    <CardDescription>{t("positions.aiRecommendationsBasedOnPositionsSchedulingAndPermissions")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {copilotSuggestions.map((suggestion) => (
@@ -631,20 +586,12 @@ export default function PositionManagement() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Layers className="h-5 w-5" />
-                    Section Coverage Snapshot
-                  </CardTitle>
-                  <CardDescription>
-                    Understand how role templates translate into application
-                    access.
-                  </CardDescription>
+                    <Layers className="h-5 w-5" />{t("positions.sectionCoverageSnapshot")}</CardTitle>
+                  <CardDescription>{t("positions.understandHowRoleTemplatesTranslateIntoApplicationAccess")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {roleAccessSummaries.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">
-                      Configure company roles to automatically sync section
-                      entitlements for each position template.
-                    </div>
+                    <div className="text-sm text-muted-foreground">{t("positions.configureCompanyRolesToAutomaticallySyncSectionEntitlements")}</div>
                   ) : (
                     roleAccessSummaries.slice(0, 4).map((summary) => (
                       <div
@@ -671,9 +618,7 @@ export default function PositionManagement() {
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {summary.accessibleSections.length === 0 ? (
-                            <Badge variant="outline" className="text-xs">
-                              No sections enabled
-                            </Badge>
+                            <Badge variant="outline" className="text-xs">{t("positions.noSectionsEnabled")}</Badge>
                           ) : (
                             summary.accessibleSections
                               .slice(0, 5)
@@ -699,9 +644,7 @@ export default function PositionManagement() {
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link to="/sections-permissions">
-                      Manage Sections & Permissions
-                    </Link>
+                    <Link to="/sections-permissions">{t("positions.manageSectionsPermissions")}</Link>
                   </Button>
                 </CardFooter>
               </Card>
@@ -711,10 +654,7 @@ export default function PositionManagement() {
               {positions.length === 0 && (
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    No position templates found. Create one to start assigning
-                    team members and connecting scheduling templates.
-                  </AlertDescription>
+                  <AlertDescription>{t("positions.noPositionTemplatesFoundCreateOneToStart")}</AlertDescription>
                 </Alert>
               )}
 
@@ -798,9 +738,7 @@ export default function PositionManagement() {
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                          Delete Position
-                                        </AlertDialogTitle>
+                                        <AlertDialogTitle>{t("positions.deletePosition")}</AlertDialogTitle>
                                         <AlertDialogDescription>
                                           Are you sure you want to delete the “
                                           {position.name}” position? This action
@@ -808,16 +746,12 @@ export default function PositionManagement() {
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                        <AlertDialogCancel>
-                                          Cancel
-                                        </AlertDialogCancel>
+                                        <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                         <AlertDialogAction
                                           onClick={() =>
                                             handleDeletePosition(position.id)
                                           }
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
+                                        >{t("common.delete")}</AlertDialogAction>
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
                                   </AlertDialog>
@@ -848,9 +782,7 @@ export default function PositionManagement() {
                                       </Badge>
                                     ))
                                 ) : (
-                                  <Badge variant="outline" className="text-xs">
-                                    Inherits role defaults
-                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">{t("positions.inheritsRoleDefaults")}</Badge>
                                 )}
                                 {position.permissions &&
                                   Object.values(position.permissions).filter(
@@ -882,21 +814,12 @@ export default function PositionManagement() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Role Hierarchy & Defaults
-                  </CardTitle>
-                  <CardDescription>
-                    Preview default permissions and section coverage for each
-                    role template.
-                  </CardDescription>
+                    <Shield className="h-5 w-5" />{t("positions.roleHierarchyDefaults")}</CardTitle>
+                  <CardDescription>{t("positions.previewDefaultPermissionsAndSectionCoverageForEach")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {roleAccessSummaries.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">
-                      No company roles loaded yet. Configure role templates
-                      under Sections & Permissions to unlock default access per
-                      position.
-                    </div>
+                    <div className="text-sm text-muted-foreground">{t("positions.noCompanyRolesLoadedYetConfigureRoleTemplates")}</div>
                   ) : (
                     roleAccessSummaries.map((summary) => {
                       const activePermissions = Object.entries(
@@ -936,14 +859,10 @@ export default function PositionManagement() {
                           </div>
 
                           <div className="space-y-2">
-                            <div className="text-xs font-medium text-muted-foreground uppercase">
-                              Default permissions
-                            </div>
+                            <div className="text-xs font-medium text-muted-foreground uppercase">{t("positions.defaultPermissions")}</div>
                             <div className="flex flex-wrap gap-1">
                               {activePermissions.length === 0 ? (
-                                <Badge variant="outline" className="text-xs">
-                                  Inherits system defaults
-                                </Badge>
+                                <Badge variant="outline" className="text-xs">{t("positions.inheritsSystemDefaults")}</Badge>
                               ) : (
                                 activePermissions
                                   .slice(0, 6)
@@ -966,14 +885,10 @@ export default function PositionManagement() {
                           </div>
 
                           <div className="space-y-2">
-                            <div className="text-xs font-medium text-muted-foreground uppercase">
-                              Section access
-                            </div>
+                            <div className="text-xs font-medium text-muted-foreground uppercase">{t("positions.sectionAccess")}</div>
                             <div className="flex flex-wrap gap-1">
                               {summary.accessibleSections.length === 0 ? (
-                                <Badge variant="outline" className="text-xs">
-                                  Not yet mapped
-                                </Badge>
+                                <Badge variant="outline" className="text-xs">{t("positions.notYetMapped")}</Badge>
                               ) : (
                                 summary.accessibleSections
                                   .slice(0, 6)
@@ -1001,9 +916,7 @@ export default function PositionManagement() {
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link to="/sections-permissions">
-                      Open Sections & Permissions
-                    </Link>
+                    <Link to="/sections-permissions">{t("positions.openSectionsPermissions")}</Link>
                   </Button>
                 </CardFooter>
               </Card>

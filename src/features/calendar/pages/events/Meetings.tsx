@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Video } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation } from "react-i18next";
 
 export default function EventsMeetingsPage() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
 
@@ -44,10 +46,8 @@ export default function EventsMeetingsPage() {
                 <Video className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Meetings</h1>
-                <p className="text-sm text-muted-foreground">
-                  Upcoming and past meetings
-                </p>
+                <h1 className="text-xl font-bold">{t("common.meetings")}</h1>
+                <p className="text-sm text-muted-foreground">{t("sections.upcomingAndPastMeetings")}</p>
               </div>
             </div>
 
@@ -55,13 +55,13 @@ export default function EventsMeetingsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search meetings..."
+                  placeholder={t("sections.searchMeetings")}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="pl-10 w-64"
                 />
               </div>
-              <Button size={isMobile ? "sm" : "default"}>New Meeting</Button>
+              <Button size={isMobile ? "sm" : "default"}>{t("sections.newMeeting2")}</Button>
             </div>
           </div>
         </div>
@@ -78,18 +78,12 @@ export default function EventsMeetingsPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      Join
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      Details
-                    </Button>
+                    <Button variant="ghost" size="sm">{t("sections.join")}</Button>
+                    <Button variant="ghost" size="sm">{t("schedule.details")}</Button>
                   </div>
                 </CardHeader>
                 <CardContent className="px-4 py-2">
-                  <p className="text-sm text-muted-foreground">
-                    No description provided.
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("learning.noDescriptionProvided")}</p>
                 </CardContent>
               </Card>
             ))}
@@ -97,9 +91,7 @@ export default function EventsMeetingsPage() {
             {filtered.length === 0 && (
               <Card>
                 <CardContent className="p-6 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    No meetings found.
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("sections.noMeetingsFound")}</p>
                 </CardContent>
               </Card>
             )}

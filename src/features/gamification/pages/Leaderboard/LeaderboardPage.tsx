@@ -13,6 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 import { LeaderboardHeader } from "./LeaderboardHeader";
 import { XPProgressCard } from "./XPProgressCard";
 import { LeaderboardTable } from "./LeaderboardTable";
+import { useTranslation } from "react-i18next";
 
 const LEADERBOARD_MILESTONES = [
   {
@@ -39,7 +40,7 @@ const LEADERBOARD_MILESTONES = [
 
 function deriveMilestones(totalXp: number) {
   const nextMilestone = LEADERBOARD_MILESTONES.find(
-    (milestone) => totalXp < milestone.xpRequired,
+    (milestone) => milestone.xpRequired > totalXp,
   ) ?? {
     label: "Custom milestone",
     xpRequired: Math.max(totalXp + 5000, 1000),
@@ -48,7 +49,7 @@ function deriveMilestones(totalXp: number) {
   const previousMilestone =
     [...LEADERBOARD_MILESTONES]
       .reverse()
-      .find((milestone) => milestone.xpRequired <= totalXp) ?? undefined;
+      .find((milestone) => totalXp >= milestone.xpRequired) ?? undefined;
   return { nextMilestone, previousMilestone };
 }
 
@@ -65,23 +66,24 @@ function LeaderboardStats({
     totalXp: number;
   } | null;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">Analytics</CardTitle>
-        <CardDescription>Snapshot for the current period</CardDescription>
+        <CardTitle className="text-base">{t("common.analytics")}</CardTitle>
+        <CardDescription>{t("gamification.snapshotForTheCurrentPeriod")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Participants</p>
+          <p className="text-sm text-muted-foreground">{t("messages.participants2")}</p>
           <p className="text-lg font-semibold">{participantCount}</p>
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Average XP</p>
+          <p className="text-sm text-muted-foreground">{t("gamification.averageXp")}</p>
           <p className="text-lg font-semibold">{averageXp.toLocaleString()}</p>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Top department</p>
+          <p className="text-sm text-muted-foreground">{t("gamification.topDepartment")}</p>
           <p className="text-sm font-semibold">
             {topDepartment?.name ?? "None"} ·{" "}
             {topDepartment?.participantCount ?? 0} participant
@@ -94,6 +96,7 @@ function LeaderboardStats({
 }
 
 export function LeaderboardPage() {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<LeaderboardPeriod>("monthly");
   const { entries, analytics, loading, error, refresh } =
     useLeaderboardData(period);
@@ -115,7 +118,7 @@ export function LeaderboardPage() {
 
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load leaderboard</AlertTitle>
+          <AlertTitle>{t("gamification.unableToLoadLeaderboard")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

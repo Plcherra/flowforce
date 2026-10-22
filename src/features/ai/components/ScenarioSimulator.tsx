@@ -32,6 +32,7 @@ import {
   type ScenarioAdjustments,
 } from "@/lib/ai/scenarioEngine";
 import { logger } from "@/utils/logger";
+import { useTranslation } from "react-i18next";
 
 interface ScenarioSimulatorProps {
   className?: string;
@@ -57,6 +58,7 @@ const formatCurrency = (value: number) =>
 export default function ScenarioSimulator({
   className,
 }: ScenarioSimulatorProps) {
+  const { t } = useTranslation();
   const { company } = useCompany();
   const {
     baseline,
@@ -146,11 +148,8 @@ export default function ScenarioSimulator({
       <div className={cn("space-y-4", className)}>
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Scenario simulator unavailable</AlertTitle>
-          <AlertDescription>
-            We could not load baseline metrics for this workspace. Please
-            refresh or check your database connection.
-          </AlertDescription>
+          <AlertTitle>{t("ai.scenarioSimulatorUnavailable")}</AlertTitle>
+          <AlertDescription>{t("ai.weCouldNotLoadBaselineMetricsForThis")}</AlertDescription>
         </Alert>
       </div>
     );
@@ -180,18 +179,18 @@ export default function ScenarioSimulator({
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <CardTitle>Baseline Snapshot</CardTitle>
+                <CardTitle>{t("ai.baselineSnapshot")}</CardTitle>
                 <CardDescription>
                   Generated {new Date(baseline.generatedAt).toLocaleString()}
                 </CardDescription>
               </div>
-              {isUsingFallback && <Badge variant="secondary">Simulated</Badge>}
+              {isUsingFallback && <Badge variant="secondary">{t("ai.simulated")}</Badge>}
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
-                <span>Staff Coverage</span>
+                <span>{t("ai.staffCoverage")}</span>
                 <Activity className="h-4 w-4 text-success" />
               </div>
               <div className="mt-2 text-2xl font-semibold">{coverage}</div>
@@ -207,7 +206,7 @@ export default function ScenarioSimulator({
 
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
-                <span>Task Backlog</span>
+                <span>{t("ai.taskBacklog")}</span>
                 <TrendingUp className="h-4 w-4 text-primary" />
               </div>
               <div className="mt-2 text-2xl font-semibold">{backlogLabel}</div>
@@ -219,7 +218,7 @@ export default function ScenarioSimulator({
 
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
-                <span>Goal Progress</span>
+                <span>{t("ai.goalProgress")}</span>
                 <Sparkles className="h-4 w-4 text-secondary" />
               </div>
               <div className="mt-2 text-2xl font-semibold">{goalProgress}</div>
@@ -230,7 +229,7 @@ export default function ScenarioSimulator({
 
             <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
-                <span>Trailing 30d Revenue</span>
+                <span>{t("ai.trailing30dRevenue")}</span>
                 <ArrowUpRight className="h-4 w-4 text-warning" />
               </div>
               <div className="mt-2 text-2xl font-semibold">
@@ -248,11 +247,8 @@ export default function ScenarioSimulator({
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <CardTitle>Forecast & Controls</CardTitle>
-                <CardDescription>
-                  Adjust levers to preview what-if impact across staffing,
-                  tasks, goals, and revenue.
-                </CardDescription>
+                <CardTitle>{t("ai.forecastControls")}</CardTitle>
+                <CardDescription>{t("ai.adjustLeversToPreviewWhatIfImpactAcross")}</CardDescription>
               </div>
               <Badge
                 className={cn(
@@ -267,7 +263,7 @@ export default function ScenarioSimulator({
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
-                <Label htmlFor="staffing-change">Staffing change (%)</Label>
+                <Label htmlFor="staffing-change">{t("ai.staffingChange")}</Label>
                 <Input
                   id="staffing-change"
                   type="number"
@@ -277,14 +273,10 @@ export default function ScenarioSimulator({
                   value={adjustments.staffingChangePct}
                   onChange={updateAdjustment("staffingChangePct", -20, 30)}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Positive values add headcount.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("ai.positiveValuesAddHeadcount")}</p>
               </div>
               <div>
-                <Label htmlFor="overtime-reduction">
-                  Overtime reduction (%)
-                </Label>
+                <Label htmlFor="overtime-reduction">{t("ai.overtimeReduction")}</Label>
                 <Input
                   id="overtime-reduction"
                   type="number"
@@ -294,12 +286,10 @@ export default function ScenarioSimulator({
                   value={adjustments.overtimeReductionPct}
                   onChange={updateAdjustment("overtimeReductionPct", 0, 40)}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Reduces labor cost exposure.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("ai.reducesLaborCostExposure")}</p>
               </div>
               <div>
-                <Label htmlFor="automation">Task automation (%)</Label>
+                <Label htmlFor="automation">{t("ai.taskAutomation")}</Label>
                 <Input
                   id="automation"
                   type="number"
@@ -309,12 +299,10 @@ export default function ScenarioSimulator({
                   value={adjustments.taskAutomationPct}
                   onChange={updateAdjustment("taskAutomationPct", 0, 60)}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Rules + AI assistance rollout.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("ai.rulesAiAssistanceRollout")}</p>
               </div>
               <div>
-                <Label htmlFor="goal-focus">Goal acceleration (%)</Label>
+                <Label htmlFor="goal-focus">{t("ai.goalAcceleration")}</Label>
                 <Input
                   id="goal-focus"
                   type="number"
@@ -324,12 +312,10 @@ export default function ScenarioSimulator({
                   value={adjustments.goalFocusPct}
                   onChange={updateAdjustment("goalFocusPct", 0, 40)}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Coaching & milestone cadence.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("ai.coachingMilestoneCadence")}</p>
               </div>
               <div>
-                <Label htmlFor="revenue-target">Revenue delta (%)</Label>
+                <Label htmlFor="revenue-target">{t("ai.revenueDelta")}</Label>
                 <Input
                   id="revenue-target"
                   type="number"
@@ -339,12 +325,10 @@ export default function ScenarioSimulator({
                   value={adjustments.revenueChangePct}
                   onChange={updateAdjustment("revenueChangePct", -20, 30)}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Menu, pricing, partnership shifts.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("ai.menuPricingPartnershipShifts")}</p>
               </div>
               <div>
-                <Label htmlFor="timeline">Timeline (weeks)</Label>
+                <Label htmlFor="timeline">{t("ai.timelineWeeks")}</Label>
                 <Input
                   id="timeline"
                   type="number"
@@ -354,9 +338,7 @@ export default function ScenarioSimulator({
                   value={adjustments.timelineWeeks}
                   onChange={updateAdjustment("timelineWeeks", 1, 12)}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Window for modeled actions.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("ai.windowForModeledActions")}</p>
               </div>
             </div>
 
@@ -364,7 +346,7 @@ export default function ScenarioSimulator({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <div className="flex items-center justify-between text-xs uppercase text-muted-foreground">
-                    <span>Projected coverage</span>
+                    <span>{t("ai.projectedCoverage")}</span>
                     <span
                       className={
                         outcome.deltas.coverageRate >= 0
@@ -382,7 +364,7 @@ export default function ScenarioSimulator({
 
                 <div>
                   <div className="flex items-center justify-between text-xs uppercase text-muted-foreground">
-                    <span>Projected backlog</span>
+                    <span>{t("ai.projectedBacklog")}</span>
                     <span
                       className={
                         outcome.deltas.backlog <= 0
@@ -400,7 +382,7 @@ export default function ScenarioSimulator({
 
                 <div>
                   <div className="flex items-center justify-between text-xs uppercase text-muted-foreground">
-                    <span>Goal confidence</span>
+                    <span>{t("ai.goalConfidence")}</span>
                     <span
                       className={
                         outcome.deltas.goalConfidence >= 0
@@ -418,7 +400,7 @@ export default function ScenarioSimulator({
 
                 <div>
                   <div className="flex items-center justify-between text-xs uppercase text-muted-foreground">
-                    <span>Revenue forecast (30d)</span>
+                    <span>{t("ai.revenueForecast30d")}</span>
                     <span
                       className={
                         outcome.deltas.revenueForecast >= 0
@@ -450,17 +432,13 @@ export default function ScenarioSimulator({
               >
                 <RefreshCw
                   className={cn("mr-2 h-4 w-4", loading && "animate-spin")}
-                />
-                Refresh data
-              </Button>
+                />{t("ai.refreshData")}</Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleReset}
                 disabled={loading}
-              >
-                Reset levers
-              </Button>
+              >{t("ai.resetLevers")}</Button>
               <Button
                 className="ml-auto"
                 onClick={handleTrigger}
@@ -480,16 +458,14 @@ export default function ScenarioSimulator({
                 className="flex flex-wrap items-center gap-3 border border-primary/40 bg-primary/5"
               >
                 <div className="flex-1">
-                  <AlertTitle>Automation queued</AlertTitle>
+                  <AlertTitle>{t("ai.automationQueued")}</AlertTitle>
                   <AlertDescription>
                     Co-Pilot created {lastTriggeredTaskIds.length} task
                     {lastTriggeredTaskIds.length === 1 ? "" : "s"} from this
                     scenario.
                   </AlertDescription>
                 </div>
-                <Button size="sm" onClick={() => navigate("/tasks?tab=queue")}>
-                  Review tasks
-                </Button>
+                <Button size="sm" onClick={() => navigate("/tasks?tab=queue")}>{t("ai.reviewTasks")}</Button>
               </Alert>
             )}
             {(lastTriggeredAt || lastGeneratedActions.length > 0) && (
@@ -506,18 +482,12 @@ export default function ScenarioSimulator({
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Co-Pilot Action Plan</CardTitle>
-          <CardDescription>
-            Recommended automations generated from this scenario. Triggering
-            will create tasks tagged for Co-Pilot follow-up.
-          </CardDescription>
+          <CardTitle>{t("ai.coPilotActionPlan")}</CardTitle>
+          <CardDescription>{t("ai.recommendedAutomationsGeneratedFromThisScenarioTriggeringWill")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {outcome.copilotActions.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Scenario looks healthy. Adjust inputs to surface automation
-              opportunities.
-            </div>
+            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{t("ai.scenarioLooksHealthyAdjustInputsToSurfaceAutomation")}</div>
           ) : (
             outcome.copilotActions.map((action) => (
               <div key={action.id} className="rounded-lg border p-4">

@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DayOption, HourOption, LockStatePreview } from "./types";
+import { useTranslation } from "react-i18next";
 
 interface LockControlsProps {
   mode: AvailabilityLockMode;
@@ -48,22 +49,17 @@ export function LockControls({
   hourOptions,
   lockStatePreview,
 }: LockControlsProps) {
+  const { t } = useTranslation();
   return (
     <Card className="border bg-background shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Lock className="h-5 w-5 text-primary" />
-          Lock controls
-        </CardTitle>
-        <CardDescription>
-          Configure how and when employees can adjust their availability.
-        </CardDescription>
+          <Lock className="h-5 w-5 text-primary" />{t("availability.lockControls")}</CardTitle>
+        <CardDescription>{t("availability.configureHowAndWhenEmployeesCanAdjustTheir")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
-          <Label className="text-sm font-semibold text-muted-foreground">
-            Mode
-          </Label>
+          <Label className="text-sm font-semibold text-muted-foreground">{t("availability.mode")}</Label>
           <RadioGroup
             value={mode}
             onValueChange={(value) =>
@@ -73,17 +69,17 @@ export function LockControls({
           >
             <ModeOption
               value="open"
-              title="Open"
+              title={t("schedule.open")}
               description="Employees can edit availability anytime."
             />
             <ModeOption
               value="auto"
-              title="Auto"
+              title={t("availability.auto")}
               description="Lock automatically before each week."
             />
             <ModeOption
               value="lock"
-              title="Lock"
+              title={t("availability.lock")}
               description="Only managers can approve changes."
             />
           </RadioGroup>
@@ -92,10 +88,10 @@ export function LockControls({
         {mode === "auto" && (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Lock day</Label>
+              <Label>{t("availability.lockDay")}</Label>
               <Select value={day} onValueChange={onDayChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select day" />
+                  <SelectValue placeholder={t("availability.selectDay")} />
                 </SelectTrigger>
                 <SelectContent>
                   {dayOptions.map((option) => (
@@ -107,10 +103,10 @@ export function LockControls({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Lock hour</Label>
+              <Label>{t("availability.lockHour")}</Label>
               <Select value={hour} onValueChange={onHourChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select hour" />
+                  <SelectValue placeholder={t("availability.selectHour")} />
                 </SelectTrigger>
                 <SelectContent>
                   {hourOptions.map((option) => (
@@ -131,19 +127,14 @@ export function LockControls({
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-primary/80">
-                  <Clock className="h-4 w-4" />
-                  Auto locking preview updates after saving new settings.
-                </div>
+                  <Clock className="h-4 w-4" />{t("availability.autoLockingPreviewUpdatesAfterSavingNewSettings")}</div>
               )}
             </div>
           </div>
         )}
 
         {mode !== "auto" && (
-          <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-            Automatic locks are disabled. Employees keep their current access
-            until you switch back to auto mode.
-          </div>
+          <div className="rounded-md border border-dashed border-muted-foreground/40 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">{t("availability.automaticLocksAreDisabledEmployeesKeepTheirCurrent")}</div>
         )}
 
         <div className="flex justify-end">

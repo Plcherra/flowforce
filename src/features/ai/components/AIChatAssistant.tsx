@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAIChat } from "@/features/ai/hooks/useAIChat";
 import { logger } from "@/utils/logger";
+import { useTranslation } from "react-i18next";
 
 type MessageRole = "user" | "assistant";
 
@@ -32,6 +33,7 @@ interface AIChatAssistantProps {
 export default function AIChatAssistant({
   context,
 }: AIChatAssistantProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -123,7 +125,7 @@ export default function AIChatAssistant({
           onClick={() => setIsOpen(true)}
           className="rounded-full w-14 h-14 shadow-lg bg-primary hover:bg-primary/90"
           size="icon"
-          aria-label="Open FlowForce AI"
+          aria-label={t("ai.openFlowforceAi")}
         >
           <MessageCircle className="h-6 w-6" />
         </Button>
@@ -141,9 +143,7 @@ export default function AIChatAssistant({
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Bot className="h-5 w-5 text-primary" />
-              FlowForce AI
-            </CardTitle>
+              <Bot className="h-5 w-5 text-primary" />{t("ai.flowforceAi")}</CardTitle>
             <div className="flex gap-1">
               <Button
                 variant="ghost"
@@ -176,7 +176,7 @@ export default function AIChatAssistant({
                 aria-live="polite"
                 aria-relevant="additions"
                 aria-busy={isLoading ? "true" : "false"}
-                aria-label="FlowForce AI conversation"
+                aria-label={t("ai.flowforceAiConversation")}
               >
                 {messages.map((message) => (
                   <div
@@ -249,7 +249,7 @@ export default function AIChatAssistant({
 
             {errorMessage && (
               <Alert variant="destructive" className="shrink-0">
-                <AlertTitle>AI assistant unavailable</AlertTitle>
+                <AlertTitle>{t("ai.aiAssistantUnavailable")}</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
             )}
@@ -259,9 +259,9 @@ export default function AIChatAssistant({
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask me about your operations..."
+                placeholder={t("ai.askMeAboutYourOperations")}
                 disabled={isLoading}
-                aria-label="Ask FlowForce AI"
+                aria-label={t("ai.askFlowforceAi")}
               />
               <Button
                 onClick={handleSendMessage}

@@ -54,6 +54,7 @@ import {
 import type { AvailabilityGrid } from "@/features/availability/components/AvailabilityRequestForm";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const BASE_TIME_OFF_ALLOWANCE = 25; // matches summary used in standalone Time Off page
 
@@ -117,6 +118,7 @@ export function TimeOffRequestPanel({
   employeeId,
   availabilityGrid,
 }: TimeOffRequestPanelProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
   const { timeOff, shifts, loading, isFallbackData, mutations } =
@@ -338,12 +340,8 @@ export function TimeOffRequestPanel({
       <Card className="border bg-background shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Calendar className="h-5 w-5 text-muted-foreground" />
-            Time Off Tracker
-          </CardTitle>
-          <CardDescription>
-            Connect to Supabase to sync real time-off requests and balances.
-          </CardDescription>
+            <Calendar className="h-5 w-5 text-muted-foreground" />{t("availability.timeOffTracker")}</CardTitle>
+          <CardDescription>{t("availability.connectToSupabaseToSyncRealTimeOff")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border border-dashed border-muted-foreground/40 p-4 text-sm text-muted-foreground">
@@ -360,35 +358,25 @@ export function TimeOffRequestPanel({
       <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <CalendarCheck className="h-5 w-5 text-primary" />
-            Time Off & Coverage
-          </CardTitle>
-          <CardDescription>
-            Track requests, balances, and how time off overlaps with your
-            scheduled shifts.
-          </CardDescription>
+            <CalendarCheck className="h-5 w-5 text-primary" />{t("availability.timeOffCoverage")}</CardTitle>
+          <CardDescription>{t("availability.trackRequestsBalancesAndHowTimeOffOverlaps")}</CardDescription>
         </div>
         <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" disabled={!employeeId || loading}>
-              Request time off
-            </Button>
+            <Button size="sm" disabled={!employeeId || loading}>{t("schedule.requestTimeOff")}</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Submit time off request</DialogTitle>
-              <DialogDescription>
-                Choose the date range and type of time off. Your supervisor will
-                be notified for approval.
-              </DialogDescription>
+              <DialogTitle>{t("availability.submitTimeOffRequest")}</DialogTitle>
+              <DialogDescription>{t("availability.chooseTheDateRangeAndTypeOfTime")}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {applicablePolicies.length > 0 ? (
                 <div className="grid gap-2">
-                  <Label htmlFor="timeoff-policy">Policy</Label>
+                  <Label htmlFor="timeoff-policy">{t("dashboard.policy")}</Label>
                   <Select value={requestPolicyId} onValueChange={setRequestPolicyId}>
                     <SelectTrigger id="timeoff-policy">
-                      <SelectValue placeholder="Choose a policy" />
+                      <SelectValue placeholder={t("availability.chooseAPolicy")} />
                     </SelectTrigger>
                     <SelectContent>
                       {applicablePolicies.map((policy) => (
@@ -401,7 +389,7 @@ export function TimeOffRequestPanel({
                 </div>
               ) : null}
               <div className="grid gap-2">
-                <Label htmlFor="timeoff-type">Type</Label>
+                <Label htmlFor="timeoff-type">{t("resources.details.type")}</Label>
                 <Select
                   value={requestType}
                   onValueChange={(value) =>
@@ -409,7 +397,7 @@ export function TimeOffRequestPanel({
                   }
                 >
                   <SelectTrigger id="timeoff-type">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("messages.selectType")} />
                   </SelectTrigger>
                   <SelectContent>
                     {REQUEST_TYPES.map((type) => (
@@ -422,7 +410,7 @@ export function TimeOffRequestPanel({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="timeoff-start">Start date</Label>
+                  <Label htmlFor="timeoff-start">{t("schedule.startDate")}</Label>
                   <Input
                     id="timeoff-start"
                     type="date"
@@ -431,7 +419,7 @@ export function TimeOffRequestPanel({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="timeoff-end">End date</Label>
+                  <Label htmlFor="timeoff-end">{t("schedule.endDate")}</Label>
                   <Input
                     id="timeoff-end"
                     type="date"
@@ -441,12 +429,10 @@ export function TimeOffRequestPanel({
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="timeoff-reason">
-                  Notes for your manager (optional)
-                </Label>
+                <Label htmlFor="timeoff-reason">{t("availability.notesForYourManagerOptional")}</Label>
                 <Input
                   id="timeoff-reason"
-                  placeholder="Context for your request"
+                  placeholder={t("availability.contextForYourRequest")}
                   value={requestReason}
                   onChange={(event) => setRequestReason(event.target.value)}
                 />
@@ -456,9 +442,7 @@ export function TimeOffRequestPanel({
               <Button
                 variant="outline"
                 onClick={() => setRequestDialogOpen(false)}
-              >
-                Cancel
-              </Button>
+              >{t("common.cancel")}</Button>
               <Button
                 onClick={handleSubmitRequest}
                 disabled={submitting || loading}
@@ -482,27 +466,27 @@ export function TimeOffRequestPanel({
           ) : (
             <SummaryTile
               icon={Calendar}
-              label="Balance remaining"
+              label={t("availability.balanceRemaining")}
               value={`${allowanceRemaining} days`}
               hint={`You’ve used ${approvedDays} of ${BASE_TIME_OFF_ALLOWANCE} days`}
             />
           )}
           <SummaryTile
             icon={CheckCircle2}
-            label="Requested"
+            label={t("inventory.requested")}
             value={`${requestedRequestCount} open`}
             hint={`${requestedDays} day${requestedDays === 1 ? "" : "s"} awaiting approval`}
             tone={requestedRequestCount > 0 ? "warning" : "default"}
           />
           <SummaryTile
             icon={Clock}
-            label="Weekly availability"
+            label={t("availability.weeklyAvailability")}
             value={`${availabilityHours} hrs`}
             hint="Configured availability this week"
           />
           <SummaryTile
             icon={AlertTriangle}
-            label="Coverage impact"
+            label={t("availability.coverageImpact")}
             value={`${requestedConflicts} shift${requestedConflicts === 1 ? "" : "s"}`}
             hint="Shifts overlapping requested time off"
             tone={requestedConflicts > 0 ? "warning" : "default"}
@@ -511,9 +495,7 @@ export function TimeOffRequestPanel({
 
         <div>
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Request history
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("availability.requestHistory")}</h3>
             {personalRequests.length > 0 && (
               <span className="text-xs text-muted-foreground">
                 Updated&nbsp;
@@ -525,10 +507,7 @@ export function TimeOffRequestPanel({
             )}
           </div>
           {personalRequests.length === 0 ? (
-            <div className="mt-3 rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
-              No time off requests yet. Submit your first request to see it
-              tracked here alongside coverage impact.
-            </div>
+            <div className="mt-3 rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">{t("availability.noTimeOffRequestsYetSubmitYourFirst")}</div>
           ) : (
             <ScrollArea className="mt-3 max-h-80 pr-3">
               <div className="space-y-3">
@@ -595,9 +574,7 @@ export function TimeOffRequestPanel({
                       {conflicts.length > 0 && (
                         <div className="mt-3 rounded-md border border-warning/40 bg-warning-muted p-3 text-xs text-warning-foreground">
                           <div className="mb-1 flex items-center gap-1 font-medium">
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            Coverage impact
-                          </div>
+                            <AlertTriangle className="h-3.5 w-3.5" />{t("availability.coverageImpact")}</div>
                           <ul className="space-y-1">
                             {conflicts.map((shift) => (
                               <li

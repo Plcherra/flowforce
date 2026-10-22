@@ -6,6 +6,7 @@ import { PageLoader } from "@/components/common/PageLoader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { CalendarDays } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const EventsCalendarContent = lazy(() =>
   import("@/features/calendar/components/EventsCalendarContent").then(
@@ -16,6 +17,7 @@ const EventsCalendarContent = lazy(() =>
 );
 
 export default function EventsCalendarPage() {
+  const { t } = useTranslation();
   const bootstrap = useCommunicationBootstrap();
 
   if (!bootstrap.userReady || bootstrap.loading) {
@@ -26,7 +28,7 @@ export default function EventsCalendarPage() {
     return (
       <div className="p-6">
         <Alert variant="destructive">
-          <AlertTitle>Unable to load calendar</AlertTitle>
+          <AlertTitle>{t("calendar.unableToLoadCalendar")}</AlertTitle>
           <AlertDescription>{bootstrap.error}</AlertDescription>
         </Alert>
       </div>
@@ -37,7 +39,7 @@ export default function EventsCalendarPage() {
     return (
       <div className="p-6">
         <EmptyStateCard
-          title="Waiting for employee roster"
+          title={t("calendar.waitingForEmployeeRoster")}
           description="Calendar access unlocks after your organization and employee data finish loading."
           icon={<CalendarDays className="h-5 w-5" />}
         />

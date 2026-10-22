@@ -8,6 +8,7 @@ import { Sparkles, Send, Bot, User, Loader2, X, Lightbulb } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { FormSubmission } from "@/types/common";
 import type { AssistantAction, AssistantContext } from "@/types/ai";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   id: string;
@@ -108,6 +109,7 @@ export default function AIAssistant({
   onClose,
   onTriggerAction,
 }: AIAssistantProps) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "intro",
@@ -378,15 +380,11 @@ What specific aspect would you like to explore?`;
     <Card className={containerClasses}>
       <CardHeader className="pb-3 border-b">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Bot className="h-5 w-5 text-primary" />
-          AI Co-Pilot
-          <Badge
+          <Bot className="h-5 w-5 text-primary" />{t("settings.aiCoPilot")}<Badge
             variant="secondary"
             className="ml-auto flex items-center gap-1 text-[0.65rem]"
           >
-            <Sparkles className="h-3 w-3" />
-            Live
-          </Badge>
+            <Sparkles className="h-3 w-3" />{t("ai.live")}</Badge>
           {variant === "floating" && (
             <Button
               variant="ghost"
@@ -433,7 +431,7 @@ What specific aspect would you like to explore?`;
               <div className="mt-3 flex items-start gap-2 text-[0.7rem] text-muted-foreground">
                 <Lightbulb className="h-3 w-3 mt-0.5 text-warning" />
                 <div>
-                  <div className="font-semibold text-xs">AI Insight</div>
+                  <div className="font-semibold text-xs">{t("ai.aiInsight")}</div>
                   <div>{context.insights[0].detail}</div>
                 </div>
               </div>
@@ -522,7 +520,7 @@ What specific aspect would you like to explore?`;
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Ask me anything about your analytics..."
+              placeholder={t("ai.askMeAnythingAboutYourAnalytics")}
               disabled={isLoading}
             />
             <Button

@@ -13,6 +13,7 @@ import {
   RefreshCw,
   TrendingUp,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ClosedLoopSummaryProps {
   loading: boolean;
@@ -27,6 +28,7 @@ export function ClosedLoopSummary({
   state,
   onRefresh,
 }: ClosedLoopSummaryProps) {
+  const { t } = useTranslation();
   const severity = (state?.detection.severityBreakdown as
     | { high: number; medium: number; low: number }
     | undefined) ?? {
@@ -56,12 +58,8 @@ export function ClosedLoopSummary({
       <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Brain className="h-5 w-5 text-primary" />
-            Closed AI Loop
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Continuous flow from detect → interpret → approve → execute → learn.
-          </p>
+            <Brain className="h-5 w-5 text-primary" />{t("ai.closedAiLoop")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("ai.continuousFlowFromDetectInterpretApproveExecuteLearn")}</p>
         </div>
         {onRefresh && (
           <Button
@@ -71,9 +69,7 @@ export function ClosedLoopSummary({
             disabled={loading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-            Refresh
-          </Button>
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />{t("common.refresh")}</Button>
         )}
       </CardHeader>
       <CardContent>
@@ -96,9 +92,7 @@ export function ClosedLoopSummary({
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                Detect
-              </header>
+                <AlertTriangle className="h-4 w-4 text-warning" />{t("ai.detect")}</header>
               <p className="mt-3 text-sm text-muted-foreground">
                 {state.detection.summary}
               </p>
@@ -121,12 +115,8 @@ export function ClosedLoopSummary({
 
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Brain className="h-4 w-4 text-primary" />
-                Interpret
-              </header>
-              <p className="mt-3 text-xs uppercase text-muted-foreground">
-                Risk score
-              </p>
+                <Brain className="h-4 w-4 text-primary" />{t("ai.interpret")}</header>
+              <p className="mt-3 text-xs uppercase text-muted-foreground">{t("ai.riskScore")}</p>
               <Progress value={Math.min(100, riskScore)} className="mt-1" />
               <p className="mt-2 text-sm font-semibold text-foreground">
                 {riskScore}/100
@@ -146,25 +136,17 @@ export function ClosedLoopSummary({
 
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Layers className="h-4 w-4 text-primary" />
-                Approve
-              </header>
+                <Layers className="h-4 w-4 text-primary" />{t("schedule.approve")}</header>
               <div className="mt-3 space-y-2 text-sm">
-                <p className="flex items-center justify-between">
-                  Pending approvals
-                  <span className="font-semibold text-foreground">
+                <p className="flex items-center justify-between">{t("ai.pendingApprovals")}<span className="font-semibold text-foreground">
                     {state.approvals.pending.length}
                   </span>
                 </p>
-                <p className="flex items-center justify-between text-muted-foreground">
-                  Ready to automate
-                  <span className="font-medium text-foreground/80">
+                <p className="flex items-center justify-between text-muted-foreground">{t("ai.readyToAutomate")}<span className="font-medium text-foreground/80">
                     {state.approvals.readyToAutomate.length}
                   </span>
                 </p>
-                <p className="flex items-center justify-between text-muted-foreground">
-                  Manual queue
-                  <span className="font-medium text-foreground/80">
+                <p className="flex items-center justify-between text-muted-foreground">{t("ai.manualQueue")}<span className="font-medium text-foreground/80">
                     {state.approvals.awaitingHuman.length}
                   </span>
                 </p>
@@ -183,9 +165,7 @@ export function ClosedLoopSummary({
                     guardrailStatus === "warning" && "text-warning",
                     guardrailStatus === "blocked" && "text-destructive",
                   )}
-                />
-                Execute
-              </header>
+                />{t("operations.execute")}</header>
               <Badge
                 variant="outline"
                 className={cn(
@@ -221,9 +201,7 @@ export function ClosedLoopSummary({
 
             <section className="rounded-lg border bg-muted/30 p-4">
               <header className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <TrendingUp className="h-4 w-4 text-secondary" />
-                Learn
-              </header>
+                <TrendingUp className="h-4 w-4 text-secondary" />{t("ai.learn")}</header>
               <p className="mt-3 text-sm text-muted-foreground">
                 {state.learning.summary}
               </p>
@@ -250,9 +228,7 @@ export function ClosedLoopSummary({
             </section>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Closed loop insights will appear once operational data is available.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("ai.closedLoopInsightsWillAppearOnceOperationalData")}</p>
         )}
       </CardContent>
     </Card>

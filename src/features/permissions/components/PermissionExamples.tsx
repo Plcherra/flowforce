@@ -14,6 +14,7 @@ import {
   MultiPermissionGuard,
   RouteGuard,
   withPermission,
+  type WithPermissionInjectedProps,
 } from "@/components/permissions";
 import {
   useCan,
@@ -22,11 +23,13 @@ import {
   useAllPermissions,
 } from "@/hooks/useCan";
 import { UserPlus, Settings, Shield, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Examples showing how to use the permission system
  */
 export function PermissionExamples() {
+  const { t } = useTranslation();
   const { can, canAny, canAll, getSource, permissions } = useCan();
   const canManageUsers = useCanCheck("manageUsers");
   const canViewOrEdit = useCanMultiple(
@@ -38,24 +41,20 @@ export function PermissionExamples() {
   return (
     <div className="space-y-6 p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Permission System Examples</h1>
-        <p className="text-muted-foreground mt-2">
-          Demonstrating different ways to use the permission system
-        </p>
+        <h1 className="text-3xl font-bold">{t("permissions.permissionSystemExamples")}</h1>
+        <p className="text-muted-foreground mt-2">{t("permissions.demonstratingDifferentWaysToUseThePermissionSystem")}</p>
       </div>
 
       {/* Hook Usage Examples */}
       <Card>
         <CardHeader>
-          <CardTitle>1. Hook Usage Examples</CardTitle>
-          <CardDescription>
-            Different ways to check permissions using hooks
-          </CardDescription>
+          <CardTitle>{t("permissions.n1HookUsageExamples")}</CardTitle>
+          <CardDescription>{t("permissions.differentWaysToCheckPermissionsUsingHooks")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold mb-2">useCan Hook</h4>
+              <h4 className="font-semibold mb-2">{t("permissions.usecanHook")}</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Badge variant={can("manageUsers") ? "default" : "secondary"}>
@@ -79,7 +78,7 @@ export function PermissionExamples() {
             </div>
 
             <div>
-              <h4 className="font-semibold mb-2">Specialized Hooks</h4>
+              <h4 className="font-semibold mb-2">{t("permissions.specializedHooks")}</h4>
               <div className="space-y-2">
                 <Badge variant={canManageUsers ? "default" : "secondary"}>
                   useCanCheck: {canManageUsers ? "Yes" : "No"}
@@ -108,35 +107,27 @@ export function PermissionExamples() {
       {/* Permission Buttons */}
       <Card>
         <CardHeader>
-          <CardTitle>2. Permission Buttons</CardTitle>
-          <CardDescription>
-            Buttons that respect permissions with different behaviors
-          </CardDescription>
+          <CardTitle>{t("permissions.n2PermissionButtons")}</CardTitle>
+          <CardDescription>{t("permissions.buttonsThatRespectPermissionsWithDifferentBehaviors")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
             <PermissionButton permission="manageUsers" variant="default">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add User
-            </PermissionButton>
+              <UserPlus className="h-4 w-4 mr-2" />{t("employees.addUser")}</PermissionButton>
 
             <PermissionButton
               permission="systemSettings"
               variant="outline"
               hideWhenDenied={true}
             >
-              <Settings className="h-4 w-4 mr-2" />
-              System Settings
-            </PermissionButton>
+              <Settings className="h-4 w-4 mr-2" />{t("navigation.systemSettings")}</PermissionButton>
 
             <MultiPermissionButton
               permissions={["viewTeamProfiles", "editTeamProfiles"]}
               strategy="any"
               variant="secondary"
             >
-              <Users className="h-4 w-4 mr-2" />
-              Team Management
-            </MultiPermissionButton>
+              <Users className="h-4 w-4 mr-2" />{t("common.positionManagement")}</MultiPermissionButton>
 
             <MultiPermissionButton
               permissions={["manageUsers", "systemSettings"]}
@@ -144,9 +135,7 @@ export function PermissionExamples() {
               variant="destructive"
               tooltipMessage="You need both User Management AND System Settings permissions"
             >
-              <Shield className="h-4 w-4 mr-2" />
-              Admin Panel
-            </MultiPermissionButton>
+              <Shield className="h-4 w-4 mr-2" />{t("permissions.adminPanel")}</MultiPermissionButton>
           </div>
         </CardContent>
       </Card>
@@ -154,20 +143,18 @@ export function PermissionExamples() {
       {/* Permission Guards */}
       <Card>
         <CardHeader>
-          <CardTitle>3. Permission Guards</CardTitle>
-          <CardDescription>
-            Conditional rendering based on permissions
-          </CardDescription>
+          <CardTitle>{t("permissions.n3PermissionGuards")}</CardTitle>
+          <CardDescription>{t("permissions.conditionalRenderingBasedOnPermissions")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <PermissionGuard
             permission="manageUsers"
             fallback={
-              <p className="text-muted-foreground">You cannot manage users</p>
+              <p className="text-muted-foreground">{t("permissions.youCannotManageUsers")}</p>
             }
           >
             <div className="p-4 bg-success-muted border border-success/40 rounded-lg">
-              <p className="text-success">✓ You can manage users!</p>
+              <p className="text-success">{t("permissions.youCanManageUsers")}</p>
             </div>
           </PermissionGuard>
 
@@ -175,15 +162,11 @@ export function PermissionExamples() {
             permissions={["viewTeamProfiles", "editTeamProfiles"]}
             strategy="any"
             fallback={
-              <p className="text-muted-foreground">
-                You cannot view or edit team profiles
-              </p>
+              <p className="text-muted-foreground">{t("permissions.youCannotViewOrEditTeamProfiles")}</p>
             }
           >
             <div className="p-4 bg-primary/10 border border-primary/40 rounded-lg">
-              <p className="text-primary">
-                ✓ You can work with team profiles!
-              </p>
+              <p className="text-primary">{t("permissions.youCanWorkWithTeamProfiles")}</p>
             </div>
           </MultiPermissionGuard>
 
@@ -191,13 +174,11 @@ export function PermissionExamples() {
             permissions={["manageUsers", "systemSettings", "viewAIInsights"]}
             strategy="all"
             fallback={
-              <p className="text-muted-foreground">
-                You need all admin permissions
-              </p>
+              <p className="text-muted-foreground">{t("permissions.youNeedAllAdminPermissions")}</p>
             }
           >
             <div className="p-4 bg-secondary/10 border border-secondary/40 rounded-lg">
-              <p className="text-secondary">✓ You have full admin access!</p>
+              <p className="text-secondary">{t("permissions.youHaveFullAdminAccess")}</p>
             </div>
           </MultiPermissionGuard>
         </CardContent>
@@ -206,10 +187,8 @@ export function PermissionExamples() {
       {/* HOC Example */}
       <Card>
         <CardHeader>
-          <CardTitle>4. Higher-Order Component (HOC)</CardTitle>
-          <CardDescription>
-            Using withPermission HOC to wrap components
-          </CardDescription>
+          <CardTitle>{t("permissions.n4HigherOrderComponentHoc")}</CardTitle>
+          <CardDescription>{t("permissions.usingWithpermissionHocToWrapComponents")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ProtectedComponent />
@@ -220,10 +199,8 @@ export function PermissionExamples() {
       {/* All Permissions Display */}
       <Card>
         <CardHeader>
-          <CardTitle>5. All Permissions Status</CardTitle>
-          <CardDescription>
-            Complete overview of current user permissions
-          </CardDescription>
+          <CardTitle>{t("permissions.n5AllPermissionsStatus")}</CardTitle>
+          <CardDescription>{t("permissions.completeOverviewOfCurrentUserPermissions")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -253,15 +230,17 @@ export function PermissionExamples() {
 }
 
 // Example components using withPermission HOC
-const BaseProtectedComponent: React.FC<any> = ({
+function BaseProtectedComponent({
   hasPermission,
   permissionSource,
   canCheck,
-}) => (
+}: WithPermissionInjectedProps) {
+  const { t } = useTranslation();
+  return (
   <div
     className={`p-4 border rounded-lg ${hasPermission ? "bg-success-muted border-success/40" : "bg-destructive/10 border-destructive/40"}`}
   >
-    <h4 className="font-semibold">Protected Component</h4>
+    <h4 className="font-semibold">{t("permissions.protectedComponent")}</h4>
     <p>Permission Status: {hasPermission ? "✓ Allowed" : "✗ Denied"}</p>
     <p>Source: {permissionSource}</p>
     <p>
@@ -270,24 +249,31 @@ const BaseProtectedComponent: React.FC<any> = ({
     </p>
   </div>
 );
+}
 
 const ProtectedComponent = withPermission({
   permissionKey: "manageUsers",
   renderWhenDenied: true,
 })(BaseProtectedComponent);
 
-const BaseConditionalComponent: React.FC<any> = () => (
+function BaseConditionalComponent() {
+  const { t } = useTranslation();
+  return (
   <div className="p-4 bg-primary/10 border border-primary/40 rounded-lg">
-    <h4 className="font-semibold">Conditional Component</h4>
-    <p>This only shows when you have systemSettings permission</p>
+    <h4 className="font-semibold">{t("permissions.conditionalComponent")}</h4>
+    <p>{t("permissions.thisOnlyShowsWhenYouHaveSystemsettingsPermission")}</p>
   </div>
 );
+}
+
+function SystemSettingsHidden() {
+  const { t } = useTranslation();
+  return (
+    <p className="text-muted-foreground">{t("permissions.systemSettingsComponentHiddenNoPermission")}</p>
+  );
+}
 
 const ConditionalComponent = withPermission({
   permissionKey: "systemSettings",
-  fallback: (
-    <p className="text-muted-foreground">
-      System settings component hidden - no permission
-    </p>
-  ),
+  fallback: <SystemSettingsHidden />,
 })(BaseConditionalComponent);

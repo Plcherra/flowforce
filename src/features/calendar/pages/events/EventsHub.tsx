@@ -22,8 +22,10 @@ import {
   getSupabaseSetupMessage,
   isMissingTableError,
 } from "@/shared/utils/supabaseErrors";
+import { useTranslation } from "react-i18next";
 
 export default function EventsHubPage() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -117,10 +119,8 @@ export default function EventsHubPage() {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Calendar</h1>
-                <p className="text-sm text-muted-foreground">
-                  Schedule meetings, events, and vendor visits in one place
-                </p>
+                <h1 className="text-xl font-bold">{t("common.calendar")}</h1>
+                <p className="text-sm text-muted-foreground">{t("calendar.scheduleMeetingsEventsAndVendorVisitsInOne")}</p>
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -128,7 +128,7 @@ export default function EventsHubPage() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-10"
-                  placeholder="Search upcoming events"
+                  placeholder={t("calendar.searchUpcomingEvents")}
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
@@ -146,9 +146,7 @@ export default function EventsHubPage() {
                   size={isMobile ? "sm" : "default"}
                   onClick={() => setVendorDialogOpen(true)}
                 >
-                  <Wrench className="mr-2 h-4 w-4" />
-                  Vendor Visit
-                </Button>
+                  <Wrench className="mr-2 h-4 w-4" />{t("schedule.vendorVisit")}</Button>
               </div>
             </div>
           </div>
@@ -159,19 +157,16 @@ export default function EventsHubPage() {
             <section className="space-y-4 lg:col-span-2">
               {calendarSetupMissing ? (
                 <FeatureSetupRequiredState
-                  title="Calendar module is not fully set up yet"
+                  title={t("calendar.calendarModuleIsNotFullySetUpYet")}
                   description={getSupabaseSetupMessage(loadError, "Calendar")}
                   icon={<CalendarDays className="h-5 w-5" />}
                   setupDescription={
-                    <>
-                      Missing table: <code>calendar_events_full</code>. Restore
-                      the calendar migrations, then refresh this page.
-                    </>
+                    <>{t("calendar.missingTable")}<code>{t("schedule.calendarEventsFull")}</code>{t("calendar.restoreTheCalendarMigrationsThenRefreshThisPage")}</>
                   }
                 />
               ) : loadError ? (
                 <FeatureErrorState
-                  title="Unable to load calendar"
+                  title={t("calendar.unableToLoadCalendar")}
                   description={loadError}
                 />
               ) : (
@@ -186,18 +181,14 @@ export default function EventsHubPage() {
             <aside className="space-y-4">
               <Card>
                 <CardHeader className="px-4 py-3">
-                  <h3 className="text-sm font-medium">Upcoming</h3>
+                  <h3 className="text-sm font-medium">{t("tasks.upcoming")}</h3>
                 </CardHeader>
                 <CardContent className="space-y-2 p-3">
                   {isLoading && (
-                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-                      Loading events…
-                    </div>
+                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">{t("calendar.loadingEvents")}</div>
                   )}
                   {!isLoading && upcoming.length === 0 && (
-                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-                      No upcoming items. Use Add to calendar to schedule one.
-                    </div>
+                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">{t("calendar.noUpcomingItemsUseAddToCalendarTo")}</div>
                   )}
                   {upcoming.map((event) => (
                     <button

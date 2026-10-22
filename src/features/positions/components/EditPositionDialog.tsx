@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { usePositions } from "@/hooks/usePositions";
+import { useTranslation } from "react-i18next";
 
 interface Position {
   id: string;
@@ -59,6 +60,7 @@ export default function EditPositionDialog({
   position,
   onClose,
 }: EditPositionDialogProps) {
+  const { t } = useTranslation();
   const { updatePosition } = usePositions();
 
   const form = useForm<FormValues>({
@@ -98,7 +100,7 @@ export default function EditPositionDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit Position</DialogTitle>
+          <DialogTitle>{t("onboarding.roleSetup.editPosition")}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -109,10 +111,10 @@ export default function EditPositionDialog({
               rules={{ required: "Position name is required" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Position Name</FormLabel>
+                  <FormLabel>{t("onboarding.positionName")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Runner, Cashier, FOH Supervisor"
+                      placeholder={t("positions.eGRunnerCashierFohSupervisor")}
                       {...field}
                     />
                   </FormControl>
@@ -127,11 +129,11 @@ export default function EditPositionDialog({
               rules={{ required: "Role is required" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role Level</FormLabel>
+                  <FormLabel>{t("positions.roleLevel")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select role level" />
+                        <SelectValue placeholder={t("positions.selectRoleLevel")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -152,10 +154,10 @@ export default function EditPositionDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("registration.companyInfo.description")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the responsibilities and duties of this position"
+                      placeholder={t("positions.describeTheResponsibilitiesAndDutiesOfThisPosition")}
                       className="min-h-[100px]"
                       {...field}
                     />
@@ -166,9 +168,7 @@ export default function EditPositionDialog({
             />
 
             <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
+              <Button type="button" variant="outline" onClick={handleClose}>{t("common.cancel")}</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting
                   ? "Updating..."

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface XPBarMilestone {
   label: string;
@@ -35,6 +36,7 @@ export function XPBar({
   loading,
   className,
 }: XPBarProps) {
+  const { t } = useTranslation();
   const { progress, xpToGo, baseline } = useMemo(() => {
     const min = previousMilestone?.xpRequired ?? 0;
     const max = Math.max(nextMilestone.xpRequired, min + 1);
@@ -70,9 +72,7 @@ export function XPBar({
     <Card className={cn("overflow-hidden border border-primary/20", className)}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Sparkles className="h-4 w-4 text-primary" />
-          XP Progress
-        </CardTitle>
+          <Sparkles className="h-4 w-4 text-primary" />{t("gamification.xpProgress")}</CardTitle>
         <CardDescription className="text-xs">
           {previousMilestone ? `${previousMilestone.label} · ` : null}
           Next milestone unlocks <strong>{nextMilestone.label}</strong>
@@ -82,7 +82,7 @@ export function XPBar({
         <div>
           <div className="text-3xl font-semibold text-foreground">
             {currentXP.toLocaleString()}{" "}
-            <span className="text-base text-muted-foreground">XP</span>
+            <span className="text-base text-muted-foreground">{t("analytics.xp")}</span>
           </div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             Need {xpToGo.toLocaleString()} XP to reach {nextMilestone.label}

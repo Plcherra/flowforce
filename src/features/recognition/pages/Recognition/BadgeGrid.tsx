@@ -8,6 +8,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface BadgeCard {
   id: string;
@@ -24,6 +25,7 @@ interface BadgeGridProps {
 }
 
 export function BadgeGrid({ badges, loading }: BadgeGridProps) {
+  const { t } = useTranslation();
   if (loading && badges.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -52,15 +54,10 @@ export function BadgeGrid({ badges, loading }: BadgeGridProps) {
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Trophy className="h-4 w-4 text-primary" />
-            Recognition badges
-          </CardTitle>
-          <CardDescription>No badges unlocked yet.</CardDescription>
+            <Trophy className="h-4 w-4 text-primary" />{t("recognition.recognitionBadges")}</CardTitle>
+          <CardDescription>{t("recognition.noBadgesUnlockedYet")}</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Recognitions award XP automatically. Once Copilot detects progress
-          toward a badge it appears here.
-        </CardContent>
+        <CardContent className="text-sm text-muted-foreground">{t("recognition.recognitionsAwardXpAutomaticallyOnceCopilotDetectsProgress")}</CardContent>
       </Card>
     );
   }
@@ -69,12 +66,8 @@ export function BadgeGrid({ badges, loading }: BadgeGridProps) {
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Trophy className="h-4 w-4 text-primary" />
-          Recognition badges
-        </CardTitle>
-        <CardDescription>
-          Progress towards automation-driven rewards
-        </CardDescription>
+          <Trophy className="h-4 w-4 text-primary" />{t("recognition.recognitionBadges")}</CardTitle>
+        <CardDescription>{t("recognition.progressTowardsAutomationDrivenRewards")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-2">
         {badges.map((badge) => {

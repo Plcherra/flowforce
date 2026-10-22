@@ -16,6 +16,7 @@ import { Schedule } from "@/types/common";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useCreateVendorVisit } from "@/features/calendar/hooks/useCreateVendorVisit";
+import { useTranslation } from "react-i18next";
 
 interface CreateVendorVisitDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export function CreateVendorVisitDialog({
   onOpenChange,
   onCreated,
 }: CreateVendorVisitDialogProps) {
+  const { t } = useTranslation();
   const { shifts } = useScheduling();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -194,40 +196,40 @@ export function CreateVendorVisitDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create Vendor Visit</DialogTitle>
+          <DialogTitle>{t("calendar.createVendorVisit")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>Title</Label>
+            <Label>{t("dashboard.title")}</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div>
-            <Label>Vendor Name</Label>
+            <Label>{t("calendar.vendorName")}</Label>
             <Input
               value={vendorName}
               onChange={(e) => setVendorName(e.target.value)}
-              placeholder="e.g., ACME Electric"
+              placeholder={t("calendar.eGAcmeElectric")}
             />
           </div>
           <div>
-            <Label>Service Type</Label>
+            <Label>{t("calendar.serviceType")}</Label>
             <Input
               value={serviceType}
               onChange={(e) => setServiceType(e.target.value)}
-              placeholder="Electrical, HVAC, etc."
+              placeholder={t("calendar.electricalHvacEtc")}
             />
           </div>
           <div>
-            <Label>Location</Label>
+            <Label>{t("schedule.location")}</Label>
             <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Site/Area"
+              placeholder={t("calendar.siteArea")}
             />
           </div>
           <div>
-            <Label>Start</Label>
+            <Label>{t("schedule.start")}</Label>
             <Input
               type="datetime-local"
               value={start}
@@ -235,7 +237,7 @@ export function CreateVendorVisitDialog({
             />
           </div>
           <div>
-            <Label>End</Label>
+            <Label>{t("schedule.end")}</Label>
             <Input
               type="datetime-local"
               value={end}
@@ -243,7 +245,7 @@ export function CreateVendorVisitDialog({
             />
           </div>
           <div className="md:col-span-2">
-            <Label>Description</Label>
+            <Label>{t("registration.companyInfo.description")}</Label>
             <Textarea
               rows={3}
               value={description}
@@ -253,14 +255,10 @@ export function CreateVendorVisitDialog({
         </div>
 
         <div className="mt-4">
-          <div className="text-sm font-medium mb-2">
-            Suggested Shifts (time/location overlap)
-          </div>
+          <div className="text-sm font-medium mb-2">{t("calendar.suggestedShiftsTimeLocationOverlap")}</div>
           <div className="max-h-48 overflow-auto border rounded-md p-2 space-y-2">
             {suggestions.length === 0 && (
-              <div className="text-xs text-muted-foreground px-2 py-4">
-                No matching shifts. Adjust time or location to find candidates.
-              </div>
+              <div className="text-xs text-muted-foreground px-2 py-4">{t("calendar.noMatchingShiftsAdjustTimeOrLocationTo")}</div>
             )}
             {suggestions.map((sh) => (
               <label key={sh.id} className="flex items-center gap-2 text-sm">
@@ -280,15 +278,11 @@ export function CreateVendorVisitDialog({
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
           <Button
             onClick={handleCreate}
             disabled={!vendorName || !title || !start || !end}
-          >
-            Create Visit
-          </Button>
+          >{t("calendar.createVisit")}</Button>
         </div>
       </DialogContent>
     </Dialog>

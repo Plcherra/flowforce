@@ -7,6 +7,7 @@ import type {
 import { RecognitionHeader } from "./RecognitionHeader";
 import { BadgeGrid, type BadgeCard } from "./BadgeGrid";
 import { RecognitionFeed } from "./RecognitionFeed";
+import { useTranslation } from "react-i18next";
 
 type BadgeBlueprint = {
   id: string;
@@ -74,6 +75,7 @@ function buildBadgeCards(recognitions: RecognitionRecord[]): BadgeCard[] {
 }
 
 export function RecognitionPage() {
+  const { t } = useTranslation();
   const { recognitions, loading, syncing, error, refresh, syncAutomation } =
     useRecognitions({ lookbackDays: 90 });
   const badges = buildBadgeCards(recognitions);
@@ -92,7 +94,7 @@ export function RecognitionPage() {
 
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Unable to load recognitions</AlertTitle>
+          <AlertTitle>{t("recognition.unableToLoadRecognitions")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 export interface XpTrendEntry {
   id: string;
@@ -33,6 +34,7 @@ export function XPTrendsSection({
   leaderboard,
   loading,
 }: XPTrendsSectionProps) {
+  const { t } = useTranslation();
   const total = Object.values(xpBySource).reduce(
     (sum, value) => sum + value,
     0,
@@ -61,13 +63,10 @@ export function XPTrendsSection({
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">XP trends</CardTitle>
-          <CardDescription>No leaderboard entries yet.</CardDescription>
+          <CardTitle className="text-base">{t("performance.xpTrends")}</CardTitle>
+          <CardDescription>{t("performance.noLeaderboardEntriesYet")}</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Once employees start completing tasks, goals, or training, XP trends
-          will appear here.
-        </CardContent>
+        <CardContent className="text-sm text-muted-foreground">{t("performance.onceEmployeesStartCompletingTasksGoalsOrTraining")}</CardContent>
       </Card>
     );
   }
@@ -75,10 +74,8 @@ export function XPTrendsSection({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">XP trends</CardTitle>
-        <CardDescription>
-          Breakdown of points earned this period
-        </CardDescription>
+        <CardTitle className="text-base">{t("performance.xpTrends")}</CardTitle>
+        <CardDescription>{t("performance.breakdownOfPointsEarnedThisPeriod")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-3">

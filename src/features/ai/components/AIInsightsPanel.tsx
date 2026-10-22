@@ -32,6 +32,7 @@ import { ClosedLoopSummary } from "@/features/ai/components/ClosedLoopSummary";
 import { useClosedLoopState } from "@/hooks/useClosedLoopState";
 import { cn } from "@/lib/utils";
 import { logger } from "@/utils/logger";
+import { useTranslation } from "react-i18next";
 
 interface AIInsightsPanelProps {
   type: "dashboard" | "scheduler" | "expenses" | "reports";
@@ -44,6 +45,7 @@ export default function AIInsightsPanel({
   context,
   className,
 }: AIInsightsPanelProps) {
+  const { t } = useTranslation();
   const { can } = useCan();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -213,23 +215,16 @@ export default function AIInsightsPanel({
         <Card className="h-full border-dashed">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Lock className="h-4 w-4 text-muted-foreground" />
-              AI Insights restricted
-            </CardTitle>
-            <CardDescription>
-              Request access from an admin to view AI recommendations and
-              closed-loop analytics.
-            </CardDescription>
+              <Lock className="h-4 w-4 text-muted-foreground" />{t("ai.aiInsightsRestricted")}</CardTitle>
+            <CardDescription>{t("ai.requestAccessFromAnAdminToViewAi")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
-            <p>Your current role is missing the `viewAIInsights` permission.</p>
+            <p>{t("ai.yourCurrentRoleIsMissingTheViewaiinsightsPermission")}</p>
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 onClick={() => navigate("/settings/permissions")}
-              >
-                View permissions
-              </Button>
+              >{t("ai.viewPermissions")}</Button>
               <Button
                 size="sm"
                 variant="outline"
@@ -240,9 +235,7 @@ export default function AIInsightsPanel({
                       "We let your workspace admins know you need AI insights.",
                   })
                 }
-              >
-                Notify admin
-              </Button>
+              >{t("ai.notifyAdmin")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -275,25 +268,25 @@ export default function AIInsightsPanel({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
                 <DropdownMenuItem onClick={() => setRefreshInterval(0)}>
-                  <span className="flex-1">Manual</span>
+                  <span className="flex-1">{t("resources.manual")}</span>
                   {refreshInterval === 0 && (
                     <div className="w-2 h-2 bg-primary rounded-full" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRefreshInterval(30)}>
-                  <span className="flex-1">30 seconds</span>
+                  <span className="flex-1">{t("ai.n30Seconds")}</span>
                   {refreshInterval === 30 && (
                     <div className="w-2 h-2 bg-primary rounded-full" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRefreshInterval(60)}>
-                  <span className="flex-1">1 minute</span>
+                  <span className="flex-1">{t("ai.n1Minute")}</span>
                   {refreshInterval === 60 && (
                     <div className="w-2 h-2 bg-primary rounded-full" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setRefreshInterval(300)}>
-                  <span className="flex-1">5 minutes</span>
+                  <span className="flex-1">{t("tasks.text5Minutes")}</span>
                   {refreshInterval === 300 && (
                     <div className="w-2 h-2 bg-primary rounded-full" />
                   )}
@@ -331,9 +324,7 @@ export default function AIInsightsPanel({
                 className="p-3 bg-primary/5 border border-primary/20 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-primary">
-                    Performance
-                  </span>
+                  <span className="text-xs font-medium text-primary">{t("common.performance")}</span>
                   <Badge variant="secondary" className="text-xs">
                     88%
                   </Badge>
@@ -351,9 +342,7 @@ export default function AIInsightsPanel({
                 className="p-3 bg-success-muted border border-success/40 rounded-lg hover:bg-success/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-success">
-                    Efficiency
-                  </span>
+                  <span className="text-xs font-medium text-success">{t("ai.efficiency")}</span>
                   <Badge variant="secondary" className="text-xs">
                     92%
                   </Badge>
@@ -371,14 +360,12 @@ export default function AIInsightsPanel({
                 className="p-3 bg-warning-muted border border-warning/40 rounded-lg hover:bg-warning/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-warning-foreground">
-                    Areas to Improve
-                  </span>
+                  <span className="text-xs font-medium text-warning-foreground">{t("ai.areasToImprove")}</span>
                   <Badge variant="outline" className="text-xs">
                     3
                   </Badge>
                 </div>
-                <p className="text-xs text-warning mt-1">Focus needed</p>
+                <p className="text-xs text-warning mt-1">{t("ai.focusNeeded")}</p>
               </button>
 
               <button
@@ -386,14 +373,12 @@ export default function AIInsightsPanel({
                 className="p-3 bg-primary/10 border border-primary/40 rounded-lg hover:bg-primary/20 transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-primary">
-                    Trending
-                  </span>
+                  <span className="text-xs font-medium text-primary">{t("ai.trending")}</span>
                   <Badge variant="secondary" className="text-xs">
                     ↗ +5%
                   </Badge>
                 </div>
-                <p className="text-xs text-primary mt-1">This week</p>
+                <p className="text-xs text-primary mt-1">{t("schedule.thisWeek")}</p>
               </button>
             </div>
 
@@ -401,21 +386,15 @@ export default function AIInsightsPanel({
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-success rounded-full"></div>
-                <span className="text-muted-foreground">
-                  Schedule adherence is strong
-                </span>
+                <span className="text-muted-foreground">{t("ai.scheduleAdherenceIsStrong")}</span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-warning rounded-full"></div>
-                <span className="text-muted-foreground">
-                  Task completion could improve
-                </span>
+                <span className="text-muted-foreground">{t("ai.taskCompletionCouldImprove")}</span>
               </div>
               <div className="flex items-center space-x-2 text-xs">
                 <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-muted-foreground">
-                  Team productivity is on track
-                </span>
+                <span className="text-muted-foreground">{t("ai.teamProductivityIsOnTrack")}</span>
               </div>
             </div>
 
@@ -431,9 +410,7 @@ export default function AIInsightsPanel({
               size="sm"
               className="w-full text-xs h-7"
               onClick={handleViewDetailedAnalysis}
-            >
-              View Detailed Analysis
-            </Button>
+            >{t("ai.viewDetailedAnalysis")}</Button>
 
             {lastUpdated && (
               <div className="flex items-center justify-center pt-2 border-t border-border/50">

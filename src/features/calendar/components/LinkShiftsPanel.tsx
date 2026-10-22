@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useShiftsForDate } from "@/hooks/useShiftsForDate";
+import { useTranslation } from "react-i18next";
 
 interface LinkShiftsPanelProps {
   eventDate: string;
@@ -29,6 +30,7 @@ export function LinkShiftsPanel({
   disabled = false,
   busy = false,
 }: LinkShiftsPanelProps) {
+  const { t } = useTranslation();
   const { shifts, staff, loading } = useShiftsForDate(eventDate, storeId);
 
   const linkedSet = useMemo(() => new Set(linkedShiftIds), [linkedShiftIds]);
@@ -44,24 +46,18 @@ export function LinkShiftsPanel({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">
-          Shifts on this day
-        </h3>
+        <h3 className="text-sm font-semibold text-foreground">{t("calendar.shiftsOnThisDay")}</h3>
         <Badge variant="outline" className="text-[11px]">
           On duty: {staff.length}
         </Badge>
       </div>
 
       {loading && (
-        <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-          Loading shifts…
-        </div>
+        <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">{t("calendar.loadingShifts")}</div>
       )}
 
       {!loading && shifts.length === 0 && (
-        <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
-          No scheduled shifts match this date.
-        </div>
+        <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">{t("calendar.noScheduledShiftsMatchThisDate")}</div>
       )}
 
       <div className="space-y-2">
@@ -95,7 +91,7 @@ export function LinkShiftsPanel({
               </div>
               <div className="text-right text-xs text-muted-foreground">
                 <p>{shift.assignments?.length ?? 0} assigned</p>
-                {checked && <span className="text-primary">Linked</span>}
+                {checked && <span className="text-primary">{t("calendar.linked")}</span>}
               </div>
             </label>
           );
@@ -103,7 +99,7 @@ export function LinkShiftsPanel({
       </div>
 
       {busy && (
-        <div className="text-xs text-muted-foreground">Saving changes…</div>
+        <div className="text-xs text-muted-foreground">{t("calendar.savingChanges")}</div>
       )}
     </div>
   );

@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useTranslation } from "react-i18next";
 
 interface PositionManagementDialogProps {
   children?: React.ReactNode;
@@ -35,6 +36,7 @@ interface PositionFormData {
 export function PositionManagementDialog({
   children,
 }: PositionManagementDialogProps) {
+  const { t } = useTranslation();
   const {
     positions,
     loading,
@@ -117,16 +119,12 @@ export function PositionManagementDialog({
       <DialogTrigger asChild>
         {children || (
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Manage Positions
-          </Button>
+            <Plus className="h-4 w-4 mr-2" />{t("positions.managePositions")}</Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
-            Position Management
-          </DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">{t("positions.positionManagement")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
@@ -138,25 +136,21 @@ export function PositionManagementDialog({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name" className="text-sm">
-                  Position Name
-                </Label>
+                <Label htmlFor="name" className="text-sm">{t("onboarding.positionName")}</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  placeholder="e.g., Barista, Cook, Manager"
+                  placeholder={t("positions.eGBaristaCookManager")}
                   required
                   className="text-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="description" className="text-sm">
-                  Description
-                </Label>
+                <Label htmlFor="description" className="text-sm">{t("registration.companyInfo.description")}</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -166,16 +160,14 @@ export function PositionManagementDialog({
                       description: e.target.value,
                     }))
                   }
-                  placeholder="Brief description of the position"
+                  placeholder={t("positions.briefDescriptionOfThePosition")}
                   rows={3}
                   className="text-sm"
                 />
               </div>
 
               <div>
-                <Label htmlFor="role" className="text-sm">
-                  Role Level
-                </Label>
+                <Label htmlFor="role" className="text-sm">{t("positions.roleLevel")}</Label>
                 <select
                   id="role"
                   value={formData.role}
@@ -191,15 +183,15 @@ export function PositionManagementDialog({
                   }
                   className="w-full p-2 border border-input rounded-md bg-background text-sm"
                 >
-                  <option value="staff">Staff</option>
-                  <option value="supervisor">Supervisor</option>
-                  <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
+                  <option value="staff">{t("schedule.staff")}</option>
+                  <option value="supervisor">{t("learning.roleSupervisor")}</option>
+                  <option value="manager">{t("learning.roleManager")}</option>
+                  <option value="admin">{t("common.admin")}</option>
                 </select>
               </div>
 
               <div>
-                <Label className="text-sm">Position Color</Label>
+                <Label className="text-sm">{t("positions.positionColor")}</Label>
                 <div className="flex items-center gap-2 mt-2">
                   <Popover>
                     <PopoverTrigger asChild>
@@ -249,9 +241,7 @@ export function PositionManagementDialog({
                     variant="outline"
                     onClick={resetForm}
                     className="text-sm"
-                  >
-                    Cancel
-                  </Button>
+                  >{t("common.cancel")}</Button>
                 )}
               </div>
             </form>
@@ -259,18 +249,12 @@ export function PositionManagementDialog({
 
           {/* Positions List */}
           <div className="space-y-4">
-            <h3 className="text-base sm:text-lg font-semibold">
-              Existing Positions
-            </h3>
+            <h3 className="text-base sm:text-lg font-semibold">{t("positions.existingPositions")}</h3>
 
             {loading ? (
-              <div className="text-sm text-muted-foreground">
-                Loading positions...
-              </div>
+              <div className="text-sm text-muted-foreground">{t("positions.loadingPositions")}</div>
             ) : positions.length === 0 ? (
-              <div className="text-sm text-muted-foreground">
-                No positions created yet
-              </div>
+              <div className="text-sm text-muted-foreground">{t("positions.noPositionsCreatedYet")}</div>
             ) : (
               <div className="space-y-2 max-h-80 sm:max-h-96 overflow-y-auto">
                 {positions.map((position) => (

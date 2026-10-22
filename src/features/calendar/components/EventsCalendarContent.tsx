@@ -19,6 +19,7 @@ import { SchedulingCalendar } from "@/features/scheduling/components/SchedulingC
 import { CreateEventDialog } from "@/features/calendar/components/CreateEventDialog";
 import { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";
 import { NetworkStatusBanner } from "@/features/calendar/components/NetworkStatusBanner";
+import { useTranslation } from "react-i18next";
 
 const formatRange = (startIso: string, endIso?: string) => {
   const start = new Date(startIso);
@@ -39,6 +40,7 @@ const formatRange = (startIso: string, endIso?: string) => {
 };
 
 export function EventsCalendarContent() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
@@ -95,10 +97,8 @@ export function EventsCalendarContent() {
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Calendar</h1>
-                <p className="text-sm text-muted-foreground">
-                  Schedule meetings, events, and vendor visits in one place.
-                </p>
+                <h1 className="text-xl font-bold">{t("common.calendar")}</h1>
+                <p className="text-sm text-muted-foreground">{t("calendar.scheduleMeetingsEventsAndVendorVisitsInOne2")}</p>
               </div>
             </div>
 
@@ -106,10 +106,10 @@ export function EventsCalendarContent() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search events..."
+                  placeholder={t("sections.searchEvents")}
                   value={search}
                   onChange={handleSearchChange}
-                  aria-label="Search events"
+                  aria-label={t("calendar.searchEvents")}
                   className="w-64 pl-10"
                 />
               </div>
@@ -125,9 +125,7 @@ export function EventsCalendarContent() {
                 size={isMobile ? "sm" : "default"}
                 onClick={handleOpenVendorDialog}
               >
-                <Wrench className="mr-2 h-4 w-4" />
-                Vendor visit
-              </Button>
+                <Wrench className="mr-2 h-4 w-4" />{t("calendar.vendorVisit")}</Button>
             </div>
           </div>
         </div>
@@ -146,7 +144,7 @@ export function EventsCalendarContent() {
               <CardHeader className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3">
                   <CalendarDays className="h-4 w-4" />
-                  <h3 className="text-sm font-medium">Event Calendar</h3>
+                  <h3 className="text-sm font-medium">{t("sections.eventCalendar")}</h3>
                 </div>
               </CardHeader>
               <CardContent className="p-4 space-y-4">
@@ -176,9 +174,7 @@ export function EventsCalendarContent() {
           <div className="space-y-4">
             <Card>
               <CardHeader className="px-4 py-3">
-                <CardTitle className="text-sm font-medium">
-                  Upcoming Events
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">{t("sections.upcomingEvents")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 p-4">
                 {loading ? (
@@ -195,9 +191,7 @@ export function EventsCalendarContent() {
                     ))}
                   </div>
                 ) : upcoming.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No upcoming events match your filters.
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("calendar.noUpcomingEventsMatchYourFilters")}</p>
                 ) : (
                   <div className="space-y-3">
                     {upcoming.map((event) => (
@@ -232,9 +226,7 @@ export function EventsCalendarContent() {
 
             <Card>
               <CardHeader className="px-4 py-3 sm:px-6">
-                <CardTitle className="text-sm font-medium">
-                  Quick Actions
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">{t("sections.quickActions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 p-4 sm:p-6">
                 <Button
@@ -242,27 +234,21 @@ export function EventsCalendarContent() {
                   className="w-full justify-start gap-2"
                   onClick={handleOpenSessionDialog}
                 >
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  Add to calendar
-                </Button>
+                  <CalendarDays className="h-4 w-4 text-muted-foreground" />{t("calendar.addToCalendar")}</Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-2"
                   disabled
-                  title="Google Calendar import is coming soon."
+                  title={t("calendar.googleCalendarImportIsComingSoon")}
                 >
-                  <CloudUpload className="h-4 w-4 text-muted-foreground" />
-                  Import from Google Calendar
-                </Button>
+                  <CloudUpload className="h-4 w-4 text-muted-foreground" />{t("sections.importFromGoogleCalendar")}</Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-2"
                   disabled
-                  title="Exporting calendars will be available soon."
+                  title={t("calendar.exportingCalendarsWillBeAvailableSoon")}
                 >
-                  <CloudDownload className="h-4 w-4 text-muted-foreground" />
-                  Export calendar
-                </Button>
+                  <CloudDownload className="h-4 w-4 text-muted-foreground" />{t("sections.exportCalendar")}</Button>
               </CardContent>
             </Card>
           </div>

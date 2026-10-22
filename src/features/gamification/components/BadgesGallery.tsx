@@ -15,6 +15,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 export interface GamificationBadge {
   id: string;
@@ -41,9 +42,12 @@ export function BadgesGallery({
   loading,
   columns = 3,
   className,
-  title = "Badges & Milestones",
-  description = "Unlock new achievements as XP accumulates across modules.",
+  title,
+  description,
 }: BadgesGalleryProps) {
+  const { t } = useTranslation();
+  const heading = title ?? t("gamification.badgesMilestones");
+  const descriptionText = description ?? t("gamification.unlockNewAchievementsAsXpAccumulatesAcrossModules");
   const columnClass = cn(
     "grid grid-cols-2 gap-4 sm:grid-cols-3",
     {
@@ -78,16 +82,13 @@ export function BadgesGallery({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Award className="h-4 w-4 text-primary" />
-          {title}
+          {heading}
         </CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>{descriptionText}</CardDescription>
       </CardHeader>
       <CardContent>
         {badges.length === 0 ? (
-          <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-            No badges available yet. Automations will surface achievements here
-            once XP accrues.
-          </div>
+          <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">{t("gamification.noBadgesAvailableYetAutomationsWillSurfaceAchievements")}</div>
         ) : (
           <div className={columnClass}>
             {badges.map((badge) => {
@@ -153,9 +154,7 @@ export function BadgesGallery({
                             : badge.earnedAt.toLocaleString()}
                         </p>
                       ) : (
-                        <p className="text-xs text-muted-foreground">
-                          Unlock by completing the recommended activity.
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t("gamification.unlockByCompletingTheRecommendedActivity")}</p>
                       )}
                     </HoverCardContent>
                   </HoverCard>

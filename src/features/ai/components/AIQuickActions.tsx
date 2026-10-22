@@ -31,6 +31,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { DEFAULT_ADJUSTMENTS } from "@/lib/ai/scenarioEngine";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type QuickActionSource = "copilot" | "tasks" | "reminders";
 
@@ -65,6 +66,7 @@ const toneClassNames: Record<
 };
 
 export function AIQuickActions({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -437,12 +439,8 @@ export function AIQuickActions({ className }: { className?: string }) {
     <Card className={className}>
       <CardHeader className="space-y-1">
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-          <Zap className="h-5 w-5 text-primary" />
-          Quick Actions & Automation
-        </CardTitle>
-        <CardDescription>
-          Fix, assign, or remind in seconds using live signals from Co-Pilot.
-        </CardDescription>
+          <Zap className="h-5 w-5 text-primary" />{t("ai.quickActionsAutomation")}</CardTitle>
+        <CardDescription>{t("ai.fixAssignOrRemindInSecondsUsingLive")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {overallLoading ? (
@@ -497,9 +495,7 @@ export function AIQuickActions({ className }: { className?: string }) {
                           <Badge
                             variant="outline"
                             className="text-xs text-primary"
-                          >
-                            Working…
-                          </Badge>
+                          >{t("ai.working")}</Badge>
                         )}
                       </div>
                       <h3 className="text-sm font-semibold text-foreground">

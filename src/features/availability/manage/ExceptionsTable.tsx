@@ -26,6 +26,7 @@ import { LoadingSpinner } from "@/components/ui/loading-states";
 
 import type { AvailabilityException } from "@/types/availability";
 import type { AvailabilityEmployee, ExceptionFormState } from "./types";
+import { useTranslation } from "react-i18next";
 
 interface ExceptionsTableProps {
   employees: AvailabilityEmployee[];
@@ -46,6 +47,7 @@ export function ExceptionsTable({
   saving,
   isLoading,
 }: ExceptionsTableProps) {
+  const { t } = useTranslation();
   const employeeOptions = employees.map((employee) => ({
     id: employee.id,
     label:
@@ -58,17 +60,13 @@ export function ExceptionsTable({
     <Card className="border bg-background shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ShieldAlert className="h-5 w-5 text-primary" />
-          Per-person exceptions
-        </CardTitle>
-        <CardDescription>
-          Allow individual employees to edit availability during locked periods.
-        </CardDescription>
+          <ShieldAlert className="h-5 w-5 text-primary" />{t("availability.perPersonExceptions")}</CardTitle>
+        <CardDescription>{t("availability.allowIndividualEmployeesToEditAvailabilityDuringLocked")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3">
           <div className="space-y-1">
-            <Label>Employee</Label>
+            <Label>{t("schedule.employee")}</Label>
             <Select
               value={form.employeeId}
               onValueChange={(value) =>
@@ -95,7 +93,7 @@ export function ExceptionsTable({
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
-              <Label>Start date</Label>
+              <Label>{t("schedule.startDate")}</Label>
               <Input
                 type="date"
                 value={form.startDate}
@@ -108,7 +106,7 @@ export function ExceptionsTable({
               />
             </div>
             <div className="space-y-1">
-              <Label>End date</Label>
+              <Label>{t("schedule.endDate")}</Label>
               <Input
                 type="date"
                 value={form.endDate}
@@ -123,9 +121,9 @@ export function ExceptionsTable({
             </div>
           </div>
           <div className="space-y-1">
-            <Label>Reason</Label>
+            <Label>{t("schedule.reason")}</Label>
             <Textarea
-              placeholder="Why is this exception needed?"
+              placeholder={t("availability.whyIsThisExceptionNeeded")}
               value={form.reason}
               onChange={(event) =>
                 onFormChange((prev) => ({
@@ -144,9 +142,7 @@ export function ExceptionsTable({
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">
-            Existing exceptions
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("availability.existingExceptions")}</h3>
           {isLoading ? (
             <div className="py-4">
               <LoadingSpinner text="Loading exceptions..." />
@@ -156,9 +152,9 @@ export function ExceptionsTable({
               <table className="w-full text-sm">
                 <thead className="bg-muted/60 text-xs uppercase text-muted-foreground">
                   <tr>
-                    <th className="px-3 py-2 text-left">Employee</th>
-                    <th className="px-3 py-2 text-left">Dates</th>
-                    <th className="px-3 py-2 text-left">Reason</th>
+                    <th className="px-3 py-2 text-left">{t("schedule.employee")}</th>
+                    <th className="px-3 py-2 text-left">{t("availability.dates")}</th>
+                    <th className="px-3 py-2 text-left">{t("schedule.reason")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,7 +179,7 @@ export function ExceptionsTable({
             </ScrollArea>
           ) : (
             <EmptyState
-              title="No exceptions configured"
+              title={t("availability.noExceptionsConfigured")}
               description="Employees will follow lock settings unless you create a temporary exception."
             />
           )}

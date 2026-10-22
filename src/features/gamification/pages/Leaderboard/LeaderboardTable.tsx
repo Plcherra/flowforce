@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { LeaderboardEntry } from "@/features/gamification/leaderboard/types";
+import { useTranslation } from "react-i18next";
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[];
@@ -23,6 +24,7 @@ interface LeaderboardTableProps {
 }
 
 export function LeaderboardTable({ entries, loading }: LeaderboardTableProps) {
+  const { t } = useTranslation();
   if (loading && entries.length === 0) {
     return (
       <Card className="shadow-sm">
@@ -43,13 +45,10 @@ export function LeaderboardTable({ entries, loading }: LeaderboardTableProps) {
     return (
       <Card className="border-dashed">
         <CardHeader>
-          <CardTitle className="text-base">Leaderboard</CardTitle>
-          <CardDescription>No XP data available</CardDescription>
+          <CardTitle className="text-base">{t("common.leaderboard")}</CardTitle>
+          <CardDescription>{t("gamification.noXpDataAvailable")}</CardDescription>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Sync XP data from Supabase or assign your first tasks to populate the
-          leaderboard.
-        </CardContent>
+        <CardContent className="text-sm text-muted-foreground">{t("gamification.syncXpDataFromSupabaseOrAssignYour")}</CardContent>
       </Card>
     );
   }
@@ -57,18 +56,18 @@ export function LeaderboardTable({ entries, loading }: LeaderboardTableProps) {
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">Leaderboard</CardTitle>
-        <CardDescription>Top performers this period</CardDescription>
+        <CardTitle className="text-base">{t("common.leaderboard")}</CardTitle>
+        <CardDescription>{t("gamification.topPerformersThisPeriod")}</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Rank</TableHead>
-              <TableHead>Employee</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead className="text-right">XP</TableHead>
+              <TableHead>{t("gamification.rank")}</TableHead>
+              <TableHead>{t("schedule.employee")}</TableHead>
+              <TableHead>{t("dashboard.profile.department")}</TableHead>
+              <TableHead>{t("messages.role")}</TableHead>
+              <TableHead className="text-right">{t("analytics.xp")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -14,6 +14,7 @@ import { UserPlus, Search, X } from "lucide-react";
 import { usePositions } from "@/hooks/usePositions";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
+import { useTranslation } from "react-i18next";
 
 interface User {
   id: string;
@@ -30,6 +31,7 @@ interface UserPositionAssignmentProps {
 export function UserPositionAssignment({
   children,
 }: UserPositionAssignmentProps) {
+  const { t } = useTranslation();
   const {
     positions,
     assignments,
@@ -92,23 +94,19 @@ export function UserPositionAssignment({
       <DialogTrigger asChild>
         {children || (
           <Button>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Assign Positions
-          </Button>
+            <UserPlus className="h-4 w-4 mr-2" />{t("positions.assignPositions")}</Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">
-            User Position Assignments
-          </DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">{t("positions.userPositionAssignments")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder={t("messages.searchUsers")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -116,13 +114,9 @@ export function UserPositionAssignment({
           </div>
 
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading users...
-            </div>
+            <div className="text-center py-8 text-muted-foreground">{t("positions.loadingUsers")}</div>
           ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No users found
-            </div>
+            <div className="text-center py-8 text-muted-foreground">{t("positions.noUsersFound")}</div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
               {filteredUsers.map((user) => {
@@ -152,14 +146,10 @@ export function UserPositionAssignment({
                     </div>
 
                     <div className="space-y-2">
-                      <div className="text-xs sm:text-sm font-medium">
-                        Current Positions:
-                      </div>
+                      <div className="text-xs sm:text-sm font-medium">{t("positions.currentPositions")}</div>
                       <div className="flex flex-wrap gap-1">
                         {userPositions.length === 0 ? (
-                          <span className="text-xs sm:text-sm text-muted-foreground italic">
-                            No positions assigned
-                          </span>
+                          <span className="text-xs sm:text-sm text-muted-foreground italic">{t("positions.noPositionsAssigned")}</span>
                         ) : (
                           userPositions.map((position) => (
                             <Badge
@@ -188,9 +178,7 @@ export function UserPositionAssignment({
                     </div>
 
                     <div className="space-y-2">
-                      <div className="text-xs sm:text-sm font-medium">
-                        Available Positions:
-                      </div>
+                      <div className="text-xs sm:text-sm font-medium">{t("positions.availablePositions")}</div>
                       <div className="flex flex-wrap gap-1">
                         {positions
                           .filter(
@@ -222,9 +210,7 @@ export function UserPositionAssignment({
                           (position) =>
                             !isUserAssignedToPosition(user.id, position.id),
                         ).length === 0 && (
-                          <span className="text-xs sm:text-sm text-muted-foreground italic">
-                            All positions assigned
-                          </span>
+                          <span className="text-xs sm:text-sm text-muted-foreground italic">{t("positions.allPositionsAssigned")}</span>
                         )}
                       </div>
                     </div>

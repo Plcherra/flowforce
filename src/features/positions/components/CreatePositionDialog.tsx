@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { usePositions } from "@/hooks/usePositions";
+import { useTranslation } from "react-i18next";
 
 interface CreatePositionDialogProps {
   open: boolean;
@@ -42,6 +43,7 @@ export default function CreatePositionDialog({
   open,
   onOpenChange,
 }: CreatePositionDialogProps) {
+  const { t } = useTranslation();
   const { createPosition } = usePositions();
 
   const form = useForm({
@@ -64,7 +66,7 @@ export default function CreatePositionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Position</DialogTitle>
+          <DialogTitle>{t("positions.createNewPosition")}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -75,10 +77,10 @@ export default function CreatePositionDialog({
               rules={{ required: "Position name is required" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Position Name</FormLabel>
+                  <FormLabel>{t("onboarding.positionName")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Runner, Cashier, FOH Supervisor"
+                      placeholder={t("positions.eGRunnerCashierFohSupervisor")}
                       {...field}
                     />
                   </FormControl>
@@ -93,14 +95,14 @@ export default function CreatePositionDialog({
               rules={{ required: "Role is required" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role Level</FormLabel>
+                  <FormLabel>{t("positions.roleLevel")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select role level" />
+                        <SelectValue placeholder={t("positions.selectRoleLevel")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -121,10 +123,10 @@ export default function CreatePositionDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("registration.companyInfo.description")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the responsibilities and duties of this position"
+                      placeholder={t("positions.describeTheResponsibilitiesAndDutiesOfThisPosition")}
                       className="min-h-[100px]"
                       {...field}
                     />
@@ -139,9 +141,7 @@ export default function CreatePositionDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
+              >{t("common.cancel")}</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting
                   ? "Creating..."
