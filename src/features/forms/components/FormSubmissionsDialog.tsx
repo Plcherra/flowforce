@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText, User, Calendar } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
+import { useFormAnswerTranslations } from "@/features/forms/hooks/useFormAnswerTranslations";
 import FormFillDialog from "./FormFillDialog";
 import { FormSubmission, FormField } from "@/types/common";
 
@@ -32,6 +33,18 @@ export default function FormSubmissionsDialog({
   const [fields, setFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
   const [fillDialogOpen, setFillDialogOpen] = useState(false);
+  const answerTranslations = useFormAnswerTranslations(
+    submissions.map((submission) => ({
+      id: submission.id,
+      submissionData:
+        submission.submissiondata &&
+        typeof submission.submissiondata === "object" &&
+        !Array.isArray(submission.submissiondata)
+          ? (submission.submissiondata as Record<string, unknown>)
+          : {},
+    })),
+    fields.map((field) => ({ id: field.id, field_type: field.field_type })),
+  );
 
   useEffect(() => {
     if (open && formId) {
@@ -177,6 +190,11 @@ export default function FormSubmissionsDialog({
                         {fields.map((field) => {
                           const value = submission.submissiondata[field.id];
                           if (!value && value !== 0) return null;
+                          const translatedAnswer =
+                            typeof value === "string"
+                              ? answerTranslations.get(submission.id)?.answers[field.id]
+                              : undefined;
+                          const shown = translatedAnswer ?? value;
 
                           return (
                             <div key={field.id}>
@@ -184,9 +202,9 @@ export default function FormSubmissionsDialog({
                                 {field.label}
                               </label>
                               <div className="mt-1">
-                                {Array.isArray(value) ? (
+                                {Array.isArray(shown) ? (
                                   <div className="flex flex-wrap gap-1">
-                                    {value.map((item, i) => (
+                                    {shown.map((item, i) => (
                                       <Badge key={i} variant="secondary">
                                         {item}
                                       </Badge>
@@ -195,7 +213,7 @@ export default function FormSubmissionsDialog({
                                 ) : field.field_type === "file" ? (
                                   <Badge variant="outline">{t("forms.fileUploaded")}</Badge>
                                 ) : (
-                                  <p className="text-sm">{String(value)}</p>
+                                  <p className="text-sm">{String(shown)}</p>
                                 )}
                               </div>
                             </div>

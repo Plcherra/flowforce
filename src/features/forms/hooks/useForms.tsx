@@ -23,6 +23,7 @@ import type {
   FormSubmissionRow,
   FormQueryRow,
 } from "@/features/forms/repositories/formsRepository";
+import { scheduleFormAnswerTranslation } from "@/features/forms/scheduleFormAnswers";
 import {
   isOfflineQueueableError,
   queueOfflineFormSubmission,
@@ -442,6 +443,7 @@ export function useForms() {
   const submitForm = async (
     formId: string,
     submissionData: Record<string, unknown>,
+    answerFields?: Array<{ id: string; field_type?: string | null }>,
   ) => {
     if (!companyId) {
       const error = new Error("Company context unavailable");
@@ -463,6 +465,15 @@ export function useForms() {
         ip_address: null,
         user_agent: userAgent,
       });
+      if (submission?.id && answerFields) {
+        scheduleFormAnswerTranslation({
+          companyId,
+          sourceId: submission.id,
+          sourceLocale,
+          submissionData,
+          fields: answerFields,
+        });
+      }
 
       updateFormsCache((current) =>
         current.map((form) =>

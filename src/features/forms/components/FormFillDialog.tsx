@@ -291,10 +291,17 @@ export default function FormFillDialog({
       for (const fieldId of flaggedFieldIds) {
         flaggedAnswers[fieldId] = { value: values[fieldId], flagged: true };
       }
-      const { data, error: submitError } = await submitForm(resolvedFormId, {
-        ...flaggedAnswers,
-        additional_information: handoverNote.trim(),
-      });
+      const { data, error: submitError } = await submitForm(
+        resolvedFormId,
+        {
+          ...flaggedAnswers,
+          additional_information: handoverNote.trim(),
+        },
+        orderedFields.map((field) => ({
+          id: field.id,
+          field_type: field.field_type,
+        })),
+      );
       if (submitError) {
         toast({
           title: "Unable to submit form",

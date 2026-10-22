@@ -23,6 +23,7 @@ export const TRANSLATABLE_FIELDS: Record<
     description: {},
     placeholder: {},
   },
+  form_submissions: {},
 };
 
 export function translatableFieldRule(
@@ -33,6 +34,12 @@ export function translatableFieldRule(
   if (!table) return null;
   if (table[fieldPath]) return table[fieldPath];
   if (sourceTable === "form_fields" && /^options\.\d+$/.test(fieldPath)) {
+    return {};
+  }
+  if (
+    sourceTable === "form_submissions" &&
+    /^submission_data\.[A-Za-z0-9_-]+$/.test(fieldPath)
+  ) {
     return {};
   }
   return null;

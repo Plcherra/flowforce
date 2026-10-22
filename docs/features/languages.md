@@ -579,7 +579,7 @@ Prove: Unit test an options JSON taken from the builder, and assert the stored v
 
 ### Phase 32 — Form answers
 
-- [ ] Translate free-text answers.
+- [x] Translate free-text answers.
 
 Rules:
 
@@ -1243,6 +1243,22 @@ Phone steps for Pedro:
 2. Open Forms, edit a form, and add a dropdown or radio question. Type an English label, a placeholder, and options such as Line, Expo, and Dish. Save the form.
 3. Set your language to Español and reload. Open the form and go to the questions. The label, the placeholder, and the option names should be Spanish. Help text is Spanish when that question already has help text stored. Choose Line. Submit the form.
 4. Set the language back to English and open the submission. The stored choice should still be the English word Line, not the Spanish label. The question label should be the English text you typed.
+
+Blockers: none. No new migration.
+
+Questions: none.
+
+### 2026-10-22 — Phase 32 Form answers
+
+Shipped: A free-text answer keeps the words that were typed. The cache path is `submission_data.{fieldId}`. Text and paragraph answers are sent to the model. A number, a date, a rating, a file, and a chosen option are not sent. The save returns before the model runs. The submissions list shows the translation for a viewer in another language. The source language shows the original sentence.
+
+Proven: `src/features/forms/formAnswerTranslation.test.ts` passed through the jiti runner. The prose answer is translated. The model is not called with `4`, `2026-10-22`, a rating, `cooler.jpg`, or the option `Line`. The stored option stays `Line`. `npm run check:i18n` printed 4584 keys for each locale and `hard-coded strings 0`. `npm run typecheck:src` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk and set your language to English.
+2. Open a form and answer a paragraph question with an English sentence. Also enter a number, a date, and a choice such as Line if the form has those questions. Submit. The form should finish without waiting.
+3. Set your language to Español and open the form submissions. The paragraph should be Spanish. The number, the date, and the choice Line should stay as you entered them.
+4. Set the language back to English and open the same submission. The paragraph should be the English sentence you typed.
 
 Blockers: none. No new migration.
 
