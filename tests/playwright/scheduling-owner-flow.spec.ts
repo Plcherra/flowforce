@@ -15,7 +15,6 @@ const staff = {
 };
 const shiftTitle = `Lunch Line ${stamp}`;
 const editedTitle = `Dinner Line ${stamp}`;
-const taskTitle = `Prep the line ${stamp}`;
 const messageBody = `Shift update ${stamp}: dinner line is published.`;
 
 test.describe.configure({ mode: 'serial' });
@@ -121,9 +120,7 @@ test.describe('Scheduling owner flow', () => {
     await page.getByTestId('create-menu').getByRole('button', { name: 'New shift' }).click();
     await page.getByLabel('Shift Title').fill(shiftTitle);
     await page.getByRole('tab', { name: 'Tasks' }).click();
-    await page.getByPlaceholder('Task title').fill(taskTitle);
-    await page.getByRole('button', { name: 'Add shift task' }).click();
-    await expect(page.getByRole('heading', { name: taskTitle })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Lists on this shift' })).toBeVisible();
     await page.getByRole('button', { name: 'Save Draft' }).click();
     await expect(page.getByText('Shift created').first()).toBeVisible({ timeout: 20_000 });
     const shiftChip = page.getByText(shiftTitle).first();
@@ -187,7 +184,7 @@ test.describe('Scheduling owner flow', () => {
     await shot(staffPage, 'scheduling_staff_my_schedule');
 
     await page.goto('/app/tasks');
-    await expect(page.getByText(taskTitle).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('tasks-page')).toBeVisible({ timeout: 20_000 });
     await shot(page, 'scheduling_connected_task');
 
     await page.goto('/app/messages');

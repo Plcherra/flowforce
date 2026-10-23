@@ -1028,14 +1028,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(details.getByText('Vendor_visit')).toHaveCount(0);
 
     await details.getByRole('tab', { name: 'Tasks' }).click();
-    await details.getByPlaceholder('Task title').fill('Count the till');
-    await details.getByRole('button', { name: 'Add shift task' }).click();
-    await expect(details.getByRole('heading', { name: 'Count the till' })).toBeVisible();
-    await details.getByPlaceholder('Task title').fill('Lock the safe');
-    await details.getByRole('button', { name: 'Add shift task' }).click();
-    await expect(details.getByRole('heading', { name: 'Lock the safe' })).toBeVisible();
-    await expect(details.getByRole('heading', { name: 'Count the till' })).toBeVisible();
-    await expect(page.getByText('Task added', { exact: true })).toBeVisible();
+    await expect(details.getByRole('heading', { name: 'Lists on this shift' })).toBeVisible();
+    await expect(details.getByText('No list attached.')).toBeVisible();
+    await expect(details.getByPlaceholder('Task title')).toHaveCount(0);
 
     await details.getByRole('tab', { name: 'Templates' }).click();
     await details.getByRole('button', { name: 'Save as Shift Template' }).click();

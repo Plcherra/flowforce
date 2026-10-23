@@ -1569,6 +1569,8 @@ Phone steps for Pedro:
 4. Open a shift that is neither cashier nor supervisor. The Tasks tab should say that shift has no lists.
 5. On All tasks, “clean downstairs” can still be there. The shift editor does not add another one.
 
+The scheduling smoke was still adding “Count the till” on that tab. It now checks Lists on this shift and that the old task box is gone. The owner flow does the same.
+
 Blockers: none. No migration.
 
 Questions: none.
