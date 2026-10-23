@@ -599,7 +599,7 @@ Prove: Unit test the area-and-slot lookup. Run it with `node scripts/test-tasks-
 
 ### Phase 26 — A shift carries its three lists
 
-- [ ] Attach the role's opening, daily, and closing lists to that role's shift.
+- [x] Attach the role's opening, daily, and closing lists to that role's shift.
 
 Rules:
 
@@ -1088,6 +1088,20 @@ Shipped: phases 25–30 in this file. No product code. Checklists are forms per 
 Proven: this file is the plan.
 
 Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
+
+### 2026-10-23 — Phase 26 A shift carries its three lists
+
+Shipped: A cashier shift resolves to the cashier opening, daily, and closing forms. A supervisor shift resolves to the supervisor forms. The shift keeps the form itself. It does not copy a second definition.
+
+Proven: Unit test `src/features/forms/utils/shiftChecklistLists.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers both roles and that each list is the same form. It passed.
+
+Phone steps for Pedro:
+1. This phase links a role's shift to that role's three checklist forms. It does not add a new screen.
+2. A cashier shift uses the cashier lists. A supervisor shift uses the supervisor lists.
+
+Blockers: none. No migration.
 
 Questions: none.
 
