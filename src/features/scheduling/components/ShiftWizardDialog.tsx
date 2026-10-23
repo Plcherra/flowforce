@@ -36,7 +36,7 @@ import { parse, differenceInMinutes } from "date-fns";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
 import { DetailsTab } from "./shift-wizard/DetailsTab";
 import { UsersTab } from "./shift-wizard/UsersTab";
-import { TasksTab } from "./shift-wizard/TasksTab";
+import { ShiftLinkedForms } from "./shift-wizard/ShiftLinkedForms";
 import { NotesTab } from "./shift-wizard/NotesTab";
 import type { ShiftTask, ShiftWizardFormData } from "./shift-wizard/types";
 import {
@@ -631,10 +631,13 @@ export function ShiftWizardDialog({
                     </TabsContent>
 
                     <TabsContent value="tasks" className="mt-0 space-y-4">
-                      <TasksTab
-                        tasks={formData.tasks as ShiftTask[]}
-                        onAddTask={onAddTask}
-                        onRemoveTask={onRemoveTask}
+                      <ShiftLinkedForms
+                        role={
+                          positions.find(
+                            (position) => position.id === formData.job_position_id,
+                          )?.name ?? formData.job_position_input
+                        }
+                        title={formData.title}
                       />
                     </TabsContent>
 

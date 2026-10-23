@@ -876,7 +876,7 @@ Prove: Unit test those two shifts. Run it with `node scripts/test-tasks-page.mjs
 
 ### Phase 41 — The shift editor shows linked forms
 
-- [ ] The schedule shift editor Tasks tab lists the forms linked to that shift’s role, read-only, and each row opens the form.
+- [x] The schedule shift editor Tasks tab lists the forms linked to that shift’s role, read-only, and each row opens the form.
 
 Rules:
 
@@ -1524,6 +1524,23 @@ Blockers: none. No migration.
 
 Questions: none.
 
+### 2026-10-23 — Phase 40 Today’s lists on Tasks
+
+Shipped: Someone who can edit tasks sees Today’s lists on My shift: each shift today, the person, opening, daily, and closing progress, and the closing note. A shift that is neither cashier nor supervisor says it has no lists. Employees still see only their own My shift. Custom create, drafts, weekday tasks, and grants stay.
+
+Proven: Unit test `src/features/tasks/utils/todayShiftMonitor.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers a cashier opening list at 2 of 3 with the closing note “no coins”, and a cook shift with no lists. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as a manager. Open Tasks and stay on My shift.
+2. Today’s lists should sit above your own lists. Each person on a shift today should be named.
+3. A cashier or supervisor shift should show Opening, Daily, and Closing, with a count such as 2 of 3, and a closing note when one was saved.
+4. A shift that is neither cashier nor supervisor should say it has no lists.
+5. Sign in as a level 1 employee. Today’s lists should not be there. My shift should still show that person’s lists.
+
+Blockers: none. No migration.
+
+Questions: none.
+
 ### 2026-10-23 — Phase 38 Tasks page leaves the skeleton
 
 Shipped: My shift no longer restarts its schedule and form queries when the task list is a new empty array. The page skeleton waits on the tasks query, and a failed query shows the existing error. The owner’s production task, with hours stored as a numeric string, still parses.
@@ -1534,6 +1551,23 @@ Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk on the iPhone. Open Tasks from the bottom OPS bar.
 2. The gray skeleton cards should leave. My shift should show today’s lists, or say there is no shift today.
 3. If the tasks cannot load, the page should say it could not load tasks, with Retry. It should not stay on the skeleton.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 41 The shift editor shows linked forms
+
+Shipped: The schedule shift editor Tasks tab, and the same tab on a new shift, no longer add a one-off shift task. They list the forms linked to that role, read-only. Each row opens the form. A cook shift says it has no lists. The old Add Shift Task control wrote a task onto one shift instance, which is what “clean downstairs” is. That duplicates custom tasks on Tasks and the role lists on Forms, so the editor stops adding and deleting those tasks. Tasks already saved stay on All tasks.
+
+Proven: Unit test `src/features/scheduling/utils/shiftLinkedForms.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers a cashier opening form pointing at `/app/forms?form=open-form`, and a cook shift with no forms. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk. Open Schedule and tap the cashier shift.
+2. Open the Tasks tab. Add Shift Task should be gone. You should see the forms linked to cashier, such as Opening, and Open form.
+3. Tap Open form. Forms should open that form.
+4. Open a shift that is neither cashier nor supervisor. The Tasks tab should say that shift has no lists.
+5. On All tasks, “clean downstairs” can still be there. The shift editor does not add another one.
 
 Blockers: none. No migration.
 

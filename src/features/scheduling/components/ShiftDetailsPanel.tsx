@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EmployeeSelector } from "./EmployeeSelector";
-import { TasksTab } from "./shift-wizard/TasksTab";
+import { ShiftLinkedForms } from "./shift-wizard/ShiftLinkedForms";
 import type { ShiftTask } from "./shift-wizard/types";
 import {
   X,
@@ -1311,26 +1311,10 @@ export function ShiftDetailsPanel({
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-4">
-            <TasksTab
-              tasks={shiftTasks}
-              onAddTask={handleAddTask}
-              onRemoveTask={handleRemoveTask}
-              onDraftChange={handleTaskDraftChange}
-              draftResetKey={taskDraftReset}
+            <ShiftLinkedForms
+              role={shift.role || shift.job_position?.name || shift.job_position?.role}
+              title={shift.title}
             />
-            {shiftTasks.length === 0 && !shiftTasksQuery.isLoading && (
-              <p className="text-sm text-muted-foreground">
-                {t("schedule.noTasksOnThisShiftYetAddOne")}
-              </p>
-            )}
-            {taskError && (
-              <p className="text-sm text-destructive">{taskError}</p>
-            )}
-            {shiftTasksQuery.isError && (
-              <p className="text-sm text-destructive">
-                {t("schedule.savedTasksCouldNotBeReloadedATask")}
-              </p>
-            )}
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">

@@ -2571,7 +2571,10 @@
     "windowStart": "Inicio de la ventana",
     "year": "Año",
     "you": "Tú",
-    "yourReminders": "Tus recordatorios"
+    "yourReminders": "Tus recordatorios",
+    "listsOnThisShift": "Listas de este turno",
+    "listsOnThisShiftHelp": "Estos formularios están vinculados a este rol. El enlace se cambia en el formulario.",
+    "openLinkedForm": "Abrir formulario"
   },
   "tasks": {
     "aTitleIsRequired": "El título es obligatorio.",

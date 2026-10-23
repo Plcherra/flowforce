@@ -2571,7 +2571,10 @@
     "windowStart": "Window start",
     "year": "Year",
     "you": "You",
-    "yourReminders": "Your reminders"
+    "yourReminders": "Your reminders",
+    "listsOnThisShift": "Lists on this shift",
+    "listsOnThisShiftHelp": "These forms are linked to this role. Change the link on the form.",
+    "openLinkedForm": "Open form"
   },
   "tasks": {
     "aTitleIsRequired": "A title is required.",

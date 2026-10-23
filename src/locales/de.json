@@ -2571,7 +2571,10 @@
     "windowStart": "Fensterbeginn",
     "year": "Jahr",
     "you": "Sie",
-    "yourReminders": "Ihre Erinnerungen"
+    "yourReminders": "Ihre Erinnerungen",
+    "listsOnThisShift": "Listen dieser Schicht",
+    "listsOnThisShiftHelp": "Diese Formulare sind mit dieser Rolle verknüpft. Die Verknüpfung ändert man am Formular.",
+    "openLinkedForm": "Formular öffnen"
   },
   "tasks": {
     "aTitleIsRequired": "Ein Titel ist erforderlich.",

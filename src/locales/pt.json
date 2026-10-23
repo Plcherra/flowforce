@@ -2571,7 +2571,10 @@
     "windowStart": "Início da janela",
     "year": "Ano",
     "you": "Você",
-    "yourReminders": "Seus lembretes"
+    "yourReminders": "Seus lembretes",
+    "listsOnThisShift": "Listas deste turno",
+    "listsOnThisShiftHelp": "Estes formulários estão ligados a este papel. A ligação muda-se no formulário.",
+    "openLinkedForm": "Abrir formulário"
   },
   "tasks": {
     "aTitleIsRequired": "O título é obrigatório.",

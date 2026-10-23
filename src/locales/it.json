@@ -2571,7 +2571,10 @@
     "windowStart": "Inizio della finestra",
     "year": "Anno",
     "you": "Tu",
-    "yourReminders": "I tuoi promemoria"
+    "yourReminders": "I tuoi promemoria",
+    "listsOnThisShift": "Liste di questo turno",
+    "listsOnThisShiftHelp": "Questi moduli sono collegati a questo ruolo. Il collegamento si cambia nel modulo.",
+    "openLinkedForm": "Apri modulo"
   },
   "tasks": {
     "aTitleIsRequired": "Il titolo è obbligatorio.",
