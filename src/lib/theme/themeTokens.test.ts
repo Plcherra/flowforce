@@ -68,6 +68,8 @@ export function runThemeTokenTests() {
   assert.equal(darkBlock.includes("175 100% 75%"), false);
   assert.equal(darkBlock.includes("129 42% 72%"), false);
 
+  const lightSurfaces = new Set(["--background", "--card", "--popover"]);
+
   assert.equal(light.size, root.size);
   for (const [name, value] of root) {
     if (name === "--input") {
@@ -75,6 +77,21 @@ export function runThemeTokenTests() {
       assert.equal(light.get(name), "214.3 31.8% 91.4%");
       continue;
     }
+    if (lightSurfaces.has(name)) continue;
     assert.equal(light.get(name), value, name);
   }
+
+  assert.equal(root.get("--background"), "0 0% 100%");
+  assert.equal(root.get("--card"), "0 0% 100%");
+  assert.equal(root.get("--popover"), "0 0% 100%");
+  assert.equal(light.get("--background"), "210 40% 96%");
+  assert.notEqual(light.get("--background"), root.get("--background"));
+  assert.equal(light.get("--card"), "210 40% 98%");
+  assert.equal(light.get("--popover"), "210 40% 98%");
+
+  const darkBackground = dark.get("--background");
+  assert.ok(darkBackground);
+  const darkLightness = darkBackground.match(/([\d.]+)%$/);
+  assert.ok(darkLightness);
+  assert.ok(Number(darkLightness[1]) <= 11, darkBackground);
 }

@@ -433,7 +433,7 @@ Pedro, 2026-10-22: FlowForce, Light, and Dark are not distinct. Light and FlowFo
 
 ### Phase 23 — Separate the three surfaces
 
-- [ ] Make Light and Dark look different from FlowForce.
+- [x] Make Light and Dark look different from FlowForce.
 
 Rules:
 
@@ -850,6 +850,22 @@ Questions: none.
 Shipped: phases 23 and 24 in this file. No app code. FlowForce stays the white signed-in look. Light gets a light blue tint, or the old teal if that tint is not obvious. Dark is dark navy or near-black. Primary blue stays.
 
 Proven: this file is the plan.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 23 Separate the three surfaces
+
+Shipped: FlowForce `--background`, `--card`, and `--popover` stay `0 0% 100%`. Light tints those surfaces: `--background` `210 40% 96%`, `--card` and `--popover` `210 40% 98%`. Dark `--background` stays `222.2 84% 4.9%`, a navy whose lightness is 4.9%, under the 11% cap. Primary, secondary, accent, success, and warning are unchanged. No theme column and no color picker.
+
+Proven: `src/lib/theme/themeTokens.test.ts` asserts Light `--background` is not FlowForce `--background`, and Dark `--background` lightness is at or below 11%. Run with jiti the same way as `scripts/test-tasks-page.mjs`. It passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk. FlowForce should stay the white page you already see.
+2. Open Settings, then General, and tap Light. The page background should pick up a light blue tint. Cards should stay a little lighter than that background. Buttons should stay the same blue.
+3. Tap Dark. The page should be dark navy, near black, not a gray mid-tone and not the white FlowForce page.
+4. Tap FlowForce again. The page should return to white.
 
 Blockers: none. No migration.
 
