@@ -159,6 +159,10 @@ export async function fetchTasksByCompany(
     throw error;
   }
 
+  return parseCompanyTasks(data);
+}
+
+export function parseCompanyTasks(data: unknown): TaskWithRelations[] {
   return taskWithRelationsSchema.array().parse(data ?? []);
 }
 

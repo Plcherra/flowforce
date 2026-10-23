@@ -91,7 +91,10 @@ export default function Tasks() {
     !permissionsLoading && (can("editTasks") || can("ai.actions.approve"));
   const { user } = useAuth();
   const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
-  const tasks = asArray(tasksData) as TaskListItem[];
+  const tasks = useMemo(
+    () => asArray(tasksData) as TaskListItem[],
+    [tasksData],
+  );
   const translations = useTaskContentTranslations(tasks);
   const visibleTasks = useMemo(
     () =>

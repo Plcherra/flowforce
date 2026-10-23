@@ -85,6 +85,9 @@ const { runTaskAssigneeScopeTests } = importTs(
 const { runTaskCreateGrantStoreTests } = importTs(
   "../src/features/roles/constants/taskCreateGrantStore.test.ts",
 );
+const { runMyShiftReloadTests } = importTs(
+  "../src/features/tasks/utils/myShiftReload.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -111,4 +114,5 @@ runWeekdayTaskDraftTests();
 runDraftInboxTests();
 runTaskAssigneeScopeTests();
 runTaskCreateGrantStoreTests();
+runMyShiftReloadTests();
 console.log("tasks page tests passed");

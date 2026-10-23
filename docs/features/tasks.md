@@ -818,6 +818,80 @@ Done when:
 
 Prove: Unit test the stored grants, the owner grant, Marcus's grant, and the revoke. Run it with `node scripts/test-tasks-page.mjs`.
 
+### Phase 38 — Tasks page leaves the skeleton
+
+- [x] The mobile Tasks page finishes loading, or shows an error, instead of staying on the gray skeleton.
+
+Rules:
+
+- The page skeleton stays up while the tasks query is still loading. My shift was restarting its schedule and form queries on every render, because an empty task list was a new array each time. That storm kept the tasks query from finishing on the phone.
+- Depend on a stable key of task ids. Two empty arrays are the same key.
+- A failed tasks query shows the existing error, not the skeleton.
+- The production owner task still parses: hours as a numeric string, a null assignee, schedule links, and string tags.
+
+Done when:
+
+- Two empty arrays share a key, and a different id changes it.
+- The production-shaped row parses to the downstairs task with hours 0.5.
+
+Prove: Unit test the key and that row. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 39 — Link a form to a shift from Forms
+
+- [ ] Creating or editing a form can link it to a cashier or supervisor opening, daily, or closing list, and can remove that link.
+
+Rules:
+
+- Depends on phase 33. Do not add a migration. Keep the link on `forms.settings.checklist`.
+- The control sits on the form editor, which is where a new form opens. The forms list shows the current link.
+- One form holds one slot. Saving that slot clears it from any other form. Other settings stay.
+- Weekdays and store stations are not stored on the form. A list applies on every shift of that role. Weekday tasks and store rotation stay on Tasks.
+- Remove the six-slot form setup from Tasks. Tasks Setup keeps weekday tasks, and only for someone who can edit tasks.
+
+Done when:
+
+- Linking a form to cashier opening writes that address and clears it from the form that had it.
+- Removing the link leaves the form with no checklist address.
+- The forms list can name the link.
+
+Prove: Unit test the link label and the save payload. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 40 — Today’s lists on Tasks
+
+- [ ] Someone who can edit tasks sees today’s shifts, who is on them, how far each list is, and the closing note. Employees still see My shift.
+
+Rules:
+
+- Depends on phase 31 and phase 39. Do not add a migration.
+- Custom task creation, drafts, weekday tasks, and the grant card stay.
+- The monitor uses the same list rules as My shift: role word, opening, daily, and closing, and the latest submission in that shift.
+- A shift that is neither cashier nor supervisor shows that it has no lists.
+
+Done when:
+
+- A cashier shift with two of three opening items done reports 2 of 3, and its closing note.
+- A shift with no role match reports no lists.
+
+Prove: Unit test those two shifts. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 41 — The shift editor shows linked forms
+
+- [ ] The schedule shift editor Tasks tab lists the forms linked to that shift’s role, read-only, and each row opens the form.
+
+Rules:
+
+- Depends on phase 39. Do not add a form editor on the schedule. Do not add a migration.
+- The old Add Shift Task control wrote a one-off task onto that shift instance. That duplicates custom tasks on Tasks and the role lists on Forms. The editor and the new-shift wizard stop adding and deleting those tasks. Tasks already saved stay on All tasks.
+- The tab reads the shift role and title, finds the cashier or supervisor lists, and links each form to `/app/forms?form=<id>`.
+- A shift that matches neither role says it has no lists.
+
+Done when:
+
+- A cashier opening form is listed for a cashier shift and points at that form.
+- A shift titled “Cook” lists nothing.
+
+Prove: Unit test those two shifts. Run it with `node scripts/test-tasks-page.mjs`.
+
 ## Open questions
 
 None. Owner answers 24, 25, and 26 record the earlier three. Pedro answered the phase 9–12 questions on 2026-10-22:
@@ -1428,6 +1502,21 @@ Phone steps for Pedro:
 3. Sign in as Marcus. Open John's Access card. Tick Level 3 and Level 4. The Right to grant box should not be there. Tap Grant scope.
 4. Sign in as John and open New custom task. The assignee list should include level 3 and level 4 people, plus himself and level 2.
 5. Sign in as Marcus again. On John's card, tap Revoke on that grant. Marcus's own right to grant should still be on his card. John's extra levels should be gone.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 38 Tasks page leaves the skeleton
+
+Shipped: My shift no longer restarts its schedule and form queries when the task list is a new empty array. The page skeleton waits on the tasks query, and a failed query shows the existing error. The owner’s production task, with hours stored as a numeric string, still parses.
+
+Proven: Unit test `src/features/tasks/utils/myShiftReload.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the stable key and the production row from company `107fbeaa-91c0-4f2d-ae17-8620d5e7afd1` (the “clean downstairs” task). It passed. The iPhone log at 15:19 showed a burst of identical schedule and form preflight requests and no finished tasks-page query. `npm run typecheck` passed. ESLint passed on the files this phase changed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk on the iPhone. Open Tasks from the bottom OPS bar.
+2. The gray skeleton cards should leave. My shift should show today’s lists, or say there is no shift today.
+3. If the tasks cannot load, the page should say it could not load tasks, with Retry. It should not stay on the skeleton.
 
 Blockers: none. No migration.
 

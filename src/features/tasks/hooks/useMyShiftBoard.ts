@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -12,6 +12,7 @@ import {
   type MyShiftSubmission,
   type MyShiftTaskRow,
 } from "@/features/tasks/utils/myShiftView";
+import { myShiftTasksKey } from "@/features/tasks/utils/myShiftReload";
 
 export type MyShiftBoard = AssembledShift | { kind: "loading" } | { kind: "error" };
 
@@ -32,6 +33,9 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
   const [board, setBoard] = useState<MyShiftBoard>({ kind: "loading" });
   const [reloadKey, setReloadKey] = useState(0);
   const refresh = useCallback(() => setReloadKey((value) => value + 1), []);
+  const tasksRef = useRef(tasks);
+  tasksRef.current = tasks;
+  const tasksKey = myShiftTasksKey(tasks);
 
   useEffect(() => {
     if (!user?.id || profileLoading) {
@@ -97,7 +101,7 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
           forms,
           fields,
           submissions,
-          tasks,
+          tasks: tasksRef.current,
         }),
       );
     })();
@@ -105,7 +109,7 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, companyId, profileLoading, tasks, reloadKey]);
+  }, [user?.id, companyId, profileLoading, tasksKey, reloadKey]);
 
   const saveList = useCallback(
     async (formId: string, itemId: string | null, done: boolean | null, note?: string) => {

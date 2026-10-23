@@ -130,7 +130,7 @@ export function useTasks() {
   }, [tasksQuery.error]);
 
   const tasks = tasksQuery.data ?? [];
-  const loading = tasksQuery.isLoading;
+  const loading = tasksQuery.isLoading && !tasksQuery.isError;
   const error = tasksError;
 
   const invalidateTasks = () => {
