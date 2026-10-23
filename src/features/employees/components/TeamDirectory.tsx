@@ -14,6 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, SearchX, Users } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
+import { useCan } from "@/hooks/useCan";
+import type { PermissionKey } from "@/hooks/useUserPermissions";
+import { directoryTools } from "../utils/directoryTools";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useInventorySuppliers, useCreateSupplier } from "@/hooks/useInventory";
 import {
@@ -49,6 +52,8 @@ export function TeamDirectory() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { profile: currentUserProfile, loading: profileLoading } = useProfile();
+  const { can } = useCan();
+  const tools = directoryTools((key) => can(key as PermissionKey));
   const companyId =
     currentUserProfile?.company_id ?? currentUserProfile?.companyId ?? null;
   const {
@@ -113,12 +118,13 @@ export function TeamDirectory() {
   useEffect(() => {
     const inviteParam = searchParams.get("invite");
     if (
+      tools.invitations &&
       inviteParam &&
       ["1", "true", "open"].includes(inviteParam.toLowerCase())
     ) {
       setInviteOpen(true);
     }
-  }, [searchParams]);
+  }, [searchParams, tools.invitations]);
 
   const clearInviteParam = () => {
     const inviteParam = searchParams.get("invite");
@@ -228,11 +234,11 @@ export function TeamDirectory() {
     setPage(1);
   }, []);
 
-  const currentRole = currentUserProfile?.role?.toLowerCase() ?? "";
-  const isAdmin = ["owner", "admin", "manager"].includes(currentRole);
-  const canManageEmployees = ["owner", "admin", "manager"].includes(
-    currentRole,
-  );
+  useEffect(() => {
+    if (!tools.vendors && activeTab === "vendors") {
+      setActiveTab("all");
+    }
+  }, [activeTab, tools.vendors]);
 
   const {
     active: activeEmployeesCount,
@@ -258,7 +264,7 @@ export function TeamDirectory() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {canManageEmployees && activeTab === "vendors" && (
+            {tools.addVendor && activeTab === "vendors" && (
               <AddVendorDialog
                 open={showAddVendorDialog}
                 onOpenChange={setShowAddVendorDialog}
@@ -269,7 +275,9 @@ export function TeamDirectory() {
               />
             )}
             <TeamActionsBar
-              isAdmin={isAdmin}
+              canInvite={tools.invitations}
+              canManageRoles={tools.roles}
+              canManagePermissions={tools.permissions}
               onOpenInvite={() => handleInviteChange(true)}
               onOpenRoles={() => setRoleManagerOpen(true)}
               onOpenPermissions={() => setPermissionManagerOpen(true)}
@@ -283,7 +291,7 @@ export function TeamDirectory() {
           companyId={companyId}
           employees={employees}
           loading={loading}
-          canManageEmployees={canManageEmployees}
+          canManageEmployees={tools.invitations}
           onOpenInvite={() => handleInviteChange(true)}
         />
 
@@ -337,7 +345,9 @@ export function TeamDirectory() {
                       count: inactiveEmployeesCount,
                     })}
                   </TabsTrigger>
-                  <TabsTrigger value="vendors">{t("employees.vendors")}</TabsTrigger>
+                  {tools.vendors ? (
+                    <TabsTrigger value="vendors">{t("employees.vendors")}</TabsTrigger>
+                  ) : null}
                 </TabsList>
 
                 <DirectoryFilters
@@ -381,7 +391,7 @@ export function TeamDirectory() {
                           : t("employees.addVendorsHint")
                       }
                       action={
-                        canManageEmployees ? (
+                        tools.addVendor ? (
                           <Button
                             type="button"
                             onClick={() => setShowAddVendorDialog(true)}

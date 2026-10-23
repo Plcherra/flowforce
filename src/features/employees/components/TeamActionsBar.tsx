@@ -9,7 +9,9 @@ import {
 import { Download } from "lucide-react";
 
 type TeamActionsBarProps = {
-  isAdmin: boolean;
+  canInvite: boolean;
+  canManageRoles: boolean;
+  canManagePermissions: boolean;
   onOpenInvite: () => void;
   onOpenRoles: () => void;
   onOpenPermissions: () => void;
@@ -18,7 +20,9 @@ type TeamActionsBarProps = {
 };
 
 export function TeamActionsBar({
-  isAdmin,
+  canInvite,
+  canManageRoles,
+  canManagePermissions,
   onOpenInvite,
   onOpenRoles,
   onOpenPermissions,
@@ -42,17 +46,23 @@ export function TeamActionsBar({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {isAdmin && (
+      {canInvite || canManageRoles || canManagePermissions ? (
         <div className="flex gap-2">
-          <Button onClick={onOpenInvite}>{t("employees.invite")}</Button>
-          <Button variant="secondary" onClick={onOpenRoles}>
-            {t("updates.roles")}
-          </Button>
-          <Button variant="outline" onClick={onOpenPermissions}>
-            {t("registration.roles.permissions")}
-          </Button>
+          {canInvite ? (
+            <Button onClick={onOpenInvite}>{t("employees.invite")}</Button>
+          ) : null}
+          {canManageRoles ? (
+            <Button variant="secondary" onClick={onOpenRoles}>
+              {t("updates.roles")}
+            </Button>
+          ) : null}
+          {canManagePermissions ? (
+            <Button variant="outline" onClick={onOpenPermissions}>
+              {t("registration.roles.permissions")}
+            </Button>
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

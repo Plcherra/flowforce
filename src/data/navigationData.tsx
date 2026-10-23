@@ -107,7 +107,7 @@ export const navigationSections: NavigationSection[] = [
     ],
   },
   {
-    title: "Reports & Intelligence",
+    title: "Insights",
     translationKey: "analyticsReports",
     items: [
       {
@@ -170,12 +170,6 @@ export const navigationSections: NavigationSection[] = [
         icon: GraduationCap,
         translationKey: "certifications",
       },
-    ],
-  },
-  {
-    title: "Administration",
-    translationKey: "adminSetup",
-    items: [
       {
         name: "Settings",
         href: "/settings",
@@ -186,7 +180,7 @@ export const navigationSections: NavigationSection[] = [
         name: "Resources",
         href: "/resources",
         icon: FileText,
-        translationKey: "reports",
+        translationKey: "resources",
       },
     ],
   },

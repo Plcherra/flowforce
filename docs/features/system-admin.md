@@ -190,7 +190,7 @@ Prove: `src/features/roles/constants/primaryActionLabel.test.ts` returns Save ch
 
 ### Phase 8 — Delete Admin and fold it into the directory
 
-- [ ] Remove the Admin page, the ADMIN bottom-nav group, and the duplicate reports.
+- [x] Remove the Admin page, the ADMIN bottom-nav group, and the duplicate reports.
 
 Rules:
 
@@ -313,5 +313,22 @@ Shipped: Pedro's marks, in this file only. Delete the Admin page. Settings stay 
 Proven: this file is the record. No product code.
 
 Blockers: none for the decision. Phase 8 does not start during the theme rework.
+
+Questions: none.
+
+### 2026-10-23 — Phase 8 Delete Admin and fold it into the directory
+
+Shipped: The Admin page is gone. `/admin` and `/app/admin` open the team directory. Settings stay on the profile card in the header, and the Settings link now sits with the team items instead of an Administration group. Resources stays in that team group, and its label is Resources, so it is no longer a second Reports link. The old Reports section is labeled Insights, including the bottom-nav short label. There is no ADMIN group and no Admin item. Directory tools follow the permissions a person already has: the whole store needs `directory.view`, vendors need `inventory.view`, adding a vendor needs `inventory.create`, invitations need `manageUsers`, roles need `admin.roles` or `directory.manage`, and the permissions button needs `admin.permissions`. The old Admin insight panel is not mounted on the directory, so Admin has no copy of the reports section. No new permission key.
+
+Proven: `src/app-shell/navigation/bottomNav/bottomNavDestinations.test.ts` and `src/features/employees/utils/directoryTools.test.ts` passed through `node scripts/test-bottom-nav.mjs`. The bottom nav groups are Ops, Inventory, Insights, and Team. There is no ADMIN group, no Administration section, and no `/admin` href. A reports permission does not turn on a directory tool.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk. Open the bottom nav on a wide screen, or More on a phone. There should be no ADMIN group and no Admin item. The group that used to say Reports should say Insights.
+2. Open the profile card in the header. Settings is still there.
+3. Open the team directory as an owner. Invitations, roles, and permissions are available. Vendors is available.
+4. Open the team directory as a manager. The whole store roster is there, and vendors are there. Invite, roles, and the permissions button stay hidden unless those permissions were granted.
+5. Open `/app/admin`. It should leave that address and open the team directory. There should be no Admin page and no second reports list on that screen.
+
+Blockers: none. No migration. Theme phases 23–24 are checked. This was the last unchecked phase in this file.
 
 Questions: none.

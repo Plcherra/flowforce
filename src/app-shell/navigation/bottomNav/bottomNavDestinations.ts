@@ -130,9 +130,8 @@ export interface BottomNavGroup {
 const BOTTOM_NAV_SHORT_LABELS: Record<string, string> = {
   dailyOperations: "Ops",
   inventory: "Inventory",
-  analyticsReports: "Reports",
+  analyticsReports: "Insights",
   team: "Team",
-  adminSetup: "Admin",
 };
 
 export function bottomNavGroupName(

@@ -68,8 +68,7 @@ const PAGE_ROUTES = [
   '/app/recognition',
   '/app/meetings',
   
-  // Admin
-  '/app/admin',
+  // Admin tools now live on the team directory. Settings stays.
   '/app/settings',
   '/app/position-management',
   '/app/sections-permissions',
@@ -100,7 +99,6 @@ const AUTH_REQUIRED = [
   '/app/employees',
   '/app/calendar',
   '/app/operations',
-  '/app/admin',
   '/app/settings',
 ];
 

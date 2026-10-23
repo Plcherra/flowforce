@@ -57,14 +57,27 @@ export function runBottomNavDestinationTests() {
     "AI Insights",
     "Performance",
     "Settings",
-    "Admin",
+    "Resources",
   ]) {
     assert.equal(moreNames.includes(name), true, `${name} should stay in More`);
   }
 
-  for (const name of ["Scheduling", "Tasks", "Messages", "Team Directory"]) {
-    assert.equal(moreNames.includes(name), false, `${name} should stay on the icon row`);
+  for (const name of ["Scheduling", "Tasks", "Messages", "Team Directory", "Admin"]) {
+    assert.equal(moreNames.includes(name), false, `${name} should stay off More`);
   }
+  assert.equal(
+    moreSections.some((section) =>
+      section.items.some((item) => item.href === "/admin" || item.href === "/app/admin"),
+    ),
+    false,
+  );
+  assert.equal(
+    moreSections.some(
+      (section) =>
+        section.title === "Administration" || section.translationKey === "adminSetup",
+    ),
+    false,
+  );
 
   const wideNames = wideBottomNavItems(primary, moreSections).map((item) => item.name);
   assert.equal(wideNames[0], "Dashboard");
@@ -145,7 +158,11 @@ export function runBottomNavDestinationTests() {
   const groups = groupWideBottomNav(asProcessed(), false);
   assert.deepEqual(
     groups.map((group) => bottomNavGroupName((key) => key, group)),
-    ["Ops", "Inventory", "Reports", "Team", "Admin"],
+    ["Ops", "Inventory", "Insights", "Team"],
+  );
+  assert.equal(
+    groups.some((group) => bottomNavGroupName((key) => key, group) === "Admin"),
+    false,
   );
   assert.equal(groups[0]?.items[0]?.name, "Dashboard");
   assert.equal(

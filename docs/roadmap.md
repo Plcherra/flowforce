@@ -4,18 +4,18 @@
 Read this index and open only the feature file marked active.
 `PROJECT-STATUS.md` is the current status of the app.
 
-The 6 AM daily run opens the one row marked active. That row is Theme rework: [docs/features/theme.md](features/theme.md), phases 23–24.
+The 6 AM daily run opens the one row marked active. That row is Tasks phases 25–30: [docs/features/tasks.md](features/tasks.md).
 
-When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. After the theme rework, the handoff is System and Admin phase 8, then Tasks phases 25–30. Do not skip a row.
+When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. After Tasks, the handoff follows the order in the table. Do not skip a row.
 
 ## Order
 
 | # | Feature | Status | File |
 | --- | --- | --- | --- |
 | 1 | Production deploy | done | Commits `8687e0dc` and `791acae7` on `main`. Vercel production for `791acae7` completed. |
-| 2 | Theme rework | active | [docs/features/theme.md](features/theme.md) phases 23–24 |
-| 3 | System and Admin phase 8 | queued | [docs/features/system-admin.md](features/system-admin.md) |
-| 4 | Tasks 25–30 | queued | [docs/features/tasks.md](features/tasks.md) |
+| 2 | Theme rework | done | [docs/features/theme.md](features/theme.md) phases 23–24. Commits `f92f6f51` and `07c0c442`. |
+| 3 | System and Admin phase 8 | done | [docs/features/system-admin.md](features/system-admin.md) |
+| 4 | Tasks 25–30 | active | [docs/features/tasks.md](features/tasks.md) |
 | 5 | Operations | queued | [docs/features/forms-communication.md](features/forms-communication.md) |
 | 6 | Team | queued | Feature file not written yet |
 | 7 | Reports | queued | Feature file not written yet. Pedro's proposed name for this section is Insights. |
@@ -32,15 +32,15 @@ Done. The production build failed from `d51a7be6` because marketing illustration
 
 ### 2. Theme rework
 
-Active. Phases 1–22 stay checked. Phases 23–24 separate the three themes: FlowForce is the white one, Light is a light blue tint or the old teal, and Dark is dark navy or near-black.
+Done. Phases 1–22 stay checked. Phases 23–24 separate the three themes: FlowForce is the white one, Light is a light blue tint, and Dark is dark navy.
 
 ### 3. System and Admin phase 8
 
-Queued until the theme rework is checked. Phase 2 is answered: delete the Admin page, keep settings on the profile card, move Admin tools into the team directory, drop the duplicate reports, call the Reports section Insights, and remove the ADMIN bottom-nav group. Phases 3–7 stay checked.
+Done. Phase 2 is answered: delete the Admin page, keep settings on the profile card, move Admin tools into the team directory, drop the duplicate reports, call the Reports section Insights, and remove the ADMIN bottom-nav group. Phases 3–8 stay checked.
 
 ### 4. Tasks 25–30
 
-Queued until System and Admin phase 8 is checked. Phases 9–12 stay checked as skips. Pedro's answers are phases 25–30. Languages and Time Off stay done.
+Active. Phases 9–12 stay checked as skips. Pedro's answers are phases 25–30. Languages and Time Off stay done.
 
 ### 5. Operations
 

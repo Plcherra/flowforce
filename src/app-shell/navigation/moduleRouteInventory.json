@@ -353,16 +353,6 @@
       "notes": "Hidden until learning/training scope is selected."
     },
     {
-      "label": "Admin",
-      "path": "/app/admin",
-      "status": "beta",
-      "sidebar": true,
-      "smoke": false,
-      "owner": "src/features/admin",
-      "dataDependency": "tenant role/profile tables",
-      "notes": "Admin work is routed through Team and Settings for v1."
-    },
-    {
       "label": "Invite Employee",
       "path": "/app/invite-employee",
       "status": "deprecated",

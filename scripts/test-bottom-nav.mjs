@@ -13,6 +13,10 @@ const importTs = jiti(import.meta.url, {
 const { runBottomNavDestinationTests } = importTs(
   "../src/app-shell/navigation/bottomNav/bottomNavDestinations.test.ts",
 );
+const { runDirectoryToolsTests } = importTs(
+  "../src/features/employees/utils/directoryTools.test.ts",
+);
 
 runBottomNavDestinationTests();
+runDirectoryToolsTests();
 console.log("bottom nav destination tests passed");

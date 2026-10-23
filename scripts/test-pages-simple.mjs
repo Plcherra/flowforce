@@ -26,7 +26,6 @@ const PAGE_ROUTES = [
   '/app/operations',
   '/app/analytics',
   '/app/reports',
-  '/app/admin',
   '/app/settings',
   '/app/expenses',
   '/app/enhanced-scheduling',
