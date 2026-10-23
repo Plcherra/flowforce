@@ -685,6 +685,139 @@ Done when:
 
 Prove: Unit test the default scope and a grant that adds levels or users, then a revoke that removes only the grant. Run it with `npm run test:product-roles` and `npm run check:roles`.
 
+### Phase 31 — My shift lists
+
+- [x] Show today's opening, daily, and closing lists, carried notes, and weekday tasks.
+
+Rules:
+
+- Files: `src/features/tasks/utils/myShiftView.ts`, `src/features/tasks/utils/myShiftView.test.ts`, `src/features/tasks/components/MyShiftTasks.tsx`, `src/features/tasks/components/TasksBoardSwitch.tsx`, `src/features/tasks/hooks/useMyShiftBoard.ts`, `src/features/tasks/pages/Tasks.tsx`.
+- Tasks opens on My shift. All tasks stays one tap away.
+- A cashier shift shows the cashier forms. A supervisor shift shows the supervisor forms. The form is the list. Open list opens the existing form.
+- Notes from the latest closing submission before this shift show at the top of opening, and only for the next person on that area. A clean close adds nothing.
+- A weekday task for this area and this weekday shows under the lists. It is not inside opening, daily, or closing.
+- A shift whose role and title are neither cashier nor supervisor says it has no lists.
+
+Done when:
+
+- My shift is the first screen on Tasks.
+- Opening shows a carried note above the list. Daily and closing do not.
+- A Friday supervisor shift shows the US Foods weekday task. A cashier shift does not.
+
+Prove: Unit test `src/features/tasks/utils/myShiftView.test.ts`, including a render of the shift screen. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 32 — Complete a list and leave a closing note
+
+- [ ] Check items on the shift list, and save a note on closing.
+
+Rules:
+
+- Depends on phase 31.
+- Files: a new helper next to the tasks feature, `MyShiftTasks.tsx`, and `useMyShiftBoard.ts`.
+- Checking an item saves a form submission for that list. The field id is true when the item is done.
+- Closing has a note box. A non-blank note is stored as `additional_information` on that submission, with the current answers. A blank note does not write `additional_information`.
+- The list shows the latest submission by the signed-in person during this shift.
+- Do not add a migration.
+
+Done when:
+
+- Marking an item done is what the next load of that submission shows.
+- A closing note is stored. Saving a blank note does not add one.
+
+Prove: Unit test the submission body. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 33 — Attach lists to a role
+
+- [ ] Let a manager point each area and slot at a form.
+
+Rules:
+
+- Depends on phase 31. Visible when `manageForms` is on.
+- Files: a new helper next to the forms feature, a setup component, and `Tasks.tsx`.
+- Six slots: cashier and supervisor, each opening, daily, and closing. Each slot picks one company form, or none.
+- Saving writes `settings.checklist` on that form and clears the same area and slot from any other form. Other settings keys stay.
+
+Done when:
+
+- Choosing a form for cashier opening addresses that form, and a second form no longer keeps that slot.
+- Clearing the slot leaves the form without a checklist address.
+
+Prove: Unit test the assign and clear. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 34 — Weekday task on a role's shift
+
+- [ ] Let a manager add a standalone task for chosen weekdays and store stations.
+
+Rules:
+
+- Depends on phase 31. Visible when `editTasks` is on.
+- The form asks for a title, cashier or supervisor, the weekdays, and front of house, back of house, or both.
+- Saving creates a task with `source` `schedule` and `links.shiftWeekdayTask`. The slot stays null. At least one weekday and one station are required.
+- That task shows on My shift when the area and the weekday match.
+
+Done when:
+
+- The US Foods shape is supervisor, Monday, Wednesday, Friday, both stations, and on no list.
+- It shows for a supervisor on Friday and not for a cashier.
+
+Prove: Unit test the saved links and the My shift match. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 35 — Accept, edit, or dismiss an AI draft
+
+- [ ] Show drafts from closing notes, and let a manager accept, edit, or dismiss each one.
+
+Rules:
+
+- Depends on phase 31. Visible when `editTasks` or `ai.actions.approve` is on.
+- Use `draftTasksFromClosingNotes` and the existing Grok helper. Do not add a provider. Do not call the live model from the test.
+- Accept inserts one published task for the draft's person, `source` `form`, status todo. Edit changes the title and description before that. Dismiss drops the draft and does not insert assigned work.
+- A clean closing list produces no draft.
+
+Done when:
+
+- A note can become a draft in the inbox.
+- Accept publishes it. Dismiss does not. Edit keeps the changed title.
+
+Prove: Unit test accept, edit, and dismiss with a fake draft. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 36 — Assignees follow the creation scope
+
+- [ ] The create dialog lists only the people the signed-in scope allows.
+
+Rules:
+
+- Depends on phase 30. Files: a new helper next to the tasks feature, `CreateTaskDialog.tsx`, and the assignee loader.
+- Included people are the signed-in user when the scope includes self, people whose hierarchy level is in the scope levels, and people named by id. A revoked grant does not add anyone.
+- Level 1 shows Assigned to you. Level N includes self and level N-1. A grant adds levels or people on top of that default. Revoking the grant removes only the grant.
+
+Done when:
+
+- Level 1 sees only themselves.
+- Level 3 with a grant for levels 3 and 4 sees self, level 2, level 3, and level 4.
+- After that grant is revoked, level 3 sees self and level 2.
+
+Prove: Unit test those three cases. Run it with `node scripts/test-tasks-page.mjs`.
+
+### Phase 37 — Grant and revoke task creation on the employee card
+
+- [ ] Edit task-creation scope, including the right to grant, on the existing access card.
+
+Rules:
+
+- Depends on phase 30 and phase 36. Do not add a second permission screen. Do not add a migration.
+- The section sits on the employee access card, beside the task create levels that are already there.
+- The owner can grant levels, people, and the right to grant. A person who has the right to grant can grant levels and people. They cannot pass on the right to grant.
+- Revoke marks that grant revoked and leaves every other grant in place.
+- Store the grants on `companies.template_config.taskCreateGrants`. Saving goes through an API route so the granter does not need the company-admin update. Other template config keys stay.
+
+Done when:
+
+- An owner can give Marcus the right to grant, and Marcus can let John create for levels 3 and 4.
+- Revoking John's grant leaves Marcus's right to grant in place.
+- A person without the right to grant cannot save a grant.
+
+Prove: Unit test the stored grants, the owner grant, Marcus's grant, and the revoke. Run it with `node scripts/test-tasks-page.mjs`.
+
 ## Open questions
 
 None. Owner answers 24, 25, and 26 record the earlier three. Pedro answered the phase 9–12 questions on 2026-10-22:
@@ -1177,5 +1310,23 @@ Phone steps for Pedro:
 2. Cashier and supervisor each have opening, daily, and closing. A later phase attaches those lists to the shift.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 31 My shift lists
+
+Shipped: Tasks opens on My shift. A cashier shift shows the cashier opening, daily, and closing forms. A supervisor shift shows the supervisor forms. Open list opens the existing form. A note from the latest closing submission before this shift sits at the top of opening for the next person in that area. A clean close adds nothing. A weekday task for this area and weekday sits under the lists, not inside them. All tasks is one tap away.
+
+Proven: Unit test `src/features/tasks/utils/myShiftView.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the cashier lists, the carried note, a clean supervisor Friday with the delivery task, and a render of the screen. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks.
+2. My shift should be selected. If you are on a cashier shift today, you should see Opening, Daily, and Closing.
+3. If yesterday's close had a note, it should sit at the top of Opening, under From last close.
+4. Tap Open list on one of those. The existing form should open.
+5. Tap All tasks. The task list, status row, and readiness counts should be there.
+6. On a Friday supervisor shift, Organize the US Foods delivery should sit under the lists when that weekday task exists. It should not sit inside Opening, Daily, or Closing.
+
+Blockers: none. No migration. Phases 32–37 are written in this file and are not built yet.
 
 Questions: none.

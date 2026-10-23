@@ -38,6 +38,9 @@ import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
+import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
+import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
+import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -62,6 +65,8 @@ const RemindersPanel = lazy(() =>
     default: module.RemindersPanel,
   })),
 );
+
+const FormFillDialog = lazy(() => import("@/features/forms/components/FormFillDialog"));
 
 type TaskListItem = TaskWithRelations & { id: string };
 
@@ -88,6 +93,9 @@ export default function Tasks() {
     [tasks, user?.id],
   );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [boardMode, setBoardMode] = useState<"shift" | "all">("shift");
+  const [openFormId, setOpenFormId] = useState<string | null>(null);
+  const shiftBoard = useMyShiftBoard(visibleTasks);
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
     null,
   );
@@ -199,13 +207,19 @@ export default function Tasks() {
         </div>
       </div>
 
+      <TasksBoardSwitch mode={boardMode} onChange={setBoardMode} />
       <ListIssueSync />
-      <ListIssueGather
-        tasks={tasks}
-        onMarkDone={(taskId) => {
-          void updateTask(taskId, { status: "completed" }).then(() => refetchTasks());
-        }}
-      />
+      {boardMode === "shift" ? (
+        <MyShiftTasks board={shiftBoard} onOpenList={setOpenFormId} />
+      ) : null}
+      {boardMode === "all" ? (
+        <ListIssueGather
+          tasks={tasks}
+          onMarkDone={(taskId) => {
+            void updateTask(taskId, { status: "completed" }).then(() => refetchTasks());
+          }}
+        />
+      ) : null}
 
       {!loading && error && (
         <Alert
@@ -226,6 +240,7 @@ export default function Tasks() {
         </Alert>
       )}
 
+      {boardMode === "all" ? (
       <TaskViewSection
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
@@ -243,15 +258,19 @@ export default function Tasks() {
         onReadinessFilterChange={setReadinessFilter}
         readinessCounts={viewReadinessCounts}
       />
+      ) : null}
 
+      {boardMode === "all" ? (
       <TaskExecutionReadinessPanel
         tasks={statusScopedTasks}
         onOpenTask={openTask}
       />
+      ) : null}
       {showCreateMenu ? (
         <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
       ) : null}
 
+      {boardMode === "all" ? (
       <div className="space-y-4">
         {visibleTasks.length === 0 || listedTasks.length === 0 ? (
           <TaskEmptyState
@@ -290,6 +309,19 @@ export default function Tasks() {
           </Suspense>
         </div>
       </div>
+      ) : null}
+
+      <Suspense fallback={null}>
+        {openFormId ? (
+          <FormFillDialog
+            open
+            formId={openFormId}
+            onOpenChange={(next) => {
+              if (!next) setOpenFormId(null);
+            }}
+          />
+        ) : null}
+      </Suspense>
 
       <Suspense fallback={null}>
         {showCreateDialog && showCreateMenu && (
