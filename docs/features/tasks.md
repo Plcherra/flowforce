@@ -582,7 +582,7 @@ Prove: Unit test `src/features/roles/constants/permissionAccessTypes.test.ts`. R
 
 ### Phase 25 — Checklists are forms for an area
 
-- [ ] Store opening, daily, and closing checklists as forms for an area.
+- [x] Store opening, daily, and closing checklists as forms for an area.
 
 Rules:
 
@@ -1088,5 +1088,19 @@ Shipped: phases 25–30 in this file. No product code. Checklists are forms per 
 Proven: this file is the plan.
 
 Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
+
+### 2026-10-23 — Phase 25 Checklists are forms for an area
+
+Shipped: Opening, daily, and closing checklists are forms. Cashier and supervisor each have those three slots. The address lives on the form settings as area and slot, beside any existing settings such as the content language. Lookup uses that address. There is no checklist table and no new task type.
+
+Proven: Unit test `src/features/forms/utils/checklistForms.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the six slots, a lookup by area and slot, and a form that is not a checklist. It passed.
+
+Phone steps for Pedro:
+1. This phase stores the checklist address on a form. It does not add a new screen.
+2. Cashier and supervisor each have opening, daily, and closing. A later phase attaches those lists to the shift.
+
+Blockers: none. No migration.
 
 Questions: none.
