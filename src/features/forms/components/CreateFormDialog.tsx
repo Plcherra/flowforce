@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,20 +8,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertTriangle,
   BookOpen,
   Calendar,
   Clock,
-  Edit,
   FileText,
   Loader2,
   Star,
   Upload,
   Users,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
@@ -41,7 +40,6 @@ interface CreateFormDialogProps {
   onPreferredMethodHandled?: () => void;
 }
 
-type CreationStep = "select-method" | "template-selection" | "file-upload";
 type TemplateField = Omit<
   FormFieldRow,
   "id" | "form_id" | "created_at" | "updated_at"
@@ -368,18 +366,14 @@ export default function CreateFormDialog({
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState<CreationStep>("select-method");
-  const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(
-    null,
-  );
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
   const [creating, setCreating] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetDialog = () => {
-    setCurrentStep("select-method");
-    setSelectedTemplate(null);
-    setUploadedFile(null);
+    setTitle("");
     setCreating(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleClose = (open: boolean) => {
@@ -393,14 +387,12 @@ export default function CreateFormDialog({
     async (
       title: string = "New Form",
       description: string = "",
-      options?: { fromFile?: boolean; templateFields?: TemplateField[] },
+      options?: { file?: File; templateFields?: TemplateField[] },
     ) => {
       setCreating(true);
       try {
-        if (options?.fromFile) {
-          if (!uploadedFile) {
-            throw new Error("No file selected for import");
-          }
+        const importedFile = options?.file;
+        if (importedFile) {
           if (!user) {
             throw new Error(
               "You must be signed in to import forms from files.",
@@ -412,18 +404,17 @@ export default function CreateFormDialog({
           }
 
           const { form } = await importFormFromFile(
-            uploadedFile,
+            importedFile,
             user.id,
             companyId,
             appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
           );
-          setUploadedFile(null);
           onFormCreated?.(form.id);
           resetDialog();
           onOpenChange(false);
           toast({
-            title: "Form imported",
-            description: `${uploadedFile.name} is ready for refinement.`,
+            title: t("forms.formImported"),
+            description: t("forms.fileReadyToEdit", { name: importedFile.name }),
           });
           return;
         }
@@ -475,29 +466,18 @@ export default function CreateFormDialog({
       profile?.companyId,
       profile?.company_id,
       saveFormFields,
+      t,
       toast,
-      uploadedFile,
       user,
     ],
   );
 
   useEffect(() => {
-    if (!open || !preferredMethod || creating) return;
-
-    if (preferredMethod === "blank") {
-      void (async () => {
-        await createFormAndStartBuilder();
-        onPreferredMethodHandled?.();
-      })();
-      return;
-    }
-
-    if (preferredMethod === "template") {
-      setCurrentStep("template-selection");
-    } else if (preferredMethod === "upload") {
-      setCurrentStep("file-upload");
-    }
-    onPreferredMethodHandled?.();
+    if (!open || preferredMethod !== "blank" || creating) return;
+    void (async () => {
+      await createFormAndStartBuilder();
+      onPreferredMethodHandled?.();
+    })();
   }, [
     open,
     preferredMethod,
@@ -506,299 +486,117 @@ export default function CreateFormDialog({
     onPreferredMethodHandled,
   ]);
 
+  useEffect(() => {
+    if (!open || preferredMethod !== "upload") return;
+    fileInputRef.current?.click();
+    onPreferredMethodHandled?.();
+  }, [open, preferredMethod, onPreferredMethodHandled]);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (creating) return;
     const file = event.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-    }
+    if (!file) return;
+    const importedTitle = file.name.replace(/\.[^/.]+$/, "");
+    void createFormAndStartBuilder(title.trim() || importedTitle, "", { file });
   };
-
-  const renderMethodSelection = () => {
-    const methods: Array<{
-      id: string;
-      title: string;
-      description: string;
-      icon: LucideIcon;
-      onSelect: () => void;
-      badge?: string;
-    }> = [
-      {
-        id: "scratch",
-        title: "Start from scratch",
-        description: "Create a custom form from the ground up",
-        icon: Edit,
-        onSelect: () => {
-          void createFormAndStartBuilder();
-        },
-      },
-      {
-        id: "template",
-        title: "Use a template",
-        description: "Choose from pre-built form templates",
-        icon: FileText,
-        onSelect: () => setCurrentStep("template-selection"),
-      },
-      {
-        id: "upload",
-        title: "Create from file",
-        description: "Upload a document to generate a form",
-        icon: Upload,
-        badge: "Beta",
-        onSelect: () => setCurrentStep("file-upload"),
-      },
-    ];
-
-    const isDisabled = creating;
-
-    return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <h3 className="mb-2 text-lg font-semibold">
-            {t("forms.howWouldYouLikeToCreateYourForm")}</h3>
-          <p className="text-sm text-muted-foreground">
-            {t("forms.chooseTheMethodThatWorksBestForYou")}</p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          {methods.map((method) => {
-            const Icon = method.icon;
-            const handleActivate = () => {
-              if (isDisabled) return;
-              method.onSelect();
-            };
-
-            return (
-              <Card
-                key={method.id}
-                role="button"
-                tabIndex={isDisabled ? -1 : 0}
-                aria-disabled={isDisabled}
-                className={`relative h-full min-h-[220px] border-2 transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${
-                  isDisabled
-                    ? "pointer-events-none cursor-not-allowed opacity-60"
-                    : "hover:border-primary/20 hover:shadow-md"
-                }`}
-                onClick={handleActivate}
-                onKeyDown={(event) => {
-                  if (isDisabled) return;
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    method.onSelect();
-                  }
-                }}
-              >
-                <CardContent className="flex h-full flex-col items-center gap-4 p-6 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-base font-semibold">{method.title}</h4>
-                    <CardDescription>{method.description}</CardDescription>
-                  </div>
-                  {method.badge && (
-                    <Badge
-                      variant="secondary"
-                      className="mt-auto text-xs uppercase tracking-wide"
-                    >
-                      {method.badge}
-                    </Badge>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderTemplateSelection = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentStep("select-method")}
-          disabled={creating}
-        >
-          {t("forms.back")}</Button>
-        <div>
-          <h3 className="text-lg font-semibold">{t("forms.chooseATemplate")}</h3>
-          <p className="text-muted-foreground">
-            {t("forms.selectAPreBuiltFormToGetStartedQuickly")}</p>
-        </div>
-      </div>
-
-      <div className="grid max-h-96 grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
-        {formTemplates.map((template) => {
-          const isSelected = selectedTemplate?.id === template.id;
-          const Icon = template.icon;
-          return (
-            <Card
-              key={template.id}
-              className={`cursor-pointer border-2 transition-shadow hover:shadow-md ${
-                isSelected ? "border-primary" : "hover:border-primary/20"
-              } ${creating ? "pointer-events-none opacity-60" : ""}`}
-              onClick={() => {
-                if (creating) return;
-                setSelectedTemplate(template);
-              }}
-            >
-              <CardContent className="p-4">
-                <div className="mb-3 flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10">
-                      <Icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold">{template.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {template.category}
-                      </Badge>
-                    </div>
-                  </div>
-                  {template.popular && (
-                    <Badge variant="secondary" className="text-xs">
-                      {t("forms.popular")}</Badge>
-                  )}
-                </div>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  {template.description}
-                </p>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
-                    {t("forms.fieldCount", {
-                      count: template.fieldPresets.length || template.fieldCount,
-                    })}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {selectedTemplate && (
-        <div className="flex justify-end">
-          <Button
-            onClick={() =>
-              createFormAndStartBuilder(
-                selectedTemplate.name,
-                selectedTemplate.description,
-                { templateFields: selectedTemplate.fieldPresets },
-              )
-            }
-            disabled={creating}
-          >
-            {creating && (
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            )}
-            {t("forms.useTemplate", { name: selectedTemplate.name })}
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderFileUpload = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCurrentStep("select-method")}
-          disabled={creating}
-        >
-          {t("forms.back")}</Button>
-        <div>
-          <h3 className="text-lg font-semibold">{t("forms.uploadAFile")}</h3>
-          <p className="text-muted-foreground">
-            {t("forms.uploadADocumentAndWeLlGenerateAFormBasedOnIt")}</p>
-        </div>
-      </div>
-
-      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-        <input
-          type="file"
-          id="file-upload"
-          accept=".pdf,.doc,.docx,.txt"
-          onChange={handleFileUpload}
-          className="hidden"
-          disabled={creating}
-        />
-        <label
-          htmlFor="file-upload"
-          className={`cursor-pointer ${creating ? "pointer-events-none opacity-60" : ""}`}
-        >
-          <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h4 className="font-semibold mb-2">{t("forms.chooseAFileToUpload")}</h4>
-          <p className="text-muted-foreground mb-4">
-            {t("forms.supportForPdfDocDocxAndTxtFiles")}</p>
-          <Button type="button" variant="outline" disabled={creating}>
-            {t("forms.browseFiles")}</Button>
-        </label>
-      </div>
-
-      {uploadedFile && (
-        <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-          <FileText className="h-5 w-5" />
-          <span className="flex-1 text-sm">{uploadedFile.name}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setUploadedFile(null);
-            }}
-            disabled={creating}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
-      {uploadedFile && (
-        <div className="flex justify-end">
-          <Button
-            onClick={() =>
-              createFormAndStartBuilder(
-                uploadedFile.name.replace(/\.[^/.]+$/, ""),
-                "",
-                { fromFile: true },
-              )
-            }
-            disabled={creating}
-          >
-            {creating && (
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            )}
-            {t("forms.continueWithFile")}</Button>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="top-4 flex max-h-[calc(100dvh-2rem)] w-[min(56rem,calc(100vw-2rem))] translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-[56rem]">
-        <div className="flex max-h-full flex-1 flex-col">
-          <DialogHeader className="space-y-2 border-b px-6 py-6">
+      <DialogContent className="top-4 flex max-h-[calc(100dvh-2rem)] w-[min(40rem,calc(100vw-1.5rem))] translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:max-w-[40rem]">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <DialogHeader className="space-y-1 border-b px-4 py-3">
             <DialogTitle>{t("forms.createNewForm")}</DialogTitle>
             <DialogDescription>
-              {t("forms.createANewFormToCollectDataFromYourTeamOrCustomers")}</DialogDescription>
+              {t("forms.createFormDirectlyHelp")}
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            {currentStep === "select-method" && renderMethodSelection()}
-            {currentStep === "template-selection" && renderTemplateSelection()}
-            {currentStep === "file-upload" && renderFileUpload()}
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3">
+            <div className="space-y-2">
+              <Label htmlFor="new-form-title">{t("forms.formTitle")}</Label>
+              <Input
+                id="new-form-title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder={t("forms.enterFormTitle")}
+                disabled={creating}
+              />
+              <Button
+                type="button"
+                className="min-h-11"
+                disabled={creating}
+                onClick={() =>
+                  void createFormAndStartBuilder(title.trim() || t("forms.newForm"))
+                }
+              >
+                {creating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : null}
+                {t("forms.createForm")}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">{t("forms.templates")}</h3>
+              <ul className="divide-y rounded-md border">
+                {formTemplates.map((template) => {
+                  const Icon = template.icon;
+                  return (
+                    <li key={template.id} className="flex items-center gap-2 px-3 py-2">
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{template.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">{template.description}</p>
+                      </div>
+                      {template.popular ? (
+                        <Badge variant="secondary" className="hidden sm:inline-flex">
+                          {t("forms.popular")}
+                        </Badge>
+                      ) : null}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="min-h-11 shrink-0"
+                        disabled={creating}
+                        onClick={() =>
+                          void createFormAndStartBuilder(
+                            template.name,
+                            template.description,
+                            { templateFields: template.fieldPresets },
+                          )
+                        }
+                      >
+                        {t("forms.loadTemplate")}
+                      </Button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">{t("forms.importFromFile")}</h3>
+              <p className="text-xs text-muted-foreground">{t("forms.importFileTypes")}</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.pdf,.doc,.docx,.txt"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={creating}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11"
+                disabled={creating}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                {t("forms.importFromFile")}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -806,7 +604,8 @@ export default function CreateFormDialog({
           <div className="pointer-events-auto absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              {t("forms.preparingYourForm")}</div>
+              {t("forms.preparingYourForm")}
+            </div>
           </div>
         )}
       </DialogContent>

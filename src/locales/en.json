@@ -3109,7 +3109,15 @@
     "noFormsAvailable": "No forms available.",
     "noSharedFormsYet": "No shared forms yet.",
     "viewSubmissions": "View submissions",
-    "unableToLoadSubmissions": "Unable to load submissions."
+    "unableToLoadSubmissions": "Unable to load submissions.",
+    "createFormDirectlyHelp": "Create the form, load a template, or import a file.",
+    "createForm": "Create form",
+    "templates": "Templates",
+    "loadTemplate": "Load",
+    "importFromFile": "Import from file",
+    "importFileTypes": "CSV, PDF, DOC, DOCX, or TXT. A CSV header row becomes the fields.",
+    "formImported": "Form imported",
+    "fileReadyToEdit": "{{name}} is ready to edit."
   },
   "updates": {
     "1Week": "1 week",

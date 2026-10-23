@@ -6,6 +6,7 @@ import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { withFormSourceLocale } from "@/features/forms/formContentFields";
 import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
 import { logger } from "@/utils/logger";
+import { fieldsFromCsv } from "@/features/forms/utils/csvFormFields";
 
 export interface FormImportResult {
   form: Tables<"forms">;
@@ -54,6 +55,9 @@ export async function importFormFromFile(
   let documentId: string | undefined;
   let storagePath: string | undefined;
   let extractedSnippet: string | undefined;
+  const csvLabels = file.name.toLowerCase().endsWith(".csv")
+    ? fieldsFromCsv(await file.text())
+    : [];
 
   try {
     const { document, storagePath: storedPath } = await uploadReportFile(file, {
@@ -118,7 +122,18 @@ export async function importFormFromFile(
     });
   }
 
-  await createDefaultFields(form.id, baseName);
+  if (csvLabels.length > 0) {
+    await supabase.from("form_fields").insert(
+      csvLabels.map((label, index) => ({
+        form_id: form.id,
+        label,
+        field_type: "text" as const,
+        field_order: index + 1,
+      })),
+    );
+  } else {
+    await createDefaultFields(form.id, baseName);
+  }
 
   if (documentId && extractedSnippet) {
     await supabase

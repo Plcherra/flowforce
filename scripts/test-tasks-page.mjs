@@ -100,6 +100,9 @@ const { runShiftLinkedFormsTests } = importTs(
 const { runFormsSurfaceTests } = importTs(
   "../src/features/forms/utils/formsSurface.test.ts",
 );
+const { runCsvFormFieldsTests } = importTs(
+  "../src/features/forms/utils/csvFormFields.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -131,4 +134,5 @@ runFormShiftLinkTests();
 runTodayShiftMonitorTests();
 runShiftLinkedFormsTests();
 runFormsSurfaceTests();
+runCsvFormFieldsTests();
 console.log("tasks page tests passed");

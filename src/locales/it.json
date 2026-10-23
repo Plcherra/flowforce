@@ -3109,7 +3109,15 @@
     "noFormsAvailable": "Nessun modulo disponibile.",
     "noSharedFormsYet": "Nessun modulo condiviso.",
     "viewSubmissions": "Vedi le risposte",
-    "unableToLoadSubmissions": "Impossibile caricare le risposte."
+    "unableToLoadSubmissions": "Impossibile caricare le risposte.",
+    "createFormDirectlyHelp": "Crea il modulo, carica un modello o importa un file.",
+    "createForm": "Crea modulo",
+    "templates": "Modelli",
+    "loadTemplate": "Carica",
+    "importFromFile": "Importa da file",
+    "importFileTypes": "CSV, PDF, DOC, DOCX o TXT. La prima riga di un CSV diventa i campi.",
+    "formImported": "Modulo importato",
+    "fileReadyToEdit": "{{name}} è pronto per la modifica."
   },
   "updates": {
     "1Week": "1 settimana",

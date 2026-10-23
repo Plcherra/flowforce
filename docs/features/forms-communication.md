@@ -35,7 +35,7 @@ Prove: `src/features/forms/utils/formsSurface.test.ts`, run with `node scripts/t
 
 ### Phase 2 — One create flow
 
-- [ ] New form opens one screen: create directly, pick a template on that screen, or import a file.
+- [x] New form opens one screen: create directly, pick a template on that screen, or import a file.
 
 Rules:
 
@@ -74,6 +74,22 @@ Phone and desktop steps for Pedro:
 2. On a phone, swipe the form table sideways. The header and the bottom nav should stay put.
 3. Tap the list icon on a form. Submissions should open and scroll. If they cannot load, the dialog says so.
 4. Edit a form. On a phone, Library, Form editor, and Live preview are three buttons. Each one scrolls. On a desktop, the three columns stay, and each column scrolls.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 2 One create flow
+
+Shipped: New form is one screen. Create form opens the editor. Templates sit on that screen and load their fields. Import from file accepts CSV, PDF, DOC, DOCX, and TXT. A CSV header row becomes one text field per column. The three method cards are gone.
+
+Proven: `src/features/forms/utils/csvFormFields.test.ts` passed through `node scripts/test-tasks-page.mjs`. A header `Name,"Clean, downstairs",Notes` becomes those three labels. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone and desktop steps for Pedro:
+1. Open Forms and tap New form. You should see a title, Create form, a template list, and Import from file. The three cards should be gone.
+2. Type a title and tap Create form. The editor should open.
+3. Start again and tap Load on a template. The editor should open with that template’s fields.
+4. Import a CSV whose first row is the column names. Those names should be the fields.
 
 Blockers: none. No migration.
 

@@ -3109,7 +3109,15 @@
     "noFormsAvailable": "No hay formularios disponibles.",
     "noSharedFormsYet": "Aún no hay formularios compartidos.",
     "viewSubmissions": "Ver respuestas",
-    "unableToLoadSubmissions": "No se pudieron cargar las respuestas."
+    "unableToLoadSubmissions": "No se pudieron cargar las respuestas.",
+    "createFormDirectlyHelp": "Crea el formulario, carga una plantilla o importa un archivo.",
+    "createForm": "Crear formulario",
+    "templates": "Plantillas",
+    "loadTemplate": "Cargar",
+    "importFromFile": "Importar desde archivo",
+    "importFileTypes": "CSV, PDF, DOC, DOCX o TXT. La primera fila de un CSV se convierte en los campos.",
+    "formImported": "Formulario importado",
+    "fileReadyToEdit": "{{name}} está listo para editar."
   },
   "updates": {
     "1Week": "1 semana",
