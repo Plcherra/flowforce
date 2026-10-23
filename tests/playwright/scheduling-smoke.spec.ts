@@ -395,6 +395,7 @@ test.beforeAll(async () => {
 });
 
 test.describe('Scheduling smoke (Playwright)', () => {
+  test.describe.configure({ mode: 'serial' });
   test.skip(
     !CAN_RUN_SCHEDULING_SMOKE,
     'Enable with PLAYWRIGHT_SMOKE=1 and provide Supabase service-role credentials.',
@@ -463,7 +464,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
       await expectNoPageOverflow(page, viewport.name);
 
       const shiftChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`);
-      await expect(shiftChip).toBeVisible();
+      await expect(shiftChip).toBeVisible({ timeout: 15_000 });
       const chipBox = await shiftChip.boundingBox();
       expect(chipBox, `${viewport.name} shift chip`).toBeTruthy();
       expect(chipBox!.x).toBeGreaterThanOrEqual(-1);

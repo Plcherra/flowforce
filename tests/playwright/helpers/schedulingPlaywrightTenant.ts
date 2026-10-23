@@ -36,7 +36,7 @@ async function upsertAuthUser(
     role: params.role,
   };
 
-  const { error: createError } = await admin.auth.admin.createUser({
+  const payload = {
     id: params.id,
     email: params.email,
     password: params.password,
@@ -46,24 +46,35 @@ async function upsertAuthUser(
       company_id: params.companyId,
       active_company_id: params.companyId,
     },
-  });
+  };
 
-  if (createError) {
-    const alreadyExists =
-      createError.message.toLowerCase().includes('already') ||
-      createError.message.toLowerCase().includes('registered');
-    if (!alreadyExists) throw createError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { error: createError } = await admin.auth.admin.createUser(payload);
+      if (!createError) return;
 
-    const { error: updateError } = await admin.auth.admin.updateUserById(
-      params.id,
-      {
+      const alreadyExists =
+        createError.message.toLowerCase().includes('already') ||
+        createError.message.toLowerCase().includes('registered');
+      if (!alreadyExists) throw createError;
+
+      const { error: updateError } = await admin.auth.admin.updateUserById(params.id, {
         email: params.email,
         password: params.password,
         email_confirm: true,
         user_metadata: metadata,
-      },
-    );
-    if (updateError) throw updateError;
+      });
+      if (updateError) throw updateError;
+      return;
+    } catch (error) {
+      const name = error instanceof Error ? error.name : '';
+      const message = error instanceof Error ? error.message : '';
+      const retryable =
+        name === 'AuthRetryableFetchError' ||
+        /fetch failed|ECONNRESET|ETIMEDOUT|timeout/i.test(message);
+      if (!retryable || attempt === 2) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+    }
   }
 }
 
