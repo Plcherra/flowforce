@@ -33,17 +33,21 @@ import {
   withTaskPoints,
   type TaskPublishState,
 } from "@/features/tasks/utils/taskSchedule";
+import type { TaskCreateScope } from "@/features/roles/constants/taskCreateScope";
+import { peopleWithinTaskCreateScope } from "@/features/tasks/utils/taskAssigneeScope";
 
 interface CreateTaskDialogProps {
   open: boolean;
   onClose: () => void;
   createLevel?: "self" | "others";
+  scope?: TaskCreateScope | null;
 }
 
 export function CreateTaskDialog({
   open,
   onClose,
   createLevel = "others",
+  scope = null,
 }: CreateTaskDialogProps) {
   const { t } = useTranslation();
   const { createTask } = useTasks();
@@ -71,6 +75,22 @@ export function CreateTaskDialog({
     goal_id: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const allowedAssignees =
+    scope && user
+      ? peopleWithinTaskCreateScope({
+          selfId: user.id,
+          scope,
+          people: assignees.map((person) => ({
+            id: person.id,
+            level: person.level,
+            name: `${person.first_name} ${person.last_name}`.trim(),
+          })),
+        })
+      : [];
+  const onlySelf =
+    createLevel === "self" ||
+    !scope ||
+    allowedAssignees.every((person) => person.id === user?.id);
 
   useEffect(() => {
     if (!optionsError) return;
@@ -116,6 +136,9 @@ export function CreateTaskDialog({
     const nextErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
       nextErrors.title = t("tasks.aTitleIsRequired");
+    }
+    if (!onlySelf && scope && !formData.assigned_to) {
+      nextErrors.assigned_to = t("tasks.chooseAssignee");
     }
     if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
       nextErrors.points = t("tasks.pointsMustBeWholeNumber");
@@ -170,12 +193,11 @@ export function CreateTaskDialog({
           }),
           points,
         ),
-        assigned_to:
-          createLevel === "self"
-            ? user.id
-            : formData.assigned_to
-              ? formData.assigned_to
-              : null,
+        assigned_to: onlySelf
+          ? user.id
+          : formData.assigned_to
+            ? formData.assigned_to
+            : null,
         departmentid: null,
         tags: null,
         attachments: [],
@@ -304,7 +326,7 @@ export function CreateTaskDialog({
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {createLevel === "self" ? (
+            {onlySelf ? (
               <div className="space-y-2">
                 <Label>{t("tasks.assignTo")}</Label>
                 <p className="text-sm text-muted-foreground">{t("tasks.assignedToYou")}</p>
@@ -332,15 +354,20 @@ export function CreateTaskDialog({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">{t("tasks.unassigned")}</SelectItem>
-                  {assignees.map((assignee) => (
+                  {scope ? null : (
+                    <SelectItem value="none">{t("tasks.unassigned")}</SelectItem>
+                  )}
+                  {allowedAssignees.map((assignee) => (
                     <SelectItem key={assignee.id} value={assignee.id}>
-                      {assignee.first_name} {assignee.last_name}
+                      {assignee.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
-            </div>
+                </Select>
+                {errors.assigned_to ? (
+                  <p className="text-sm text-destructive">{errors.assigned_to}</p>
+                ) : null}
+              </div>
             )}
 
             <div className="space-y-2">

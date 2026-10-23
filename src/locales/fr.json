@@ -2776,7 +2776,8 @@
     "draftAccepted": "Brouillon accepté",
     "draftDismissed": "Brouillon écarté",
     "draftsReady": "Les brouillons sont prêts",
-    "unableToDraft": "Impossible de créer les brouillons"
+    "unableToDraft": "Impossible de créer les brouillons",
+    "chooseAssignee": "Choisissez une personne que ce périmètre permet."
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",

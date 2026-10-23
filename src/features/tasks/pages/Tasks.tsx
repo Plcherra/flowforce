@@ -44,6 +44,7 @@ import { WeekdayTaskSetup } from "@/features/tasks/components/WeekdayTaskSetup";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
+import { useTaskAssigneeScope } from "@/features/tasks/hooks/useTaskAssigneeScope";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -103,6 +104,7 @@ export default function Tasks() {
   const [boardMode, setBoardMode] = useState<"shift" | "all" | "setup">("shift");
   const [openFormId, setOpenFormId] = useState<string | null>(null);
   const shift = useMyShiftBoard(visibleTasks);
+  const assigneeScope = useTaskAssigneeScope();
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
     null,
   );
@@ -350,6 +352,7 @@ export default function Tasks() {
           <CreateTaskDialog
             open={showCreateDialog}
             createLevel={customCreateLevel === "self" ? "self" : "others"}
+            scope={assigneeScope}
             onClose={() => setShowCreateDialog(false)}
           />
         )}

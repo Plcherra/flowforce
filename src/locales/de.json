@@ -2776,7 +2776,8 @@
     "draftAccepted": "Entwurf angenommen",
     "draftDismissed": "Entwurf verworfen",
     "draftsReady": "Entwürfe sind bereit",
-    "unableToDraft": "Entwürfe konnten nicht erstellt werden"
+    "unableToDraft": "Entwürfe konnten nicht erstellt werden",
+    "chooseAssignee": "Wählen Sie eine Person, die dieser Umfang erlaubt."
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",

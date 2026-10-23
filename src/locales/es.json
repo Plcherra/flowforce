@@ -2776,7 +2776,8 @@
     "draftAccepted": "Borrador aceptado",
     "draftDismissed": "Borrador descartado",
     "draftsReady": "Los borradores están listos",
-    "unableToDraft": "No se pudieron crear los borradores"
+    "unableToDraft": "No se pudieron crear los borradores",
+    "chooseAssignee": "Elige a una persona que este alcance permite."
   },
   "shell": {
     "accountSetupRequired": "Hace falta configurar la cuenta",

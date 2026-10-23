@@ -2776,7 +2776,8 @@
     "draftAccepted": "Bozza accettata",
     "draftDismissed": "Bozza scartata",
     "draftsReady": "Le bozze sono pronte",
-    "unableToDraft": "Impossibile creare le bozze"
+    "unableToDraft": "Impossibile creare le bozze",
+    "chooseAssignee": "Scegli una persona che questo ambito consente."
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

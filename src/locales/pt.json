@@ -2776,7 +2776,8 @@
     "draftAccepted": "Rascunho aceito",
     "draftDismissed": "Rascunho descartado",
     "draftsReady": "Os rascunhos estão prontos",
-    "unableToDraft": "Não foi possível criar os rascunhos"
+    "unableToDraft": "Não foi possível criar os rascunhos",
+    "chooseAssignee": "Escolha uma pessoa que este alcance permite."
   },
   "shell": {
     "accountSetupRequired": "A configuração da conta é necessária",

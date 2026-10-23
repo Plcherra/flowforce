@@ -7,6 +7,7 @@ export interface TaskFormAssignee {
   id: string;
   first_name: string;
   last_name: string;
+  level: number;
 }
 
 export interface TaskFormGoal {
@@ -50,7 +51,7 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
 
       let assigneeQuery = supabase
         .from("profiles")
-        .select("id, first_name, last_name")
+        .select("id, first_name, last_name, role_id")
         .eq("employment_status", "active")
         .order("first_name", { ascending: true });
 
@@ -62,15 +63,30 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       assigneeQuery = assigneeQuery.eq("company_id", companyId);
       goalsQuery = goalsQuery.eq("company_id", companyId);
 
-      const [assigneesResult, goalsResult] = await Promise.all([
+      const [assigneesResult, goalsResult, rolesResult] = await Promise.all([
         assigneeQuery,
         goalsQuery,
+        supabase
+          .from("company_roles")
+          .select("id, hierarchy_level")
+          .eq("company_id", companyId),
       ]);
 
       if (assigneesResult.error) throw assigneesResult.error;
       if (goalsResult.error) throw goalsResult.error;
+      if (rolesResult.error) throw rolesResult.error;
 
-      setAssignees((assigneesResult.data ?? []) as TaskFormAssignee[]);
+      const levels = new Map(
+        (rolesResult.data ?? []).map((role) => [role.id, role.hierarchy_level ?? 1]),
+      );
+      setAssignees(
+        (assigneesResult.data ?? []).map((person) => ({
+          id: person.id,
+          first_name: person.first_name,
+          last_name: person.last_name,
+          level: levels.get(person.role_id ?? "") ?? 1,
+        })),
+      );
       setGoals((goalsResult.data ?? []) as TaskFormGoal[]);
     } catch (fetchError) {
       logger.error("Error loading task form options", {

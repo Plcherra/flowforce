@@ -2776,7 +2776,8 @@
     "draftAccepted": "Draft accepted",
     "draftDismissed": "Draft dismissed",
     "draftsReady": "Drafts are ready",
-    "unableToDraft": "Unable to draft tasks"
+    "unableToDraft": "Unable to draft tasks",
+    "chooseAssignee": "Choose a person this scope allows."
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

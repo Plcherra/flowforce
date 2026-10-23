@@ -782,7 +782,7 @@ Prove: Unit test accept, edit, and dismiss with a fake draft. Run it with `node 
 
 ### Phase 36 — Assignees follow the creation scope
 
-- [ ] The create dialog lists only the people the signed-in scope allows.
+- [x] The create dialog lists only the people the signed-in scope allows.
 
 Rules:
 
@@ -1396,5 +1396,22 @@ Phone steps for Pedro:
 5. A closing list with an empty note should not add a draft.
 
 Blockers: none. No migration. The draft call needs the xAI key on the server. If it is missing, the screen says it could not draft.
+
+Questions: none.
+
+### 2026-10-23 — Phase 36 Assignees follow the creation scope
+
+Shipped: New custom task lists only the people in the signed-in creation scope. Level 1 sees Assigned to you. Level N includes self and level N-1. A grant adds levels or people on top of that. A revoked grant does not. The list uses each person's hierarchy level.
+
+Proven: Unit test `src/features/tasks/utils/taskAssigneeScope.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers level 1, John's grant for levels 3 and 4, and the revoke back to self and level 2. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as a level 1 person who can create a task. Open Tasks, tap +, then New custom task.
+2. Assign to should say Assigned to you. There should be no list of other people.
+3. Sign in as a level 3 person. New custom task should list themselves and level 2 people.
+4. After an owner grants that person levels 3 and 4, the list should also include those levels.
+5. After that grant is revoked, level 3 and level 4 people should leave the list. Level 2 should stay.
+
+Blockers: none. No migration. The grant itself is the next phase, so steps 4 and 5 wait until that screen is saved.
 
 Questions: none.
