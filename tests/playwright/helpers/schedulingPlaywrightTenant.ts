@@ -195,6 +195,16 @@ export async function ensureSchedulingPlaywrightTenant(admin: SupabaseClient) {
     { onConflict: 'company_id' },
   );
   if (settingsError) throw settingsError;
+
+  const { error: prefsError } = await admin.from('org_prefs').upsert({
+    id: tenant.companyId,
+    availability_choice: 'fixed',
+    availability_lock_mode: 'open',
+    schedule_window_start_weekday: 1,
+    schedule_window_end_weekday: 5,
+    schedule_posting_weekday: 0,
+  });
+  if (prefsError) throw prefsError;
 }
 
 export async function cleanupSchedulingPlaywrightTenant(admin: SupabaseClient) {

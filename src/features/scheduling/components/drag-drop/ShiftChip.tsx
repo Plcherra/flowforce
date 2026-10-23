@@ -91,7 +91,7 @@ export function ShiftChip({
       data-minimized={minimized ? "true" : "false"}
       data-opaque={isAssigned ? "true" : "false"}
       className={cn(
-        "relative z-20 rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 border text-left",
+        "relative z-20 w-full min-w-0 max-w-full overflow-hidden rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 border text-left",
         isAssigned ? "text-primary-foreground" : "bg-background border-border shadow-sm",
         isDragging && "opacity-40",
         draggable && "touch-none",

@@ -210,7 +210,7 @@ function GridCellComponent({
       }
       data-minimized={minimizedView ? "true" : "false"}
       className={cn(
-        "border-l border-r relative hover:bg-muted/20 transition-colors p-1",
+        "min-w-0 overflow-hidden border-l border-r relative hover:bg-muted/20 transition-colors p-1",
         minimizedView
           ? "min-h-6"
           : employeeId
@@ -233,7 +233,7 @@ function GridCellComponent({
           {t("schedule.requestedOff")}
         </div>
       ) : null}
-      <div className="flex flex-wrap gap-1">
+      <div className="flex min-w-0 flex-col gap-1">
         {daySchedules.map((schedule) => (
           <ShiftChip
             key={schedule.id}

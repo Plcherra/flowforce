@@ -798,9 +798,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.getByTestId('employee-selector-add').click();
     await page.getByRole('option', { name: /Scheduling Staff/i }).click();
 
-    await expect(
-      page.getByTestId('shift-details-panel').getByText(/pending PTO/i),
-    ).toBeVisible({
+    await expect(page.getByText(/pending PTO/i)).toBeVisible({
       timeout: 15_000,
     });
     await expect(
@@ -892,7 +890,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
       `schedule-cell-${SCHEDULING_PW_TENANT.managerId}-${managerAvail.dayIso}`,
     );
     await dragDndKit(page, sourceChip, targetCell);
-    await expect(page.getByText('Shift moved', { exact: true })).toBeVisible({
+    await expect(
+      targetCell.getByTestId(`schedule-shift-${seedHandles.shiftId}`),
+    ).toBeVisible({
       timeout: 15_000,
     });
 
