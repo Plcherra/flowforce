@@ -19,6 +19,10 @@ concurrency:
 env:
   NODE_VERSION: "22"
   SUPABASE_CLI_VERSION: "2.101.0"
+  # GitHub-hosted runners share one anonymous public.ecr.aws quota, which
+  # returns "toomanyrequests: Data limit exceeded". CLI 2.101.0 reads this
+  # and pulls the same tags from ghcr.io/supabase instead.
+  SUPABASE_INTERNAL_IMAGE_REGISTRY: ghcr.io
   NEXT_TELEMETRY_DISABLED: "1"
   NEXT_PUBLIC_ENABLE_AI_INSIGHTS: "false"
   NEXT_PUBLIC_ENABLE_REMOTE_LOGS: "false"
@@ -75,7 +79,8 @@ jobs:
       - name: Start local Supabase
         shell: bash
         run: |
-          excluded_services="analytics,edge-runtime,functions,imgproxy,inbucket,meta,realtime,studio,vector"
+          # CLI 2.101.0 rejects the old names analytics, functions, inbucket, and meta.
+          excluded_services="edge-runtime,imgproxy,logflare,mailpit,postgres-meta,realtime,studio,vector"
           for attempt in 1 2 3; do
             if supabase start --exclude "$excluded_services"; then
               exit 0
