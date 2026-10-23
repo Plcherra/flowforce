@@ -616,7 +616,7 @@ Prove: Unit test the shift-to-lists lookup for cashier and supervisor. Run it wi
 
 ### Phase 27 — Standalone tasks on a role's weekdays
 
-- [ ] Let a recurring task sit on a role's shift on chosen weekdays, and on no list.
+- [x] Let a recurring task sit on a role's shift on chosen weekdays, and on no list.
 
 Rules:
 
@@ -1088,6 +1088,21 @@ Shipped: phases 25–30 in this file. No product code. Checklists are forms per 
 Proven: this file is the plan.
 
 Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
+
+### 2026-10-23 — Phase 27 Standalone tasks on a role's weekdays
+
+Shipped: A standalone task can sit on a role's shift on chosen weekdays and on no checklist. The US Foods delivery is Monday, Wednesday, and Friday on the supervisor shift. Front of house and back of house are two store-level stations on that task, not two global people. The assignment is stored on the task `links` JSON, so no new table was added.
+
+Proven: Unit test `src/features/tasks/utils/shiftWeekdayTask.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the weekday match, the empty list slot, and both stations. It passed.
+
+Phone steps for Pedro:
+1. This phase records the weekday task on the task links. It does not add a new screen.
+2. The delivery task is supervisor, Monday, Wednesday, and Friday, and it is not on opening, daily, or closing.
+3. Front of house checks the receipt and the quality. Back of house organizes. Those are store stations on the task.
+
+Blockers: none. No migration. The existing `tasks.links` JSON holds the weekday and area assignment.
 
 Questions: none.
 
