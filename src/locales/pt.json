@@ -2744,7 +2744,15 @@
     "unableToLoadShift": "Não foi possível carregar o turno",
     "noteForNextOpener": "Nota para quem abre",
     "notePlaceholder": "Sem moedas, dinheiro retirado, ou o que já está preparado",
-    "saveNote": "Salvar nota"
+    "saveNote": "Salvar nota",
+    "setup": "Ajustes",
+    "attachLists": "Listas do turno",
+    "attachListsHelp": "O turno de cada função usa o formulário de abertura, diário e fechamento dessa função.",
+    "chooseForm": "Escolher um formulário",
+    "noForm": "Sem formulário",
+    "saveList": "Salvar lista",
+    "listSaved": "Lista salva",
+    "unableToSaveList": "Não foi possível salvar a lista"
   },
   "shell": {
     "accountSetupRequired": "A configuração da conta é necessária",

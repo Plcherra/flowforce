@@ -2744,7 +2744,15 @@
     "unableToLoadShift": "Impossibile caricare il turno",
     "noteForNextOpener": "Nota per chi apre",
     "notePlaceholder": "Niente monete, contanti ritirati, o cosa è già pronto",
-    "saveNote": "Salva nota"
+    "saveNote": "Salva nota",
+    "setup": "Impostazioni",
+    "attachLists": "Liste del turno",
+    "attachListsHelp": "Il turno di ogni ruolo usa il modulo di apertura, giornaliero e di chiusura di quel ruolo.",
+    "chooseForm": "Scegli un modulo",
+    "noForm": "Nessun modulo",
+    "saveList": "Salva lista",
+    "listSaved": "Lista salvata",
+    "unableToSaveList": "Impossibile salvare la lista"
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

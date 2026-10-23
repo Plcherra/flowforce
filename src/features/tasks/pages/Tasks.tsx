@@ -38,6 +38,7 @@ import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
+import { ChecklistSetup } from "@/features/tasks/components/ChecklistSetup";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
@@ -81,6 +82,7 @@ export default function Tasks() {
     keysSet: taskCreateKeysAreSet("custom", getSource),
   });
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
+  const showSetup = !permissionsLoading && can("manageForms");
   const { user } = useAuth();
   const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
@@ -93,7 +95,7 @@ export default function Tasks() {
     [tasks, user?.id],
   );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [boardMode, setBoardMode] = useState<"shift" | "all">("shift");
+  const [boardMode, setBoardMode] = useState<"shift" | "all" | "setup">("shift");
   const [openFormId, setOpenFormId] = useState<string | null>(null);
   const shift = useMyShiftBoard(visibleTasks);
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
@@ -207,8 +209,9 @@ export default function Tasks() {
         </div>
       </div>
 
-      <TasksBoardSwitch mode={boardMode} onChange={setBoardMode} />
+      <TasksBoardSwitch mode={boardMode} showSetup={showSetup} onChange={setBoardMode} />
       <ListIssueSync />
+      {boardMode === "setup" && showSetup ? <ChecklistSetup /> : null}
       {boardMode === "shift" ? (
         <MyShiftTasks
           board={shift.board}

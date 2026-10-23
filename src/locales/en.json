@@ -2744,7 +2744,15 @@
     "unableToLoadShift": "Unable to load your shift",
     "noteForNextOpener": "Note for the next opener",
     "notePlaceholder": "No coins, cash taken, or what is already prepped",
-    "saveNote": "Save note"
+    "saveNote": "Save note",
+    "setup": "Setup",
+    "attachLists": "Lists on a shift",
+    "attachListsHelp": "Each role shift uses that role's opening, daily, and closing form.",
+    "chooseForm": "Choose a form",
+    "noForm": "No form",
+    "saveList": "Save list",
+    "listSaved": "List saved",
+    "unableToSaveList": "Unable to save the list"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

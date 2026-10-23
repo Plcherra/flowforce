@@ -728,7 +728,7 @@ Prove: Unit test the submission body. Run it with `node scripts/test-tasks-page.
 
 ### Phase 33 — Attach lists to a role
 
-- [ ] Let a manager point each area and slot at a form.
+- [x] Let a manager point each area and slot at a form.
 
 Rules:
 
@@ -1343,6 +1343,23 @@ Phone steps for Pedro:
 3. On Closing, type "no coins in the drawer" and tap Save note.
 4. The next person's Opening should show that note under From last close.
 5. Save Closing with the note box empty. It should not add a new note.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 33 Attach lists to a role
+
+Shipped: Someone who can manage forms sees Setup on Tasks. Six slots — cashier and supervisor, each opening, daily, and closing — each pick one company form or none. Saving writes the checklist address on that form and clears the same slot from any other form. Other settings, such as the content language, stay.
+
+Proven: Unit test `src/features/forms/utils/assignChecklistForm.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the assign, the clear, and a render of the six slots. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can manage forms. Open Tasks.
+2. Tap Setup. You should see six rows: Cashier and Supervisor, each with Opening, Daily, and Closing.
+3. On Cashier Opening, choose a form and tap Save list. Open My shift on a cashier shift. Opening should name that form.
+4. Point Cashier Opening at a different form and save. The first form should no longer be the opening list.
+5. Choose No form and save. Opening should say No list attached.
 
 Blockers: none. No migration.
 

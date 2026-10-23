@@ -70,6 +70,9 @@ const { runMyShiftViewTests } = importTs(
 const { runChecklistProgressTests } = importTs(
   "../src/features/tasks/utils/checklistProgress.test.ts",
 );
+const { runAssignChecklistFormTests } = importTs(
+  "../src/features/forms/utils/assignChecklistForm.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -91,4 +94,5 @@ runClosingNoteTests();
 await runClosingNoteDraftTests();
 runMyShiftViewTests();
 runChecklistProgressTests();
+runAssignChecklistFormTests();
 console.log("tasks page tests passed");

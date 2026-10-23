@@ -2744,7 +2744,15 @@
     "unableToLoadShift": "Schicht konnte nicht geladen werden",
     "noteForNextOpener": "Notiz für die nächste Öffnung",
     "notePlaceholder": "Kein Kleingeld, Bargeld entnommen, oder was schon vorbereitet ist",
-    "saveNote": "Notiz speichern"
+    "saveNote": "Notiz speichern",
+    "setup": "Einrichtung",
+    "attachLists": "Listen der Schicht",
+    "attachListsHelp": "Die Schicht jeder Rolle nutzt das Öffnungs-, Tages- und Abschlussformular dieser Rolle.",
+    "chooseForm": "Formular wählen",
+    "noForm": "Kein Formular",
+    "saveList": "Liste speichern",
+    "listSaved": "Liste gespeichert",
+    "unableToSaveList": "Liste konnte nicht gespeichert werden"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",
