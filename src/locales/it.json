@@ -2789,7 +2789,9 @@
     "cannotPassGrant": "Solo il proprietario può passare il diritto di concedere.",
     "scopeSaved": "Ambito salvato",
     "unableToSaveScope": "Impossibile salvare l'ambito",
-    "listsLiveOnForms": "Le liste di apertura, giornata e chiusura si collegano nel modulo."
+    "listsLiveOnForms": "Le liste di apertura, giornata e chiusura si collegano nel modulo.",
+    "todayLists": "Liste di oggi",
+    "listProgress": "{{done}} di {{total}}"
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

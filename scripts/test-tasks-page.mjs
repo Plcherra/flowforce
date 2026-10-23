@@ -91,6 +91,9 @@ const { runMyShiftReloadTests } = importTs(
 const { runFormShiftLinkTests } = importTs(
   "../src/features/forms/utils/formShiftLink.test.ts",
 );
+const { runTodayShiftMonitorTests } = importTs(
+  "../src/features/tasks/utils/todayShiftMonitor.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -119,4 +122,5 @@ runTaskAssigneeScopeTests();
 runTaskCreateGrantStoreTests();
 runMyShiftReloadTests();
 runFormShiftLinkTests();
+runTodayShiftMonitorTests();
 console.log("tasks page tests passed");

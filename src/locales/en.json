@@ -2789,7 +2789,9 @@
     "cannotPassGrant": "Only the owner can pass on the right to grant.",
     "scopeSaved": "Scope saved",
     "unableToSaveScope": "Unable to save the scope",
-    "listsLiveOnForms": "Opening, daily, and closing lists are attached on the form."
+    "listsLiveOnForms": "Opening, daily, and closing lists are attached on the form.",
+    "todayLists": "Today’s lists",
+    "listProgress": "{{done}} of {{total}}"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

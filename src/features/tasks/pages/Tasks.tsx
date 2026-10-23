@@ -41,6 +41,7 @@ import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
 import { DraftInbox } from "@/features/tasks/components/DraftInbox";
 import { WeekdayTaskSetup } from "@/features/tasks/components/WeekdayTaskSetup";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
+import { TodayShiftMonitor } from "@/features/tasks/components/TodayShiftMonitor";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
 import { useTaskAssigneeScope } from "@/features/tasks/hooks/useTaskAssigneeScope";
@@ -225,6 +226,7 @@ export default function Tasks() {
           <WeekdayTaskSetup />
         </div>
       ) : null}
+      {boardMode === "shift" && can("editTasks") ? <TodayShiftMonitor /> : null}
       {boardMode === "shift" && showDrafts ? <DraftInbox tasks={visibleTasks} /> : null}
       {boardMode === "shift" ? (
         <MyShiftTasks

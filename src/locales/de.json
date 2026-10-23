@@ -2789,7 +2789,9 @@
     "cannotPassGrant": "Nur der Inhaber kann das Recht zu vergeben weitergeben.",
     "scopeSaved": "Umfang gespeichert",
     "unableToSaveScope": "Umfang konnte nicht gespeichert werden",
-    "listsLiveOnForms": "Öffnungs-, Tages- und Abschlusslisten werden am Formular verknüpft."
+    "listsLiveOnForms": "Öffnungs-, Tages- und Abschlusslisten werden am Formular verknüpft.",
+    "todayLists": "Listen von heute",
+    "listProgress": "{{done}} von {{total}}"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",

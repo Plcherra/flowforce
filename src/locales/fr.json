@@ -2789,7 +2789,9 @@
     "cannotPassGrant": "Seul le propriétaire peut transmettre le droit d'accorder.",
     "scopeSaved": "Portée enregistrée",
     "unableToSaveScope": "Impossible d'enregistrer la portée",
-    "listsLiveOnForms": "Les listes d'ouverture, de journée et de fermeture se lient sur le formulaire."
+    "listsLiveOnForms": "Les listes d'ouverture, de journée et de fermeture se lient sur le formulaire.",
+    "todayLists": "Listes d'aujourd'hui",
+    "listProgress": "{{done}} sur {{total}}"
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",

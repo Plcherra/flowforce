@@ -858,7 +858,7 @@ Prove: Unit test the link label and the save payload. Run it with `node scripts/
 
 ### Phase 40 — Today’s lists on Tasks
 
-- [ ] Someone who can edit tasks sees today’s shifts, who is on them, how far each list is, and the closing note. Employees still see My shift.
+- [x] Someone who can edit tasks sees today’s shifts, who is on them, how far each list is, and the closing note. Employees still see My shift.
 
 Rules:
 
@@ -1511,7 +1511,7 @@ Questions: none.
 
 Shipped: The form editor, which opens when a form is created, can link that form to cashier or supervisor opening, daily, or closing. Saving moves that slot off any other form. Remove clears the link. The forms list names the link. Tasks Setup no longer attaches forms. It keeps weekday tasks for someone who can edit tasks, and says the lists live on the form. Weekdays and store rotation stay on those weekday tasks. A list applies on every shift of that role.
 
-Proven: Unit test `src/features/forms/utils/formShiftLink.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the cashier opening label and a save that moves the slot while keeping the language setting. It passed.
+Proven: Unit test `src/features/forms/utils/formShiftLink.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the cashier opening label and a save that moves the slot while keeping the language setting. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
 
 Phone steps for Pedro:
 1. Sign in on https://www.flowforce.uk. Open Forms and create a form, or edit one.

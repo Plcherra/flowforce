@@ -2789,7 +2789,9 @@
     "cannotPassGrant": "Solo el dueño puede pasar el derecho a conceder.",
     "scopeSaved": "Alcance guardado",
     "unableToSaveScope": "No se pudo guardar el alcance",
-    "listsLiveOnForms": "Las listas de apertura, del día y de cierre se vinculan en el formulario."
+    "listsLiveOnForms": "Las listas de apertura, del día y de cierre se vinculan en el formulario.",
+    "todayLists": "Listas de hoy",
+    "listProgress": "{{done}} de {{total}}"
   },
   "shell": {
     "accountSetupRequired": "Hace falta configurar la cuenta",
