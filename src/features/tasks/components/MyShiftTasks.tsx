@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import type { ChecklistSlot } from "@/features/forms/utils/checklistForms";
 import type { StoreStation } from "@/features/tasks/utils/shiftWeekdayTask";
 import type { AssembledShift, MyShiftListView } from "@/features/tasks/utils/myShiftView";
@@ -19,9 +21,16 @@ const STATION_KEYS: Record<StoreStation, string> = {
 interface MyShiftTasksProps {
   board: AssembledShift | { kind: "loading" } | { kind: "error" };
   onOpenList: (formId: string) => void;
+  onToggleItem?: (formId: string, itemId: string, done: boolean) => void;
+  onSaveClosingNote?: (formId: string, note: string) => void;
 }
 
-export function MyShiftTasks({ board, onOpenList }: MyShiftTasksProps) {
+export function MyShiftTasks({
+  board,
+  onOpenList,
+  onToggleItem,
+  onSaveClosingNote,
+}: MyShiftTasksProps) {
   const { t } = useTranslation();
 
   if (board.kind === "loading") {
@@ -63,7 +72,13 @@ export function MyShiftTasks({ board, onOpenList }: MyShiftTasksProps) {
         <p className="text-sm text-muted-foreground">{board.shiftTitle}</p>
       </div>
       {board.view.lists.map((list) => (
-        <ShiftList key={list.slot} list={list} onOpenList={onOpenList} />
+        <ShiftList
+          key={list.slot}
+          list={list}
+          onOpenList={onOpenList}
+          onToggleItem={onToggleItem}
+          onSaveClosingNote={onSaveClosingNote}
+        />
       ))}
       {board.view.weekdayTasks.length > 0 ? (
         <div
@@ -90,11 +105,19 @@ export function MyShiftTasks({ board, onOpenList }: MyShiftTasksProps) {
 function ShiftList({
   list,
   onOpenList,
+  onToggleItem,
+  onSaveClosingNote,
 }: {
   list: MyShiftListView;
   onOpenList: (formId: string) => void;
+  onToggleItem?: (formId: string, itemId: string, done: boolean) => void;
+  onSaveClosingNote?: (formId: string, note: string) => void;
 }) {
   const { t } = useTranslation();
+  const [note, setNote] = useState(list.savedNote);
+  useEffect(() => {
+    setNote(list.savedNote);
+  }, [list.savedNote]);
   return (
     <div
       className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
@@ -124,12 +147,45 @@ function ShiftList({
       {list.items.length > 0 ? (
         <ul className="space-y-1">
           {list.items.map((item) => (
-            <li key={item.id} className="text-sm">
-              {item.done ? `${t("tasks.markDone")} · ` : ""}
-              {item.label}
+            <li key={item.id}>
+              <label className="flex min-h-11 items-center gap-3 text-sm">
+                <Checkbox
+                  checked={item.done}
+                  data-testid={`my-shift-item-${item.id}`}
+                  onCheckedChange={(value) => {
+                    if (!list.formId || !onToggleItem) return;
+                    onToggleItem(list.formId, item.id, value === true);
+                  }}
+                />
+                <span>{item.label}</span>
+              </label>
             </li>
           ))}
         </ul>
+      ) : null}
+      {list.slot === "closing" && list.formId ? (
+        <div className="space-y-2">
+          <label className="space-y-1" htmlFor="my-shift-closing-note">
+            <span className="text-sm font-medium">{t("tasks.noteForNextOpener")}</span>
+            <Textarea
+              id="my-shift-closing-note"
+              data-testid="my-shift-closing-note"
+              value={note}
+              rows={3}
+              placeholder={t("tasks.notePlaceholder")}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </label>
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 w-full"
+            data-testid="my-shift-save-note"
+            onClick={() => onSaveClosingNote?.(list.formId ?? "", note)}
+          >
+            {t("tasks.saveNote")}
+          </Button>
+        </div>
       ) : null}
       <Button
         type="button"

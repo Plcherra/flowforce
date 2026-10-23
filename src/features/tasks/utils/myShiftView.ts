@@ -53,6 +53,7 @@ export type MyShiftListView = {
   formId: string | null;
   title: string | null;
   notes: string[];
+  savedNote: string;
   items: MyShiftChecklistItem[];
 };
 
@@ -324,6 +325,10 @@ export function assembleMyShift(input: {
         formId: form?.id ?? null,
         title: form?.title ?? null,
         notes: slot === "opening" ? notes : [],
+        savedNote:
+          slot === "closing"
+            ? readAdditionalInformation(submission?.submission_data)
+            : "",
         items,
       };
     }),

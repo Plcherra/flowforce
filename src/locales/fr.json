@@ -2741,7 +2741,10 @@
     "openingList": "Ouverture",
     "closingList": "Fermeture",
     "loadingShift": "Chargement de votre service",
-    "unableToLoadShift": "Impossible de charger le service"
+    "unableToLoadShift": "Impossible de charger le service",
+    "noteForNextOpener": "Note pour la prochaine ouverture",
+    "notePlaceholder": "Pas de monnaie, espèces retirées, ou ce qui est déjà prêt",
+    "saveNote": "Enregistrer la note"
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",

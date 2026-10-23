@@ -95,7 +95,7 @@ export default function Tasks() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [boardMode, setBoardMode] = useState<"shift" | "all">("shift");
   const [openFormId, setOpenFormId] = useState<string | null>(null);
-  const shiftBoard = useMyShiftBoard(visibleTasks);
+  const shift = useMyShiftBoard(visibleTasks);
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
     null,
   );
@@ -210,7 +210,12 @@ export default function Tasks() {
       <TasksBoardSwitch mode={boardMode} onChange={setBoardMode} />
       <ListIssueSync />
       {boardMode === "shift" ? (
-        <MyShiftTasks board={shiftBoard} onOpenList={setOpenFormId} />
+        <MyShiftTasks
+          board={shift.board}
+          onOpenList={setOpenFormId}
+          onToggleItem={shift.toggleItem}
+          onSaveClosingNote={shift.saveClosingNote}
+        />
       ) : null}
       {boardMode === "all" ? (
         <ListIssueGather
@@ -317,7 +322,10 @@ export default function Tasks() {
             open
             formId={openFormId}
             onOpenChange={(next) => {
-              if (!next) setOpenFormId(null);
+              if (!next) {
+                setOpenFormId(null);
+                shift.refresh();
+              }
             }}
           />
         ) : null}

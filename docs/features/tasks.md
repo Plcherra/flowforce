@@ -708,7 +708,7 @@ Prove: Unit test `src/features/tasks/utils/myShiftView.test.ts`, including a ren
 
 ### Phase 32 — Complete a list and leave a closing note
 
-- [ ] Check items on the shift list, and save a note on closing.
+- [x] Check items on the shift list, and save a note on closing.
 
 Rules:
 
@@ -1328,5 +1328,22 @@ Phone steps for Pedro:
 6. On a Friday supervisor shift, Organize the US Foods delivery should sit under the lists when that weekday task exists. It should not sit inside Opening, Daily, or Closing.
 
 Blockers: none. No migration. Phases 32–37 are written in this file and are not built yet.
+
+Questions: none.
+
+### 2026-10-23 — Phase 32 Complete a list and leave a closing note
+
+Shipped: Each item on My shift is a checkbox. Checking it saves a form submission for that list, with the field id true when the item is done. Closing has a note box. A filled note is stored as additional_information together with the current answers. A blank note does not write additional_information. The list reads the latest submission by the signed-in person during this shift.
+
+Proven: Unit test `src/features/tasks/utils/checklistProgress.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers a saved note, a blank note, an item-only save, and a render of the checkbox and the note box. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Tasks. Stay on My shift.
+2. Open a list that has items. Tap a checkbox. Leave the page and come back. That item should stay checked.
+3. On Closing, type "no coins in the drawer" and tap Save note.
+4. The next person's Opening should show that note under From last close.
+5. Save Closing with the note box empty. It should not add a new note.
+
+Blockers: none. No migration.
 
 Questions: none.

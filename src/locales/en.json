@@ -2741,7 +2741,10 @@
     "openingList": "Opening",
     "closingList": "Closing",
     "loadingShift": "Loading your shift",
-    "unableToLoadShift": "Unable to load your shift"
+    "unableToLoadShift": "Unable to load your shift",
+    "noteForNextOpener": "Note for the next opener",
+    "notePlaceholder": "No coins, cash taken, or what is already prepped",
+    "saveNote": "Save note"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

@@ -2741,7 +2741,10 @@
     "openingList": "Apertura",
     "closingList": "Chiusura",
     "loadingShift": "Caricamento del turno",
-    "unableToLoadShift": "Impossibile caricare il turno"
+    "unableToLoadShift": "Impossibile caricare il turno",
+    "noteForNextOpener": "Nota per chi apre",
+    "notePlaceholder": "Niente monete, contanti ritirati, o cosa è già pronto",
+    "saveNote": "Salva nota"
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

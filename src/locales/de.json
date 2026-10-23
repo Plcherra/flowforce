@@ -2741,7 +2741,10 @@
     "openingList": "Öffnung",
     "closingList": "Abschluss",
     "loadingShift": "Schicht wird geladen",
-    "unableToLoadShift": "Schicht konnte nicht geladen werden"
+    "unableToLoadShift": "Schicht konnte nicht geladen werden",
+    "noteForNextOpener": "Notiz für die nächste Öffnung",
+    "notePlaceholder": "Kein Kleingeld, Bargeld entnommen, oder was schon vorbereitet ist",
+    "saveNote": "Notiz speichern"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",
