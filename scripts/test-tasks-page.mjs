@@ -82,6 +82,9 @@ const { runDraftInboxTests } = importTs(
 const { runTaskAssigneeScopeTests } = importTs(
   "../src/features/tasks/utils/taskAssigneeScope.test.ts",
 );
+const { runTaskCreateGrantStoreTests } = importTs(
+  "../src/features/roles/constants/taskCreateGrantStore.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -107,4 +110,5 @@ runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();
 runDraftInboxTests();
 runTaskAssigneeScopeTests();
+runTaskCreateGrantStoreTests();
 console.log("tasks page tests passed");

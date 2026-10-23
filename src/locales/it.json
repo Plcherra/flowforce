@@ -2777,7 +2777,18 @@
     "draftDismissed": "Bozza scartata",
     "draftsReady": "Le bozze sono pronte",
     "unableToDraft": "Impossibile creare le bozze",
-    "chooseAssignee": "Scegli una persona che questo ambito consente."
+    "chooseAssignee": "Scegli una persona che questo ambito consente.",
+    "taskCreationScope": "Ambito di creazione attività",
+    "personLevel": "Livello {{level}}",
+    "noExtraScope": "Nessuna concessione extra. Resta il valore del livello.",
+    "rightToGrant": "Diritto di concedere",
+    "extraLevels": "Livelli extra",
+    "revokeGrant": "Revoca",
+    "grantScope": "Concedi ambito",
+    "cannotGrantScope": "Non puoi concedere la creazione di attività.",
+    "cannotPassGrant": "Solo il proprietario può passare il diritto di concedere.",
+    "scopeSaved": "Ambito salvato",
+    "unableToSaveScope": "Impossibile salvare l'ambito"
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

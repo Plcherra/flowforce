@@ -2777,7 +2777,18 @@
     "draftDismissed": "Rascunho descartado",
     "draftsReady": "Os rascunhos estão prontos",
     "unableToDraft": "Não foi possível criar os rascunhos",
-    "chooseAssignee": "Escolha uma pessoa que este alcance permite."
+    "chooseAssignee": "Escolha uma pessoa que este alcance permite.",
+    "taskCreationScope": "Alcance para criar tarefas",
+    "personLevel": "Nível {{level}}",
+    "noExtraScope": "Sem concessão extra. O padrão do nível continua.",
+    "rightToGrant": "Direito de conceder",
+    "extraLevels": "Níveis extra",
+    "revokeGrant": "Revogar",
+    "grantScope": "Conceder alcance",
+    "cannotGrantScope": "Você não pode conceder a criação de tarefas.",
+    "cannotPassGrant": "Só o dono pode passar o direito de conceder.",
+    "scopeSaved": "Alcance salvo",
+    "unableToSaveScope": "Não foi possível salvar o alcance"
   },
   "shell": {
     "accountSetupRequired": "A configuração da conta é necessária",

@@ -800,7 +800,7 @@ Prove: Unit test those three cases. Run it with `node scripts/test-tasks-page.mj
 
 ### Phase 37 — Grant and revoke task creation on the employee card
 
-- [ ] Edit task-creation scope, including the right to grant, on the existing access card.
+- [x] Edit task-creation scope, including the right to grant, on the existing access card.
 
 Rules:
 
@@ -1413,5 +1413,22 @@ Phone steps for Pedro:
 5. After that grant is revoked, level 3 and level 4 people should leave the list. Level 2 should stay.
 
 Blockers: none. No migration. The grant itself is the next phase, so steps 4 and 5 wait until that screen is saved.
+
+Questions: none.
+
+### 2026-10-23 — Phase 37 Grant and revoke task creation on the employee card
+
+Shipped: The employee access card has a task-creation scope section beside the existing create levels. The owner can grant levels, people, and the right to grant. A person who already has the right to grant can grant levels and people, and cannot pass that right on. Revoke marks that one grant revoked. Grants live on `companies.template_config.taskCreateGrants`. Saving goes through `/api/tasks/task-create-grants`, so the granter does not need the company-admin update. Other template config keys stay.
+
+Proven: Unit test `src/features/roles/constants/taskCreateGrantStore.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the owner grant to Marcus, Marcus granting John levels 3 and 4, Marcus being blocked from passing the right to grant, a person without the right being blocked, the revoke leaving Marcus's right in place, and a render of the section without the pass-grant checkbox. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as the owner. Open an employee, then Access.
+2. On Marcus, a level 4 person, tick Right to grant and tap Grant scope. His card should list that right.
+3. Sign in as Marcus. Open John's Access card. Tick Level 3 and Level 4. The Right to grant box should not be there. Tap Grant scope.
+4. Sign in as John and open New custom task. The assignee list should include level 3 and level 4 people, plus himself and level 2.
+5. Sign in as Marcus again. On John's card, tap Revoke on that grant. Marcus's own right to grant should still be on his card. John's extra levels should be gone.
+
+Blockers: none. No migration.
 
 Questions: none.

@@ -2777,7 +2777,18 @@
     "draftDismissed": "Brouillon écarté",
     "draftsReady": "Les brouillons sont prêts",
     "unableToDraft": "Impossible de créer les brouillons",
-    "chooseAssignee": "Choisissez une personne que ce périmètre permet."
+    "chooseAssignee": "Choisissez une personne que ce périmètre permet.",
+    "taskCreationScope": "Portée de création des tâches",
+    "personLevel": "Niveau {{level}}",
+    "noExtraScope": "Aucune concession en plus. La valeur du niveau reste.",
+    "rightToGrant": "Droit d'accorder",
+    "extraLevels": "Niveaux en plus",
+    "revokeGrant": "Révoquer",
+    "grantScope": "Accorder la portée",
+    "cannotGrantScope": "Vous ne pouvez pas accorder la création de tâches.",
+    "cannotPassGrant": "Seul le propriétaire peut transmettre le droit d'accorder.",
+    "scopeSaved": "Portée enregistrée",
+    "unableToSaveScope": "Impossible d'enregistrer la portée"
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",

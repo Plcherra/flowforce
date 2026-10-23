@@ -20,6 +20,7 @@ import { useUserPermissionOverrides } from "@/hooks/useUserPermissions";
 import { saveEmployeeAccess } from "@/features/employees/utils/saveEmployeeAccess";
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
 import { TaskCreateAccessSection } from "./TaskCreateAccessSection";
+import { TaskCreateScopeEditor } from "./TaskCreateScopeEditor";
 import { ListIssueAccessSection } from "./ListIssueAccessSection";
 import { diffsForTaskCreateLevel } from "@/features/tasks/utils/taskCreateAccess";
 import {
@@ -273,6 +274,10 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
                 diffs={diffs}
                 disabled={!canEditAccess}
                 onChange={handleTaskCreateChange}
+              />
+              <TaskCreateScopeEditor
+                granteeId={user.id}
+                granteeLevel={selectedRole.hierarchy_level ?? 1}
               />
               <ListIssueAccessSection
                 classPermissions={classPermissions}

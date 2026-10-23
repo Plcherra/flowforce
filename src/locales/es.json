@@ -2777,7 +2777,18 @@
     "draftDismissed": "Borrador descartado",
     "draftsReady": "Los borradores están listos",
     "unableToDraft": "No se pudieron crear los borradores",
-    "chooseAssignee": "Elige a una persona que este alcance permite."
+    "chooseAssignee": "Elige a una persona que este alcance permite.",
+    "taskCreationScope": "Alcance para crear tareas",
+    "personLevel": "Nivel {{level}}",
+    "noExtraScope": "Sin concesión extra. Sigue el valor del nivel.",
+    "rightToGrant": "Derecho a conceder",
+    "extraLevels": "Niveles extra",
+    "revokeGrant": "Revocar",
+    "grantScope": "Conceder alcance",
+    "cannotGrantScope": "No puedes conceder la creación de tareas.",
+    "cannotPassGrant": "Solo el dueño puede pasar el derecho a conceder.",
+    "scopeSaved": "Alcance guardado",
+    "unableToSaveScope": "No se pudo guardar el alcance"
   },
   "shell": {
     "accountSetupRequired": "Hace falta configurar la cuenta",

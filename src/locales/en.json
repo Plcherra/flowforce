@@ -2777,7 +2777,18 @@
     "draftDismissed": "Draft dismissed",
     "draftsReady": "Drafts are ready",
     "unableToDraft": "Unable to draft tasks",
-    "chooseAssignee": "Choose a person this scope allows."
+    "chooseAssignee": "Choose a person this scope allows.",
+    "taskCreationScope": "Task creation scope",
+    "personLevel": "Level {{level}}",
+    "noExtraScope": "No extra grant. The level default still applies.",
+    "rightToGrant": "Right to grant",
+    "extraLevels": "Extra levels",
+    "revokeGrant": "Revoke",
+    "grantScope": "Grant scope",
+    "cannotGrantScope": "You cannot grant task creation.",
+    "cannotPassGrant": "Only the owner can pass on the right to grant.",
+    "scopeSaved": "Scope saved",
+    "unableToSaveScope": "Unable to save the scope"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

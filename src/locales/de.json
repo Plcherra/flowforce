@@ -2777,7 +2777,18 @@
     "draftDismissed": "Entwurf verworfen",
     "draftsReady": "Entwürfe sind bereit",
     "unableToDraft": "Entwürfe konnten nicht erstellt werden",
-    "chooseAssignee": "Wählen Sie eine Person, die dieser Umfang erlaubt."
+    "chooseAssignee": "Wählen Sie eine Person, die dieser Umfang erlaubt.",
+    "taskCreationScope": "Umfang der Aufgabenerstellung",
+    "personLevel": "Stufe {{level}}",
+    "noExtraScope": "Keine zusätzliche Freigabe. Der Stufenstandard bleibt.",
+    "rightToGrant": "Recht zu vergeben",
+    "extraLevels": "Zusätzliche Stufen",
+    "revokeGrant": "Widerrufen",
+    "grantScope": "Umfang vergeben",
+    "cannotGrantScope": "Sie können die Aufgabenerstellung nicht vergeben.",
+    "cannotPassGrant": "Nur der Inhaber kann das Recht zu vergeben weitergeben.",
+    "scopeSaved": "Umfang gespeichert",
+    "unableToSaveScope": "Umfang konnte nicht gespeichert werden"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",
