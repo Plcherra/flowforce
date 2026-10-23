@@ -2766,7 +2766,17 @@
     "weekdayThu": "Qui",
     "weekdayFri": "Sex",
     "weekdaySat": "Sáb",
-    "weekdaySun": "Dom"
+    "weekdaySun": "Dom",
+    "drafts": "Rascunhos",
+    "draftsHelp": "As notas de fechamento podem virar tarefas. Aceite uma para publicá-la. Descarte uma para removê-la.",
+    "draftFromNotes": "Rascunho a partir das notas de fechamento",
+    "acceptDraft": "Aceitar",
+    "dismissDraft": "Descartar",
+    "noDrafts": "Sem rascunhos",
+    "draftAccepted": "Rascunho aceito",
+    "draftDismissed": "Rascunho descartado",
+    "draftsReady": "Os rascunhos estão prontos",
+    "unableToDraft": "Não foi possível criar os rascunhos"
   },
   "shell": {
     "accountSetupRequired": "A configuração da conta é necessária",

@@ -39,6 +39,7 @@ import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
 import { ChecklistSetup } from "@/features/tasks/components/ChecklistSetup";
+import { DraftInbox } from "@/features/tasks/components/DraftInbox";
 import { WeekdayTaskSetup } from "@/features/tasks/components/WeekdayTaskSetup";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
@@ -85,6 +86,8 @@ export default function Tasks() {
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
   const showSetup =
     !permissionsLoading && (can("manageForms") || can("editTasks"));
+  const showDrafts =
+    !permissionsLoading && (can("editTasks") || can("ai.actions.approve"));
   const { user } = useAuth();
   const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
@@ -219,6 +222,7 @@ export default function Tasks() {
           {can("editTasks") ? <WeekdayTaskSetup /> : null}
         </div>
       ) : null}
+      {boardMode === "shift" && showDrafts ? <DraftInbox tasks={visibleTasks} /> : null}
       {boardMode === "shift" ? (
         <MyShiftTasks
           board={shift.board}

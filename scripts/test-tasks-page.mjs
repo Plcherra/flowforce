@@ -76,6 +76,9 @@ const { runAssignChecklistFormTests } = importTs(
 const { runWeekdayTaskDraftTests } = importTs(
   "../src/features/tasks/utils/weekdayTaskDraft.test.ts",
 );
+const { runDraftInboxTests } = importTs(
+  "../src/features/tasks/utils/draftInbox.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -99,4 +102,5 @@ runMyShiftViewTests();
 runChecklistProgressTests();
 runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();
+runDraftInboxTests();
 console.log("tasks page tests passed");

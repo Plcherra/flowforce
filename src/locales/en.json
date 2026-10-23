@@ -2766,7 +2766,17 @@
     "weekdayThu": "Thu",
     "weekdayFri": "Fri",
     "weekdaySat": "Sat",
-    "weekdaySun": "Sun"
+    "weekdaySun": "Sun",
+    "drafts": "Drafts",
+    "draftsHelp": "Closing notes can become tasks. Accept one to publish it. Dismiss one to drop it.",
+    "draftFromNotes": "Draft from closing notes",
+    "acceptDraft": "Accept",
+    "dismissDraft": "Dismiss",
+    "noDrafts": "No drafts",
+    "draftAccepted": "Draft accepted",
+    "draftDismissed": "Draft dismissed",
+    "draftsReady": "Drafts are ready",
+    "unableToDraft": "Unable to draft tasks"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

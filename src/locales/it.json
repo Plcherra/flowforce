@@ -2766,7 +2766,17 @@
     "weekdayThu": "Gio",
     "weekdayFri": "Ven",
     "weekdaySat": "Sab",
-    "weekdaySun": "Dom"
+    "weekdaySun": "Dom",
+    "drafts": "Bozze",
+    "draftsHelp": "Le note di chiusura possono diventare attività. Accettane una per pubblicarla. Scartane una per toglierla.",
+    "draftFromNotes": "Bozza dalle note di chiusura",
+    "acceptDraft": "Accetta",
+    "dismissDraft": "Scarta",
+    "noDrafts": "Nessuna bozza",
+    "draftAccepted": "Bozza accettata",
+    "draftDismissed": "Bozza scartata",
+    "draftsReady": "Le bozze sono pronte",
+    "unableToDraft": "Impossibile creare le bozze"
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

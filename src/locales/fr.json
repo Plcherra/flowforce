@@ -2766,7 +2766,17 @@
     "weekdayThu": "Jeu",
     "weekdayFri": "Ven",
     "weekdaySat": "Sam",
-    "weekdaySun": "Dim"
+    "weekdaySun": "Dim",
+    "drafts": "Brouillons",
+    "draftsHelp": "Les notes de fermeture peuvent devenir des tâches. Acceptez-en une pour la publier. Écartez-en une pour la retirer.",
+    "draftFromNotes": "Brouillon depuis les notes de fermeture",
+    "acceptDraft": "Accepter",
+    "dismissDraft": "Écarter",
+    "noDrafts": "Aucun brouillon",
+    "draftAccepted": "Brouillon accepté",
+    "draftDismissed": "Brouillon écarté",
+    "draftsReady": "Les brouillons sont prêts",
+    "unableToDraft": "Impossible de créer les brouillons"
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",

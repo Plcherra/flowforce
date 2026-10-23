@@ -2766,7 +2766,17 @@
     "weekdayThu": "Do",
     "weekdayFri": "Fr",
     "weekdaySat": "Sa",
-    "weekdaySun": "So"
+    "weekdaySun": "So",
+    "drafts": "Entwürfe",
+    "draftsHelp": "Abschlussnotizen können Aufgaben werden. Annehmen veröffentlicht eine. Verwerfen entfernt sie.",
+    "draftFromNotes": "Entwurf aus Abschlussnotizen",
+    "acceptDraft": "Annehmen",
+    "dismissDraft": "Verwerfen",
+    "noDrafts": "Keine Entwürfe",
+    "draftAccepted": "Entwurf angenommen",
+    "draftDismissed": "Entwurf verworfen",
+    "draftsReady": "Entwürfe sind bereit",
+    "unableToDraft": "Entwürfe konnten nicht erstellt werden"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",

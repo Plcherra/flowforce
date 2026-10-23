@@ -2766,7 +2766,17 @@
     "weekdayThu": "Jue",
     "weekdayFri": "Vie",
     "weekdaySat": "Sáb",
-    "weekdaySun": "Dom"
+    "weekdaySun": "Dom",
+    "drafts": "Borradores",
+    "draftsHelp": "Las notas de cierre pueden volverse tareas. Acepta una para publicarla. Descarta una para quitarla.",
+    "draftFromNotes": "Borrador desde las notas de cierre",
+    "acceptDraft": "Aceptar",
+    "dismissDraft": "Descartar",
+    "noDrafts": "No hay borradores",
+    "draftAccepted": "Borrador aceptado",
+    "draftDismissed": "Borrador descartado",
+    "draftsReady": "Los borradores están listos",
+    "unableToDraft": "No se pudieron crear los borradores"
   },
   "shell": {
     "accountSetupRequired": "Hace falta configurar la cuenta",

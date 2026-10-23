@@ -764,7 +764,7 @@ Prove: Unit test the saved links and the My shift match. Run it with `node scrip
 
 ### Phase 35 — Accept, edit, or dismiss an AI draft
 
-- [ ] Show drafts from closing notes, and let a manager accept, edit, or dismiss each one.
+- [x] Show drafts from closing notes, and let a manager accept, edit, or dismiss each one.
 
 Rules:
 
@@ -1379,5 +1379,22 @@ Phone steps for Pedro:
 5. On a cashier shift that same Friday, the delivery should not appear.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 35 Accept, edit, or dismiss an AI draft
+
+Shipped: Someone who can edit tasks, or approve AI actions, sees Drafts on My shift. Draft from closing notes sends the latest closing note through the existing Grok path and stores each reply as an unpublished draft. Accept publishes that task for the draft's person. Edit changes the title and description first. Dismiss cancels the draft and does not assign the work. A closing list with no note adds no draft.
+
+Proven: Unit test `src/features/tasks/utils/draftInbox.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers accept, edit, dismiss, and a render of the inbox. It passed. The live model was not called. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as a manager. Open Tasks and stay on My shift.
+2. Drafts should sit above the lists. Tap Draft from closing notes after a closing list has a note.
+3. A draft should appear. Change the title, then tap Accept. That task should be published for the next person.
+4. Draft again if another note exists. Tap Dismiss. That draft should leave the inbox and should not be assigned work.
+5. A closing list with an empty note should not add a draft.
+
+Blockers: none. No migration. The draft call needs the xAI key on the server. If it is missing, the screen says it could not draft.
 
 Questions: none.
