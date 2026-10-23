@@ -451,7 +451,7 @@ Prove: Extend `src/lib/theme/themeTokens.test.ts` so Light `--background` is not
 
 ### Phase 24 — The switch still selects those surfaces
 
-- [ ] Keep FlowForce, Light, and Dark on the switch, each applying its own surface.
+- [x] Keep FlowForce, Light, and Dark on the switch, each applying its own surface.
 
 Rules:
 
@@ -866,6 +866,23 @@ Phone steps for Pedro:
 2. Open Settings, then General, and tap Light. The page background should pick up a light blue tint. Cards should stay a little lighter than that background. Buttons should stay the same blue.
 3. Tap Dark. The page should be dark navy, near black, not a gray mid-tone and not the white FlowForce page.
 4. Tap FlowForce again. The page should return to white.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 24 The switch still selects those surfaces
+
+Shipped: FlowForce, Light, and Dark still round-trip through `localStorage` key `flowforce-theme`. Each name sets its own `data-theme`. FlowForce and Light do not set the `dark` class. Dark does. Light's `data-theme="light"` background is not the FlowForce white background, so choosing Light leaves the white page.
+
+Proven: `src/lib/theme/applyTheme.test.ts` covers the three names, the `data-theme` each one sets, the stored-key round trip, and the before-paint script. Run with jiti the same way as `scripts/test-tasks-page.mjs`. It passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk and open Settings, then General.
+2. The switch is still FlowForce, Light, and Dark. There is no fourth theme.
+3. Tap Light and reload. The light blue page should still be on. It should not snap back to the white FlowForce page.
+4. Tap Dark and reload. The dark navy page should stay, including after a reload.
+5. Tap FlowForce and reload. The page should be white again.
 
 Blockers: none. No migration.
 
