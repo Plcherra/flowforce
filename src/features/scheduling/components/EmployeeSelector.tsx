@@ -41,13 +41,15 @@ export function EmployeeSelector({
 
   const handleAssignEmployee = async (employeeId: string) => {
     try {
-      const success = await assignUserToShift(shiftId, employeeId);
-      if (success) {
+      const outcome = await assignUserToShift(shiftId, employeeId);
+      if (outcome) {
         setOpen(false);
-        toast({
-          title: "Employee assigned",
-          description: "Employee has been assigned to this shift.",
-        });
+        if (outcome === true) {
+          toast({
+            title: "Employee assigned",
+            description: "Employee has been assigned to this shift.",
+          });
+        }
       }
     } catch (error) {
       const errorMessage =

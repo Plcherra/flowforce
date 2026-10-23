@@ -26,6 +26,9 @@ export type SchedulingMutationOptions = {
   silent?: boolean;
 };
 
+/** `"warning"` means the assignment was saved and a warning toast was already shown. */
+export type AssignOutcome = boolean | "warning";
+
 export interface SchedulingMutations {
   createSchedule: (
     payload: ShiftInsertPayload,
@@ -41,7 +44,7 @@ export interface SchedulingMutations {
     userId: string,
     status?: string,
     options?: SchedulingMutationOptions,
-  ) => Promise<boolean>;
+  ) => Promise<AssignOutcome>;
   unassign: (
     shiftId: string,
     userId: string,
@@ -83,6 +86,7 @@ export interface SchedulingMutations {
     weekStart: string;
     weekEnd: string;
     isPublished: boolean;
+    blockingConflictCount?: number;
   }) => Promise<boolean>;
   approveTimeOff: (requestId: string, notes?: string) => Promise<boolean>;
   upsertVendorEvent: (

@@ -824,6 +824,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     );
 
     await page.reload();
+    const conflictsPill = page.getByTestId('schedule-readiness-pill-conflicts');
+    await expect(conflictsPill).toBeVisible();
+    await expect(conflictsPill).not.toContainText(/^0\s*conflicts/i);
     await openWeekDesk(page);
     await page.getByRole('button', { name: 'Publish to the team' }).click();
     await expect(page.getByText('Publish blocked', { exact: true })).toBeVisible({

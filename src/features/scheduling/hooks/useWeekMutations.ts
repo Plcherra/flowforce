@@ -136,9 +136,20 @@ export function useWeekMutations({
       weekStart: string;
       weekEnd: string;
       isPublished: boolean;
+      blockingConflictCount?: number;
     }) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
+        return false;
+      }
+
+      const knownBlocking = params.blockingConflictCount ?? 0;
+      if (params.isPublished && knownBlocking > 0) {
+        toast({
+          title: "Publish blocked",
+          description: `${knownBlocking} assignment${knownBlocking === 1 ? "" : "s"} conflict with staff availability. Fix conflicts in the readiness panel.`,
+          variant: "destructive",
+        });
         return false;
       }
 

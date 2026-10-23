@@ -25,7 +25,10 @@ import { useTimeOffMutations } from "@/features/scheduling/hooks/useTimeOffMutat
 import { useWeekMutations } from "@/features/scheduling/hooks/useWeekMutations";
 import { calculateWeekRange } from "@/features/scheduling/utils/weekHelpers";
 import { extractAvailableLocations } from "@/features/scheduling/utils/locationHelpers";
-import type { SchedulingMutations } from "@/features/scheduling/types/mutations";
+import type {
+  SchedulingMutationOptions,
+  SchedulingMutations,
+} from "@/features/scheduling/types/mutations";
 import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
 
 interface SchedulingContextType {
@@ -131,13 +134,18 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   });
 
   const assign = useCallback(
-    async (shiftId: string, userId: string, status: string = "assigned") => {
+    async (
+      shiftId: string,
+      userId: string,
+      status: string = "assigned",
+      options?: SchedulingMutationOptions,
+    ) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
         return false;
       }
 
-      return assignInternal(shiftId, userId, status);
+      return assignInternal(shiftId, userId, status, options);
     },
     [assignInternal, isUsingFallbackData, showReadOnlyNotice],
   );

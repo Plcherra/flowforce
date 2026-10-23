@@ -45,7 +45,7 @@ interface UseDragDropHandlersProps {
     shiftId: string,
     userId: string,
     status?: string,
-  ) => Promise<boolean>;
+  ) => Promise<boolean | "warning">;
   refetchAll: () => Promise<void>;
   setPendingVendorEvent: (event: PendingVendorEvent | null) => void;
   setVendorModalOpen: (open: boolean) => void;

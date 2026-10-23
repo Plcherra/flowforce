@@ -82,7 +82,7 @@ export interface DragDropActions {
     shiftId: string,
     userId: string,
     status?: string,
-  ) => Promise<boolean>;
+  ) => Promise<boolean | "warning">;
   unassign: (shiftId: string, userId: string) => Promise<boolean>;
   createVendorEvent: (
     payload: Tables<"vendor_event">,

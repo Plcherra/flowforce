@@ -30,7 +30,10 @@ import {
   upsertVendorEvent as upsertVendorEventRecord,
 } from "@/features/scheduling/repositories/schedulingRepository";
 import type { Tables } from "@/integrations/supabase/public-types";
-import type { SchedulingMutationOptions } from "@/features/scheduling/types/mutations";
+import type {
+  AssignOutcome,
+  SchedulingMutationOptions,
+} from "@/features/scheduling/types/mutations";
 
 interface SchedulingConsolidatedResult {
   shifts: ShiftWithAssignments[];
@@ -48,7 +51,7 @@ interface SchedulingConsolidatedResult {
     userId: string,
     status?: string,
     options?: SchedulingMutationOptions,
-  ) => Promise<boolean>;
+  ) => Promise<AssignOutcome>;
   unassign: (
     shiftId: string,
     userId: string,
@@ -278,6 +281,7 @@ export function useSchedulingConsolidated(
             title: "Assigned with warning",
             description: result.reasons.join(" "),
           });
+          return "warning";
         }
         return true;
       } catch (err) {

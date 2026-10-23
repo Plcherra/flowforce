@@ -14,7 +14,11 @@ interface ApplyTemplateActions {
   bulkCreateShifts: (
     payloads: import("@/features/scheduling/types/mutations").ShiftInsertPayload[],
   ) => Promise<boolean>;
-  assign: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
+  assign: (
+    shiftId: string,
+    userId: string,
+    status?: string,
+  ) => Promise<boolean | "warning">;
   refetchAll: () => Promise<void>;
 }
 

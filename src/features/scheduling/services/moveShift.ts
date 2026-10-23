@@ -12,7 +12,11 @@ export interface MoveShiftParams {
     id: string,
     updates: { start_time: string; end_time: string },
   ) => Promise<unknown>;
-  assign: (shiftId: string, userId: string, status?: string) => Promise<boolean>;
+  assign: (
+    shiftId: string,
+    userId: string,
+    status?: string,
+  ) => Promise<boolean | "warning">;
   unassign: (shiftId: string, userId: string) => Promise<boolean>;
   getCellAvailability?: (
     employeeId: string,

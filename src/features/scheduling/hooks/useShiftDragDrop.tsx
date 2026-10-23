@@ -27,7 +27,7 @@ interface UseShiftDragDropParams {
     userId: string,
     status?: string,
     options?: SchedulingMutationOptions,
-  ) => Promise<boolean>;
+  ) => Promise<boolean | "warning">;
   unassign: (
     shiftId: string,
     userId: string,

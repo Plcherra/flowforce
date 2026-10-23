@@ -9,6 +9,7 @@ import type {
 } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { ProfileSummary } from "./useSchedulingConsolidated";
 import { buildCellAvailabilityMap } from "@/features/scheduling/services/availability/scheduleAvailabilityEngine";
+import { buildScheduleReadinessSummary } from "@/features/scheduling/utils/scheduleReadiness";
 import type { GridCellAvailability } from "@/types/platform";
 import { logger } from "@/utils/logger";
 import {
@@ -291,13 +292,30 @@ export function useScheduleBoard({
 
   const publishWeekStatus = useCallback(
     async (isPublished: boolean) => {
+      const blockingConflictCount = isPublished
+        ? buildScheduleReadinessSummary({
+            shifts: filteredSchedules,
+            timeOff: timeOffRequests,
+            unavailability,
+            staffAvailability,
+          }).blockingConflictCount
+        : 0;
       await publishWeek({
-        weekStart: formattedWeekStart,
-        weekEnd: formattedWeekEnd,
+        weekStart: weekStart.toISOString(),
+        weekEnd: weekEnd.toISOString(),
         isPublished,
+        blockingConflictCount,
       });
     },
-    [formattedWeekEnd, formattedWeekStart, publishWeek],
+    [
+      filteredSchedules,
+      publishWeek,
+      staffAvailability,
+      timeOffRequests,
+      unavailability,
+      weekEnd,
+      weekStart,
+    ],
   );
 
   const cellAvailability = useMemo(
