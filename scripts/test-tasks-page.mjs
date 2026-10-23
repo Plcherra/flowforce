@@ -58,6 +58,9 @@ const { runShiftChecklistListTests } = importTs(
 const { runShiftWeekdayTaskTests } = importTs(
   "../src/features/tasks/utils/shiftWeekdayTask.test.ts",
 );
+const { runClosingNoteTests } = importTs(
+  "../src/features/forms/utils/closingNotes.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -75,4 +78,5 @@ runListIssueGatherTests();
 runChecklistFormTests();
 runShiftChecklistListTests();
 runShiftWeekdayTaskTests();
+runClosingNoteTests();
 console.log("tasks page tests passed");

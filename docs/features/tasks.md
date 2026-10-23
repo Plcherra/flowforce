@@ -634,7 +634,7 @@ Prove: Unit test the weekday match and that the task has no list slot. Run it wi
 
 ### Phase 28 — Closing notes show on the next opening list
 
-- [ ] Carry a closing note or exception onto the next opening person's list.
+- [x] Carry a closing note or exception onto the next opening person's list.
 
 Rules:
 
@@ -1088,6 +1088,21 @@ Shipped: phases 25–30 in this file. No product code. Checklists are forms per 
 Proven: this file is the plan.
 
 Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
+
+### 2026-10-23 — Phase 28 Closing notes show on the next opening list
+
+Shipped: A note or exception on a closing list is carried onto the next opening shift for that area. The person is whoever is on that next opening shift. A clean closing list adds nothing.
+
+Proven: Unit test `src/features/forms/utils/closingNotes.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers one note carried to the earlier opening person and a clean close that carries nothing. It passed.
+
+Phone steps for Pedro:
+1. This phase carries the note onto the next opening list. It does not add a new screen.
+2. A closing note such as "no coins in the drawer" shows for the next opening person in that area.
+3. A closing list with no note adds nothing to the next opening list.
+
+Blockers: none. No migration.
 
 Questions: none.
 
