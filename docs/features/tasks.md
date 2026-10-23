@@ -668,7 +668,7 @@ Prove: Unit test the draft builder with a fake model response. Do not call the l
 
 ### Phase 30 — Task creation in the permission matrix
 
-- [ ] Put task creation in the existing matrix, with a grantable scope that can be revoked.
+- [x] Put task creation in the existing matrix, with a grantable scope that can be revoked.
 
 Rules:
 
@@ -1088,6 +1088,22 @@ Shipped: phases 25–30 in this file. No product code. Checklists are forms per 
 Proven: this file is the plan.
 
 Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
+
+### 2026-10-23 — Phase 30 Task creation in the permission matrix
+
+Shipped: Task creation scope stays in `src/features/roles`. Level 1 defaults to self only. Level N defaults to self plus level N-1. The owner can grant the right to grant task creation. That person can grant target levels or target users, as when Marcus, level 4, lets John, level 3, create for levels 3 and 4 and for one coworker. Revoking John's grant removes only that extra right. Marcus keeps the right to grant. No new permission key and no second screen.
+
+Proven: Unit test `src/features/roles/constants/taskCreateScope.test.ts`, run with `npm run test:product-roles`, covers the level 1 default, the level N-1 default, Marcus granting John levels and a user, a person who cannot grant, and a revoke that leaves the other grant in place. `npm run check:roles` passed.
+
+Phone steps for Pedro:
+1. This phase is the scope rule in the existing roles code. The employee card still shows the create switches that were already there.
+2. A level 1 person can create tasks for themselves.
+3. A level 3 person can create tasks for level 2 by default.
+4. An owner can let someone else grant a wider set, and revoking that wider set leaves the default in place.
+
+Blockers: none. No migration. This was the last unchecked phase in this file.
 
 Questions: none.
 
