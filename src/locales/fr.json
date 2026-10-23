@@ -2788,7 +2788,8 @@
     "cannotGrantScope": "Vous ne pouvez pas accorder la création de tâches.",
     "cannotPassGrant": "Seul le propriétaire peut transmettre le droit d'accorder.",
     "scopeSaved": "Portée enregistrée",
-    "unableToSaveScope": "Impossible d'enregistrer la portée"
+    "unableToSaveScope": "Impossible d'enregistrer la portée",
+    "listsLiveOnForms": "Les listes d'ouverture, de journée et de fermeture se lient sur le formulaire."
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",
@@ -3086,7 +3087,15 @@
     "videoUpload": "Téléversement de vidéo",
     "viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly": "Consultez et gérez tous les envois. Exportez les données ou remplissez le formulaire directement.",
     "writeDescriptionContent": "Rédigez le contenu de la description...",
-    "manySubmissions": "{{count}} envois"
+    "manySubmissions": "{{count}} envois",
+    "shiftLink": "Liste du service",
+    "shiftLinkHelp": "Cette liste est sur chaque service de ce rôle. Les tâches du jour et la rotation du magasin restent dans Tâches.",
+    "notLinked": "Pas liée à un service",
+    "linkedAs": "{{area}} · {{slot}}",
+    "saveShiftLink": "Enregistrer le lien",
+    "removeShiftLink": "Retirer le lien",
+    "shiftLinkSaved": "Lien enregistré",
+    "unableToSaveShiftLink": "Impossible d'enregistrer le lien"
   },
   "updates": {
     "1Week": "1 semaine",

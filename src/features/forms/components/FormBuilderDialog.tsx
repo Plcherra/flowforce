@@ -30,6 +30,7 @@ import type { FormField } from "@/types/forms";
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { FormsErrorFallback } from "@/components/ui/feature-error-fallbacks";
+import { FormShiftLinkEditor } from "@/features/forms/components/FormShiftLinkEditor";
 
 interface FormBuilderDialogProps {
   open: boolean;
@@ -313,6 +314,7 @@ export default function FormBuilderDialog({
               />
             </div>
           </div>
+          <FormShiftLinkEditor formId={formId} />
         </DialogHeader>
 
         <ErrorBoundary fallbackRender={FormsErrorFallback}>

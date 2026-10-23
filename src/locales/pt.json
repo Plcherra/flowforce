@@ -2788,7 +2788,8 @@
     "cannotGrantScope": "Você não pode conceder a criação de tarefas.",
     "cannotPassGrant": "Só o dono pode passar o direito de conceder.",
     "scopeSaved": "Alcance salvo",
-    "unableToSaveScope": "Não foi possível salvar o alcance"
+    "unableToSaveScope": "Não foi possível salvar o alcance",
+    "listsLiveOnForms": "As listas de abertura, do dia e de fecho ficam no formulário."
   },
   "shell": {
     "accountSetupRequired": "A configuração da conta é necessária",
@@ -3086,7 +3087,15 @@
     "videoUpload": "Envio de vídeo",
     "viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly": "Veja e gerencie todos os envios. Exporte os dados ou preencha o formulário diretamente.",
     "writeDescriptionContent": "Escreva o conteúdo da descrição...",
-    "manySubmissions": "{{count}} envios"
+    "manySubmissions": "{{count}} envios",
+    "shiftLink": "Lista do turno",
+    "shiftLinkHelp": "Esta lista fica em cada turno desse papel. As tarefas da semana e a rotação da loja continuam em Tarefas.",
+    "notLinked": "Sem ligação a um turno",
+    "linkedAs": "{{area}} · {{slot}}",
+    "saveShiftLink": "Guardar ligação",
+    "removeShiftLink": "Remover ligação",
+    "shiftLinkSaved": "Ligação guardada",
+    "unableToSaveShiftLink": "Não foi possível guardar a ligação"
   },
   "updates": {
     "1Week": "1 semana",

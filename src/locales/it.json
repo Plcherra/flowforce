@@ -2788,7 +2788,8 @@
     "cannotGrantScope": "Non puoi concedere la creazione di attività.",
     "cannotPassGrant": "Solo il proprietario può passare il diritto di concedere.",
     "scopeSaved": "Ambito salvato",
-    "unableToSaveScope": "Impossibile salvare l'ambito"
+    "unableToSaveScope": "Impossibile salvare l'ambito",
+    "listsLiveOnForms": "Le liste di apertura, giornata e chiusura si collegano nel modulo."
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",
@@ -3086,7 +3087,15 @@
     "videoUpload": "Caricamento video",
     "viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly": "Vedi e gestisci tutti gli invii. Esporta i dati o compila il modulo direttamente.",
     "writeDescriptionContent": "Scrivi il contenuto della descrizione...",
-    "manySubmissions": "{{count}} invii"
+    "manySubmissions": "{{count}} invii",
+    "shiftLink": "Lista del turno",
+    "shiftLinkHelp": "Questa lista è su ogni turno di quel ruolo. I compiti dei giorni e la rotazione del negozio restano in Attività.",
+    "notLinked": "Non collegata a un turno",
+    "linkedAs": "{{area}} · {{slot}}",
+    "saveShiftLink": "Salva collegamento",
+    "removeShiftLink": "Rimuovi collegamento",
+    "shiftLinkSaved": "Collegamento salvato",
+    "unableToSaveShiftLink": "Impossibile salvare il collegamento"
   },
   "updates": {
     "1Week": "1 settimana",

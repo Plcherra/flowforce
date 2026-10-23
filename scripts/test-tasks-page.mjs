@@ -88,6 +88,9 @@ const { runTaskCreateGrantStoreTests } = importTs(
 const { runMyShiftReloadTests } = importTs(
   "../src/features/tasks/utils/myShiftReload.test.ts",
 );
+const { runFormShiftLinkTests } = importTs(
+  "../src/features/forms/utils/formShiftLink.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -115,4 +118,5 @@ runDraftInboxTests();
 runTaskAssigneeScopeTests();
 runTaskCreateGrantStoreTests();
 runMyShiftReloadTests();
+runFormShiftLinkTests();
 console.log("tasks page tests passed");

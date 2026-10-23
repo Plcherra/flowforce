@@ -2788,7 +2788,8 @@
     "cannotGrantScope": "Sie können die Aufgabenerstellung nicht vergeben.",
     "cannotPassGrant": "Nur der Inhaber kann das Recht zu vergeben weitergeben.",
     "scopeSaved": "Umfang gespeichert",
-    "unableToSaveScope": "Umfang konnte nicht gespeichert werden"
+    "unableToSaveScope": "Umfang konnte nicht gespeichert werden",
+    "listsLiveOnForms": "Öffnungs-, Tages- und Abschlusslisten werden am Formular verknüpft."
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",
@@ -3086,7 +3087,15 @@
     "videoUpload": "Video-Upload",
     "viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly": "Alle Einreichungen ansehen und verwalten. Daten exportieren oder das Formular direkt ausfüllen.",
     "writeDescriptionContent": "Beschreibungstext schreiben...",
-    "manySubmissions": "{{count}} Einreichungen"
+    "manySubmissions": "{{count}} Einreichungen",
+    "shiftLink": "Schichtliste",
+    "shiftLinkHelp": "Diese Liste gilt für jede Schicht dieser Rolle. Wochentagsaufgaben und die Ladenrotation bleiben unter Aufgaben.",
+    "notLinked": "Nicht mit einer Schicht verknüpft",
+    "linkedAs": "{{area}} · {{slot}}",
+    "saveShiftLink": "Verknüpfung speichern",
+    "removeShiftLink": "Verknüpfung entfernen",
+    "shiftLinkSaved": "Verknüpfung gespeichert",
+    "unableToSaveShiftLink": "Verknüpfung konnte nicht gespeichert werden"
   },
   "updates": {
     "1Week": "1 Woche",

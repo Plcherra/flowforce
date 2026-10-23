@@ -22,6 +22,7 @@ import {
   getStatusColor,
   getTypeLabel,
 } from "@/features/forms/components/form-utils";
+import { formShiftLinkKeys } from "@/features/forms/utils/formShiftLink";
 
 interface FormsSectionProps {
   title: string;
@@ -156,6 +157,18 @@ export function FormsSection({
                         title={form.title}
                         translation={translations?.get(form.id) ?? null}
                       />
+                      {(() => {
+                        const link = formShiftLinkKeys(form.settings);
+                        if (!link) return null;
+                        return (
+                          <p className="text-xs text-muted-foreground">
+                            {t("forms.linkedAs", {
+                              area: t(link.areaKey),
+                              slot: t(link.slotKey),
+                            })}
+                          </p>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>{getTypeLabel(form)}</TableCell>
                     <TableCell>

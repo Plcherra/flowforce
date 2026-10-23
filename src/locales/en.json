@@ -2788,7 +2788,8 @@
     "cannotGrantScope": "You cannot grant task creation.",
     "cannotPassGrant": "Only the owner can pass on the right to grant.",
     "scopeSaved": "Scope saved",
-    "unableToSaveScope": "Unable to save the scope"
+    "unableToSaveScope": "Unable to save the scope",
+    "listsLiveOnForms": "Opening, daily, and closing lists are attached on the form."
   },
   "shell": {
     "accountSetupRequired": "Account setup required",
@@ -3086,7 +3087,15 @@
     "videoUpload": "Video Upload",
     "viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly": "View and manage all form submissions. Export data or fill out the form directly.",
     "writeDescriptionContent": "Write description content...",
-    "manySubmissions": "{{count}} submissions"
+    "manySubmissions": "{{count}} submissions",
+    "shiftLink": "Shift list",
+    "shiftLinkHelp": "This list is on every shift of that role. Weekday tasks and store rotation stay on Tasks.",
+    "notLinked": "Not linked to a shift",
+    "linkedAs": "{{area}} · {{slot}}",
+    "saveShiftLink": "Save shift link",
+    "removeShiftLink": "Remove shift link",
+    "shiftLinkSaved": "Shift link saved",
+    "unableToSaveShiftLink": "Unable to save the shift link"
   },
   "updates": {
     "1Week": "1 week",

@@ -838,7 +838,7 @@ Prove: Unit test the key and that row. Run it with `node scripts/test-tasks-page
 
 ### Phase 39 — Link a form to a shift from Forms
 
-- [ ] Creating or editing a form can link it to a cashier or supervisor opening, daily, or closing list, and can remove that link.
+- [x] Creating or editing a form can link it to a cashier or supervisor opening, daily, or closing list, and can remove that link.
 
 Rules:
 
@@ -1502,6 +1502,23 @@ Phone steps for Pedro:
 3. Sign in as Marcus. Open John's Access card. Tick Level 3 and Level 4. The Right to grant box should not be there. Tap Grant scope.
 4. Sign in as John and open New custom task. The assignee list should include level 3 and level 4 people, plus himself and level 2.
 5. Sign in as Marcus again. On John's card, tap Revoke on that grant. Marcus's own right to grant should still be on his card. John's extra levels should be gone.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 39 Link a form to a shift from Forms
+
+Shipped: The form editor, which opens when a form is created, can link that form to cashier or supervisor opening, daily, or closing. Saving moves that slot off any other form. Remove clears the link. The forms list names the link. Tasks Setup no longer attaches forms. It keeps weekday tasks for someone who can edit tasks, and says the lists live on the form. Weekdays and store rotation stay on those weekday tasks. A list applies on every shift of that role.
+
+Proven: Unit test `src/features/forms/utils/formShiftLink.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the cashier opening label and a save that moves the slot while keeping the language setting. It passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk. Open Forms and create a form, or edit one.
+2. Under Shift list, choose Cashier and Opening, then tap Save shift link. The line should name Cashier and Opening.
+3. Back on Forms, that form’s row should show the same link.
+4. Open the form again and tap Remove shift link. The row should no longer name a shift.
+5. Open Tasks, then Setup. The six form slots should be gone. Weekday task should still be there, with a line that lists are attached on the form.
 
 Blockers: none. No migration.
 
