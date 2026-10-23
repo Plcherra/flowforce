@@ -10,7 +10,6 @@ import {
   GraduationCap,
   Megaphone,
   MessageSquare,
-  Settings,
   Shield,
   Sparkles,
   Target,
@@ -169,12 +168,6 @@ export const navigationSections: NavigationSection[] = [
         href: "/certifications",
         icon: GraduationCap,
         translationKey: "certifications",
-      },
-      {
-        name: "Settings",
-        href: "/settings",
-        icon: Settings,
-        translationKey: "settings",
       },
       {
         name: "Resources",

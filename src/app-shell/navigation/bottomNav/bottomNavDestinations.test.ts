@@ -56,11 +56,22 @@ export function runBottomNavDestinationTests() {
     "Analytics",
     "AI Insights",
     "Performance",
-    "Settings",
     "Resources",
   ]) {
     assert.equal(moreNames.includes(name), true, `${name} should stay in More`);
   }
+  assert.equal(moreNames.includes("Settings"), false, "Settings stays off More");
+  assert.equal(
+    moreSections.some((section) =>
+      section.items.some(
+        (item) =>
+          item.name === "Settings" ||
+          item.href === "/settings" ||
+          item.href === "/app/settings",
+      ),
+    ),
+    false,
+  );
 
   for (const name of ["Scheduling", "Tasks", "Messages", "Team Directory", "Admin"]) {
     assert.equal(moreNames.includes(name), false, `${name} should stay off More`);
@@ -169,9 +180,30 @@ export function runBottomNavDestinationTests() {
     groups[0]?.items.some((item) => item.name === "Team Directory"),
     false,
   );
+  const teamGroup = groups.find((group) => group.translationKey === "team");
+  assert.equal(teamGroup?.items[0]?.name, "Team Directory");
+  assert.deepEqual(
+    teamGroup?.items.map((item) => item.name),
+    [
+      "Team Directory",
+      "Performance",
+      "Recognition",
+      "Leaderboard",
+      "Learning Center",
+      "Certifications",
+      "Resources",
+    ],
+  );
   assert.equal(
-    groups.find((group) => group.translationKey === "team")?.items[0]?.name,
-    "Team Directory",
+    groups.some((group) =>
+      group.items.some(
+        (item) =>
+          item.name === "Settings" ||
+          item.href === "/settings" ||
+          item.href === "/app/settings",
+      ),
+    ),
+    false,
   );
   assert.deepEqual(
     groups

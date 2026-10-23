@@ -49,4 +49,16 @@ export function runDirectoryToolsTests() {
   assert.equal(reports.wholeStore, false);
   assert.equal(reports.vendors, false);
   assert.equal(reports.invitations, false);
+
+  assert.deepEqual(
+    Object.keys(directoryTools(allow(["systemSettings", "admin.settings"]))).sort(),
+    [
+      "addVendor",
+      "invitations",
+      "permissions",
+      "roles",
+      "vendors",
+      "wholeStore",
+    ],
+  );
 }

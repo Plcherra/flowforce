@@ -106,11 +106,11 @@
       "label": "Settings",
       "path": "/app/settings",
       "status": "production",
-      "sidebar": true,
+      "sidebar": false,
       "smoke": true,
       "owner": "src/features/system",
       "dataDependency": "tenant settings tables",
-      "notes": "Company settings, roles, feature gates, and admin configuration."
+      "notes": "Opened from the header profile card. Not a team-directory or bottom-nav entry."
     },
     {
       "label": "Messages Filter",

@@ -332,3 +332,18 @@ Phone steps for Pedro:
 Blockers: none. No migration. Theme phases 23–24 are checked. This was the last unchecked phase in this file.
 
 Questions: none.
+
+### 2026-10-23 — Settings stay on the profile card
+
+Shipped: The Settings entry is gone from the team directory navigation and from the Team group in the bottom nav, including More. The team directory stays people-related: roster, invitations, roles, permissions, and vendors, each behind the permission it already uses. The header profile card still opens `/app/settings`. That page is the same Settings screen the team entry opened, so no setting had to move. `/settings`, `/settings/:path*`, `/admin/settings`, and `/app/admin/settings` still open that page. `/admin` and `/app/admin` still open the team directory.
+
+Proven: `src/app-shell/navigation/bottomNav/bottomNavDestinations.test.ts` and `src/features/employees/utils/directoryTools.test.ts` passed through `node scripts/test-bottom-nav.mjs`. The Team group has no Settings item. `src/features/system/utils/settingsTabs.test.ts` passed through `node scripts/test-product-roles-setup.mjs`. The profile card navigates to `/app/settings`, the team directory source has no settings tab, and the old settings redirects land on `/app/settings`.
+
+Phone steps for Pedro:
+1. Sign in at https://www.flowforce.uk. Open the profile card in the header. Settings opens General, Security, Region, Notifications, AI, Integrations, and Billing.
+2. Open the Team group in the bottom nav, and More on a phone. There is no Settings icon. The team directory still has the roster, and invitations, roles, permissions, and vendors follow the permissions you already have.
+3. Open `/settings` and `/admin/settings`. Both open the same Settings page as the profile card. Open `/app/admin`. That still opens the team directory.
+
+Blockers: none. No migration. No setting lived only on the team-directory link.
+
+Questions: none.
