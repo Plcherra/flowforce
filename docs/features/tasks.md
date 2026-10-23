@@ -651,7 +651,7 @@ Prove: Unit test one note carried forward and one clean close that carries nothi
 
 ### Phase 29 — AI drafts the next shift's tasks from those notes
 
-- [ ] Draft tasks from the additional-information notes for the next shift.
+- [x] Draft tasks from the additional-information notes for the next shift.
 
 Rules:
 
@@ -1088,6 +1088,21 @@ Shipped: phases 25–30 in this file. No product code. Checklists are forms per 
 Proven: this file is the plan.
 
 Blockers: phases 27 and 30 may add a migration. The owner approves it during that phase.
+
+Questions: none.
+
+### 2026-10-23 — Phase 29 AI drafts the next shift's tasks from those notes
+
+Shipped: Closing notes are sent through the existing Grok request builder. The model reply becomes draft tasks for the next shift. A draft is not accepted and is not assigned work. A clean closing list does not call the model and produces no draft. The request omits `search_parameters`.
+
+Proven: Unit test `src/features/tasks/utils/closingNoteDrafts.test.ts`, run with `node scripts/test-tasks-page.mjs`, uses a fake model response. A note becomes one unaccepted draft. A clean list stays empty and does not call the model. It passed. The live model was not called.
+
+Phone steps for Pedro:
+1. This phase drafts tasks from closing notes. It does not publish them.
+2. A closing note can become a draft for the next shift. It stays a draft until someone accepts it.
+3. A clean closing list produces no draft.
+
+Blockers: none. No migration.
 
 Questions: none.
 
