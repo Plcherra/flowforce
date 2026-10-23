@@ -3100,7 +3100,16 @@
     "saveShiftLink": "Guardar ligação",
     "removeShiftLink": "Remover ligação",
     "shiftLinkSaved": "Ligação guardada",
-    "unableToSaveShiftLink": "Não foi possível guardar a ligação"
+    "unableToSaveShiftLink": "Não foi possível guardar a ligação",
+    "myForms": "Meus formulários",
+    "teamForms": "Formulários da equipe",
+    "archivedForms": "Formulários arquivados",
+    "noArchivedForms": "Nenhum formulário arquivado.",
+    "youHaveNoFormsYet": "Você ainda não tem formulários. Crie um para começar.",
+    "noFormsAvailable": "Nenhum formulário disponível.",
+    "noSharedFormsYet": "Ainda não há formulários compartilhados.",
+    "viewSubmissions": "Ver respostas",
+    "unableToLoadSubmissions": "Não foi possível carregar as respostas."
   },
   "updates": {
     "1Week": "1 semana",

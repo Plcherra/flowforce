@@ -185,10 +185,10 @@ export function FormsReadinessPanel({
 
   return (
     <Card className="border-border/70 bg-background/95 shadow-sm">
-      <CardHeader className="space-y-3">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <CardHeader className="space-y-1 px-4 py-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl">{t("forms.formsReadiness")}</CardTitle>
+            <CardTitle className="text-base">{t("forms.formsReadiness")}</CardTitle>
             <p className="text-sm text-muted-foreground">
               {t("forms.builderSubmissionsAdvancedFieldsAndReviewCoverageInOneView")}</p>
           </div>
@@ -198,14 +198,14 @@ export function FormsReadinessPanel({
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <CardContent className="space-y-2 px-4 pb-3">
+        <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
           {cards.map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.label}
-                className="rounded-lg border border-border/70 bg-muted/30 p-3"
+                className="rounded-md border border-border/70 bg-muted/30 px-2 py-1.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-medium uppercase text-muted-foreground">
@@ -213,7 +213,7 @@ export function FormsReadinessPanel({
                   </p>
                   <Icon className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <p className="mt-2 text-2xl font-semibold text-foreground">
+                <p className="text-lg font-semibold leading-tight text-foreground">
                   {item.value}
                 </p>
                 <p className="text-xs text-muted-foreground">{item.detail}</p>

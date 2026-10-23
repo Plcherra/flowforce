@@ -3100,7 +3100,16 @@
     "saveShiftLink": "Salva collegamento",
     "removeShiftLink": "Rimuovi collegamento",
     "shiftLinkSaved": "Collegamento salvato",
-    "unableToSaveShiftLink": "Impossibile salvare il collegamento"
+    "unableToSaveShiftLink": "Impossibile salvare il collegamento",
+    "myForms": "I miei moduli",
+    "teamForms": "Moduli del team",
+    "archivedForms": "Moduli archiviati",
+    "noArchivedForms": "Nessun modulo archiviato.",
+    "youHaveNoFormsYet": "Non hai ancora moduli. Creane uno per iniziare.",
+    "noFormsAvailable": "Nessun modulo disponibile.",
+    "noSharedFormsYet": "Nessun modulo condiviso.",
+    "viewSubmissions": "Vedi le risposte",
+    "unableToLoadSubmissions": "Impossibile caricare le risposte."
   },
   "updates": {
     "1Week": "1 settimana",

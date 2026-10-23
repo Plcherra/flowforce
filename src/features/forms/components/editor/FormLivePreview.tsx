@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { paneScroller } from "@/features/forms/utils/formsSurface";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -47,7 +47,7 @@ export function FormLivePreview() {
             {t("forms.formIsInteractiveButChangesAreNotSavedUseThisPreviewToValidateConfiguration")}</p>
         </div>
       </div>
-      <ScrollArea className="flex-1">
+      <div className={paneScroller}>
         <div className="space-y-6 p-4">
           <div className="space-y-1">
             <h2 className="text-xl font-semibold text-foreground">
@@ -209,7 +209,7 @@ export function FormLivePreview() {
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

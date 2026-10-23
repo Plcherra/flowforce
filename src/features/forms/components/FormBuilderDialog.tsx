@@ -7,11 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,11 +16,8 @@ import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useFormSchemaStore, useFormSchema, type FormSchema } from "@/stores/useFormSchemaStore";
-import FormFieldLibrary, {
-  type FieldTemplate,
-} from "@/features/forms/components/editor/FormFieldLibrary";
-import FormEditorPanel from "@/features/forms/components/editor/FormEditorPanel";
-import FormLivePreview from "@/features/forms/components/editor/FormLivePreview";
+import { type FieldTemplate } from "@/features/forms/components/editor/FormFieldLibrary";
+import { FormBuilderWorkspace } from "@/features/forms/components/editor/FormBuilderWorkspace";
 import type { FormField } from "@/types/forms";
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/ui/error-boundary";
@@ -282,8 +274,8 @@ export default function FormBuilderDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none">
-        <DialogHeader className="flex-shrink-0 space-y-1 border-b px-6 py-4 pr-14">
-          <DialogTitle className="text-2xl font-semibold">
+        <DialogHeader className="max-h-[40vh] shrink-0 space-y-1 overflow-y-auto border-b px-4 py-3 pr-12">
+          <DialogTitle className="text-lg font-semibold">
             {t("forms.formEditor")}</DialogTitle>
           <DialogDescription>
             {t("forms.composeFieldsConfigureOptionsAndPreviewTheLiveFormExperience")}</DialogDescription>
@@ -319,35 +311,7 @@ export default function FormBuilderDialog({
 
         <ErrorBoundary fallbackRender={FormsErrorFallback}>
           <div className="relative flex min-h-0 flex-1 flex-col">
-            <ResizablePanelGroup
-              direction="horizontal"
-              className="flex-1 min-h-0 overflow-hidden"
-            >
-              <ResizablePanel
-                defaultSize={20}
-                minSize={15}
-                maxSize={25}
-                className="flex min-h-0 min-w-[220px] flex-col"
-              >
-                <FormFieldLibrary onAddField={handleAddTemplate} />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel
-                defaultSize={50}
-                minSize={40}
-                className="flex min-h-0 flex-col"
-              >
-                <FormEditorPanel />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel
-                defaultSize={30}
-                minSize={25}
-                className="flex min-h-0 flex-col"
-              >
-                <FormLivePreview />
-              </ResizablePanel>
-            </ResizablePanelGroup>
+            <FormBuilderWorkspace onAddField={handleAddTemplate} />
             {loading && (
               <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/70">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">

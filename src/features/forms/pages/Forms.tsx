@@ -28,6 +28,9 @@ const FormBuilderDialog = lazy(
   () => import("@/features/forms/components/FormBuilderDialog"),
 );
 const FormFillDialog = lazy(() => import("@/features/forms/components/FormFillDialog"));
+const FormSubmissionsDialog = lazy(
+  () => import("@/features/forms/components/FormSubmissionsDialog"),
+);
 
 type StatusFilter = "all" | "published" | "draft" | "archived";
 
@@ -86,6 +89,7 @@ export default function Forms() {
   const [builderFormId, setBuilderFormId] = useState<string | null>(null);
   const [builderFallback, setBuilderFallback] = useState<BuilderFallback>(null);
   const [fillFormId, setFillFormId] = useState<string | null>(null);
+  const [submissionsFormId, setSubmissionsFormId] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const requestedFormId = searchParams.get("form");
   const openedFormRef = useRef<string | null>(null);
@@ -107,9 +111,9 @@ export default function Forms() {
       return [
         {
           key: "archived",
-          title: "Archived Forms",
+          title: t("forms.archivedForms"),
           forms: archivedForms,
-          emptyMessage: "No archived forms.",
+          emptyMessage: t("forms.noArchivedForms"),
         },
       ];
     }
@@ -136,19 +140,19 @@ export default function Forms() {
     const activeSections: FormSectionConfig[] = [
       {
         key: "my",
-        title: "My Forms",
+        title: t("forms.myForms"),
         forms: myForms,
         emptyMessage: canCreateForms
-          ? "You have no forms yet. Create one to get started."
-          : "No forms available.",
+          ? t("forms.youHaveNoFormsYet")
+          : t("forms.noFormsAvailable"),
       },
     ];
     if (!hideOtherSubmissions) {
       activeSections.push({
         key: "team",
-        title: "Team Forms",
+        title: t("forms.teamForms"),
         forms: teamForms,
-        emptyMessage: "No shared forms yet.",
+        emptyMessage: t("forms.noSharedFormsYet"),
       });
     }
 
@@ -161,14 +165,14 @@ export default function Forms() {
       );
       activeSections.push({
         key: "archived",
-        title: "Archived Forms",
+        title: t("forms.archivedForms"),
         forms: archivedForms,
-        emptyMessage: "No archived forms.",
+        emptyMessage: t("forms.noArchivedForms"),
       });
     }
 
     return activeSections;
-  }, [forms, statusFilter, query, translations, user?.id, canCreateForms, hideOtherSubmissions]);
+  }, [forms, statusFilter, query, translations, user?.id, canCreateForms, hideOtherSubmissions, t]);
 
   const builderForm = builderFormId
     ? asArray(forms).find((form) => form.id === builderFormId)
@@ -224,10 +228,10 @@ export default function Forms() {
       loadingTitle="Loading Forms"
       loadingDescription="Preparing your workspace forms…"
     >
-      <div className="w-full space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="w-full space-y-3 px-1 py-3 sm:px-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t("common.forms")}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{t("common.forms")}</h1>
             <p className="text-sm text-muted-foreground">
               {t("forms.createAndManageDataCollectionForms")}</p>
           </div>
@@ -281,7 +285,7 @@ export default function Forms() {
           </TabsList>
 
           {statusTabs.map((value) => (
-            <TabsContent key={value} value={value} className="space-y-6 pt-4">
+            <TabsContent key={value} value={value} className="space-y-3 pt-2">
               {statusFilter === value &&
                 sections.map((section) => (
                   <ErrorBoundary
@@ -304,6 +308,7 @@ export default function Forms() {
                       translations={translations}
                       onFill={handleOpenFill}
                       onEdit={handleOpenBuilder}
+                      onViewSubmissions={setSubmissionsFormId}
                     />
                   </ErrorBoundary>
                 ))}
@@ -355,6 +360,17 @@ export default function Forms() {
             </ErrorBoundary>
           </Suspense>
         )}
+        {submissionsFormId ? (
+          <Suspense fallback={null}>
+            <FormSubmissionsDialog
+              open
+              onOpenChange={(open) => {
+                if (!open) setSubmissionsFormId(null);
+              }}
+              formId={submissionsFormId}
+            />
+          </Suspense>
+        ) : null}
         {fillFormId && (
           <Suspense fallback={null}>
             <ErrorBoundary

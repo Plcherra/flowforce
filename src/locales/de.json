@@ -3100,7 +3100,16 @@
     "saveShiftLink": "Verknüpfung speichern",
     "removeShiftLink": "Verknüpfung entfernen",
     "shiftLinkSaved": "Verknüpfung gespeichert",
-    "unableToSaveShiftLink": "Verknüpfung konnte nicht gespeichert werden"
+    "unableToSaveShiftLink": "Verknüpfung konnte nicht gespeichert werden",
+    "myForms": "Meine Formulare",
+    "teamForms": "Team-Formulare",
+    "archivedForms": "Archivierte Formulare",
+    "noArchivedForms": "Keine archivierten Formulare.",
+    "youHaveNoFormsYet": "Du hast noch keine Formulare. Erstelle eines, um zu starten.",
+    "noFormsAvailable": "Keine Formulare verfügbar.",
+    "noSharedFormsYet": "Noch keine geteilten Formulare.",
+    "viewSubmissions": "Antworten ansehen",
+    "unableToLoadSubmissions": "Antworten konnten nicht geladen werden."
   },
   "updates": {
     "1Week": "1 Woche",

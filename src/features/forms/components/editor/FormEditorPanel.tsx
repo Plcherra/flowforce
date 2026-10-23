@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { paneScroller } from "@/features/forms/utils/formsSurface";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -195,7 +195,7 @@ export function FormEditorPanel() {
           </div>
         </div>
       </div>
-      <ScrollArea className="flex-1">
+      <div className={paneScroller}>
         <div className="space-y-4 p-4">
           {schema.sections.map((section) => (
             <div key={section.id} className="space-y-3">
@@ -255,7 +255,7 @@ export function FormEditorPanel() {
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
       {activeSection && activeField && (
         <div className="border-t bg-background p-4">
           <div className="space-y-4">

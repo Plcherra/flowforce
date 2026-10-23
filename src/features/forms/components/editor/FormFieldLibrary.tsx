@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { paneScroller } from "@/features/forms/utils/formsSurface";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -116,7 +116,7 @@ export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
           aria-label={t("forms.searchFieldLibrary")}
         />
       </div>
-      <ScrollArea className="flex-1">
+      <div className={paneScroller}>
         <div className="space-y-4 pr-2">
           {filteredTemplates.map((template) => (
             <div
@@ -150,7 +150,7 @@ export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

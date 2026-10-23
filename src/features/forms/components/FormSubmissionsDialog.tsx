@@ -32,6 +32,7 @@ export default function FormSubmissionsDialog({
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [fields, setFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [fillDialogOpen, setFillDialogOpen] = useState(false);
   const answerTranslations = useFormAnswerTranslations(
     submissions.map((submission) => ({
@@ -55,16 +56,19 @@ export default function FormSubmissionsDialog({
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(false);
     const [submissionsResult, fieldsResult] = await Promise.all([
       getFormSubmissions(formId),
       getFormFields(formId),
     ]);
 
-    if (!submissionsResult.error) {
+    if (submissionsResult.error || fieldsResult.error) {
+      setLoadError(true);
+      setSubmissions([]);
+      setFields([]);
+    } else {
       setSubmissions((submissionsResult.data ?? []) as FormSubmission[]);
-    }
-    if (!fieldsResult.error) {
-      setFields(fieldsResult.data as any);
+      setFields((fieldsResult.data ?? []) as FormField[]);
     }
     setLoading(false);
   };
@@ -116,8 +120,8 @@ export default function FormSubmissionsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="flex max-h-[min(40rem,calc(100dvh-2rem))] w-[min(56rem,calc(100vw-1.5rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-[56rem]">
+          <DialogHeader className="shrink-0 space-y-2 border-b px-4 py-3 pr-12">
             <div className="flex justify-between items-center">
               <DialogTitle>{t("forms.formSubmissions")}</DialogTitle>
               <div className="flex gap-2">
@@ -134,8 +138,11 @@ export default function FormSubmissionsDialog({
               {t("forms.viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly")}</DialogDescription>
           </DialogHeader>
 
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
           {loading ? (
             <div className="text-center py-8">{t("forms.loadingSubmissions")}</div>
+          ) : loadError ? (
+            <p className="py-6 text-sm text-destructive">{t("forms.unableToLoadSubmissions")}</p>
           ) : submissions.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center">
@@ -226,6 +233,7 @@ export default function FormSubmissionsDialog({
               </div>
             </div>
           )}
+          </div>
         </DialogContent>
       </Dialog>
 

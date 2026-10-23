@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { KeyboardEvent } from "react";
-import { Edit, Loader2 } from "lucide-react";
+import { ClipboardList, Edit, Loader2 } from "lucide-react";
+import { formsTableScroller } from "@/features/forms/utils/formsSurface";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -34,6 +35,7 @@ interface FormsSectionProps {
   translations?: Map<string, FormContentTranslation | null>;
   onFill: (formId: string) => void;
   onEdit: (formId: string) => void;
+  onViewSubmissions?: (formId: string) => void;
 }
 
 export function FormsSection({
@@ -46,6 +48,7 @@ export function FormsSection({
   translations,
   onFill,
   onEdit,
+  onViewSubmissions,
 }: FormsSectionProps) {
   const { t } = useTranslation();
   const skeletonRows = Array.from({ length: 3 });
@@ -61,8 +64,8 @@ export function FormsSection({
   };
 
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+    <section className="space-y-2">
+      <h2 className="text-base font-semibold text-foreground">{title}</h2>
       <Card className="border border-muted bg-background">
         {loading ? (
           <div className="p-4">
@@ -75,8 +78,8 @@ export function FormsSection({
                   <TableHead>{t("forms.created")}</TableHead>
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
-                  {canEdit && (
-                    <TableHead className="w-[60px] text-center">{t("common.edit")}</TableHead>
+                  {(canEdit || onViewSubmissions) && (
+                    <TableHead className="w-[96px] text-right">{t("common.edit")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -101,9 +104,9 @@ export function FormsSection({
                     <TableCell>
                       <Skeleton className="h-5 w-24" />
                     </TableCell>
-                    {canEdit && (
+                    {(canEdit || onViewSubmissions) && (
                       <TableCell>
-                        <Skeleton className="mx-auto h-8 w-8 rounded-full" />
+                        <Skeleton className="ml-auto h-8 w-8 rounded-full" />
                       </TableCell>
                     )}
                   </TableRow>
@@ -116,7 +119,7 @@ export function FormsSection({
             {emptyMessage}
           </div>
         ) : (
-          <div className="relative">
+          <div className={`relative ${formsTableScroller}`}>
             {refreshing && (
               <div className="absolute right-4 top-3 z-10 flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -135,8 +138,8 @@ export function FormsSection({
                   <TableHead>{t("forms.created")}</TableHead>
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
-                  {canEdit && (
-                    <TableHead className="w-[60px] text-center">{t("common.edit")}</TableHead>
+                  {(canEdit || onViewSubmissions) && (
+                    <TableHead className="w-[96px] text-right">{t("common.edit")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -183,24 +186,32 @@ export function FormsSection({
                       {formatDate(form.updated_at || form.created_at)}
                     </TableCell>
                     <TableCell>{getOwnerName(form)}</TableCell>
-                    {canEdit && (
-                      <TableCell onClick={(event) => event.stopPropagation()}>
-                        <div className="flex justify-center">
+                    <TableCell onClick={(event) => event.stopPropagation()}>
+                      <div className="flex justify-end gap-1">
+                        {onViewSubmissions ? (
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="min-h-11 min-w-11"
+                            aria-label={t("forms.viewSubmissions")}
+                            onClick={() => onViewSubmissions(form.id)}
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                          </Button>
+                        ) : null}
+                        {canEdit ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="min-h-11 min-w-11"
                             aria-label={t("forms.editForm")}
-                            disabled={!canEdit}
-                            onClick={() => {
-                              if (!canEdit) return;
-                              onEdit(form.id);
-                            }}
+                            onClick={() => onEdit(form.id)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                        </div>
-                      </TableCell>
-                    )}
+                        ) : null}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

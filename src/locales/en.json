@@ -3100,7 +3100,16 @@
     "saveShiftLink": "Save shift link",
     "removeShiftLink": "Remove shift link",
     "shiftLinkSaved": "Shift link saved",
-    "unableToSaveShiftLink": "Unable to save the shift link"
+    "unableToSaveShiftLink": "Unable to save the shift link",
+    "myForms": "My forms",
+    "teamForms": "Team forms",
+    "archivedForms": "Archived forms",
+    "noArchivedForms": "No archived forms.",
+    "youHaveNoFormsYet": "You have no forms yet. Create one to get started.",
+    "noFormsAvailable": "No forms available.",
+    "noSharedFormsYet": "No shared forms yet.",
+    "viewSubmissions": "View submissions",
+    "unableToLoadSubmissions": "Unable to load submissions."
   },
   "updates": {
     "1Week": "1 week",
