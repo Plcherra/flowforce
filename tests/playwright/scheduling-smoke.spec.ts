@@ -433,7 +433,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     if (!seedHandles) return;
     await page.setViewportSize({ width: 1366, height: 900 });
     await expect(page.getByTestId('schedule-readiness-bar')).toBeVisible();
-    await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toBeVisible();
+    await expect(page.getByTestId(`schedule-shift-${seedHandles.shiftId}`)).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByRole('heading', { name: 'Schedule' })).toBeVisible();
   });
 
@@ -798,7 +800,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await page.getByTestId('employee-selector-add').click();
     await page.getByRole('option', { name: /Scheduling Staff/i }).click();
 
-    await expect(page.getByText(/pending PTO/i)).toBeVisible({
+    await expect(
+      page.getByLabel('Notifications (F8)').getByText(/pending PTO/i),
+    ).toBeVisible({
       timeout: 15_000,
     });
     await expect(

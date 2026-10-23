@@ -151,13 +151,17 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   );
 
   const unassign = useCallback(
-    async (shiftId: string, userId: string) => {
+    async (
+      shiftId: string,
+      userId: string,
+      options?: SchedulingMutationOptions,
+    ) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
         return false;
       }
 
-      return unassignInternal(shiftId, userId);
+      return unassignInternal(shiftId, userId, options);
     },
     [isUsingFallbackData, showReadOnlyNotice, unassignInternal],
   );

@@ -129,7 +129,7 @@ export function useShiftDragDrop({
         });
       }
 
-      void refetchAll();
+      await refetchAll();
 
       if (result.severity === "warning") {
         toast({
