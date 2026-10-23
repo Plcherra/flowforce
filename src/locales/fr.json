@@ -2752,7 +2752,21 @@
     "noForm": "Aucun formulaire",
     "saveList": "Enregistrer la liste",
     "listSaved": "Liste enregistrée",
-    "unableToSaveList": "Impossible d'enregistrer la liste"
+    "unableToSaveList": "Impossible d'enregistrer la liste",
+    "weekdayTask": "Tâche de semaine",
+    "weekdayTaskHelp": "Elle est sur le service du rôle les jours choisis. Elle n'est pas dans une liste.",
+    "taskTitle": "Titre",
+    "saveWeekdayTask": "Enregistrer la tâche",
+    "weekdayTaskSaved": "Tâche enregistrée",
+    "unableToSaveWeekdayTask": "Impossible d'enregistrer la tâche",
+    "pickWeekdayAndStation": "Choisissez un titre, un jour et un poste.",
+    "weekdayMon": "Lun",
+    "weekdayTue": "Mar",
+    "weekdayWed": "Mer",
+    "weekdayThu": "Jeu",
+    "weekdayFri": "Ven",
+    "weekdaySat": "Sam",
+    "weekdaySun": "Dim"
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",

@@ -2752,7 +2752,21 @@
     "noForm": "Nessun modulo",
     "saveList": "Salva lista",
     "listSaved": "Lista salvata",
-    "unableToSaveList": "Impossibile salvare la lista"
+    "unableToSaveList": "Impossibile salvare la lista",
+    "weekdayTask": "Attività dei giorni",
+    "weekdayTaskHelp": "Sta nel turno del ruolo nei giorni scelti. Non è in una lista.",
+    "taskTitle": "Titolo",
+    "saveWeekdayTask": "Salva attività",
+    "weekdayTaskSaved": "Attività salvata",
+    "unableToSaveWeekdayTask": "Impossibile salvare l'attività",
+    "pickWeekdayAndStation": "Scegli un titolo, un giorno e una postazione.",
+    "weekdayMon": "Lun",
+    "weekdayTue": "Mar",
+    "weekdayWed": "Mer",
+    "weekdayThu": "Gio",
+    "weekdayFri": "Ven",
+    "weekdaySat": "Sab",
+    "weekdaySun": "Dom"
   },
   "shell": {
     "accountSetupRequired": "Configurazione dell'account necessaria",

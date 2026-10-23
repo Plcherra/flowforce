@@ -2752,7 +2752,21 @@
     "noForm": "No form",
     "saveList": "Save list",
     "listSaved": "List saved",
-    "unableToSaveList": "Unable to save the list"
+    "unableToSaveList": "Unable to save the list",
+    "weekdayTask": "Weekday task",
+    "weekdayTaskHelp": "This sits on the role's shift on the chosen days. It is not on a list.",
+    "taskTitle": "Title",
+    "saveWeekdayTask": "Save weekday task",
+    "weekdayTaskSaved": "Weekday task saved",
+    "unableToSaveWeekdayTask": "Unable to save the weekday task",
+    "pickWeekdayAndStation": "Choose a title, a weekday, and a station.",
+    "weekdayMon": "Mon",
+    "weekdayTue": "Tue",
+    "weekdayWed": "Wed",
+    "weekdayThu": "Thu",
+    "weekdayFri": "Fri",
+    "weekdaySat": "Sat",
+    "weekdaySun": "Sun"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",

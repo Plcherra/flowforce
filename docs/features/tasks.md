@@ -746,7 +746,7 @@ Prove: Unit test the assign and clear. Run it with `node scripts/test-tasks-page
 
 ### Phase 34 — Weekday task on a role's shift
 
-- [ ] Let a manager add a standalone task for chosen weekdays and store stations.
+- [x] Let a manager add a standalone task for chosen weekdays and store stations.
 
 Rules:
 
@@ -1360,6 +1360,23 @@ Phone steps for Pedro:
 3. On Cashier Opening, choose a form and tap Save list. Open My shift on a cashier shift. Opening should name that form.
 4. Point Cashier Opening at a different form and save. The first form should no longer be the opening list.
 5. Choose No form and save. Opening should say No list attached.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 34 Weekday task on a role's shift
+
+Shipped: Setup shows a weekday task when the person can edit tasks. It asks for a title, cashier or supervisor, the weekdays, and front of house, back of house, or both. Saving creates a schedule task whose links hold the weekday assignment and a null list slot. My shift shows it when the area and the weekday match.
+
+Proven: Unit test `src/features/tasks/utils/weekdayTaskDraft.test.ts`, run with `node scripts/test-tasks-page.mjs`, covers the US Foods shape, a missing weekday, the Friday supervisor match, the cashier miss, and a render of the form. It passed. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone steps for Pedro:
+1. Sign in on https://www.flowforce.uk as someone who can edit tasks. Open Tasks and tap Setup.
+2. Under Weekday task, type "Organize the US Foods delivery". Leave Supervisor selected.
+3. Tap Mon, Wed, and Fri. Tap Front of house and Back of house. Tap Save weekday task.
+4. Open My shift on a Friday supervisor shift. The delivery should sit under the lists, not inside Opening, Daily, or Closing.
+5. On a cashier shift that same Friday, the delivery should not appear.
 
 Blockers: none. No migration.
 

@@ -2752,7 +2752,21 @@
     "noForm": "Sem formulário",
     "saveList": "Salvar lista",
     "listSaved": "Lista salva",
-    "unableToSaveList": "Não foi possível salvar a lista"
+    "unableToSaveList": "Não foi possível salvar a lista",
+    "weekdayTask": "Tarefa da semana",
+    "weekdayTaskHelp": "Fica no turno da função nos dias escolhidos. Não está numa lista.",
+    "taskTitle": "Título",
+    "saveWeekdayTask": "Salvar tarefa",
+    "weekdayTaskSaved": "Tarefa salva",
+    "unableToSaveWeekdayTask": "Não foi possível salvar a tarefa",
+    "pickWeekdayAndStation": "Escolha um título, um dia e uma estação.",
+    "weekdayMon": "Seg",
+    "weekdayTue": "Ter",
+    "weekdayWed": "Qua",
+    "weekdayThu": "Qui",
+    "weekdayFri": "Sex",
+    "weekdaySat": "Sáb",
+    "weekdaySun": "Dom"
   },
   "shell": {
     "accountSetupRequired": "A configuração da conta é necessária",

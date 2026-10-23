@@ -2752,7 +2752,21 @@
     "noForm": "Kein Formular",
     "saveList": "Liste speichern",
     "listSaved": "Liste gespeichert",
-    "unableToSaveList": "Liste konnte nicht gespeichert werden"
+    "unableToSaveList": "Liste konnte nicht gespeichert werden",
+    "weekdayTask": "Wochentagsaufgabe",
+    "weekdayTaskHelp": "Sie liegt an den gewählten Tagen auf der Schicht der Rolle. Sie ist auf keiner Liste.",
+    "taskTitle": "Titel",
+    "saveWeekdayTask": "Wochentagsaufgabe speichern",
+    "weekdayTaskSaved": "Wochentagsaufgabe gespeichert",
+    "unableToSaveWeekdayTask": "Wochentagsaufgabe konnte nicht gespeichert werden",
+    "pickWeekdayAndStation": "Wählen Sie einen Titel, einen Wochentag und eine Station.",
+    "weekdayMon": "Mo",
+    "weekdayTue": "Di",
+    "weekdayWed": "Mi",
+    "weekdayThu": "Do",
+    "weekdayFri": "Fr",
+    "weekdaySat": "Sa",
+    "weekdaySun": "So"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",

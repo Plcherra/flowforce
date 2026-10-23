@@ -39,6 +39,7 @@ import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
 import { ChecklistSetup } from "@/features/tasks/components/ChecklistSetup";
+import { WeekdayTaskSetup } from "@/features/tasks/components/WeekdayTaskSetup";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
@@ -82,7 +83,8 @@ export default function Tasks() {
     keysSet: taskCreateKeysAreSet("custom", getSource),
   });
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
-  const showSetup = !permissionsLoading && can("manageForms");
+  const showSetup =
+    !permissionsLoading && (can("manageForms") || can("editTasks"));
   const { user } = useAuth();
   const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
   const tasks = asArray(tasksData) as TaskListItem[];
@@ -211,7 +213,12 @@ export default function Tasks() {
 
       <TasksBoardSwitch mode={boardMode} showSetup={showSetup} onChange={setBoardMode} />
       <ListIssueSync />
-      {boardMode === "setup" && showSetup ? <ChecklistSetup /> : null}
+      {boardMode === "setup" && showSetup ? (
+        <div className="space-y-6">
+          {can("manageForms") ? <ChecklistSetup /> : null}
+          {can("editTasks") ? <WeekdayTaskSetup /> : null}
+        </div>
+      ) : null}
       {boardMode === "shift" ? (
         <MyShiftTasks
           board={shift.board}

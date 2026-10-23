@@ -2752,7 +2752,21 @@
     "noForm": "Sin formulario",
     "saveList": "Guardar lista",
     "listSaved": "Lista guardada",
-    "unableToSaveList": "No se pudo guardar la lista"
+    "unableToSaveList": "No se pudo guardar la lista",
+    "weekdayTask": "Tarea de la semana",
+    "weekdayTaskHelp": "Va en el turno del rol los días elegidos. No está en una lista.",
+    "taskTitle": "Título",
+    "saveWeekdayTask": "Guardar tarea",
+    "weekdayTaskSaved": "Tarea guardada",
+    "unableToSaveWeekdayTask": "No se pudo guardar la tarea",
+    "pickWeekdayAndStation": "Elige un título, un día y una estación.",
+    "weekdayMon": "Lun",
+    "weekdayTue": "Mar",
+    "weekdayWed": "Mié",
+    "weekdayThu": "Jue",
+    "weekdayFri": "Vie",
+    "weekdaySat": "Sáb",
+    "weekdaySun": "Dom"
   },
   "shell": {
     "accountSetupRequired": "Hace falta configurar la cuenta",
