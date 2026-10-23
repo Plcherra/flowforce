@@ -265,7 +265,7 @@ async function seedSchedulingFixtures(
   const eventDate = today.format('YYYY-MM-DD');
   const published = options?.published ?? false;
 
-  await client.from('schedules').upsert({
+  const { error: scheduleError } = await client.from('schedules').upsert({
     id: shiftId,
     title: 'Playwright Smoke Shift',
     role: 'Supervisor',
@@ -276,6 +276,7 @@ async function seedSchedulingFixtures(
     is_published: published,
     status: 'scheduled',
   });
+  if (scheduleError) throw scheduleError;
 
   if (options?.assignToStaff) {
     await client
@@ -689,9 +690,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.getByTestId('availability-weekday-rows')).toBeVisible();
     await page
       .getByTestId('availability-day-mon')
-      .getByRole('button', { name: 'All day on' })
+      .getByRole('button', { name: 'Available all day' })
       .click();
-    await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Send availability' })).toBeEnabled();
   });
 
   test('approved PTO shows blocked cell overlay on manager grid', async ({ page }) => {

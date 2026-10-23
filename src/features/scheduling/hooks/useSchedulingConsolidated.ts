@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { scheduleShiftTextTranslation } from "@/features/scheduling/scheduleShiftText";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { canViewScheduleDrafts } from "@/utils/authRoles";
 import { logger } from "@/utils/logger";
 import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
@@ -80,6 +81,7 @@ export function useSchedulingConsolidated(
   const { companyId, start, end, enabled = true } = params;
   const { toast } = useToast();
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
@@ -128,7 +130,7 @@ export function useSchedulingConsolidated(
     }
   }, [companyId]);
 
-  const includeDrafts = canViewScheduleDrafts(user);
+  const includeDrafts = canViewScheduleDrafts(user, profile?.role);
   const schedulesQueryKey =
     companyId && range.start && range.end
       ? buildSchedulesWeekQueryKey({
