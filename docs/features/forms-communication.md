@@ -1,6 +1,6 @@
 # Forms and Communication
 
-Queued. Leave this file closed until the Operations row in `docs/roadmap.md` is active. That row is forms, chats, and company updates, and it comes after System and Admin.
+Forms phases 1 and 2 are checked. The Operations row in `docs/roadmap.md` is done.
 
 Pedro asked for the forms page phases below on 2026-10-23. Chats and company updates stay unphased. Do not invent more phases from this file.
 
@@ -92,5 +92,17 @@ Phone and desktop steps for Pedro:
 4. Import a CSV whose first row is the column names. Those names should be the fields.
 
 Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-24 — No unchecked phase left
+
+Shipped: nothing. Phases 1 and 2 were already checked. Chats and company updates stay unphased, as this file requires. The roadmap marks Operations done and Team active.
+
+Proven: this file has no unchecked phase. No product code changed.
+
+Phone steps for Pedro: none from this run.
+
+Blockers: Team has no feature file and no owner audit. No phase was drafted.
 
 Questions: none.

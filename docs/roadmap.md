@@ -4,9 +4,9 @@
 Read this index and open only the feature file marked active.
 `PROJECT-STATUS.md` is the current status of the app.
 
-The 6 AM daily run opens the one row marked active. That row is Operations: [docs/features/forms-communication.md](features/forms-communication.md).
+The 6 AM daily run opens the one row marked active. That row is Team. The feature file is not written yet. There is no owner audit to phase from. Do not invent the file.
 
-When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. After Operations, the handoff follows the order in the table. Do not skip a row. The Operations file has no phases yet. Do not invent them.
+When the active file has no unchecked phase left, the same run updates this table before it opens another feature. The finished row becomes done. The next row in the order below becomes active. It then opens that file. After Team, the handoff follows the order in the table. Do not skip a row.
 
 ## Order
 
@@ -16,8 +16,8 @@ When the active file has no unchecked phase left, the same run updates this tabl
 | 2 | Theme rework | done | [docs/features/theme.md](features/theme.md) phases 23–24. Commits `f92f6f51` and `07c0c442`. |
 | 3 | System and Admin phase 8 | done | [docs/features/system-admin.md](features/system-admin.md) |
 | 4 | Tasks 25–30 | done | [docs/features/tasks.md](features/tasks.md) phases 25–30 |
-| 5 | Operations | active | [docs/features/forms-communication.md](features/forms-communication.md) |
-| 6 | Team | queued | Feature file not written yet |
+| 5 | Operations | done | [docs/features/forms-communication.md](features/forms-communication.md) phases 1–2. Commits `a8d17cf1` and `befbad3b`. Chats and company updates stay unphased. |
+| 6 | Team | active | Feature file not written yet. No owner audit, so no phases were drafted. |
 | 7 | Reports | queued | Feature file not written yet. Pedro's proposed name for this section is Insights. |
 | 8 | Inventory | queued | [docs/features/inventory.md](features/inventory.md) |
 | 9 | Company onboarding | queued | Feature file not written yet |
@@ -44,11 +44,11 @@ Done. Phases 9–12 stay checked as skips. Phases 25–30 are checked. Languages
 
 ### 5. Operations
 
-Active. Forms, communication (chats), and company updates. The file is [docs/features/forms-communication.md](features/forms-communication.md). It has no phases yet. Do not invent them.
+Done. Forms page phases 1 and 2 are checked: density and scroll `a8d17cf1`, and one create flow `befbad3b`. Chats and company updates stay unphased. The feature file says not to invent more phases.
 
 ### 6. Team
 
-Recognition, XP, performance, certifications, and user onboarding. Every user goes through user onboarding on their first login. The feature file is not written yet. Do not start this row early, and do not invent the file from a Theme, Languages, or Time Off run.
+Active. Recognition, XP, performance, certifications, and user onboarding. Every user goes through user onboarding on their first login. The feature file is not written yet. No owner audit is in the repo, so the 2026-10-24 run did not draft phases. Do not invent the file.
 
 ### 7. Reports
 
