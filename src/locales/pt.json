@@ -2574,7 +2574,15 @@
     "yourReminders": "Seus lembretes",
     "listsOnThisShift": "Listas deste turno",
     "listsOnThisShiftHelp": "Estes formulários estão ligados a este papel. A ligação muda-se no formulário.",
-    "openLinkedForm": "Abrir formulário"
+    "openLinkedForm": "Abrir formulário",
+    "loadATemplate": "Carregar um modelo",
+    "templateWeekendTimeOff": "Folga no fim de semana",
+    "templateWeekdayTimeOff": "Folga em dia de semana",
+    "templateStandardAvailability": "Disponibilidade padrão",
+    "templateSchedulingNotice": "Aviso de escala",
+    "appliesToLevels": "Aplica-se aos níveis",
+    "appliesToLevelsHelp": "A quem esta política se aplica. Isso não muda quem pode vê-la ou editá-la.",
+    "appliesToRoles": "Aplica-se aos papéis"
   },
   "tasks": {
     "aTitleIsRequired": "O título é obrigatório.",

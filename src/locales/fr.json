@@ -2574,7 +2574,15 @@
     "yourReminders": "Vos rappels",
     "listsOnThisShift": "Listes de ce service",
     "listsOnThisShiftHelp": "Ces formulaires sont liés à ce rôle. Le lien se change sur le formulaire.",
-    "openLinkedForm": "Ouvrir le formulaire"
+    "openLinkedForm": "Ouvrir le formulaire",
+    "loadATemplate": "Charger un modèle",
+    "templateWeekendTimeOff": "Congé du week-end",
+    "templateWeekdayTimeOff": "Congé en semaine",
+    "templateStandardAvailability": "Disponibilité standard",
+    "templateSchedulingNotice": "Préavis de planning",
+    "appliesToLevels": "S'applique aux niveaux",
+    "appliesToLevelsHelp": "À qui cette politique s'applique. Cela ne change pas qui peut la voir ou la modifier.",
+    "appliesToRoles": "S'applique aux rôles"
   },
   "tasks": {
     "aTitleIsRequired": "Un titre est obligatoire.",

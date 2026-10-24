@@ -2574,7 +2574,15 @@
     "yourReminders": "Tus recordatorios",
     "listsOnThisShift": "Listas de este turno",
     "listsOnThisShiftHelp": "Estos formularios están vinculados a este rol. El enlace se cambia en el formulario.",
-    "openLinkedForm": "Abrir formulario"
+    "openLinkedForm": "Abrir formulario",
+    "loadATemplate": "Cargar una plantilla",
+    "templateWeekendTimeOff": "Descanso de fin de semana",
+    "templateWeekdayTimeOff": "Descanso entre semana",
+    "templateStandardAvailability": "Disponibilidad estándar",
+    "templateSchedulingNotice": "Aviso de horario",
+    "appliesToLevels": "Se aplica a los niveles",
+    "appliesToLevelsHelp": "A quién se aplica esta política. No cambia quién puede verla o editarla.",
+    "appliesToRoles": "Se aplica a los roles"
   },
   "tasks": {
     "aTitleIsRequired": "El título es obligatorio.",

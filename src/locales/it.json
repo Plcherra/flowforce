@@ -2574,7 +2574,15 @@
     "yourReminders": "I tuoi promemoria",
     "listsOnThisShift": "Liste di questo turno",
     "listsOnThisShiftHelp": "Questi moduli sono collegati a questo ruolo. Il collegamento si cambia nel modulo.",
-    "openLinkedForm": "Apri modulo"
+    "openLinkedForm": "Apri modulo",
+    "loadATemplate": "Carica un modello",
+    "templateWeekendTimeOff": "Riposo nel weekend",
+    "templateWeekdayTimeOff": "Riposo infrasettimanale",
+    "templateStandardAvailability": "Disponibilità standard",
+    "templateSchedulingNotice": "Preavviso di turno",
+    "appliesToLevels": "Si applica ai livelli",
+    "appliesToLevelsHelp": "A chi si applica questa politica. Non cambia chi può vederla o modificarla.",
+    "appliesToRoles": "Si applica ai ruoli"
   },
   "tasks": {
     "aTitleIsRequired": "Il titolo è obbligatorio.",

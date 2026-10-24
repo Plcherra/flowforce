@@ -2574,7 +2574,15 @@
     "yourReminders": "Your reminders",
     "listsOnThisShift": "Lists on this shift",
     "listsOnThisShiftHelp": "These forms are linked to this role. Change the link on the form.",
-    "openLinkedForm": "Open form"
+    "openLinkedForm": "Open form",
+    "loadATemplate": "Load a template",
+    "templateWeekendTimeOff": "Weekend time off",
+    "templateWeekdayTimeOff": "Weekday time off",
+    "templateStandardAvailability": "Standard availability",
+    "templateSchedulingNotice": "Scheduling notice",
+    "appliesToLevels": "Applies to levels",
+    "appliesToLevelsHelp": "Who this policy applies to. This does not change who can view or edit it.",
+    "appliesToRoles": "Applies to roles"
   },
   "tasks": {
     "aTitleIsRequired": "A title is required.",

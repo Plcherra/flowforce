@@ -258,6 +258,27 @@ Done when:
 
 Prove: `src/features/scheduling/utils/timeOffPolicy.test.ts`, run with `node scripts/test-schedule-task-link.mjs`.
 
+### Phase 10 — Policy templates, levels, and people
+
+- [x] Company policies load a template, name who it applies to once, and pick people from a search.
+
+Rules:
+
+- Do not add a migration. Do not build multi-location.
+- Replace Weekend example and Weekday example with templates that fill the form and stay editable. Keep the weekend numbers: Saturday and Sunday, 2 days a month, 24 days a year. Keep the weekday numbers: Monday through Friday, 7 days of notice, 90 days a year. Add one availability template and one scheduling-rules template that fill the name and the type only.
+- Stores showed Walk-in because the form listed `inv_locations`. Those are inventory count rooms, not stores. The app has no stores table. Hide Stores when the company has one store or none. Today that count is none.
+- Levels showed Owner, Admin, Manager, and Staff twice because company roles use the same names. Show product levels once, labeled Applies to levels, with helper text that this chooses who the policy applies to, not who can view or edit it. A role whose name is not a product level can still be chosen.
+- People use the shared people picker: search, filter by role and level, a selected count, and chips only for the people already chosen.
+- Write `docs/proposals/multi-location.md` for Pedro. Do not start that work.
+
+Done when:
+
+- The weekend template is still Saturday and Sunday, 2 days a month, and 24 days a year. The weekday template is still 7 days of notice and 90 days a year.
+- Stores stay hidden at 0 and 1 store, and show at 2.
+- A role named Owner is treated as a level name. A role named Cashier is not.
+
+Prove: `src/features/scheduling/utils/policyTemplates.test.ts`, run with `node scripts/test-schedule-task-link.mjs`.
+
 ## Open questions
 
 None.
@@ -427,3 +448,19 @@ Phone steps for Pedro:
 Blockers: none. No migration.
 
 Questions: none.
+
+### 2026-10-23 — Phase 10 Policy templates, levels, and people
+
+Shipped: Company policies load a template into the form, and the fields stay editable. Weekend time off is still Saturday and Sunday, 2 days a month, and 24 days a year. Weekday time off is still Monday through Friday, 7 days of notice, and 90 days a year. Standard availability and Scheduling notice fill the name and the type. The Weekend example and Weekday example buttons are gone. Stores listed Walk-in because the form read inventory count rooms in `inv_locations`. There is no stores table, so Stores is hidden. Levels show once, as Applies to levels, with helper text that this is who the policy applies to. A role that is not Owner, Admin, Manager, or Staff can still be chosen. People use the shared search picker. `docs/proposals/multi-location.md` is the note for Pedro. No multi-location work was started.
+
+Proven: `src/features/scheduling/utils/policyTemplates.test.ts` passed through `node scripts/test-schedule-task-link.mjs`. Weekend and weekday numbers match. Stores stay hidden at 0 and 1 and show at 2. Owner is a level name. Cashier is not. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone and desktop steps for Pedro:
+1. Open Schedule, then Company policies, then Create policy.
+2. Weekend example and Weekday example should be gone. Tap Weekend time off. Saturday and Sunday, 2 a month, and 24 a year should fill in. Change a number and save. The saved row should keep your edit.
+3. Applies to levels should list Owner, Admin, Manager, and Staff once, with the helper line. Stores should be gone.
+4. Choose people. Search, filter, and see chips only for the people you picked. The full roster should not be a wall of chips.
+
+Blockers: none. No migration.
+
+Questions: none. The multi-location note is a proposal, not an open product question.

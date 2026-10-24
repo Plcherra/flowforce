@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useCompanyRoles } from "@/hooks/useCompanyRoles";
 import { PRODUCT_LEVELS } from "@/features/roles/constants/productLevels";
@@ -24,7 +22,14 @@ import {
   exampleKeepsOpenEdit,
 } from "@/features/scheduling/utils/policyDraft";
 import type { TimeOffUnit } from "@/features/scheduling/utils/timeOffPolicy";
-import { CompanyPolicyList, PolicyPeoplePicker } from "@/features/scheduling/components/CompanyPolicyList";
+import { CompanyPolicyList } from "@/features/scheduling/components/CompanyPolicyList";
+import { PeoplePicker } from "@/components/people/PeoplePicker";
+import {
+  POLICY_TEMPLATES,
+  isLevelNamedRole,
+  policyTemplateById,
+  showPolicyStores,
+} from "@/features/scheduling/utils/policyTemplates";
 
 const WEEKDAYS = [
   { value: 1, label: "Mon" },
@@ -81,19 +86,18 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
   const [editingName, setEditingName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const storesQuery = useQuery({
-    queryKey: ["company-policy-stores", companyId],
-    enabled: Boolean(companyId) && canManage,
-    queryFn: async () => {
-      const { data, error: storeError } = await supabase
-        .from("inv_locations")
-        .select("id, name")
-        .eq("company_id", companyId!)
-        .order("name", { ascending: true });
-      if (storeError) throw storeError;
-      return data ?? [];
-    },
-  });
+  const extraRoles = roles.filter((role) => !isLevelNamedRole(role.name));
+  const realStoreCount = 0;
+  const people = useMemo(
+    () =>
+      employees.map((person) => ({
+        id: person.id,
+        name: getEmployeeFullName(person),
+        role: person.position?.name ?? null,
+        level: person.role ?? null,
+      })),
+    [employees, getEmployeeFullName],
+  );
   const prepareExample = (exampleName: string) => {
     if (!exampleKeepsOpenEdit(editingName, exampleName)) {
       setEditingId(null);
@@ -104,14 +108,19 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
     setName(exampleName);
   };
 
-  const fillExample = (name: "Weekend" | "Weekday") => {
-    prepareExample(name);
-    setUnit("days");
-    setCapWeek("");
-    setCapMonth(name === "Weekend" ? "2" : "");
-    setCapYear(name === "Weekend" ? "24" : "90");
-    setNoticeDays(name === "Weekend" ? "0" : "7");
-    setWeekdays(name === "Weekend" ? [6, 0] : [1, 2, 3, 4, 5]);
+  const fillTemplate = (id: string) => {
+    const template = policyTemplateById(id);
+    if (!template) return;
+    const label = t(template.nameKey);
+    prepareExample(label);
+    setType(template.type);
+    setName(label);
+    if (template.unit) setUnit(template.unit);
+    setCapWeek(template.capWeek == null ? "" : String(template.capWeek));
+    setCapMonth(template.capMonth == null ? "" : String(template.capMonth));
+    setCapYear(template.capYear == null ? "" : String(template.capYear));
+    setNoticeDays(template.noticeDays == null ? "0" : String(template.noticeDays));
+    if (template.weekdays) setWeekdays(template.weekdays);
   };
   const loadPolicy = (policy: CompanyPolicyRecord) => {
     const draft = draftFromPolicy(policy);
@@ -226,7 +235,7 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
       <CompanyPolicyList
         policies={companyPolicies}
         roles={roles}
-        stores={storesQuery.data ?? []}
+        stores={[]}
         onEdit={loadPolicy}
         onRetire={(policyId) => {
           void handleRetire(policyId);
@@ -274,16 +283,24 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
               />
             </div>
           </div>
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">{t("schedule.loadATemplate")}</p>
+            <div className="flex flex-wrap gap-2">
+              {POLICY_TEMPLATES.map((template) => (
+                <Button
+                  key={template.id}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fillTemplate(template.id)}
+                >
+                  {t(template.nameKey)}
+                </Button>
+              ))}
+            </div>
+          </div>
           {type === "time_off" ? (
             <>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" size="sm" variant="outline" onClick={() => fillExample("Weekend")}>
-                  {t("schedule.weekendExample")}
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => fillExample("Weekday")}>
-                  {t("schedule.weekdayExample")}
-                </Button>
-              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="grid gap-1">
                   <Label>{t("schedule.unit")}</Label>
@@ -347,7 +364,8 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
             </>
           ) : null}
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">{t("schedule.levels")}</p>
+            <p className="text-xs font-medium text-muted-foreground">{t("schedule.appliesToLevels")}</p>
+            <p className="text-xs text-muted-foreground">{t("schedule.appliesToLevelsHelp")}</p>
             <div className="flex flex-wrap gap-2">
               {PRODUCT_LEVELS.map((level) => (
                 <Button
@@ -362,42 +380,33 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
               ))}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {roles.map((role) => (
-              <Button
-                key={role.id}
-                type="button"
-                size="sm"
-                variant={roleIds.includes(role.id) ? "default" : "outline"}
-                onClick={() => toggleId(role.id, roleIds, setRoleIds)}
-              >
-                {role.name}
-              </Button>
-            ))}
-          </div>
-          {(storesQuery.data ?? []).length > 0 ? (
+          {extraRoles.length > 0 ? (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">{t("schedule.stores")}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("schedule.appliesToRoles")}</p>
               <div className="flex flex-wrap gap-2">
-                {(storesQuery.data ?? []).map((store) => (
+                {extraRoles.map((role) => (
                   <Button
-                    key={store.id}
+                    key={role.id}
                     type="button"
                     size="sm"
-                    variant={storeIds.includes(store.id) ? "default" : "outline"}
-                    onClick={() => toggleId(store.id, storeIds, setStoreIds)}
+                    variant={roleIds.includes(role.id) ? "default" : "outline"}
+                    onClick={() => toggleId(role.id, roleIds, setRoleIds)}
                   >
-                    {store.name || store.id}
+                    {role.name}
                   </Button>
                 ))}
               </div>
             </div>
           ) : null}
-          <PolicyPeoplePicker
-            employees={employees}
+          {showPolicyStores(realStoreCount) ? (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">{t("schedule.stores")}</p>
+            </div>
+          ) : null}
+          <PeoplePicker
+            people={people}
             selectedIds={userIds}
-            nameFor={getEmployeeFullName}
-            onToggle={(id) => toggleId(id, userIds, setUserIds)}
+            onChange={setUserIds}
           />
           <p className="text-xs text-muted-foreground">
             {t("schedule.leaveAssignmentsEmptyToApplyThisPolicyToEveryone")}

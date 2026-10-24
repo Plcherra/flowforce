@@ -2574,7 +2574,15 @@
     "yourReminders": "Ihre Erinnerungen",
     "listsOnThisShift": "Listen dieser Schicht",
     "listsOnThisShiftHelp": "Diese Formulare sind mit dieser Rolle verknüpft. Die Verknüpfung ändert man am Formular.",
-    "openLinkedForm": "Formular öffnen"
+    "openLinkedForm": "Formular öffnen",
+    "loadATemplate": "Vorlage laden",
+    "templateWeekendTimeOff": "Wochenende frei",
+    "templateWeekdayTimeOff": "Freizeit unter der Woche",
+    "templateStandardAvailability": "Standard-Verfügbarkeit",
+    "templateSchedulingNotice": "Planungsfrist",
+    "appliesToLevels": "Gilt für Ebenen",
+    "appliesToLevelsHelp": "Für wen diese Richtlinie gilt. Das ändert nicht, wer sie sehen oder bearbeiten kann.",
+    "appliesToRoles": "Gilt für Rollen"
   },
   "tasks": {
     "aTitleIsRequired": "Ein Titel ist erforderlich.",
