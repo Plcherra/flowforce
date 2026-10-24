@@ -892,6 +892,26 @@ Done when:
 
 Prove: Unit test those two shifts. Run it with `node scripts/test-tasks-page.mjs`.
 
+### Phase 42 — Attach a task from the shift
+
+- [x] The shift editor can attach a published form or a custom task. That task shows on the shift and on Tasks.
+
+Rules:
+
+- Depends on phase 41. Keep the form editor link. Do not add a second task table. Do not add a migration.
+- Lists on this shift stay. Under them, add a shift task: pick a published form or type a custom title such as clean the restroom.
+- The row is a normal task with source schedule and links.schedule_id. The form id, the assignee ids, and the optional start and end use the same links object as custom tasks. assigned_to stays the first assignee so existing task rows keep working.
+- More than one person can be assigned. Start and end are optional. Empty times do not invent a window.
+- The new-shift wizard collects the same draft and writes it when the shift is saved.
+- Tasks already saved, including clean downstairs, stay on All tasks.
+
+Done when:
+
+- A form attachment stores that form id, both assignees, and the window, and assigned_to is the first person.
+- A custom task with no times stores a null window and a null form id.
+
+Prove: `src/features/tasks/utils/shiftTaskWrite.test.ts`, run with `node scripts/test-tasks-page.mjs`.
+
 ## Open questions
 
 None. Owner answers 24, 25, and 26 record the earlier three. Pedro answered the phase 9–12 questions on 2026-10-22:
@@ -1570,6 +1590,23 @@ Phone steps for Pedro:
 5. On All tasks, “clean downstairs” can still be there. The shift editor does not add another one.
 
 The scheduling smoke was still adding “Count the till” on that tab. It now checks Lists on this shift and that the old task box is gone. The owner flow does the same.
+
+Blockers: none. No migration.
+
+Questions: none.
+
+### 2026-10-23 — Phase 42 Attach a task from the shift
+
+Shipped: The shift Tasks tab still lists the forms linked from the form editor. Under that, a shift can take a published form or a custom task such as clean the restroom. The row is a normal task with source schedule. The form id, assignee ids, and optional start and end live on the same links object custom tasks already use. assigned_to stays the first person. The task shows on the shift and on Tasks. The new-shift wizard keeps the same draft and writes it when the shift is saved. No second task table.
+
+Proven: `src/features/tasks/utils/shiftTaskWrite.test.ts` passed through `node scripts/test-tasks-page.mjs`. A form attachment stores the form id, both assignees, and the window, and assigned_to is the first person. A custom task with no times stores a null window and a null form id. `npm run typecheck` passed. ESLint passed on the files this phase changed. `npm run check:i18n` passed.
+
+Phone and desktop steps for Pedro:
+1. Open Schedule and a cashier shift. Tasks still shows Lists on this shift.
+2. Under Shift tasks, leave Published form on Custom task, type Clean the restroom, choose two people, and set a start and end if you want. Tap Add to this shift.
+3. The task should appear on that tab. Open Tasks. The same task should be there, with the shift name and the time window.
+4. Add again and pick a published form. Open form on that row should open the form.
+5. On a new shift, the Tasks tab can collect the same draft before you save the shift.
 
 Blockers: none. No migration.
 

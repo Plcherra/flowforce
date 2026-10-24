@@ -1030,6 +1030,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await details.getByRole('tab', { name: 'Tasks' }).click();
     await expect(details.getByRole('heading', { name: 'Lists on this shift' })).toBeVisible();
     await expect(details.getByText('No list attached.')).toBeVisible();
+    await expect(details.getByRole('heading', { name: 'Shift tasks' })).toBeVisible();
     await expect(details.getByPlaceholder('Task title')).toHaveCount(0);
 
     await details.getByRole('tab', { name: 'Templates' }).click();

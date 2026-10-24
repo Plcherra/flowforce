@@ -4,6 +4,10 @@ export interface ShiftTask {
   description: string;
   priority: "low" | "medium" | "high";
   estimated_minutes: number;
+  formId?: string | null;
+  assigneeIds?: string[];
+  startsAt?: string | null;
+  endsAt?: string | null;
 }
 
 export interface BreakItem {

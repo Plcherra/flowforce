@@ -103,6 +103,12 @@ const { runFormsSurfaceTests } = importTs(
 const { runCsvFormFieldsTests } = importTs(
   "../src/features/forms/utils/csvFormFields.test.ts",
 );
+const { runShiftTaskWriteTests } = importTs(
+  "../src/features/tasks/utils/shiftTaskWrite.test.ts",
+);
+const { runPeoplePickerFilterTests } = importTs(
+  "../src/components/people/peoplePickerFilter.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -135,4 +141,6 @@ runTodayShiftMonitorTests();
 runShiftLinkedFormsTests();
 runFormsSurfaceTests();
 runCsvFormFieldsTests();
+runShiftTaskWriteTests();
+runPeoplePickerFilterTests();
 console.log("tasks page tests passed");

@@ -2794,7 +2794,18 @@
     "unableToSaveScope": "Impossible d'enregistrer la portée",
     "listsLiveOnForms": "Les listes d'ouverture, de journée et de fermeture se lient sur le formulaire.",
     "todayLists": "Listes d'aujourd'hui",
-    "listProgress": "{{done}} sur {{total}}"
+    "listProgress": "{{done}} sur {{total}}",
+    "shiftTasks": "Tâches du service",
+    "shiftTasksHelp": "Visible sur ce service et dans Tâches. Les listes du rôle restent au-dessus.",
+    "noShiftTasks": "Aucune tâche de service pour le moment.",
+    "customShiftTask": "Tâche personnalisée",
+    "taskName": "Nom de la tâche",
+    "shiftTaskExample": "Nettoyer les toilettes",
+    "addShiftTask": "Ajouter à ce service",
+    "shiftTaskAdded": "Tâche de service ajoutée",
+    "shiftTaskNotSaved": "La tâche de service n'a pas été enregistrée",
+    "remove": "Retirer",
+    "thisShift": "Ce service"
   },
   "shell": {
     "accountSetupRequired": "Configuration du compte requise",
@@ -3117,7 +3128,8 @@
     "importFromFile": "Importer un fichier",
     "importFileTypes": "CSV, PDF, DOC, DOCX ou TXT. La première ligne d'un CSV devient les champs.",
     "formImported": "Formulaire importé",
-    "fileReadyToEdit": "{{name}} est prêt à modifier."
+    "fileReadyToEdit": "{{name}} est prêt à modifier.",
+    "publishedForm": "Formulaire publié"
   },
   "updates": {
     "1Week": "1 semaine",
@@ -4999,5 +5011,14 @@
   "i18n": {
     "translatedFrom": "Traduit de {{language}}. Voir l'original",
     "seeTranslation": "Voir la traduction"
+  },
+  "people": {
+    "choosePeople": "Choisir des personnes",
+    "selectedCount": "{{count}} sélectionnés",
+    "searchPeople": "Rechercher des personnes",
+    "allLevels": "Tous les niveaux",
+    "allRoles": "Tous les rôles",
+    "noPeopleMatch": "Aucun résultat.",
+    "removePerson": "Retirer"
   }
 }

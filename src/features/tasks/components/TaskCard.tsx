@@ -2,6 +2,7 @@
  * Task card component
  */
 
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Calendar, User, Flag, Target } from "lucide-react";
 import {
@@ -22,6 +23,7 @@ import type { TaskContentTranslation } from "../taskContentFields";
 import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
 import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
+import { readAssigneeIds } from "../utils/shiftTaskWrite";
 import { readTaskKind, TASK_KIND_LABELS } from "../utils/taskKind";
 import {
   formatTaskWindow,
@@ -58,6 +60,8 @@ export function TaskCard({
   const windowLabel = formatTaskWindow(schedule.startsAt, schedule.endsAt);
   const publishLabel = taskPublishLabel(schedule.publishState);
   const points = readTaskPoints(task.links);
+  const { t } = useTranslation();
+  const assigneeCount = readAssigneeIds(task.links, task.assigned_to).length;
 
   return (
     <Card
@@ -134,6 +138,9 @@ export function TaskCard({
                 <span>
                   {task.assignedprofile.first_name}{" "}
                   {task.assignedprofile.last_name}
+                  {assigneeCount > 1
+                    ? ` · ${t("people.selectedCount", { count: assigneeCount })}`
+                    : ""}
                 </span>
               </div>
             )}

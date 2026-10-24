@@ -2794,7 +2794,18 @@
     "unableToSaveScope": "No se pudo guardar el alcance",
     "listsLiveOnForms": "Las listas de apertura, del día y de cierre se vinculan en el formulario.",
     "todayLists": "Listas de hoy",
-    "listProgress": "{{done}} de {{total}}"
+    "listProgress": "{{done}} de {{total}}",
+    "shiftTasks": "Tareas del turno",
+    "shiftTasksHelp": "Se ve en este turno y en Tareas. Las listas del rol siguen arriba.",
+    "noShiftTasks": "Aún no hay tareas del turno.",
+    "customShiftTask": "Tarea personalizada",
+    "taskName": "Nombre de la tarea",
+    "shiftTaskExample": "Limpiar el baño",
+    "addShiftTask": "Añadir a este turno",
+    "shiftTaskAdded": "Tarea del turno añadida",
+    "shiftTaskNotSaved": "La tarea del turno no se guardó",
+    "remove": "Quitar",
+    "thisShift": "Este turno"
   },
   "shell": {
     "accountSetupRequired": "Hace falta configurar la cuenta",
@@ -3117,7 +3128,8 @@
     "importFromFile": "Importar desde archivo",
     "importFileTypes": "CSV, PDF, DOC, DOCX o TXT. La primera fila de un CSV se convierte en los campos.",
     "formImported": "Formulario importado",
-    "fileReadyToEdit": "{{name}} está listo para editar."
+    "fileReadyToEdit": "{{name}} está listo para editar.",
+    "publishedForm": "Formulario publicado"
   },
   "updates": {
     "1Week": "1 semana",
@@ -4999,5 +5011,14 @@
   "i18n": {
     "translatedFrom": "Traducido de {{language}}. Ver original",
     "seeTranslation": "Ver traducción"
+  },
+  "people": {
+    "choosePeople": "Elegir personas",
+    "selectedCount": "{{count}} seleccionados",
+    "searchPeople": "Buscar personas",
+    "allLevels": "Todos los niveles",
+    "allRoles": "Todos los roles",
+    "noPeopleMatch": "Nadie coincide.",
+    "removePerson": "Quitar"
   }
 }

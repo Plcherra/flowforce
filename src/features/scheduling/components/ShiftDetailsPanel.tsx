@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { EmployeeSelector } from "./EmployeeSelector";
 import { ShiftLinkedForms } from "./shift-wizard/ShiftLinkedForms";
+import { ShiftTasksPanel } from "./shift-wizard/ShiftTasksPanel";
 import type { ShiftTask } from "./shift-wizard/types";
 import {
   X,
@@ -1314,6 +1315,11 @@ export function ShiftDetailsPanel({
             <ShiftLinkedForms
               role={shift.role || shift.job_position?.name || shift.job_position?.role}
               title={shift.title}
+            />
+            <ShiftTasksPanel
+              scheduleId={shift.id}
+              shiftTitle={shift.title || ""}
+              shiftEndIso={shift.end_time}
             />
           </TabsContent>
 

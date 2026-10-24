@@ -2794,7 +2794,18 @@
     "unableToSaveScope": "Unable to save the scope",
     "listsLiveOnForms": "Opening, daily, and closing lists are attached on the form.",
     "todayLists": "Today’s lists",
-    "listProgress": "{{done}} of {{total}}"
+    "listProgress": "{{done}} of {{total}}",
+    "shiftTasks": "Shift tasks",
+    "shiftTasksHelp": "Shows on this shift and on Tasks. Role lists stay above.",
+    "noShiftTasks": "No shift tasks yet.",
+    "customShiftTask": "Custom task",
+    "taskName": "Task name",
+    "shiftTaskExample": "Clean the restroom",
+    "addShiftTask": "Add to this shift",
+    "shiftTaskAdded": "Shift task added",
+    "shiftTaskNotSaved": "Shift task was not saved",
+    "remove": "Remove",
+    "thisShift": "This shift"
   },
   "shell": {
     "accountSetupRequired": "Account setup required",
@@ -3117,7 +3128,8 @@
     "importFromFile": "Import from file",
     "importFileTypes": "CSV, PDF, DOC, DOCX, or TXT. A CSV header row becomes the fields.",
     "formImported": "Form imported",
-    "fileReadyToEdit": "{{name}} is ready to edit."
+    "fileReadyToEdit": "{{name}} is ready to edit.",
+    "publishedForm": "Published form"
   },
   "updates": {
     "1Week": "1 week",
@@ -4999,5 +5011,14 @@
   "i18n": {
     "translatedFrom": "Translated from {{language}}. See original",
     "seeTranslation": "See translation"
+  },
+  "people": {
+    "choosePeople": "Choose people",
+    "selectedCount": "{{count}} selected",
+    "searchPeople": "Search people",
+    "allLevels": "All levels",
+    "allRoles": "All roles",
+    "noPeopleMatch": "No one matches.",
+    "removePerson": "Remove"
   }
 }

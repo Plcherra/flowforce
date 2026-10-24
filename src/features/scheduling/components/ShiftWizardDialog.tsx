@@ -37,6 +37,7 @@ import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates
 import { DetailsTab } from "./shift-wizard/DetailsTab";
 import { UsersTab } from "./shift-wizard/UsersTab";
 import { ShiftLinkedForms } from "./shift-wizard/ShiftLinkedForms";
+import { ShiftTasksPanel } from "./shift-wizard/ShiftTasksPanel";
 import { NotesTab } from "./shift-wizard/NotesTab";
 import type { ShiftTask, ShiftWizardFormData } from "./shift-wizard/types";
 import {
@@ -45,6 +46,8 @@ import {
 } from "@/features/scheduling/utils/scheduleReadiness";
 import { queryKeys } from "@/lib/queryKeys";
 import { insertTask } from "@/features/tasks/repositories/tasksRepository";
+import { shiftTaskRow } from "@/features/tasks/utils/shiftTaskWrite";
+import type { Json } from "@/integrations/supabase/public-types";
 import { logger } from "@/utils/logger";
 
 export interface ShiftWizardTemplateSeed {
@@ -325,23 +328,24 @@ export function ShiftWizardDialog({
       const title = task.title.trim();
       if (!title) continue;
       try {
-        await insertTask({
+        const row = shiftTaskRow({
           title,
-          description: task.description.trim() || null,
+          description: task.description,
           priority: task.priority,
-          estimated_hours: task.estimated_minutes / 60,
-          company_id: companyId,
-          created_by: user.id,
-          assigned_to: formData.assignedusers[0] ?? null,
-          due_date: shiftEnd.toISOString().slice(0, 10),
-          status: "todo",
-          source: "schedule",
-          tags: ["schedule", shiftId],
-          links: {
-            schedule_id: shiftId,
-            shift_title: formData.title || "Untitled shift",
-          },
+          estimatedMinutes: task.estimated_minutes,
+          formId: task.formId ?? null,
+          assigneeIds: task.assigneeIds?.length
+            ? task.assigneeIds
+            : formData.assignedusers,
+          startsAt: task.startsAt ?? null,
+          endsAt: task.endsAt ?? null,
+          companyId,
+          createdBy: user.id,
+          scheduleId: shiftId,
+          shiftTitle: formData.title || "Untitled shift",
+          fallbackDue: shiftEnd.toISOString(),
         });
+        await insertTask({ ...row, links: row.links as Json });
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to save shift task";
@@ -638,6 +642,13 @@ export function ShiftWizardDialog({
                           )?.name ?? formData.job_position_input
                         }
                         title={formData.title}
+                      />
+                      <ShiftTasksPanel
+                        shiftTitle={formData.title}
+                        drafts={formData.tasks}
+                        onDraftsChange={(tasks) =>
+                          setFormData((current) => ({ ...current, tasks }))
+                        }
                       />
                     </TabsContent>
 

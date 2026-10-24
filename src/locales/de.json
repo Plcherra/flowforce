@@ -2794,7 +2794,18 @@
     "unableToSaveScope": "Umfang konnte nicht gespeichert werden",
     "listsLiveOnForms": "Öffnungs-, Tages- und Abschlusslisten werden am Formular verknüpft.",
     "todayLists": "Listen von heute",
-    "listProgress": "{{done}} von {{total}}"
+    "listProgress": "{{done}} von {{total}}",
+    "shiftTasks": "Schichtaufgaben",
+    "shiftTasksHelp": "Sichtbar in dieser Schicht und unter Aufgaben. Die Rollenlisten bleiben darüber.",
+    "noShiftTasks": "Noch keine Schichtaufgaben.",
+    "customShiftTask": "Eigene Aufgabe",
+    "taskName": "Aufgabenname",
+    "shiftTaskExample": "Toilette putzen",
+    "addShiftTask": "Zu dieser Schicht hinzufügen",
+    "shiftTaskAdded": "Schichtaufgabe hinzugefügt",
+    "shiftTaskNotSaved": "Schichtaufgabe wurde nicht gespeichert",
+    "remove": "Entfernen",
+    "thisShift": "Diese Schicht"
   },
   "shell": {
     "accountSetupRequired": "Kontoeinrichtung erforderlich",
@@ -3117,7 +3128,8 @@
     "importFromFile": "Aus Datei importieren",
     "importFileTypes": "CSV, PDF, DOC, DOCX oder TXT. Die erste CSV-Zeile wird zu den Feldern.",
     "formImported": "Formular importiert",
-    "fileReadyToEdit": "{{name}} kann jetzt bearbeitet werden."
+    "fileReadyToEdit": "{{name}} kann jetzt bearbeitet werden.",
+    "publishedForm": "Veröffentlichtes Formular"
   },
   "updates": {
     "1Week": "1 Woche",
@@ -4999,5 +5011,14 @@
   "i18n": {
     "translatedFrom": "Übersetzt aus {{language}}. Original anzeigen",
     "seeTranslation": "Übersetzung anzeigen"
+  },
+  "people": {
+    "choosePeople": "Personen wählen",
+    "selectedCount": "{{count}} ausgewählt",
+    "searchPeople": "Personen suchen",
+    "allLevels": "Alle Ebenen",
+    "allRoles": "Alle Rollen",
+    "noPeopleMatch": "Niemand passt.",
+    "removePerson": "Entfernen"
   }
 }
