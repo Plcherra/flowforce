@@ -4,7 +4,7 @@ Scanned 2026-10-25 from the current app routes, `src/features`, `src/data/naviga
 
 ## Manual smoke
 
-Sign in at https://www.flowforce.uk. Refresh after the production deploy of this change finishes.
+Sign in at https://www.flowforce.uk. Refresh after the production deploy of `7ff6266f` finishes.
 
 Desktop sidebar, top to bottom:
 
