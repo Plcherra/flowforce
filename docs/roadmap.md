@@ -17,7 +17,7 @@ When the active file has no unchecked phase left, the same run updates this tabl
 | 3 | System and Admin phase 8 | done | [docs/features/system-admin.md](features/system-admin.md) |
 | 4 | Tasks 25–30 | done | [docs/features/tasks.md](features/tasks.md) phases 25–30 |
 | 5 | Operations | done | [docs/features/forms-communication.md](features/forms-communication.md) phases 1–2. Commits `a8d17cf1` and `befbad3b`. Chats and company updates stay unphased. |
-| 6 | Team | active | Feature file not written yet. No owner audit, so no phases were drafted. |
+| 6 | Team | active | Feature file not written yet. No owner audit, so no phases were drafted. Checked again 2026-10-25. |
 | 7 | Reports | queued | Feature file not written yet. Pedro's proposed name for this section is Insights. |
 | 8 | Inventory | queued | [docs/features/inventory.md](features/inventory.md) |
 | 9 | Company onboarding | queued | Feature file not written yet |
@@ -49,6 +49,8 @@ Done. Forms page phases 1 and 2 are checked: density and scroll `a8d17cf1`, and 
 ### 6. Team
 
 Active. Recognition, XP, performance, certifications, and user onboarding. Every user goes through user onboarding on their first login. The feature file is not written yet. No owner audit is in the repo, so the 2026-10-24 run did not draft phases. Do not invent the file.
+
+2026-10-25: The daily run opened this row again. `docs/features/` still has no Team file and no owner audit. No phase was drafted. Reports stays queued. No migration.
 
 ### 7. Reports
 
