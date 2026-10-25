@@ -1,6 +1,31 @@
 # Project Status
 
-Scanned 2026-10-16 from the current app routes, `src/features`, `src/data/navigationData.tsx`, and `src/app-shell/navigation/moduleRouteInventory.json` (updated 2026-06-30). Status below is what the pages actually render. Production, beta, hidden, and deprecated labels come from that inventory file. The old pilot tracker is not a status source.
+Scanned 2026-10-25 from the current app routes, `src/features`, `src/data/navigationData.tsx`, and `src/app-shell/navigation/moduleRouteInventory.json` (inventory file still dated 2026-06-30). Status below is what the pages actually render. Production, beta, hidden, and deprecated labels come from that inventory file. The old pilot tracker is not a status source.
+
+## Manual smoke
+
+Sign in at https://www.flowforce.uk. The app on that deploy matches `54bc6ccf` on `main`. Today’s product screens did not change. Use this pass to confirm navigation and the screens already live.
+
+Desktop sidebar, top to bottom:
+
+- Daily Operations: Scheduling, Tasks, Messages, Company Updates, Forms, Operations, Calendar.
+- Inventory & Cost: Inventory, Expenses.
+- Insights: Reports, Analytics, AI Insights.
+- Team & HR: Team Directory, Performance, Recognition, Leaderboard, Learning Center, Certifications, Resources.
+
+Phone icon bar: Dashboard, Scheduling, Tasks, Messages, Team Directory, then More. More holds the rest of those links. There is no Admin icon and no Admin group. On a wide phone the groups read Ops, Inventory, Insights, and Team.
+
+Settings opens from the profile card in the header, at `/app/settings`. It is not in the sidebar or the bottom nav. `/admin` and `/app/admin` open the team directory.
+
+While you click through:
+
+1. Dashboard loads. Recent Activity still says activity tracking is coming soon.
+2. Scheduling opens the week. If the schedule query fails, the page says read-only preview mode.
+3. Tasks opens the list. Creating a task still shows Select goal (optional).
+4. Forms: New form is one screen, with create, a template on that screen, or import. On a phone the form table scrolls sideways and the header stays put.
+5. Insights → AI Insights loads text. On a phone the chat is a bottom sheet above the icon nav.
+6. Team Directory opens. The old Admin page is not a separate item.
+7. Profile card → Settings opens.
 
 ## 1. Features in code
 
@@ -8,7 +33,7 @@ Public pages outside the module inventory: `/` (marketing), `/features`, `/prici
 
 ### Production
 
-These routes mount real feature pages and are marked production in `moduleRouteInventory.json`. The main sidebar (`navigationData.tsx`) links Dashboard, Scheduling, Tasks, Messages, Company Updates, Forms, Inventory, Reports, Team, and Settings. Items, Counts, Purchasing, Prep, Cookbook, and Inventory Reports are linked from the inventory nav, not the main sidebar.
+These routes mount real feature pages and are marked production in `moduleRouteInventory.json`. The sidebar (`navigationData.tsx`) is the four groups in the manual smoke section above. Dashboard is on the bottom nav and in the command palette, not in that sidebar list. Settings opens from the header profile card. Items, Counts, Purchasing, Prep, Cookbook, and Inventory Reports are linked from the inventory nav, not the main sidebar.
 
 | Feature | Route | Code |
 | --- | --- | --- |
@@ -38,7 +63,7 @@ These routes mount real feature pages and are marked production in `moduleRouteI
 
 ### Beta
 
-Marked beta in `moduleRouteInventory.json`. All of these still have pages, and the ones with `sidebar: true` are still in the main sidebar.
+Marked beta in `moduleRouteInventory.json`. These pages still exist. The ones listed in `navigationData.tsx` are in the sidebar. Admin is not in that list and is not in the inventory. `/admin` and `/app/admin` redirect to `/app/employees`.
 
 | Feature | Route | Flag |
 | --- | --- | --- |
@@ -52,7 +77,6 @@ Marked beta in `moduleRouteInventory.json`. All of these still have pages, and t
 | Leaderboard | `/app/leaderboard` | Sidebar. `src/features/gamification`. |
 | Learning Center | `/app/learning-center` | Sidebar. |
 | Certifications | `/app/certifications` | Sidebar. |
-| Admin | `/app/admin` | Sidebar. Inventory says v1 admin work belongs on Team and Settings. |
 | Resources | `/app/resources` plus docs, blog, and video child routes | Sidebar. `DocumentationDetail` still says the body is a placeholder. |
 | Meetings | `/app/meetings` | Redirects to `/app/calendar`. |
 | Events calendar | `/app/events/calendar` | Redirects to `/app/calendar`. |
@@ -83,7 +107,7 @@ Aliases in `moduleRouteInventory.json`, plus two abandoned redirects that are no
 
 ## 2. How the app works
 
-Sign-in, invite signup, and password reset live at `/auth`. `NavigationGuard` and `ProtectedRoute` send anonymous users away from `/app/*`, and send an existing session from `/auth` or `/` to `/app/dashboard`. A new owner finishes `/company-registration`, which signs them up, calls the server onboarding API, stores `company_id` on the profile, and opens the dashboard; `AppShell` holds the sidebar until that profile is a real company, not a placeholder. The dashboard command center loads that tenant’s labor, tasks, and stock. Scheduling (`/app/enhanced-scheduling`) is the week calendar, with availability and time off as panels on the same page; tasks, messages, and forms are separate tenant-backed pages for assignments, conversations, and checklists. Inventory (`/app/inventory`) reads items, stock, and waste, and its own nav opens items, counts, purchasing, and waste actions.
+Sign-in, invite signup, and password reset live at `/auth`. `NavigationGuard` and `ProtectedRoute` send anonymous users away from `/app/*`, and send an existing session from `/auth` or `/` to `/app/dashboard`. A new owner finishes `/company-registration`, which signs them up, calls the server onboarding API, stores `company_id` on the profile, and opens the dashboard; `AppShell` holds the sidebar until that profile is a real company, not a placeholder. The dashboard command center loads that tenant’s labor, tasks, and stock. Scheduling (`/app/enhanced-scheduling`) is the week calendar, with availability and time off as panels on the same page; tasks, messages, and forms are separate tenant-backed pages for assignments, conversations, and checklists. Inventory (`/app/inventory`) reads items, stock, and waste, and its own nav opens items, counts, purchasing, and waste actions. Settings stay on the profile card. The Admin page is gone; both admin URLs open the team directory.
 
 ## 3. Top five unfinished items
 
@@ -93,4 +117,4 @@ Ranked by what still blocks a restaurant from running a real pilot. There is no 
 2. **Live screens substitute demo data when queries fail.** Scheduling injects fallback shifts, the working cookbook shows demo recipes, and operations returns mock KPIs. **Fix:** on a failed or missing tenant query, show an empty or error state and do not render fallback shifts, recipes, or KPI mocks.
 3. **A new owner can still get stuck before the dashboard.** Signup continues without a session when email confirmation blocks `signInWithPassword`, and a permissions failure tells the user to check the onboarding service-role key. **Fix:** make `/company-registration` finish with a session and a `company_id` profile and land on `/app/dashboard` with no second sign-in and no manual env step.
 4. **Inventory routes the inventory file calls production are split or empty.** `/app/inventory/prep` is an empty mock, `/app/inventory/cookbook` is a coming-soon card while the real cookbook is only on `/app/cookbook`, and inventory-report waste, variance, and prep tabs are placeholders. The main sidebar does not link items, counts, or purchasing. **Fix:** point the canonical prep, cookbook, and inventory-report routes at the live item, recipe, waste, and count queries, and add Items, Counts, and Purchasing to the pilot sidebar.
-5. **Abandoned and beta pages are still one click from the pilot.** Goals and Help Desk are redirect stubs with no feature folders, availability UI is unused, resources docs are placeholders, and analytics, AI, operations, expenses, and the HR modules stay in the default sidebar. **Fix:** remove `/app/goals` and `/app/help-desk`, redirect the flat inventory aliases, and hide beta sidebar entries until the 11 pilot routes are verified.
+5. **Abandoned and beta pages are still one click from the pilot.** Goals and Help Desk are redirect stubs with no feature folders, availability UI is unused, resources docs are placeholders, and analytics, AI, operations, expenses, and the HR modules stay in the default sidebar. Admin is no longer a sidebar or bottom-nav item. **Fix:** remove `/app/goals` and `/app/help-desk`, redirect the flat inventory aliases, and hide beta sidebar entries until the 11 pilot routes are verified.
