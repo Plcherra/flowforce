@@ -3,6 +3,7 @@ import { dayIso } from "@/features/scheduling/utils/gridIndexes";
 import {
   chosenShiftIds,
   eventShowsOnShift,
+  groupEventsByDay,
   placeEventsOnDayShifts,
 } from "./placeDayEvents";
 
@@ -101,4 +102,18 @@ export function runPlaceDayEventsTests() {
     ),
     false,
   );
+
+  const grouped = groupEventsByDay(
+    [open, chosen, orphan, emptyDay],
+    (event) => event.start,
+  );
+  assert.deepEqual(
+    grouped.get(dayIso(monday))?.map((event) => event.id),
+    ["open", "chosen", "orphan"],
+  );
+  assert.deepEqual(
+    grouped.get(dayIso(wednesday))?.map((event) => event.id),
+    ["empty"],
+  );
+  assert.equal(grouped.has(dayIso(tuesday)), false);
 }

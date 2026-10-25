@@ -1,32 +1,24 @@
 import { useTranslation } from "react-i18next";
-import { Calendar, Clock, Users, Plus } from "lucide-react";
+import { Calendar, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import type { ShiftTemplate, VendorPaletteItem } from "./types";
+import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
+import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
+import type { ShiftTemplate } from "./types";
 
 interface ScheduleTemplatesPanelProps {
   templates: ShiftTemplate[];
-  vendors: VendorPaletteItem[];
   onTemplateDragStart: (
     event: React.DragEvent,
     template: ShiftTemplate,
   ) => void;
-  onVendorDragStart: (
-    event: React.DragEvent,
-    vendor: VendorPaletteItem,
-  ) => void;
   onTemplateClick?: (template: ShiftTemplate) => void;
-  onQuickVendorVisit: () => Promise<void>;
 }
 
 export function ScheduleTemplatesPanel({
   templates,
-  vendors,
   onTemplateDragStart,
-  onVendorDragStart,
   onTemplateClick,
-  onQuickVendorVisit,
 }: ScheduleTemplatesPanelProps) {
   const { t } = useTranslation();
   return (
@@ -36,68 +28,43 @@ export function ScheduleTemplatesPanel({
           <Calendar className="h-5 w-5 text-primary" />
           {t("schedule.roleTemplates")}
         </CardTitle>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onQuickVendorVisit}>
-            <Plus className="h-3 w-3 mr-1" />
-            {t("schedule.vendorVisit")}
-          </Button>
-        </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        {templates.map((template) => (
-          <div
-            key={template.id}
-            data-testid={`role-template-${template.id}`}
-            draggable
-            onDragStart={(event) => onTemplateDragStart(event, template)}
-            onClick={() => onTemplateClick?.(template)}
-            className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors"
-            style={{ borderLeftColor: template.color, borderLeftWidth: "4px" }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-sm">{template.name}</span>
-              <Badge variant="secondary" className="text-xs">
-                {template.role}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              {template.startTime} - {template.endTime}
-              <Users className="h-3 w-3 ml-2" />
-              {template.minStaff}-{template.maxStaff}
-            </div>
-          </div>
-        ))}
-
-        <div className="pt-4 mt-4 border-t space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">{t("schedule.vendorVisits")}</h3>
-            <Badge variant="outline">{t("schedule.dragToSchedule")}</Badge>
-          </div>
-          {vendors.map((vendor) => (
+        {templates.map((template) => {
+          const paint = shiftChipPaint(template.color, "unassigned");
+          return (
             <div
-              key={vendor.id}
-              data-testid={`vendor-palette-${vendor.id}`}
+              key={template.id}
+              data-testid={`role-template-${template.id}`}
               draggable
-              onDragStart={(event) => onVendorDragStart(event, vendor)}
-              className="p-3 border rounded-lg cursor-grab active:cursor-grabbing hover:bg-muted/40 transition-colors"
-              style={{ borderLeftColor: vendor.color, borderLeftWidth: "4px" }}
+              onDragStart={(event) => onTemplateDragStart(event, template)}
+              onClick={() => onTemplateClick?.(template)}
+              className="rounded-lg cursor-grab border border-black/10 p-3 shadow-sm active:cursor-grabbing"
+              style={{
+                backgroundColor: paint.backgroundColor,
+                color: paint.color,
+                borderLeft: paint.borderLeft,
+              }}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-medium text-sm">{vendor.label}</span>
-                <Badge
-                  variant="secondary"
-                  className="text-[10px]"
-                  style={{ backgroundColor: vendor.color, color: "#fff" }}
-                >
-                  {t("schedule.vendor")}
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-medium">{template.name}</span>
+                <Badge variant="secondary" className="text-xs">
+                  {template.role}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Default duration · {vendor.defaultDurationHours}h
-              </p>
+              <div className="flex items-center gap-2 text-xs opacity-80">
+                <Clock className="h-3 w-3" />
+                {template.startTime} - {template.endTime}
+                <Users className="ml-2 h-3 w-3" />
+                {template.minStaff}-{template.maxStaff}
+              </div>
             </div>
-          ))}
+          );
+        })}
+
+        <div className="mt-4 space-y-2 border-t pt-4">
+          <h3 className="text-sm font-semibold">{t("schedule.vendorVisits")}</h3>
+          <DayEventNotice className="text-xs" />
         </div>
       </CardContent>
     </Card>

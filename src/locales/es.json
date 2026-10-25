@@ -2582,7 +2582,9 @@
     "templateSchedulingNotice": "Aviso de horario",
     "appliesToLevels": "Se aplica a los niveles",
     "appliesToLevelsHelp": "A quién se aplica esta política. No cambia quién puede verla o editarla.",
-    "appliesToRoles": "Se aplica a los roles"
+    "appliesToRoles": "Se aplica a los roles",
+    "dayEventCount": "{{count}} en este día",
+    "eventsLiveOnCalendar": "Los eventos pertenecen al día. Configúralos en Calendario."
   },
   "tasks": {
     "aTitleIsRequired": "El título es obligatorio.",
@@ -2808,6 +2810,11 @@
     "noShiftTasks": "Aún no hay tareas del turno.",
     "customShiftTask": "Tarea personalizada",
     "publishAFormToAttach": "Publica un formulario con campos en Formularios y aparecerá aquí.",
+    "shiftForms": "Formularios del turno",
+    "shiftFormsHelp": "Formularios publicados que puedes vincular a este turno.",
+    "linkFormToShift": "Vincular a este turno",
+    "formLinkedToShift": "Formulario vinculado a este turno",
+    "linkedToThisShift": "Vinculado a este turno",
     "taskName": "Nombre de la tarea",
     "shiftTaskExample": "Limpiar el baño",
     "addShiftTask": "Añadir a este turno",

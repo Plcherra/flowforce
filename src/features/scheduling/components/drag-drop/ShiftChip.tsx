@@ -3,10 +3,8 @@ import { AlertTriangle } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
-import type {
-  ShiftWithAssignments,
-  VendorEventWithMetadata,
-} from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
+import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export function formatShiftWindow(schedule: ShiftWithAssignments) {
   if (!schedule.start_time || !schedule.end_time) return "Invalid time";
@@ -31,9 +29,6 @@ interface ShiftChipProps {
   draggable?: boolean;
   variant?: "assigned" | "unassigned";
   minimized?: boolean;
-  vendorEvents?: VendorEventWithMetadata[];
-  getVendorLabel: (vendorType: string) => string;
-  getVendorColor: (vendorType: string) => string;
   onShiftClick: (shiftId: string) => void;
 }
 
@@ -44,9 +39,6 @@ export function ShiftChip({
   draggable = false,
   variant = "assigned",
   minimized = false,
-  vendorEvents = [],
-  getVendorLabel,
-  getVendorColor,
   onShiftClick,
 }: ShiftChipProps) {
   const {
@@ -70,8 +62,7 @@ export function ShiftChip({
       ? { transform: CSS.Translate.toString(transform) }
       : undefined;
 
-  const isAssigned = variant === "assigned";
-  const fillColor = schedule.color ?? "#3b82f6";
+  const paint = shiftChipPaint(schedule.color, variant);
   const roleLabel = schedule.job_position?.name || schedule.role || "";
 
   return (
@@ -80,19 +71,15 @@ export function ShiftChip({
       ref={draggable ? setNodeRef : undefined}
       style={{
         ...style,
-        ...(isAssigned
-          ? {
-              backgroundColor: fillColor,
-              borderLeft: `3px solid ${fillColor}`,
-            }
-          : {}),
+        backgroundColor: paint.backgroundColor,
+        color: paint.color,
+        borderLeft: paint.borderLeft,
       }}
       data-testid={`schedule-shift-${schedule.id}`}
       data-minimized={minimized ? "true" : "false"}
-      data-opaque={isAssigned ? "true" : "false"}
+      data-opaque={paint.opaque ? "true" : "false"}
       className={cn(
-        "relative z-20 w-full min-w-0 max-w-full overflow-hidden rounded px-2 py-1 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 border text-left",
-        isAssigned ? "text-primary-foreground" : "bg-background border-border shadow-sm",
+        "relative z-20 w-full min-w-0 max-w-full overflow-hidden rounded-md border border-black/10 px-2.5 py-1.5 text-[11px] cursor-pointer hover:shadow-md transition-all duration-200 text-left shadow-sm",
         isDragging && "opacity-40",
         draggable && "touch-none",
       )}
@@ -119,33 +106,12 @@ export function ShiftChip({
           <div data-testid="shift-chip-time" className="text-xs opacity-75">
             {formatShiftWindow(schedule)}
           </div>
-          <div
-            data-testid="shift-chip-duration"
-            className={cn(
-              "text-[10px]",
-              isAssigned ? "text-primary-foreground/80" : "text-muted-foreground",
-            )}
-          >
+          <div data-testid="shift-chip-duration" className="text-[10px] opacity-80">
             {formatShiftDuration(schedule)}
             {schedule.required_headcount
               ? ` · ${schedule.required_headcount} req.`
               : ""}
           </div>
-          {vendorEvents.map((event) => (
-            <div
-              key={`${event.id}-chip`}
-              data-testid={`schedule-vendor-chip-${event.id}`}
-              className="mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium"
-              style={{
-                backgroundColor: `${getVendorColor(event.service_type || event.vendor_name || "")}15`,
-                color: getVendorColor(
-                  event.service_type || event.vendor_name || "",
-                ),
-              }}
-            >
-              Vendor · {getVendorLabel(event.service_type || event.vendor_name)}
-            </div>
-          ))}
         </>
       )}
     </button>
@@ -159,12 +125,14 @@ export function ShiftChipOverlay({
   schedule: ShiftWithAssignments;
   hasConflict?: boolean;
 }) {
+  const paint = shiftChipPaint(schedule.color, "assigned");
   return (
     <div
-      className="rounded px-2 py-1 text-[11px] border text-primary-foreground shadow-lg cursor-grabbing"
+      className="rounded-md border border-black/10 px-2.5 py-1.5 text-[11px] shadow-lg cursor-grabbing"
       style={{
-        backgroundColor: schedule.color ?? "#3b82f6",
-        borderLeft: `3px solid ${schedule.color ?? "#3b82f6"}`,
+        backgroundColor: paint.backgroundColor,
+        color: paint.color,
+        borderLeft: paint.borderLeft,
       }}
     >
       <div className="font-medium truncate flex items-center gap-1">

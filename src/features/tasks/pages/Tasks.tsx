@@ -39,7 +39,6 @@ import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
 import { DraftInbox } from "@/features/tasks/components/DraftInbox";
-import { WeekdayTaskSetup } from "@/features/tasks/components/WeekdayTaskSetup";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
 import { TodayShiftMonitor } from "@/features/tasks/components/TodayShiftMonitor";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
@@ -85,7 +84,6 @@ export default function Tasks() {
     keysSet: taskCreateKeysAreSet("custom", getSource),
   });
   const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
-  const showSetup = !permissionsLoading && can("editTasks");
   const showDrafts =
     !permissionsLoading && (can("editTasks") || can("ai.actions.approve"));
   const { user } = useAuth();
@@ -103,7 +101,7 @@ export default function Tasks() {
     [tasks, user?.id],
   );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [boardMode, setBoardMode] = useState<"shift" | "all" | "setup">("shift");
+  const [boardMode, setBoardMode] = useState<"shift" | "all">("shift");
   const [openFormId, setOpenFormId] = useState<string | null>(null);
   const shift = useMyShiftBoard(visibleTasks);
   const assigneeScope = useTaskAssigneeScope();
@@ -218,14 +216,8 @@ export default function Tasks() {
         </div>
       </div>
 
-      <TasksBoardSwitch mode={boardMode} showSetup={showSetup} onChange={setBoardMode} />
+      <TasksBoardSwitch mode={boardMode} onChange={setBoardMode} />
       <ListIssueSync />
-      {boardMode === "setup" && showSetup ? (
-        <div className="space-y-6">
-          <p className="text-sm text-muted-foreground">{t("tasks.listsLiveOnForms")}</p>
-          <WeekdayTaskSetup />
-        </div>
-      ) : null}
       {boardMode === "shift" && can("editTasks") ? <TodayShiftMonitor /> : null}
       {boardMode === "shift" && showDrafts ? <DraftInbox tasks={visibleTasks} /> : null}
       {boardMode === "shift" ? (

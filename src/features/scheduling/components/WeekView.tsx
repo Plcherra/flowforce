@@ -11,6 +11,8 @@ import type {
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor, calculateCoverageStats } from "@/utils/schedulingUtils";
+import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
+import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 import { useShiftTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
 import { ShiftGridCopy } from "@/features/scheduling/components/ShiftGridCopy";
 
@@ -30,11 +32,9 @@ export function WeekView({
   schedules,
   selectedDate,
   onSelectShift,
-  onSelectEvent,
   isMobile = false,
   overlayEvents = [],
   hideShiftActions = false,
-  selectedEventId = null,
   locationFilter,
 }: WeekViewProps) {
   const { t } = useTranslation();
@@ -79,47 +79,6 @@ export function WeekView({
     [overlayEvents],
   );
 
-  const eventsByShiftId = useMemo(() => {
-    const map = new Map<string, CalendarEvent[]>();
-    overlayEvents.forEach((event) => {
-      const fallback = Array.isArray(event.raw?.related_shift_ids)
-        ? event.raw.related_shift_ids
-        : [];
-      const ids = event.shiftIds?.length ? event.shiftIds : fallback;
-      ids.forEach((shiftId) => {
-        if (!shiftId) return;
-        const list = map.get(shiftId) ?? [];
-        list.push(event);
-        map.set(shiftId, list);
-      });
-    });
-    return map;
-  }, [overlayEvents]);
-
-  const handleEventClick = (eventId: string) => {
-    if (!onSelectEvent) return;
-    if (selectedEventId === eventId) {
-      onSelectEvent(null);
-    } else {
-      onSelectEvent(eventId);
-    }
-  };
-
-  const renderAttendeeSummary = (event: CalendarEvent) => {
-    const attendees = event.attendees ?? [];
-    if (attendees.length === 0) return null;
-    const names = attendees.map((attendee) => attendee.name).filter(Boolean);
-    if (names.length === 0) return null;
-    const summary = names.slice(0, 2).join(", ");
-    const extra = names.length > 2 ? ` +${names.length - 2}` : "";
-    return (
-      <div className="text-[11px] text-muted-foreground">
-        {summary}
-        {extra}
-      </div>
-    );
-  };
-
   if (isMobile) {
     // Mobile: Show simplified horizontal scrollable week view
     return (
@@ -147,6 +106,10 @@ export function WeekView({
                       {format(day, "d")}
                     </div>
                     <div className="mt-1">
+                      <DayEventNotice
+                        count={getEventsForDay(day).length}
+                        className="mb-1"
+                      />
                       <div className="text-xs text-muted-foreground">
                         {stats.totalHours}h
                       </div>
@@ -183,13 +146,19 @@ export function WeekView({
                     {t("schedule.noShiftsScheduled")}
                   </div>
                 )}
-                {dayShifts.map((shift) => (
+                {dayShifts.map((shift) => {
+                  const paint = shiftChipPaint(
+                    getShiftColor(shift),
+                    shift.assignments?.length ? "assigned" : "unassigned",
+                  );
+                  return (
                   <div
                     key={shift.id}
-                    className="p-3 border rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                    className="cursor-pointer rounded-lg border border-black/10 p-3 shadow-sm transition-shadow hover:shadow-md"
                     style={{
-                      borderLeftColor: getShiftColor(shift),
-                      borderLeftWidth: "4px",
+                      backgroundColor: paint.backgroundColor,
+                      color: paint.color,
+                      borderLeft: paint.borderLeft,
                     }}
                     onClick={() => onSelectShift(shift.id)}
                   >
@@ -201,10 +170,10 @@ export function WeekView({
                           notes={shift.notes}
                           fallback={shift.job_position?.name || "Shift"}
                           translation={shiftTranslations.get(shift.id) ?? null}
-                          titleClassName="font-medium text-foreground text-sm"
-                          notesClassName="text-xs text-muted-foreground"
+                          titleClassName="text-sm font-medium"
+                          notesClassName="text-xs opacity-80"
                         />
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm opacity-80">
                           {format(new Date(shift.start_time), "HH:mm")} -
                           {format(new Date(shift.end_time), "HH:mm")}
                         </div>
@@ -242,13 +211,14 @@ export function WeekView({
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs opacity-80">
                           {shift.assignments.length} assigned
                         </span>
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })}
@@ -295,84 +265,9 @@ export function WeekView({
                   >
                     {stats.totalHeadcount}/{stats.requiredHeadcount} staff
                   </div>
-                  {(() => {
-                    const evs = getEventsForDay(day);
-                    if (evs.length === 0) return null;
-                    return (
-                      <div className="text-[11px] text-primary/80">
-                        {evs.length} event{evs.length > 1 ? "s" : ""}
-                      </div>
-                    );
-                  })()}
+                  <DayEventNotice count={getEventsForDay(day).length} />
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-8 border-b bg-muted/40">
-        <div className="p-3 border-r">
-          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            {t("schedule.meetingsEvents")}
-          </div>
-          <div className="text-[11px] text-muted-foreground">
-            {t("schedule.sessionsLinkedToTheSchedule")}
-          </div>
-        </div>
-        {weekDays.map((day) => {
-          const dayEvents = getEventsForDay(day)
-            .slice()
-            .sort(
-              (a, b) =>
-                new Date(a.start).getTime() - new Date(b.start).getTime(),
-            );
-          return (
-            <div key={`events-${day.toISOString()}`} className="border-r p-2">
-              {dayEvents.length === 0 ? (
-                <div className="h-20 flex items-center justify-center text-[11px] text-muted-foreground">
-                  {t("schedule.noSessions")}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {dayEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className={`rounded-md border border-border/60 bg-background p-2 text-xs shadow-sm transition hover:shadow-md cursor-pointer ${
-                        selectedEventId === event.id
-                          ? "ring-2 ring-primary"
-                          : ""
-                      }`}
-                      style={{
-                        borderLeftColor: event.color ?? "#6366f1",
-                        borderLeftWidth: 4,
-                      }}
-                      onClick={() => handleEventClick(event.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold text-foreground text-[13px] truncate">
-                          {event.title || "Untitled"}
-                        </div>
-                        {event.type && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] capitalize"
-                          >
-                            {event.type}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {format(new Date(event.start), "HH:mm")} –{" "}
-                        {event.end
-                          ? format(new Date(event.end), "HH:mm")
-                          : "TBD"}
-                      </div>
-                      {renderAttendeeSummary(event)}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           );
         })}
@@ -470,14 +365,18 @@ export function WeekView({
                             <div className="h-16" />
                           ) : (
                             employeeShifts.map((shift) => {
-                              const linkedEvents =
-                                eventsByShiftId.get(shift.id) ?? [];
+                              const paint = shiftChipPaint(
+                                getShiftColor(shift),
+                                "assigned",
+                              );
                               return (
                                 <div
                                   key={shift.id}
-                                  className="rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow mb-1 p-2 text-primary-foreground text-xs"
+                                  className="mb-1 cursor-pointer rounded-md border border-black/10 p-2 text-xs shadow-sm transition-shadow hover:shadow-md"
                                   style={{
-                                    backgroundColor: getShiftColor(shift),
+                                    backgroundColor: paint.backgroundColor,
+                                    color: paint.color,
+                                    borderLeft: paint.borderLeft,
                                     opacity: shift.is_published ? 1 : 0.9,
                                   }}
                                   onClick={() => onSelectShift(shift.id)}
@@ -492,7 +391,7 @@ export function WeekView({
                                     translation={
                                       shiftTranslations.get(shift.id) ?? null
                                     }
-                                    titleClassName="font-medium truncate mb-1"
+                                    titleClassName="mb-1 truncate font-medium"
                                     notesClassName="truncate opacity-90"
                                   />
                                   <div className="flex items-center gap-1 text-[11px] opacity-90">
@@ -507,42 +406,10 @@ export function WeekView({
                                   {!shift.is_published && (
                                     <Badge
                                       variant="secondary"
-                                      className="text-[10px] mt-1"
+                                      className="mt-1 text-[10px]"
                                     >
                                       {t("schedule.draft")}
                                     </Badge>
-                                  )}
-                                  {linkedEvents.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-1">
-                                      {linkedEvents.map((event) => {
-                                        const startTime = new Date(event.start);
-                                        const timeLabel = Number.isNaN(
-                                          startTime.getTime(),
-                                        )
-                                          ? ""
-                                          : `${format(startTime, "HH:mm")} · `;
-                                        const isSelected =
-                                          selectedEventId === event.id;
-                                        return (
-                                          <button
-                                            key={event.id}
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              onSelectEvent?.(event.id);
-                                            }}
-                                            className={`rounded-full border px-2 py-0.5 text-[10px] transition ${
-                                              isSelected
-                                                ? "border-border bg-background/20 text-primary-foreground"
-                                                : "border-border/50 bg-background/10 text-primary-foreground hover:border-border"
-                                            }`}
-                                          >
-                                            {timeLabel}
-                                            {event.title || "Session"}
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
                                   )}
                                 </div>
                               );

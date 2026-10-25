@@ -2582,7 +2582,9 @@
     "templateSchedulingNotice": "Scheduling notice",
     "appliesToLevels": "Applies to levels",
     "appliesToLevelsHelp": "Who this policy applies to. This does not change who can view or edit it.",
-    "appliesToRoles": "Applies to roles"
+    "appliesToRoles": "Applies to roles",
+    "dayEventCount": "{{count}} on this day",
+    "eventsLiveOnCalendar": "Events belong to the day. Set them up on Calendar."
   },
   "tasks": {
     "aTitleIsRequired": "A title is required.",
@@ -2808,6 +2810,11 @@
     "noShiftTasks": "No shift tasks yet.",
     "customShiftTask": "Custom task",
     "publishAFormToAttach": "Publish a form with fields on Forms, then it shows up here.",
+    "shiftForms": "Shift forms",
+    "shiftFormsHelp": "Published forms you can link to this shift.",
+    "linkFormToShift": "Link to this shift",
+    "formLinkedToShift": "Form linked to this shift",
+    "linkedToThisShift": "Linked to this shift",
     "taskName": "Task name",
     "shiftTaskExample": "Clean the restroom",
     "addShiftTask": "Add to this shift",

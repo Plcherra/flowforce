@@ -55,7 +55,6 @@ export function CreateTaskDialog({
   const { toast } = useToast();
   const {
     assignees,
-    goals,
     loading: optionsLoading,
     error: optionsError,
   } = useTaskFormOptions(open);
@@ -72,7 +71,6 @@ export function CreateTaskDialog({
     publish_state: "published" as TaskPublishState,
     points: "",
     assigned_to: "",
-    goal_id: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const allowedAssignees =
@@ -126,7 +124,6 @@ export function CreateTaskDialog({
       publish_state: "published",
       points: "",
       assigned_to: "",
-      goal_id: "",
     });
     setCreateReminder(false);
     setErrors({});
@@ -204,7 +201,7 @@ export function CreateTaskDialog({
         parent_task_id: null,
         workflowid: null,
         actual_hours: null,
-        goal_id: formData.goal_id ? formData.goal_id : null,
+        goal_id: null,
       };
 
       const { data: newTask, error } = await createTask(taskData);
@@ -370,36 +367,6 @@ export function CreateTaskDialog({
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="goal_id">{t("tasks.linkedGoal")}</Label>
-              <Select
-                value={formData.goal_id || "none"}
-                onValueChange={(value) =>
-                  handleFieldChange("goal_id", value === "none" ? "" : value)
-                }
-                disabled={optionsLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      optionsLoading
-                        ? "Loading goals…"
-                        : goals.length === 0
-                          ? "No goals available"
-                          : "Select goal (optional)"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t("tasks.noGoal")}</SelectItem>
-                  {goals.map((goal) => (
-                    <SelectItem key={goal.id} value={goal.id}>
-                      {goal.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

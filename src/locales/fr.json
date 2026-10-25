@@ -2582,7 +2582,9 @@
     "templateSchedulingNotice": "Préavis de planning",
     "appliesToLevels": "S'applique aux niveaux",
     "appliesToLevelsHelp": "À qui cette politique s'applique. Cela ne change pas qui peut la voir ou la modifier.",
-    "appliesToRoles": "S'applique aux rôles"
+    "appliesToRoles": "S'applique aux rôles",
+    "dayEventCount": "{{count}} ce jour-là",
+    "eventsLiveOnCalendar": "Les événements appartiennent au jour. Réglez-les dans Calendrier."
   },
   "tasks": {
     "aTitleIsRequired": "Un titre est obligatoire.",
@@ -2808,6 +2810,11 @@
     "noShiftTasks": "Aucune tâche de service pour le moment.",
     "customShiftTask": "Tâche personnalisée",
     "publishAFormToAttach": "Publiez un formulaire avec des champs dans Formulaires, puis il s'affiche ici.",
+    "shiftForms": "Formulaires du service",
+    "shiftFormsHelp": "Formulaires publiés que vous pouvez lier à ce service.",
+    "linkFormToShift": "Lier à ce service",
+    "formLinkedToShift": "Formulaire lié à ce service",
+    "linkedToThisShift": "Lié à ce service",
     "taskName": "Nom de la tâche",
     "shiftTaskExample": "Nettoyer les toilettes",
     "addShiftTask": "Ajouter à ce service",

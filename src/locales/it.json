@@ -2582,7 +2582,9 @@
     "templateSchedulingNotice": "Preavviso di turno",
     "appliesToLevels": "Si applica ai livelli",
     "appliesToLevelsHelp": "A chi si applica questa politica. Non cambia chi può vederla o modificarla.",
-    "appliesToRoles": "Si applica ai ruoli"
+    "appliesToRoles": "Si applica ai ruoli",
+    "dayEventCount": "{{count}} in questo giorno",
+    "eventsLiveOnCalendar": "Gli eventi appartengono al giorno. Impostali nel Calendario."
   },
   "tasks": {
     "aTitleIsRequired": "Il titolo è obbligatorio.",
@@ -2808,6 +2810,11 @@
     "noShiftTasks": "Nessuna attività del turno.",
     "customShiftTask": "Attività personalizzata",
     "publishAFormToAttach": "Pubblica un modulo con campi in Moduli e comparirà qui.",
+    "shiftForms": "Moduli del turno",
+    "shiftFormsHelp": "Moduli pubblicati che puoi collegare a questo turno.",
+    "linkFormToShift": "Collega a questo turno",
+    "formLinkedToShift": "Modulo collegato a questo turno",
+    "linkedToThisShift": "Collegato a questo turno",
     "taskName": "Nome attività",
     "shiftTaskExample": "Pulire il bagno",
     "addShiftTask": "Aggiungi a questo turno",

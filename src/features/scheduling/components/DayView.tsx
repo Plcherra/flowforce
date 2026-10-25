@@ -3,7 +3,7 @@ import { format, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Plus, CalendarDays } from "lucide-react";
+import { Clock, Users, Plus } from "lucide-react";
 import type {
   ShiftWithAssignments,
   AssignmentWithUser,
@@ -13,6 +13,8 @@ import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useMemo, useState } from "react";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor } from "@/utils/schedulingUtils";
+import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
+import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 
 interface DayViewProps {
   schedules: ShiftWithAssignments[];
@@ -30,12 +32,10 @@ export function DayView({
   schedules,
   selectedDate,
   onSelectShift,
-  onSelectEvent,
   filters: _filters,
   isMobile = false,
   hideShiftActions = false,
   overlayEvents = [],
-  selectedEventId = null,
 }: DayViewProps) {
   const { t } = useTranslation();
   const [showAddShift, setShowAddShift] = useState(false);
@@ -52,15 +52,6 @@ export function DayView({
     [overlayEvents, selectedDate],
   );
 
-  const handleEventClick = (eventId: string) => {
-    if (!onSelectEvent) return;
-    if (selectedEventId === eventId) {
-      onSelectEvent(null);
-    } else {
-      onSelectEvent(eventId);
-    }
-  };
-
   return (
     <div className={`p-${isMobile ? "4" : "6"}`}>
       <div className={`mb-${isMobile ? "4" : "6"}`}>
@@ -72,68 +63,8 @@ export function DayView({
         <p className="text-muted-foreground">{dayShifts.length} shifts scheduled</p>
       </div>
 
-      <div className="mb-6 space-y-2">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold text-foreground">
-            {t("schedule.meetingsEvents2")}
-          </h3>
-        </div>
-        {dayEvents.length === 0 ? (
-          <div className="rounded-md border border-dashed border-muted-foreground/40 p-4 text-sm text-muted-foreground">
-            {t("schedule.noSessionsScheduledForThisDay")}
-          </div>
-        ) : (
-          <div className="grid gap-3">
-            {dayEvents.map((event) => (
-              <div
-                key={event.id}
-                className={`rounded-md border border-border/70 bg-background p-3 shadow-sm transition hover:shadow-md cursor-pointer ${
-                  selectedEventId === event.id ? "ring-2 ring-primary" : ""
-                }`}
-                style={{
-                  borderLeftColor: event.color ?? "#6366f1",
-                  borderLeftWidth: 4,
-                }}
-                onClick={() => handleEventClick(event.id)}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-semibold text-foreground">
-                    {event.title || "Untitled session"}
-                  </div>
-                  {event.type && (
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {event.type}
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {format(new Date(event.start), "HH:mm")} –{" "}
-                  {event.end ? format(new Date(event.end), "HH:mm") : "TBD"}
-                  {event.location ? ` • ${event.location}` : ""}
-                </div>
-                {event.attendees && event.attendees.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {event.attendees.slice(0, 4).map((attendee) => (
-                      <Badge
-                        key={attendee.id}
-                        variant="secondary"
-                        className="text-[10px]"
-                      >
-                        {attendee.name}
-                      </Badge>
-                    ))}
-                    {event.attendees.length > 4 && (
-                      <Badge variant="secondary" className="text-[10px]">
-                        +{event.attendees.length - 4}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="mb-6">
+        <DayEventNotice count={dayEvents.length} className="text-xs" />
       </div>
 
       <div
@@ -227,14 +158,24 @@ export function DayView({
             </div>
           ) : (
             <div className="space-y-3">
-              {dayShifts.map((shift) => (
+              {dayShifts.map((shift) => {
+                const paint = shiftChipPaint(
+                  getShiftColor(shift),
+                  shift.assignments?.length ? "assigned" : "unassigned",
+                );
+                return (
                 <div
                   key={shift.id}
-                  className="p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                  className="cursor-pointer rounded-lg border border-black/10 p-4 shadow-sm transition-shadow hover:shadow-md [&_.text-muted-foreground]:text-current [&_.text-muted-foreground]:opacity-80"
+                  style={{
+                    backgroundColor: paint.backgroundColor,
+                    color: paint.color,
+                    borderLeft: paint.borderLeft,
+                  }}
                   onClick={() => onSelectShift(shift.id)}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-foreground">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h4 className="font-medium">
                       {shift.title || shift.job_position?.name || "Shift"}
                     </h4>
                     <Badge
@@ -312,7 +253,8 @@ export function DayView({
                     </Badge>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

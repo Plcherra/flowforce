@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useMemo, useRef } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { DndContext } from "@dnd-kit/core";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
@@ -29,10 +28,8 @@ import { useScheduleBoard } from "@/features/scheduling/hooks/useScheduleBoard";
 import type { PendingVendorEvent, ShiftTemplate } from "./drag-drop/types";
 import {
   ROLE_TEMPLATES,
-  VENDOR_PALETTE,
-  getVendorLabel,
-  getVendorColor,
 } from "@/features/scheduling/constants/templates";
+import type { VendorPaletteItem } from "@/features/scheduling/components/drag-drop/types";
 import { useDragDropHandlers } from "@/features/scheduling/hooks/useDragDropHandlers";
 import { useShiftDragDrop } from "@/features/scheduling/hooks/useShiftDragDrop";
 import { useVendorForm } from "@/features/scheduling/hooks/useVendorForm";
@@ -88,10 +85,9 @@ export function DragDropScheduleCalendar({
   onToggleSmartFill,
 }: DragDropScheduleCalendarProps) {
   const { t } = useTranslation();
-  const { toast } = useToast();
-  const [draggedVendor, setDraggedVendor] = useState<
-    (typeof VENDOR_PALETTE)[number] | null
-  >(null);
+  const [draggedVendor, setDraggedVendor] = useState<VendorPaletteItem | null>(
+    null,
+  );
   const [vendorModalOpen, setVendorModalOpen] = useState(false);
   const [pendingVendorEvent, setPendingVendorEvent] =
     useState<PendingVendorEvent | null>(null);
@@ -195,7 +191,6 @@ export function DragDropScheduleCalendar({
 
   const {
     handleTemplateDragStart,
-    handleVendorDragStart,
     handleDragOver,
     handleBoardDrop,
   } = useDragDropHandlers({
@@ -282,26 +277,8 @@ export function DragDropScheduleCalendar({
           <AssignmentPanel
             showTemplates={showTemplates}
             templates={ROLE_TEMPLATES}
-            vendors={VENDOR_PALETTE}
             onTemplateDragStart={handleTemplateDragStart}
             onTemplateClick={openRoleTemplateWizard}
-            onVendorDragStart={handleVendorDragStart}
-            onQuickVendorVisit={async () => {
-              try {
-                await createVendorEvent({
-                  vendor_type: "general",
-                  event_date: format(selectedDate, "yyyy-MM-dd"),
-                  start_time: "09:00",
-                  end_time: "10:00",
-                  notes: "Quick vendor visit",
-                });
-              } catch {
-                toast({
-                  title: "Failed to log vendor visit",
-                  variant: "destructive",
-                });
-              }
-            }}
           />
         )}
 
@@ -382,8 +359,6 @@ export function DragDropScheduleCalendar({
                 onShiftClick={openShiftDetails}
                 onDrop={readOnly ? undefined : handleBoardDrop}
                 onDragOver={readOnly ? undefined : handleDragOver}
-                getVendorLabel={getVendorLabel}
-                getVendorColor={getVendorColor}
                 minimizedView={minimizedView}
                 timeOffRequests={timeOffRequests}
               />

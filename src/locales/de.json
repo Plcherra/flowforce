@@ -2582,7 +2582,9 @@
     "templateSchedulingNotice": "Planungsfrist",
     "appliesToLevels": "Gilt für Ebenen",
     "appliesToLevelsHelp": "Für wen diese Richtlinie gilt. Das ändert nicht, wer sie sehen oder bearbeiten kann.",
-    "appliesToRoles": "Gilt für Rollen"
+    "appliesToRoles": "Gilt für Rollen",
+    "dayEventCount": "{{count}} an diesem Tag",
+    "eventsLiveOnCalendar": "Ereignisse gehören zum Tag. Richte sie im Kalender ein."
   },
   "tasks": {
     "aTitleIsRequired": "Ein Titel ist erforderlich.",
@@ -2808,6 +2810,11 @@
     "noShiftTasks": "Noch keine Schichtaufgaben.",
     "customShiftTask": "Eigene Aufgabe",
     "publishAFormToAttach": "Veröffentliche ein Formular mit Feldern unter Formulare, dann erscheint es hier.",
+    "shiftForms": "Schichtformulare",
+    "shiftFormsHelp": "Veröffentlichte Formulare, die du mit dieser Schicht verknüpfen kannst.",
+    "linkFormToShift": "Mit dieser Schicht verknüpfen",
+    "formLinkedToShift": "Formular mit dieser Schicht verknüpft",
+    "linkedToThisShift": "Mit dieser Schicht verknüpft",
     "taskName": "Aufgabenname",
     "shiftTaskExample": "Toilette putzen",
     "addShiftTask": "Zu dieser Schicht hinzufügen",

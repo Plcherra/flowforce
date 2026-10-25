@@ -18,6 +18,9 @@ import {
   VIRTUALIZE_EMPLOYEE_THRESHOLD,
 } from "@/features/scheduling/utils/gridIndexes";
 import { ShiftChip } from "@/features/scheduling/components/drag-drop/ShiftChip";
+import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
+import { groupEventsByDay } from "@/features/scheduling/services/placeDayEvents";
+import { vendorEventStart } from "@/features/scheduling/utils/calendarDay";
 import { WeekGridFooter } from "@/features/scheduling/components/drag-drop/WeekGridFooter";
 import {
   isRequestedOffDay,
@@ -60,8 +63,6 @@ export interface WeekGridProps {
   onShiftClick: (shiftId: string) => void;
   onDrop?: (event: React.DragEvent, day: Date, employeeId?: string) => void;
   onDragOver?: (event: React.DragEvent) => void;
-  getVendorLabel: (vendorType: string) => string;
-  getVendorColor: (vendorType: string) => string;
   minimizedView?: boolean;
 }
 
@@ -158,14 +159,10 @@ function GridCellComponent({
   cell,
   daySchedules,
   conflictByShiftId,
-  vendorEventsByShift,
-  unlinkedVendorEvents = [],
   showAvailabilityLayer,
   enableShiftDrag,
   html5Drop,
   onShiftClick,
-  getVendorLabel,
-  getVendorColor,
   minimizedView = false,
   requestedOff = false,
 }: {
@@ -174,8 +171,6 @@ function GridCellComponent({
   cell: GridCellAvailability | undefined;
   daySchedules: ShiftWithAssignments[];
   conflictByShiftId: Map<string, boolean>;
-  vendorEventsByShift: Map<string, VendorEventWithMetadata[]>;
-  unlinkedVendorEvents?: VendorEventWithMetadata[];
   showAvailabilityLayer: boolean;
   enableShiftDrag: boolean;
   html5Drop?: {
@@ -183,8 +178,6 @@ function GridCellComponent({
     onDrop?: (event: React.DragEvent) => void;
   };
   onShiftClick: (shiftId: string) => void;
-  getVendorLabel: (vendorType: string) => string;
-  getVendorColor: (vendorType: string) => string;
   minimizedView?: boolean;
   requestedOff?: boolean;
 }) {
@@ -242,24 +235,9 @@ function GridCellComponent({
             employeeId={employeeId ?? null}
             draggable={enableShiftDrag}
             variant={employeeId ? "assigned" : "unassigned"}
-            vendorEvents={vendorEventsByShift.get(schedule.id) ?? []}
-            getVendorLabel={getVendorLabel}
-            getVendorColor={getVendorColor}
             onShiftClick={onShiftClick}
             minimized={minimizedView}
           />
-        ))}
-        {unlinkedVendorEvents.map((event) => (
-          <div
-            key={event.id}
-            className="relative z-10 rounded-full px-2 py-1 text-[10px] font-medium"
-            style={{
-              backgroundColor: `${getVendorColor(event.service_type || event.vendor_name || "")}20`,
-              color: getVendorColor(event.service_type || event.vendor_name || ""),
-            }}
-          >
-            Vendor · {getVendorLabel(event.service_type || event.vendor_name)}
-          </div>
         ))}
       </div>
     </div>
@@ -272,13 +250,10 @@ function EmployeeRowComponent({
   shiftsByEmployeeDay,
   cellAvailability,
   conflictByShiftId,
-  vendorEventsByShift,
   showAvailabilityLayer,
   enableShiftDrag,
   html5DropForCell,
   onShiftClick,
-  getVendorLabel,
-  getVendorColor,
   minimizedView = false,
   timeOffRequests = [],
 }: {
@@ -287,7 +262,6 @@ function EmployeeRowComponent({
   shiftsByEmployeeDay: ShiftsByEmployeeDay;
   cellAvailability: Map<string, Map<string, GridCellAvailability>>;
   conflictByShiftId: Map<string, boolean>;
-  vendorEventsByShift: Map<string, VendorEventWithMetadata[]>;
   showAvailabilityLayer: boolean;
   enableShiftDrag: boolean;
   html5DropForCell: (
@@ -298,8 +272,6 @@ function EmployeeRowComponent({
     onDrop?: (event: React.DragEvent) => void;
   };
   onShiftClick: (shiftId: string) => void;
-  getVendorLabel: (vendorType: string) => string;
-  getVendorColor: (vendorType: string) => string;
   minimizedView?: boolean;
   timeOffRequests?: TimeOffSpan[];
 }) {
@@ -338,13 +310,10 @@ function EmployeeRowComponent({
             cell={cell}
             daySchedules={daySchedules}
             conflictByShiftId={conflictByShiftId}
-            vendorEventsByShift={vendorEventsByShift}
             showAvailabilityLayer={showAvailabilityLayer}
             enableShiftDrag={enableShiftDrag}
             html5Drop={html5DropForCell(day, employee.id)}
             onShiftClick={onShiftClick}
-            getVendorLabel={getVendorLabel}
-            getVendorColor={getVendorColor}
             minimizedView={minimizedView}
             requestedOff={isRequestedOffDay(timeOffRequests, employee.id, day)}
           />
@@ -374,8 +343,6 @@ export function WeekGrid({
   onShiftClick,
   onDrop,
   onDragOver,
-  getVendorLabel,
-  getVendorColor,
   minimizedView = false,
   timeOffRequests = [],
 }: WeekGridProps) {
@@ -406,6 +373,22 @@ export function WeekGrid({
       unassignedShifts.map(({ day, shifts }) => [day.toISOString(), shifts]),
     );
   }, [unassignedShifts]);
+
+  const eventsByDay = useMemo(() => {
+    const seen = new Set<string>();
+    const events: VendorEventWithMetadata[] = [];
+    for (const list of [
+      ...vendorEventsByShift.values(),
+      ...looseVendorEventsByDay.values(),
+    ]) {
+      for (const event of list) {
+        if (!event.id || seen.has(event.id)) continue;
+        seen.add(event.id);
+        events.push(event);
+      }
+    }
+    return groupEventsByDay(events, vendorEventStart);
+  }, [looseVendorEventsByDay, vendorEventsByShift]);
 
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
     () => new Set(),
@@ -456,13 +439,10 @@ export function WeekGrid({
         shiftsByEmployeeDay={shiftsByEmployeeDay}
         cellAvailability={cellAvailability}
         conflictByShiftId={conflictByShiftId}
-        vendorEventsByShift={vendorEventsByShift}
         showAvailabilityLayer={showAvailabilityLayer}
         enableShiftDrag={enableShiftDrag}
         html5DropForCell={html5DropForCell}
         onShiftClick={onShiftClick}
-        getVendorLabel={getVendorLabel}
-        getVendorColor={getVendorColor}
         minimizedView={minimizedView}
         timeOffRequests={timeOffRequests}
       />
@@ -471,15 +451,12 @@ export function WeekGrid({
       cellAvailability,
       conflictByShiftId,
       enableShiftDrag,
-      getVendorColor,
-      getVendorLabel,
       html5DropForCell,
       onShiftClick,
       shiftsByEmployeeDay,
       showAvailabilityLayer,
       minimizedView,
       timeOffRequests,
-      vendorEventsByShift,
       weekDays,
     ],
   );
@@ -503,6 +480,10 @@ export function WeekGrid({
               <div className="text-xs text-muted-foreground">
                 {format(day, "MMM d")}
               </div>
+              <DayEventNotice
+                count={eventsByDay.get(dayIso(day))?.length ?? 0}
+                className="mt-1"
+              />
             </div>
           ))}
         </div>
@@ -513,7 +494,6 @@ export function WeekGrid({
           </div>
           {weekDays.map((day) => {
             const shifts = unassignedLookup.get(day.toISOString()) ?? [];
-            const unlinked = looseVendorEventsByDay.get(dayIso(day)) ?? [];
             return (
               <GridCell
                 key={`unassigned-${dayIso(day)}`}
@@ -521,14 +501,10 @@ export function WeekGrid({
                 cell={undefined}
                 daySchedules={shifts}
                 conflictByShiftId={conflictByShiftId}
-                vendorEventsByShift={vendorEventsByShift}
-                unlinkedVendorEvents={unlinked}
                 showAvailabilityLayer={false}
                 enableShiftDrag={enableShiftDrag}
                 html5Drop={html5DropForCell(day)}
                 onShiftClick={onShiftClick}
-                getVendorLabel={getVendorLabel}
-                getVendorColor={getVendorColor}
                 minimizedView={minimizedView}
               />
             );

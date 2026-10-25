@@ -95,7 +95,6 @@ export function ShiftTasksPanel({
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<ShiftTaskPriority>("medium");
   const [minutes, setMinutes] = useState("30");
-  const [formId, setFormId] = useState("none");
   const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
@@ -151,26 +150,26 @@ export function ShiftTasksPanel({
     endsAt: task.endsAt ?? null,
   }));
 
-  const addTask = async () => {
-    const chosenForm = (formsQuery.data ?? []).find((form) => form.id === formId);
-    const nextTitle = title.trim() || chosenForm?.title || "";
-    if (!nextTitle) {
+  const saveTask = async (draft: {
+    title: string;
+    description: string;
+    priority: ShiftTaskPriority;
+    estimatedMinutes: number;
+    formId: string | null;
+    assigneeIds: string[];
+    startsAt: string | null;
+    endsAt: string | null;
+  }) => {
+    if (!draft.title.trim()) {
       toast({ title: t("tasks.aTitleIsRequired"), variant: "destructive" });
-      return;
+      return false;
     }
-    const draft = {
-      title: nextTitle,
-      description,
-      priority,
-      estimatedMinutes: Number(minutes) || 0,
-      formId: formId === "none" ? null : formId,
-      assigneeIds,
-      startsAt: fromDatetimeLocalValue(startsAt),
-      endsAt: fromDatetimeLocalValue(endsAt),
-    };
-    if ((startsAt || endsAt) && (!draft.startsAt || !draft.endsAt || draft.endsAt < draft.startsAt)) {
+    if (
+      (draft.startsAt || draft.endsAt) &&
+      (!draft.startsAt || !draft.endsAt || draft.endsAt < draft.startsAt)
+    ) {
       toast({ title: t("tasks.endMustBeAfterStart"), variant: "destructive" });
-      return;
+      return false;
     }
     if (!scheduleId) {
       onDraftsChange?.([
@@ -187,12 +186,9 @@ export function ShiftTasksPanel({
           endsAt: draft.endsAt,
         },
       ]);
-      setTitle("");
-      setDescription("");
-      setFormId("none");
-      return;
+      return true;
     }
-    if (!companyId || !user?.id) return;
+    if (!companyId || !user?.id) return false;
     setSaving(true);
     try {
       const row = shiftTaskRow({
@@ -207,19 +203,54 @@ export function ShiftTasksPanel({
       await queryClient.invalidateQueries({
         queryKey: ["shift-task-attachments", companyId, scheduleId],
       });
-      setTitle("");
-      setDescription("");
-      setFormId("none");
-      toast({ title: t("tasks.shiftTaskAdded") });
+      toast({
+        title: draft.formId ? t("tasks.formLinkedToShift") : t("tasks.shiftTaskAdded"),
+      });
+      return true;
     } catch (error) {
       toast({
         title: t("tasks.shiftTaskNotSaved"),
         description: error instanceof Error ? error.message : undefined,
         variant: "destructive",
       });
+      return false;
     } finally {
       setSaving(false);
     }
+  };
+
+  const addSimpleTask = async () => {
+    const saved = await saveTask({
+      title: title.trim(),
+      description,
+      priority,
+      estimatedMinutes: Number(minutes) || 0,
+      formId: null,
+      assigneeIds,
+      startsAt: fromDatetimeLocalValue(startsAt),
+      endsAt: fromDatetimeLocalValue(endsAt),
+    });
+    if (!saved) return;
+    setTitle("");
+    setDescription("");
+    setAssigneeIds([]);
+    setStartsAt("");
+    setEndsAt("");
+    setPriority("medium");
+    setMinutes("30");
+  };
+
+  const linkForm = async (form: { id: string; title: string | null }) => {
+    await saveTask({
+      title: form.title?.trim() || t("forms.publishedForm"),
+      description: "",
+      priority: "medium",
+      estimatedMinutes: 0,
+      formId: form.id,
+      assigneeIds: [],
+      startsAt: null,
+      endsAt: null,
+    });
   };
 
   const removeTask = async (taskId: string) => {
@@ -268,30 +299,6 @@ export function ShiftTasksPanel({
         </ul>
       )}
       <div className="grid gap-2">
-        <Label>{t("forms.publishedForm")}</Label>
-        <Select
-          value={formId}
-          onValueChange={(value) => {
-            setFormId(value);
-            const form = (formsQuery.data ?? []).find((item) => item.id === value);
-            if (form && !title.trim()) setTitle(form.title ?? "");
-          }}
-        >
-          <SelectTrigger className="min-h-11">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">{t("tasks.customShiftTask")}</SelectItem>
-            {attachableShiftForms(formsQuery.data ?? []).map((form) => (
-              <SelectItem key={form.id} value={form.id}>
-                {form.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {formsQuery.isSuccess && attachableShiftForms(formsQuery.data ?? []).length === 0 ? (
-          <p className="text-xs text-muted-foreground">{t("tasks.publishAFormToAttach")}</p>
-        ) : null}
         <Label htmlFor="shift-task-name">{t("tasks.taskName")}</Label>
         <Input
           id="shift-task-name"
@@ -348,9 +355,46 @@ export function ShiftTasksPanel({
           </div>
         </div>
         <PeoplePicker people={people} selectedIds={assigneeIds} onChange={setAssigneeIds} />
-        <Button type="button" className="min-h-11" disabled={saving} onClick={() => void addTask()}>
+        <Button type="button" className="min-h-11" disabled={saving} onClick={() => void addSimpleTask()}>
           {t("tasks.addShiftTask")}
         </Button>
+      </div>
+      <div className="space-y-2 border-t pt-3" data-testid="shift-forms-panel">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold">{t("tasks.shiftForms")}</h3>
+          <p className="text-sm text-muted-foreground">{t("tasks.shiftFormsHelp")}</p>
+        </div>
+        {formsQuery.isSuccess && attachableShiftForms(formsQuery.data ?? []).length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("tasks.publishAFormToAttach")}</p>
+        ) : (
+          <ul className="space-y-2">
+            {attachableShiftForms(formsQuery.data ?? []).map((form) => {
+              const linked = tasks.some((task) => task.formId === form.id);
+              return (
+                <li
+                  key={form.id}
+                  className="flex items-center justify-between gap-2 rounded-xl border border-border/70 px-3 py-2 text-sm"
+                >
+                  <span className="min-w-0 truncate font-medium">{form.title}</span>
+                  {linked ? (
+                    <span className="text-xs text-muted-foreground">{t("tasks.linkedToThisShift")}</span>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="min-h-11"
+                      disabled={saving}
+                      onClick={() => void linkForm(form)}
+                    >
+                      {t("tasks.linkFormToShift")}
+                    </Button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </section>
   );

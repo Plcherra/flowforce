@@ -27,7 +27,6 @@ import {
   CheckCircle,
   MessageSquare,
   Send,
-  Target,
   Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -133,7 +132,6 @@ export function TaskDetailsDialog({
   const { toast } = useToast();
   const {
     assignees,
-    goals,
     loading: optionsLoading,
   } = useTaskFormOptions(open);
 
@@ -145,9 +143,7 @@ export function TaskDetailsDialog({
     null,
   );
   const [assignmentValue, setAssignmentValue] = useState("none");
-  const [goalValue, setGoalValue] = useState("none");
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
-  const [updatingGoal, setUpdatingGoal] = useState(false);
   const [executionForm, setExecutionForm] = useState({
     priority: "medium",
     starts_at: "",
@@ -175,12 +171,10 @@ export function TaskDetailsDialog({
     const task = currentTask;
     if (!task) {
       setAssignmentValue("none");
-      setGoalValue("none");
       return;
     }
 
     setAssignmentValue(task.assigned_to ?? "none");
-    setGoalValue(task.goal_id ?? "none");
     const schedule = readTaskSchedule(task.links);
     setExecutionForm({
       priority: task.priority ?? "medium",
@@ -353,73 +347,6 @@ export function TaskDetailsDialog({
       });
     } finally {
       setUpdatingAssignment(false);
-    }
-  };
-
-  const handleGoalChange = async (value: string) => {
-    if (!currentTask) return;
-
-    const nextGoalId = value === "none" ? null : value;
-    const previousGoalId = currentTask.goal_id ?? null;
-
-    if (nextGoalId === previousGoalId) {
-      setGoalValue(value);
-      return;
-    }
-
-    setGoalValue(value);
-    setUpdatingGoal(true);
-
-    try {
-      const { data, error } = await updateTask(currentTask.id, {
-        goal_id: nextGoalId,
-      });
-
-      if (error || !data) {
-        throw error ?? new Error("Unable to update goal");
-      }
-
-      const selectedGoal = goals.find(
-        (goalOption) => goalOption.id === nextGoalId,
-      );
-
-      const updatedTask: TaskWithRelations = {
-        ...currentTask,
-        ...data,
-        goal:
-          nextGoalId && selectedGoal
-            ? {
-                id: selectedGoal.id,
-                title: selectedGoal.title,
-                status: selectedGoal.status,
-                progress: selectedGoal.progress,
-                target_completion_date: selectedGoal.target_completion_date,
-              }
-            : null,
-      };
-
-      setCurrentTask(updatedTask);
-      onTaskUpdate?.(updatedTask);
-
-      toast({
-        title: "Goal link updated",
-        description: selectedGoal
-          ? `Task linked to goal “${selectedGoal.title}”.`
-          : "Task is no longer linked to a goal.",
-      });
-    } catch (error) {
-      logger.error("Error updating task goal link:", {
-        error,
-        tags: ["error"],
-      });
-      setGoalValue(previousGoalId ?? "none");
-      toast({
-        title: "Goal update failed",
-        description: "Could not update the goal link. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdatingGoal(false);
     }
   };
 
@@ -821,48 +748,6 @@ export function TaskDetailsDialog({
                 {updatingAssignment && (
                   <p className="text-xs text-muted-foreground">
                     {t("tasks.updatingAssignment")}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  {t("tasks.linkedGoal")}
-                </Label>
-                <Select
-                  value={goalValue}
-                  onValueChange={handleGoalChange}
-                  disabled={optionsLoading || updatingGoal}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("tasks.selectGoal")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t("tasks.noGoal")}</SelectItem>
-                    {goals.map((goalOption) => (
-                      <SelectItem key={goalOption.id} value={goalOption.id}>
-                        {goalOption.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {updatingGoal && (
-                  <p className="text-xs text-muted-foreground">
-                    {t("tasks.updatingGoalLink")}
-                  </p>
-                )}
-                {goalValue !== "none" && currentTask.goal && (
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Target className="h-3.5 w-3.5" />
-                      {currentTask.goal.title}
-                    </span>
-                    <span>{currentTask.goal.progress}%</span>
-                  </div>
-                )}
-                {goalValue === "none" && (
-                  <p className="text-xs text-muted-foreground">
-                    {t("tasks.notLinkedToAGoal")}
                   </p>
                 )}
               </div>

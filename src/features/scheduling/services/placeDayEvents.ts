@@ -7,6 +7,23 @@ export interface DatedShift {
   start: Date;
 }
 
+/** Events belong to the calendar day, whether or not a shift was chosen. */
+export function groupEventsByDay<T>(
+  events: T[],
+  eventStart: (event: T) => Date | null,
+): Map<string, T[]> {
+  const byDay = new Map<string, T[]>();
+  for (const event of events) {
+    const start = eventStart(event);
+    if (!start || Number.isNaN(start.getTime())) continue;
+    const key = dayIso(start);
+    const list = byDay.get(key) ?? [];
+    list.push(event);
+    byDay.set(key, list);
+  }
+  return byDay;
+}
+
 export function chosenShiftIds(event: {
   related_shift_ids?: string[] | null;
   shift_id?: string | null;

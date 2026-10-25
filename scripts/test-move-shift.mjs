@@ -15,7 +15,11 @@ const { runMoveShiftTests } = importTs(
 const { runPlaceDayEventsTests } = importTs(
   "../src/features/scheduling/services/placeDayEvents.test.ts",
 );
+const { runShiftChipPaintTests } = importTs(
+  "../src/features/scheduling/utils/shiftChipPaint.test.ts",
+);
 
 await runMoveShiftTests();
 runPlaceDayEventsTests();
+runShiftChipPaintTests();
 console.log("moveShift tests passed");

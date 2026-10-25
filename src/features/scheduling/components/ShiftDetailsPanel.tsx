@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -26,25 +25,16 @@ import {
   Eye,
   Trash2,
   Calendar as CalendarIcon,
-  Plus,
-  Minus,
   ShieldAlert,
 } from "lucide-react";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { format } from "date-fns";
-import { useEvents } from "@/hooks/useEvents";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { RequestShiftSwapButton } from "@/features/scheduling/components/RequestShiftSwapButton";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
-import { eventShowsOnShift } from "@/features/scheduling/services/placeDayEvents";
-import { RecognitionText } from "@/features/recognition/components/RecognitionText";
-import { useVendorDescriptionTranslations } from "@/features/i18n/hooks/useRemainingTextTranslations";
-import {
-  parseCalendarInstant,
-  vendorEventStart,
-} from "@/features/scheduling/utils/calendarDay";
+import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/public-types";
 import {
@@ -59,19 +49,6 @@ import type {
 import { logger } from "@/utils/logger";
 import { buildShiftConflictWarnings } from "@/features/scheduling/utils/scheduleReadiness";
 
-const vendorLabelLookup: Record<string, string> = {
-  ecolab: "Ecolab Service",
-  electrician: "Electrician",
-  cleaning: "Cleaning Crew",
-  inspection: "Health Inspection",
-  general: "Vendor Visit",
-  vendor_visit: "Vendor visit",
-};
-
-const getVendorLabel = (vendorType: string | null | undefined) => {
-  if (!vendorType) return "Vendor";
-  return vendorLabelLookup[vendorType] ?? vendorType.replace(/_/g, " ");
-};
 
 const parseHourlyRate = (value: string) => {
   if (value.trim().length === 0) return null;
@@ -81,39 +58,6 @@ const parseHourlyRate = (value: string) => {
 
 const shiftTaskPriorities = ["low", "medium", "high"] as const;
 
-const visitTypeStorageKey = (companyId: string) =>
-  `ff-visit-types:${companyId}`;
-const hiddenVisitTypeStorageKey = (companyId: string) =>
-  `ff-visit-types-hidden:${companyId}`;
-
-const readStringList = (key: string) => {
-  if (typeof window === "undefined") return [] as string[];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(key) ?? "[]");
-    return Array.isArray(parsed)
-      ? parsed.filter((item): item is string => typeof item === "string")
-      : [];
-  } catch {
-    return [];
-  }
-};
-
-const writeStringList = (key: string, values: string[]) => {
-  window.localStorage.setItem(key, JSON.stringify(values));
-};
-
-const mergeVisitTypes = (current: string[], extra: string[], hidden: Set<string>) => {
-  const seen = new Set<string>();
-  const next: string[] = [];
-  for (const value of [...current, ...extra]) {
-    const label = value.trim();
-    const key = label.toLowerCase();
-    if (!label || hidden.has(key) || seen.has(key)) continue;
-    seen.add(key);
-    next.push(label);
-  }
-  return next.sort((a, b) => a.localeCompare(b));
-};
 
 type StoredShiftTask = {
   title?: string;
@@ -166,17 +110,8 @@ export function ShiftDetailsPanel({
     timeOff,
     unavailability,
     staffAvailability,
-    vendorEvents,
     mutations: { updateSchedule, deleteSchedule },
   } = useScheduling();
-  const {
-    getEventsForShift,
-    toggleChecklistItem,
-    createVendorVisit,
-    linkVisitToShifts,
-    updateEvent,
-    deleteEvent,
-  } = useEvents();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -184,20 +119,9 @@ export function ShiftDetailsPanel({
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const { templates, createTemplate } = useShiftTemplates();
   const [loading, setLoading] = useState(false);
-  const [addingVisit, setAddingVisit] = useState(false);
-  const [visitSetupOpen, setVisitSetupOpen] = useState(false);
-  const [visitForm, setVisitForm] = useState({
-    vendorType: "",
-    vendorName: "",
-    start: "",
-    end: "",
-    location: "",
-    notes: "",
-  });
   const [savedTasks, setSavedTasks] = useState<ShiftTask[]>([]);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [taskDraftReset, setTaskDraftReset] = useState(0);
-  const [savedVisitTypes, setSavedVisitTypes] = useState<string[]>([]);
   const taskDraftRef = useRef<Pick<
     ShiftTask,
     "title" | "description" | "priority" | "estimated_minutes"
@@ -217,9 +141,6 @@ export function ShiftDetailsPanel({
   const [templateSaving, setTemplateSaving] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [activeTab, setActiveTab] = useState("details");
-  const [eventEdits, setEventEdits] = useState<
-    Record<string, { title: string; location?: string | null }>
-  >({});
 
   const shift = shifts.find((s) => s.id === shiftId);
   const currentUserIsAssigned = Boolean(
@@ -262,42 +183,6 @@ export function ShiftDetailsPanel({
     }
   }, [shift]);
 
-  useEffect(() => {
-    if (!companyId) {
-      setSavedVisitTypes([]);
-      return;
-    }
-    const hidden = new Set(
-      readStringList(hiddenVisitTypeStorageKey(companyId)).map((item) =>
-        item.toLowerCase(),
-      ),
-    );
-    setSavedVisitTypes(
-      mergeVisitTypes(readStringList(visitTypeStorageKey(companyId)), [], hidden),
-    );
-    let cancelled = false;
-    void supabase
-      .from("vendor_visits")
-      .select("service_type")
-      .eq("company_id", companyId)
-      .then(({ data }) => {
-        if (cancelled || !companyId) return;
-        const latestHidden = new Set(
-          readStringList(hiddenVisitTypeStorageKey(companyId)).map((item) =>
-            item.toLowerCase(),
-          ),
-        );
-        const used = (data ?? [])
-          .map((row) => row.service_type)
-          .filter((value): value is string => Boolean(value));
-        setSavedVisitTypes((current) =>
-          mergeVisitTypes(current, used, latestHidden),
-        );
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [companyId]);
 
   const handleSave = async () => {
     if (!shift) return;
@@ -335,21 +220,6 @@ export function ShiftDetailsPanel({
         });
       }
 
-      // Persist edits for linked events (title/location) using same Save action
-      const linked = getEventsForShift(shift.id);
-      for (const ev of linked) {
-        const edit = eventEdits[ev.id];
-        if (!edit) continue;
-        const updates: Partial<{ title: string; location?: string | null }> =
-          {};
-        if (typeof edit.title === "string" && edit.title !== ev.title)
-          updates.title = edit.title;
-        if (typeof edit.location === "string" && edit.location !== ev.location)
-          updates.location = edit.location;
-        if (Object.keys(updates).length > 0) {
-          await updateEvent(ev.id, updates);
-        }
-      }
     } catch (error) {
       logger.error("Error saving shift:", { error, tags: ["error"] });
     } finally {
@@ -395,94 +265,6 @@ export function ShiftDetailsPanel({
     ];
   }, [savedTasks, shiftTasksQuery.data]);
 
-  const saveCurrentVisitType = () => {
-    const label = visitForm.vendorType.trim();
-    if (!label || !companyId) return;
-    const hidden = readStringList(hiddenVisitTypeStorageKey(companyId)).filter(
-      (item) => item.toLowerCase() !== label.toLowerCase(),
-    );
-    writeStringList(hiddenVisitTypeStorageKey(companyId), hidden);
-    const next = mergeVisitTypes(savedVisitTypes, [label], new Set());
-    writeStringList(visitTypeStorageKey(companyId), next);
-    setSavedVisitTypes(next);
-  };
-
-  const deleteVisitType = (label: string) => {
-    const name = label.trim();
-    if (!name || !companyId) return;
-    const hidden = readStringList(hiddenVisitTypeStorageKey(companyId));
-    if (!hidden.some((item) => item.toLowerCase() === name.toLowerCase())) {
-      writeStringList(hiddenVisitTypeStorageKey(companyId), [...hidden, name]);
-    }
-    const next = savedVisitTypes.filter(
-      (item) => item.toLowerCase() !== name.toLowerCase(),
-    );
-    writeStringList(visitTypeStorageKey(companyId), next);
-    setSavedVisitTypes(next);
-    if (visitForm.vendorType.trim().toLowerCase() === name.toLowerCase()) {
-      setVisitForm((current) => ({ ...current, vendorType: "" }));
-    }
-  };
-
-  const openVisitSetup = () => {
-    if (!shift) return;
-    setVisitForm({
-      vendorType: "",
-      vendorName: "",
-      start: format(new Date(shift.start_time), "yyyy-MM-dd'T'HH:mm"),
-      end: format(new Date(shift.end_time), "yyyy-MM-dd'T'HH:mm"),
-      location: shift.location || "",
-      notes: "",
-    });
-    setVisitSetupOpen(true);
-  };
-
-  const handleAddVendorVisit = async () => {
-    if (!shift || addingVisit) return;
-    const start = new Date(visitForm.start);
-    const end = new Date(visitForm.end);
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
-      toast({
-        title: "Check the visit times",
-        description: "End time has to be after the start time.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const typedVisit = visitForm.vendorType.trim();
-    const vendorName = visitForm.vendorName.trim() || typedVisit || "Vendor visit";
-    const serviceType = typedVisit || vendorName;
-    setAddingVisit(true);
-    try {
-      const ev = await createVendorVisit({
-        title: vendorName,
-        description: visitForm.notes.trim() || undefined,
-        start: start.toISOString(),
-        end: end.toISOString(),
-        location: visitForm.location.trim() || shift.location || undefined,
-        vendor: { name: vendorName, service_type: serviceType },
-        related_shift_ids: [shift.id],
-      });
-      try {
-        await linkVisitToShifts(ev.id, [shift.id]);
-      } catch (linkError) {
-        logger.warn("Vendor visit saved without a shift link refresh", {
-          error: linkError,
-          tags: ["warning"],
-        });
-      }
-      if (typedVisit) saveCurrentVisitType();
-      setVisitSetupOpen(false);
-      toast({
-        title: "Vendor visit linked",
-        description: `${vendorName} is saved on this shift.`,
-      });
-    } catch (error) {
-      logger.error("Error linking vendor visit", { error, tags: ["error"] });
-    } finally {
-      setAddingVisit(false);
-    }
-  };
 
   const handleAddTask = async (task: ShiftTask) => {
     if (!companyId || !user?.id || !shift) {
@@ -684,31 +466,6 @@ export function ShiftDetailsPanel({
     }
   };
 
-  const linkedEvents = useMemo(
-    () => (shift ? getEventsForShift(shift.id) : []),
-    [getEventsForShift, shift],
-  );
-  const linkedVendorVisits = useMemo(
-    () =>
-      shift
-        ? vendorEvents.filter((event) =>
-            eventShowsOnShift(event, {
-              id: shift.id,
-              start_time: shift.start_time,
-            }),
-          )
-        : [],
-    [shift, vendorEvents],
-  );
-  const vendorSources = useMemo(
-    () =>
-      linkedVendorVisits.map((event) => ({
-        id: event.id ?? undefined,
-        description: event.description,
-      })),
-    [linkedVendorVisits],
-  );
-  const vendorTranslations = useVendorDescriptionTranslations(vendorSources);
   const conflictWarnings = useMemo(
     () =>
       shift
@@ -723,22 +480,6 @@ export function ShiftDetailsPanel({
     [shift, shifts, timeOff, unavailability, staffAvailability],
   );
 
-  useEffect(() => {
-    if (!shift) {
-      setEventEdits({});
-      return;
-    }
-
-    const buffer: Record<string, { title: string; location?: string | null }> =
-      {};
-    linkedEvents.forEach((event) => {
-      buffer[event.id] = {
-        title: event.title || "",
-        location: event.location ?? null,
-      };
-    });
-    setEventEdits(buffer);
-  }, [linkedEvents, shift]);
 
   if (!shift) {
     return (
@@ -797,48 +538,9 @@ export function ShiftDetailsPanel({
             ) : null}
             {/* Basic Information */}
             <div className="space-y-4">
-              {linkedVendorVisits.length > 0 && (
-                <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold">{t("schedule.vendorVisits")}</span>
-                    <Badge variant="outline">{linkedVendorVisits.length}</Badge>
-                  </div>
-                  <div className="space-y-2">
-                    {linkedVendorVisits.map((event) => {
-                      const start = vendorEventStart(event);
-                      const end = parseCalendarInstant(event.end_time);
-                      return (
-                      <div key={event.id} className="space-y-1 text-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-muted-foreground">
-                            {getVendorLabel(event.service_type || event.vendor_name)}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {start ? format(start, "MMM d · HH:mm") : "—"}
-                            {end ? `–${format(end, "HH:mm")}` : ""}
-                          </span>
-                        </div>
-                        {event.description && event.id ? (
-                          <RecognitionText
-                            recordId={event.id}
-                            text={event.description}
-                            translation={
-                              vendorTranslations.get(event.id)?.values.description
-                                ? {
-                                    sourceLocale: vendorTranslations.get(event.id)!.sourceLocale,
-                                    text: vendorTranslations.get(event.id)!.values.description,
-                                  }
-                                : null
-                            }
-                            className="text-xs text-muted-foreground"
-                          />
-                        ) : null}
-                      </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
+                <DayEventNotice className="text-xs" />
+              </div>
               {conflictWarnings.length > 0 && (
                 <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/60 p-4">
                   <div className="flex items-center justify-between">
@@ -1010,305 +712,6 @@ export function ShiftDetailsPanel({
               )}
             </div>
 
-            {/* Linked Events */}
-            <div className="space-y-2 border rounded-md p-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">{t("schedule.linkedEvents")}</h4>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={openVisitSetup}
-                  disabled={addingVisit}
-                  title={t("schedule.addVendorVisit")}
-                  aria-label={t("schedule.addVendorVisit")}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {visitSetupOpen && (
-                <div className="space-y-3 rounded-md border bg-muted/20 p-3">
-                  <p className="text-sm font-medium">{t("schedule.scheduleVendorVisit2")}</p>
-                  <div className="space-y-2">
-                    <Label htmlFor="visit-type">{t("schedule.visitType")}</Label>
-                    <div className="relative">
-                      <Input
-                        id="visit-type"
-                        value={visitForm.vendorType}
-                        placeholder={t("schedule.typeAVisitType")}
-                        className="pr-16"
-                        onChange={(event) =>
-                          setVisitForm((current) => ({
-                            ...current,
-                            vendorType: event.target.value,
-                          }))
-                        }
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            event.preventDefault();
-                            saveCurrentVisitType();
-                          }
-                        }}
-                      />
-                      <div className="absolute inset-y-0 right-1 flex items-center">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          aria-label={t("schedule.saveVisitType")}
-                          title={t("schedule.saveVisitType")}
-                          disabled={!visitForm.vendorType.trim()}
-                          onClick={saveCurrentVisitType}
-                        >
-                          <Save className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          aria-label={t("schedule.deleteVisitType")}
-                          title={t("schedule.deleteVisitType")}
-                          disabled={
-                            !savedVisitTypes.some(
-                              (type) =>
-                                type.toLowerCase() ===
-                                visitForm.vendorType.trim().toLowerCase(),
-                            )
-                          }
-                          onClick={() => deleteVisitType(visitForm.vendorType)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                    {savedVisitTypes.length > 0 && (
-                      <div className="space-y-1">
-                        {savedVisitTypes.map((type) => (
-                          <div
-                            key={type.toLowerCase()}
-                            className="flex items-center gap-1 rounded-md border bg-background px-2"
-                          >
-                            <button
-                              type="button"
-                              className="min-w-0 flex-1 truncate py-1.5 text-left text-sm"
-                              onClick={() =>
-                                setVisitForm((current) => ({
-                                  ...current,
-                                  vendorType: type,
-                                }))
-                              }
-                            >
-                              {type}
-                            </button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 shrink-0"
-                              aria-label={`Delete ${type}`}
-                              title={`Delete ${type}`}
-                              onClick={() => deleteVisitType(type)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="visit-name">{t("schedule.vendorName")}</Label>
-                    <Input
-                      id="visit-name"
-                      value={visitForm.vendorName}
-                      placeholder={getVendorLabel(visitForm.vendorType)}
-                      onChange={(event) =>
-                        setVisitForm((current) => ({
-                          ...current,
-                          vendorName: event.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="visit-start">{t("schedule.start")}</Label>
-                      <Input
-                        id="visit-start"
-                        type="datetime-local"
-                        value={visitForm.start}
-                        onChange={(event) =>
-                          setVisitForm((current) => ({
-                            ...current,
-                            start: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="visit-end">{t("schedule.end")}</Label>
-                      <Input
-                        id="visit-end"
-                        type="datetime-local"
-                        value={visitForm.end}
-                        onChange={(event) =>
-                          setVisitForm((current) => ({
-                            ...current,
-                            end: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="visit-location">{t("schedule.location")}</Label>
-                    <Input
-                      id="visit-location"
-                      value={visitForm.location}
-                      placeholder={t("schedule.whereTheyShouldGo")}
-                      onChange={(event) =>
-                        setVisitForm((current) => ({
-                          ...current,
-                          location: event.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="visit-notes">{t("schedule.notes")}</Label>
-                    <Textarea
-                      id="visit-notes"
-                      rows={2}
-                      value={visitForm.notes}
-                      placeholder={t("schedule.whatShouldTheShiftDoForThisVisit")}
-                      onChange={(event) =>
-                        setVisitForm((current) => ({
-                          ...current,
-                          notes: event.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      onClick={handleAddVendorVisit}
-                      disabled={addingVisit}
-                    >
-                      {addingVisit ? "Saving visit..." : "Save visit"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setVisitSetupOpen(false)}
-                      disabled={addingVisit}
-                    >
-                      {t("schedule.cancel")}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {linkedEvents.length === 0 && !visitSetupOpen && (
-                <p className="text-xs text-muted-foreground">
-                  {t("schedule.noEventsLinkedToThisShift")}
-                </p>
-              )}
-
-              {linkedEvents.map((ev) => (
-                <div key={ev.id} className="rounded-md border p-2 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <Input
-                        value={eventEdits[ev.id]?.title ?? ev.title}
-                        onChange={(e) =>
-                          setEventEdits((s) => ({
-                            ...s,
-                            [ev.id]: {
-                              ...(s[ev.id] || { title: "" }),
-                              title: e.target.value,
-                            },
-                          }))
-                        }
-                        className="h-8 text-sm"
-                        placeholder={t("schedule.eventTitle")}
-                      />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {new Date(ev.start).toLocaleString()}{" "}
-                        {ev.end
-                          ? "– " + new Date(ev.end).toLocaleTimeString()
-                          : ""}
-                      </div>
-                      <div className="mt-2">
-                        <Input
-                          value={
-                            eventEdits[ev.id]?.location ?? ev.location ?? ""
-                          }
-                          onChange={(e) =>
-                            setEventEdits((s) => ({
-                              ...s,
-                              [ev.id]: {
-                                ...(s[ev.id] || { title: ev.title }),
-                                location: e.target.value,
-                              },
-                            }))
-                          }
-                          className="h-8 text-sm"
-                          placeholder={t("schedule.location")}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">
-                        {getVendorLabel(ev.vendor?.service_type || ev.type)}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={t("schedule.deleteEvent")}
-                        aria-label={t("schedule.deleteEvent")}
-                        onClick={async () => {
-                          if (confirm("Delete this linked event?")) {
-                            await deleteEvent(ev.id);
-                          }
-                        }}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {ev.checklist && ev.checklist.length > 0 && (
-                    <div className="space-y-1">
-                      {ev.checklist.map((item) => (
-                        <label
-                          key={item.id}
-                          className="flex items-center gap-2 text-xs"
-                        >
-                          <Checkbox
-                            checked={item.done}
-                            onCheckedChange={(v) =>
-                              toggleChecklistItem(ev.id, item.id, Boolean(v))
-                            }
-                          />
-                          <span>{item.text}</span>
-                          {item.who && (
-                            <Badge
-                              variant="secondary"
-                              className="ml-2 capitalize"
-                            >
-                              {item.who}
-                            </Badge>
-                          )}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-4">

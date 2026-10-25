@@ -1,30 +1,21 @@
 import { ScheduleTemplatesPanel } from "./ScheduleTemplatesPanel";
-import type { ShiftTemplate, VendorPaletteItem } from "./types";
+import type { ShiftTemplate } from "./types";
 
 interface AssignmentPanelProps {
   showTemplates: boolean;
   templates: ShiftTemplate[];
-  vendors: VendorPaletteItem[];
   onTemplateDragStart: (
     event: React.DragEvent,
     template: ShiftTemplate,
   ) => void;
-  onVendorDragStart: (
-    event: React.DragEvent,
-    vendor: VendorPaletteItem,
-  ) => void;
   onTemplateClick?: (template: ShiftTemplate) => void;
-  onQuickVendorVisit: () => Promise<void>;
 }
 
 export function AssignmentPanel({
   showTemplates,
   templates,
-  vendors,
   onTemplateDragStart,
-  onVendorDragStart,
   onTemplateClick,
-  onQuickVendorVisit,
 }: AssignmentPanelProps) {
   if (!showTemplates) {
     return null;
@@ -34,11 +25,8 @@ export function AssignmentPanel({
     <div className="flex flex-col gap-6 lg:w-80 flex-shrink-0">
       <ScheduleTemplatesPanel
         templates={templates}
-        vendors={vendors}
         onTemplateDragStart={onTemplateDragStart}
-        onVendorDragStart={onVendorDragStart}
         onTemplateClick={onTemplateClick}
-        onQuickVendorVisit={onQuickVendorVisit}
       />
     </div>
   );
