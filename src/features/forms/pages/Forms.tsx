@@ -14,6 +14,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { submittedFormsHidden } from "@/features/roles/constants/permissionAccessTypes";
 import { useForms } from "@/features/forms/hooks/useForms";
+import { useFormListActions } from "@/features/forms/hooks/useFormListActions";
+import { FormDeleteDialog } from "@/features/forms/components/FormDeleteDialog";
 import { useFormContentTranslations } from "@/features/forms/hooks/useFormContentTranslations";
 import type { FormContentTranslation } from "@/features/forms/formContentFields";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
@@ -90,6 +92,8 @@ export default function Forms() {
   const [builderFallback, setBuilderFallback] = useState<BuilderFallback>(null);
   const [fillFormId, setFillFormId] = useState<string | null>(null);
   const [submissionsFormId, setSubmissionsFormId] = useState<string | null>(null);
+  const [discardEmptyId, setDiscardEmptyId] = useState<string | null>(null);
+  const listActions = useFormListActions();
   const [searchParams] = useSearchParams();
   const requestedFormId = searchParams.get("form");
   const openedFormRef = useRef<string | null>(null);
@@ -189,6 +193,7 @@ export default function Forms() {
   const handleOpenBuilder = useCallback(
     (formId: string) => {
       if (!canCreateForms) return;
+      setDiscardEmptyId(null);
       setBuilderFallback(null);
       setBuilderFormId(formId);
     },
@@ -308,6 +313,8 @@ export default function Forms() {
                       translations={translations}
                       onFill={handleOpenFill}
                       onEdit={handleOpenBuilder}
+                      onDelete={listActions.setDeleteId}
+                      onPublish={(formId) => void listActions.publishForm(formId)}
                       onViewSubmissions={setSubmissionsFormId}
                     />
                   </ErrorBoundary>
@@ -326,8 +333,9 @@ export default function Forms() {
             <CreateFormDialog
               open={createDialogOpen}
               onOpenChange={setCreateDialogOpen}
-              onFormCreated={(formId) => {
+              onFormCreated={(formId, meta) => {
                 setCreateDialogOpen(false);
+                setDiscardEmptyId(meta?.discardIfEmpty ? formId : null);
                 setBuilderFallback({ title: "New Form", description: "" });
                 setBuilderFormId(formId);
                 void refetchForms();
@@ -350,12 +358,14 @@ export default function Forms() {
                   if (!open) {
                     setBuilderFormId(null);
                     setBuilderFallback(null);
+                    setDiscardEmptyId(null);
                     void refetchForms();
                   }
                 }}
                 formId={builderFormId}
                 initialTitle={builderInitialTitle}
                 initialDescription={builderInitialDescription}
+                discardIfEmpty={discardEmptyId === builderFormId}
               />
             </ErrorBoundary>
           </Suspense>
@@ -371,6 +381,14 @@ export default function Forms() {
             />
           </Suspense>
         ) : null}
+        <FormDeleteDialog
+          open={Boolean(listActions.deleteId)}
+          pending={listActions.pending}
+          onOpenChange={(open) => {
+            if (!open) listActions.setDeleteId(null);
+          }}
+          onConfirm={() => void listActions.confirmDelete()}
+        />
         {fillFormId && (
           <Suspense fallback={null}>
             <ErrorBoundary

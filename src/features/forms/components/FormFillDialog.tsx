@@ -26,6 +26,7 @@ import {
 import { useFormFieldTranslations } from "@/features/forms/hooks/useFormFieldTranslations";
 import { groupFieldsByCategory } from "../utils/formFieldHelpers";
 import { buildWizardSteps } from "../utils/wizardSteps";
+import { canSubmitForm } from "@/features/forms/utils/formLifecycle";
 import { buildReviewSections } from "../utils/reviewSections";
 import { getDefaultValueForField } from "../utils/formValueFormatters";
 import { useFormWizard } from "../hooks/useFormWizard";
@@ -277,6 +278,13 @@ export default function FormFillDialog({
   );
 
   const handleSubmit = form.handleSubmit(async (values) => {
+    if (!canSubmitForm(orderedFields.length)) {
+      toast({
+        title: t("forms.thisFormDoesntHaveAnyFieldsConfiguredYet"),
+        variant: "destructive",
+      });
+      return;
+    }
     if (!resolvedFormId) {
       toast({
         title: "Missing form",
@@ -641,7 +649,7 @@ export default function FormFillDialog({
                 onBack={wizard.handleBack}
                 onNext={wizard.handleNext}
                 onSubmit={handleSubmit}
-                canProceedNext={!isLoading}
+                canProceedNext={!isLoading && canSubmitForm(orderedFields.length)}
               />
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { KeyboardEvent } from "react";
-import { ClipboardList, Edit, Loader2 } from "lucide-react";
+import { ClipboardList, Edit, Loader2, Trash2 } from "lucide-react";
 import { formsTableScroller } from "@/features/forms/utils/formsSurface";
 import { Card } from "@/components/ui/card";
 import {
@@ -35,6 +35,8 @@ interface FormsSectionProps {
   translations?: Map<string, FormContentTranslation | null>;
   onFill: (formId: string) => void;
   onEdit: (formId: string) => void;
+  onDelete?: (formId: string) => void;
+  onPublish?: (formId: string) => void;
   onViewSubmissions?: (formId: string) => void;
 }
 
@@ -48,6 +50,8 @@ export function FormsSection({
   translations,
   onFill,
   onEdit,
+  onDelete,
+  onPublish,
   onViewSubmissions,
 }: FormsSectionProps) {
   const { t } = useTranslation();
@@ -79,7 +83,7 @@ export function FormsSection({
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
                   {(canEdit || onViewSubmissions) && (
-                    <TableHead className="w-[96px] text-right">{t("common.edit")}</TableHead>
+                    <TableHead className="text-right">{t("common.edit")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -139,7 +143,7 @@ export function FormsSection({
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
                   {(canEdit || onViewSubmissions) && (
-                    <TableHead className="w-[96px] text-right">{t("common.edit")}</TableHead>
+                    <TableHead className="text-right">{t("common.edit")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -199,6 +203,16 @@ export function FormsSection({
                             <ClipboardList className="h-4 w-4" />
                           </Button>
                         ) : null}
+                        {canEdit && form.status === "draft" && onPublish ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-11"
+                            onClick={() => onPublish(form.id)}
+                          >
+                            {t("forms.publishForm")}
+                          </Button>
+                        ) : null}
                         {canEdit ? (
                           <Button
                             variant="ghost"
@@ -208,6 +222,17 @@ export function FormsSection({
                             onClick={() => onEdit(form.id)}
                           >
                             <Edit className="h-4 w-4" />
+                          </Button>
+                        ) : null}
+                        {canEdit && onDelete ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="min-h-11 min-w-11"
+                            aria-label={t("forms.deleteForm")}
+                            onClick={() => onDelete(form.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         ) : null}
                       </div>

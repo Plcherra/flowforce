@@ -106,3 +106,19 @@ Phone steps for Pedro: none from this run.
 Blockers: Team has no feature file and no owner audit. No phase was drafted.
 
 Questions: none.
+
+### 2026-10-25 — Publish, delete, and template fields
+
+Shipped: A form needs at least one field before it can be saved or published. Closing a new form that still has no fields removes that draft. Each template now includes its own fields, including Event Registration. The form row has Publish and Delete. Publish makes the form available on a shift’s Published form list. A form with no fields cannot be submitted. No migration.
+
+Phone steps for Pedro:
+1. Open Forms. On Event Registration, tap Delete and confirm. That copy has no fields.
+2. Tap New form, then Load on Event Registration. The editor should show Full name, Email, Event, Number of guests, Dietary notes, and Attending.
+3. Tap Publish. The row should say published.
+4. Open Scheduling, create or edit a shift, and open Tasks. Published form should list Event Registration. Custom task stays available.
+5. Tap New form, then Create form, then Cancel without adding a field. That draft should disappear.
+6. A draft row should have Delete even before it is published.
+
+Blockers: none. No migration.
+
+Questions: none.

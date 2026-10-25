@@ -22,7 +22,7 @@ While you click through:
 1. Dashboard loads. Recent Activity still says activity tracking is coming soon.
 2. Scheduling opens the week. If the schedule query fails, the page says read-only preview mode.
 3. Tasks opens the list. Creating a task still shows Select goal (optional).
-4. Forms: New form is one screen, with create, a template on that screen, or import. On a phone the form table scrolls sideways and the header stays put.
+4. Forms: New form is one screen, with create, a template on that screen, or import. A template opens with its fields. Save and Publish need at least one field. Publish puts the form on a shift’s Published form list. Delete is on the row, including drafts. Closing a new form with no fields removes that draft. On a phone the form table scrolls sideways and the header stays put.
 5. Insights → AI Insights loads text. On a phone the chat is a bottom sheet above the icon nav.
 6. Team Directory opens. The old Admin page is not a separate item.
 7. Profile card → Settings opens.

@@ -24,335 +24,35 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useForms } from "@/features/forms/hooks/useForms";
-import type { FormFieldRow } from "@/features/forms/hooks/useForms";
 import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { importFormFromFile } from "@/features/forms/services/formImportService";
+import { deleteFormRow } from "@/features/forms/repositories/formsRepository";
+import { formTemplates, type TemplateField } from "@/features/forms/utils/formTemplates";
 import { logger } from "@/utils/logger";
 
 interface CreateFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onFormCreated?: (formId: string) => void;
+  onFormCreated?: (formId: string, meta?: { discardIfEmpty?: boolean }) => void;
   preferredMethod?: "blank" | "template" | "upload";
   onPreferredMethodHandled?: () => void;
 }
 
-type TemplateField = Omit<
-  FormFieldRow,
-  "id" | "form_id" | "created_at" | "updated_at"
->;
+const templateIcons: Record<string, LucideIcon> = {
+  "employee-feedback": Users,
+  "event-registration": Calendar,
+  "incident-report": AlertTriangle,
+  "leave-request": Clock,
+  "customer-survey": Star,
+  "training-evaluation": BookOpen,
+  "restaurant-opening-checklist": Clock,
+  "food-safety-temperature-log": AlertTriangle,
+  "retail-inventory-count": Star,
+};
 
-interface FormTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  icon: LucideIcon;
-  fieldCount: number;
-  fieldPresets: TemplateField[];
-  popular?: boolean;
-}
-
-const makeTemplateField = (
-  field: Omit<TemplateField, "field_order">,
-): TemplateField => field;
-
-const formTemplates: FormTemplate[] = [
-  {
-    id: "employee-feedback",
-    name: "Employee Feedback",
-    description: "Collect feedback from employees about workplace satisfaction",
-    category: "HR",
-    icon: Users,
-    fieldCount: 8,
-    fieldPresets: [],
-    popular: true,
-  },
-  {
-    id: "event-registration",
-    name: "Event Registration",
-    description: "Register attendees for company events",
-    category: "Events",
-    icon: Calendar,
-    fieldCount: 6,
-    fieldPresets: [],
-  },
-  {
-    id: "incident-report",
-    name: "Incident Report",
-    description: "Report workplace incidents and safety concerns",
-    category: "Safety",
-    icon: AlertTriangle,
-    fieldCount: 10,
-    fieldPresets: [],
-    popular: true,
-  },
-  {
-    id: "leave-request",
-    name: "Leave Request",
-    description: "Submit time off and leave requests",
-    category: "HR",
-    icon: Clock,
-    fieldCount: 7,
-    fieldPresets: [],
-  },
-  {
-    id: "customer-survey",
-    name: "Customer Survey",
-    description: "Gather customer feedback and satisfaction ratings",
-    category: "Customer",
-    icon: Star,
-    fieldCount: 12,
-    fieldPresets: [],
-  },
-  {
-    id: "training-evaluation",
-    name: "Training Evaluation",
-    description: "Evaluate training effectiveness and gather feedback",
-    category: "Training",
-    icon: BookOpen,
-    fieldCount: 9,
-    fieldPresets: [],
-  },
-  {
-    id: "restaurant-opening-checklist",
-    name: "Restaurant Opening Checklist",
-    description: "Prep the store, stations, safety checks, and manager signoff before service.",
-    category: "Restaurant",
-    icon: Clock,
-    fieldCount: 4,
-    fieldPresets: [
-      makeTemplateField({
-        field_type: "text",
-        label: "Opening manager",
-        placeholder: "Name",
-        description: null,
-        is_required: true,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "checkbox",
-        label: "Stations ready",
-        placeholder: null,
-        description: null,
-        is_required: true,
-        options: ["Line", "Expo", "Dish", "Prep", "Register"],
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "location",
-        label: "Store location confirmation",
-        placeholder: null,
-        description: null,
-        is_required: false,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "signature",
-        label: "Manager signoff",
-        placeholder: null,
-        description: null,
-        is_required: true,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-    ],
-    popular: true,
-  },
-  {
-    id: "food-safety-temperature-log",
-    name: "Food Safety Temperature Log",
-    description: "Capture cold holding, hot holding, corrective action, and evidence photos.",
-    category: "Restaurant",
-    icon: AlertTriangle,
-    fieldCount: 4,
-    fieldPresets: [
-      makeTemplateField({
-        field_type: "text",
-        label: "Station or unit",
-        placeholder: "Walk-in, hot well, prep table",
-        description: null,
-        is_required: true,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "number",
-        label: "Temperature",
-        placeholder: "Degrees",
-        description: null,
-        is_required: true,
-        options: null,
-        validation_rules: null,
-        min_value: -20,
-        max_value: 250,
-        step_value: 0.1,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "image_upload",
-        label: "Evidence photo",
-        placeholder: null,
-        description: null,
-        is_required: false,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: { accepted_types: ["image/*"], max_files: 3, max_size: 10 },
-      }),
-      makeTemplateField({
-        field_type: "textarea",
-        label: "Corrective action",
-        placeholder: "What changed if temperature was out of range?",
-        description: null,
-        is_required: false,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-    ],
-  },
-  {
-    id: "retail-inventory-count",
-    name: "Retail Inventory Count",
-    description: "Scan items, count shelf/backroom stock, rate shelf condition, and attach photos.",
-    category: "Retail",
-    icon: Star,
-    fieldCount: 4,
-    fieldPresets: [
-      makeTemplateField({
-        field_type: "scanner",
-        label: "SKU or barcode",
-        placeholder: null,
-        description: null,
-        is_required: true,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: { scan_types: ["barcode", "qr_code"], auto_submit: false },
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "number",
-        label: "On-hand count",
-        placeholder: "Units",
-        description: null,
-        is_required: true,
-        options: null,
-        validation_rules: null,
-        min_value: 0,
-        max_value: null,
-        step_value: 1,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "rating",
-        label: "Shelf condition",
-        placeholder: null,
-        description: null,
-        is_required: false,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: { max_rating: 5, rating_type: "stars" },
-        scan_config: null,
-        media_config: null,
-      }),
-      makeTemplateField({
-        field_type: "image_upload",
-        label: "Shelf photo",
-        placeholder: null,
-        description: null,
-        is_required: false,
-        options: null,
-        validation_rules: null,
-        min_value: null,
-        max_value: null,
-        step_value: null,
-        formula_expression: null,
-        dependent_fields: null,
-        rating_config: null,
-        scan_config: null,
-        media_config: { accepted_types: ["image/*"], max_files: 4, max_size: 10 },
-      }),
-    ],
-  },
-];
 
 export default function CreateFormDialog({
   open,
@@ -437,11 +137,17 @@ export default function CreateFormDialog({
             options.templateFields,
           );
           if (fieldError) {
+            const companyId = profile?.companyId ?? profile?.company_id ?? null;
+            if (companyId) {
+              await deleteFormRow(companyId, data.id).catch(() => undefined);
+            }
             throw fieldError;
           }
         }
 
-        onFormCreated?.(data.id);
+        onFormCreated?.(data.id, {
+          discardIfEmpty: !options?.templateFields?.length,
+        });
         resetDialog();
         onOpenChange(false);
       } catch (error) {
@@ -540,7 +246,7 @@ export default function CreateFormDialog({
               <h3 className="text-sm font-semibold">{t("forms.templates")}</h3>
               <ul className="divide-y rounded-md border">
                 {formTemplates.map((template) => {
-                  const Icon = template.icon;
+                  const Icon = templateIcons[template.id] ?? FileText;
                   return (
                     <li key={template.id} className="flex items-center gap-2 px-3 py-2">
                       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -563,7 +269,7 @@ export default function CreateFormDialog({
                           void createFormAndStartBuilder(
                             template.name,
                             template.description,
-                            { templateFields: template.fieldPresets },
+                            { templateFields: template.fields },
                           )
                         }
                       >

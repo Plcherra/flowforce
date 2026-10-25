@@ -261,7 +261,11 @@ export function useForms() {
     }
   };
 
-  const updateForm = async (formId: string, updates: Partial<FormRow>) => {
+  const updateForm = async (
+    formId: string,
+    updates: Partial<FormRow>,
+    options?: { quiet?: boolean },
+  ) => {
     if (!companyId) {
       const error = new Error("Company context unavailable");
       toast({
@@ -290,10 +294,12 @@ export function useForms() {
         );
       }
 
-      toast({
-        title: "Success",
-        description: "Form updated successfully",
-      });
+      if (!options?.quiet) {
+        toast({
+          title: "Success",
+          description: "Form updated successfully",
+        });
+      }
 
       return { error: null };
     } catch (error) {

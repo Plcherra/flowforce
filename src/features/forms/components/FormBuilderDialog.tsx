@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForms, type FormFieldRow } from "@/features/forms/hooks/useForms";
-import { updateFormRow } from "@/features/forms/repositories/formsRepository";
+import { deleteFormRow, updateFormRow } from "@/features/forms/repositories/formsRepository";
+import { canKeepForm, shouldDiscardEmptyDraft } from "@/features/forms/utils/formLifecycle";
 import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ interface FormBuilderDialogProps {
   formId: string;
   initialTitle?: string;
   initialDescription?: string;
+  discardIfEmpty?: boolean;
 }
 
 const randomId = () => {
@@ -48,6 +50,7 @@ export default function FormBuilderDialog({
   formId,
   initialTitle = "New Form",
   initialDescription = "",
+  discardIfEmpty = false,
 }: FormBuilderDialogProps) {
   const { t, i18n } = useTranslation();
   const { getFormFields, saveFormFields } = useForms();
@@ -64,6 +67,7 @@ export default function FormBuilderDialog({
   const [formDescription, setFormDescription] = useState(initialDescription);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const savedFieldCountRef = useRef(0);
 
   useEffect(() => {
     if (!open) {
@@ -98,6 +102,7 @@ export default function FormBuilderDialog({
         (a, b) => (a.field_order ?? 0) - (b.field_order ?? 0),
       );
 
+      savedFieldCountRef.current = rows.length;
       loadSchema({
         id: formId,
         title: initialTitle ?? "Untitled form",
@@ -172,7 +177,24 @@ export default function FormBuilderDialog({
     });
   };
 
-  const handleSave = async () => {
+  const requestClose = (nextOpen: boolean) => {
+    if (nextOpen) return;
+    void (async () => {
+      const companyId = profile?.companyId ?? profile?.company_id ?? null;
+      if (
+        companyId &&
+        shouldDiscardEmptyDraft({
+          discardIfEmpty,
+          savedFieldCount: savedFieldCountRef.current,
+        })
+      ) {
+        await deleteFormRow(companyId, formId).catch(() => undefined);
+      }
+      onOpenChange(false);
+    })();
+  };
+
+  const handleSave = async (mode: "draft" | "published" = "draft") => {
     const current = useFormSchemaStore.getState().schema;
     if (!current) return;
 
@@ -186,6 +208,13 @@ export default function FormBuilderDialog({
     }
 
     const fields = current.sections.flatMap((section) => section.fields);
+    if (!canKeepForm(fields.length)) {
+      toast({
+        title: t(mode === "published" ? "forms.addAFieldBeforePublish" : "forms.addAFieldBeforeSave"),
+        variant: "destructive",
+      });
+      return;
+    }
     if (fields.some((field) => !field.label.trim())) {
       toast({
         title: "Field label required",
@@ -209,7 +238,10 @@ export default function FormBuilderDialog({
       const updated = await updateFormRow(
         companyId,
         formId,
-        { title: formTitle, description: formDescription || null },
+        {
+          title: formTitle,
+          description: formDescription || null,
+        },
         appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
       );
 
@@ -256,9 +288,21 @@ export default function FormBuilderDialog({
         return;
       }
 
+      if (mode === "published") {
+        const published = await updateFormRow(companyId, formId, { status: "published" });
+        if (!published) {
+          toast({
+            title: t("forms.addAFieldBeforePublish"),
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      savedFieldCountRef.current = fields.length;
       toast({
-        title: "Form saved",
-        description: "All changes have been stored.",
+        title: mode === "published" ? t("forms.formPublished") : t("forms.formSaved"),
+        description: mode === "published" ? t("forms.formPublishedHelp") : t("forms.formSavedHelp"),
       });
       onOpenChange(false);
     } finally {
@@ -272,7 +316,7 @@ export default function FormBuilderDialog({
     0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={requestClose}>
       <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none">
         <DialogHeader className="max-h-[40vh] shrink-0 space-y-1 overflow-y-auto border-b px-4 py-3 pr-12">
           <DialogTitle className="text-lg font-semibold">
@@ -334,17 +378,19 @@ export default function FormBuilderDialog({
                 : "Live preview updates automatically."}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button variant="ghost" onClick={() => requestClose(false)}>
               {t("common.cancel")}</Button>
-            <Button onClick={handleSave} disabled={loading || isSaving}>
+            <Button variant="outline" onClick={() => void handleSave("draft")} disabled={loading || isSaving}>
+              {t("forms.saveChanges")}</Button>
+            <Button onClick={() => void handleSave("published")} disabled={loading || isSaving}>
               {isSaving && (
                 <Loader2
                   className="mr-2 h-4 w-4 animate-spin"
                   aria-hidden="true"
                 />
               )}
-              {t("forms.saveChanges")}</Button>
+              {t("forms.publishForm")}</Button>
           </div>
         </div>
       </DialogContent>

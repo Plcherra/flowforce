@@ -34,6 +34,7 @@ import {
 } from "@/features/tasks/utils/taskSchedule";
 import type { Json } from "@/integrations/supabase/public-types";
 import type { ShiftTask } from "./types";
+import { attachableShiftForms } from "@/features/forms/utils/formLifecycle";
 
 type SavedTask = ShiftTask & {
   formId: string | null;
@@ -281,13 +282,16 @@ export function ShiftTasksPanel({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">{t("tasks.customShiftTask")}</SelectItem>
-            {(formsQuery.data ?? []).map((form) => (
+            {attachableShiftForms(formsQuery.data ?? []).map((form) => (
               <SelectItem key={form.id} value={form.id}>
                 {form.title}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {formsQuery.isSuccess && attachableShiftForms(formsQuery.data ?? []).length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("tasks.publishAFormToAttach")}</p>
+        ) : null}
         <Label htmlFor="shift-task-name">{t("tasks.taskName")}</Label>
         <Input
           id="shift-task-name"
