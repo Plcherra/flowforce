@@ -49,5 +49,5 @@ export interface UpdateMediaItem {
 export interface CompanyUpdateWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onComplete?: (data: WizardFormData) => void;
+  onComplete?: (data: WizardFormData) => void | Promise<void>;
 }

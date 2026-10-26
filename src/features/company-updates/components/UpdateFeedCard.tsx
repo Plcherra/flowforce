@@ -5,24 +5,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Heart,
-  MessageCircle,
-  Eye,
-  Pin,
-  MoreHorizontal,
-  Archive,
-  Pencil,
-  Trash2,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { Heart, MessageCircle, Eye, Pin } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { dateLocaleForLanguage } from "@/features/company-updates/dateLocale";
+import { UpdateManageMenu } from "@/features/company-updates/components/UpdateManageMenu";
 import {
   getBackgroundCss,
   getTypeColor,
@@ -45,6 +31,7 @@ interface UpdateFeedCardProps {
   onArchive: (updateId: string) => void;
   onDelete: (updateId: string) => void;
   onEdit?: (update: CompanyUpdate) => void;
+  onPublish?: (updateId: string) => void;
   canManage: boolean;
   onView?: (updateId: string) => void;
   viewerHasViewed?: boolean;
@@ -63,12 +50,15 @@ export function UpdateFeedCard({
   onArchive,
   onDelete,
   onEdit,
+  onPublish,
   canManage,
   onView,
   viewerHasViewed,
   commentError,
 }: UpdateFeedCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleForLanguage(i18n.language);
+  const authorName = update.author.name.trim() || t("updates.teamMember");
   const engagement = useMemo(() => getEngagementSettings(update), [update]);
   const isLiked = Boolean(update.viewerHasLiked);
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -123,7 +113,7 @@ export function UpdateFeedCard({
             <Avatar className="h-10 w-10 shrink-0">
               <AvatarImage src={update.author.avatar} />
               <AvatarFallback className="text-xs">
-                {update.author.name
+                {authorName
                   .split(" ")
                   .map((part) => part[0])
                   .join("")}
@@ -131,9 +121,7 @@ export function UpdateFeedCard({
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-sm truncate">
-                  {update.author.name}
-                </h3>
+                <h3 className="font-semibold text-sm truncate">{authorName}</h3>
                 {update.author.role && (
                   <Badge variant="outline" className="text-xs shrink-0">
                     {update.author.role}
@@ -147,44 +135,32 @@ export function UpdateFeedCard({
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(update.publishDate), {
                     addSuffix: true,
+                    locale: dateLocale,
                   })}
                 </span>
                 <Badge
                   className={`text-xs ${getTypeColor(update.type)} flex items-center gap-1`}
                 >
                   {getUpdateIcon(update.type)}
-                  <span className="capitalize">{update.type}</span>
+                  <span>{t(`dashboard.${update.type}`)}</span>
                 </Badge>
+                {update.status === "scheduled" ? (
+                  <Badge variant="outline" className="text-xs">
+                    {t("updates.scheduledBadge")}
+                  </Badge>
+                ) : null}
               </div>
             </div>
           </div>
 
           {canManage && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                {onEdit ? (
-                  <DropdownMenuItem onClick={() => onEdit(update)}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    {t("common.edit")}
-                  </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuItem onClick={() => onArchive(update.id)}>
-                  <Archive className="mr-2 h-4 w-4" />
-                  {t("updates.archive")} </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDelete(update.id)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {t("common.delete")} </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UpdateManageMenu
+              update={update}
+              onEdit={onEdit}
+              onArchive={onArchive}
+              onDelete={onDelete}
+              onPublish={onPublish}
+            />
           )}
         </div>
       </CardHeader>
@@ -274,8 +250,8 @@ export function UpdateFeedCard({
                 <div key={comment.id} className="flex gap-2">
                   <Avatar className="h-6 w-6 shrink-0">
                     <AvatarImage src={comment.author.avatar} />
-                    <AvatarFallback className="text-xs">
-                      {comment.author.name
+                      <AvatarFallback className="text-xs">
+                      {(comment.author.name.trim() || t("updates.teamMember"))
                         .split(" ")
                         .map((part) => part[0])
                         .join("")}
@@ -285,20 +261,22 @@ export function UpdateFeedCard({
                     <div className="bg-muted/50 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-xs truncate">
-                          {comment.author.name}
+                          {comment.author.name.trim() || t("updates.teamMember")}
                         </span>
                         <span className="text-xs text-muted-foreground shrink-0">
                           {formatDistanceToNow(new Date(comment.createdAt), {
                             addSuffix: true,
+                            locale: dateLocale,
                           })}
                         </span>
                       </div>
                       <CompanyUpdateCommentText comment={comment} />
                     </div>
-                    <Button variant="ghost" size="sm" className="h-6 px-2 mt-1">
-                      <Heart className="h-3 w-3 mr-1" />
-                      <span className="text-xs">{comment.likes}</span>
-                    </Button>
+                    {comment.likes > 0 ? (
+                      <p className="mt-1 px-2 text-xs text-muted-foreground">
+                        {t("updates.channelLikes")}: {comment.likes}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               ))}

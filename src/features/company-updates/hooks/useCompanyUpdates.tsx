@@ -54,8 +54,7 @@ const toCompanyUpdate = (
       getFullName(
         row.authorprofile?.first_name,
         row.authorprofile?.last_name,
-      ) ||
-      "Company Updates",
+      ),
     avatar: row.author_avatar ?? row.authorprofile?.avatar_url ?? null,
     role: row.author_role ?? row.authorprofile?.role ?? null,
   },

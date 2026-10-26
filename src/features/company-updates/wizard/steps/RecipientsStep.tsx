@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import React, { useMemo, useState } from "react";
+import { AlertCircle, Globe, Target } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -7,74 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import {
-  Users,
-  Search,
-  Building,
-  UserCheck,
-  Globe,
-  Target,
-  AlertCircle,
-} from "lucide-react";
-
-import type { WizardFormData } from "../CreateUpdateWizard";
-import { useProfile } from "@/hooks/useProfile";
 import { useRecipientInsights } from "@/features/company-updates/wizard/useRecipientInsights";
+import type { WizardFormData } from "../CreateUpdateWizard";
 
 interface RecipientsStepProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
-}
-
-type SegmentOption = {
-  id: string;
-  name: string;
-  count?: number;
-};
-
-const STATIC_DEPARTMENTS: SegmentOption[] = [
-  { id: "hr", name: "Human Resources" },
-  { id: "engineering", name: "Engineering" },
-  { id: "sales", name: "Sales" },
-  { id: "marketing", name: "Marketing" },
-  { id: "operations", name: "Operations" },
-  { id: "finance", name: "Finance" },
-];
-
-const STATIC_ROLES: SegmentOption[] = [
-  { id: "admin", name: "Admin" },
-  { id: "manager", name: "Manager" },
-  { id: "employee", name: "Employee" },
-  { id: "contractor", name: "Contractor" },
-];
-
-type RecipientUser = {
-  id: string;
-  name: string;
-  role?: string | null;
-  department?: string | null;
-};
-
-const STATIC_USERS: RecipientUser[] = [];
-
-function resolveSegmentOptions(
-  segments: Array<{ id: string; name: string; count?: number; type: string }>,
-  segmentType: string,
-  fallback: SegmentOption[],
-): SegmentOption[] {
-  const filtered = segments
-    .filter((segment) => segment.type === segmentType)
-    .map<SegmentOption>((segment) => ({
-      id: segment.id,
-      name: segment.name,
-      count: segment.count,
-    }));
-  return filtered.length > 0 ? filtered : fallback;
 }
 
 export function RecipientsStep({
@@ -82,522 +24,95 @@ export function RecipientsStep({
   updateFormData,
 }: RecipientsStepProps) {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const { profile } = useProfile();
   const insights = useRecipientInsights(formData);
+  const audienceIsEveryone =
+    formData.recipients.type === "all" &&
+    formData.recipients.targets.length === 0;
 
-  const availableUsers = useMemo<RecipientUser[]>(() => {
-    const users = [...STATIC_USERS];
-
-    if (profile) {
-      const id = profile.userId ?? profile.id ?? "current-user";
-      const firstName = profile.firstName ?? profile.first_name ?? "";
-      const lastName = profile.lastName ?? profile.last_name ?? "";
-      const displayName =
-        [firstName, lastName].filter(Boolean).join(" ").trim() ||
-        profile.email ||
-        "You";
-      const alreadyIncluded = users.some((user) => user.id === id);
-
-      if (!alreadyIncluded) {
-        users.push({
-          id,
-          name: displayName,
-          role: profile.role ?? "Member",
-          department: null,
-        });
-      }
-    }
-
-    return users;
-  }, [profile]);
-
-  const updateRecipients = (updates: Partial<typeof formData.recipients>) => {
+  useEffect(() => {
+    if (audienceIsEveryone) return;
     updateFormData({
-      recipients: { ...formData.recipients, ...updates },
+      recipients: { type: "all", targets: [] },
     });
-  };
-
-  const handleRecipientTypeChange = (type: typeof formData.recipients.type) => {
-    updateRecipients({
-      type,
-      targets: type === "all" ? [] : formData.recipients.targets,
-    });
-  };
-
-  const toggleTarget = (
-    targetId: string,
-    category: "departments" | "roles" | "individuals" | "groups",
-  ) => {
-    const currentTargets = formData.recipients.targets;
-    const prefixedId = `${category}:${targetId}`;
-
-    const newTargets = currentTargets.includes(prefixedId)
-      ? currentTargets.filter((id) => id !== prefixedId)
-      : [...currentTargets, prefixedId];
-
-    updateRecipients({ targets: newTargets });
-  };
-
-  const isTargetSelected = (targetId: string, category: string) => {
-    return formData.recipients.targets.includes(`${category}:${targetId}`);
-  };
-
-  const getRecipientCountLabel = () => {
-    if (formData.recipients.type === "all") {
-      return "All employees";
-    }
-
-    const selectionByCategory = formData.recipients.targets.reduce<
-      Record<string, number>
-    >((acc, target) => {
-      const [category] = target.split(":");
-      acc[category] = (acc[category] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    if (formData.recipients.type === "individuals") {
-      const individualCount = selectionByCategory.individuals ?? 0;
-      return individualCount > 0
-        ? `${individualCount} ${individualCount === 1 ? "person" : "people"}`
-        : "No recipients selected";
-    }
-
-    const appliedCategory = formData.recipients.type;
-    const labels: Record<string, { singular: string; plural: string }> = {
-      departments: { singular: "department", plural: "departments" },
-      roles: { singular: "role", plural: "roles" },
-      individuals: { singular: "person", plural: "people" },
-      groups: { singular: "group", plural: "groups" },
-      all: { singular: "employee", plural: "employees" },
-    };
-    const selectedCount = selectionByCategory[appliedCategory] ?? 0;
-    return selectedCount > 0
-      ? `${selectedCount} ${selectedCount === 1 ? labels[appliedCategory].singular : labels[appliedCategory].plural}`
-      : "No recipients selected";
-  };
-
-  const filteredUsers = availableUsers.filter(
-    (user: RecipientUser) =>
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.department?.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  const departmentOptions = useMemo(
-    () =>
-      resolveSegmentOptions(
-        insights.segments,
-        "departments",
-        STATIC_DEPARTMENTS,
-      ),
-    [insights.segments],
-  );
-
-  const roleOptions = useMemo(
-    () => resolveSegmentOptions(insights.segments, "roles", STATIC_ROLES),
-    [insights.segments],
-  );
-
-  const selectedTargetBadges = useMemo(() => {
-    return formData.recipients.targets.map((target) => {
-      const [category, id] = target.split(":");
-      if (category === "departments") {
-        const match = departmentOptions.find((dept) => dept.id === id);
-        return { target, label: match?.name ?? id };
-      }
-      if (category === "roles") {
-        const match = roleOptions.find((role) => role.id === id);
-        return { target, label: match?.name ?? id };
-      }
-      if (category === "individuals") {
-        const match = availableUsers.find((user) => user.id === id);
-        return { target, label: match?.name ?? id };
-      }
-      return { target, label: id };
-    });
-  }, [
-    availableUsers,
-    departmentOptions,
-    formData.recipients.targets,
-    roleOptions,
-  ]);
-
-  const insightsBanner = (
-    <Card className="border-primary/40 bg-primary/5">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-primary">
-          <Target className="h-4 w-4" />
-          {t("updates.audienceInsights")} </CardTitle>
-        <CardDescription className="text-xs text-primary/80">
-          {t("updates.estimatedReachUsesActiveEmployeeDataFromTheLastSync")} </CardDescription>
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
-        {insights.loading ? (
-          <Skeleton className="h-14 rounded-md" />
-        ) : (
-          <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
-            <p className="text-xs text-muted-foreground">{t("updates.estimatedReach")}</p>
-            <p className="text-lg font-semibold text-primary">
-              {insights.estimatedReach.toLocaleString()}
-            </p>
-          </div>
-        )}
-
-        {insights.loading ? (
-          <Skeleton className="h-14 rounded-md" />
-        ) : (
-          <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
-            <p className="text-xs text-muted-foreground">{t("updates.totalEmployees")}</p>
-            <p className="text-lg font-semibold">
-              {insights.totalEmployees.toLocaleString()}
-            </p>
-          </div>
-        )}
-
-        {insights.loading ? (
-          <Skeleton className="h-14 rounded-md" />
-        ) : (
-          <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
-            <p className="text-xs text-muted-foreground">{t("updates.activeFilters")}</p>
-            <p className="text-lg font-semibold">{insights.activeFilters}</p>
-          </div>
-        )}
-
-        {!insights.loading && insights.actionItems.length > 0 && (
-          <div className="col-span-full space-y-2 rounded-lg border border-warning/40 bg-warning-muted px-3 py-2 text-xs text-warning-foreground">
-            <div className="flex items-center gap-2 font-medium">
-              <AlertCircle className="h-3.5 w-3.5" />
-              {t("updates.reviewBeforePublishing")} </div>
-            <ul className="list-disc space-y-1 pl-4">
-              {insights.actionItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-
-  const segmentSuggestions = (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">
-          {t("updates.suggestedSegments")} </CardTitle>
-        <CardDescription className="text-xs">
-          {t("updates.pullInFrequentAudiencesWithOneClick")} </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
-        {insights.loading && <Skeleton className="h-8 w-32 rounded-full" />}
-        {!insights.loading && insights.segments.length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            {t("updates.noSuggestionsYetAdjustFiltersToSeeRecommendations")} </p>
-        )}
-        {insights.segments.map((segment) => (
-          <Button
-            key={`${segment.type}:${segment.id}`}
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              toggleTarget(
-                segment.id,
-                segment.type as "departments" | "roles" | "groups",
-              )
-            }
-          >
-            {segment.name}
-            <Badge variant="outline" className="ml-2">
-              {segment.count}
-            </Badge>
-          </Button>
-        ))}
-      </CardContent>
-    </Card>
-  );
+  }, [audienceIsEveryone, updateFormData]);
 
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="mb-2 text-lg font-semibold">{t("updates.selectRecipients")}</h3>
-        <p className="text-muted-foreground">
-          {t("updates.chooseWhoShouldReceiveThisUpdateAndConfirmTheirReach")} </p>
+        <h3 className="mb-2 text-lg font-semibold">
+          {t("updates.selectRecipients")}
+        </h3>
+        <p className="text-muted-foreground">{t("updates.everyoneCanRead")}</p>
       </div>
 
-      {insightsBanner}
-      {segmentSuggestions}
+      <Card className="border-primary/40 bg-primary/5">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium text-primary">
+            <Target className="h-4 w-4" />
+            {t("updates.audienceInsights")}
+          </CardTitle>
+          <CardDescription className="text-xs text-primary/80">
+            {t("updates.estimatedReachUsesActiveEmployeeDataFromTheLastSync")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+          {insights.loading ? (
+            <Skeleton className="h-14 rounded-md" />
+          ) : (
+            <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
+              <p className="text-xs text-muted-foreground">
+                {t("updates.estimatedReach")}
+              </p>
+              <p className="text-lg font-semibold text-primary">
+                {t("updates.employeeCount", { count: insights.estimatedReach })}
+              </p>
+            </div>
+          )}
+          {insights.loading ? (
+            <Skeleton className="h-14 rounded-md" />
+          ) : (
+            <div className="rounded-lg border border-primary/30 bg-background px-3 py-2">
+              <p className="text-xs text-muted-foreground">
+                {t("updates.totalEmployees")}
+              </p>
+              <p className="text-lg font-semibold">
+                {t("updates.employeeCount", { count: insights.totalEmployees })}
+              </p>
+            </div>
+          )}
+          {insights.error ? (
+            <p className="text-sm text-destructive sm:col-span-2" role="alert">
+              {insights.error}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === "all" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => handleRecipientTypeChange("all")}
-        >
-          <CardContent className="p-4 text-center">
-            <Globe className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">{t("updates.allEmployees")}</h4>
-            <p className="text-sm text-muted-foreground">{t("updates.everyoneInCompany")}</p>
-            {formData.recipients.type === "all" && (
-              <Badge variant="default" className="mt-2">
-                {t("updates.selected")} </Badge>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === "departments"
-              ? "ring-2 ring-primary"
-              : ""
-          }`}
-          onClick={() => handleRecipientTypeChange("departments")}
-        >
-          <CardContent className="p-4 text-center">
-            <Building className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">{t("updates.departments")}</h4>
-            <p className="text-sm text-muted-foreground">
-              {t("updates.selectByDepartment")} </p>
-            {formData.recipients.type === "departments" && (
-              <Badge variant="default" className="mt-2">
-                {t("updates.selected")} </Badge>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === "roles" ? "ring-2 ring-primary" : ""
-          }`}
-          onClick={() => handleRecipientTypeChange("roles")}
-        >
-          <CardContent className="p-4 text-center">
-            <UserCheck className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">{t("updates.roles")}</h4>
-            <p className="text-sm text-muted-foreground">{t("updates.selectByRole")}</p>
-            {formData.recipients.type === "roles" && (
-              <Badge variant="default" className="mt-2">
-                {t("updates.selected")} </Badge>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            formData.recipients.type === "individuals"
-              ? "ring-2 ring-primary"
-              : ""
-          }`}
-          onClick={() => handleRecipientTypeChange("individuals")}
-        >
-          <CardContent className="p-4 text-center">
-            <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-            <h4 className="font-semibold">{t("updates.individuals")}</h4>
-            <p className="text-sm text-muted-foreground">
-              {t("updates.selectSpecificUsers")} </p>
-            {formData.recipients.type === "individuals" && (
-              <Badge variant="default" className="mt-2">
-                {t("updates.selected")} </Badge>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {formData.recipients.type !== "all" && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
-            {formData.recipients.type === "departments" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    {t("updates.selectDepartments")} </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {departmentOptions.map(({ id, name, count }) => {
-                    return (
-                      <div
-                        key={`department-${id}`}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            checked={isTargetSelected(id, "departments")}
-                            onCheckedChange={() =>
-                              toggleTarget(id, "departments")
-                            }
-                          />
-                          <span className="font-medium">{name}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {count !== undefined
-                            ? `${count} employees`
-                            : "Connect a directory to view counts"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            )}
-
-            {formData.recipients.type === "roles" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">{t("updates.selectRoles")}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {roleOptions.map(({ id, name, count }) => {
-                    return (
-                      <div
-                        key={`role-${id}`}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            checked={isTargetSelected(id, "roles")}
-                            onCheckedChange={() => toggleTarget(id, "roles")}
-                          />
-                          <span className="font-medium">{name}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {count !== undefined
-                            ? `${count} employees`
-                            : "Connect a directory to view counts"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            )}
-
-            {formData.recipients.type === "individuals" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">
-                    {t("updates.selectIndividuals")} </CardTitle>
-                  <CardDescription className="text-sm">
-                    {t("updates.addSpecificTeammatesOrSearchAcrossYourDirectory")} </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={searchTerm}
-                      onChange={(event) => setSearchTerm(event.target.value)}
-                      placeholder={t("updates.searchByNameRoleOrDepartment")}
-                      className="pl-9"
-                    />
-                  </div>
-
-                  {filteredUsers.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">
-                      {t("updates.noPeopleFoundConnectADirectoryOrAdjustYourSearch")} </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {filteredUsers.map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <Checkbox
-                              checked={isTargetSelected(user.id, "individuals")}
-                              onCheckedChange={() =>
-                                toggleTarget(user.id, "individuals")
-                              }
-                            />
-                            <div>
-                              <p className="font-medium">{user.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {[user.role, user.department]
-                                  .filter(Boolean)
-                                  .join(" • ")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+      <Card className="ring-2 ring-primary">
+        <CardContent className="flex items-start gap-3 p-4">
+          <Globe className="mt-0.5 h-6 w-6 shrink-0 text-muted-foreground" />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="font-semibold">{t("updates.allEmployees")}</h4>
+              <Badge>{t("updates.selected")}</Badge>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("updates.everyoneInCompany")}
+            </p>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">{t("updates.selectionSummary")}</CardTitle>
-                <CardDescription className="text-sm">
-                  {t("updates.reviewTheExpectedReachBeforeSendingYourAnnouncement")} </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("updates.selectedAudience")}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {getRecipientCountLabel()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("updates.estimatedReach")}</span>
-                  {insights.loading ? (
-                    <Skeleton className="h-5 w-16 rounded" />
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      {insights.estimatedReach.toLocaleString()} {t("updates.people")} </span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t("updates.activeFilters")}</span>
-                  {insights.loading ? (
-                    <Skeleton className="h-5 w-10 rounded" />
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      {insights.activeFilters}
-                    </span>
-                  )}
-                </div>
-
-                {selectedTargetBadges.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-medium uppercase text-muted-foreground tracking-wide">
-                      {t("updates.currentSelection")} </p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedTargetBadges.map(({ target, label }) => (
-                        <Badge
-                          key={target}
-                          variant="secondary"
-                          className="cursor-pointer"
-                          onClick={() => {
-                            const [category, id] = target.split(":");
-                            toggleTarget(
-                              id,
-                              category as
-                                | "departments"
-                                | "roles"
-                                | "individuals"
-                                | "groups",
-                            );
-                          }}
-                        >
-                          {label}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {insights.error && (
-                  <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
-                    {insights.error}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+      {!insights.loading && insights.actionItems.length > 0 ? (
+        <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning-muted px-3 py-2 text-xs text-warning-foreground">
+          <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <ul className="list-disc space-y-1 pl-4">
+            {insights.actionItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

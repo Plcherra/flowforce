@@ -115,4 +115,11 @@ export type CreateCompanyUpdateInput = {
   recipients?: UpdateRecipient | null;
   assignedEmployees?: string[];
   isPinned?: boolean;
+  status?: CompanyUpdateStatus;
+  scheduledDate?: string | null;
+  publishDate?: string | null;
+  author_id?: string | null;
+  author_name?: string | null;
+  author_role?: string | null;
+  author_avatar?: string | null;
 };

@@ -19,7 +19,9 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { getErrorMessage } from "@/shared/utils";
 import { formatDistanceToNow } from "date-fns";
+import { dateLocaleForLanguage } from "@/features/company-updates/dateLocale";
 import { TemplateSelectionStep } from "./steps/TemplateSelectionStep";
 import { DesignContentStep } from "./steps/DesignContentStep";
 import { RecipientsStep } from "./steps/RecipientsStep";
@@ -33,6 +35,14 @@ import type {
   WizardFormData,
   WizardStepId,
 } from "./types";
+
+const STEP_NAME_KEYS: Record<WizardStepId, string> = {
+  template: "updates.stepTemplate",
+  design: "updates.stepDesign",
+  recipients: "updates.stepRecipients",
+  publish: "updates.stepPublish",
+  summary: "updates.stepSummary",
+};
 
 const STEP_COMPONENT_RENDERERS: Record<
   WizardStepId,
@@ -57,12 +67,19 @@ export function CompanyUpdateWizard({
 }: CompanyUpdateWizardProps) {
   const draft = useCompanyUpdateDraft();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleForLanguage(i18n.language);
 
   const autoSaveLabel = draft.lastSavedAt
-    ? `Autosaved ${formatDistanceToNow(draft.lastSavedAt, { addSuffix: true })}`
+    ? t("updates.autosavedAgo", {
+        when: formatDistanceToNow(draft.lastSavedAt, {
+          addSuffix: true,
+          locale: dateLocale,
+        }),
+      })
     : draft.hasPersistedDraft
-      ? "Draft restored from previous session"
-      : "Autosave enabled";
+      ? t("updates.draftRestored")
+      : t("updates.autosaveEnabled");
 
   const handleDialogChange = (nextOpen: boolean) => {
     if (!nextOpen && draft.isSubmitting) {
@@ -79,20 +96,16 @@ export function CompanyUpdateWizard({
   const handleSubmit = async () => {
     draft.setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      toast({
-        title: "Update created",
-        description: "Your company update has been published and distributed.",
-      });
-
-      onComplete?.(draft.formData);
+      await onComplete?.(draft.formData);
       onOpenChange(false);
       draft.reset();
-    } catch (_error) {
+    } catch (error) {
       toast({
-        title: "Unable to publish",
-        description: "We could not publish the update. Please try again.",
+        title: t("updates.unableToPublish"),
+        description: getErrorMessage(
+          error,
+          t("updates.unableToPublishDescription"),
+        ),
         variant: "destructive",
       });
     } finally {
@@ -194,6 +207,7 @@ function StepNavigation({
   currentIndex: number;
   onStepChange: (index: number) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="shrink-0 border-b border-border/60 px-4 py-2 sm:px-6">
       <nav className="grid grid-cols-5 items-stretch gap-1.5 sm:gap-2">
@@ -232,7 +246,9 @@ function StepNavigation({
               >
                 {isComplete ? <CheckCircle className="h-3 w-3" /> : index + 1}
               </span>
-              <span className="truncate font-medium">{step.name}</span>
+              <span className="truncate font-medium">
+                {t(STEP_NAME_KEYS[step.id])}
+              </span>
             </button>
           );
         })}
