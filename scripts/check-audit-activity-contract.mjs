@@ -26,6 +26,7 @@ const systemSettings = readText(
   "src/features/system/hooks/useSystemSettings.ts",
 );
 const auditLogUi = readText("src/features/admin/components/AuditLog.tsx");
+const englishLocale = readText("src/locales/en.json");
 const inviteRoute = readText("app/api/employees/invite/route.ts");
 const auditMigration = readText(
   "supabase/migrations/20260527000200_phase3_audit_activity_contract.sql",
@@ -114,8 +115,13 @@ assertIncludes(
 );
 assertIncludes(
   auditLogUi,
-  "Activity Audit Log",
+  "admin.activityAuditLog",
   "admin UI must expose general activity review",
+);
+assertIncludes(
+  englishLocale,
+  '"activityAuditLog": "Activity Audit Log"',
+  "English activity audit title must stay Activity Audit Log",
 );
 assertIncludes(
   auditLogUi,
