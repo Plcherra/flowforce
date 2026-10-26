@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { requestContentTranslation } from "@/features/i18n/requestContentTranslation";
+import { sanitizeUpdateSearch } from "@/features/company-updates/companyUpdateAccess";
 import {
   companyUpdateTouchesContent,
   companyUpdateTranslationFields,
@@ -209,8 +210,11 @@ const listUpdates = async ({
     }
   }
 
-  if (searchTerm) {
-    query = query.or(`title.ilike.%${searchTerm}%,body.ilike.%${searchTerm}%`);
+  const safeSearch = sanitizeUpdateSearch(searchTerm ?? "");
+  if (safeSearch) {
+    query = query.or(
+      `title.ilike.%${safeSearch}%,body.ilike.%${safeSearch}%`,
+    );
   }
 
   const { data, error, count } = await query.range(from, to);

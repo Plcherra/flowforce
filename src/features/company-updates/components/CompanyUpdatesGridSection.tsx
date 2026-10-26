@@ -12,6 +12,12 @@ interface CompanyUpdatesGridSectionProps {
   canCreateUpdate: boolean;
   wizardOpen: boolean;
   onCreate: () => void;
+  onLike: (updateId: string, currentlyLiked: boolean) => void;
+  onOpenComments: (update: CompanyUpdate) => void;
+  onEdit: (update: CompanyUpdate) => void;
+  onArchive: (updateId: string) => void;
+  onDelete: (updateId: string) => void;
+  onPublish: (updateId: string) => void;
 }
 
 export function CompanyUpdatesGridSection({
@@ -22,13 +28,30 @@ export function CompanyUpdatesGridSection({
   canCreateUpdate,
   wizardOpen,
   onCreate,
+  onLike,
+  onOpenComments,
+  onEdit,
+  onArchive,
+  onDelete,
+  onPublish,
 }: CompanyUpdatesGridSectionProps) {
   if (loading) {
     return <GridSkeleton />;
   }
 
   if (safeArrayLength(updates) > 0) {
-    return <UpdateGridView updates={updates} />;
+    return (
+      <UpdateGridView
+        updates={updates}
+        canManage={canCreateUpdate}
+        onLike={onLike}
+        onOpenComments={onOpenComments}
+        onEdit={onEdit}
+        onArchive={onArchive}
+        onDelete={onDelete}
+        onPublish={onPublish}
+      />
+    );
   }
 
   return (

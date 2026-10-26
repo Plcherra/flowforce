@@ -48,10 +48,9 @@ export function useCompanyUpdateComments(updateIds: string[]) {
           updatedAt: row.updated_at,
           author: {
             id: row.author_id,
-            name:
-              [row.author?.first_name, row.author?.last_name]
-                .filter(Boolean)
-                .join(" ") || "Team Member",
+            name: [row.author?.first_name, row.author?.last_name]
+              .filter(Boolean)
+              .join(" "),
             avatar: row.author?.avatar_url ?? null,
           },
         });

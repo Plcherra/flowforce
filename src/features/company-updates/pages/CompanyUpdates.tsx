@@ -5,14 +5,21 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { PageLoader } from "@/components/common/PageLoader";
 import { CompanyUpdatesFeedSection } from "@/features/company-updates/components/CompanyUpdatesFeedSection";
+import { CompanyUpdatesGridSection } from "@/features/company-updates/components/CompanyUpdatesGridSection";
+import { CompanyUpdatesListSection } from "@/features/company-updates/components/CompanyUpdatesListSection";
 import { EditUpdateDialog } from "@/features/company-updates/components/EditUpdateDialog";
 import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
+import {
+  canManageCompanyUpdates,
+  isCompanyUpdateDue,
+} from "@/features/company-updates/companyUpdateAccess";
 import {
   CompanyUpdatesPagination,
   PAGE_SIZE_OPTIONS,
@@ -34,6 +41,7 @@ import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
 import type { CompanyUpdate, UpdateComment } from "@/types/companyUpdates";
 import type { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
 import { asArray, safeArrayLength, safeArrayMap } from "@/utils/reactQueryTypes";
+import { Button } from "@/components/ui/button";
 import { AlertTriangle, Megaphone } from "lucide-react";
 
 const CreateUpdateWizard = lazy(
@@ -56,6 +64,7 @@ export default function CompanyUpdates() {
     pageSize,
     setPageSize,
     viewMode,
+    setViewMode,
   } = useCompanyUpdateFilters();
   const {
     values: commentInputs,
@@ -69,11 +78,16 @@ export default function CompanyUpdates() {
   >({});
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(null);
+  const publishingDue = useRef(new Set<string>());
+  const canCreateUpdate = canManageCompanyUpdates({
+    role: profile?.role,
+    can: (key) => can(key),
+  });
 
-  const { updates, loading, error, pagination } = useCompanyUpdates({
+  const { updates, loading, error, pagination, refetch } = useCompanyUpdates({
     page,
     pageSize,
-    status: "published",
+    status: canCreateUpdate ? ["published", "scheduled"] : "published",
     searchTerm,
   });
   const {
@@ -92,6 +106,7 @@ export default function CompanyUpdates() {
     createUpdate,
     archiveUpdate,
     deleteUpdate,
+    publishUpdate,
     toggleLike,
     markAsViewed,
     addComment,
@@ -113,7 +128,7 @@ export default function CompanyUpdates() {
   const isInitialLoading = loading && safeArrayLength(safeUpdates) === 0;
   const errorMessage =
     error && !updatesSchemaMissing
-      ? getErrorMessage(error, "Unable to load company updates.")
+      ? getErrorMessage(error, t("updates.unableToLoadCompanyUpdates"))
       : null;
   const recognitionErrorMessage = recognitionsSchemaMissing
     ? null
@@ -121,15 +136,6 @@ export default function CompanyUpdates() {
   const hasSearch = Boolean(searchTerm.trim());
   const totalPages = Math.max(1, Math.ceil((pagination.total ?? 0) / pageSize));
   const showPagination = !moduleSchemaMissing && totalPages > 1;
-  const canCreateUpdate = useMemo(() => {
-    if (can("systemSettings") || can("admin.settings")) {
-      return true;
-    }
-
-    const role = (profile?.role || "").toLowerCase();
-    return ["owner", "company_admin", "admin", "manager"].includes(role);
-  }, [can, profile?.role]);
-
   useEffect(() => {
     setPage(1);
   }, [pageSize, searchTerm, viewMode, setPage]);
@@ -155,8 +161,16 @@ export default function CompanyUpdates() {
   );
 
   const handleUpdateComplete = useCallback(
-    (formData: WizardFormData) => {
-      void createUpdate({
+    async (formData: WizardFormData) => {
+      const publishNow = formData.publishingSettings.publishNow !== false;
+      const authorName = [profile?.first_name, profile?.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      const scheduledDate = publishNow
+        ? null
+        : formData.publishingSettings.scheduledDate ?? null;
+      await createUpdate({
         title: formData.title,
         body: formData.body,
         richContent: formData.richContent,
@@ -164,11 +178,20 @@ export default function CompanyUpdates() {
         priority: formData.priority,
         backgroundStyle: formData.backgroundStyle,
         publishingSettings: formData.publishingSettings,
-        recipients: formData.recipients,
+        recipients: { type: "all", targets: [] },
         isPinned: false,
+        status: publishNow ? "published" : "scheduled",
+        scheduledDate,
+        publishDate: publishNow
+          ? new Date().toISOString().slice(0, 10)
+          : scheduledDate,
+        author_id: profile?.id ?? profile?.userId ?? null,
+        author_name: authorName || null,
+        author_role: profile?.role ?? null,
+        author_avatar: profile?.avatar_url ?? null,
       });
     },
-    [createUpdate],
+    [createUpdate, profile],
   );
 
   const handleLike = useCallback(
@@ -189,16 +212,16 @@ export default function CompanyUpdates() {
         await addComment({ updateId: update.id, content });
         clearComment(update.id);
       } catch (error) {
-        const message = getErrorMessage(error, "Unable to post comment.");
+        const message = getErrorMessage(error, t("updates.unableToPostComment"));
         setCommentError(update.id, message);
         toast({
-          title: "Unable to post comment",
+          title: t("updates.unableToPostComment"),
           description: message,
           variant: "destructive",
         });
       }
     },
-    [addComment, commentInputs, clearComment, setCommentError, toast],
+    [addComment, commentInputs, clearComment, setCommentError, t, toast],
   );
 
   const handleToggleComments = useCallback((update: CompanyUpdate) => {
@@ -207,33 +230,75 @@ export default function CompanyUpdates() {
 
   const handleArchive = useCallback(
     (updateId: string) => {
-      archiveUpdate(updateId).then(() => {
-        toast({
-          title: "Update archived",
-          description: "The update has been moved out of the feed.",
+      archiveUpdate(updateId)
+        .then(() => {
+          toast({
+            title: t("updates.updateArchived"),
+            description: t("updates.updateArchivedDescription"),
+          });
+        })
+        .catch((archiveError) => {
+          toast({
+            title: t("updates.unableToArchive"),
+            description: getErrorMessage(
+              archiveError,
+              t("updates.pleaseTryAgain"),
+            ),
+            variant: "destructive",
+          });
         });
-      });
     },
-    [archiveUpdate, toast],
+    [archiveUpdate, t, toast],
   );
 
   const handleDelete = useCallback(
     (updateId: string) => {
-      const confirmed = window.confirm(
-        "Delete this update? This action cannot be undone.",
-      );
+      const confirmed = window.confirm(t("updates.deleteUpdateConfirm"));
       if (!confirmed) {
         return;
       }
 
-      deleteUpdate(updateId).then(() => {
-        toast({
-          title: "Update deleted",
-          description: "The update has been removed permanently.",
+      deleteUpdate(updateId)
+        .then(() => {
+          toast({
+            title: t("updates.updateDeleted"),
+            description: t("updates.updateDeletedDescription"),
+          });
+        })
+        .catch((deleteError) => {
+          toast({
+            title: t("updates.unableToDelete"),
+            description: getErrorMessage(
+              deleteError,
+              t("updates.pleaseTryAgain"),
+            ),
+            variant: "destructive",
+          });
         });
-      });
     },
-    [deleteUpdate, toast],
+    [deleteUpdate, t, toast],
+  );
+
+  const handlePublish = useCallback(
+    (updateId: string) => {
+      publishUpdate(updateId)
+        .then(() => {
+          toast({
+            title: t("updates.publishedNow"),
+            description: t("updates.publishedNowDescription"),
+          });
+        })
+        .catch(() => undefined);
+    },
+    [publishUpdate, t, toast],
+  );
+
+  const handleOpenComments = useCallback(
+    (update: CompanyUpdate) => {
+      setViewMode("feed");
+      setVisibleComments((prev) => ({ ...prev, [update.id]: true }));
+    },
+    [setViewMode],
   );
 
   const getUpdateComments = useCallback(
@@ -241,8 +306,19 @@ export default function CompanyUpdates() {
     [commentsByUpdate],
   );
 
+  useEffect(() => {
+    if (!canCreateUpdate) return;
+    for (const update of safeUpdates) {
+      if (!isCompanyUpdateDue(update) || publishingDue.current.has(update.id)) {
+        continue;
+      }
+      publishingDue.current.add(update.id);
+      void publishUpdate(update.id).catch(() => undefined);
+    }
+  }, [canCreateUpdate, publishUpdate, safeUpdates]);
+
   if (!bootstrap.userReady || bootstrap.loading) {
-    return <PageLoader text="Loading company updates..." />;
+    return <PageLoader text={t("updates.loadingCompanyUpdates")} />;
   }
 
   if (bootstrap.error) {
@@ -262,7 +338,7 @@ export default function CompanyUpdates() {
       <div className="p-6">
         <EmptyStateCard
           title={t("updates.workspaceDataIsStillLoading")}
-          description="Company updates unlock once we have your organization and employee information."
+          description={t("updates.workspaceUnlocks")}
           icon={<Megaphone className="h-5 w-5" />}
         />
       </div>
@@ -276,6 +352,8 @@ export default function CompanyUpdates() {
         onCreate={openCreateWizard}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
         wizardOpen={createWizardOpen}
       />
 
@@ -294,12 +372,59 @@ export default function CompanyUpdates() {
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>{t("updates.unableToLoadUpdates")}</AlertTitle>
-                <AlertDescription>{errorMessage}</AlertDescription>
+                <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <span>{errorMessage}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9"
+                    onClick={() => void refetch()}
+                  >
+                    {t("common.tryAgain")}
+                  </Button>
+                </AlertDescription>
               </Alert>
             </div>
           )}
 
-          {!moduleSchemaMissing && (
+          {!moduleSchemaMissing && viewMode === "grid" && (
+            <CompanyUpdatesGridSection
+              updates={safeUpdates}
+              loading={isInitialLoading}
+              hasSearch={hasSearch}
+              searchTerm={searchTerm}
+              canCreateUpdate={canCreateUpdate}
+              wizardOpen={createWizardOpen}
+              onCreate={openCreateWizard}
+              onLike={handleLike}
+              onOpenComments={handleOpenComments}
+              onEdit={setEditingUpdate}
+              onArchive={handleArchive}
+              onDelete={handleDelete}
+              onPublish={handlePublish}
+            />
+          )}
+
+          {!moduleSchemaMissing && viewMode === "list" && (
+            <CompanyUpdatesListSection
+              updates={safeUpdates}
+              loading={isInitialLoading}
+              hasSearch={hasSearch}
+              searchTerm={searchTerm}
+              canCreateUpdate={canCreateUpdate}
+              wizardOpen={createWizardOpen}
+              onCreate={openCreateWizard}
+              onLike={handleLike}
+              onOpenComments={handleOpenComments}
+              onEdit={setEditingUpdate}
+              onArchive={handleArchive}
+              onDelete={handleDelete}
+              onPublish={handlePublish}
+            />
+          )}
+
+          {!moduleSchemaMissing && viewMode === "feed" && (
             <CompanyUpdatesFeedSection
               updates={safeUpdates}
               loading={isInitialLoading}
@@ -322,6 +447,7 @@ export default function CompanyUpdates() {
               onArchive={handleArchive}
               onDelete={handleDelete}
               onEdit={setEditingUpdate}
+              onPublish={handlePublish}
               onView={(updateId) => markAsViewed({ updateId })}
             />
           )}
