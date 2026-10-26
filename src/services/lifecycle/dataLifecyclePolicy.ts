@@ -24,7 +24,7 @@ export type LegalHoldStatus = (typeof LEGAL_HOLD_STATUSES)[number];
 
 export type LifecycleRetentionClass =
   | "tenant_configuration"
-  | "employeeprofile"
+  | "employee_profile"
   | "operational_record"
   | "financial_record"
   | "audit_record"
@@ -62,7 +62,7 @@ export const DATA_LIFECYCLE_POLICY: LifecyclePolicyRule[] = [
   },
   {
     table: "profiles",
-    retentionClass: "employeeprofile",
+    retentionClass: "employee_profile",
     defaultRetentionDays: 1095,
     disposition: "soft_delete",
     exportable: true,
@@ -72,7 +72,7 @@ export const DATA_LIFECYCLE_POLICY: LifecyclePolicyRule[] = [
   },
   {
     table: "company_members",
-    retentionClass: "employeeprofile",
+    retentionClass: "employee_profile",
     defaultRetentionDays: 1095,
     disposition: "soft_delete",
     exportable: true,
