@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   CalendarDays,
-  CloudDownload,
-  CloudUpload,
   Plus,
   Search,
   Wrench,
@@ -24,7 +22,7 @@ import { useTranslation } from "react-i18next";
 const formatRange = (startIso: string, endIso?: string) => {
   const start = new Date(startIso);
   if (Number.isNaN(start.getTime())) {
-    return "Unknown time";
+    return "";
   }
 
   const base = start.toLocaleString([], {
@@ -118,7 +116,7 @@ export function EventsCalendarContent() {
                 onClick={handleOpenSessionDialog}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                {isMobile ? "Add" : "Add to calendar"}
+                {t("calendar.addToCalendar")}
               </Button>
               <Button
                 variant="outline"
@@ -202,14 +200,14 @@ export function EventsCalendarContent() {
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <div className="text-sm font-medium text-foreground">
-                              {event.title || "Untitled session"}
+                              {event.title || t("calendar.untitledEvent")}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {formatRange(event.start, event.end)}
                             </div>
                           </div>
                           <Badge variant="outline" className="capitalize">
-                            {event.type ?? "event"}
+                            {event.type ?? t("dashboard.event")}
                           </Badge>
                         </div>
                         {event.description && (
@@ -224,33 +222,6 @@ export function EventsCalendarContent() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="px-4 py-3 sm:px-6">
-                <CardTitle className="text-sm font-medium">{t("sections.quickActions")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 p-4 sm:p-6">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2"
-                  onClick={handleOpenSessionDialog}
-                >
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />{t("calendar.addToCalendar")}</Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2"
-                  disabled
-                  title={t("calendar.googleCalendarImportIsComingSoon")}
-                >
-                  <CloudUpload className="h-4 w-4 text-muted-foreground" />{t("sections.importFromGoogleCalendar")}</Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-2"
-                  disabled
-                  title={t("calendar.exportingCalendarsWillBeAvailableSoon")}
-                >
-                  <CloudDownload className="h-4 w-4 text-muted-foreground" />{t("sections.exportCalendar")}</Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@ const timeRange = (startIso: string, endIso: string) => {
   const start = parseISO(startIso);
   const end = parseISO(endIso);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
-    return "Time TBD";
+    return "";
   return `${format(start, "HH:mm")} – ${format(end, "HH:mm")}`;
 };
 
@@ -48,7 +48,7 @@ export function LinkShiftsPanel({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground">{t("calendar.shiftsOnThisDay")}</h3>
         <Badge variant="outline" className="text-[11px]">
-          On duty: {staff.length}
+          {t("calendar.onDutyCount", { count: staff.length })}
         </Badge>
       </div>
 
@@ -77,7 +77,7 @@ export function LinkShiftsPanel({
                 />
                 <div>
                   <p className="font-semibold text-foreground">
-                    {shift.title || shift.job_position?.name || "Shift"}
+                    {shift.title || shift.job_position?.name || t("calendar.shiftFallback")}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {timeRange(shift.start_time, shift.end_time)}

@@ -20,10 +20,15 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import { useEvents, type EventAttendee } from "@/hooks/useEvents";
+import { useEvents, type AppEvent, type EventAttendee } from "@/hooks/useEvents";
 import { useProfile } from "@/hooks/useProfile";
 import type { Schedule } from "@/types/common";
 import { useCreateCalendarEvent } from "@/features/calendar/hooks/useCreateCalendarEvent";
+import {
+  defaultEventWindow,
+  fromDatetimeLocalValue,
+  isEndAfterStart,
+} from "@/features/calendar/utils/calendarBoard";
 import { useTranslation } from "react-i18next";
 
 type SessionType = "meeting" | "event";
@@ -32,7 +37,7 @@ interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultType?: SessionType;
-  onCreated?: (eventId: string) => void;
+  onCreated?: (event: AppEvent) => void;
 }
 
 type SelectionRecord = Record<string, boolean>;
@@ -74,13 +79,12 @@ export function CreateEventDialog({
   useEffect(() => {
     if (open) {
       setSessionType(defaultType);
-      setTitle("New calendar item");
+      setTitle("");
       setDescription("");
       setLocation("");
-      const now = new Date();
-      const soon = new Date(now.getTime() + 60 * 60 * 1000);
-      setStart(now.toISOString().slice(0, 16));
-      setEnd(soon.toISOString().slice(0, 16));
+      const window = defaultEventWindow();
+      setStart(window.start);
+      setEnd(window.end);
       setParticipantQuery("");
       setSelectedParticipants({});
       setSelectedShiftIds({});
@@ -95,7 +99,7 @@ export function CreateEventDialog({
       const name =
         `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim() ||
         employee.email ||
-        "Team member";
+        t("calendar.teamMember");
       map.set(employee.id, {
         id: employee.id,
         name,
@@ -119,7 +123,7 @@ export function CreateEventDialog({
     return Array.from(map.values()).sort((a, b) =>
       a.name.localeCompare(b.name),
     );
-  }, [employees, events]);
+  }, [employees, events, t]);
 
   const filteredAttendees = !participantQuery.trim()
     ? attendeeOptions
@@ -199,7 +203,7 @@ export function CreateEventDialog({
             const user = assignment.user;
             const name =
               `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
-              "Team member";
+              t("calendar.teamMember");
             push({
               id: user.id,
               name,
@@ -214,10 +218,20 @@ export function CreateEventDialog({
   };
 
   const handleCreate = async () => {
-    if (!title.trim() || !start || !end) {
+    const startIso = fromDatetimeLocalValue(start);
+    const endIso = fromDatetimeLocalValue(end);
+    if (!title.trim() || !startIso || !endIso) {
       toast({
-        title: "Missing information",
-        description: "Title, start time and end time are required.",
+        title: t("calendar.missingInformation"),
+        description: t("calendar.titleStartEndRequired"),
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!isEndAfterStart(startIso, endIso)) {
+      toast({
+        title: t("calendar.invalidDate"),
+        description: t("calendar.endBeforeStart"),
         variant: "destructive",
       });
       return;
@@ -226,25 +240,8 @@ export function CreateEventDialog({
     const companyId = profile?.companyId ?? profile?.company_id ?? null;
     if (!companyId) {
       toast({
-        title: "Missing company context",
-        description: "You need an active company to create events.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    let startIso: Date;
-    let endIso: Date;
-    try {
-      startIso = new Date(start);
-      endIso = new Date(end);
-      if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
-        throw new Error("Invalid date");
-      }
-    } catch (_error) {
-      toast({
-        title: "Invalid date",
-        description: "Please provide valid start and end times.",
+        title: t("calendar.missingCompany"),
+        description: t("calendar.needCompanyToCreate"),
         variant: "destructive",
       });
       return;
@@ -275,29 +272,26 @@ export function CreateEventDialog({
       });
 
       if (created?.id) {
-        onCreated?.(created.id);
+        onCreated?.(created);
       }
 
       toast({
         title:
-          sessionType === "meeting" ? "Meeting scheduled" : "Event created",
-        description: `${title.trim()} on ${new Date(startIso).toLocaleString()}`,
+          sessionType === "meeting"
+            ? t("calendar.meetingScheduled")
+            : t("calendar.eventCreated"),
+        description: `${title.trim()} · ${startIso.toLocaleString()}`,
       });
 
       onOpenChange(false);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast({
-        title: "Event not saved",
-        description: message,
-        variant: "destructive",
-      });
+    } catch {
+      return;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("calendar.addToCalendar")}</DialogTitle>
           <DialogDescription>{t("calendar.chooseMeetingOrEventThenAddDetailsInvite")}</DialogDescription>
@@ -312,18 +306,18 @@ export function CreateEventDialog({
               onChange={(event) => setTitle(event.target.value)}
               placeholder={
                 sessionType === "meeting"
-                  ? "Quarterly planning meeting"
-                  : "All hands event"
+                  ? t("calendar.meetingPlaceholder")
+                  : t("calendar.eventPlaceholder")
               }
             />
           </div>
           <div>
-            <Label>{t("resources.details.type")}</Label>
+            <Label htmlFor="session-type">{t("resources.details.type")}</Label>
             <Select
               value={sessionType}
               onValueChange={(value) => setSessionType(value as SessionType)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="session-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -438,7 +432,7 @@ export function CreateEventDialog({
                   />
                   <div>
                     <div className="font-medium leading-none">
-                      {shift.title || shift.job_position?.name || "Shift"}
+                      {shift.title || shift.job_position?.name || t("calendar.shiftFallback")}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {new Date(shift.start_time).toLocaleTimeString([], {
