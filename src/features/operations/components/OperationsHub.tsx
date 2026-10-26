@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Layers } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { IssuesStream } from "./IssuesStream";
 import { AutomationsPanel } from "./AutomationsPanel";
@@ -12,9 +12,11 @@ import { ManagerReviewQueuePanel } from "./ManagerReviewQueuePanel";
 import { CompliancePacksPanel } from "./CompliancePacksPanel";
 import { WorkflowAutomationHooksPanel } from "./WorkflowAutomationHooksPanel";
 import { ExecutionQualityPanel } from "./ExecutionQualityPanel";
-import { InventorySignalWidget } from "@/features/messages/components/ops/InventorySignalWidget";
+import { OperationsSignalsCard } from "./OperationsSignalsCard";
+import { useOperationsHubMetrics } from "../hooks/useOperationsHubMetrics";
+import type { HubKpiKey } from "../utils/operationsHubMetrics";
 
-const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
+const kpiKeys: HubKpiKey[] = [
   "tasks_compliance",
   "inventory_health",
   "labor_vs_sales",
@@ -22,6 +24,13 @@ const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
 
 export function OperationsHub() {
   const { t } = useTranslation();
+  const hub = useOperationsHubMetrics();
+  const results = {
+    tasks_compliance: hub.model?.tasks ?? null,
+    inventory_health: hub.model?.inventory ?? null,
+    labor_vs_sales: hub.model?.labor ?? null,
+  };
+
   return (
     <div className="min-h-[calc(100vh-4rem)] w-full bg-muted/30 py-4">
       <div className="flex w-full max-w-none flex-col gap-4 px-3 sm:px-4">
@@ -29,24 +38,23 @@ export function OperationsHub() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="rounded-3xl border bg-background/95 p-5 shadow-sm"
+          className="rounded-3xl border bg-background/95 p-4 shadow-sm sm:p-5"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5" /> {t("shell.flowforce")}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:tracking-[0.4em]">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" /> {t("shell.flowforce")}
               </div>
-              <h1 className="mt-2 text-3xl font-semibold">{t("operations.operationsHub")}</h1>
+              <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">
+                {t("operations.operationsHub")}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 {t("operations.kpisLiveIssuesAndAutomationDraftsInOneMinimalistBoard")}
               </p>
             </div>
-            <div className="hidden text-sm text-muted-foreground lg:flex lg:flex-col lg:items-end">
-              <span>{t("operations.updatedEvery15Min")}</span>
-              <span className="text-xs uppercase tracking-[0.4em]">
-                {t("operations.flowforceOperations")}
-              </span>
-            </div>
+            <p className="max-w-xs text-sm text-muted-foreground sm:text-right">
+              {t("operations.hubFromCompanyData")}
+            </p>
           </div>
         </motion.header>
 
@@ -57,7 +65,21 @@ export function OperationsHub() {
           className="grid gap-4 md:grid-cols-3"
         >
           {kpiKeys.map((key) => (
-            <KpiCard key={key} kpiKey={key} />
+            <KpiCard
+              key={key}
+              kpiKey={key}
+              loading={hub.loading}
+              failed={
+                key === "tasks_compliance"
+                  ? hub.errors.tasks === "error"
+                  : key === "inventory_health"
+                    ? hub.errors.inventory === "error"
+                    : hub.errors.labor === "error"
+              }
+              result={results[key]}
+              saving={hub.savingKey === key}
+              onSuggest={hub.saveSuggestion}
+            />
           ))}
         </motion.section>
 
@@ -71,20 +93,14 @@ export function OperationsHub() {
             <IssuesStream />
           </div>
           <div className="min-w-0">
-            <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">
-                    {t("operations.opsWidgets")}
-                  </p>
-                  <h3 className="text-lg font-semibold">{t("operations.realtimeSignals")}</h3>
-                </div>
-                <Layers className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div className="mt-4 space-y-4">
-                <InventorySignalWidget />
-              </div>
-            </div>
+            <OperationsSignalsCard
+              loading={hub.loading}
+              currency={hub.currency}
+              countsFailed={hub.errors.counts === "error"}
+              stockFailed={hub.errors.inventory === "error"}
+              wasteFailed={hub.errors.waste === "error"}
+              model={hub.model}
+            />
           </div>
         </motion.section>
 

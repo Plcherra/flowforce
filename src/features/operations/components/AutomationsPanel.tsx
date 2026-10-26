@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { dispatchAutomationToFlowForce } from "@/server/automation/adapters/flowforceOperationsAdapter";
 import type { AutomationScript } from "@/server/automation/validateScript";
 import { logger } from "@/utils/logger";
+import { OPS_SUGGESTIONS_CHANGED } from "../utils/operationsHubSuggestion";
 
 interface AutomationSuggestion {
   id: string;
@@ -50,8 +51,13 @@ export function AutomationsPanel() {
     }
 
     void load();
+    const refresh = () => {
+      void load();
+    };
+    window.addEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     return () => {
       active = false;
+      window.removeEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     };
   }, []);
 
