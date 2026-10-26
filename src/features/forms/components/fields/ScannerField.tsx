@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,29 +46,14 @@ export function ScannerField({
   const [manualValue, setManualValue] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
   const supportedTypes = config.scan_types || ["barcode", "qr_code"];
 
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }, // Prefer back camera
-      });
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsScanning(true);
-      }
-    } catch (error) {
-      logger.error("Error accessing camera:", { error, tags: ["error"] });
-      toast({
-        title: "Error",
-        description: "Unable to access camera. Please check permissions.",
-        variant: "destructive",
-      });
-    }
+  const startCamera = useCallback(() => {
+    setManualEntry(false);
+    setIsScanning(true);
   }, []);
 
   const stopCamera = useCallback(() => {
@@ -99,27 +84,84 @@ export function ScannerField({
     setManualValue("");
 
     toast({
-      title: "Success",
-      description: "Code entered successfully",
+      title: t("forms.saved"),
+      description: t("forms.codeEntered"),
     });
-  }, [manualValue, onChange]);
+  }, [manualValue, onChange, t]);
 
-  const simulateScan = useCallback(() => {
-    // For demo purposes - simulate a successful scan
-    const mockData: ScanData = {
-      scandata: Math.random().toString(36).substring(2, 15),
-      scan_type: supportedTypes[0],
-      scanformat: "simulated",
+  useEffect(() => {
+    if (!isScanning) return;
+    let cancelled = false;
+    const Detector = (
+      window as Window & {
+        BarcodeDetector?: new (options?: { formats?: string[] }) => {
+          detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue?: string; format?: string }>>;
+        };
+      }
+    ).BarcodeDetector;
+
+    const run = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => undefined);
+        }
+        if (!Detector) return;
+        const detector = new Detector({
+          formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39", "upc_a", "upc_e"],
+        });
+        const readFrame = async () => {
+          if (cancelled || !videoRef.current) return;
+          try {
+            const codes = await detector.detect(videoRef.current);
+            const raw = codes[0]?.rawValue;
+            if (raw) {
+              const scanType =
+                raw.length > 20 || raw.includes("http") ? "qr_code" : "barcode";
+              onChangeRef.current({
+                scandata: raw,
+                scan_type: scanType,
+                scanformat: codes[0]?.format || "camera",
+              });
+              stopCamera();
+              toast({
+                title: t("forms.saved"),
+                description: t("forms.codeScanned"),
+              });
+              return;
+            }
+          } catch (error) {
+            logger.warn("Barcode frame was not readable", { error, tags: ["warning"] });
+          }
+          if (!cancelled) window.setTimeout(() => void readFrame(), 350);
+        };
+        void readFrame();
+      } catch (error) {
+        logger.error("Error accessing camera:", { error, tags: ["error"] });
+        if (!cancelled) {
+          setIsScanning(false);
+          setManualEntry(true);
+          toast({
+            title: t("forms.errorTitle"),
+            description: t("forms.cameraPermission"),
+            variant: "destructive",
+          });
+        }
+      }
     };
-
-    onChange(mockData);
-    stopCamera();
-
-    toast({
-      title: "Success",
-      description: "Code scanned successfully",
-    });
-  }, [onChange, stopCamera, supportedTypes]);
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [isScanning, stopCamera, t]);
 
   const clearScan = useCallback(() => {
     onChange(undefined);
@@ -129,9 +171,9 @@ export function ScannerField({
   const formatScanType = (type: string) => {
     switch (type) {
       case "qr_code":
-        return "QR Code";
+        return t("forms.qrCode");
       case "barcode":
-        return "Barcode";
+        return t("forms.barcode");
       default:
         return type;
     }
@@ -206,6 +248,11 @@ export function ScannerField({
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("forms.positionTheCodeWithinTheCameraView")}</p>
+                {typeof window !== "undefined" && !("BarcodeDetector" in window) ? (
+                  <p className="text-xs text-muted-foreground">
+                    {t("forms.scanNotSupported")}
+                  </p>
+                ) : null}
               </div>
 
               <div className="relative">
@@ -232,10 +279,13 @@ export function ScannerField({
                 <Button
                   type="button"
                   size="sm"
-                  onClick={simulateScan}
+                  onClick={() => {
+                    stopCamera();
+                    setManualEntry(true);
+                  }}
                   className="flex-1"
                 >
-                  {t("forms.simulateScan")}</Button>
+                  {t("forms.enterManually")}</Button>
               </div>
             </div>
           </CardContent>

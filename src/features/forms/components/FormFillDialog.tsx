@@ -27,6 +27,7 @@ import { useFormFieldTranslations } from "@/features/forms/hooks/useFormFieldTra
 import { groupFieldsByCategory } from "../utils/formFieldHelpers";
 import { buildWizardSteps } from "../utils/wizardSteps";
 import { canSubmitForm } from "@/features/forms/utils/formLifecycle";
+import { formulaAnswerMap } from "@/features/forms/utils/formulaValue";
 import { buildReviewSections } from "../utils/reviewSections";
 import { getDefaultValueForField } from "../utils/formValueFormatters";
 import { useFormWizard } from "../hooks/useFormWizard";
@@ -95,7 +96,7 @@ export default function FormFillDialog({
   });
   const content = useFormContentDisplay({
     recordId: resolvedFormId ?? undefined,
-    title: hydratedForm?.title ?? "Fill form",
+    title: hydratedForm?.title ?? t("forms.fillFormTitle"),
     description: hydratedForm?.description,
     translation,
   });
@@ -287,8 +288,8 @@ export default function FormFillDialog({
     }
     if (!resolvedFormId) {
       toast({
-        title: "Missing form",
-        description: "Please close and reopen this form.",
+        title: t("forms.missingForm"),
+        description: t("forms.missingFormHelp"),
         variant: "destructive",
       });
       return;
@@ -299,7 +300,7 @@ export default function FormFillDialog({
       for (const fieldId of flaggedFieldIds) {
         flaggedAnswers[fieldId] = { value: values[fieldId], flagged: true };
       }
-      const { data, error: submitError } = await submitForm(
+      const { data, error: submitError, offline } = await submitForm(
         resolvedFormId,
         {
           ...flaggedAnswers,
@@ -309,11 +310,12 @@ export default function FormFillDialog({
           id: field.id,
           field_type: field.field_type,
         })),
+        { quiet: true },
       );
       if (submitError) {
         toast({
-          title: "Unable to submit form",
-          description: submitError.message || "Please try again later.",
+          title: t("forms.unableToSubmit"),
+          description: t("forms.pleaseTryAgain"),
           variant: "destructive",
         });
         logger.error("Form submission error", { error: submitError, tags: ["error"] });
@@ -396,26 +398,28 @@ export default function FormFillDialog({
       }
 
       toast(
-        taskFailed
+        offline
           ? {
-              title: "Form saved",
-              description: "The form was saved, but the task was not.",
-              variant: "destructive",
+              title: t("forms.savedOffline"),
+              description: t("forms.savedOfflineHelp"),
             }
-          : {
-              title: "Response submitted",
-              description: "Your form was submitted successfully.",
-            },
+          : taskFailed
+            ? {
+                title: t("forms.formSaved"),
+                description: t("forms.handoverTaskFailed"),
+                variant: "destructive",
+              }
+            : {
+                title: t("forms.responseSubmitted"),
+                description: t("forms.responseSubmittedHelp"),
+              },
       );
       onSubmitted?.();
       wizard.setCurrentStepIndex(steps.length - 1);
     } catch (err) {
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : "Unable to submit form. Please check your connection and try again.";
       toast({
-        title: "Submission failed",
-        description: errorMessage,
+        title: t("forms.submissionFailed"),
+        description: t("forms.pleaseTryAgain"),
         variant: "destructive",
       });
       logger.error("Form submission error", { error: err, tags: ["error"] });
@@ -449,9 +453,16 @@ export default function FormFillDialog({
     }
     return next;
   }, [fieldTranslations, formValues, orderedFields]);
+  const formulaData = useMemo(
+    () => formulaAnswerMap(orderedFields, formValues),
+    [formValues, orderedFields],
+  );
   const reviewSections = useMemo(
-    () => buildReviewSections(reviewBuckets, reviewValues, visibleFields),
-    [reviewBuckets, reviewValues, visibleFields],
+    () =>
+      buildReviewSections(reviewBuckets, reviewValues, visibleFields).map(
+        (section) => ({ ...section, title: t(section.title) }),
+      ),
+    [reviewBuckets, reviewValues, t, visibleFields],
   );
 
   const metaCardProps = useMemo(() => {
@@ -462,20 +473,20 @@ export default function FormFillDialog({
     const localTime = new Date().toLocaleString();
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return {
-      title: content.title || "Form response",
+      title: content.title || t("forms.formResponse"),
       userInitials: initials,
       userName,
       timestamp: localTime,
       timezone: timeZone,
-      entryId: submissionId ? `#${submissionId.slice(0, 6)}` : "#Draft",
-      statusLabel: submissionId ? "Completed" : "Draft",
+      entryId: submissionId ? `#${submissionId.slice(0, 6)}` : t("forms.draftEntry"),
+      statusLabel: submissionId ? t("forms.statusCompleted") : t("forms.statusDraft"),
     };
-  }, [content.title, submissionId, user]);
+  }, [content.title, submissionId, t, user]);
 
   const handleExport = () => {
     void exportFormResponseToPdf({
       headerTitle: content.title,
-      headerSubtitle: content.description ?? "Form response preview",
+      headerSubtitle: content.description ?? t("forms.formResponsePreview"),
       meta: metaCardProps,
       sections: reviewSections,
     });
@@ -503,7 +514,7 @@ export default function FormFillDialog({
         <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-sm text-destructive">
           <p className="font-semibold">{t("forms.unableToLoadFormFields")}</p>
           <p className="mt-1 text-muted-foreground">
-            {error instanceof Error ? error.message : "Please try again."}
+            {t("forms.pleaseTryAgain")}
           </p>
           <Button variant="outline" className="mt-4" onClick={() => refetch()}>
             {t("forms.tryAgain")}</Button>
@@ -524,7 +535,7 @@ export default function FormFillDialog({
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-foreground">
-                {content.title || "Form response"}
+                {content.title || t("forms.formResponse")}
               </h3>
               {content.description && (
                 <p className="text-sm text-muted-foreground">
@@ -546,6 +557,7 @@ export default function FormFillDialog({
                 key={field.id}
                 field={field}
                 form={form}
+                formulaData={formulaData}
                 translation={fieldTranslations.get(field.id) ?? null}
               />
             ))}
@@ -555,8 +567,8 @@ export default function FormFillDialog({
         return (
           <div className="space-y-6">
             <FormReviewLayout
-              headerTitle={content.title || "Form response"}
-              headerSubtitle="Preview your answers before submitting."
+              headerTitle={content.title || t("forms.formResponse")}
+              headerSubtitle={t("forms.previewAnswers")}
               meta={metaCardProps}
               sections={reviewSections}
             />
@@ -597,9 +609,9 @@ export default function FormFillDialog({
       >
         <div className="flex h-full flex-col">
           <WizardTopBar
-            title={content.title || "Fill form"}
+            title={content.title || t("forms.fillFormTitle")}
             description={
-              content.description || "Follow the guided steps to complete the form."
+              content.description || t("forms.fillFormHelp")
             }
             control={content.control}
             onToggleOriginal={content.toggle}

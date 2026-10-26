@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Loader2, Trash2 } from "lucide-react";
-import { formsTableScroller } from "@/features/forms/utils/formsSurface";
+import { formsTableMinWidth, formsTableScroller } from "@/features/forms/utils/formsSurface";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -36,6 +36,8 @@ interface FormsSectionProps {
   onEdit: (formId: string) => void;
   onDelete?: (formId: string) => void;
   onPublish?: (formId: string) => void;
+  onArchive?: (formId: string) => void;
+  onRestore?: (formId: string) => void;
   onViewSubmissions?: (formId: string) => void;
 }
 
@@ -45,12 +47,14 @@ export function FormsSection({
   loading,
   refreshing = false,
   canEdit = true,
-  emptyMessage = "No forms to display.",
+  emptyMessage,
   translations,
   onFill,
   onEdit,
   onDelete,
   onPublish,
+  onArchive,
+  onRestore,
   onViewSubmissions,
 }: FormsSectionProps) {
   const { t } = useTranslation();
@@ -109,7 +113,7 @@ export function FormsSection({
           </div>
         ) : forms.length === 0 ? (
           <div className="p-6 text-sm text-muted-foreground">
-            {emptyMessage}
+            {emptyMessage ?? t("forms.noFormsToDisplay")}
           </div>
         ) : (
           <div className={`relative ${formsTableScroller}`}>
@@ -119,9 +123,9 @@ export function FormsSection({
                 {t("forms.syncing")}</div>
             )}
             <Table
-              className={
-                refreshing ? "opacity-60 transition-opacity" : undefined
-              }
+              className={`${formsTableMinWidth} ${
+                refreshing ? "opacity-60 transition-opacity" : ""
+              }`}
             >
               <TableHeader>
                 <TableRow>
@@ -158,19 +162,23 @@ export function FormsSection({
                         );
                       })()}
                     </TableCell>
-                    <TableCell>{getTypeLabel(form)}</TableCell>
+                    <TableCell>{getTypeLabel(form, t("forms.general"))}</TableCell>
                     <TableCell>
-                      <Badge
-                        className={`${getStatusColor(form.status)} capitalize`}
-                      >
-                        {form.status}
+                      <Badge className={getStatusColor(form.status)}>
+                        {t(
+                          form.status === "published"
+                            ? "forms.statusPublished"
+                            : form.status === "archived"
+                              ? "forms.statusArchived"
+                              : "forms.statusDraft",
+                        )}
                       </Badge>
                     </TableCell>
                     <TableCell>{formatDate(form.created_at)}</TableCell>
                     <TableCell>
                       {formatDate(form.updated_at || form.created_at)}
                     </TableCell>
-                    <TableCell>{getOwnerName(form)}</TableCell>
+                    <TableCell>{getOwnerName(form, t("forms.unassigned"))}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap justify-end gap-1">
                         <Button
@@ -199,6 +207,26 @@ export function FormsSection({
                             onClick={() => onPublish(form.id)}
                           >
                             {t("forms.publishForm")}
+                          </Button>
+                        ) : null}
+                        {canEdit && form.status !== "archived" && onArchive ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-11"
+                            onClick={() => onArchive(form.id)}
+                          >
+                            {t("forms.archiveForm")}
+                          </Button>
+                        ) : null}
+                        {canEdit && form.status === "archived" && onRestore ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-11"
+                            onClick={() => onRestore(form.id)}
+                          >
+                            {t("forms.restoreForm")}
                           </Button>
                         ) : null}
                         {canEdit ? (

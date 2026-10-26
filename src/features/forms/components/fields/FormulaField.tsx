@@ -425,26 +425,19 @@ export function FormulaField({
 // For form builder preview
 export function FormulaFieldPreview({
   label: labelProp,
-  description = "Automatically calculated based on cash denominations",
+  description,
   className = "",
 }: Partial<FormulaFieldProps>) {
   const { t } = useTranslation();
-  const label = labelProp ?? t("forms.totalCashCount");
-  const sampleFields = [
-    { label: "$20 Bills", name: "twenty_bills", type: "number" },
-    { label: "$10 Bills", name: "ten_bills", type: "number" },
-    { label: "$5 Bills", name: "five_bills", type: "number" },
-    { label: "$1 Bills", name: "one_bills", type: "number" },
-  ];
+  const label = labelProp ?? t("forms.fieldFormula");
 
   return (
     <FormulaField
       label={label}
       description={description}
-      formula="{twenty_bills} * 20 + {ten_bills} * 10 + {five_bills} * 5 + {one_bills} * 1"
-      formData={{ twenty_bills: 3, ten_bills: 5, five_bills: 4, one_bills: 12 }}
-      availableFields={sampleFields}
-      isBuilding={true}
+      formula=""
+      formData={{}}
+      availableFields={[]}
       className={className}
     />
   );
