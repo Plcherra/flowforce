@@ -17,7 +17,7 @@ import {
 export function useReminders() {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const { toast } = useToast();
@@ -130,14 +130,14 @@ export function useReminders() {
       await invalidatePerformanceDataset();
 
       toast({
-        title: "Success",
-        description: "Reminder deleted successfully.",
+        title: t("tasks.successTitle"),
+        description: t("tasks.reminderDeleted"),
       });
     } catch (error) {
       logger.error("Error deleting reminder:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to delete reminder.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.reminderDeleteFailed"),
         variant: "destructive",
       });
     }
@@ -173,7 +173,7 @@ export function useReminders() {
       if (reminder.notification_methods.includes("browser")) {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification(copy?.title ?? reminder.title, {
-            body: (copy?.description ?? reminder.description) || "Reminder notification",
+            body: (copy?.description ?? reminder.description) || t("tasks.reminderNotification"),
             icon: "/favicon.ico",
           });
         }
@@ -210,14 +210,14 @@ export function useReminders() {
       });
 
       toast({
-        title: "Success",
-        description: "Reminder marked as completed.",
+        title: t("tasks.successTitle"),
+        description: t("tasks.reminderCompletedHelp"),
       });
     } catch (error) {
       logger.error("Error marking reminder as completed", { error });
       toast({
-        title: "Error",
-        description: "Failed to update reminder.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.reminderUpdateFailed"),
         variant: "destructive",
       });
     }

@@ -1,5 +1,6 @@
 import { isPast, isToday } from "date-fns";
 import { normalizeStatus } from "./normalization";
+import { readAssigneeIds } from "./shiftTaskWrite";
 
 export type ReadinessFilter = "overdue" | "unassigned" | "due";
 
@@ -14,6 +15,7 @@ interface ReadinessTask {
   due_date?: string | null;
   status?: string | null;
   assigned_to?: string | null;
+  links?: unknown;
 }
 
 function isClosed(status?: string | null) {
@@ -37,7 +39,8 @@ export function isDueTodayTask(task: ReadinessTask): boolean {
 }
 
 export function isUnassignedTask(task: ReadinessTask): boolean {
-  return !task.assigned_to;
+  if (task.assigned_to) return false;
+  return readAssigneeIds(task.links, null).length === 0;
 }
 
 export function readinessCounts(tasks: ReadinessTask[]) {

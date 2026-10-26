@@ -136,8 +136,7 @@ export function CreateReminderDialog({
       });
 
       toast({
-        title: "Success",
-        description: "Reminder created successfully.",
+        title: t("tasks.reminderCreated"),
       });
 
       // Reset form
@@ -161,8 +160,8 @@ export function CreateReminderDialog({
     } catch (error) {
       logger.error("Error creating reminder:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to create reminder. Please try again.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.reminderFailed"),
         variant: "destructive",
       });
     } finally {
@@ -172,7 +171,7 @@ export function CreateReminderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] overflow-y-auto p-4 sm:max-w-[500px] sm:p-6">
         <DialogHeader>
           <DialogTitle>{t("tasks.createReminder")}</DialogTitle>
           <DialogDescription>
@@ -210,7 +209,7 @@ export function CreateReminderDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t("tasks.reminderTime")}</Label>
               <Select
@@ -255,7 +254,7 @@ export function CreateReminderDialog({
           </div>
 
           {reminderInterval === "custom" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("tasks.reminderDate")}</Label>
                 <Popover>
@@ -267,7 +266,7 @@ export function CreateReminderDialog({
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {reminderDate
                         ? format(reminderDate, "PPP")
-                        : "Pick a date"}
+                        : t("tasks.pickDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -355,7 +354,7 @@ export function CreateReminderDialog({
               {t("tasks.chooseHowYouWantToReceiveThisReminder")}
             </p>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
                 className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                   formData.notification_methods.includes("in_app")
@@ -429,12 +428,12 @@ export function CreateReminderDialog({
               {formData.notification_methods.map((method) => (
                 <Badge key={method} variant="secondary" className="text-xs">
                   {method === "in_app"
-                    ? "In-App"
+                    ? t("tasks.inApp")
                     : method === "browser"
-                      ? "Browser"
+                      ? t("tasks.browserPush")
                       : method === "email"
-                        ? "Email"
-                        : "Mobile"}
+                        ? t("tasks.email")
+                        : t("tasks.mobilePush")}
                 </Badge>
               ))}
             </div>
@@ -542,7 +541,7 @@ export function CreateReminderDialog({
                 formData.notification_methods.length === 0
               }
             >
-              {loading ? "Creating..." : "Create Reminder"}
+              {loading ? t("tasks.creating") : t("tasks.createReminder")}
             </Button>
           </DialogFooter>
         </form>

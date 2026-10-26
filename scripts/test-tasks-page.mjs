@@ -82,6 +82,9 @@ const { runDraftInboxTests } = importTs(
 const { runTaskAssigneeScopeTests } = importTs(
   "../src/features/tasks/utils/taskAssigneeScope.test.ts",
 );
+const { runTaskAudienceTests } = importTs(
+  "../src/features/tasks/utils/taskAudience.test.ts",
+);
 const { runTaskCreateGrantStoreTests } = importTs(
   "../src/features/roles/constants/taskCreateGrantStore.test.ts",
 );
@@ -143,6 +146,7 @@ runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();
 runDraftInboxTests();
 runTaskAssigneeScopeTests();
+runTaskAudienceTests();
 runTaskCreateGrantStoreTests();
 runMyShiftReloadTests();
 runFormShiftLinkTests();

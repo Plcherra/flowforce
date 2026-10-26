@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { buildTaskExecutionSummary } from "@/features/tasks/utils/taskExecutionReadiness";
+import { translatedWarningLabel } from "@/features/tasks/utils/taskCopy";
 
 interface TaskExecutionReadinessPanelProps {
   tasks: TaskWithRelations[];
@@ -30,11 +31,11 @@ export function TaskExecutionReadinessPanel({
           <li key={issue.id}>
             <button
               type="button"
-              className="flex w-full items-baseline gap-3 px-3 py-2 text-left text-sm hover:bg-muted/50"
+              className="flex min-h-11 w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-muted/50"
               onClick={() => issue.taskId && onOpenTask(issue.taskId)}
             >
               <span className="shrink-0 text-xs font-medium text-muted-foreground">
-                {issue.label}
+                {translatedWarningLabel(t, issue.label)}
               </span>
               <span className="min-w-0 truncate">{issue.detail}</span>
             </button>

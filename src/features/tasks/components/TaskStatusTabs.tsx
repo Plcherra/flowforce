@@ -3,9 +3,11 @@
  */
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TaskStatusFilter } from "../types/filters";
-import { statusDefinition, type StatusTabItem } from "../utils/statusTabLayout";
+import type { StatusTabItem } from "../utils/statusTabLayout";
+import { translatedStatusHint, translatedStatusLabel } from "../utils/taskCopy";
 
 interface TaskStatusTabsProps {
   statusFilter: TaskStatusFilter;
@@ -18,6 +20,7 @@ export function TaskStatusTabs({
   onStatusChange,
   statusTabs,
 }: TaskStatusTabsProps) {
+  const { t } = useTranslation();
   return (
     <Tabs
       value={statusFilter}
@@ -29,11 +32,11 @@ export function TaskStatusTabs({
           <TabsTrigger
             key={tab.value}
             value={tab.value}
-            title={statusDefinition(tab.value)}
-            className="flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-2 py-1 text-sm data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
+            title={translatedStatusHint(t, tab.value)}
+            className="flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-2 py-1 text-sm data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
             data-testid={`tasks-status-${tab.value}`}
           >
-            <span>{tab.label}</span>
+            <span>{translatedStatusLabel(t, tab.value, tab.label)}</span>
             <span className="text-xs font-medium tabular-nums text-muted-foreground">
               {tab.count}
             </span>
