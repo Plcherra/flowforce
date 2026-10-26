@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 
-import { parseCompanyUpdateRows } from "./repositories/companyUpdatesRepository";
+import {
+  parseCompanyUpdateReactions,
+  parseCompanyUpdateRows,
+} from "./repositories/companyUpdatesRepository";
 
 const storedUpdate = {
   id: "1",
@@ -38,4 +41,13 @@ export function runCompanyUpdateRowTests() {
   assert.equal(counted.comments_count, 1);
   assert.equal(counted.views_count, 4);
   assert.equal(counted.is_pinned, true);
+
+  const reactions = parseCompanyUpdateReactions([
+    { update_id: "u1", reaction_type: "like" },
+    { update_id: "u1", reaction_type: "nope" },
+    { updateid: "u1", reaction_type: "view" },
+  ]);
+  assert.equal(reactions.length, 1);
+  assert.equal(reactions[0]?.update_id, "u1");
+  assert.equal(reactions[0]?.reaction_type, "like");
 }
