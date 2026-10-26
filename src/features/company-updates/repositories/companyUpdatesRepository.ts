@@ -108,7 +108,7 @@ const engagementSchema = z.object({
 
 const engagementRowSchema = z.object({
   id: z.string(),
-  updateid: z.string(),
+  update_id: z.string(),
   company_id: z.string(),
   likes_count: z.number().nullable().optional(),
   comments_count: z.number().nullable().optional(),
@@ -165,13 +165,13 @@ const companyUpdateRowSchema = z.object({
 });
 
 const reactionRowSchema = z.object({
-  updateid: z.string(),
+  update_id: z.string(),
   reaction_type: z.union([z.literal("like"), z.literal("view")]),
 });
 
 const commentRowSchema = z.object({
   id: z.string(),
-  updateid: z.string(),
+  update_id: z.string(),
   company_id: z.string(),
   author_id: z.string(),
   content: z.string(),
@@ -294,17 +294,23 @@ const listReactions = async ({
 
   const { data, error } = await supabase
     .from("company_update_reactions")
-    .select("updateid, reaction_type")
+    .select("update_id, reaction_type")
     .eq("company_id", companyId)
     .eq("user_id", userId)
-    .in("updateid", updateIds);
+    .in("update_id", updateIds);
 
   if (error) {
     throw error;
   }
 
-  return parseSupabaseData(z.array(reactionRowSchema), data ?? []);
+  return parseCompanyUpdateReactions(data);
 };
+
+export const parseCompanyUpdateReactions = (data: unknown) =>
+  (Array.isArray(data) ? data : []).flatMap((row) => {
+    const parsed = reactionRowSchema.safeParse(row);
+    return parsed.success ? [parsed.data] : [];
+  });
 
 const listComments = async ({ companyId, updateIds }: ListCommentsParams) => {
   if (updateIds.length === 0) {
@@ -317,7 +323,7 @@ const listComments = async ({ companyId, updateIds }: ListCommentsParams) => {
       "*, author:profiles!company_update_comments_author_id_fkey (id, first_name, last_name, avatar_url)",
     )
     .eq("company_id", companyId)
-    .in("updateid", updateIds)
+    .in("update_id", updateIds)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -501,15 +507,27 @@ const upsertReaction = async ({
   userId,
   reactionType,
 }: ReactionMutationParams) => {
-  const { error } = await supabase.from("company_update_reactions").upsert(
-    {
-      company_id: companyId,
-      updateid: updateId,
-      user_id: userId,
-      reaction_type: reactionType,
-    },
-    { onConflict: "updateid,user_id,reaction_type" },
-  );
+  const existing = await supabase
+    .from("company_update_reactions")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("update_id", updateId)
+    .eq("user_id", userId)
+    .eq("reaction_type", reactionType)
+    .limit(1);
+  if (existing.error) {
+    throw existing.error;
+  }
+  if ((existing.data ?? []).length > 0) {
+    return;
+  }
+
+  const { error } = await supabase.from("company_update_reactions").insert({
+    company_id: companyId,
+    update_id: updateId,
+    user_id: userId,
+    reaction_type: reactionType,
+  });
 
   if (error) {
     throw error;
@@ -526,7 +544,7 @@ const deleteReaction = async ({
     .from("company_update_reactions")
     .delete()
     .eq("company_id", companyId)
-    .eq("updateid", updateId)
+    .eq("update_id", updateId)
     .eq("user_id", userId)
     .eq("reaction_type", reactionType);
 
@@ -548,7 +566,7 @@ const createComment = async ({
       const { error } = await supabase.from("company_update_comments").insert({
         id,
         company_id: companyId,
-        updateid: updateId,
+        update_id: updateId,
         author_id: userId,
         content,
       });

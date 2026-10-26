@@ -140,7 +140,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
     const set = new Set<string>();
     (reactionsQuery.data ?? []).forEach((row) => {
       if (row.reaction_type === "like") {
-        set.add(row.updateid);
+        set.add(row.update_id);
       }
     });
     return set;
@@ -150,7 +150,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
     const set = new Set<string>();
     (reactionsQuery.data ?? []).forEach((row) => {
       if (row.reaction_type === "view") {
-        set.add(row.updateid);
+        set.add(row.update_id);
       }
     });
     return set;
@@ -179,7 +179,7 @@ export function useCompanyUpdates(options?: UseCompanyUpdateOptions) {
   return {
     updates,
     loading: updatesQuery.isLoading || reactionsQuery.isLoading,
-    error: updatesQuery.error || reactionsQuery.error || null,
+    error: updatesQuery.error ?? null,
     pagination: {
       page,
       pageSize,
