@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type { FormField, FormFieldType } from "@/types/forms";
 
 export interface FormulaDef {
@@ -57,7 +56,6 @@ const randomId = () => {
 };
 
 export const useFormSchemaStore = create<FormSchemaState>()(
-  persist(
     (set, get) => ({
       schema: null,
       activeSectionId: null,
@@ -234,11 +232,6 @@ export const useFormSchemaStore = create<FormSchemaState>()(
         set({ schema: { ...current, metadata } });
       },
     }),
-    {
-      name: "form-schema-store",
-      partialize: (state) => ({ schema: state.schema }),
-    },
-  ),
 );
 
 export const useFormSchema = () =>

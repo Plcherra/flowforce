@@ -634,7 +634,10 @@ test.describe('Scheduling smoke (Playwright)', () => {
       .getByTestId('schedule-day-event-notice')
       .filter({ hasText: '1 on this day' });
     await expect(notice.first()).toBeVisible({ timeout: 15_000 });
-    await expect(notice.first()).toHaveAttribute('href', '/app/calendar');
+    await expect(notice.first()).toHaveAttribute(
+      'href',
+      /\/app\/calendar\?date=\d{4}-\d{2}-\d{2}(&event=|$)/,
+    );
     await expect(page.getByText('Vendor · Health Inspection')).toHaveCount(0);
   });
 
@@ -982,7 +985,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.locator('[data-index]').first()).toBeVisible();
   });
 
-  test('shift details links a visit, adds a task, and saves a template', async ({ page }) => {
+  test('shift details points events at calendar, adds a task, and saves a template', async ({ page }) => {
     if (!seedHandles) return;
 
     await page.getByTestId(`schedule-shift-${seedHandles.shiftId}`).click();
@@ -992,13 +995,12 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(details.getByRole('button', { name: 'Close shift details' })).toHaveCount(1);
 
     await expect(details.getByRole('button', { name: 'Add vendor visit' })).toHaveCount(0);
-    await expect(details.getByTestId('schedule-day-event-notice')).toBeVisible();
-    await expect(details.getByTestId('schedule-day-event-notice')).toHaveAttribute(
-      'href',
-      '/app/calendar',
-    );
+    await expect(details.getByTestId('schedule-day-event-notice')).toHaveCount(0);
 
     await details.getByRole('tab', { name: 'Tasks' }).click();
+    await expect(details.getByText('Priority')).toHaveCount(0);
+    await expect(details.getByLabel('Minutes')).toHaveCount(0);
+    await expect(details.getByRole('button', { name: 'Choose a form' })).toBeVisible();
     await expect(details.getByRole('heading', { name: 'Lists on this shift' })).toBeVisible();
     await expect(details.getByText('No list attached.')).toBeVisible();
     await expect(details.getByRole('heading', { name: 'Shift tasks' })).toBeVisible();

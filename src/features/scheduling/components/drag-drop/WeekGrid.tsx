@@ -387,7 +387,7 @@ export function WeekGrid({
         events.push(event);
       }
     }
-    return groupEventsByDay(events, vendorEventStart);
+    return groupEventsByDay<VendorEventWithMetadata>(events, vendorEventStart);
   }, [looseVendorEventsByDay, vendorEventsByShift]);
 
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
@@ -474,18 +474,25 @@ export function WeekGrid({
           <div className="p-2 text-sm font-medium text-muted-foreground">
             {t("schedule.employee")}
           </div>
-          {weekDays.map((day) => (
-            <div key={day.toISOString()} className="p-2 text-center border-l">
-              <div className="font-medium text-sm">{format(day, "EEE")}</div>
-              <div className="text-xs text-muted-foreground">
-                {format(day, "MMM d")}
+          {weekDays.map((day) => {
+            const dayKey = dayIso(day);
+            const dayEvents = eventsByDay.get(dayKey) ?? [];
+            const onlyEvent = dayEvents.length === 1 ? dayEvents[0] : null;
+            return (
+              <div key={day.toISOString()} className="p-2 text-center border-l">
+                <div className="font-medium text-sm">{format(day, "EEE")}</div>
+                <div className="text-xs text-muted-foreground">
+                  {format(day, "MMM d")}
+                </div>
+                <DayEventNotice
+                  count={dayEvents.length}
+                  date={dayKey}
+                  eventId={onlyEvent?.linked_event_id || onlyEvent?.id || null}
+                  className="mt-1"
+                />
               </div>
-              <DayEventNotice
-                count={eventsByDay.get(dayIso(day))?.length ?? 0}
-                className="mt-1"
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-8 border-b bg-muted/20 relative z-0">

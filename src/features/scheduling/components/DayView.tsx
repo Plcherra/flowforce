@@ -13,7 +13,7 @@ import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useMemo, useState } from "react";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor } from "@/utils/schedulingUtils";
-import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
+import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 
 interface DayViewProps {
@@ -36,6 +36,8 @@ export function DayView({
   isMobile = false,
   hideShiftActions = false,
   overlayEvents = [],
+  onSelectEvent,
+  selectedEventId = null,
 }: DayViewProps) {
   const { t } = useTranslation();
   const [showAddShift, setShowAddShift] = useState(false);
@@ -63,9 +65,18 @@ export function DayView({
         <p className="text-muted-foreground">{dayShifts.length} shifts scheduled</p>
       </div>
 
-      <div className="mb-6">
-        <DayEventNotice count={dayEvents.length} className="text-xs" />
-      </div>
+      {dayEvents.length > 0 ? (
+        <div className="mb-6 grid gap-2 sm:grid-cols-2">
+          {dayEvents.map((event) => (
+            <CalendarEventBlock
+              key={event.id}
+              event={event}
+              selected={selectedEventId === event.id}
+              onSelect={onSelectEvent}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <div
         className={`grid grid-cols-1 ${isMobile ? "" : "lg:grid-cols-2"} gap-${isMobile ? "4" : "6"}`}

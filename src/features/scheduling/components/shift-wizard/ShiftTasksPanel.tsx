@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PeoplePicker } from "@/components/people/PeoplePicker";
 import type { PickerPerson } from "@/components/people/peoplePickerFilter";
 import { useEmployees } from "@/features/employees/hooks/useEmployees";
@@ -34,7 +27,7 @@ import {
 } from "@/features/tasks/utils/taskSchedule";
 import type { Json } from "@/integrations/supabase/public-types";
 import type { ShiftTask } from "./types";
-import { attachableShiftForms } from "@/features/forms/utils/formLifecycle";
+import { ShiftFormPicker } from "./ShiftFormPicker";
 
 type SavedTask = ShiftTask & {
   formId: string | null;
@@ -93,27 +86,10 @@ export function ShiftTasksPanel({
   const { employees, getEmployeeFullName } = useEmployees({ companyId, enabled: Boolean(companyId) });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<ShiftTaskPriority>("medium");
-  const [minutes, setMinutes] = useState("30");
   const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const formsQuery = useQuery({
-    queryKey: ["shift-task-forms", companyId],
-    enabled: Boolean(companyId),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("forms")
-        .select("id, title, status")
-        .eq("company_id", companyId!)
-        .eq("status", "published")
-        .order("title", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
 
   const tasksQuery = useQuery({
     queryKey: ["shift-task-attachments", companyId, scheduleId],
@@ -223,8 +199,8 @@ export function ShiftTasksPanel({
     const saved = await saveTask({
       title: title.trim(),
       description,
-      priority,
-      estimatedMinutes: Number(minutes) || 0,
+      priority: "medium",
+      estimatedMinutes: 0,
       formId: null,
       assigneeIds,
       startsAt: fromDatetimeLocalValue(startsAt),
@@ -236,8 +212,6 @@ export function ShiftTasksPanel({
     setAssigneeIds([]);
     setStartsAt("");
     setEndsAt("");
-    setPriority("medium");
-    setMinutes("30");
   };
 
   const linkForm = async (form: { id: string; title: string | null }) => {
@@ -286,7 +260,7 @@ export function ShiftTasksPanel({
                   </p>
                   {task.formId ? (
                     <Link to={`/app/forms?form=${task.formId}`} className="text-xs underline">
-                      {t("schedule.openLinkedForm")}
+                      {t("tasks.fillAndSend")}
                     </Link>
                   ) : null}
                 </div>
@@ -313,28 +287,6 @@ export function ShiftTasksPanel({
           rows={2}
         />
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="grid gap-1">
-            <Label>{t("tasks.priority")}</Label>
-            <Select value={priority} onValueChange={(value) => setPriority(value as ShiftTaskPriority)}>
-              <SelectTrigger className="min-h-11">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">{t("tasks.low")}</SelectItem>
-                <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
-                <SelectItem value="high">{t("tasks.high")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-1">
-            <Label htmlFor="shift-task-minutes">{t("schedule.minutes")}</Label>
-            <Input
-              id="shift-task-minutes"
-              inputMode="numeric"
-              value={minutes}
-              onChange={(event) => setMinutes(event.target.value)}
-            />
-          </div>
           <div className="grid gap-1">
             <Label htmlFor="shift-task-start">{t("tasks.starts")}</Label>
             <Input
@@ -364,37 +316,11 @@ export function ShiftTasksPanel({
           <h3 className="text-sm font-semibold">{t("tasks.shiftForms")}</h3>
           <p className="text-sm text-muted-foreground">{t("tasks.shiftFormsHelp")}</p>
         </div>
-        {formsQuery.isSuccess && attachableShiftForms(formsQuery.data ?? []).length === 0 ? (
-          <p className="text-xs text-muted-foreground">{t("tasks.publishAFormToAttach")}</p>
-        ) : (
-          <ul className="space-y-2">
-            {attachableShiftForms(formsQuery.data ?? []).map((form) => {
-              const linked = tasks.some((task) => task.formId === form.id);
-              return (
-                <li
-                  key={form.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-border/70 px-3 py-2 text-sm"
-                >
-                  <span className="min-w-0 truncate font-medium">{form.title}</span>
-                  {linked ? (
-                    <span className="text-xs text-muted-foreground">{t("tasks.linkedToThisShift")}</span>
-                  ) : (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="min-h-11"
-                      disabled={saving}
-                      onClick={() => void linkForm(form)}
-                    >
-                      {t("tasks.linkFormToShift")}
-                    </Button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <ShiftFormPicker
+          disabled={saving}
+          linkedIds={tasks.flatMap((task) => (task.formId ? [task.formId] : []))}
+          onLink={(form) => void linkForm(form)}
+        />
       </div>
     </section>
   );

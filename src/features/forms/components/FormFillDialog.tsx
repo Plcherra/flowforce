@@ -591,7 +591,10 @@ export default function FormFillDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none bg-background p-0 shadow-none sm:rounded-none">
+      <DialogContent
+        hideClose
+        className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none bg-background p-0 shadow-none sm:rounded-none"
+      >
         <div className="flex h-full flex-col">
           <WizardTopBar
             title={content.title || "Fill form"}

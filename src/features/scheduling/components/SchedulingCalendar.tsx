@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "@/lib/router-adapter";
 import {
   endOfDay,
   endOfMonth,
@@ -63,6 +64,10 @@ export function SchedulingCalendar({
   onOverlayEventSelect,
 }: SchedulingCalendarProps = {}) {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const requestedDate = searchParams.get("date");
+  const requestedEvent = searchParams.get("event");
+  const appliedEventRef = useRef<string | null>(null);
   const { shifts, loading, error: schedulingError } = useScheduling();
   const isMobile = useIsMobile();
   const [currentView, setCurrentView] = useState<ViewType>(
@@ -173,13 +178,39 @@ export function SchedulingCalendar({
   }, [filteredShifts, onShiftSelect, selectedShift]);
 
   useEffect(() => {
+    if (!requestedDate || !/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) return;
+    const next = new Date(`${requestedDate}T12:00:00`);
+    if (Number.isNaN(next.getTime())) return;
+    setSelectedDate(next);
+  }, [requestedDate]);
+
+  useEffect(() => {
+    if (!requestedEvent || eventsLoading) return;
+    if (appliedEventRef.current === requestedEvent) return;
     if (
-      selectedEventId &&
-      !overlayEvents.some((event) => event.id === selectedEventId)
+      requestedDate &&
+      !/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)
     ) {
+      return;
+    }
+    if (requestedDate) {
+      const visible = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+      if (visible !== requestedDate) return;
+    }
+    if (overlayEvents.some((event) => event.id === requestedEvent)) {
+      appliedEventRef.current = requestedEvent;
+      setSelectedShift(null);
+      setSelectedEventId(requestedEvent);
+    }
+  }, [eventsLoading, overlayEvents, requestedDate, requestedEvent, selectedDate]);
+
+  useEffect(() => {
+    if (eventsLoading || !selectedEventId) return;
+    if (selectedEventId === requestedEvent && appliedEventRef.current !== requestedEvent) return;
+    if (!overlayEvents.some((event) => event.id === selectedEventId)) {
       setSelectedEventId(null);
     }
-  }, [overlayEvents, selectedEventId]);
+  }, [eventsLoading, overlayEvents, requestedEvent, selectedEventId]);
 
   const handleDateChange = (direction: "prev" | "next") => {
     const newDate = new Date(selectedDate);
@@ -317,7 +348,7 @@ export function SchedulingCalendar({
       {!setupMissing && !externalDetails && (
         <EventDetailsDrawer
           event={selectedEvent}
-          open={Boolean(selectedEventId)}
+          open={Boolean(selectedEvent)}
           onOpenChange={(open) => {
             if (!open) {
               handleSelectEvent(null);

@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import { Calendar, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 import type { ShiftTemplate } from "./types";
 
@@ -61,11 +60,6 @@ export function ScheduleTemplatesPanel({
             </div>
           );
         })}
-
-        <div className="mt-4 space-y-2 border-t pt-4">
-          <h3 className="text-sm font-semibold">{t("schedule.vendorVisits")}</h3>
-          <DayEventNotice className="text-xs" />
-        </div>
       </CardContent>
     </Card>
   );

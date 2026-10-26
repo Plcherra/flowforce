@@ -112,6 +112,9 @@ const { runPeoplePickerFilterTests } = importTs(
 const { runFormLifecycleTests } = importTs(
   "../src/features/forms/utils/formLifecycle.test.ts",
 );
+const { runFormFieldRowTests } = importTs(
+  "../src/features/forms/utils/formFieldRows.test.ts",
+);
 const { runFormTemplateTests } = importTs(
   "../src/features/forms/utils/formTemplates.test.ts",
 );
@@ -150,5 +153,6 @@ runCsvFormFieldsTests();
 runShiftTaskWriteTests();
 runPeoplePickerFilterTests();
 runFormLifecycleTests();
+runFormFieldRowTests();
 runFormTemplateTests();
 console.log("tasks page tests passed");

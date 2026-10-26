@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { KeyboardEvent } from "react";
-import { ClipboardList, Edit, Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { formsTableScroller } from "@/features/forms/utils/formsSurface";
 import { Card } from "@/components/ui/card";
 import {
@@ -57,16 +56,6 @@ export function FormsSection({
   const { t } = useTranslation();
   const skeletonRows = Array.from({ length: 3 });
 
-  const handleRowKeyDown = (
-    event: KeyboardEvent<HTMLTableRowElement>,
-    formId: string,
-  ) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onFill(formId);
-    }
-  };
-
   return (
     <section className="space-y-2">
       <h2 className="text-base font-semibold text-foreground">{title}</h2>
@@ -83,7 +72,7 @@ export function FormsSection({
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
                   {(canEdit || onViewSubmissions) && (
-                    <TableHead className="text-right">{t("common.edit")}</TableHead>
+                    <TableHead className="text-right">{t("forms.formActions")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
@@ -143,21 +132,13 @@ export function FormsSection({
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
                   {(canEdit || onViewSubmissions) && (
-                    <TableHead className="text-right">{t("common.edit")}</TableHead>
+                    <TableHead className="text-right">{t("forms.formActions")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {forms.map((form) => (
-                  <TableRow
-                    key={form.id}
-                    className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Open ${form.title} to fill`}
-                    onClick={() => onFill(form.id)}
-                    onKeyDown={(event) => handleRowKeyDown(event, form.id)}
-                  >
+                  <TableRow key={form.id}>
                     <TableCell>
                       <FormListTitle
                         formId={form.id}
@@ -190,17 +171,24 @@ export function FormsSection({
                       {formatDate(form.updated_at || form.created_at)}
                     </TableCell>
                     <TableCell>{getOwnerName(form)}</TableCell>
-                    <TableCell onClick={(event) => event.stopPropagation()}>
-                      <div className="flex justify-end gap-1">
+                    <TableCell>
+                      <div className="flex flex-wrap justify-end gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="min-h-11"
+                          onClick={() => onFill(form.id)}
+                        >
+                          {t("forms.fillForm")}
+                        </Button>
                         {onViewSubmissions ? (
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="min-h-11 min-w-11"
-                            aria-label={t("forms.viewSubmissions")}
+                            variant="outline"
+                            size="sm"
+                            className="min-h-11"
                             onClick={() => onViewSubmissions(form.id)}
                           >
-                            <ClipboardList className="h-4 w-4" />
+                            {t("forms.viewSubmissions")}
                           </Button>
                         ) : null}
                         {canEdit && form.status === "draft" && onPublish ? (
@@ -215,13 +203,12 @@ export function FormsSection({
                         ) : null}
                         {canEdit ? (
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="min-h-11 min-w-11"
-                            aria-label={t("forms.editForm")}
+                            variant="outline"
+                            size="sm"
+                            className="min-h-11"
                             onClick={() => onEdit(form.id)}
                           >
-                            <Edit className="h-4 w-4" />
+                            {t("forms.editForm")}
                           </Button>
                         ) : null}
                         {canEdit && onDelete ? (

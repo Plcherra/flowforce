@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText, User, Calendar } from "lucide-react";
+import { Link } from "@/lib/router-adapter";
 import { useForms } from "@/features/forms/hooks/useForms";
 import { useFormAnswerTranslations } from "@/features/forms/hooks/useFormAnswerTranslations";
 import FormFillDialog from "./FormFillDialog";
@@ -135,7 +136,12 @@ export default function FormSubmissionsDialog({
               </div>
             </div>
             <DialogDescription>
-              {t("forms.viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly")}</DialogDescription>
+              {t("forms.viewAndManageAllFormSubmissionsExportDataOrFillOutTheFormDirectly")}{" "}
+              {t("forms.submissionsFeedWork")}{" "}
+              <Link to="/app/analytics" className="underline">
+                {t("common.analytics")}
+              </Link>
+            </DialogDescription>
           </DialogHeader>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">

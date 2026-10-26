@@ -11,7 +11,7 @@ import type {
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor, calculateCoverageStats } from "@/utils/schedulingUtils";
-import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
+import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 import { useShiftTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
 import { ShiftGridCopy } from "@/features/scheduling/components/ShiftGridCopy";
@@ -32,9 +32,11 @@ export function WeekView({
   schedules,
   selectedDate,
   onSelectShift,
+  onSelectEvent,
   isMobile = false,
   overlayEvents = [],
   hideShiftActions = false,
+  selectedEventId = null,
   locationFilter,
 }: WeekViewProps) {
   const { t } = useTranslation();
@@ -106,10 +108,6 @@ export function WeekView({
                       {format(day, "d")}
                     </div>
                     <div className="mt-1">
-                      <DayEventNotice
-                        count={getEventsForDay(day).length}
-                        className="mb-1"
-                      />
                       <div className="text-xs text-muted-foreground">
                         {stats.totalHours}h
                       </div>
@@ -141,6 +139,14 @@ export function WeekView({
                 <h3 className="text-sm font-medium text-foreground">
                   {format(day, "EEEE, MMM d")}
                 </h3>
+                {getEventsForDay(day).map((event) => (
+                  <CalendarEventBlock
+                    key={event.id}
+                    event={event}
+                    selected={selectedEventId === event.id}
+                    onSelect={onSelectEvent}
+                  />
+                ))}
                 {dayShifts.length === 0 && (
                   <div className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
                     {t("schedule.noShiftsScheduled")}
@@ -265,7 +271,6 @@ export function WeekView({
                   >
                     {stats.totalHeadcount}/{stats.requiredHeadcount} staff
                   </div>
-                  <DayEventNotice count={getEventsForDay(day).length} />
                 </div>
               </div>
             </div>
@@ -319,9 +324,32 @@ export function WeekView({
           });
           const employees = Array.from(employeeMap.values());
 
+          const weekEvents = overlayEvents.length > 0;
           return (
             <div className="min-h-[600px]">
               <div className="grid grid-cols-8">
+                {weekEvents ? (
+                  <>
+                    <div className="flex items-center border-r border-b border-border bg-muted/30 p-3 text-sm font-medium">
+                      {t("common.events")}
+                    </div>
+                    {weekDays.map((day) => (
+                      <div
+                        key={`events-${day.toISOString()}`}
+                        className="border-r border-b border-border p-1"
+                      >
+                        {getEventsForDay(day).map((event) => (
+                          <CalendarEventBlock
+                            key={event.id}
+                            event={event}
+                            selected={selectedEventId === event.id}
+                            onSelect={onSelectEvent}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </>
+                ) : null}
                 {employees.map((employee) => (
                   <Fragment key={employee.id}>
                     <div className="border-r border-border bg-muted/30 p-3 flex items-center gap-2">

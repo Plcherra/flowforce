@@ -15,6 +15,7 @@ import {
 } from "@/features/forms/formContentFields";
 import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
 import { scheduleFormFieldTranslation } from "@/features/forms/scheduleFormField";
+import { parseFormFieldRows } from "@/features/forms/utils/formFieldRows";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([
@@ -56,30 +57,6 @@ const formRowSchema = z.object({
   settings: jsonSchema.nullable(),
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
-});
-
-const formFieldRowSchema = z.object({
-  id: z.string(),
-  company_id: z.string().nullable().optional(),
-  form_id: z.string().nullable(),
-  field_order: z.number().nullable(),
-  field_type: z.string().nullable() as z.ZodType<FormFieldRow["field_type"]>,
-  label: z.string().nullable(),
-  description: z.string().nullable(),
-  placeholder: z.string().nullable(),
-  is_required: z.boolean().nullable(),
-  options: jsonSchema.nullable(),
-  validation_rules: jsonSchema.nullable(),
-  min_value: z.number().nullable(),
-  max_value: z.number().nullable(),
-  step_value: z.number().nullable(),
-  formula_expression: z.string().nullable(),
-  dependent_fields: jsonSchema.nullable(),
-  rating_config: jsonSchema.nullable(),
-  scan_config: jsonSchema.nullable(),
-  media_config: jsonSchema.nullable(),
-  created_at: z.string().nullable(),
-  updated_at: z.string().nullable(),
 });
 
 const formSubmissionRowObjectSchema = z.object({
@@ -384,7 +361,7 @@ export async function fetchFormFields(
     throw error;
   }
 
-  return z.array(formFieldRowSchema).parse(data ?? []);
+  return parseFormFieldRows(data ?? []) as FormFieldRow[];
 }
 
 type SaveableFormField = Omit<
@@ -399,16 +376,28 @@ export async function replaceFormFields(
   sourceLocale?: AppLanguage,
 ): Promise<void> {
   await ensureCompanyScope(companyId);
-  const { error: deleteError } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("form_fields")
-    .delete()
+    .select("id")
     .eq("form_id", formId)
     .eq("company_id", companyId);
-  if (deleteError) {
-    throw deleteError;
-  }
+  if (existingError) throw existingError;
+  const previousIds = (existing ?? [])
+    .map((row) => row.id)
+    .filter((id): id is string => Boolean(id));
+
+  const removePrevious = async () => {
+    if (!previousIds.length) return;
+    const { error: deleteError } = await supabase
+      .from("form_fields")
+      .delete()
+      .in("id", previousIds)
+      .eq("company_id", companyId);
+    if (deleteError) throw deleteError;
+  };
 
   if (!fields.length) {
+    await removePrevious();
     return;
   }
 
@@ -426,6 +415,7 @@ export async function replaceFormFields(
   if (error) {
     throw error;
   }
+  await removePrevious();
   if (!sourceLocale) return;
   for (const row of data ?? []) {
     if (!row.id) continue;

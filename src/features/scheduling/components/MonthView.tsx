@@ -7,13 +7,13 @@ import {
   isSameDay,
   parseISO,
 } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useMemo, useState } from "react";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
+import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";
 
 interface MonthViewProps {
   schedules: ShiftWithAssignments[];
@@ -106,19 +106,13 @@ export function MonthView({
 
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((event) => (
-                    <div
+                    <CalendarEventBlock
                       key={event.id}
-                      className={`text-[10px] p-1 rounded border border-border/60 bg-background cursor-pointer ${
-                        selectedEventId === event.id
-                          ? "ring-1 ring-primary"
-                          : ""
-                      }`}
-                      onClick={() => handleEventClick(event.id)}
-                    >
-                      <div className="font-medium truncate">
-                        {event.title || "Session"}
-                      </div>
-                    </div>
+                      event={event}
+                      compact
+                      selected={selectedEventId === event.id}
+                      onSelect={handleEventClick}
+                    />
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="text-[10px] text-muted-foreground">
@@ -195,30 +189,13 @@ export function MonthView({
 
               <div className="space-y-1">
                 {dayEvents.slice(0, 3).map((event) => (
-                  <div
+                  <CalendarEventBlock
                     key={event.id}
-                    className={`flex items-center justify-between rounded border border-border/70 bg-background px-2 py-1 text-[11px] cursor-pointer ${
-                      selectedEventId === event.id ? "ring-1 ring-primary" : ""
-                    }`}
-                    onClick={() => handleEventClick(event.id)}
-                  >
-                    <div className="truncate">
-                      <span className="font-medium">
-                        {event.title || "Session"}
-                      </span>
-                      <span className="ml-1 text-xs text-muted-foreground">
-                        {format(new Date(event.start), "HH:mm")}
-                      </span>
-                    </div>
-                    {event.type && (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] capitalize"
-                      >
-                        {event.type}
-                      </Badge>
-                    )}
-                  </div>
+                    event={event}
+                    compact
+                    selected={selectedEventId === event.id}
+                    onSelect={handleEventClick}
+                  />
                 ))}
 
                 {dayEvents.length > 3 && (

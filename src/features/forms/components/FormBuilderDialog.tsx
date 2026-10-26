@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -54,6 +55,7 @@ export default function FormBuilderDialog({
 }: FormBuilderDialogProps) {
   const { t, i18n } = useTranslation();
   const { getFormFields, saveFormFields } = useForms();
+  const queryClient = useQueryClient();
   const { profile } = useProfile();
   const { toast } = useToast();
 
@@ -300,6 +302,7 @@ export default function FormBuilderDialog({
       }
 
       savedFieldCountRef.current = fields.length;
+      await queryClient.invalidateQueries({ queryKey: ["form-fields"] });
       toast({
         title: mode === "published" ? t("forms.formPublished") : t("forms.formSaved"),
         description: mode === "published" ? t("forms.formPublishedHelp") : t("forms.formSavedHelp"),
@@ -317,7 +320,10 @@ export default function FormBuilderDialog({
 
   return (
     <Dialog open={open} onOpenChange={requestClose}>
-      <DialogContent className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none">
+      <DialogContent
+        hideClose
+        className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none"
+      >
         <DialogHeader className="max-h-[40vh] shrink-0 space-y-1 overflow-y-auto border-b px-4 py-3 pr-12">
           <DialogTitle className="text-lg font-semibold">
             {t("forms.formEditor")}</DialogTitle>

@@ -239,6 +239,8 @@ export default function Forms() {
             <h1 className="text-xl font-semibold text-foreground">{t("common.forms")}</h1>
             <p className="text-sm text-muted-foreground">
               {t("forms.createAndManageDataCollectionForms")}</p>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              {t("forms.fillVersusManage")}</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-full max-w-xs space-y-1">

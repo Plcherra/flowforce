@@ -34,7 +34,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { RequestShiftSwapButton } from "@/features/scheduling/components/RequestShiftSwapButton";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
-import { DayEventNotice } from "@/features/scheduling/components/DayEventNotice";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/public-types";
 import {
@@ -538,9 +537,6 @@ export function ShiftDetailsPanel({
             ) : null}
             {/* Basic Information */}
             <div className="space-y-4">
-              <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
-                <DayEventNotice className="text-xs" />
-              </div>
               {conflictWarnings.length > 0 && (
                 <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/60 p-4">
                   <div className="flex items-center justify-between">

@@ -4,7 +4,7 @@ Scanned 2026-10-25 from the current app routes, `src/features`, `src/data/naviga
 
 ## Manual smoke
 
-Sign in at https://www.flowforce.uk. Refresh after the production deploy of `7ff6266f` finishes.
+Sign in at https://www.flowforce.uk. Refresh after the production deploy finishes.
 
 Desktop sidebar, top to bottom:
 
@@ -22,9 +22,9 @@ While you click through:
 1. Dashboard loads. Recent Activity still says activity tracking is coming soon.
 2. Scheduling opens the week. If the schedule query fails, the page says read-only preview mode.
 3. Tasks opens on My shift. The tabs are My shift and All tasks. There is no Setup tab. Creating a task has no linked goal.
-4. Scheduling week: assigned shifts are solid color blocks. Open shifts are a lighter wash of the same color with a thick bar. A day with an event shows a small notice on that day that opens Calendar. Events are set up on Calendar, not by dragging a block onto the schedule.
-5. A shift’s Tasks tab has a simple task (name, description, start, end, people) and, under that, Shift forms. Shift forms lists published forms. Link adds that form to the shift.
-6. Forms: New form is one screen, with create, a template on that screen, or import. A template opens with its fields. Save and Publish need at least one field. Publish puts the form on a shift’s Shift forms list. Delete is on the row, including drafts. Closing a new form with no fields removes that draft. On a phone the form table scrolls sideways and the header stays put.
+4. Scheduling week: assigned shifts are solid color blocks. Open shifts are a lighter wash of the same color with a thick bar. A day with an event shows a small notice on that day. That notice opens Calendar on that day and that event. The calendar week shows the event as a color block, like a shift. Events are set up on Calendar, not by dragging a block onto the schedule. Shift details does not repeat the calendar sentence.
+5. A shift’s Tasks tab has a simple task: name, description, start, end, and people. There is no priority and no minutes. Under that, Choose a form opens published forms. Link adds the one you pick. On the shift, Fill and send opens the form to submit. Edit and Publish stay on Forms.
+6. Forms: New form is one screen, with create, a template on that screen, or import. A template opens with its fields. Save and Publish keep those fields. The form editor has Cancel, and no second close icon. The forms list has Fill, Submissions, and Edit as separate buttons. Submissions is where the answers are. Tasks and Analytics read those same answers. Delete is on the row, including drafts. Closing a new form with no fields removes that draft. On a phone the form table scrolls sideways and the header stays put.
 7. Insights → AI Insights loads text. On a phone the chat is a bottom sheet above the icon nav.
 8. Team Directory opens. The old Admin page is not a separate item.
 9. Profile card → Settings opens.
