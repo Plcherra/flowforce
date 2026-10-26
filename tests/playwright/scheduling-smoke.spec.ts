@@ -612,52 +612,30 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(footerCell).toContainText('%');
   });
 
-  test('linking vendor visit to shift surfaces vendor chip', async ({ page }) => {
+  test('a day event is a notice, not a chip on the shift', async ({ page }) => {
     if (!adminClient || !seedHandles) return;
 
-    await adminClient
-      .from('schedules')
-      .update({
-        start_time: dayjs(seedHandles.eventDate).hour(9).minute(0).second(0).toISOString(),
-        end_time: dayjs(seedHandles.eventDate).hour(11).minute(0).second(0).toISOString(),
-      })
-      .eq('id', seedHandles.shiftId);
+    const start = dayjs(seedHandles.eventDate).hour(10).minute(0).second(0);
+    const { error } = await adminClient.from('vendor_visits').insert({
+      company_id: SCHEDULING_PW_TENANT.companyId,
+      vendor_name: 'Health Inspection',
+      service_type: 'inspection',
+      start_time: start.toISOString(),
+      end_time: start.add(1, 'hour').toISOString(),
+      description: 'Playwright visit',
+    });
+    if (error) throw error;
+
     await page.reload();
     await toggleRoleTemplates(page);
+    await expect(page.getByTestId('vendor-palette-vendor-inspection')).toHaveCount(0);
 
-    const dropTarget = page.getByTestId(
-      `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${seedHandles.eventDate}`,
-    );
-    await dropTarget.scrollIntoViewIfNeeded();
-    const dropTestId = `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${seedHandles.eventDate}`;
-    await page.getByTestId('vendor-palette-vendor-inspection').evaluate((element, targetTestId) => {
-      const target = document.querySelector(`[data-testid="${targetTestId}"]`);
-      if (!(target instanceof HTMLElement)) {
-        throw new Error(`Missing drop target ${targetTestId}`);
-      }
-      const dataTransfer = new DataTransfer();
-      element.dispatchEvent(
-        new DragEvent('dragstart', { bubbles: true, cancelable: true, dataTransfer }),
-      );
-      target.dispatchEvent(
-        new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer }),
-      );
-      target.dispatchEvent(
-        new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer }),
-      );
-    }, dropTestId);
-
-    await expect(page.getByTestId('vendor-event-dialog')).toBeVisible();
-
-    await page.getByTestId('vendor-event-shift-select').click();
-    await page.getByRole('option', { name: /Playwright Smoke Shift/i }).click();
-    await page.getByTestId('vendor-event-save').click();
-
-    await expect(page.getByTestId('vendor-event-dialog')).toBeHidden({ timeout: 15_000 });
-    await expect(page.getByText('Scheduling Error')).toHaveCount(0);
-    await expect(page.getByText('Vendor · Health Inspection').first()).toBeVisible({
-      timeout: 15_000,
-    });
+    const notice = page
+      .getByTestId('schedule-day-event-notice')
+      .filter({ hasText: '1 on this day' });
+    await expect(notice.first()).toBeVisible({ timeout: 15_000 });
+    await expect(notice.first()).toHaveAttribute('href', '/app/calendar');
+    await expect(page.getByText('Vendor · Health Inspection')).toHaveCount(0);
   });
 
   test('staff view shows My Schedule without manager publish actions', async ({ page }) => {
@@ -1013,25 +991,21 @@ test.describe('Scheduling smoke (Playwright)', () => {
     await expect(page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
     await expect(details.getByRole('button', { name: 'Close shift details' })).toHaveCount(1);
 
-    await details.getByRole('button', { name: 'Add vendor visit' }).click();
-    await details.getByRole('textbox', { name: 'Visit type' }).fill('Delivery');
-    await details.getByRole('button', { name: 'Save visit type' }).click();
-    await expect(details.getByRole('button', { name: 'Delivery', exact: true })).toBeVisible();
-    await details.getByRole('button', { name: 'Delete Delivery' }).click();
-    await expect(details.getByRole('button', { name: 'Delivery', exact: true })).toHaveCount(0);
-    await details.getByLabel('Vendor name').fill('Health Inspection');
-    await details.getByRole('button', { name: 'Save visit', exact: true }).click();
-    await expect(details.getByPlaceholder('Event title')).toHaveValue('Health Inspection', {
-      timeout: 15_000,
-    });
-    await expect(page.getByText('Vendor visit not saved')).toHaveCount(0);
-    await expect(details.getByText('Vendor_visit')).toHaveCount(0);
+    await expect(details.getByRole('button', { name: 'Add vendor visit' })).toHaveCount(0);
+    await expect(details.getByTestId('schedule-day-event-notice')).toBeVisible();
+    await expect(details.getByTestId('schedule-day-event-notice')).toHaveAttribute(
+      'href',
+      '/app/calendar',
+    );
 
     await details.getByRole('tab', { name: 'Tasks' }).click();
     await expect(details.getByRole('heading', { name: 'Lists on this shift' })).toBeVisible();
     await expect(details.getByText('No list attached.')).toBeVisible();
     await expect(details.getByRole('heading', { name: 'Shift tasks' })).toBeVisible();
-    await expect(details.getByPlaceholder('Task title')).toHaveCount(0);
+    await expect(details.getByRole('heading', { name: 'Shift forms' })).toBeVisible();
+    await details.getByLabel('Task name').fill('Clean the restroom');
+    await details.getByRole('button', { name: 'Add to this shift' }).click();
+    await expect(details.getByText('Clean the restroom')).toBeVisible({ timeout: 15_000 });
 
     await details.getByRole('tab', { name: 'Templates' }).click();
     await details.getByRole('button', { name: 'Save as Shift Template' }).click();
