@@ -23,8 +23,8 @@ const kpiKeys: Array<Parameters<typeof KpiCard>[0]["kpiKey"]> = [
 export function OperationsHub() {
   const { t } = useTranslation();
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-muted/30 py-6">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 lg:px-0">
+    <div className="min-h-[calc(100vh-4rem)] w-full bg-muted/30 py-4">
+      <div className="flex w-full max-w-none flex-col gap-4 px-3 sm:px-4">
         <motion.header
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -65,12 +65,12 @@ export function OperationsHub() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]"
+          className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(22rem,32rem)]"
         >
-          <div className="space-y-6">
+          <div className="min-w-0">
             <IssuesStream />
           </div>
-          <div className="space-y-6">
+          <div className="min-w-0">
             <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -85,16 +85,19 @@ export function OperationsHub() {
                 <InventorySignalWidget />
               </div>
             </div>
-            <SopChecklistBuilderPanel />
-            <RecurringOperationsCalendarPanel />
-            <FieldExecutionPanel />
-            <ManagerReviewQueuePanel />
-            <CompliancePacksPanel />
-            <WorkflowAutomationHooksPanel />
-            <ExecutionQualityPanel />
-            <AutomationsPanel />
           </div>
         </motion.section>
+
+        <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          <SopChecklistBuilderPanel />
+          <RecurringOperationsCalendarPanel />
+          <FieldExecutionPanel />
+          <ManagerReviewQueuePanel />
+          <CompliancePacksPanel />
+          <WorkflowAutomationHooksPanel />
+          <ExecutionQualityPanel />
+          <AutomationsPanel />
+        </section>
       </div>
     </div>
   );

@@ -71,7 +71,7 @@ Marked beta in `moduleRouteInventory.json`. These pages still exist. The ones li
 | --- | --- | --- |
 | Analytics | `/app/analytics` | Sidebar. Inventory note: still not operator reports. |
 | AI Insights | `/app/ai-insights` | Sidebar. Page still has a placeholder insight. |
-| Operations | `/app/operations` | Sidebar. KPI hooks return mock summaries when `get_kpi_summary` is missing. |
+| Operations | `/app/operations` | Sidebar. The hub uses the full window. KPI hooks return mock summaries when `get_kpi_summary` is missing. |
 | Calendar | `/app/calendar` | Sidebar. Google Calendar import is marked coming soon. |
 | Expenses | `/app/expenses` | Sidebar. Page lives in `src/features/inventory`, not `src/features/finance`. That folder does not exist; the inventory owner field is stale. |
 | Performance | `/app/performance` | Sidebar. |
