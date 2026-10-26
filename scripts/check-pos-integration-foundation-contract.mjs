@@ -24,6 +24,7 @@ const service = readText(
   "src/services/integrations/posIntegrationFoundation.ts",
 );
 const auditEvents = readText("src/services/audit/auditEvents.ts");
+const englishLocale = readText("src/locales/en.json");
 const ui = readText(
   "src/features/system/components/IntegrationSettingsPanel.tsx",
 );
@@ -80,7 +81,7 @@ requireIncludes(
 requireIncludes(
   ui,
   [
-    "POS sync health",
+    "settings.posSyncHealth",
     "buildPOSIntegrationHealthSummary",
     "getPOSSyncStreamDefinitions",
     "buildPOSCredentialMetadata",
@@ -88,6 +89,11 @@ requireIncludes(
     "posHealth.status",
   ],
   "integration settings UI",
+);
+requireIncludes(
+  englishLocale,
+  ["POS sync health"],
+  "English POS sync copy",
 );
 
 if (ui.includes("apiKey: apiKey.trim()")) {

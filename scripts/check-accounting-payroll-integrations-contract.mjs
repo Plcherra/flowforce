@@ -24,6 +24,7 @@ const service = readText(
   "src/services/integrations/accountingPayrollIntegrations.ts",
 );
 const auditEvents = readText("src/services/audit/auditEvents.ts");
+const englishLocale = readText("src/locales/en.json");
 const ui = readText(
   "src/features/system/components/IntegrationSettingsPanel.tsx",
 );
@@ -79,17 +80,27 @@ requireIncludes(
 requireIncludes(
   ui,
   [
-    "Accounting and payroll readiness",
+    "settings.accountingAndPayrollReadiness",
     "buildAccountingPayrollReadiness",
     "getAccountingExportScopes",
     "getPayrollLaborImportScopes",
     "getAccountingPayrollReconciliationViews",
-    "QuickBooks/Xero bills",
-    "Payroll imports",
-    "Logs and retries",
+    "settings.quickbooksXeroBillsExpensesPaymentsCreditsSummariesAnd",
+    "settings.payrollImports",
+    "settings.logsAndRetries",
     "Reconciliation",
   ],
   "integration settings UI",
+);
+requireIncludes(
+  englishLocale,
+  [
+    "Accounting and payroll readiness",
+    "QuickBooks/Xero bills",
+    "Payroll imports",
+    "Logs and retries",
+  ],
+  "English accounting and payroll copy",
 );
 
 requireIncludes(

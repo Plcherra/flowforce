@@ -25,6 +25,7 @@ const migration = readText(
 const dashboardHook = readText(
   "src/features/dashboard/hooks/useOperatorCommandCenterData.ts",
 );
+const englishLocale = readText("src/locales/en.json");
 const dashboardCard = readText(
   "src/features/dashboard/components/OperatorCommandCenter.tsx",
 );
@@ -82,9 +83,14 @@ requireIncludes(
     "wasteCostToday",
     "productionCostToday",
     "overstaffedShiftsToday",
-    "Today&apos;s labor, production, waste, purchasing, and",
+    "dashboard.todaySLaborProductionWastePurchasingAndExpenseCost",
   ],
   "operator command center cards",
+);
+requireIncludes(
+  englishLocale,
+  ["Today's labor, production, waste, purchasing, and"],
+  "English shift profitability copy",
 );
 
 requireIncludes(

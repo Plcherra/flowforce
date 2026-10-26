@@ -27,6 +27,7 @@ const report = readText(
 const plan = readText("docs/roadmap/08-mobile-app-and-offline-mode.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
 const service = readText("src/services/mobile/mobileCoreWorkflows.ts");
+const englishLocale = readText("src/locales/en.json");
 const dashboardActions = readText(
   "src/features/dashboard/components/MobileCoreWorkflowActions.tsx",
 );
@@ -73,13 +74,18 @@ requireIncludes(
 requireIncludes(
   dashboardActions,
   [
-    "Daily actions",
+    "dashboard.dailyActions",
     "getMobileQuickActionsForAudience",
     "data-mobile-core-workflows",
     "start_inventory_count",
     "profile_notifications",
   ],
   "mobile dashboard workflow actions",
+);
+requireIncludes(
+  englishLocale,
+  ["Daily actions"],
+  "English mobile workflow copy",
 );
 
 requireIncludes(

@@ -85,7 +85,7 @@ requireIncludes(
 
 requireIncludes(
   appShell,
-  ["useMobilePushNotifications", "companyId: profileState.profile?.companyId"],
+  ["useMobilePushNotifications", "companyId: companyId ?? undefined"],
   "app shell mobile push registration",
 );
 

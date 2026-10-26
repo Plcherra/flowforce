@@ -24,6 +24,7 @@ const repository = readText(
   "src/features/inventory/repositories/countsRepository.ts",
 );
 const countDetail = readText("src/features/inventory/routes/CountDetail.tsx");
+const englishLocale = readText("src/locales/en.json");
 const countTable = readText(
   "src/features/inventory/components/MarketManCountingInterface.tsx",
 );
@@ -77,8 +78,18 @@ requireIncludes(
 
 requireIncludes(
   countDetail,
-  ["summarizeCountLines", "Missing", "Variance Lines", "Net Variance"],
+  [
+    "summarizeCountLines",
+    "inventory.stillMissing",
+    "inventory.varianceLines2",
+    "inventory.netVariance2",
+  ],
   "count detail",
+);
+requireIncludes(
+  englishLocale,
+  ["still missing.", "Variance Lines", "Net Variance"],
+  "English count detail copy",
 );
 
 requireIncludes(
@@ -86,11 +97,16 @@ requireIncludes(
   [
     "calculateCountVariance",
     "summarizeCountLines",
-    "Missing",
-    "Variance",
-    "Net variance",
+    "inventory.missing",
+    "inventory.variance",
+    "inventory.netVariance",
   ],
   "counting table",
+);
+requireIncludes(
+  englishLocale,
+  ["Missing", "Variance", "Net variance:"],
+  "English counting table copy",
 );
 
 requireIncludes(
