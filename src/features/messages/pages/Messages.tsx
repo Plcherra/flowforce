@@ -18,7 +18,7 @@ export default function Messages() {
   // Only require user to be ready, not full bootstrap
   // Messages can work without employees/organization data
   if (!bootstrap.userReady) {
-    return <PageLoader text="Loading your workspace..." />;
+    return <PageLoader text={t("messages.loadingWorkspace")} />;
   }
 
   // Show error only if it's critical (not just missing employees)
@@ -34,7 +34,7 @@ export default function Messages() {
   }
 
   if (viewModel.loading) {
-    return <PageLoader text="Preparing conversations..." />;
+    return <PageLoader text={t("messages.preparingConversations")} />;
   }
 
   return (

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
@@ -21,6 +22,7 @@ export function MessageInput({
   channelName,
   onSendMessage,
 }: MessageInputProps) {
+  const { t } = useTranslation();
   const [messageInput, setMessageInput] = useState("");
   const [messageAttachments, setMessageAttachments] = useState<
     MessageAttachment[]
@@ -62,16 +64,16 @@ export function MessageInput({
       resizeTextarea();
     } catch (error) {
       logger.error("Failed to send message", { error, tags: ["error"] });
-      setErrorMessage("Unable to send message. Please try again.");
+      setErrorMessage(t("messages.unableToSend"));
       toast({
-        title: "Message not sent",
-        description: "We could not deliver your message. Please try again.",
+        title: t("messages.messageNotSent"),
+        description: t("messages.couldNotDeliver"),
         variant: "destructive",
       });
     } finally {
       setSending(false);
     }
-  }, [messageAttachments, messageInput, onSendMessage, resizeTextarea, toast]);
+  }, [messageAttachments, messageInput, onSendMessage, resizeTextarea, t, toast]);
 
   const handleFormSubmit = useCallback(
     async (event: React.FormEvent) => {
@@ -115,8 +117,8 @@ export function MessageInput({
             setMessageInput(event.target.value);
             resizeTextarea();
           }}
-          placeholder={`Message ${channelName}`}
-          aria-label={`Message ${channelName}`}
+          placeholder={t("messages.messageChannel", { name: channelName })}
+          aria-label={t("messages.messageChannel", { name: channelName })}
           aria-invalid={Boolean(errorMessage)}
           className="flex-1 resize-none"
           rows={1}
@@ -134,7 +136,7 @@ export function MessageInput({
             aria-disabled={submitDisabled}
           >
             <Send className="h-4 w-4 mr-2" />
-            {sending ? "Sending…" : "Send"}
+            {sending ? t("messages.sending") : t("messages.send")}
           </Button>
         </div>
       </form>

@@ -6,8 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, Trash2, Edit2, Check, X } from "lucide-react";
 import { MessageReactions } from "./MessageReactions";
+import { MessageAttachments } from "./MessageAttachments";
 import { useMessageTranslations } from "@/features/messages/hooks/useMessageTranslations";
 import { MessageBody } from "@/features/messages/components/conversations/MessageBody";
+import {
+  collectThreadReplies,
+  normalizeMessageAttachments,
+  replyParentId,
+  senderDisplayName,
+} from "@/features/messages/threadReplies";
 import { format } from "date-fns";
 import type { Message, ThreadMessage } from "@/types/messages";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,6 +65,19 @@ export function MessagesList({
     [messages],
   );
   const translations = useMessageTranslations(messageSources);
+  const replyCounts = useMemo(() => {
+    const sources = messages.map((message) => ({
+      id: message.id,
+      replyToId: replyParentId(message),
+      createdAt: new Date(message.created_at ?? 0).getTime(),
+    }));
+    return new Map(
+      sources.map((message) => [
+        message.id,
+        collectThreadReplies(sources, message.id).length,
+      ]),
+    );
+  }, [messages]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messagePendingDelete, setMessagePendingDelete] =
     useState<Message | null>(null);
@@ -126,8 +146,10 @@ export function MessagesList({
             };
             const firstName = senderProfile.first_name ?? "";
             const lastName = senderProfile.last_name ?? "";
-            const displayName =
-              `${firstName} ${lastName}`.trim() || "Team member";
+            const displayName = senderDisplayName(
+              senderProfile,
+              t("messages.teamMember"),
+            );
             const initials =
               `${firstName.charAt(0) ?? ""}${lastName.charAt(0) ?? ""}`.trim() ||
               displayName.charAt(0).toUpperCase() ||
@@ -140,13 +162,36 @@ export function MessagesList({
                 ? format(createdAt, "MMM dd, yyyy at h:mm a")
                 : "";
 
-            const replyProfile = message.reply_to_message?.senderprofile;
-            const replyName = replyProfile
-              ? [replyProfile.first_name, replyProfile.last_name]
-                  .filter(Boolean)
-                  .join(" ")
-                  .trim() || "a teammate"
-              : "a teammate";
+            const parentId = replyParentId(message);
+            const parentMessage = parentId
+              ? safeMessages.find((item) => item.id === parentId)
+              : undefined;
+            const replyProfile =
+              message.reply_to_message?.senderprofile ??
+              parentMessage?.senderprofile;
+            const replyName = senderDisplayName(
+              replyProfile,
+              t("messages.teammate"),
+            );
+            const replyContent =
+              message.reply_to_message?.content ||
+              parentMessage?.content ||
+              t("messages.sharedAMessage");
+            const attachments = normalizeMessageAttachments(message.attachments);
+            const replyCount = replyCounts.get(message.id) ?? 0;
+            const openThread = () => {
+              onThreadMessage({
+                id: message.id,
+                content: message.content,
+                sender: {
+                  id: message.senderid,
+                  name: displayName,
+                  avatar: senderProfile.avatar_url ?? undefined,
+                },
+                createdAt: createdAt ?? new Date(),
+                replyCount,
+              });
+            };
 
             // Calculate read receipts
             const messageTime = createdAt ? createdAt.getTime() : 0;
@@ -180,13 +225,13 @@ export function MessagesList({
                       </p>
                     )}
                   </div>
-                  {message.reply_to_message && (
+                  {(message.reply_to_message || parentMessage) && (
                     <div className="mt-1 rounded border-l-2 border-border bg-muted/50 p-2">
                       <p className="text-xs text-muted-foreground">
                         {t("messages.replyingTo")} {replyName}
                       </p>
                       <p className="truncate text-sm text-foreground/80">
-                        {message.reply_to_message.content || "Shared a message"}
+                        {replyContent}
                       </p>
                     </div>
                   )}
@@ -238,37 +283,45 @@ export function MessagesList({
                         content={message.content}
                         translation={translations.get(message.id) ?? null}
                       />
+                      {attachments.length > 0 && (
+                        <MessageAttachments
+                          attachments={attachments}
+                          readOnly
+                        />
+                      )}
                       {message.edited_at && (
                         <span className="ml-2 text-xs text-muted-foreground italic">
-                          (edited)
+                          {t("messages.edited")}
                         </span>
                       )}
 
-                      {/* Message Actions */}
-                      <div className="mt-2 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                      {replyCount > 0 && (
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
-                          aria-label={`Open thread for message from ${displayName}`}
-                          onClick={() => {
-                            onThreadMessage({
-                              id: message.id,
-                              content: message.content,
-                              sender: {
-                                id: message.senderid,
-                                name: displayName,
-                                avatar: senderProfile.avatar_url ?? undefined,
-                              },
-                              createdAt: createdAt ?? new Date(),
-                              replyCount: 0,
-                            });
-                          }}
+                          className="mt-1 h-7 px-2 text-xs"
+                          onClick={openThread}
+                        >
+                          {t("messages.replyCount", { count: replyCount })}
+                        </Button>
+                      )}
+
+                      {/* Message Actions */}
+                      <div className="mt-2 flex items-center gap-2 opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition-opacity [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          aria-label={t("messages.openThread")}
+                          onClick={openThread}
                         >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
                         {message.senderid === currentUserId &&
                           onUpdateMessage && (
                             <Button
+                              type="button"
                               variant="ghost"
                               size="sm"
                               aria-label={t("messages.editMessage")}
@@ -282,6 +335,7 @@ export function MessagesList({
                           )}
                         {message.senderid === currentUserId && (
                           <Button
+                            type="button"
                             variant="ghost"
                             size="sm"
                             aria-label={t("messages.deleteMessage")}
