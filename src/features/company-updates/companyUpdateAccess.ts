@@ -89,3 +89,35 @@ export function isCompanyUpdateDue(
 export function sanitizeUpdateSearch(term: string): string {
   return term.replace(/[%_,.()]/g, " ").replace(/\s+/g, " ").trim();
 }
+
+/** Stored counts are nullable numerics. A missing count is zero. */
+export function readCompanyUpdateCount(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+}
+
+export function companyUpdateLoadMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (
+    error !== null &&
+    typeof error === "object" &&
+    "name" in error &&
+    error.name === "ZodError"
+  ) {
+    return fallback;
+  }
+  if (error instanceof Error) {
+    const message = error.message.trim();
+    if (!message || message.startsWith("[") || message.startsWith("{")) {
+      return fallback;
+    }
+    return message;
+  }
+  return fallback;
+}

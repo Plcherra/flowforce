@@ -13,7 +13,11 @@ try {
   const { runCompanyUpdateAccessTests } = importTs(
     "../src/features/company-updates/companyUpdateAccess.test.ts",
   );
+  const { runCompanyUpdateRowTests } = importTs(
+    "../src/features/company-updates/companyUpdateRow.test.ts",
+  );
   runCompanyUpdateAccessTests();
+  runCompanyUpdateRowTests();
   console.log("company updates page tests passed");
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);

@@ -3,7 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { requestContentTranslation } from "@/features/i18n/requestContentTranslation";
-import { sanitizeUpdateSearch } from "@/features/company-updates/companyUpdateAccess";
+import {
+  readCompanyUpdateCount,
+  sanitizeUpdateSearch,
+} from "@/features/company-updates/companyUpdateAccess";
 import {
   companyUpdateTouchesContent,
   companyUpdateTranslationFields,
@@ -137,10 +140,23 @@ const companyUpdateRowSchema = z.object({
   author_avatar: z.string().nullable().optional(),
   publish_date: z.string().nullable().optional(),
   scheduled_date: z.string().nullable().optional(),
-  is_pinned: z.boolean(),
-  likes_count: z.number(),
-  comments_count: z.number(),
-  views_count: z.number(),
+  is_pinned: z
+    .boolean()
+    .nullable()
+    .optional()
+    .transform((value) => value === true),
+  likes_count: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform(readCompanyUpdateCount),
+  comments_count: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform(readCompanyUpdateCount),
+  views_count: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform(readCompanyUpdateCount),
   created_by: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -165,9 +181,15 @@ const commentRowSchema = z.object({
   author: profileSchema,
 });
 
-const parseSupabaseData = <T>(schema: z.ZodType<T>, data: unknown): T => {
+const parseSupabaseData = <T extends z.ZodTypeAny>(
+  schema: T,
+  data: unknown,
+): z.output<T> => {
   return schema.parse(data);
 };
+
+export const parseCompanyUpdateRows = (data: unknown) =>
+  parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
 
 export type CompanyUpdateRow = z.infer<typeof companyUpdateRowSchema>;
 export type ReactionRow = z.infer<typeof reactionRowSchema>;
@@ -223,7 +245,7 @@ const listUpdates = async ({
     throw error;
   }
 
-  const parsed = parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
+  const parsed = parseCompanyUpdateRows(data);
   return {
     records: parsed,
     total: count ?? parsed.length,
@@ -242,7 +264,7 @@ const listDraftUpdates = async ({ companyId }: ListDraftsParams) => {
     throw error;
   }
 
-  return parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
+  return parseCompanyUpdateRows(data);
 };
 
 const listEngagementSummaries = async ({
@@ -350,6 +372,10 @@ const createUpdate = async ({
       const { error } = await supabase.from("company_updates").insert({
         id,
         company_id: companyId,
+        likes_count: 0,
+        comments_count: 0,
+        views_count: 0,
+        is_pinned: false,
         ...columns,
         status: columns.status ?? "published",
       });

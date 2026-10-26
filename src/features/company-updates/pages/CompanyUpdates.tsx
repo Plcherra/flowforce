@@ -18,6 +18,7 @@ import { EditUpdateDialog } from "@/features/company-updates/components/EditUpda
 import { CompanyUpdatesHeader } from "@/features/company-updates/components/CompanyUpdatesHeader";
 import {
   canManageCompanyUpdates,
+  companyUpdateLoadMessage,
   isCompanyUpdateDue,
 } from "@/features/company-updates/companyUpdateAccess";
 import {
@@ -128,8 +129,9 @@ export default function CompanyUpdates() {
   const isInitialLoading = loading && safeArrayLength(safeUpdates) === 0;
   const errorMessage =
     error && !updatesSchemaMissing
-      ? getErrorMessage(error, t("updates.unableToLoadCompanyUpdates"))
+      ? companyUpdateLoadMessage(error, t("updates.pleaseTryAgain"))
       : null;
+  const showUpdates = !moduleSchemaMissing && !errorMessage;
   const recognitionErrorMessage = recognitionsSchemaMissing
     ? null
     : recognitionError;
@@ -388,7 +390,7 @@ export default function CompanyUpdates() {
             </div>
           )}
 
-          {!moduleSchemaMissing && viewMode === "grid" && (
+          {showUpdates && viewMode === "grid" && (
             <CompanyUpdatesGridSection
               updates={safeUpdates}
               loading={isInitialLoading}
@@ -406,7 +408,7 @@ export default function CompanyUpdates() {
             />
           )}
 
-          {!moduleSchemaMissing && viewMode === "list" && (
+          {showUpdates && viewMode === "list" && (
             <CompanyUpdatesListSection
               updates={safeUpdates}
               loading={isInitialLoading}
@@ -424,7 +426,7 @@ export default function CompanyUpdates() {
             />
           )}
 
-          {!moduleSchemaMissing && viewMode === "feed" && (
+          {showUpdates && viewMode === "feed" && (
             <CompanyUpdatesFeedSection
               updates={safeUpdates}
               loading={isInitialLoading}

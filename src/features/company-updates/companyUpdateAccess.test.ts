@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 import {
   canManageCompanyUpdates,
   companyUpdateGoesLiveAt,
+  companyUpdateLoadMessage,
   isCompanyUpdateDue,
   normalizeCompanyUpdateViewMode,
+  readCompanyUpdateCount,
   sanitizeUpdateSearch,
 } from "./companyUpdateAccess";
 
@@ -118,4 +120,23 @@ export function runCompanyUpdateAccessTests() {
 
   assert.equal(sanitizeUpdateSearch("walk-in, ready"), "walk-in ready");
   assert.equal(sanitizeUpdateSearch("100%_done"), "100 done");
+
+  assert.equal(readCompanyUpdateCount(null), 0);
+  assert.equal(readCompanyUpdateCount(undefined), 0);
+  assert.equal(readCompanyUpdateCount(4), 4);
+  assert.equal(readCompanyUpdateCount("3"), 3);
+  assert.equal(readCompanyUpdateCount("nope"), 0);
+
+  const zodError = new Error(
+    '[{"path":["likes_count"],"message":"Expected number, received null"}]',
+  );
+  zodError.name = "ZodError";
+  assert.equal(
+    companyUpdateLoadMessage(zodError, "Please try again."),
+    "Please try again.",
+  );
+  assert.equal(
+    companyUpdateLoadMessage(new Error("permission denied"), "Please try again."),
+    "permission denied",
+  );
 }
