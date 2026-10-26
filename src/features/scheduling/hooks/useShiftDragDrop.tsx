@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   DragOverlay,
   PointerSensor,
@@ -14,6 +15,12 @@ import type { SchedulingMutationOptions } from "@/features/scheduling/types/muta
 import { moveShift } from "@/features/scheduling/services/moveShift";
 import { ShiftChipOverlay } from "@/features/scheduling/components/drag-drop/ShiftChip";
 import { refreshTasksForShift } from "@/features/tasks/repositories/scheduleTaskSync";
+import { translateScheduleReason } from "@/features/scheduling/utils/translateScheduleReason";
+
+const dragMutationOptions: SchedulingMutationOptions = {
+  refresh: false,
+  silent: true,
+};
 
 interface UseShiftDragDropParams {
   enabled: boolean;
@@ -50,11 +57,8 @@ export function useShiftDragDrop({
   getCellAvailability,
   conflictByShiftId,
 }: UseShiftDragDropParams) {
+  const { t } = useTranslation();
   const { toast } = useToast();
-  const dragMutationOptions: SchedulingMutationOptions = {
-    refresh: false,
-    silent: true,
-  };
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(
     null,
   );
@@ -112,8 +116,11 @@ export function useShiftDragDrop({
 
       if (!result.ok) {
         toast({
-          title: "Cannot move shift",
-          description: result.reasons[0] ?? "Move blocked by availability rules.",
+          title: t("schedule.cannotMoveShift"),
+          description: translateScheduleReason(
+            result.reasons[0] ?? "Move blocked by availability rules.",
+            t,
+          ),
           variant: "destructive",
         });
         return;
@@ -123,9 +130,8 @@ export function useShiftDragDrop({
         await refreshTasksForShift(shift.id);
       } catch {
         toast({
-          title: "Tasks not updated",
-          description:
-            "The shift moved, but its tasks still have the old day.",
+          title: t("schedule.tasksNotUpdated"),
+          description: t("schedule.tasksKeptOldDay"),
         });
       }
 
@@ -133,8 +139,11 @@ export function useShiftDragDrop({
 
       if (result.severity === "warning") {
         toast({
-          title: "Shift moved with warning",
-          description: result.reasons[0] ?? "Employee has a scheduling conflict.",
+          title: t("schedule.shiftMovedWithWarning"),
+          description: translateScheduleReason(
+            result.reasons[0] ?? "Employee has a scheduling conflict.",
+            t,
+          ),
         });
       }
     },
@@ -143,6 +152,7 @@ export function useShiftDragDrop({
       enabled,
       getCellAvailability,
       refetchAll,
+      t,
       toast,
       unassign,
       updateSchedule,

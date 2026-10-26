@@ -32,7 +32,6 @@ export interface ShiftWizardFormData {
   hourly_rate: string;
   required_level?: number;
   assignedusers: string[];
-  can_claim: boolean;
   breaks: BreakItem[];
   notes: string;
   attachments: File[];

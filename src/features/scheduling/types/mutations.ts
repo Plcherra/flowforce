@@ -32,6 +32,7 @@ export type AssignOutcome = boolean | "warning";
 export interface SchedulingMutations {
   createSchedule: (
     payload: ShiftInsertPayload,
+    options?: SchedulingMutationOptions,
   ) => Promise<Tables<"schedules"> | null>;
   updateSchedule: (
     id: string,

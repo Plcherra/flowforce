@@ -19,6 +19,7 @@ import {
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { useShiftMutations } from "@/features/scheduling/hooks/useShiftMutations";
 import { useVendorMutations } from "@/features/scheduling/hooks/useVendorMutations";
 import { useTimeOffMutations } from "@/features/scheduling/hooks/useTimeOffMutations";
@@ -61,6 +62,7 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const { profile } = useProfile();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const fallbackActionNoticeShownRef = useRef(false);
   const [referenceDate, setReferenceDate] = useState(() =>
     startOfWeek(new Date()),
@@ -69,11 +71,11 @@ export function SchedulingProvider({ children }: SchedulingProviderProps) {
   const showReadOnlyNotice = useCallback(() => {
     if (fallbackActionNoticeShownRef.current) return;
     toast({
-      title: "Read-only preview mode",
-      description: "Connect your data source to enable scheduling changes.",
+      title: t("schedule.readOnlyPreviewTitle"),
+      description: t("schedule.readOnlyChangesOff"),
     });
     fallbackActionNoticeShownRef.current = true;
-  }, [toast]);
+  }, [t, toast]);
 
   const companyId = profile?.companyId ?? null;
 

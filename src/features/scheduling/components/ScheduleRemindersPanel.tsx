@@ -57,13 +57,16 @@ const WEEKDAYS = [
   "sunday",
 ] as const;
 
-function weekdayLabel(day: string) {
-  return day.charAt(0).toUpperCase() + day.slice(1);
+function weekdayLabel(day: string, labels: Record<string, string>) {
+  return labels[day] ?? day;
 }
 
-function personName(person?: { first_name?: string | null; last_name?: string | null }) {
+function personName(
+  person?: { first_name?: string | null; last_name?: string | null },
+  fallback = "Team member",
+) {
   const name = [person?.first_name, person?.last_name].filter(Boolean).join(" ").trim();
-  return name || "Team member";
+  return name || fallback;
 }
 
 interface ScheduleRemindersPanelProps {
@@ -74,6 +77,22 @@ export function ScheduleRemindersPanel({
   canAssignReminders,
 }: ScheduleRemindersPanelProps) {
   const { t } = useTranslation();
+  const dayLabels: Record<string, string> = {
+    monday: t("schedule.dayMonday"),
+    tuesday: t("schedule.dayTuesday"),
+    wednesday: t("schedule.dayWednesday"),
+    thursday: t("schedule.dayThursday"),
+    friday: t("schedule.dayFriday"),
+    saturday: t("schedule.daySaturday"),
+    sunday: t("schedule.daySunday"),
+  };
+  const repeatLabels = {
+    daily: t("schedule.repeatDaily"),
+    weekly: t("schedule.repeatWeekly"),
+    weekdays: t("schedule.repeatWeekdays"),
+    once: t("schedule.repeatOnce"),
+  };
+  const memberLabel = t("schedule.teamMember");
   const { toast } = useToast();
   const { profile } = useProfile();
   const profileId = profile?.id ?? null;
@@ -146,7 +165,7 @@ export function ScheduleRemindersPanel({
     if (!title) return;
     personal.addReminder({
       title,
-      message: "Personal reminder. This does not change anyone else's reminders.",
+      message: t("schedule.personalReminderNote"),
       day: personalDay,
       time: personalTime,
       recordKind: personalKind || undefined,
@@ -176,16 +195,16 @@ export function ScheduleRemindersPanel({
         queryKey: ["schedule-assignment-reminders", companyId],
       });
       toast({
-        title: "Reminder assigned",
+        title: t("schedule.reminderAssigned"),
         description:
           targetId === profileId
-            ? "This reminder is for you. Staff cannot change reminders you assign."
-            : "The employee can see it, and cannot edit or remove it.",
+            ? t("schedule.reminderAssignedSelf")
+            : t("schedule.reminderAssignedOther"),
       });
     } catch {
       toast({
-        title: "Could not assign the reminder",
-        description: "Try again in a moment.",
+        title: t("schedule.couldNotAssignReminder"),
+        description: t("schedule.pleaseTryAgainInAFewMoments"),
         variant: "destructive",
       });
     } finally {
@@ -201,8 +220,8 @@ export function ScheduleRemindersPanel({
       });
     } catch {
       toast({
-        title: "Could not remove the reminder",
-        description: "Try again in a moment.",
+        title: t("schedule.couldNotRemoveReminder"),
+        description: t("schedule.pleaseTryAgainInAFewMoments"),
         variant: "destructive",
       });
     }
@@ -229,7 +248,10 @@ export function ScheduleRemindersPanel({
               <div>
                 <p className="text-sm font-medium">{reminder.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {weekdayLabel(reminder.day)} at {reminder.time}
+                  {t("schedule.reminderAt", {
+                    day: weekdayLabel(reminder.day, dayLabels),
+                    time: reminder.time,
+                  })}
                 </p>
                 {reminder.recordKind && reminder.recordId ? (
                   <Link
@@ -237,7 +259,7 @@ export function ScheduleRemindersPanel({
                     data-testid={`open-personal-reminder-${reminder.id}`}
                     className="text-xs font-medium text-primary"
                   >
-                    Open {reminder.recordKind}
+                    {t("schedule.openRecord", { kind: reminder.recordKind })}
                   </Link>
                 ) : null}
               </div>
@@ -282,7 +304,7 @@ export function ScheduleRemindersPanel({
                 <SelectContent>
                   {WEEKDAYS.map((day) => (
                     <SelectItem key={day} value={day}>
-                      {weekdayLabel(day)}
+                      {weekdayLabel(day, dayLabels)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -326,12 +348,14 @@ export function ScheduleRemindersPanel({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {canAssignReminders ? "Reminders you assign" : "Assigned to you"}
+            {canAssignReminders
+              ? t("schedule.remindersYouAssign")
+              : t("schedule.assignedToYouTitle")}
           </CardTitle>
           <CardDescription>
             {canAssignReminders
-              ? "Assign one to yourself or to an employee. They can read it. They cannot edit it or turn it off."
-              : "A manager or owner set these. You can add your own reminder above, and you cannot change these."}
+              ? t("schedule.assignReminderHelp")
+              : t("schedule.assignedReminderReadOnlyHelp")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -346,18 +370,18 @@ export function ScheduleRemindersPanel({
           {visibleAssigned.length === 0 && !assignedQuery.isLoading ? (
             <p className="text-sm text-muted-foreground">
               {canAssignReminders
-                ? "No assigned reminders yet."
-                : "Nothing has been assigned to you."}
+                ? t("schedule.noAssignedRemindersYet")
+                : t("schedule.nothingAssignedToYou")}
             </p>
           ) : null}
 
           {visibleAssigned.map((reminder) => {
             const when = reminder.remind_at
               ? format(new Date(reminder.remind_at), "EEE p")
-              : weekdayLabel(reminder.repeat_interval ?? "weekly");
+              : weekdayLabel(reminder.repeat_interval ?? "weekly", dayLabels);
             const target = reminder.user_id
-              ? personName(peopleById.get(reminder.user_id))
-              : "Team";
+              ? personName(peopleById.get(reminder.user_id), memberLabel)
+              : t("schedule.teamWord");
             return (
               <div
                 key={reminder.id}
@@ -365,7 +389,9 @@ export function ScheduleRemindersPanel({
                 data-testid="assigned-reminder"
               >
                 <div>
-                  <p className="text-sm font-medium">{reminder.title || "Reminder"}</p>
+                  <p className="text-sm font-medium">
+                    {reminder.title || t("schedule.reminder")}
+                  </p>
                   {reminder.description ? (
                     <p className="text-xs text-muted-foreground">{reminder.description}</p>
                   ) : null}
@@ -377,14 +403,14 @@ export function ScheduleRemindersPanel({
                     {clockLabel(reminder.remind_at)}
                   </p>
                   <p className="text-xs text-muted-foreground" data-testid="assigned-reminder-repeat">
-                    {repeatLabel(reminder.repeat_interval)}
+                    {repeatLabel(reminder.repeat_interval, repeatLabels)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <AssignedReminderControls
                     companyId={companyId}
                     reminderId={reminder.id}
-                    title={reminder.title || "Reminder"}
+                    title={reminder.title || t("schedule.reminder")}
                     allowDeactivate={reminder.allow_deactivate === true}
                     isAssignee={reminder.user_id === profileId}
                     canGrantDeactivate={canGrantDeactivate}
@@ -395,7 +421,9 @@ export function ScheduleRemindersPanel({
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8"
-                    aria-label={`Remove ${reminder.title || "reminder"}`}
+                    aria-label={t("schedule.removeReminder", {
+                      title: reminder.title || t("schedule.reminderWord"),
+                    })}
                     onClick={() => removeTeamReminder(reminder.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -439,7 +467,7 @@ export function ScheduleRemindersPanel({
                         .filter((person) => person.id !== profileId)
                         .map((person) => (
                           <SelectItem key={person.id} value={person.id}>
-                            {personName(person)}
+                            {personName(person, memberLabel)}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -454,7 +482,7 @@ export function ScheduleRemindersPanel({
                     <SelectContent>
                       {WEEKDAYS.map((day) => (
                         <SelectItem key={day} value={day}>
-                          {weekdayLabel(day)}
+                          {weekdayLabel(day, dayLabels)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -477,7 +505,7 @@ export function ScheduleRemindersPanel({
                 onClick={addTeamReminder}
                 disabled={savingTeam || !teamTitle.trim() || !profileId}
               >
-                {savingTeam ? "Assigning..." : "Assign reminder"}
+                {savingTeam ? t("schedule.assigning") : t("schedule.assignReminder")}
               </Button>
             </div>
           ) : null}

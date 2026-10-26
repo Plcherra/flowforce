@@ -25,16 +25,18 @@ export function RequestShiftSwapButton({
       }),
     onSuccess: async () => {
       toast({
-        title: "Swap requested",
-        description: "It will show under My swaps.",
+        title: t("schedule.swapRequested"),
+        description: t("schedule.swapRequestedHelp"),
       });
       await queryClient.invalidateQueries({ queryKey: ["shift-swaps"] });
     },
     onError: (error) => {
       toast({
-        title: "Unable to request swap",
+        title: t("schedule.unableToRequestSwap"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error
+            ? error.message
+            : t("schedule.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },

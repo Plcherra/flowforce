@@ -130,11 +130,14 @@ export function UsersTab({
                               }
                               className="text-[10px]"
                             >
-                              Reliability{" "}
-                              {(employee.reliability ?? 0).toFixed(0)}%
+                              {t("schedule.reliabilityPercent", {
+                                percent: (employee.reliability ?? 0).toFixed(0),
+                              })}
                             </Badge>
                             <Badge variant="secondary" className="text-[10px]">
-                              Level {employee.skillLevel ?? 1}
+                              {t("schedule.levelNumber", {
+                                level: employee.skillLevel ?? 1,
+                              })}
                             </Badge>
                           </div>
                           {employee.badges && employee.badges.length > 0 && (
@@ -173,10 +176,10 @@ export function UsersTab({
                   {noCandidates && (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       {userViews.qualified && !formData.job_position_id
-                        ? "Pick a position to see qualified users"
+                        ? t("schedule.pickPositionForQualified")
                         : userViews.time
-                          ? "No available users for this time window"
-                          : "No users found"}
+                          ? t("schedule.noUsersForWindow")
+                          : t("schedule.noUsersFound")}
                     </p>
                   )}
                 </div>
@@ -188,7 +191,9 @@ export function UsersTab({
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">
-                  Selected Users ({formData.assignedusers.length})
+                  {t("schedule.selectedUsersCount", {
+                    count: formData.assignedusers.length,
+                  })}
                 </CardTitle>
               </CardHeader>
               <CardContent>

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { format } from "date-fns";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
 import { DndContext } from "@dnd-kit/core";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
@@ -44,6 +45,7 @@ interface DragDropScheduleCalendarProps {
   locationFilter?: string;
   onAutoScheduleClick?: () => void;
   autoScheduleDisabled?: boolean;
+  boardLocked?: boolean;
   readOnly?: boolean;
   profileId?: string | null;
   onOpenPanel?: (panel: import("../types/panels").SchedulingPanelId) => void;
@@ -77,6 +79,7 @@ export function DragDropScheduleCalendar({
   locationFilter,
   onAutoScheduleClick,
   autoScheduleDisabled = false,
+  boardLocked = false,
   readOnly = false,
   profileId = null,
   onOpenPanel,
@@ -84,7 +87,9 @@ export function DragDropScheduleCalendar({
   smartFillOpen = false,
   onToggleSmartFill,
 }: DragDropScheduleCalendarProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
+  const editsLocked = readOnly || boardLocked;
   const [draggedVendor, setDraggedVendor] = useState<VendorPaletteItem | null>(
     null,
   );
@@ -213,7 +218,7 @@ export function DragDropScheduleCalendar({
     handleDragEnd,
     dragOverlay,
   } = useShiftDragDrop({
-    enabled: !readOnly,
+    enabled: !editsLocked,
     updateSchedule,
     assign,
     unassign,
@@ -233,6 +238,7 @@ export function DragDropScheduleCalendar({
       startTime: template.startTime,
       endTime: template.endTime,
       role: template.role,
+      color: template.color,
     });
     setShowAddShift(true);
   };
@@ -305,9 +311,9 @@ export function DragDropScheduleCalendar({
             setShowDailyInfo={setShowDailyInfo}
             showAvailabilityLayer={showAvailabilityLayer}
             setShowAvailabilityLayer={setShowAvailabilityLayer}
-            readOnly={readOnly}
+            readOnly={editsLocked}
             onOpenTimeOffPanel={
-              onOpenPanel ? () => onOpenPanel("timeoff") : undefined
+              readOnly && onOpenPanel ? () => onOpenPanel("timeoff") : undefined
             }
             smartFillOpen={smartFillOpen}
             onToggleSmartFill={onToggleSmartFill}
@@ -319,7 +325,8 @@ export function DragDropScheduleCalendar({
               view="week"
               hasLocationFilter={Boolean(locationFilter)}
               readOnly={readOnly}
-              onSuggestFills={readOnly ? undefined : onSuggestFills}
+              unavailable={boardLocked}
+              onSuggestFills={editsLocked ? undefined : onSuggestFills}
               onOpenAvailability={
                 onOpenPanel ? () => onOpenPanel("availability") : undefined
               }
@@ -354,11 +361,11 @@ export function DragDropScheduleCalendar({
                 dailyGridStats={boardDailyGridStats}
                 showAvailabilityLayer={showAvailabilityLayer}
                 showGridFooter={showDailyInfo}
-                enableShiftDrag={!readOnly}
+                enableShiftDrag={!editsLocked}
                 scrollContainerRef={gridScrollRef}
                 onShiftClick={openShiftDetails}
-                onDrop={readOnly ? undefined : handleBoardDrop}
-                onDragOver={readOnly ? undefined : handleDragOver}
+                onDrop={editsLocked ? undefined : handleBoardDrop}
+                onDragOver={editsLocked ? undefined : handleDragOver}
                 minimizedView={minimizedView}
                 timeOffRequests={timeOffRequests}
               />
@@ -462,7 +469,7 @@ export function DragDropScheduleCalendar({
                       )
                     }
                   >
-                    {format(d, "EEE")}
+                    {format(d, "EEE", { locale })}
                   </Button>
                 ))}
               </div>
@@ -511,7 +518,9 @@ export function DragDropScheduleCalendar({
                       end_time: end.toISOString(),
                       location: locationFilter ?? "",
                       is_all_day: false,
-                      timezone: "UTC",
+                      timezone:
+                        Intl.DateTimeFormat().resolvedOptions().timeZone ||
+                        "UTC",
                       required_headcount: multiHeadcount,
                       notes: null,
                       break_minutes: 30,

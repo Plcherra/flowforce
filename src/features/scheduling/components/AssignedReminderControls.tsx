@@ -31,7 +31,7 @@ export function AssignedReminderControls({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
-  const label = title || "reminder";
+  const label = title || t("schedule.reminderWord");
 
   const refresh = async () => {
     await queryClient.invalidateQueries({
@@ -48,15 +48,17 @@ export function AssignedReminderControls({
       await setReminderAllowDeactivate(reminderId, allow);
       await refresh();
       toast({
-        title: allow ? "Deactivate allowed" : "Deactivate turned off",
+        title: allow
+          ? t("schedule.deactivateAllowed")
+          : t("schedule.deactivateTurnedOff"),
         description: allow
-          ? "That person can turn this reminder off."
-          : "That person can no longer turn this reminder off.",
+          ? t("schedule.deactivateAllowedHelp")
+          : t("schedule.deactivateTurnedOffHelp"),
       });
     } catch {
       toast({
-        title: "Could not update deactivate",
-        description: "Try again in a moment.",
+        title: t("schedule.couldNotUpdateDeactivate"),
+        description: t("schedule.pleaseTryAgainInAFewMoments"),
         variant: "destructive",
       });
     } finally {
@@ -70,13 +72,13 @@ export function AssignedReminderControls({
       await deactivateAssignedReminder(reminderId);
       await refresh();
       toast({
-        title: "Reminder turned off",
-        description: "It is hidden for you. Other people's reminders stay.",
+        title: t("schedule.reminderTurnedOff"),
+        description: t("schedule.reminderTurnedOffHelp"),
       });
     } catch {
       toast({
-        title: "Could not turn the reminder off",
-        description: "Try again in a moment.",
+        title: t("schedule.couldNotTurnReminderOff"),
+        description: t("schedule.pleaseTryAgainInAFewMoments"),
         variant: "destructive",
       });
     } finally {
@@ -93,7 +95,7 @@ export function AssignedReminderControls({
           checked={allowDeactivate}
           disabled={saving}
           onCheckedChange={(checked) => void setFlag(checked)}
-          aria-label={`Allow deactivate ${label}`}
+          aria-label={t("schedule.allowDeactivateNamed", { title: label })}
           data-testid="allow-deactivate-reminder"
         />
       ) : null}

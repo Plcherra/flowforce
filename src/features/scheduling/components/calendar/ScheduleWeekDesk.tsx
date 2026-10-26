@@ -224,11 +224,11 @@ export function ScheduleWeekDesk({
             className="w-56 p-2"
             data-testid="create-menu"
           >
-            {createItem("New shift", onOpenAddShift)}
-            {createItem("Several shifts", onOpenMultiAdd)}
-            {createItem("Import spreadsheet", onOpenImportShifts)}
-            {createItem("Mark unavailability", onOpenAddUnavailability)}
-            {createItem("Book time off", onOpenAddTimeOff)}
+            {createItem(t("schedule.newShift"), onOpenAddShift)}
+            {createItem(t("schedule.severalShifts"), onOpenMultiAdd)}
+            {createItem(t("schedule.importSpreadsheet"), onOpenImportShifts)}
+            {createItem(t("schedule.markUnavailability"), onOpenAddUnavailability)}
+            {createItem(t("schedule.bookTimeOff"), onOpenAddTimeOff)}
           </PopoverContent>
         </Popover>
       ) : null}

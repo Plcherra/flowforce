@@ -140,7 +140,9 @@ export function ScheduleMoreMenu({
               ))}
               {conflicts.length > 4 ? (
                 <p className="px-1 text-xs text-muted-foreground">
-                  {conflicts.length - 4} more conflicts not shown.
+                  {t("schedule.moreConflictsHidden", {
+                    count: conflicts.length - 4,
+                  })}
                 </p>
               ) : null}
             </div>
