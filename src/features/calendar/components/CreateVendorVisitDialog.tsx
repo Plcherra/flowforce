@@ -10,18 +10,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { type EventAttendee } from "@/hooks/useEvents";
+import { type AppEvent, type EventAttendee } from "@/hooks/useEvents";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { Schedule } from "@/types/common";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useCreateVendorVisit } from "@/features/calendar/hooks/useCreateVendorVisit";
+import {
+  defaultEventWindow,
+  fromDatetimeLocalValue,
+  isEndAfterStart,
+} from "@/features/calendar/utils/calendarBoard";
 import { useTranslation } from "react-i18next";
 
 interface CreateVendorVisitDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated?: (eventId: string) => void;
+  onCreated?: (event: AppEvent) => void;
 }
 
 export function CreateVendorVisitDialog({
@@ -35,7 +40,7 @@ export function CreateVendorVisitDialog({
   const { profile } = useProfile();
   const { createVendorVisit } = useCreateVendorVisit();
 
-  const [title, setTitle] = useState("Vendor Visit");
+  const [title, setTitle] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [serviceType, setServiceType] = useState("");
   const [location, setLocation] = useState("");
@@ -48,10 +53,14 @@ export function CreateVendorVisitDialog({
 
   useEffect(() => {
     if (open) {
-      const s = new Date();
-      const e = new Date(s.getTime() + 60 * 60 * 1000);
-      setStart(s.toISOString().slice(0, 16));
-      setEnd(e.toISOString().slice(0, 16));
+      const window = defaultEventWindow();
+      setTitle("");
+      setVendorName("");
+      setServiceType("");
+      setLocation("");
+      setDescription("");
+      setStart(window.start);
+      setEnd(window.end);
       setSelectedShiftIds({});
     }
   }, [open]);
@@ -91,7 +100,7 @@ export function CreateVendorVisitDialog({
           if (assignment.user?.id) {
             const name =
               `${assignment.user.first_name ?? ""} ${assignment.user.last_name ?? ""}`.trim() ||
-              "Team member";
+              t("calendar.teamMember");
             map.set(assignment.user.id, {
               id: assignment.user.id,
               name,
@@ -106,11 +115,20 @@ export function CreateVendorVisitDialog({
   };
 
   const handleCreate = async () => {
-    if (!start || !end || !title.trim() || !vendorName.trim()) {
+    const startIso = fromDatetimeLocalValue(start);
+    const endIso = fromDatetimeLocalValue(end);
+    if (!startIso || !endIso || !title.trim() || !vendorName.trim()) {
       toast({
-        title: "Missing information",
-        description:
-          "All required fields must be filled before creating a visit.",
+        title: t("calendar.missingInformation"),
+        description: t("calendar.vendorFieldsRequired"),
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!isEndAfterStart(startIso, endIso)) {
+      toast({
+        title: t("calendar.invalidDate"),
+        description: t("calendar.endBeforeStart"),
         variant: "destructive",
       });
       return;
@@ -119,25 +137,8 @@ export function CreateVendorVisitDialog({
     const companyId = profile?.companyId ?? profile?.company_id ?? null;
     if (!companyId) {
       toast({
-        title: "Missing company context",
-        description: "You need an active company to create vendor visits.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    let startIso: Date;
-    let endIso: Date;
-    try {
-      startIso = new Date(start);
-      endIso = new Date(end);
-      if (Number.isNaN(startIso.getTime()) || Number.isNaN(endIso.getTime())) {
-        throw new Error("Invalid date");
-      }
-    } catch {
-      toast({
-        title: "Invalid date",
-        description: "Please provide valid start and end times.",
+        title: t("calendar.missingCompany"),
+        description: t("calendar.needCompanyForVendor"),
         variant: "destructive",
       });
       return;
@@ -149,104 +150,91 @@ export function CreateVendorVisitDialog({
 
     try {
       const visit = await createVendorVisit({
-        title,
+        title: title.trim(),
         description: description || undefined,
         location: location || undefined,
         start: startIso.toISOString(),
         end: endIso.toISOString(),
         related_shift_ids: linkedShiftIds,
         attendees: buildAttendees(linkedShiftIds),
-        checklist: [
-          {
-            id: "sv-greet",
-            text: "Supervisor greet vendor",
-            done: false,
-            who: "supervisor",
-          },
-          {
-            id: "vd-complete",
-            text: "Vendor completes service scope",
-            done: false,
-            who: "vendor",
-          },
-        ],
-        vendor: { name: vendorName, service_type: serviceType || undefined },
+        vendor: { name: vendorName.trim(), service_type: serviceType || undefined },
       });
 
       if (visit.id) {
-        onCreated?.(visit.id);
+        onCreated?.(visit);
       }
 
       toast({
-        title: "Vendor visit created",
-        description: `${vendorName} scheduled for ${new Date(start).toLocaleString()}.`,
+        title: t("calendar.vendorVisitCreated"),
+        description: `${vendorName.trim()} · ${startIso.toLocaleString()}`,
       });
       onOpenChange(false);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      toast({
-        title: "Vendor visit not saved",
-        description: message,
-        variant: "destructive",
-      });
+    } catch {
+      return;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("calendar.createVendorVisit")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label>{t("dashboard.title")}</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Label htmlFor="vendor-title">{t("dashboard.title")}</Label>
+            <Input id="vendor-title" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div>
-            <Label>{t("calendar.vendorName")}</Label>
+            <Label htmlFor="vendor-name">{t("calendar.vendorName")}</Label>
             <Input
+              id="vendor-name"
               value={vendorName}
               onChange={(e) => setVendorName(e.target.value)}
               placeholder={t("calendar.eGAcmeElectric")}
             />
           </div>
           <div>
-            <Label>{t("calendar.serviceType")}</Label>
+            <Label htmlFor="vendor-service">{t("calendar.serviceType")}</Label>
             <Input
+              id="vendor-service"
               value={serviceType}
               onChange={(e) => setServiceType(e.target.value)}
               placeholder={t("calendar.electricalHvacEtc")}
             />
           </div>
           <div>
-            <Label>{t("schedule.location")}</Label>
+            <Label htmlFor="vendor-location">{t("schedule.location")}</Label>
             <Input
+              id="vendor-location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder={t("calendar.siteArea")}
             />
           </div>
           <div>
-            <Label>{t("schedule.start")}</Label>
+            <Label htmlFor="vendor-start">{t("schedule.start")}</Label>
             <Input
+              id="vendor-start"
               type="datetime-local"
               value={start}
               onChange={(e) => setStart(e.target.value)}
             />
           </div>
           <div>
-            <Label>{t("schedule.end")}</Label>
+            <Label htmlFor="vendor-end">{t("schedule.end")}</Label>
             <Input
+              id="vendor-end"
               type="datetime-local"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
             />
           </div>
           <div className="md:col-span-2">
-            <Label>{t("registration.companyInfo.description")}</Label>
+            <Label htmlFor="vendor-description">{t("registration.companyInfo.description")}</Label>
             <Textarea
+              id="vendor-description"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -267,7 +255,7 @@ export function CreateVendorVisitDialog({
                   onCheckedChange={(v) => toggleShift(sh.id, v)}
                 />
                 <span className="truncate">
-                  {sh.title || sh.job_position?.name || "Shift"} –{" "}
+                  {sh.title || sh.job_position?.name || t("calendar.shiftFallback")} –{" "}
                   {new Date(sh.start_time).toLocaleTimeString()} to{" "}
                   {new Date(sh.end_time).toLocaleTimeString()}{" "}
                   {sh.location ? `• ${sh.location}` : ""}

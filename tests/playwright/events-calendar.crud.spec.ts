@@ -48,5 +48,20 @@ test.describe('Calendar CRUD flow', () => {
     await expect(visitDialog).toBeHidden({ timeout: 30_000 });
 
     await expect(page.getByText(visitTitle)).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: /^close$/i }).click();
+
+    await page.getByRole("button", { name: eventTitle }).first().click();
+    await page.getByTestId("calendar-edit-event").click();
+    const editedTitle = `${eventTitle} edited`;
+    const editDialog = page.getByRole("dialog", { name: /edit event/i });
+    await editDialog.getByLabel("Title").fill(editedTitle);
+    await editDialog.getByTestId("calendar-save-event").click();
+    await expect(editDialog).toBeHidden({ timeout: 30_000 });
+    await expect(page.getByText(editedTitle)).toBeVisible({ timeout: 30_000 });
+
+    await page.getByRole("button", { name: editedTitle }).first().click();
+    await page.getByTestId("calendar-delete-event").click();
+    await page.getByTestId("calendar-confirm-delete").click();
+    await expect(page.getByText(editedTitle)).toHaveCount(0, { timeout: 30_000 });
   });
 });

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TablesInsert } from "@/integrations/supabase/public-types";
 import { useAuth } from "@/hooks/useAuth";
@@ -320,6 +321,7 @@ const parseError = (error: unknown): string => {
 };
 
 export function useEvents() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -413,8 +415,8 @@ export function useEvents() {
 
     if (isTransient && !offlineToastShownRef.current) {
       toast({
-        title: "Calendar temporarily unavailable",
-        description: "Showing saved events while we reconnect.",
+        title: t("calendar.unableToLoadCalendar"),
+        description: t("calendar.showingSavedEvents"),
         variant: "default",
       });
       offlineToastShownRef.current = true;
@@ -425,6 +427,7 @@ export function useEvents() {
     eventsQuery.failureCount,
     eventsQuery.isError,
     eventsQuery.isFetching,
+    t,
     toast,
   ]);
 
@@ -488,7 +491,7 @@ export function useEvents() {
     onError: (mutationError) => {
       const normalizedError = normalizeCalendarError(mutationError);
       toast({
-        title: "Event not saved",
+        title: t("calendar.eventNotSaved"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -563,7 +566,7 @@ export function useEvents() {
     onError: (mutationError) => {
       const normalizedError = normalizeCalendarError(mutationError);
       toast({
-        title: "Vendor visit not saved",
+        title: t("calendar.vendorVisitNotSaved"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -607,7 +610,7 @@ export function useEvents() {
     onError: (mutationError) => {
       const normalizedError = normalizeCalendarError(mutationError);
       toast({
-        title: "Update failed",
+        title: t("calendar.eventNotSaved"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -642,7 +645,7 @@ export function useEvents() {
     onError: (mutationError) => {
       const normalizedError = normalizeCalendarError(mutationError);
       toast({
-        title: "Delete failed",
+        title: t("calendar.deleteThisEvent"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -699,16 +702,19 @@ export function useEvents() {
   const updateEvent = useCallback(
     async (id: string, updates: Partial<AppEvent>) => {
       if (!companyId) {
+        let saved: AppEvent | undefined;
         updateLocalEvents((previous) =>
           sortEvents(
-            previous.map((entry) =>
-              entry.id === id ? { ...entry, ...updates } : entry,
-            ),
+            previous.map((entry) => {
+              if (entry.id !== id) return entry;
+              saved = { ...entry, ...updates };
+              return saved;
+            }),
           ),
         );
-        return;
+        return saved;
       }
-      await updateEventMutation.mutateAsync({ id, updates });
+      return updateEventMutation.mutateAsync({ id, updates });
     },
     [companyId, updateEventMutation, updateLocalEvents],
   );
