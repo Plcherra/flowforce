@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +35,7 @@ const INITIAL_STATE: RecipientInsightsState = {
 export function useRecipientInsights(formData: WizardFormData) {
   const [state, setState] = useState<RecipientInsightsState>(INITIAL_STATE);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     let cancelled = false;
@@ -76,12 +78,11 @@ export function useRecipientInsights(formData: WizardFormData) {
           setState((prev) => ({
             ...prev,
             loading: false,
-            error: "Unable to load recipient metrics",
+            error: t("updates.unableToLoadRecipientMetrics"),
           }));
           toast({
-            title: "Recipient metrics unavailable",
-            description:
-              "We could not fetch the latest recipient counts. Try again soon.",
+            title: t("updates.recipientMetricsUnavailable"),
+            description: t("updates.recipientMetricsTryAgain"),
             variant: "destructive",
           });
         }
@@ -93,36 +94,25 @@ export function useRecipientInsights(formData: WizardFormData) {
     return () => {
       cancelled = true;
     };
-  }, [formData.recipients, toast]);
+  }, [formData.recipients, t, toast]);
 
   const actionItems = useMemo(() => {
     const items: string[] = [];
 
     if (state.activeFilters === 0 && formData.recipients.type !== "all") {
-      items.push("Add at least one audience to avoid sending to zero people.");
+      items.push(t("updates.noRecipientsSelected"));
     }
 
     if (state.estimatedReach === 0 && formData.recipients.type !== "all") {
-      items.push(
-        "No employees match the current filters. Adjust the selection.",
-      );
-    }
-
-    if (
-      state.estimatedReach > state.totalEmployees * 0.8 &&
-      formData.recipients.type !== "all"
-    ) {
-      items.push(
-        "You are targeting most of the company—consider sending to everyone.",
-      );
+      items.push(t("updates.noEmployeesMatch"));
     }
 
     return items;
   }, [
     state.activeFilters,
     state.estimatedReach,
-    state.totalEmployees,
     formData.recipients.type,
+    t,
   ]);
 
   return {

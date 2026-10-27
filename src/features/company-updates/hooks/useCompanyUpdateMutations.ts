@@ -7,11 +7,13 @@ import {
   companyUpdatesRepository,
   type CompanyUpdateRow,
   type CommentRow,
+  type ReactionRow,
 } from "@/features/company-updates/repositories/companyUpdatesRepository";
 import type { CreateCompanyUpdateInput } from "@/types/companyUpdates";
 
 const UPDATES_QUERY_KEY = "company-updates";
 const COMMENTS_QUERY_KEY = "company-update-comments";
+const REACTIONS_QUERY_KEY = "company-update-reactions";
 
 type CachedUpdateRow = CompanyUpdateRow & {
   viewerHasLiked?: boolean;
@@ -40,7 +42,7 @@ const clone = <T>(value: T): T => structuredClone(value);
 
 export function useCompanyUpdateMutations() {
   const { toast } = useToast();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const queryClient = useQueryClient();
@@ -48,6 +50,22 @@ export function useCompanyUpdateMutations() {
   const invalidateUpdates = () => {
     queryClient.invalidateQueries({ queryKey: [UPDATES_QUERY_KEY] });
     queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY] });
+    queryClient.invalidateQueries({ queryKey: [REACTIONS_QUERY_KEY] });
+  };
+
+  const setLikedInCache = (updateId: string, liked: boolean) => {
+    queryClient.setQueriesData<ReactionRow[]>(
+      { queryKey: [REACTIONS_QUERY_KEY] },
+      (current) => {
+        if (!current) return current;
+        const without = current.filter(
+          (row) =>
+            !(row.update_id === updateId && row.reaction_type === "like"),
+        );
+        if (!liked) return without;
+        return [...without, { update_id: updateId, reaction_type: "like" }];
+      },
+    );
   };
 
   const applyUpdateToQueries = (
@@ -63,33 +81,30 @@ export function useCompanyUpdateMutations() {
 
   const createUpdateMutation = useMutation({
     mutationFn: async (input: CreateCompanyUpdateInput) => {
-      if (!companyId) throw new Error("Missing company context.");
+      if (!companyId) throw new Error(t("updates.missingCompanyContext"));
       await companyUpdatesRepository.createUpdate({
         companyId,
         payload: input,
         sourceLocale: appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
       });
     },
-    onSuccess: () => {
+    onSuccess: (_data, input) => {
       invalidateUpdates();
+      const scheduled = input.status === "scheduled";
       toast({
-        title: "Update created",
-        description: "Your announcement is now live.",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Unable to create update",
-        description:
-          error instanceof Error ? error.message : "Please try again.",
-        variant: "destructive",
+        title: scheduled
+          ? t("updates.scheduledBadge")
+          : t("updates.updateCreated"),
+        description: scheduled
+          ? t("updates.scheduledHeld")
+          : t("updates.updateCreatedDescription"),
       });
     },
   });
 
   const archiveMutation = useMutation({
     mutationFn: async (updateId: string) => {
-      if (!companyId) throw new Error("Missing company context.");
+      if (!companyId) throw new Error(t("updates.missingCompanyContext"));
       await companyUpdatesRepository.updateStatus({
         companyId,
         updateId,
@@ -107,7 +122,7 @@ export function useCompanyUpdateMutations() {
       updateId: string;
       payload: Partial<Record<string, unknown>>;
     }) => {
-      if (!companyId) throw new Error("Missing company context.");
+      if (!companyId) throw new Error(t("updates.missingCompanyContext"));
       await companyUpdatesRepository.updateUpdate({
         companyId,
         updateId,
@@ -118,15 +133,15 @@ export function useCompanyUpdateMutations() {
     onSuccess: () => {
       invalidateUpdates();
       toast({
-        title: "Update updated",
-        description: "Your changes have been saved.",
+        title: t("updates.updateEdited"),
+        description: t("updates.updateEditedDescription"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Unable to update",
+        title: t("updates.unableToSaveUpdate"),
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error ? error.message : t("updates.pleaseTryAgain"),
         variant: "destructive",
       });
     },
@@ -134,7 +149,7 @@ export function useCompanyUpdateMutations() {
 
   const deleteMutation = useMutation({
     mutationFn: async (updateId: string) => {
-      if (!companyId) throw new Error("Missing company context.");
+      if (!companyId) throw new Error(t("updates.missingCompanyContext"));
       await companyUpdatesRepository.deleteUpdate({ companyId, updateId });
     },
     onSuccess: invalidateUpdates,
@@ -148,7 +163,7 @@ export function useCompanyUpdateMutations() {
       updateId: string;
       isPinned: boolean;
     }) => {
-      if (!companyId) throw new Error("Missing company context.");
+      if (!companyId) throw new Error(t("updates.missingCompanyContext"));
       await companyUpdatesRepository.togglePin({
         companyId,
         updateId,
@@ -175,7 +190,7 @@ export function useCompanyUpdateMutations() {
 
   const likeMutation = useMutation({
     mutationFn: async ({ updateId, currentlyLiked }: ToggleLikeVariables) => {
-      if (!companyId || !profile?.id) throw new Error("Missing user context.");
+      if (!companyId || !profile?.id) throw new Error(t("updates.missingUserContext"));
       if (currentlyLiked) {
         await companyUpdatesRepository.deleteReaction({
           companyId,
@@ -194,6 +209,7 @@ export function useCompanyUpdateMutations() {
     },
     onMutate: async ({ updateId, currentlyLiked }) => {
       const delta = currentlyLiked ? -1 : 1;
+      setLikedInCache(updateId, !currentlyLiked);
       applyUpdateToQueries((data) => {
         if (!data) return data;
         return {
@@ -211,7 +227,15 @@ export function useCompanyUpdateMutations() {
       });
       return { updateId, currentlyLiked };
     },
-    onError: () => invalidateUpdates(),
+    onError: (error) => {
+      invalidateUpdates();
+      toast({
+        title: t("updates.unableToSaveUpdate"),
+        description:
+          error instanceof Error ? error.message : t("updates.pleaseTryAgain"),
+        variant: "destructive",
+      });
+    },
     onSettled: invalidateUpdates,
   });
 
@@ -248,7 +272,7 @@ export function useCompanyUpdateMutations() {
 
   const commentMutation = useMutation({
     mutationFn: async ({ updateId, content }: CommentVariables) => {
-      if (!companyId || !profile?.id) throw new Error("Missing user context.");
+      if (!companyId || !profile?.id) throw new Error(t("updates.missingUserContext"));
       await companyUpdatesRepository.createComment({
         companyId,
         updateId,
@@ -262,7 +286,7 @@ export function useCompanyUpdateMutations() {
       const now = new Date().toISOString();
       const optimisticComment: CommentRow = {
         id: tempId,
-        updateid: updateId,
+        update_id: updateId,
         company_id: companyId ?? "",
         author_id: profile?.id ?? "me",
         content,
@@ -309,15 +333,37 @@ export function useCompanyUpdateMutations() {
     onSettled: invalidateUpdates,
   });
 
+  const publishMutation = useMutation({
+    mutationFn: async (updateId: string) => {
+      if (!companyId) throw new Error(t("updates.missingCompanyContext"));
+      await companyUpdatesRepository.updateStatus({
+        companyId,
+        updateId,
+        status: "published",
+      });
+    },
+    onSuccess: () => {
+      invalidateUpdates();
+    },
+    onError: (error) => {
+      toast({
+        title: t("updates.unableToPublish"),
+        description:
+          error instanceof Error ? error.message : t("updates.pleaseTryAgain"),
+        variant: "destructive",
+      });
+    },
+  });
+
   const ensureCompany = () => {
     if (!companyId) {
-      throw new Error("Missing company context.");
+      throw new Error(t("updates.missingCompanyContext"));
     }
   };
 
   const ensureUser = () => {
     if (!companyId || !profile?.id) {
-      throw new Error("Missing user context.");
+      throw new Error(t("updates.missingUserContext"));
     }
   };
 
@@ -340,6 +386,10 @@ export function useCompanyUpdateMutations() {
     deleteUpdate: (updateId: string) => {
       ensureCompany();
       return deleteMutation.mutateAsync(updateId);
+    },
+    publishUpdate: (updateId: string) => {
+      ensureCompany();
+      return publishMutation.mutateAsync(updateId);
     },
     togglePin: ({
       updateId,

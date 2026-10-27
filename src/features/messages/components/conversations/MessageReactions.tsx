@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -40,6 +41,7 @@ export function MessageReactions({
   messageId,
   className = "",
 }: MessageReactionsProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [reactions, setReactions] = useState<Reaction[]>([]);
@@ -122,8 +124,8 @@ export function MessageReactions({
     } catch (error) {
       logger.error("Error adding reaction", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to add reaction",
+        title: t("common.somethingWentWrong"),
+        description: t("messages.reactionFailed"),
         variant: "destructive",
       });
     } finally {
@@ -142,8 +144,8 @@ export function MessageReactions({
     } catch (error) {
       logger.error("Error removing reaction", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to remove reaction",
+        title: t("common.somethingWentWrong"),
+        description: t("messages.reactionRemoveFailed"),
         variant: "destructive",
       });
     }
@@ -206,10 +208,12 @@ export function MessageReactions({
       <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
         <PopoverTrigger asChild>
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className="h-6 px-2 rounded-full hover:bg-primary/10"
             disabled={loading}
+            aria-label={t("messages.addEmoji")}
           >
             <Plus className="h-3 w-3" />
           </Button>

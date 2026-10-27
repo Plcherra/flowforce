@@ -22,6 +22,7 @@ export function useMessages() {
     messages,
     loading: messagesLoading,
     refetchMessages,
+    appendMessage,
     error: messagesError,
     clearError: clearMessagesError,
   } = useChannelMessages(currentChannelId);
@@ -58,6 +59,7 @@ export function useMessages() {
     sendMessage,
     searchMessages,
     refetchMessages,
+    appendMessage,
     deleteMessage,
 
     // Error state

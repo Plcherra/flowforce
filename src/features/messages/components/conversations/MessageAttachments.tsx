@@ -48,8 +48,8 @@ export function MessageAttachments({
 
     if (!companyId) {
       toast({
-        title: "Missing company",
-        description: "Your account is not attached to a company yet.",
+        title: t("messages.missingCompany"),
+        description: t("messages.accountNotAttached"),
         variant: "destructive",
       });
       return;
@@ -93,14 +93,13 @@ export function MessageAttachments({
       onAttachmentsChange?.(updatedAttachments);
 
       toast({
-        title: "Success",
-        description: `${newAttachments.length} file(s) uploaded successfully`,
+        title: t("messages.filesUploaded", { count: newAttachments.length }),
       });
     } catch (error) {
       logger.error("Upload error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to upload files",
+        title: t("common.somethingWentWrong"),
+        description: t("messages.uploadFailed"),
         variant: "destructive",
       });
     } finally {
@@ -127,14 +126,13 @@ export function MessageAttachments({
       onAttachmentsChange?.(updatedAttachments);
 
       toast({
-        title: "Success",
-        description: "File removed successfully",
+        title: t("messages.fileRemoved"),
       });
     } catch (error) {
       logger.error("Remove error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to remove file",
+        title: t("common.somethingWentWrong"),
+        description: t("messages.fileRemoveFailed"),
         variant: "destructive",
       });
     }
@@ -167,8 +165,8 @@ export function MessageAttachments({
     } catch (error) {
       logger.error("Download error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to download file",
+        title: t("common.somethingWentWrong"),
+        description: t("messages.downloadFailed"),
         variant: "destructive",
       });
     }
@@ -197,8 +195,8 @@ export function MessageAttachments({
     } catch (error) {
       logger.error("Preview error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to open file preview",
+        title: t("common.somethingWentWrong"),
+        description: t("messages.previewFailed"),
         variant: "destructive",
       });
     }
@@ -218,14 +216,16 @@ export function MessageAttachments({
             accept="*/*"
           />
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="gap-2"
+            aria-label={t("messages.attachFile")}
           >
             <Paperclip className="h-4 w-4" />
-            {uploading ? "Uploading..." : "Attach Files"}
+            {uploading ? t("messages.uploadingFiles") : t("messages.attachFile")}
           </Button>
         </div>
       )}
@@ -275,9 +275,11 @@ export function MessageAttachments({
                     {isImage(attachment.type) &&
                       (attachment.path || attachment.url) && (
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0"
+                          aria-label={attachment.name}
                           onClick={() => void previewAttachment(attachment)}
                         >
                           <Eye className="h-4 w-4" />
@@ -286,9 +288,11 @@ export function MessageAttachments({
 
                     {/* Download button */}
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      aria-label={attachment.name}
                       onClick={() => downloadAttachment(attachment)}
                     >
                       <Download className="h-4 w-4" />
@@ -297,9 +301,11 @@ export function MessageAttachments({
                     {/* Remove button (only if not read-only) */}
                     {!readOnly && (
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-destructive hover:text-destructive/80"
+                        aria-label={attachment.name}
                         onClick={() => removeAttachment(attachment)}
                       >
                         <X className="h-4 w-4" />
