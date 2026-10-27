@@ -6,6 +6,10 @@ import { DndContext } from "@dnd-kit/core";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
 import { WeekGrid } from "@/features/scheduling/components/drag-drop/WeekGrid";
+import {
+  MobileWeekBoard,
+  usePhoneScheduleLayout,
+} from "@/features/scheduling/components/drag-drop/MobileWeekBoard";
 import { ShiftDetailsPanel } from "@/features/scheduling/components/ShiftDetailsPanel";
 import {
   ShiftWizardDialog,
@@ -104,6 +108,8 @@ export function DragDropScheduleCalendar({
   const [showTemplates, setShowTemplates] = useState(false);
   const [showWeekTemplates, setShowWeekTemplates] = useState(false);
   const [showAddShift, setShowAddShift] = useState(false);
+  const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
+  const isPhone = usePhoneScheduleLayout();
   const [showImportShifts, setShowImportShifts] = useState(false);
   const [showMultiAdd, setShowMultiAdd] = useState(false);
   const [showAddUnavailability, setShowAddUnavailability] = useState(false);
@@ -228,6 +234,13 @@ export function DragDropScheduleCalendar({
   });
 
   const openBlankShiftWizard = () => {
+    setQuickAddDate(null);
+    setWizardSeed(null);
+    setShowAddShift(true);
+  };
+
+  const openShiftOnDay = (day: Date) => {
+    setQuickAddDate(day);
     setWizardSeed(null);
     setShowAddShift(true);
   };
@@ -338,11 +351,20 @@ export function DragDropScheduleCalendar({
             data-testid="schedule-grid-scroll"
             className="min-h-0 flex-1 overflow-auto"
           >
-            <DndContext
-              sensors={sensors}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
+            {isPhone ? (
+              <MobileWeekBoard
+                weekDays={weekDays}
+                shifts={weekSchedules}
+                conflictByShiftId={boardConflictByShiftId}
+                onShiftClick={openShiftDetails}
+                onAddShift={editsLocked ? undefined : openShiftOnDay}
+              />
+            ) : (
+              <DndContext
+                sensors={sensors}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
               <WeekGrid
                 weekDays={weekDays}
                 employees={
@@ -370,7 +392,8 @@ export function DragDropScheduleCalendar({
                 timeOffRequests={timeOffRequests}
               />
               {dragOverlay}
-            </DndContext>
+              </DndContext>
+            )}
           </div>
         </div>
       </div>
@@ -408,8 +431,11 @@ export function DragDropScheduleCalendar({
       {/* Add Shift Dialog */}
       <ShiftWizardDialog
         open={showAddShift}
-        onOpenChange={setShowAddShift}
-        selectedDate={selectedDate}
+        onOpenChange={(open) => {
+          setShowAddShift(open);
+          if (!open) setQuickAddDate(null);
+        }}
+        selectedDate={quickAddDate || selectedDate}
         templateSeed={wizardSeed}
       />
 

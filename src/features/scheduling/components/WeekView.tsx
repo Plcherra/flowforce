@@ -84,8 +84,18 @@ export function WeekView({
     [overlayEvents],
   );
 
+  const shiftWizard = hideShiftActions ? null : (
+    <ShiftWizardDialog
+      open={showAddShift}
+      onOpenChange={(open) => {
+        setShowAddShift(open);
+        if (!open) setQuickAddDate(null);
+      }}
+      selectedDate={quickAddDate || selectedDate}
+    />
+  );
+
   if (isMobile) {
-    // Mobile: Show simplified horizontal scrollable week view
     return (
       <div className="space-y-4">
         {locationFilter && (
@@ -93,44 +103,37 @@ export function WeekView({
             {t("schedule.viewingShiftsFor", { location: locationFilter })}
           </p>
         )}
-        {/* Mobile week header */}
-        <div className="overflow-x-auto">
-          <div className="flex space-x-2 pb-2" style={{ minWidth: "700px" }}>
-            {weekDays.map((day) => {
-              const stats = getCoverageStats(day);
-              return (
-                <div
-                  key={day.toISOString()}
-                  className="flex-1 min-w-[90px] p-3 border rounded-lg bg-background"
-                >
-                  <div className="text-center">
-                    <div className="text-sm font-medium text-foreground">
-                      {format(day, "EEE", { locale })}
-                    </div>
-                    <div className="text-lg font-semibold text-foreground">
-                      {format(day, "d")}
-                    </div>
-                    <div className="mt-1">
-                      <div className="text-xs text-muted-foreground">
-                        {stats.totalHours}h
-                      </div>
-                      <div
-                        className={`text-xs font-medium ${
-                          stats.coverageRatio >= 1
-                            ? "text-success"
-                            : stats.coverageRatio >= 0.75
-                              ? "text-warning"
-                              : "text-destructive"
-                        }`}
-                      >
-                        {stats.totalHeadcount}/{stats.requiredHeadcount}
-                      </div>
-                    </div>
-                  </div>
+        <div className="grid grid-cols-7 gap-1">
+          {weekDays.map((day) => {
+            const stats = getCoverageStats(day);
+            return (
+              <div
+                key={day.toISOString()}
+                className="min-w-0 rounded-lg border bg-background p-1 text-center"
+              >
+                <div className="truncate text-[11px] font-medium text-foreground">
+                  {format(day, "EEEEE", { locale })}
                 </div>
-              );
-            })}
-          </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {format(day, "d")}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  {stats.totalHours}h
+                </div>
+                <div
+                  className={`text-[10px] font-medium ${
+                    stats.coverageRatio >= 1
+                      ? "text-success"
+                      : stats.coverageRatio >= 0.75
+                        ? "text-warning"
+                        : "text-destructive"
+                  }`}
+                >
+                  {stats.totalHeadcount}/{stats.requiredHeadcount}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Mobile shifts list */}
@@ -251,6 +254,7 @@ export function WeekView({
             );
           })}
         </div>
+        {shiftWizard}
       </div>
     );
   }
@@ -494,17 +498,7 @@ export function WeekView({
           );
         })()}
       </div>
-      {/* Centralized Add Shift Dialog */}
-      {!hideShiftActions && (
-        <ShiftWizardDialog
-          open={showAddShift}
-          onOpenChange={(open) => {
-            setShowAddShift(open);
-            if (!open) setQuickAddDate(null);
-          }}
-          selectedDate={quickAddDate || selectedDate}
-        />
-      )}
+      {shiftWizard}
     </div>
   );
 }
