@@ -26,13 +26,13 @@ import { readTaskKind } from "../utils/taskKind";
 import {
   translatedKindLabel,
   translatedPriorityLabel,
+  translatedPublishLabel,
   translatedStatusLabel,
 } from "../utils/taskCopy";
 import {
   formatTaskWindow,
   readTaskPoints,
   readTaskSchedule,
-  taskPublishLabel,
 } from "../utils/taskSchedule";
 import type { SelectionHandlers } from "../hooks/useTaskSelection";
 import type { TFunction } from "i18next";
@@ -76,7 +76,7 @@ export function TaskCard({
   const formId = readFormId(task.links);
   const schedule = readTaskSchedule(task.links);
   const windowLabel = formatTaskWindow(schedule.startsAt, schedule.endsAt);
-  const publishLabel = taskPublishLabel(schedule.publishState);
+  const publishLabel = translatedPublishLabel(t, schedule.publishState);
   const points = readTaskPoints(task.links);
   const assigneeCount = readAssigneeIds(task.links, task.assigned_to).length;
 

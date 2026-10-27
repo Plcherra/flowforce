@@ -9,6 +9,7 @@ import {
   canSeeListIssueGather,
   gatheredListIssues,
   listIssueGrant,
+  listIssueMarkDoneAllowed,
 } from "@/features/tasks/utils/listIssueGather";
 
 const KIND_KEYS: Record<string, string> = {
@@ -60,7 +61,8 @@ export function ListIssueGather({
             issue.links && typeof issue.links === "object"
               ? (issue.links as { list_issue_kind?: string }).list_issue_kind
               : null;
-          const finished = issue.status === "done" || issue.status === "completed";
+          const canMarkDone = listIssueMarkDoneAllowed(issue.status);
+          const cancelled = issue.status === "cancelled";
           return (
             <li
               key={issue.id}
@@ -73,7 +75,7 @@ export function ListIssueGather({
                 </span>
                 {issue.title || t("tasks.checklistTask")}
               </span>
-              {canAct && !finished ? (
+              {canAct && canMarkDone ? (
                 <Button
                   type="button"
                   size="sm"
@@ -84,6 +86,10 @@ export function ListIssueGather({
                 >
                   {t("tasks.markDone")}
                 </Button>
+              ) : canAct ? (
+                <span className="text-sm text-muted-foreground">
+                  {cancelled ? t("tasks.statusCancelled") : t("tasks.statusDone")}
+                </span>
               ) : null}
             </li>
           );

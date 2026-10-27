@@ -69,6 +69,7 @@ import { useFormContentDisplay } from "@/features/forms/components/FormContentTe
 import { TaskCommentBody } from "@/features/tasks/components/TaskCommentBody";
 import { useTaskCommentTranslations } from "@/features/tasks/hooks/useTaskCommentTranslations";
 import type { TaskContentTranslation } from "@/features/tasks/taskContentFields";
+import { executionContentPatch } from "@/features/tasks/utils/executionUpdate";
 
 type ButtonVariant = "default" | "secondary" | "outline";
 interface TaskDetailsDialogProps {
@@ -218,8 +219,10 @@ export function TaskDetailsDialog({
     setSavingExecution(true);
     try {
       const { data, error } = await updateTask(currentTask.id, {
-        title: executionForm.title.trim(),
-        description: executionForm.description.trim() || null,
+        ...executionContentPatch(currentTask, {
+          title: executionForm.title,
+          description: executionForm.description,
+        }),
         priority: executionForm.priority,
         due_date: dueDateFromWindowEnd(endsAt),
         actual_hours: parseHoursInput(executionForm.actual_hours),

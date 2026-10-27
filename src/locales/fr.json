@@ -2624,6 +2624,7 @@
     "department": "Service :",
     "description": "Description",
     "draft": "Brouillon",
+    "scheduled": "Planifié",
     "due": "Échéance :",
     "dueThisWeek": "Échéance cette semaine",
     "dueToday": "Échéance aujourd'hui",

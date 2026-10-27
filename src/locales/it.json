@@ -2624,6 +2624,7 @@
     "department": "Reparto:",
     "description": "Descrizione",
     "draft": "Bozza",
+    "scheduled": "Programmato",
     "due": "Scadenza:",
     "dueThisWeek": "In scadenza questa settimana",
     "dueToday": "In scadenza oggi",

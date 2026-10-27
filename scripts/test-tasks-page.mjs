@@ -37,6 +37,9 @@ const { runTomorrowShiftTests } = importTs(
 const { runTaskCreateAccessTests } = importTs(
   "../src/features/tasks/utils/taskCreateAccess.test.ts",
 );
+const { runExecutionUpdateTests } = importTs(
+  "../src/features/tasks/utils/executionUpdate.test.ts",
+);
 const { runListIssueTests } = importTs(
   "../src/features/tasks/utils/listIssues.test.ts",
 );
@@ -131,6 +134,7 @@ runHandoverTaskTests();
 runTaskScheduleTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
+runExecutionUpdateTests();
 runListIssueTests();
 runTaskPointsTotalTests();
 runListIssueInsertTests();

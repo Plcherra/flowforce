@@ -2624,6 +2624,7 @@
     "department": "Departamento:",
     "description": "Descripción",
     "draft": "Borrador",
+    "scheduled": "Programado",
     "due": "Vence:",
     "dueThisWeek": "Vence esta semana",
     "dueToday": "Vence hoy",

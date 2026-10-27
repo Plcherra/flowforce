@@ -25,6 +25,12 @@ export function canActOnListIssue(grant: ListIssueGrant): boolean {
   return grant === "act";
 }
 
+export function listIssueMarkDoneAllowed(
+  status: string | null | undefined,
+): boolean {
+  return status !== "done" && status !== "completed" && status !== "cancelled";
+}
+
 export function gatheredListIssues<T extends { links?: unknown; source?: string | null }>(
   tasks: T[],
 ): T[] {

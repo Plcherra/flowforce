@@ -169,26 +169,12 @@ export function useReminders() {
       const reminder = reminders.find((r) => r.id === id);
       if (!reminder) return;
 
-      // Simulate notification trigger based on methods
       if (reminder.notification_methods.includes("browser")) {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification(copy?.title ?? reminder.title, {
             body: (copy?.description ?? reminder.description) || t("tasks.reminderNotification"),
             icon: "/favicon.ico",
           });
-        }
-      }
-
-      // Play sound if enabled
-      if (reminder.sound_enabled) {
-        try {
-          const audio = new Audio(`/sounds/${reminder.sound_type}.mp3`);
-          audio.play().catch(() => {
-            // Fallback to default browser notification sound
-            logger.debug("Sound notification triggered");
-          });
-        } catch (_error) {
-          logger.debug("Sound notification triggered (fallback)");
         }
       }
 

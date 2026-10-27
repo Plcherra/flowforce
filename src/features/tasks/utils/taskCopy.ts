@@ -67,6 +67,15 @@ export function translatedStatusHint(t: TFunction, value: string): string {
   return t(key);
 }
 
+export function translatedPublishLabel(
+  t: TFunction,
+  state: string | null | undefined,
+): string | null {
+  if (state === "draft") return t("tasks.draft");
+  if (state === "scheduled") return t("tasks.scheduled");
+  return null;
+}
+
 export function translatedKindLabel(t: TFunction, kind: TaskKind): string {
   return t(KIND_KEYS[kind]);
 }

@@ -204,6 +204,12 @@ function pickViewerShift(
   return chooseCoveringShift(mapped.length > 0 ? mapped : mine, now);
 }
 
+export function shiftTaskMarkDoneAllowed(
+  status: string | null | undefined,
+): boolean {
+  return status !== "done" && status !== "completed" && status !== "cancelled";
+}
+
 export function shiftTasksForSchedule(
   tasks: readonly MyShiftTaskRow[],
   scheduleId: string,

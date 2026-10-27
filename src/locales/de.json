@@ -2624,6 +2624,7 @@
     "department": "Abteilung:",
     "description": "Beschreibung",
     "draft": "Entwurf",
+    "scheduled": "Geplant",
     "due": "Fällig:",
     "dueThisWeek": "Diese Woche fällig",
     "dueToday": "Heute fällig",

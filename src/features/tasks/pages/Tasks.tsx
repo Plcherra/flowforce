@@ -90,7 +90,7 @@ export default function Tasks() {
   const canSeeTeam =
     !permissionsLoading && (can("viewTeamTasks") || can("editTasks"));
   const { user } = useAuth();
-  const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
+  const { tasks: tasksData, loading, error, refetchTasks, updateStatus } = useTasks();
   const tasks = useMemo(
     () => asArray(tasksData) as TaskListItem[],
     [tasksData],
@@ -234,10 +234,11 @@ export default function Tasks() {
           onSaveClosingNote={shift.saveClosingNote}
           onFillForm={setOpenFormId}
           onCompleteTask={(taskId) => {
-            void updateTask(taskId, {
-              status: "completed",
-              completed_at: new Date().toISOString(),
-            }).then(() => refetchTasks());
+            void updateStatus(taskId, "completed").then(async (result) => {
+              if (!result.data || result.error) return;
+              await refetchTasks();
+              shift.refresh();
+            });
           }}
         />
       ) : null}
@@ -245,7 +246,10 @@ export default function Tasks() {
         <ListIssueGather
           tasks={visibleTasks}
           onMarkDone={(taskId) => {
-            void updateTask(taskId, { status: "completed" }).then(() => refetchTasks());
+            void updateStatus(taskId, "completed").then(async (result) => {
+              if (!result.data || result.error) return;
+              await refetchTasks();
+            });
           }}
         />
       ) : null}

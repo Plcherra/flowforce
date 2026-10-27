@@ -5,7 +5,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import type { ChecklistSlot } from "@/features/forms/utils/checklistForms";
 import type { StoreStation } from "@/features/tasks/utils/shiftWeekdayTask";
-import type { AssembledShift, MyShiftListView, MyShiftShiftCard } from "@/features/tasks/utils/myShiftView";
+import {
+  shiftTaskMarkDoneAllowed,
+  type AssembledShift,
+  type MyShiftListView,
+  type MyShiftShiftCard,
+} from "@/features/tasks/utils/myShiftView";
 import { formatTaskWindow } from "@/features/tasks/utils/taskSchedule";
 
 const SLOT_KEYS: Record<ChecklistSlot, string> = {
@@ -26,10 +31,6 @@ interface MyShiftTasksProps {
   onSaveClosingNote?: (formId: string, note: string) => void;
   onFillForm?: (formId: string) => void;
   onCompleteTask?: (taskId: string) => void;
-}
-
-function isFinished(status: string | null): boolean {
-  return status === "done" || status === "completed";
 }
 
 export function MyShiftTasks({
@@ -237,7 +238,8 @@ function ShiftTaskCard({
 }) {
   const { t } = useTranslation();
   const windowLabel = formatTaskWindow(task.startsAt, task.endsAt);
-  const finished = isFinished(task.status);
+  const cancelled = task.status === "cancelled";
+  const canMarkDone = shiftTaskMarkDoneAllowed(task.status);
   return (
     <article
       className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
@@ -253,9 +255,7 @@ function ShiftTaskCard({
           {windowLabel ? ` · ${windowLabel}` : ""}
         </p>
       </div>
-      {finished ? (
-        <p className="text-sm text-muted-foreground">{t("tasks.statusDone")}</p>
-      ) : (
+      {canMarkDone ? (
         <Button
           type="button"
           className="min-h-11 w-full"
@@ -264,6 +264,13 @@ function ShiftTaskCard({
         >
           {t("tasks.markDone")}
         </Button>
+      ) : (
+        <p
+          className="text-sm text-muted-foreground"
+          data-testid={`my-shift-task-closed-${task.id}`}
+        >
+          {cancelled ? t("tasks.statusCancelled") : t("tasks.statusDone")}
+        </p>
       )}
       {task.formId ? (
         <Button

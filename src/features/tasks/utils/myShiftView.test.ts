@@ -5,7 +5,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { withChecklistAddress } from "@/features/forms/utils/checklistForms";
 import { withShiftWeekdayTask, US_FOODS_DELIVERY } from "./shiftWeekdayTask";
 import { MyShiftTasks } from "../components/MyShiftTasks";
-import { assembleMyShift, checklistAreaFromShift } from "./myShiftView";
+import {
+  assembleMyShift,
+  checklistAreaFromShift,
+  shiftTaskMarkDoneAllowed,
+} from "./myShiftView";
 
 const CASHIER_OPENING = {
   id: "form-open",
@@ -238,4 +242,49 @@ export function runMyShiftViewTests() {
   assert.match(cookHtml, /my-shift-task-fill-restroom/);
   assert.match(cookHtml, /my-shift-task-done-restroom/);
   assert.equal(cookHtml.includes("my-shift-list-opening"), false);
+
+  assert.equal(shiftTaskMarkDoneAllowed("todo"), true);
+  assert.equal(shiftTaskMarkDoneAllowed("completed"), false);
+  assert.equal(shiftTaskMarkDoneAllowed("cancelled"), false);
+
+  const cancelled = assembleMyShift({
+    viewerId: "lee",
+    now: new Date("2026-10-23T15:00:00"),
+    schedules: [
+      {
+        id: "line",
+        role: "Cook",
+        title: "Line",
+        start_time: "2026-10-23T12:00:00.000Z",
+        end_time: "2026-10-23T20:00:00.000Z",
+        user_id: "lee",
+        is_published: true,
+        is_template: false,
+      },
+    ],
+    forms: [],
+    fields: [],
+    submissions: [],
+    tasks: [
+      {
+        id: "restroom",
+        title: "Clean the restroom",
+        description: "After lunch",
+        status: "cancelled",
+        assigned_to: "lee",
+        links: { schedule_id: "line", assignee_ids: ["lee"] },
+      },
+    ],
+  });
+  assert.equal(cancelled.kind, "ready");
+  if (cancelled.kind !== "ready") return;
+  const cancelledHtml = renderToStaticMarkup(
+    createElement(MyShiftTasks, {
+      board: cancelled,
+      onOpenList: () => undefined,
+      onCompleteTask: () => undefined,
+    }),
+  );
+  assert.match(cancelledHtml, /my-shift-task-closed-restroom/);
+  assert.equal(cancelledHtml.includes("my-shift-task-done-restroom"), false);
 }
