@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Reply,  X, Send } from "lucide-react";
 import { format } from "date-fns";
+import type { ThreadReplySender } from "@/features/messages/threadReplies";
 
 interface ThreadMessage {
   id: string;
@@ -27,7 +28,7 @@ interface ThreadedMessageViewProps {
   message: ThreadMessage;
   allReplies: ThreadMessage[];
   onClose: () => void;
-  onSendReply: (content: string, parentId?: string) => void;
+  onSendReply: ThreadReplySender;
   className?: string;
 }
 
@@ -59,26 +60,31 @@ export function ThreadedMessageView({
   const { t } = useTranslation();
   const [replyContent, setReplyContent] = useState("");
   const [activeReplyTo, setActiveReplyTo] = useState<string | null>(null);
-  const [threadReplies, setThreadReplies] = useState<ThreadMessage[]>([]);
+  const [sending, setSending] = useState(false);
+  const threadReplies = useMemo(
+    () =>
+      allReplies.filter(
+        (reply) =>
+          reply.parentId === message.id ||
+          allReplies.some(
+            (item) => item.id === reply.parentId && item.parentId === message.id,
+          ),
+      ),
+    [allReplies, message.id],
+  );
 
-  useEffect(() => {
-    // Filter replies that belong to this thread
-    const replies = allReplies.filter(
-      (reply) =>
-        reply.parentId === message.id ||
-        allReplies.some(
-          (r) => r.id === reply.parentId && r.parentId === message.id,
-        ),
-    );
-    setThreadReplies(replies);
-  }, [allReplies, message.id]);
-
-  const handleSendReply = () => {
-    if (!replyContent.trim()) return;
-
-    onSendReply(replyContent, activeReplyTo || message.id);
-    setReplyContent("");
-    setActiveReplyTo(null);
+  const handleSendReply = async () => {
+    if (!replyContent.trim() || sending) return;
+    setSending(true);
+    try {
+      await onSendReply(replyContent, activeReplyTo || message.id);
+      setReplyContent("");
+      setActiveReplyTo(null);
+    } catch {
+      // The send action already reports the failure.
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleReplyToMessage = (messageId: string) => {
@@ -96,7 +102,7 @@ export function ThreadedMessageView({
   };
 
   const renderMessage = (msg: ThreadMessage, level: number = 0) => {
-    const displayName = msg.sender.name?.trim() || "Unknown teammate";
+    const displayName = msg.sender.name?.trim() || t("messages.unknownTeammate");
     const initials = getInitialsFromName(displayName);
     const createdAtLabel = formatThreadTimestamp(msg.createdAt);
     const indentation = level > 0 ? Math.min(level * 24, 48) : 0;
@@ -163,10 +169,12 @@ export function ThreadedMessageView({
               {t("messages.messageCount", { count: threadReplies.length + 1 })} </Badge>
           </CardTitle>
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
             onClick={onClose}
+            aria-label={t("messages.closeThread")}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -213,18 +221,27 @@ export function ThreadedMessageView({
             <Input
               placeholder={
                 activeReplyTo && activeReplyTo !== message.id
-                  ? "Reply to message..."
-                  : "Reply to thread..."
+                  ? t("messages.replyToMessage")
+                  : t("messages.replyToThread")
               }
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendReply()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void handleSendReply();
+                }
+              }}
+              aria-label={t("messages.writeAReply")}
               className="flex-1"
+              disabled={sending}
             />
             <Button
+              type="button"
               size="sm"
-              onClick={handleSendReply}
-              disabled={!replyContent.trim()}
+              onClick={() => void handleSendReply()}
+              disabled={!replyContent.trim() || sending}
+              aria-label={t("messages.sendReply")}
             >
               <Send className="h-4 w-4" />
             </Button>

@@ -20,11 +20,11 @@ interface NewChatPanelProps {
   onStartGroup: (input: { name: string; memberIds: string[] }) => Promise<void>;
 }
 
-function displayName(user: ChatPerson) {
+function displayName(user: ChatPerson, fallback: string) {
   return (
     [user.first_name, user.last_name].filter(Boolean).join(" ").trim() ||
     user.email ||
-    "Teammate"
+    fallback
   );
 }
 
@@ -64,10 +64,12 @@ export function NewChatPanel({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {groupMode ? "New group" : "New chat"}
+              {groupMode ? t("messages.newGroup") : t("messages.newChat")}
             </p>
             <h2 className="mt-1 text-2xl font-semibold">
-              {groupMode ? "Who is in this group?" : "Choose someone"}
+              {groupMode
+                ? t("messages.whoIsInThisGroup")
+                : t("messages.chooseSomeone")}
             </h2>
           </div>
           <Button variant="ghost" onClick={onClose}>
@@ -92,12 +94,12 @@ export function NewChatPanel({
             ) : filteredUsers.length === 0 ? (
               <p className="col-span-full py-8 text-center text-sm text-muted-foreground">
                 {searchQuery
-                  ? "No people match that search."
-                  : "No other teammates yet."}
+                  ? t("messages.noPeopleMatch")
+                  : t("messages.noOtherTeammates")}
               </p>
             ) : (
               filteredUsers.map((user) => {
-                const name = displayName(user);
+                const name = displayName(user, t("messages.teammate"));
                 const selected = selectedIds.includes(user.id);
                 return (
                   <button
@@ -127,7 +129,7 @@ export function NewChatPanel({
                         {name}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {user.role || user.email || "Teammate"}
+                        {user.role || user.email || t("messages.teammate")}
                       </span>
                     </span>
                   </button>
@@ -146,7 +148,7 @@ export function NewChatPanel({
               setSelectedIds([]);
             }}
           >
-            {groupMode ? "New chat" : "Create a new group"}
+            {groupMode ? t("messages.newChat") : t("messages.createANewGroup")}
           </Button>
 
           {groupMode && (
