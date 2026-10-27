@@ -18,7 +18,7 @@ export function CompanyUpdatesSetupState({
   return (
     <FeatureSetupRequiredState
       title={t("updates.companyUpdatesModuleIsNotFullySetUpYet")}
-      description="The app is running, but the database tables for company updates and recognitions have not been created in this Supabase project yet."
+      description={t("updates.setupTablesMissing")}
       icon={<Megaphone className="h-5 w-5" />}
       action={
         canCreate ? (

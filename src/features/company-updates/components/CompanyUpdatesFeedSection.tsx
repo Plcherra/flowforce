@@ -30,6 +30,7 @@ interface CompanyUpdatesFeedSectionProps {
   onArchive: (updateId: string) => void;
   onDelete: (updateId: string) => void;
   onEdit: (update: CompanyUpdate) => void;
+  onPublish?: (updateId: string) => void;
   onView: (updateId: string) => void;
 }
 
@@ -55,11 +56,12 @@ export function CompanyUpdatesFeedSection({
   onArchive,
   onDelete,
   onEdit,
+  onPublish,
   onView,
 }: CompanyUpdatesFeedSectionProps) {
   return (
     <div className="px-4 py-6 space-y-4">
-      {recognitionHighlights.length > 0 && (
+      {(recognitionHighlights.length > 0 || Boolean(recognitionError)) && (
         <RecognitionHighlights
           loading={recognitionLoading}
           highlights={recognitionHighlights}
@@ -85,6 +87,7 @@ export function CompanyUpdatesFeedSection({
               onArchive={onArchive}
               onDelete={onDelete}
               onEdit={onEdit}
+              onPublish={onPublish}
               canManage={canCreateUpdate}
               onView={onView}
               viewerHasViewed={update.viewerHasViewed}

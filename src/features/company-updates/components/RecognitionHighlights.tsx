@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/lib/router-adapter";
 import { formatDistanceToNow } from "date-fns";
+import { dateLocaleForLanguage } from "@/features/company-updates/dateLocale";
 import { cn } from "@/lib/utils";
 import { recognitionSourceMeta } from "@/lib/recognitionMeta";
 import type { RecognitionRecord } from "@/types/recognition";
@@ -21,7 +22,8 @@ export function RecognitionHighlights({
   highlights,
   error,
 }: RecognitionHighlightsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleForLanguage(i18n.language);
   const computedHighlights = useMemo(
     () => highlights.slice(0, 3),
     [highlights],
@@ -110,12 +112,13 @@ export function RecognitionHighlights({
           const Icon = meta.icon;
           const recipientName = recognition.recipient
             ? `${recognition.recipient.first_name ?? ""} ${recognition.recipient.last_name ?? ""}`.trim()
-            : "Team Member";
+            : t("updates.teamMember");
           const awardedDistance = recognition.awarded_at
             ? formatDistanceToNow(new Date(recognition.awarded_at), {
                 addSuffix: true,
+                locale: dateLocale,
               })
-            : "just now";
+            : t("updates.justNow");
 
           return (
             <div key={recognition.id} className="flex items-start gap-3">
@@ -138,8 +141,7 @@ export function RecognitionHighlights({
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {details?.message ??
-                    "Notable achievement recognised by the team."}
+                  {details?.message ?? t("updates.notableAchievement")}
                 </p>
               </div>
             </div>

@@ -70,8 +70,8 @@ export function EditUpdateDialog({
 
     if (!formData.title.trim()) {
       toast({
-        title: "Error",
-        description: "Title is required",
+        title: t("dashboard.error"),
+        description: t("updates.titleRequired"),
         variant: "destructive",
       });
       return;
@@ -87,23 +87,10 @@ export function EditUpdateDialog({
         priority: formData.priority,
       });
 
-      toast({
-        title: "Update edited",
-        description: "Your changes have been saved successfully.",
-      });
-
       onOpenChange(false);
       onUpdateComplete?.();
     } catch (error) {
       logger.error("Failed to update", { error, tags: ["error"] });
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to update. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
