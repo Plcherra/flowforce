@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { dispatchAutomationToFlowForce } from "@/server/automation/adapters/flowforceOperationsAdapter";
 import type { AutomationScript } from "@/server/automation/validateScript";
 import { logger } from "@/utils/logger";
+import { OPS_SUGGESTIONS_CHANGED } from "../utils/operationsHubSuggestion";
 
 interface AutomationSuggestion {
   id: string;
@@ -23,6 +25,7 @@ const sectionTitleClass =
 
 export function AutomationsPanel() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [dispatching, setDispatching] = useState<string | null>(null);
@@ -50,8 +53,13 @@ export function AutomationsPanel() {
     }
 
     void load();
+    const refresh = () => {
+      void load();
+    };
+    window.addEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     return () => {
       active = false;
+      window.removeEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     };
   }, []);
 
@@ -67,11 +75,33 @@ export function AutomationsPanel() {
   async function handleDispatch(suggestion: AutomationSuggestion) {
     setDispatching(suggestion.id);
     try {
-      await dispatchAutomationToFlowForce(suggestion.script);
+      const result = await dispatchAutomationToFlowForce(suggestion.script);
+      if (!result.dispatched) {
+        toast({
+          variant: "destructive",
+          title: t("operations.sendToFlowForceUnavailable"),
+        });
+        return;
+      }
+      const { error } = await supabase
+        .from("ops_automation_suggestions")
+        .update({ status: "active" })
+        .eq("id", suggestion.id);
+      if (error) throw error;
+      setSuggestions((current) =>
+        current.map((row) =>
+          row.id === suggestion.id ? { ...row, status: "active" } : row,
+        ),
+      );
+      toast({ title: t("operations.sendToFlowForceSaved") });
     } catch (error) {
       logger.error("[AutomationsPanel] Failed to dispatch automation", {
         error,
         tags: ["error"],
+      });
+      toast({
+        variant: "destructive",
+        title: t("operations.sendToFlowForceFailed"),
       });
     } finally {
       setDispatching(null);
@@ -159,8 +189,8 @@ export function AutomationsPanel() {
                       onClick={() => void handleDispatch(automation)}
                     >
                       {dispatching === automation.id
-                        ? "Dispatching…"
-                        : "Send to FlowForce"}
+                        ? t("operations.sendToFlowForceWorking")
+                        : t("operations.sendToFlowForce")}
                     </Button>
                   </motion.div>
                 ))}
