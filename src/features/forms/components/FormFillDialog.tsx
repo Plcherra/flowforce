@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -453,10 +453,20 @@ export default function FormFillDialog({
     }
     return next;
   }, [fieldTranslations, formValues, orderedFields]);
-  const formulaData = useMemo(
-    () => formulaAnswerMap(orderedFields, formValues),
-    [formValues, orderedFields],
+  const formulaSignature = JSON.stringify(
+    formulaAnswerMap(orderedFields, formValues),
   );
+  const formulaCache = useRef({
+    signature: "",
+    data: {} as Record<string, unknown>,
+  });
+  if (formulaCache.current.signature !== formulaSignature) {
+    formulaCache.current = {
+      signature: formulaSignature,
+      data: formulaAnswerMap(orderedFields, formValues),
+    };
+  }
+  const formulaData = formulaCache.current.data;
   const reviewSections = useMemo(
     () =>
       buildReviewSections(reviewBuckets, reviewValues, visibleFields).map(

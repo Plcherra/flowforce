@@ -28,6 +28,44 @@ export function evaluateArithmeticFormula(
   }
 }
 
+function numericValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) {
+    return Number(value);
+  }
+  return null;
+}
+
+/** True when a {Label} still has no number, so the formula is waiting rather than broken. */
+export function formulaIsWaiting(
+  expression: string,
+  data: Record<string, unknown>,
+): boolean {
+  for (const match of expression.matchAll(/\{([^{}]+)\}/g)) {
+    if (numericValue(data[match[1] ?? ""]) == null) return true;
+  }
+  return false;
+}
+
+export function formulaDisplay(
+  expression: string,
+  data: Record<string, unknown>,
+): { value: number | null; invalid: boolean } {
+  const trimmed = expression.trim();
+  if (!trimmed) return { value: null, invalid: false };
+  const value = evaluateArithmeticFormula(trimmed, data);
+  if (value != null) return { value, invalid: false };
+  return { value: null, invalid: !formulaIsWaiting(trimmed, data) };
+}
+
+/** Parent form state should update only when the calculated number changes. */
+export function shouldEmitFormulaValue(
+  previous: number | null | undefined,
+  next: number | null,
+): boolean {
+  return previous === undefined || !Object.is(previous, next);
+}
+
 export function formulaAnswerMap(
   fields: Array<{ id: string; label?: string | null }>,
   values: Record<string, unknown>,

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import {
+  formulaDisplay,
+  shouldEmitFormulaValue,
+} from "@/features/forms/utils/formulaValue";
 
 interface FormulaFieldProps {
   label: string;
@@ -58,48 +62,10 @@ export function FormulaField({
   const [error, setError] = useState<string>("");
   const [formulaElements, setFormulaElements] = useState<FormulaElement[]>([]);
   const [showBuilder, setShowBuilder] = useState(isBuilding);
-
-  // Simple formula evaluation function
-  const evaluateFormula = (
-    expr: string,
-    data: Record<string, any>,
-  ): number | null => {
-    try {
-      let processedFormula = expr;
-
-      // Replace field references with actual values
-      Object.keys(data).forEach((key) => {
-        const value = data[key];
-        if (
-          typeof value === "number" ||
-          (typeof value === "string" && !isNaN(Number(value)))
-        ) {
-          processedFormula = processedFormula.replace(
-            new RegExp(`\\{${key}\\}`, "g"),
-            String(Number(value)),
-          );
-        }
-      });
-
-      // Basic arithmetic operations only
-      if (!/^[0-9+\-*/().\s]+$/.test(processedFormula)) {
-        throw new Error("Invalid characters in formula");
-      }
-
-      // Use Function constructor for safe evaluation (limited to arithmetic)
-      const result = new Function(
-        `"use strict"; return (${processedFormula})`,
-      )();
-
-      if (typeof result !== "number" || !isFinite(result)) {
-        throw new Error("Formula result is not a valid number");
-      }
-
-      return Math.round(result * 100) / 100; // Round to 2 decimal places
-    } catch (_err) {
-      throw new Error("Invalid formula");
-    }
-  };
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const emittedRef = useRef<number | null | undefined>(undefined);
+  const formDataKey = JSON.stringify(formData ?? {});
 
   // Parse formula into elements for visual builder
   useEffect(() => {
@@ -110,19 +76,18 @@ export function FormulaField({
   }, [formula, isBuilding]);
 
   useEffect(() => {
-    if (formula && Object.keys(formData).length > 0) {
-      try {
-        const result = evaluateFormula(formula, formData);
-        setCalculatedValue(result);
-        setError("");
-        onChange?.(result);
-      } catch (err) {
-        setCalculatedValue(null);
-        setError(err instanceof Error ? err.message : "Calculation error");
-        onChange?.(null);
-      }
+    if (!formula.trim()) {
+      setCalculatedValue(null);
+      setError("");
+      return;
     }
-  }, [formula, formData, onChange]);
+    const display = formulaDisplay(formula, formData ?? {});
+    setCalculatedValue(display.value);
+    setError(display.invalid ? t("forms.invalidFormula") : "");
+    if (!shouldEmitFormulaValue(emittedRef.current, display.value)) return;
+    emittedRef.current = display.value;
+    onChangeRef.current?.(display.value);
+  }, [formula, formData, formDataKey, t]);
 
   const parseFormulaToElements = (formulaStr: string) => {
     const elements: FormulaElement[] = [];
@@ -202,20 +167,6 @@ export function FormulaField({
     onFormulaChange?.(newFormula);
   };
 
-  const cashDenominations = [
-    { label: "$100 Bills", value: 100 },
-    { label: "$50 Bills", value: 50 },
-    { label: "$20 Bills", value: 20 },
-    { label: "$10 Bills", value: 10 },
-    { label: "$5 Bills", value: 5 },
-    { label: "$1 Bills", value: 1 },
-    { label: "$1 Coins", value: 1 },
-    { label: "$0.25 Coins", value: 0.25 },
-    { label: "$0.10 Coins", value: 0.1 },
-    { label: "$0.05 Coins", value: 0.05 },
-    { label: "$0.01 Coins", value: 0.01 },
-  ];
-
   const getFormulaHelp = () => (
     <div className="space-y-2 text-sm">
       <div>
@@ -283,33 +234,6 @@ export function FormulaField({
             <CardTitle className="text-sm">{t("forms.formulaBuilder")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Quick Cash Counting Templates */}
-            <div>
-              <Label className="text-xs text-muted-foreground">
-                {t("forms.quickTemplates")}</Label>
-              <div className="flex flex-wrap gap-1 mt-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setFormulaElements([]);
-                    cashDenominations.forEach((denom, index) => {
-                      const fieldName = denom.label
-                        .toLowerCase()
-                        .replace(/[$\s.]/g, "_")
-                        .replace("__", "_");
-                      if (index > 0) {
-                        addFieldToFormula(fieldName, denom.value);
-                      } else {
-                        addFieldToFormula(fieldName, denom.value);
-                      }
-                    });
-                  }}
-                >
-                  {t("forms.cashCountTotal")}</Button>
-              </div>
-            </div>
-
             {/* Add Field Selector */}
             <div>
               <Label className="text-xs text-muted-foreground">{t("forms.addField")}</Label>
@@ -330,31 +254,6 @@ export function FormulaField({
                       ))}
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
-
-            {/* Cash Denominations */}
-            <div>
-              <Label className="text-xs text-muted-foreground">
-                {t("forms.addCashDenomination")}</Label>
-              <div className="grid grid-cols-3 gap-1 mt-1">
-                {cashDenominations.map((denom) => (
-                  <Button
-                    key={denom.label}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const fieldName = denom.label
-                        .toLowerCase()
-                        .replace(/[$\s.]/g, "_")
-                        .replace("__", "_");
-                      addFieldToFormula(fieldName, denom.value);
-                    }}
-                    className="text-xs h-8"
-                  >
-                    {denom.label}
-                  </Button>
-                ))}
               </div>
             </div>
 

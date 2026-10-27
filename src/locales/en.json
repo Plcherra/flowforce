@@ -3190,6 +3190,7 @@
     "formatValue": "Format: {{format}}",
     "formsReadiness": "Forms Readiness",
     "formula": "Formula:",
+    "invalidFormula": "Invalid formula",
     "formulaBuilder": "Formula Builder",
     "formulaConfiguration": "Formula Configuration",
     "formulaPreview": "Formula Preview",

@@ -17,7 +17,9 @@ import { useFormAnswerTranslations } from "@/features/forms/hooks/useFormAnswerT
 import FormFillDialog from "./FormFillDialog";
 import { FormSubmission, FormField } from "@/types/common";
 import {
+  submissionCsvCell,
   submissionDisplayText,
+  submissionHasAnswer,
   submissionIsFile,
 } from "@/features/forms/utils/submissionValue";
 
@@ -97,13 +99,13 @@ export default function FormSubmissionsDialog({
       const row = [
         new Date(submission.submitted_at).toLocaleString(),
         submitterName,
-        ...fields.map((field) => {
-          const value = submission.submissiondata[field.id];
-          if (typeof value === "boolean") return t(value ? "forms.yes" : "forms.no");
-          return submissionIsFile(field.field_type)
-            ? t("forms.fileUploaded")
-            : submissionDisplayText(value);
-        }),
+        ...fields.map((field) =>
+          submissionCsvCell(field.field_type, submission.submissiondata[field.id], {
+            yes: t("forms.yes"),
+            no: t("forms.no"),
+            uploaded: t("forms.fileUploaded"),
+          }),
+        ),
       ];
       return row;
     });
@@ -218,7 +220,10 @@ export default function FormSubmissionsDialog({
                             typeof value === "boolean"
                               ? t(value ? "forms.yes" : "forms.no")
                               : (translatedAnswer ?? submissionDisplayText(value));
-                          if (!shown) return null;
+                          const uploaded =
+                            submissionIsFile(field.field_type) &&
+                            submissionHasAnswer(value);
+                          if (!shown && !uploaded) return null;
 
                           return (
                             <div key={field.id}>
@@ -226,8 +231,11 @@ export default function FormSubmissionsDialog({
                                 {field.label}
                               </label>
                               <div className="mt-1">
-                                {submissionIsFile(field.field_type) ? (
-                                  <Badge variant="outline">{t("forms.fileUploaded")}</Badge>
+                                {uploaded ? (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline">{t("forms.fileUploaded")}</Badge>
+                                    {shown ? <p className="text-sm break-all">{shown}</p> : null}
+                                  </div>
                                 ) : (
                                   <p className="text-sm">{shown}</p>
                                 )}

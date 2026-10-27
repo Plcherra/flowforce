@@ -3190,6 +3190,7 @@
     "formatValue": "Formato: {{format}}",
     "formsReadiness": "Preparación de formularios",
     "formula": "Fórmula:",
+    "invalidFormula": "Fórmula no válida",
     "formulaBuilder": "Constructor de fórmulas",
     "formulaConfiguration": "Configuración de la fórmula",
     "formulaPreview": "Vista previa de la fórmula",

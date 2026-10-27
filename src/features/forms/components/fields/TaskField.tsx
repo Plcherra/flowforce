@@ -369,7 +369,7 @@ export function TaskField({
 // For form builder preview
 export function TaskFieldPreview({
   label: labelProp,
-  description = "Create and assign a task",
+  description,
   className = "",
 }: Partial<TaskFieldProps>) {
   const { t } = useTranslation();
@@ -380,10 +380,7 @@ export function TaskFieldPreview({
       description={description}
       value={undefined}
       onChange={() => {}}
-      availableUsers={[
-        { id: "1", name: "John Doe", email: "john@example.com" },
-        { id: "2", name: "Jane Smith", email: "jane@example.com" },
-      ]}
+      availableUsers={[]}
       className={className}
     />
   );

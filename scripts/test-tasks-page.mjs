@@ -127,6 +127,9 @@ const { runFormEditorLayoutTests } = importTs(
 const { runFormulaValueTests } = importTs(
   "../src/features/forms/utils/formulaValue.test.ts",
 );
+const { runSubmissionValueTests } = importTs(
+  "../src/features/forms/utils/submissionValue.test.ts",
+);
 const { runFormTemplateCopyTests } = importTs(
   "../src/features/forms/utils/formTemplateCopy.test.ts",
 );
@@ -173,6 +176,7 @@ runFormTemplateTests();
 runImportFormFieldTests();
 runFormEditorLayoutTests();
 runFormulaValueTests();
+runSubmissionValueTests();
 runFormTemplateCopyTests();
 runFormsReadinessTests();
 console.log("tasks page tests passed");

@@ -3190,6 +3190,7 @@
     "formatValue": "Formato: {{format}}",
     "formsReadiness": "Prontezza dei moduli",
     "formula": "Formula:",
+    "invalidFormula": "Formula non valida",
     "formulaBuilder": "Generatore di formule",
     "formulaConfiguration": "Configurazione della formula",
     "formulaPreview": "Anteprima della formula",

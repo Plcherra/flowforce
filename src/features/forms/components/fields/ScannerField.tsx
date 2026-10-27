@@ -56,13 +56,19 @@ export function ScannerField({
     setIsScanning(true);
   }, []);
 
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+  const releaseStream = useCallback(() => {
+    const stream = streamRef.current;
+    streamRef.current = null;
+    stream?.getTracks().forEach((track) => track.stop());
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
-    setIsScanning(false);
   }, []);
+
+  const stopCamera = useCallback(() => {
+    releaseStream();
+    setIsScanning(false);
+  }, [releaseStream]);
 
   const handleManualSubmit = useCallback(() => {
     if (!manualValue.trim()) return;
@@ -160,8 +166,9 @@ export function ScannerField({
     void run();
     return () => {
       cancelled = true;
+      releaseStream();
     };
-  }, [isScanning, stopCamera, t]);
+  }, [isScanning, releaseStream, stopCamera, t]);
 
   const clearScan = useCallback(() => {
     onChange(undefined);
@@ -365,7 +372,7 @@ export function ScannerField({
 // For form builder preview
 export function ScannerFieldPreview({
   label: labelProp,
-  description = "Scan a barcode or QR code",
+  description,
   className = "",
 }: Partial<ScannerFieldProps>) {
   const { t } = useTranslation();
@@ -373,7 +380,7 @@ export function ScannerFieldPreview({
   return (
     <ScannerField
       label={label}
-      description={description}
+      description={description ?? t("forms.fieldScannerHelp")}
       value={undefined}
       onChange={() => {}}
       config={{
