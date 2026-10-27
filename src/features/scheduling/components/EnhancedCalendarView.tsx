@@ -19,6 +19,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { formatCount } from "@/features/scheduling/utils/pluralize";
 import {
@@ -34,6 +35,7 @@ interface EnhancedCalendarViewProps {
   onAutoScheduleClick?: () => void;
   onSuggestFills?: () => void;
   actionsDisabled?: boolean;
+  boardLocked?: boolean;
   readOnly?: boolean;
   profileId?: string | null;
   smartFillOpen?: boolean;
@@ -46,12 +48,14 @@ export function EnhancedCalendarView({
   onAutoScheduleClick,
   onSuggestFills,
   actionsDisabled = false,
+  boardLocked = false,
   readOnly = false,
   profileId = null,
   smartFillOpen = false,
   onToggleSmartFill,
 }: EnhancedCalendarViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
   const { shifts, loading, setWeekReference, weekRange } = useScheduling();
   const isMobile = useIsMobile();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -211,14 +215,14 @@ export function EnhancedCalendarView({
   const getDateRangeText = () => {
     switch (currentView) {
       case "month":
-        return format(selectedDate, "MMMM yyyy");
+        return format(selectedDate, "MMMM yyyy", { locale });
       case "week":
       case "staff": {
         const weekStart = new Date(selectedDate);
         weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
-        return `${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}`;
+        return `${format(weekStart, "MMM d", { locale })} - ${format(weekEnd, "MMM d, yyyy", { locale })}`;
       }
       default:
         return "";
@@ -227,15 +231,19 @@ export function EnhancedCalendarView({
 
   const noShiftsAvailable = !loading && filteredShifts.length === 0;
   const shiftCountLabel = loading
-    ? "Loading shifts"
-    : formatCount(filteredShifts.length, "shift");
+    ? t("schedule.loadingSchedule")
+    : formatCount(
+        filteredShifts.length,
+        t("schedule.shiftSingular"),
+        t("schedule.shiftPlural"),
+      );
 
   return (
     <div id="schedule-board" className="flex min-h-0 flex-1 flex-col">
       <Card className="flex min-h-0 flex-1 flex-col">
         <div className="shrink-0 border-b px-3 py-2">
           <ScheduleRangeBar
-            title={readOnly ? "My Schedule" : "Schedule"}
+            title={readOnly ? t("schedule.mySchedule") : t("schedule.boardTitle")}
             rangeLabel={getDateRangeText()}
             shiftCountLabel={shiftCountLabel}
             views={availableViews}
@@ -273,6 +281,7 @@ export function EnhancedCalendarView({
                     onSelectShift={setSelectedShift}
                     isMobile={isMobile}
                     locationFilter={locationFilter}
+                    hideShiftActions={readOnly || boardLocked}
                   />
                 ))}
 
@@ -282,6 +291,7 @@ export function EnhancedCalendarView({
                   locationFilter={locationFilter}
                   onAutoScheduleClick={onAutoScheduleClick}
                   autoScheduleDisabled={actionsDisabled}
+                  boardLocked={boardLocked}
                   readOnly={readOnly}
                   profileId={profileId}
                   onOpenPanel={onOpenPanel}
@@ -308,6 +318,7 @@ export function EnhancedCalendarView({
                     onSelectShift={setSelectedShift}
                     isMobile={isMobile}
                     locationFilter={locationFilter}
+                    hideShiftActions={readOnly || boardLocked}
                   />
                 ))}
             </>

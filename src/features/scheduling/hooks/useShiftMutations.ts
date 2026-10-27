@@ -27,7 +27,10 @@ import { useToast } from "@/hooks/use-toast";
 import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { scheduleShiftTextTranslation } from "@/features/scheduling/scheduleShiftText";
 import { cancelTasksForShift } from "@/features/tasks/repositories/scheduleTaskSync";
-import type { ShiftInsertPayload, SchedulingMutationOptions } from "../types/mutations";
+import type {
+  ShiftInsertPayload,
+  SchedulingMutationOptions,
+} from "../types/mutations";
 import type { ShiftUpsertInput } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import type {
   Tables,
@@ -67,7 +70,7 @@ export function useShiftMutations({
   ensureCompanyContext,
 }: UseShiftMutationsProps) {
   const { toast } = useToast();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   /**
@@ -76,33 +79,33 @@ export function useShiftMutations({
    * @returns Created shift record or null if failed/fallback mode
    */
   const createSchedule = useCallback(
-    async (payload: ShiftInsertPayload) => {
+    async (payload: ShiftInsertPayload, options?: SchedulingMutationOptions) => {
       if (isUsingFallbackData) {
         showReadOnlyNotice();
         return null;
       }
 
       try {
-        const result = await upsertShift(payload as ShiftUpsertInput);
-        if (result) {
+        const result = await upsertShift(payload as ShiftUpsertInput, options);
+        if (result && !options?.silent) {
           toast({
-            title: "Shift created",
-            description: "New shift added to the schedule.",
+            title: t("schedule.shiftCreated"),
+            description: t("schedule.shiftCreatedHelp"),
           });
         }
         return result;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to create shift";
+          err instanceof Error ? err.message : t("schedule.failedToCreateShift");
         toast({
-          title: "Shift creation failed",
+          title: t("schedule.shiftCreationFailed"),
           description: message,
           variant: "destructive",
         });
         return null;
       }
     },
-    [isUsingFallbackData, showReadOnlyNotice, toast, upsertShift],
+    [isUsingFallbackData, showReadOnlyNotice, t, toast, upsertShift],
   );
 
   /**
@@ -132,23 +135,23 @@ export function useShiftMutations({
         );
         if (result && !options?.silent) {
           toast({
-            title: "Shift updated",
-            description: "Shift details saved successfully.",
+            title: t("schedule.shiftUpdated"),
+            description: t("schedule.shiftUpdatedHelp"),
           });
         }
         return result;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to update shift";
+          err instanceof Error ? err.message : t("schedule.failedToUpdateShift");
         toast({
-          title: "Shift update failed",
+          title: t("schedule.shiftUpdateFailed"),
           description: message,
           variant: "destructive",
         });
         return null;
       }
     },
-    [isUsingFallbackData, showReadOnlyNotice, toast, upsertShift],
+    [isUsingFallbackData, showReadOnlyNotice, t, toast, upsertShift],
   );
 
   /**
@@ -174,15 +177,15 @@ export function useShiftMutations({
         if (deleteError) throw deleteError;
         await refetchAll();
         toast({
-          title: "Shift removed",
-          description: "Shift deleted from the schedule.",
+          title: t("schedule.shiftRemoved"),
+          description: t("schedule.shiftRemovedHelp"),
         });
         return true;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to delete shift";
+          err instanceof Error ? err.message : t("schedule.failedToDeleteShift");
         toast({
-          title: "Shift deletion failed",
+          title: t("schedule.shiftDeleteFailed"),
           description: message,
           variant: "destructive",
         });
@@ -195,6 +198,7 @@ export function useShiftMutations({
       isUsingFallbackData,
       refetchAll,
       showReadOnlyNotice,
+      t,
       toast,
     ],
   );
@@ -218,9 +222,7 @@ export function useShiftMutations({
 
         const normalizedPayloads = payloads.map((payload) => {
           if (!payload.title || !payload.start_time || !payload.end_time) {
-            throw new Error(
-              "Shift title, start_time, and end_time are required for bulk creation.",
-            );
+            throw new Error(t("schedule.shiftTimesRequired"));
           }
 
           return {
@@ -251,15 +253,17 @@ export function useShiftMutations({
         await refetchAll();
 
         toast({
-          title: "Shifts created",
-          description: `${payloads.length} shift${payloads.length === 1 ? "" : "s"} added to the schedule.`,
+          title: t("schedule.shiftsCreated"),
+          description: t("schedule.shiftsCreatedHelp", {
+            count: payloads.length,
+          }),
         });
         return true;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to create shifts";
+          err instanceof Error ? err.message : t("schedule.failedToCreateShifts");
         toast({
-          title: "Shift creation failed",
+          title: t("schedule.shiftCreationFailed"),
           description: message,
           variant: "destructive",
         });
@@ -273,6 +277,7 @@ export function useShiftMutations({
       refetchAll,
       showReadOnlyNotice,
       sourceLocale,
+      t,
       toast,
       userId,
     ],

@@ -2,8 +2,10 @@ import { useTranslation } from "react-i18next";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Clock } from "lucide-react";
+import { Clock, Plus } from "lucide-react";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
 import type {
   ShiftWithAssignments,
   AssignmentWithUser,
@@ -12,7 +14,7 @@ import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor, calculateCoverageStats } from "@/utils/schedulingUtils";
 import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";
-import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
+import { shiftChipPaint, shiftIsOpen } from "@/features/scheduling/utils/shiftChipPaint";
 import { useShiftTextTranslations } from "@/features/scheduling/hooks/useScheduleTextTranslations";
 import { ShiftGridCopy } from "@/features/scheduling/components/ShiftGridCopy";
 
@@ -39,7 +41,8 @@ export function WeekView({
   selectedEventId = null,
   locationFilter,
 }: WeekViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
   const shiftSources = useMemo(
     () =>
       schedules.map((shift) => ({
@@ -81,53 +84,56 @@ export function WeekView({
     [overlayEvents],
   );
 
+  const shiftWizard = hideShiftActions ? null : (
+    <ShiftWizardDialog
+      open={showAddShift}
+      onOpenChange={(open) => {
+        setShowAddShift(open);
+        if (!open) setQuickAddDate(null);
+      }}
+      selectedDate={quickAddDate || selectedDate}
+    />
+  );
+
   if (isMobile) {
-    // Mobile: Show simplified horizontal scrollable week view
     return (
       <div className="space-y-4">
         {locationFilter && (
           <p className="text-center text-xs text-muted-foreground">
-            Viewing shifts for {locationFilter}
+            {t("schedule.viewingShiftsFor", { location: locationFilter })}
           </p>
         )}
-        {/* Mobile week header */}
-        <div className="overflow-x-auto">
-          <div className="flex space-x-2 pb-2" style={{ minWidth: "700px" }}>
-            {weekDays.map((day) => {
-              const stats = getCoverageStats(day);
-              return (
-                <div
-                  key={day.toISOString()}
-                  className="flex-1 min-w-[90px] p-3 border rounded-lg bg-background"
-                >
-                  <div className="text-center">
-                    <div className="text-sm font-medium text-foreground">
-                      {format(day, "EEE")}
-                    </div>
-                    <div className="text-lg font-semibold text-foreground">
-                      {format(day, "d")}
-                    </div>
-                    <div className="mt-1">
-                      <div className="text-xs text-muted-foreground">
-                        {stats.totalHours}h
-                      </div>
-                      <div
-                        className={`text-xs font-medium ${
-                          stats.coverageRatio >= 1
-                            ? "text-success"
-                            : stats.coverageRatio >= 0.75
-                              ? "text-warning"
-                              : "text-destructive"
-                        }`}
-                      >
-                        {stats.totalHeadcount}/{stats.requiredHeadcount}
-                      </div>
-                    </div>
-                  </div>
+        <div className="grid grid-cols-7 gap-1">
+          {weekDays.map((day) => {
+            const stats = getCoverageStats(day);
+            return (
+              <div
+                key={day.toISOString()}
+                className="min-w-0 rounded-lg border bg-background p-1 text-center"
+              >
+                <div className="truncate text-[11px] font-medium text-foreground">
+                  {format(day, "EEEEE", { locale })}
                 </div>
-              );
-            })}
-          </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {format(day, "d")}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  {stats.totalHours}h
+                </div>
+                <div
+                  className={`text-[10px] font-medium ${
+                    stats.coverageRatio >= 1
+                      ? "text-success"
+                      : stats.coverageRatio >= 0.75
+                        ? "text-warning"
+                        : "text-destructive"
+                  }`}
+                >
+                  {stats.totalHeadcount}/{stats.requiredHeadcount}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Mobile shifts list */}
@@ -136,8 +142,23 @@ export function WeekView({
             const dayShifts = getShiftsForDay(day);
             return (
               <div key={day.toISOString()} className="space-y-2">
-                <h3 className="text-sm font-medium text-foreground">
-                  {format(day, "EEEE, MMM d")}
+                <h3 className="flex items-center justify-between text-sm font-medium text-foreground">
+                  {format(day, "EEEE, MMM d", { locale })}
+                  {!hideShiftActions ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2"
+                      aria-label={t("schedule.newShift")}
+                      onClick={() => {
+                        setQuickAddDate(day);
+                        setShowAddShift(true);
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  ) : null}
                 </h3>
                 {getEventsForDay(day).map((event) => (
                   <CalendarEventBlock
@@ -155,7 +176,7 @@ export function WeekView({
                 {dayShifts.map((shift) => {
                   const paint = shiftChipPaint(
                     getShiftColor(shift),
-                    shift.assignments?.length ? "assigned" : "unassigned",
+                    shiftIsOpen(shift) ? "unassigned" : "assigned",
                   );
                   return (
                   <div
@@ -174,7 +195,7 @@ export function WeekView({
                           shiftId={shift.id}
                           title={shift.title}
                           notes={shift.notes}
-                          fallback={shift.job_position?.name || "Shift"}
+                          fallback={shift.job_position?.name || t("schedule.shiftSingular")}
                           translation={shiftTranslations.get(shift.id) ?? null}
                           titleClassName="text-sm font-medium"
                           notesClassName="text-xs opacity-80"
@@ -188,7 +209,9 @@ export function WeekView({
                         variant={shift.is_published ? "default" : "secondary"}
                         className="text-xs"
                       >
-                        {shift.is_published ? "Published" : "Draft"}
+                        {shift.is_published
+                          ? t("schedule.published")
+                          : t("schedule.draft")}
                       </Badge>
                     </div>
 
@@ -218,7 +241,9 @@ export function WeekView({
                           )}
                         </div>
                         <span className="text-xs opacity-80">
-                          {shift.assignments.length} assigned
+                          {t("schedule.assignedCount", {
+                            count: shift.assignments.length,
+                          })}
                         </span>
                       </div>
                     )}
@@ -229,19 +254,20 @@ export function WeekView({
             );
           })}
         </div>
+        {shiftWizard}
       </div>
     );
   }
 
   return (
-    <div className="h-full">
+    <div className="h-full overflow-x-auto">
       {locationFilter && (
         <p className="mb-3 text-sm text-muted-foreground">
-          Filtered by {locationFilter}
+          {t("schedule.filteredByLocation", { location: locationFilter })}
         </p>
       )}
       {/* Header with day names and coverage stats */}
-      <div className="grid grid-cols-8 border-b">
+      <div className="grid min-w-[800px] grid-cols-8 border-b">
         <div className="p-4 border-r bg-muted/30">
           <div className="text-sm font-medium text-muted-foreground">{t("schedule.staff")}</div>
         </div>
@@ -251,14 +277,29 @@ export function WeekView({
             <div key={day.toISOString()} className="p-4 border-r">
               <div className="text-center">
                 <div className="text-sm font-medium text-foreground">
-                  {format(day, "EEE")}
+                  {format(day, "EEE", { locale })}
                 </div>
                 <div className="text-lg font-semibold text-foreground">
                   {format(day, "d")}
                 </div>
+                {!hideShiftActions ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="mt-1 h-6 w-full px-1"
+                    aria-label={t("schedule.newShift")}
+                    onClick={() => {
+                      setQuickAddDate(day);
+                      setShowAddShift(true);
+                    }}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                ) : null}
                 <div className="mt-2 space-y-1">
                   <div className="text-xs text-muted-foreground">
-                    {stats.totalHours}h scheduled
+                    {t("schedule.hoursScheduled", { count: stats.totalHours })}
                   </div>
                   <div
                     className={`text-xs font-medium ${
@@ -269,7 +310,10 @@ export function WeekView({
                           : "text-destructive"
                     }`}
                   >
-                    {stats.totalHeadcount}/{stats.requiredHeadcount} staff
+                    {t("schedule.staffCoverage", {
+                      filled: stats.totalHeadcount,
+                      required: stats.requiredHeadcount,
+                    })}
                   </div>
                 </div>
               </div>
@@ -303,22 +347,25 @@ export function WeekView({
                     if (!employeeMap.has(userId)) {
                       employeeMap.set(userId, {
                         id: assignment.user.id || userId,
-                        first_name: assignment.user.first_name || "Unknown",
-                        last_name: assignment.user.last_name || "Employee",
+                        first_name:
+                          assignment.user.first_name ||
+                          t("schedule.unknownFirstName"),
+                        last_name:
+                          assignment.user.last_name ||
+                          t("schedule.unknownLastName"),
                         avatar_url: assignment.user.avatar_url || null,
                       });
                     }
                   }
                 });
-              } else {
-                if (!employeeMap.has("unassigned")) {
-                  employeeMap.set("unassigned", {
-                    id: "unassigned",
-                    first_name: "Unassigned",
-                    last_name: "Shifts",
-                    avatar_url: null,
-                  });
-                }
+              }
+              if (shiftIsOpen(shift) && !employeeMap.has("unassigned")) {
+                employeeMap.set("unassigned", {
+                  id: "unassigned",
+                  first_name: t("schedule.unassignedShifts"),
+                  last_name: "",
+                  avatar_url: null,
+                });
               }
             });
           });
@@ -326,7 +373,7 @@ export function WeekView({
 
           const weekEvents = overlayEvents.length > 0;
           return (
-            <div className="min-h-[600px]">
+            <div className="min-h-[600px] min-w-[800px]">
               <div className="grid grid-cols-8">
                 {weekEvents ? (
                   <>
@@ -370,10 +417,7 @@ export function WeekView({
                       const employeeShifts = getShiftsForDay(day).filter(
                         (shift) => {
                           if (employee.id === "unassigned") {
-                            return (
-                              !shift.assignments ||
-                              shift.assignments.length === 0
-                            );
+                            return shiftIsOpen(shift);
                           }
                           return shift.assignments?.some(
                             (assignment: AssignmentWithUser) =>
@@ -395,7 +439,7 @@ export function WeekView({
                             employeeShifts.map((shift) => {
                               const paint = shiftChipPaint(
                                 getShiftColor(shift),
-                                "assigned",
+                                shiftIsOpen(shift) ? "unassigned" : "assigned",
                               );
                               return (
                                 <div
@@ -414,7 +458,8 @@ export function WeekView({
                                     title={shift.title}
                                     notes={shift.notes}
                                     fallback={
-                                      shift.job_position?.name || "Shift"
+                                      shift.job_position?.name ||
+                                      t("schedule.shiftSingular")
                                     }
                                     translation={
                                       shiftTranslations.get(shift.id) ?? null
@@ -453,17 +498,7 @@ export function WeekView({
           );
         })()}
       </div>
-      {/* Centralized Add Shift Dialog */}
-      {!hideShiftActions && (
-        <ShiftWizardDialog
-          open={showAddShift}
-          onOpenChange={(open) => {
-            setShowAddShift(open);
-            if (!open) setQuickAddDate(null);
-          }}
-          selectedDate={quickAddDate || selectedDate}
-        />
-      )}
+      {shiftWizard}
     </div>
   );
 }

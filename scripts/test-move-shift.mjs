@@ -21,9 +21,13 @@ const { runShiftChipPaintTests } = importTs(
 const { runCalendarEventHrefTests } = importTs(
   "../src/features/scheduling/utils/calendarEventHref.test.ts",
 );
+const { runShiftLaunchTests } = importTs(
+  "../src/features/scheduling/utils/shiftLaunch.test.ts",
+);
 
 await runMoveShiftTests();
 runPlaceDayEventsTests();
 runShiftChipPaintTests();
 runCalendarEventHrefTests();
+runShiftLaunchTests();
 console.log("moveShift tests passed");

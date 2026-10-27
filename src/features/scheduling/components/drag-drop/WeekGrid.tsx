@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { format, isSameDay } from "date-fns";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
+import { shiftIsOpen } from "@/features/scheduling/utils/shiftChipPaint";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDroppable } from "@dnd-kit/core";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,8 +69,7 @@ export interface WeekGridProps {
 }
 
 const formatName = (employee: EmployeeSummary) =>
-  `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim() ||
-  "Unknown User";
+  `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim();
 
 function AvailabilityLegend() {
   const { t } = useTranslation();
@@ -99,6 +100,7 @@ function AvailabilityCellOverlay({
 }: {
   cell: GridCellAvailability | undefined;
 }) {
+  const { t } = useTranslation();
   if (!cell) return null;
 
   const pendingPto = cell.blockers.some(
@@ -122,7 +124,7 @@ function AvailabilityCellOverlay({
           }}
         />
         <div className="relative p-1 text-[10px] font-medium text-destructive">
-          {approvedPto ? "PTO" : (cell.hint ?? "Off")}
+          {approvedPto ? t("schedule.pto") : (cell.hint ?? t("schedule.off"))}
         </div>
       </div>
     );
@@ -146,7 +148,7 @@ function AvailabilityCellOverlay({
           )}
           data-testid="schedule-cell-availability-hint"
         >
-          {cell.hint ?? "PTO pending"}
+          {cell.hint ?? t("schedule.ptoPending")}
         </div>
       )}
     </>
@@ -229,12 +231,13 @@ function GridCellComponent({
       <div className="flex min-w-0 flex-col gap-1">
         {daySchedules.map((schedule) => (
           <ShiftChip
-            key={schedule.id}
+            key={`${schedule.id}-${employeeId ?? "open"}`}
             schedule={schedule}
             hasConflict={conflictByShiftId.get(schedule.id) ?? false}
             employeeId={employeeId ?? null}
             draggable={enableShiftDrag}
-            variant={employeeId ? "assigned" : "unassigned"}
+            dragId={`shift-${schedule.id}-${employeeId ?? "open"}`}
+            variant={shiftIsOpen(schedule) ? "unassigned" : "assigned"}
             onShiftClick={onShiftClick}
             minimized={minimizedView}
           />
@@ -275,6 +278,7 @@ function EmployeeRowComponent({
   minimizedView?: boolean;
   timeOffRequests?: TimeOffSpan[];
 }) {
+  const { t } = useTranslation();
   const employeeDays = shiftsByEmployeeDay.get(employee.id);
 
   return (
@@ -286,7 +290,7 @@ function EmployeeRowComponent({
       data-testid="schedule-employee-row"
       data-minimized={minimizedView ? "true" : "false"}
     >
-      <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center gap-2">
+      <div className="sticky left-0 z-20 flex items-center gap-2 border-r bg-background p-2 text-xs font-medium text-muted-foreground">
         <Avatar className="h-6 w-6">
           <AvatarImage src={employee.avatar_url ?? undefined} />
           <AvatarFallback className="text-xs">
@@ -294,7 +298,9 @@ function EmployeeRowComponent({
             {employee.last_name?.[0]}
           </AvatarFallback>
         </Avatar>
-        <span className="truncate">{formatName(employee)}</span>
+        <span className="truncate">
+          {formatName(employee) || t("schedule.unknownUser")}
+        </span>
       </div>
 
       {weekDays.map((day) => {
@@ -346,14 +352,15 @@ export function WeekGrid({
   minimizedView = false,
   timeOffRequests = [],
 }: WeekGridProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
   const internalScrollRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = scrollContainerRef ?? internalScrollRef;
   const weekKey = weekDays[0]?.toISOString() ?? "";
 
   useLayoutEffect(() => {
-    const scroller = horizontalScrollRef.current;
+    const scroller = scrollContainerRef?.current ?? horizontalScrollRef.current;
     if (!scroller) return;
     const alignToday = () => {
       const todayIndex = weekDays.findIndex((day) => isSameDay(day, new Date()));
@@ -366,7 +373,7 @@ export function WeekGrid({
     alignToday();
     const frame = requestAnimationFrame(alignToday);
     return () => cancelAnimationFrame(frame);
-  }, [weekDays, weekKey]);
+  }, [scrollContainerRef, weekDays, weekKey]);
 
   const unassignedLookup = useMemo(() => {
     return new Map<string, ShiftWithAssignments[]>(
@@ -464,14 +471,14 @@ export function WeekGrid({
   return (
     <div
       ref={horizontalScrollRef}
-      className="overflow-x-auto"
+      className="min-w-[800px]"
       data-testid="schedule-week-grid"
       data-minimized={minimizedView ? "true" : "false"}
     >
-      <div className="min-w-[800px]">
+      <div>
         {showAvailabilityLayer ? <AvailabilityLegend /> : null}
-        <div className="grid grid-cols-8 border-b bg-background relative z-10">
-          <div className="p-2 text-sm font-medium text-muted-foreground">
+        <div className="sticky top-0 z-30 grid grid-cols-8 border-b bg-background">
+          <div className="sticky left-0 z-40 bg-background p-2 text-sm font-medium text-muted-foreground">
             {t("schedule.employee")}
           </div>
           {weekDays.map((day) => {
@@ -479,10 +486,10 @@ export function WeekGrid({
             const dayEvents = eventsByDay.get(dayKey) ?? [];
             const onlyEvent = dayEvents.length === 1 ? dayEvents[0] : null;
             return (
-              <div key={day.toISOString()} className="p-2 text-center border-l">
-                <div className="font-medium text-sm">{format(day, "EEE")}</div>
+              <div key={day.toISOString()} className="border-l bg-background p-2 text-center">
+                <div className="font-medium text-sm">{format(day, "EEE", { locale })}</div>
                 <div className="text-xs text-muted-foreground">
-                  {format(day, "MMM d")}
+                  {format(day, "MMM d", { locale })}
                 </div>
                 <DayEventNotice
                   count={dayEvents.length}
@@ -496,7 +503,7 @@ export function WeekGrid({
         </div>
 
         <div className="grid grid-cols-8 border-b bg-muted/20 relative z-0">
-          <div className="p-2 text-xs font-medium text-muted-foreground border-r flex items-center">
+          <div className="sticky left-0 z-20 flex items-center border-r bg-muted p-2 text-xs font-medium text-muted-foreground">
             {t("schedule.unassignedShifts")}
           </div>
           {weekDays.map((day) => {

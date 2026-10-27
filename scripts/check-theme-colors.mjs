@@ -109,7 +109,6 @@ const allowedFiles = new Set([
   "src/features/scheduling/components/ShiftWizardDialog.tsx",
   "src/features/scheduling/components/WeekView.tsx",
   "src/features/scheduling/constants/templates.ts",
-  "src/features/scheduling/hooks/fallbackData.ts",
   "src/features/scheduling/utils/weekHelpers.ts",
   "src/features/scheduling/utils/weekTemplateSerializer.test.ts",
   "src/features/scheduling/utils/weekTemplateSerializer.ts",

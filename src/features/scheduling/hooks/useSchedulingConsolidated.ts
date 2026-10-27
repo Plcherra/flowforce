@@ -9,6 +9,11 @@ import { useProfile } from "@/hooks/useProfile";
 import { canViewScheduleDrafts } from "@/utils/authRoles";
 import { logger } from "@/utils/logger";
 import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
+import {
+  scheduleBoardIsReadOnly,
+  scheduleQueryFailureMode,
+  scheduleQueryRecovered,
+} from "@/features/scheduling/utils/scheduleQueryFailure";
 import type {
   AssignmentWithUser,
   SchedulingQueryParams,
@@ -85,7 +90,7 @@ export function useSchedulingConsolidated(
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   const [shifts, setShifts] = useState<ShiftWithAssignments[]>([]);
@@ -100,7 +105,6 @@ export function useSchedulingConsolidated(
   const [vendorEvents, setVendorEvents] = useState<VendorEventWithMetadata[]>([]);
   const [teamMembers, setTeamMembers] = useState<ProfileSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
   const fallbackNoticeShownRef = useRef<boolean>(false);
   const queryClient = useQueryClient();
 
@@ -158,20 +162,32 @@ export function useSchedulingConsolidated(
   });
 
   useEffect(() => {
-    if (schedulesQuery.data) {
-      const payload = schedulesQuery.data;
-      setShifts(payload.shifts);
-      setAssignments(payload.assignments);
-      setTimeOffRequests(payload.timeOff);
-      setUnavailability(payload.unavailability);
-      setStaffAvailability(payload.staffAvailability);
-      setVendorEvents(payload.vendorEvents);
-      setTeamMembers(payload.teamMembers);
-      setIsUsingFallback(false);
-      fallbackNoticeShownRef.current = false;
-      setError(null);
+    const dataUpdatedAt = schedulesQuery.dataUpdatedAt;
+    if (
+      !scheduleQueryRecovered({
+        status: schedulesQuery.status,
+        hasData: Boolean(schedulesQuery.data),
+        dataUpdatedAt,
+      }) ||
+      !schedulesQuery.data
+    ) {
+      return;
     }
-  }, [schedulesQuery.data]);
+    const payload = schedulesQuery.data;
+    setShifts(payload.shifts);
+    setAssignments(payload.assignments);
+    setTimeOffRequests(payload.timeOff);
+    setUnavailability(payload.unavailability);
+    setStaffAvailability(payload.staffAvailability);
+    setVendorEvents(payload.vendorEvents);
+    setTeamMembers(payload.teamMembers);
+    fallbackNoticeShownRef.current = false;
+    setError(null);
+  }, [
+    schedulesQuery.data,
+    schedulesQuery.dataUpdatedAt,
+    schedulesQuery.status,
+  ]);
 
   useEffect(() => {
     if (!schedulesQuery.error || !range.start) {
@@ -205,8 +221,8 @@ export function useSchedulingConsolidated(
     }
 
     setError(errorMessage);
-    setIsUsingFallback(false);
-    if (!schedulesQuery.data) {
+    const failure = scheduleQueryFailureMode(Boolean(schedulesQuery.data));
+    if (failure.clearBoard) {
       setShifts([]);
       setAssignments([]);
       setTimeOffRequests([]);
@@ -218,15 +234,15 @@ export function useSchedulingConsolidated(
 
     if (!fallbackNoticeShownRef.current) {
       toast({
-        title: "Couldn't load the schedule",
+        title: t("schedule.couldntLoadSchedule"),
         description: missingSchema
-          ? "Scheduling data is missing for this workspace. Demo shifts were not added."
-          : errorMessage || DEFAULT_ERROR,
+          ? t("schedule.scheduleDataMissing")
+          : t("schedule.readOnlyPreviewHelp"),
         variant: "destructive",
       });
       fallbackNoticeShownRef.current = true;
     }
-  }, [range.start, schedulesQuery.data, schedulesQuery.error, toast]);
+  }, [range.start, schedulesQuery.data, schedulesQuery.error, t, toast]);
 
   const refetchAll = useCallback(async () => {
     if (!schedulesQueryKey) return;
@@ -278,7 +294,7 @@ export function useSchedulingConsolidated(
           result.reasons?.length
         ) {
           toast({
-            title: "Assigned with warning",
+            title: t("schedule.assignedWithWarning"),
             description: result.reasons.join(" "),
           });
           return "warning";
@@ -288,16 +304,16 @@ export function useSchedulingConsolidated(
         const message =
           err instanceof Error
             ? err.message
-            : "Unable to assign teammate to shift.";
+            : t("schedule.unableToAssign");
         toast({
-          title: "Assignment error",
+          title: t("schedule.assignmentError"),
           description: message,
           variant: "destructive",
         });
         return false;
       }
     },
-    [ensureCompanyContext, refetchAll, toast, user?.id],
+    [ensureCompanyContext, refetchAll, t, toast, user?.id],
   );
 
   const unassign = useCallback(
@@ -331,16 +347,16 @@ export function useSchedulingConsolidated(
         const message =
           err instanceof Error
             ? err.message
-            : "Unable to unassign teammate from shift.";
+            : t("schedule.unableToUnassign");
         toast({
-          title: "Unassignment error",
+          title: t("schedule.unassignmentError"),
           description: message,
           variant: "destructive",
         });
         return false;
       }
     },
-    [ensureCompanyContext, refetchAll, toast],
+    [ensureCompanyContext, refetchAll, t, toast],
   );
 
   const upsertShift = useCallback(
@@ -350,7 +366,7 @@ export function useSchedulingConsolidated(
 
         if (!payload.start_time || !payload.end_time) {
           throw new Error(
-            "Shift title, start_time, and end_time are required.",
+            t("schedule.shiftTimesRequired"),
           );
         }
 
@@ -392,16 +408,16 @@ export function useSchedulingConsolidated(
         return record;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Unable to save shift.";
+          err instanceof Error ? err.message : t("schedule.unableToSaveShift");
         toast({
-          title: "Shift save error",
+          title: t("schedule.shiftSaveError"),
           description: message,
           variant: "destructive",
         });
         return null;
       }
     },
-    [companyId, ensureCompanyContext, refetchAll, sourceLocale, toast, user?.id],
+    [companyId, ensureCompanyContext, refetchAll, sourceLocale, t, toast, user?.id],
   );
 
   const upsertVendorEvent = useCallback(
@@ -432,7 +448,11 @@ export function useSchedulingConsolidated(
     [companyId, ensureCompanyContext, refetchAll, sourceLocale, toast],
   );
 
-  const loading = schedulesQuery.isLoading && !isUsingFallback;
+  const loading = schedulesQuery.isFetching && !schedulesQuery.data;
+  const isUsingFallback = scheduleBoardIsReadOnly({
+    status: schedulesQuery.status,
+    hasRange: Boolean(range.start),
+  });
 
   return {
     shifts,

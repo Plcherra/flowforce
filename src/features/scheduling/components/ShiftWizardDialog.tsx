@@ -20,8 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertTriangle, Users } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -49,12 +47,14 @@ import { insertTask } from "@/features/tasks/repositories/tasksRepository";
 import { shiftTaskRow } from "@/features/tasks/utils/shiftTaskWrite";
 import type { Json } from "@/integrations/supabase/public-types";
 import { logger } from "@/utils/logger";
+import { shiftDraftRole } from "@/features/scheduling/utils/shiftDraftRole";
 
 export interface ShiftWizardTemplateSeed {
   title: string;
   startTime: string;
   endTime: string;
   role: string;
+  color?: string;
 }
 
 interface ShiftWizardDialogProps {
@@ -70,7 +70,7 @@ const DEFAULT_BREAK = {
   start_minutes: 240,
   duration_minutes: 30,
   is_paid: false,
-  title: "Lunch Break",
+  title: "",
 } as const;
 
 const timezoneFallback = "America/New_York";
@@ -94,7 +94,6 @@ const createDefaultFormState = (date: Date): ShiftWizardFormData => ({
   required_headcount: 1,
   hourly_rate: "",
   assignedusers: [],
-  can_claim: false,
   breaks: [
     {
       ...DEFAULT_BREAK,
@@ -413,18 +412,18 @@ export function ShiftWizardDialog({
           0,
         ),
         hourly_rate: parseHourlyRate(formData.hourly_rate),
-        color: "#3b82f6",
+        color: templateSeed?.color || "#3b82f6",
         is_published: publish,
         is_template: false,
         template_id: null,
         position_id: formData.job_position_id || null,
-        role: "Staff",
+        role: shiftDraftRole(formData.job_position_input),
         status: "scheduled",
         user_id: null,
         requirements: [],
       } satisfies Parameters<typeof createSchedule>[0];
 
-      const created = await createSchedule(payload);
+      const created = await createSchedule(payload, { silent: true });
       if (created) {
         await handleAssignUsers(created.id);
         const taskErrors = await persistShiftTasks(created.id, end);
@@ -452,21 +451,29 @@ export function ShiftWizardDialog({
         onOpenChange?.(false);
         resetForm();
 
+        const title = formData.title || t("schedule.shiftSingular");
+        const savedKey = publish
+          ? formData.tasks.length > 0
+            ? "schedule.shiftCreatedTasksPublished"
+            : "schedule.shiftCreatedPublished"
+          : formData.tasks.length > 0
+            ? "schedule.shiftCreatedTasksDraft"
+            : "schedule.shiftCreatedDraft";
         toast({
-          title: taskErrors.length > 0 ? "Shift created, task not saved" : "Shift created",
-          description:
+          title:
             taskErrors.length > 0
-              ? taskErrors[0]
-              : `Shift "${formData.title || "Untitled"}" has been ${publish ? "published" : "saved as draft"}${formData.tasks.length > 0 ? " and its tasks were added to Tasks." : "."}`,
+              ? t("schedule.shiftCreatedTasksFailed")
+              : t("schedule.shiftCreated"),
+          description: taskErrors.length > 0 ? taskErrors[0] : t(savedKey, { title }),
           variant: taskErrors.length > 0 ? "destructive" : "default",
         });
       }
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to create shift";
+        err instanceof Error ? err.message : t("schedule.failedToCreateShift");
       logger.error("Failed to create shift", { error: err, tags: ["error"] });
       toast({
-        title: "Shift creation failed",
+        title: t("schedule.shiftCreationFailed"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -509,13 +516,13 @@ export function ShiftWizardDialog({
         >
           <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle className="flex items-center gap-2">
-              Create New Shift
+              {t("schedule.createNewShift")}
               {isFallbackData && (
                 <Badge
                   variant="secondary"
                   className="text-[10px] uppercase tracking-wide"
                 >
-                  {t("schedule.preview")}
+                  {t("schedule.readOnlyShort")}
                 </Badge>
               )}
             </DialogTitle>
@@ -524,7 +531,7 @@ export function ShiftWizardDialog({
             </DialogDescription>
             {isFallbackData && (
               <p className="mt-2 text-xs text-muted-foreground">
-                {t("schedule.liveSchedulingUpdatesAreDisabledWhileDemoData")}
+                {t("schedule.readOnlyChangesOff")}
               </p>
             )}
             {draftWarnings.length > 0 && (
@@ -534,7 +541,12 @@ export function ShiftWizardDialog({
                 <AlertDescription>
                   {draftWarnings[0]?.message}
                   {draftWarnings.length > 1
-                    ? ` ${draftWarnings.length - 1} more conflict${draftWarnings.length === 2 ? "" : "s"} found.`
+                    ? ` ${t(
+                        draftWarnings.length === 2
+                          ? "schedule.moreConflict"
+                          : "schedule.moreConflicts",
+                        { count: draftWarnings.length - 1 },
+                      )}`
                     : ""}
                 </AlertDescription>
               </Alert>
@@ -582,22 +594,6 @@ export function ShiftWizardDialog({
                         isUserAvailableForWindow={isUserAvailableForWindow}
                       />
 
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="can-claim"
-                          checked={formData.can_claim}
-                          onCheckedChange={(checked) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              can_claim: checked,
-                            }))
-                          }
-                        />
-                        <Label htmlFor="can-claim">
-                          {t("schedule.enableUsersToClaimThisShift")}
-                        </Label>
-                      </div>
-
                       {formData.job_position_id && (
                         <Card>
                           <CardContent className="pt-4">
@@ -605,19 +601,16 @@ export function ShiftWizardDialog({
                               <div className="flex items-center space-x-2">
                                 <Users className="h-4 w-4" />
                                 <span className="text-sm text-muted-foreground">
-                                  {
-                                    getEmployeesByPosition(
+                                  {t("schedule.qualifiedFor", {
+                                    count: getEmployeesByPosition(
                                       formData.job_position_id,
-                                    ).length
-                                  }{" "}
-                                  users are qualified for{" "}
-                                  {
-                                    positions.find(
-                                      (position) =>
-                                        position.id ===
-                                        formData.job_position_id,
-                                    )?.name
-                                  }
+                                    ).length,
+                                    position:
+                                      positions.find(
+                                        (position) =>
+                                          position.id === formData.job_position_id,
+                                      )?.name ?? "",
+                                  })}
                                 </span>
                               </div>
                               <Badge variant="secondary">
@@ -690,10 +683,10 @@ export function ShiftWizardDialog({
                   disabled={loading || isFallbackData}
                   onClick={() => handleSave(false)}
                 >
-                  {loading ? "Saving..." : "Save Draft"}
+                  {loading ? t("schedule.saving") : t("schedule.saveDraft")}
                 </Button>
                 <Button type="submit" disabled={loading || isFallbackData}>
-                  {loading ? "Publishing..." : "Publish"}
+                  {loading ? t("schedule.publishing") : t("schedule.publishShift")}
                 </Button>
               </div>
             </div>

@@ -7,7 +7,6 @@ import { AlertTriangle, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile } from "@/hooks/useProfile";
 import { useScheduling } from "@/contexts/SchedulingContext";
-import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
 import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
 import {
   getSupabaseSetupMessage,
@@ -86,21 +85,17 @@ export function NextGenSchedulingSystem({
   const smartFill = useSmartFillPanel(schedulingRole.profileId);
   const setSmartFillOpen = smartFill.setOpen;
 
-  const advancedFeaturesDisabled = Boolean(isFallbackData || schedulingError);
   const schedulingSetupMissing = isMissingBackendResourceError(
     schedulingError,
     SCHEDULING_RESOURCE_NAMES,
   );
+  const boardLocked = Boolean(isFallbackData || schedulingError);
+  const advancedFeaturesDisabled = boardLocked;
 
-  const showStatusAlert = Boolean(schedulingError) || isFallbackData;
-  const statusTitle = isFallbackData
-    ? "Viewing demo scheduling data"
-    : "Scheduling data unavailable";
-  const statusDescription = isFallbackData
-    ? "Live scheduling data could not be reached. Preview data is displayed and scheduling actions are temporarily disabled."
-    : (schedulingError ??
-      "An unexpected error occurred while loading scheduling data.");
-  const actionsDisabled = isFallbackData;
+  const showStatusAlert = boardLocked && !schedulingSetupMissing;
+  const statusTitle = t("schedule.readOnlyPreviewTitle");
+  const statusDescription = t("schedule.readOnlyPreviewHelp");
+  const actionsDisabled = boardLocked;
   const retryDisabled = loading;
 
   const handleRetry = () => {
@@ -128,7 +123,7 @@ export function NextGenSchedulingSystem({
   const canBuildSchedule = schedulingRole.canManageSchedule;
 
   return (
-    <div className="flex h-[calc(100dvh-3rem)] min-h-0 flex-col overflow-hidden bg-background">
+    <div className="flex h-[calc(100dvh-4rem-var(--bottom-nav-stack,5.85rem))] min-h-0 flex-col overflow-hidden bg-background">
       <div className="flex min-h-0 w-full flex-1 flex-col px-2 py-1.5 sm:px-3">
         {schedulingSetupMissing ? (
           <FeatureSetupRequiredState
@@ -151,22 +146,6 @@ export function NextGenSchedulingSystem({
                 <code>{t("schedule.scheduleAssignments")}</code>, {t("schedule.timeOffAvailabilityVendorVisitsThenRefresh")}
               </>
             }
-          />
-        ) : schedulingError ? (
-          <FeatureErrorState
-            title={t("schedule.schedulingDataUnavailable")}
-            description={statusDescription}
-            action={
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleRetry}
-                disabled={retryDisabled}
-              >
-                {t("schedule.retry")}
-              </Button>
-            }
-            className="mb-4"
           />
         ) : showStatusAlert ? (
           <Alert
@@ -205,6 +184,7 @@ export function NextGenSchedulingSystem({
                 onOpenPanel={openPanel}
                 onAutoScheduleClick={() => setShowAutoScheduler(true)}
                 actionsDisabled={actionsDisabled}
+                boardLocked={boardLocked}
                 readOnly={!canBuildSchedule}
                 profileId={schedulingRole.profileId}
                 onSuggestFills={handleSuggestFills}

@@ -65,13 +65,16 @@ type StoredShiftTask = {
   estimated_minutes?: number;
 };
 
-const toShiftTask = (row: {
-  id: string;
-  title: string | null;
-  description: string | null;
-  priority: string | null;
-  estimated_hours: number | null;
-}): ShiftTask => {
+const toShiftTask = (
+  row: {
+    id: string;
+    title: string | null;
+    description: string | null;
+    priority: string | null;
+    estimated_hours: number | null;
+  },
+  untitled: string,
+): ShiftTask => {
   const priority = shiftTaskPriorities.includes(
     row.priority as (typeof shiftTaskPriorities)[number],
   )
@@ -79,7 +82,7 @@ const toShiftTask = (row: {
     : "medium";
   return {
     id: row.id,
-    title: row.title ?? "Untitled task",
+    title: row.title ?? untitled,
     description: row.description ?? "",
     priority,
     estimated_minutes: Math.max(0, Math.round((row.estimated_hours ?? 0) * 60)),
@@ -204,9 +207,8 @@ export function ShiftDetailsPanel({
             tags: ["error"],
           });
           toast({
-            title: "Tasks not updated",
-            description:
-              "The shift moved, but its tasks still have the old day.",
+            title: t("schedule.tasksNotUpdated"),
+            description: t("schedule.tasksKeptOldDay"),
           });
         }
       }
@@ -252,7 +254,9 @@ export function ShiftDetailsPanel({
         .filter("links->>schedule_id", "eq", shiftId)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return (data ?? []).map(toShiftTask);
+      return (data ?? []).map((row) =>
+        toShiftTask(row, t("schedule.untitledTask")),
+      );
     },
   });
   const shiftTasks = useMemo(() => {
@@ -268,11 +272,11 @@ export function ShiftDetailsPanel({
   const handleAddTask = async (task: ShiftTask) => {
     if (!companyId || !user?.id || !shift) {
       toast({
-        title: "Task not saved",
-        description: "Company context is required to add a task.",
+        title: t("schedule.taskNotSaved"),
+        description: t("schedule.companyRequiredForTask"),
         variant: "destructive",
       });
-      throw new Error("Company context is required to add a task.");
+      throw new Error(t("schedule.companyRequiredForTask"));
     }
     const title = task.title.trim();
     try {
@@ -290,12 +294,12 @@ export function ShiftDetailsPanel({
         tags: ["schedule", shift.id],
         links: {
           schedule_id: shift.id,
-          shift_title: shift.title || "Untitled shift",
+          shift_title: shift.title || t("schedule.untitledShift"),
         },
       });
       setSavedTasks((current) => [
         ...current.filter((item) => item.id !== created.id),
-        toShiftTask(created),
+        toShiftTask(created, t("schedule.untitledTask")),
       ]);
       setTaskError(null);
       taskDraftRef.current = null;
@@ -303,13 +307,14 @@ export function ShiftDetailsPanel({
       await queryClient.invalidateQueries({
         queryKey: ["shift-tasks", companyId, shift.id],
       });
-      toast({ title: "Task added", description: title });
+      toast({ title: t("schedule.taskAdded"), description: title });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to save shift task";
+      const message =
+        error instanceof Error ? error.message : t("schedule.failedToSaveShiftTask");
       setTaskError(message);
       logger.error("Failed to save shift task", { error, tags: ["error"] });
       toast({
-        title: "Task not saved",
+        title: t("schedule.taskNotSaved"),
         description: message,
         variant: "destructive",
       });
@@ -326,12 +331,13 @@ export function ShiftDetailsPanel({
       await queryClient.invalidateQueries({
         queryKey: ["shift-tasks", companyId, shiftId],
       });
-      toast({ title: "Task removed" });
+      toast({ title: t("schedule.taskRemoved") });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to remove task";
+      const message =
+        error instanceof Error ? error.message : t("schedule.failedToRemoveTask");
       logger.error("Failed to remove shift task", { error, tags: ["error"] });
       toast({
-        title: "Task not removed",
+        title: t("schedule.taskNotRemoved"),
         description: message,
         variant: "destructive",
       });
@@ -350,7 +356,7 @@ export function ShiftDetailsPanel({
           ? Math.round((durationMs / 3_600_000) * 100) / 100
           : null;
       const result = await createTemplate({
-        name: formData.title.trim() || "Shift template",
+        name: formData.title.trim() || t("schedule.shiftTemplate"),
         description: formData.location.trim() || null,
         default_notes: formData.notes.trim() || null,
         color: formData.color || null,
@@ -371,20 +377,22 @@ export function ShiftDetailsPanel({
         const message =
           result.error instanceof Error
             ? result.error.message
-            : "Could not save this shift as a template.";
+            : t("schedule.couldNotSaveTemplate");
         throw new Error(message);
       }
       setSelectedTemplateId(result.data.id);
       toast({
-        title: "Template saved",
-        description: result.data.name || "Shift template",
+        title: t("schedule.templateSaved"),
+        description: result.data.name || t("schedule.shiftTemplate"),
       });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Could not save this shift as a template.";
+        error instanceof Error
+          ? error.message
+          : t("schedule.couldNotSaveTemplate");
       logger.error("Failed to save shift template", { error, tags: ["error"] });
       toast({
-        title: "Template not saved",
+        title: t("schedule.templateNotSaved"),
         description: message,
         variant: "destructive",
       });
@@ -433,7 +441,7 @@ export function ShiftDetailsPanel({
       try {
         await handleAddTask({
           id: `${template.id}-${task.title}`,
-          title: task.title?.trim() || "Template task",
+          title: task.title?.trim() || t("schedule.templateTask"),
           description: task.description ?? "",
           priority,
           estimated_minutes: task.estimated_minutes ?? 30,
@@ -445,13 +453,13 @@ export function ShiftDetailsPanel({
 
     setActiveTab("details");
     toast({
-      title: "Template loaded",
-      description: "Save changes to keep these shift details.",
+      title: t("schedule.templateLoaded"),
+      description: t("schedule.templateLoadedHelp"),
     });
   };
 
   const handleDelete = async () => {
-    if (!shift || !confirm("Are you sure you want to delete this shift?"))
+    if (!shift || !confirm(t("schedule.deleteShiftConfirm")))
       return;
 
     setLoading(true);
@@ -587,8 +595,8 @@ export function ShiftDetailsPanel({
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                               {warning.severity === "hard"
-                                ? "Blocking"
-                                : "Advisory"}{" "}
+                                ? t("schedule.blockingLabel")
+                                : t("schedule.advisoryLabel")}{" "}
                               • {warning.code.replace(/_/g, " ")}
                             </p>
                             <p className="text-sm text-foreground">
@@ -699,11 +707,11 @@ export function ShiftDetailsPanel({
             {/* Status */}
             <div className="flex items-center gap-2">
               <Badge variant={shift.is_published ? "default" : "secondary"}>
-                {shift.is_published ? "Published" : "Draft"}
+                {shift.is_published ? t("schedule.published") : t("schedule.draft")}
               </Badge>
-              {shift.position_id && (
+              {(shift.job_position?.name || shift.role) && (
                 <Badge variant="outline">
-                  Position ID: {shift.position_id}
+                  {shift.job_position?.name || shift.role}
                 </Badge>
               )}
             </div>
@@ -729,7 +737,7 @@ export function ShiftDetailsPanel({
               onClick={handleSaveTemplate}
               disabled={templateSaving || !companyId}
             >
-              {templateSaving ? "Saving template..." : "Save as Shift Template"}
+              {templateSaving ? t("schedule.savingTemplate") : t("schedule.saveAsShiftTemplate")}
             </Button>
             <div className="space-y-2">
               <Label htmlFor="shift-template">{t("schedule.loadFromTemplate")}</Label>
@@ -742,15 +750,15 @@ export function ShiftDetailsPanel({
                   <SelectValue
                     placeholder={
                       templates.length === 0
-                        ? "No templates yet"
-                        : "Choose a template"
+                        ? t("schedule.noTemplatesYet")
+                        : t("schedule.chooseTemplate")
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      {template.name || "Untitled template"}
+                      {template.name || t("schedule.untitledTemplate")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -771,7 +779,7 @@ export function ShiftDetailsPanel({
       <div className="flex shrink-0 flex-col gap-2 border-t p-6">
         <Button onClick={handleSave} disabled={loading}>
           <Save className="mr-2 h-4 w-4" />
-          {loading ? "Saving..." : "Save Changes"}
+          {loading ? t("schedule.saving") : t("schedule.saveShiftChanges")}
         </Button>
 
         {!shift.is_published && (

@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
 import {
   format,
-  startOfMonth,
-  endOfMonth,
   eachDayOfInterval,
+  addDays,
   isSameDay,
+  isSameMonth,
   parseISO,
+  startOfWeek,
 } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -14,6 +15,10 @@ import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { useMemo, useState } from "react";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
+import { monthGridRange } from "@/features/scheduling/utils/monthGrid";
+import { shiftChipPaint, shiftIsOpen } from "@/features/scheduling/utils/shiftChipPaint";
+import { getShiftColor } from "@/utils/schedulingUtils";
 
 interface MonthViewProps {
   schedules: ShiftWithAssignments[];
@@ -27,6 +32,18 @@ interface MonthViewProps {
   locationFilter?: string;
 }
 
+function shiftBlockStyle(shift: ShiftWithAssignments) {
+  const paint = shiftChipPaint(
+    getShiftColor(shift),
+    shiftIsOpen(shift) ? "unassigned" : "assigned",
+  );
+  return {
+    backgroundColor: paint.backgroundColor,
+    color: paint.color,
+    borderLeft: paint.borderLeft,
+  };
+}
+
 export function MonthView({
   schedules,
   selectedDate,
@@ -38,12 +55,16 @@ export function MonthView({
   selectedEventId = null,
   locationFilter,
 }: MonthViewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
   const [showAddShift, setShowAddShift] = useState(false);
   const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
-  const monthStart = startOfMonth(selectedDate);
-  const monthEnd = endOfMonth(selectedDate);
-  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const grid = monthGridRange(selectedDate);
+  const gridDays = eachDayOfInterval({ start: grid.start, end: grid.end });
+  const weekdayHeaders = eachDayOfInterval({
+    start: startOfWeek(new Date()),
+    end: addDays(startOfWeek(new Date()), 6),
+  }).map((day) => format(day, isMobile ? "EEEEE" : "EEE", { locale }));
 
   const getShiftsForDay = (day: Date) => {
     return schedules.filter((schedule) =>
@@ -70,40 +91,67 @@ export function MonthView({
     }
   };
 
+  const openAdd = (day: Date) => {
+    setQuickAddDate(day);
+    setShowAddShift(true);
+  };
+
+  const addButton = (day: Date) =>
+    hideShiftActions || !isSameMonth(day, selectedDate) ? null : (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="mt-1 h-6 w-full text-xs"
+        aria-label={t("schedule.newShift")}
+        onClick={() => openAdd(day)}
+      >
+        <Plus className="h-3 w-3" />
+      </Button>
+    );
+
+  const wizard = hideShiftActions ? null : (
+    <ShiftWizardDialog
+      open={showAddShift}
+      onOpenChange={(open) => {
+        setShowAddShift(open);
+        if (!open) setQuickAddDate(null);
+      }}
+      selectedDate={quickAddDate || selectedDate}
+    />
+  );
+
   if (isMobile) {
     return (
       <div className="p-2">
         {locationFilter && (
           <p className="mb-2 text-center text-[11px] text-muted-foreground">
-            Showing shifts for {locationFilter}
+            {t("schedule.showingShiftsFor", { location: locationFilter })}
           </p>
         )}
-        {/* Mobile Calendar Grid - Smaller cells */}
         <div className="grid grid-cols-7 gap-1">
-          {/* Day Headers */}
-          {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+          {weekdayHeaders.map((day, index) => (
             <div
-              key={index}
-              className="p-2 text-center text-xs font-medium text-muted-foreground"
+              key={`${day}-${index}`}
+              className="p-1 text-center text-xs font-medium text-muted-foreground"
             >
               {day}
             </div>
           ))}
 
-          {/* Calendar Days */}
-          {monthDays.map((day) => {
-            const dayShifts = getShiftsForDay(day);
-            const dayEvents = getEventsForDay(day);
+          {gridDays.map((day) => {
+            const inMonth = isSameMonth(day, selectedDate);
+            const dayShifts = inMonth ? getShiftsForDay(day) : [];
+            const dayEvents = inMonth ? getEventsForDay(day) : [];
 
             return (
               <div
                 key={day.toISOString()}
-                className="min-h-[80px] border border-border p-1 bg-background hover:bg-muted"
+                className={`min-h-[80px] border border-border p-1 ${
+                  inMonth ? "bg-background" : "bg-muted/30 text-muted-foreground"
+                }`}
               >
-                <div className="text-xs font-medium text-foreground mb-1">
-                  {format(day, "d")}
-                </div>
-
+                <div className="mb-1 text-xs font-medium">{format(day, "d")}</div>
                 <div className="space-y-1">
                   {dayEvents.slice(0, 2).map((event) => (
                     <CalendarEventBlock
@@ -116,55 +164,46 @@ export function MonthView({
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="text-[10px] text-muted-foreground">
-                      +{dayEvents.length - 2} sessions
+                      {t("schedule.moreSessions", { count: dayEvents.length - 2 })}
                     </div>
                   )}
                   {dayShifts.slice(0, 2).map((shift) => (
                     <div
                       key={shift.id}
-                      className="text-xs p-1 rounded cursor-pointer hover:shadow-sm transition-shadow"
-                      style={{
-                        backgroundColor: shift.color || "#3b82f6",
-                        color: "white",
-                      }}
+                      className="cursor-pointer rounded p-1 text-xs hover:shadow-sm"
+                      style={shiftBlockStyle(shift)}
                       onClick={() => onSelectShift(shift.id)}
                     >
-                      <div className="font-medium truncate text-xs">
-                        {shift.title?.substring(0, 8) || "Shift"}
+                      <div className="truncate text-xs font-medium">
+                        {shift.title || t("schedule.shiftSingular")}
                       </div>
                     </div>
                   ))}
-
                   {dayShifts.length > 2 && (
                     <div className="text-xs text-muted-foreground">
                       +{dayShifts.length - 2}
                     </div>
                   )}
-                  {dayEvents.length === 0 && dayShifts.length === 0 && (
-                    <p className="text-[10px] text-muted-foreground">
-                      {t("schedule.noShifts")}
-                    </p>
-                  )}
                 </div>
+                {addButton(day)}
               </div>
             );
           })}
         </div>
+        {wizard}
       </div>
     );
   }
 
   return (
-    <div className="p-4">
+    <div className="overflow-x-auto p-4">
       {locationFilter && (
         <p className="mb-3 text-sm text-muted-foreground">
-          Filtered by {locationFilter}
+          {t("schedule.filteredByLocation", { location: locationFilter })}
         </p>
       )}
-      {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {/* Day Headers */}
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+      <div className="grid min-w-[720px] grid-cols-7 gap-1">
+        {weekdayHeaders.map((day) => (
           <div
             key={day}
             className="p-2 text-center text-sm font-medium text-muted-foreground"
@@ -173,17 +212,23 @@ export function MonthView({
           </div>
         ))}
 
-        {/* Calendar Days */}
-        {monthDays.map((day) => {
-          const dayShifts = getShiftsForDay(day);
-          const dayEvents = getEventsForDay(day);
+        {gridDays.map((day) => {
+          const inMonth = isSameMonth(day, selectedDate);
+          const dayShifts = inMonth ? getShiftsForDay(day) : [];
+          const dayEvents = inMonth ? getEventsForDay(day) : [];
 
           return (
             <div
               key={day.toISOString()}
-              className="min-h-[120px] border border-border p-2 bg-background hover:bg-muted"
+              className={`min-h-[120px] border border-border p-2 ${
+                inMonth ? "bg-background hover:bg-muted" : "bg-muted/30"
+              }`}
             >
-              <div className="text-sm font-medium text-foreground mb-2">
+              <div
+                className={`mb-2 text-sm font-medium ${
+                  inMonth ? "text-foreground" : "text-muted-foreground"
+                }`}
+              >
                 {format(day, "d")}
               </div>
 
@@ -200,22 +245,19 @@ export function MonthView({
 
                 {dayEvents.length > 3 && (
                   <div className="text-xs text-muted-foreground">
-                    +{dayEvents.length - 3} more sessions
+                    {t("schedule.moreSessions", { count: dayEvents.length - 3 })}
                   </div>
                 )}
 
                 {dayShifts.slice(0, 3).map((shift) => (
                   <div
                     key={shift.id}
-                    className="text-xs p-1 rounded cursor-pointer hover:shadow-sm transition-shadow"
-                    style={{
-                      backgroundColor: shift.color || "#3b82f6",
-                      color: "white",
-                    }}
+                    className="cursor-pointer rounded p-1 text-xs transition-shadow hover:shadow-sm"
+                    style={shiftBlockStyle(shift)}
                     onClick={() => onSelectShift(shift.id)}
                   >
-                    <div className="font-medium truncate">
-                      {shift.title || "Shift"}
+                    <div className="truncate font-medium">
+                      {shift.title || t("schedule.shiftSingular")}
                     </div>
                     <div className="opacity-90">
                       {format(new Date(shift.start_time), "HH:mm")}
@@ -225,45 +267,21 @@ export function MonthView({
 
                 {dayShifts.length > 3 && (
                   <div className="text-xs text-muted-foreground">
-                    +{dayShifts.length - 3} more
+                    {t("schedule.moreItems", { count: dayShifts.length - 3 })}
                   </div>
                 )}
-                {dayEvents.length === 0 && dayShifts.length === 0 && (
+                {inMonth && dayEvents.length === 0 && dayShifts.length === 0 && (
                   <p className="text-xs text-muted-foreground">
                     {t("schedule.noShiftsScheduled")}
                   </p>
                 )}
               </div>
-
-              {/* Quick add button (hidden for events-only calendar) */}
-              {!hideShiftActions && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full mt-2 h-6 text-xs opacity-0 hover:opacity-100 transition-opacity"
-                  onClick={() => {
-                    setQuickAddDate(day);
-                    setShowAddShift(true);
-                  }}
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              )}
+              {addButton(day)}
             </div>
           );
         })}
       </div>
-      {/* Centralized Add Shift Dialog */}
-      {!hideShiftActions && (
-        <ShiftWizardDialog
-          open={showAddShift}
-          onOpenChange={(open) => {
-            setShowAddShift(open);
-            if (!open) setQuickAddDate(null);
-          }}
-          selectedDate={quickAddDate || selectedDate}
-        />
-      )}
+      {wizard}
     </div>
   );
 }
