@@ -9,7 +9,11 @@ import { useProfile } from "@/hooks/useProfile";
 import { canViewScheduleDrafts } from "@/utils/authRoles";
 import { logger } from "@/utils/logger";
 import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
-import { scheduleQueryFailureMode } from "@/features/scheduling/utils/scheduleQueryFailure";
+import {
+  scheduleBoardIsReadOnly,
+  scheduleQueryFailureMode,
+  scheduleQueryRecovered,
+} from "@/features/scheduling/utils/scheduleQueryFailure";
 import type {
   AssignmentWithUser,
   SchedulingQueryParams,
@@ -101,7 +105,6 @@ export function useSchedulingConsolidated(
   const [vendorEvents, setVendorEvents] = useState<VendorEventWithMetadata[]>([]);
   const [teamMembers, setTeamMembers] = useState<ProfileSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isUsingFallback, setIsUsingFallback] = useState<boolean>(false);
   const fallbackNoticeShownRef = useRef<boolean>(false);
   const queryClient = useQueryClient();
 
@@ -159,20 +162,32 @@ export function useSchedulingConsolidated(
   });
 
   useEffect(() => {
-    if (schedulesQuery.data) {
-      const payload = schedulesQuery.data;
-      setShifts(payload.shifts);
-      setAssignments(payload.assignments);
-      setTimeOffRequests(payload.timeOff);
-      setUnavailability(payload.unavailability);
-      setStaffAvailability(payload.staffAvailability);
-      setVendorEvents(payload.vendorEvents);
-      setTeamMembers(payload.teamMembers);
-      setIsUsingFallback(false);
-      fallbackNoticeShownRef.current = false;
-      setError(null);
+    const dataUpdatedAt = schedulesQuery.dataUpdatedAt;
+    if (
+      !scheduleQueryRecovered({
+        status: schedulesQuery.status,
+        hasData: Boolean(schedulesQuery.data),
+        dataUpdatedAt,
+      }) ||
+      !schedulesQuery.data
+    ) {
+      return;
     }
-  }, [schedulesQuery.data]);
+    const payload = schedulesQuery.data;
+    setShifts(payload.shifts);
+    setAssignments(payload.assignments);
+    setTimeOffRequests(payload.timeOff);
+    setUnavailability(payload.unavailability);
+    setStaffAvailability(payload.staffAvailability);
+    setVendorEvents(payload.vendorEvents);
+    setTeamMembers(payload.teamMembers);
+    fallbackNoticeShownRef.current = false;
+    setError(null);
+  }, [
+    schedulesQuery.data,
+    schedulesQuery.dataUpdatedAt,
+    schedulesQuery.status,
+  ]);
 
   useEffect(() => {
     if (!schedulesQuery.error || !range.start) {
@@ -207,7 +222,6 @@ export function useSchedulingConsolidated(
 
     setError(errorMessage);
     const failure = scheduleQueryFailureMode(Boolean(schedulesQuery.data));
-    setIsUsingFallback(failure.readOnly);
     if (failure.clearBoard) {
       setShifts([]);
       setAssignments([]);
@@ -435,6 +449,10 @@ export function useSchedulingConsolidated(
   );
 
   const loading = schedulesQuery.isFetching && !schedulesQuery.data;
+  const isUsingFallback = scheduleBoardIsReadOnly({
+    status: schedulesQuery.status,
+    hasRange: Boolean(range.start),
+  });
 
   return {
     shifts,

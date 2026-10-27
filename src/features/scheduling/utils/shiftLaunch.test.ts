@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { shiftIsOpen } from "./shiftChipPaint";
 import { shiftDraftRole } from "./shiftDraftRole";
-import { scheduleQueryFailureMode } from "./scheduleQueryFailure";
+import {
+  scheduleBoardIsReadOnly,
+  scheduleQueryFailureMode,
+  scheduleQueryRecovered,
+} from "./scheduleQueryFailure";
 import { monthGridRange } from "./monthGrid";
 import { translateScheduleReason } from "./translateScheduleReason";
 
@@ -37,6 +41,48 @@ export function runShiftLaunchTests() {
     readOnly: true,
     clearBoard: false,
   });
+
+  assert.equal(
+    scheduleBoardIsReadOnly({ status: "error", hasRange: true }),
+    true,
+  );
+  assert.equal(
+    scheduleBoardIsReadOnly({ status: "success", hasRange: true }),
+    false,
+  );
+  assert.equal(
+    scheduleBoardIsReadOnly({ status: "pending", hasRange: true }),
+    false,
+  );
+  assert.equal(
+    scheduleBoardIsReadOnly({ status: "error", hasRange: false }),
+    false,
+  );
+  const unchangedRows = { id: "cached-week" };
+  assert.equal(
+    scheduleQueryRecovered({
+      status: "success",
+      hasData: Boolean(unchangedRows),
+      dataUpdatedAt: 2_000,
+    }),
+    true,
+  );
+  assert.equal(
+    scheduleQueryRecovered({
+      status: "error",
+      hasData: Boolean(unchangedRows),
+      dataUpdatedAt: 1_000,
+    }),
+    false,
+  );
+  assert.equal(
+    scheduleQueryRecovered({
+      status: "success",
+      hasData: true,
+      dataUpdatedAt: 0,
+    }),
+    false,
+  );
 
   const october = monthGridRange(new Date(2026, 9, 15));
   assert.equal(october.start.getDay(), 0);
