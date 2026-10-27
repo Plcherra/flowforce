@@ -9,12 +9,13 @@ import {
   canSeeListIssueGather,
   gatheredListIssues,
   listIssueGrant,
+  listIssueMarkDoneAllowed,
 } from "@/features/tasks/utils/listIssueGather";
 
-const KIND_LABELS: Record<string, string> = {
-  missed_form: "List not done",
-  missing_required: "Required item missing",
-  flagged_item: "Flagged item",
+const KIND_KEYS: Record<string, string> = {
+  missed_form: "tasks.listNotDone",
+  missing_required: "tasks.requiredMissing",
+  flagged_item: "tasks.flaggedItem",
 };
 
 export function ListIssueGather({
@@ -60,29 +61,35 @@ export function ListIssueGather({
             issue.links && typeof issue.links === "object"
               ? (issue.links as { list_issue_kind?: string }).list_issue_kind
               : null;
-          const finished = issue.status === "done" || issue.status === "completed";
+          const canMarkDone = listIssueMarkDoneAllowed(issue.status);
+          const cancelled = issue.status === "cancelled";
           return (
             <li
               key={issue.id}
-              className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
+              className="flex flex-col gap-2 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
             >
-              <span>
+              <span className="min-w-0">
                 <span className="text-muted-foreground">
-                  {KIND_LABELS[kind ?? ""] ?? "List issue"}
+                  {t(KIND_KEYS[kind ?? ""] ?? "tasks.listIssue")}
                   {" · "}
                 </span>
-                {issue.title || "Checklist task"}
+                {issue.title || t("tasks.checklistTask")}
               </span>
-              {canAct && !finished ? (
+              {canAct && canMarkDone ? (
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
+                  className="min-h-11 shrink-0"
                   data-testid={`list-issue-done-${issue.id}`}
                   onClick={() => onMarkDone(issue.id)}
                 >
                   {t("tasks.markDone")}
                 </Button>
+              ) : canAct ? (
+                <span className="text-sm text-muted-foreground">
+                  {cancelled ? t("tasks.statusCancelled") : t("tasks.statusDone")}
+                </span>
               ) : null}
             </li>
           );

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getTaskStatusLabel } from "@/constants/taskStatus";
+import type { TFunction } from "i18next";
 import {
   Calendar,
   CheckCircle,
@@ -16,6 +16,10 @@ import {
 import { formatDistanceToNow, format } from "date-fns";
 import { useTaskTimeline, type TaskActivity } from "@/features/tasks/hooks";
 import { TimelineSkeleton } from "@/components/loading/TaskSkeletons";
+import {
+  translatedPriorityLabel,
+  translatedStatusLabel,
+} from "../utils/taskCopy";
 
 interface TaskTimelineProps {
   taskId: string | null;
@@ -38,47 +42,55 @@ const getActivityIcon = (activityType: string) => {
   );
 };
 
-const formatMetadata = (activity: TaskActivity) => {
+function formatMetadata(t: TFunction, activity: TaskActivity): string | null {
   const metadata = (activity.metadata ?? {}) as Record<string, unknown>;
 
   if (activity.action_type === "task_status_changed") {
-    return `Status changed from "${getTaskStatusLabel(metadata.old_status as string)}" to "${getTaskStatusLabel(
-      metadata.new_status as string,
-    )}"`;
+    return t("tasks.timelineStatusChanged", {
+      from: translatedStatusLabel(t, String(metadata.old_status ?? "")),
+      to: translatedStatusLabel(t, String(metadata.new_status ?? "")),
+    });
   }
 
   if (activity.action_type === "task_due_changed") {
     const oldDue = metadata.old_due_date
       ? format(new Date(metadata.old_due_date as string), "PPP")
-      : "none";
+      : t("tasks.timelineNone");
     const newDue = metadata.new_due_date
       ? format(new Date(metadata.new_due_date as string), "PPP")
-      : "none";
-    return `Due date updated from ${oldDue} to ${newDue}`;
+      : t("tasks.timelineNone");
+    return t("tasks.timelineDueChanged", { from: oldDue, to: newDue });
   }
 
   if (activity.action_type === "task_assigned") {
     if (metadata.new_assignee && !metadata.old_assignee) {
-      return "Task assigned";
+      return t("tasks.timelineAssigned");
     }
     if (!metadata.new_assignee && metadata.old_assignee) {
-      return "Task unassigned";
+      return t("tasks.timelineUnassigned");
     }
-    return "Task reassigned";
+    return t("tasks.timelineReassigned");
   }
 
   if (activity.action_type === "task_completed") {
     return metadata.completed_at
-      ? `Completed ${formatDistanceToNow(new Date(metadata.completed_at as string), { addSuffix: true })}`
-      : "Task marked as done";
+      ? t("tasks.timelineCompletedWhen", {
+          when: formatDistanceToNow(new Date(metadata.completed_at as string), {
+            addSuffix: true,
+          }),
+        })
+      : t("tasks.timelineMarkedDone");
   }
 
   if (activity.action_type === "task_created") {
-    return `Priority set to ${(metadata.priority as string) ?? "medium"}`;
+    const priority = String(metadata.priority ?? "medium");
+    return t("tasks.timelinePrioritySet", {
+      priority: translatedPriorityLabel(t, priority, priority),
+    });
   }
 
   return null;
-};
+}
 
 export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
   const { t } = useTranslation();
@@ -91,9 +103,9 @@ export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
       icon: getActivityIcon(activity.action_type),
       description: activity.description,
       createdAt: activity.created_at,
-      metadata: formatMetadata(activity),
+      metadata: formatMetadata(t, activity),
     }));
-  }, [activities]);
+  }, [activities, t]);
 
   if (!taskId) {
     return null;
@@ -104,7 +116,9 @@ export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{t("tasks.timeline")}</h3>
         {hasTimeline && (
-          <Badge variant="secondary">{activities.length} events</Badge>
+          <Badge variant="secondary">
+            {t("tasks.timelineEvents", { count: activities.length })}
+          </Badge>
         )}
       </div>
       <div className="border rounded-md bg-muted/40">

@@ -29,6 +29,7 @@ import {
 import { useCan } from "@/hooks/useCan";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
+import { canSeeTask } from "@/features/tasks/utils/taskAudience";
 import { isTaskListedForViewer } from "@/features/tasks/utils/taskSchedule";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
@@ -83,11 +84,13 @@ export default function Tasks() {
     legacyEdit: can("editTasks"),
     keysSet: taskCreateKeysAreSet("custom", getSource),
   });
-  const showCreateMenu = permissionsLoading || customCreateLevel !== "none";
+  const showCreateMenu = !permissionsLoading && customCreateLevel !== "none";
   const showDrafts =
     !permissionsLoading && (can("editTasks") || can("ai.actions.approve"));
+  const canSeeTeam =
+    !permissionsLoading && (can("viewTeamTasks") || can("editTasks"));
   const { user } = useAuth();
-  const { tasks: tasksData, loading, error, refetchTasks, updateTask } = useTasks();
+  const { tasks: tasksData, loading, error, refetchTasks, updateStatus } = useTasks();
   const tasks = useMemo(
     () => asArray(tasksData) as TaskListItem[],
     [tasksData],
@@ -96,14 +99,19 @@ export default function Tasks() {
   const visibleTasks = useMemo(
     () =>
       tasks.filter((task) =>
-        isTaskListedForViewer(task, user?.id ?? null),
+        canSeeTask(task, user?.id ?? null, canSeeTeam),
       ),
+    [canSeeTeam, tasks, user?.id],
+  );
+  const shiftTasks = useMemo(
+    () =>
+      tasks.filter((task) => isTaskListedForViewer(task, user?.id ?? null)),
     [tasks, user?.id],
   );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [boardMode, setBoardMode] = useState<"shift" | "all">("shift");
   const [openFormId, setOpenFormId] = useState<string | null>(null);
-  const shift = useMyShiftBoard(visibleTasks);
+  const shift = useMyShiftBoard(shiftTasks);
   const assigneeScope = useTaskAssigneeScope();
   const [readinessFilter, setReadinessFilter] = useState<ReadinessFilter | null>(
     null,
@@ -201,9 +209,7 @@ export default function Tasks() {
           >
             {t("tasks.tasks")}
           </h1>
-          <p className="text-muted-foreground">
-            {"Today's work, including tasks that came from a shift."}
-          </p>
+          <p className="text-muted-foreground">{t("tasks.pageSubtitle")}</p>
         </div>
         <div
           className={
@@ -226,13 +232,24 @@ export default function Tasks() {
           onOpenList={setOpenFormId}
           onToggleItem={shift.toggleItem}
           onSaveClosingNote={shift.saveClosingNote}
+          onFillForm={setOpenFormId}
+          onCompleteTask={(taskId) => {
+            void updateStatus(taskId, "completed").then(async (result) => {
+              if (!result.data || result.error) return;
+              await refetchTasks();
+              shift.refresh();
+            });
+          }}
         />
       ) : null}
       {boardMode === "all" ? (
         <ListIssueGather
-          tasks={tasks}
+          tasks={visibleTasks}
           onMarkDone={(taskId) => {
-            void updateTask(taskId, { status: "completed" }).then(() => refetchTasks());
+            void updateStatus(taskId, "completed").then(async (result) => {
+              if (!result.data || result.error) return;
+              await refetchTasks();
+            });
           }}
         />
       ) : null}
@@ -307,6 +324,7 @@ export default function Tasks() {
                   highlighted={highlightedTaskId === task.id}
                   selectionHandlers={selectionHandlers}
                   translation={translations.get(task.id) ?? null}
+                  onFillForm={setOpenFormId}
                 />
               );
             })}
@@ -361,6 +379,10 @@ export default function Tasks() {
             onClose={closeTask}
             onTaskUpdate={(updatedTask) => openTask(updatedTask.id)}
             translation={translations.get(selectedTask.id) ?? null}
+            onFillForm={(formId) => {
+              closeTask();
+              setOpenFormId(formId);
+            }}
           />
         </Suspense>
       )}

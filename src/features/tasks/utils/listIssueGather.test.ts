@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   canActOnListIssue,
   canSeeListIssueGather,
+  listIssueMarkDoneAllowed,
   diffsForListIssueGrant,
   gatheredListIssues,
   listIssueGrant,
@@ -17,6 +18,9 @@ export function runListIssueGatherTests() {
   assert.equal(canSeeListIssueGather("none"), false);
   assert.equal(canActOnListIssue("act"), true);
   assert.equal(canActOnListIssue("read"), false);
+  assert.equal(listIssueMarkDoneAllowed("todo"), true);
+  assert.equal(listIssueMarkDoneAllowed("cancelled"), false);
+  assert.equal(listIssueMarkDoneAllowed("completed"), false);
 
   const tasks = [
     { id: "1", source: "form", links: { list_issue_kind: "missed_form" } },

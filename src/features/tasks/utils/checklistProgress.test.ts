@@ -41,6 +41,7 @@ export function runChecklistProgressTests() {
     view: {
       area: "cashier",
       weekdayTasks: [],
+      shiftTasks: [],
       lists: [
         {
           slot: "opening",

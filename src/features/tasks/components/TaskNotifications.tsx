@@ -73,22 +73,22 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
     }
   };
 
-  const getNotificationTitle = (notification: any) => {
+  const getNotificationTitle = (notification: { type?: string }) => {
     switch (notification.type) {
       case "task_assigned":
-        return "New Task Assignment";
+        return t("tasks.notifyAssigned");
       case "task_due_soon":
-        return "Task Due Soon";
+        return t("tasks.notifyDueSoon");
       case "task_overdue":
-        return "Task Overdue";
+        return t("tasks.notifyOverdue");
       case "task_completed":
-        return "Task Completed";
+        return t("tasks.notifyCompleted");
       case "task_status_changed":
-        return "Task Status Updated";
+        return t("tasks.notifyStatusUpdated");
       case "task_comment":
-        return "New Comment";
+        return t("tasks.notifyComment");
       default:
-        return "Task Notification";
+        return t("tasks.notifyGeneric");
     }
   };
 
@@ -156,11 +156,11 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
         <Button
           variant="outline"
           size="sm"
-          className="relative"
+          className="relative min-h-11 min-w-11"
           aria-label={
             unreadCount > 0
-              ? `${unreadCount} unread task notifications`
-              : "Open task notifications"
+              ? t("tasks.unreadNotifications", { count: unreadCount })
+              : t("tasks.openNotifications")
           }
           data-testid="task-notifications-trigger"
         >
@@ -179,7 +179,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
+      <PopoverContent align="end" className="w-[min(20rem,calc(100vw-1.5rem))] p-0">
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -189,7 +189,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
                   variant="ghost"
                   size="sm"
                   onClick={markAllAsRead}
-                  className="text-xs"
+                  className="min-h-11 text-xs"
                 >
                   {t("tasks.markAllRead")}
                 </Button>
@@ -197,8 +197,7 @@ export function TaskNotifications({ onTaskNavigate }: TaskNotificationsProps) {
             </div>
             {unreadCount > 0 && (
               <CardDescription>
-                You have {unreadCount} unread notification
-                {unreadCount !== 1 ? "s" : ""}
+                {t("tasks.unreadSummary", { count: unreadCount })}
               </CardDescription>
             )}
           </CardHeader>

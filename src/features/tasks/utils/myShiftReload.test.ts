@@ -40,6 +40,14 @@ export function runMyShiftReloadTests() {
   assert.equal(myShiftTasksKey([]), myShiftTasksKey([]));
   assert.equal(myShiftTasksKey([{ id: "a" }]), myShiftTasksKey([{ id: "a" }]));
   assert.notEqual(myShiftTasksKey([{ id: "a" }]), myShiftTasksKey([{ id: "b" }]));
+  assert.notEqual(
+    myShiftTasksKey([{ id: "a", status: "todo" }]),
+    myShiftTasksKey([{ id: "a", status: "completed" }]),
+  );
+  assert.notEqual(
+    myShiftTasksKey([{ id: "a", status: "todo" }]),
+    myShiftTasksKey([{ id: "a", status: "cancelled" }]),
+  );
 
   const parsed = parseCompanyTasks([productionTask]);
   assert.equal(parsed.length, 1);

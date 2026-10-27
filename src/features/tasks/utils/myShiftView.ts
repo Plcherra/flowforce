@@ -14,6 +14,8 @@ import {
   type StoreStation,
   type Weekday,
 } from "./shiftWeekdayTask";
+import { readAssigneeIds, readFormId } from "./shiftTaskWrite";
+import { readTaskSchedule } from "./taskSchedule";
 
 const WEEKDAY_BY_JS_DAY: Weekday[] = [
   "sun",
@@ -63,10 +65,22 @@ export type MyShiftWeekdayCard = {
   stations: StoreStation[];
 };
 
+export type MyShiftShiftCard = {
+  id: string;
+  title: string;
+  description: string;
+  formId: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  assigneeCount: number;
+  status: string | null;
+};
+
 export type MyShiftView = {
-  area: ChecklistArea;
+  area: ChecklistArea | null;
   lists: MyShiftListView[];
   weekdayTasks: MyShiftWeekdayCard[];
+  shiftTasks: MyShiftShiftCard[];
 };
 
 export type MyShiftSchedule = {
@@ -103,6 +117,9 @@ export type MyShiftSubmission = {
 export type MyShiftTaskRow = {
   id: string;
   title?: string | null;
+  description?: string | null;
+  status?: string | null;
+  assigned_to?: string | null;
   links?: unknown;
 };
 
@@ -153,6 +170,25 @@ function overlapsToday(
   return startMs < end.getTime() && endMs > start.getTime();
 }
 
+function chooseCoveringShift(
+  rows: readonly MyShiftSchedule[],
+  now: Date,
+): MyShiftSchedule | null {
+  if (rows.length === 0) return null;
+  const nowMs = now.getTime();
+  const covering = rows.find((row) => {
+    const startMs = new Date(row.start_time ?? "").getTime();
+    const endMs = row.end_time
+      ? new Date(row.end_time).getTime()
+      : startMs + 60 * 60 * 1000;
+    return startMs <= nowMs && nowMs <= endMs;
+  });
+  const pool = covering ? [covering] : rows;
+  return [...pool].sort((left, right) =>
+    `${left.start_time ?? ""}`.localeCompare(`${right.start_time ?? ""}`),
+  )[0];
+}
+
 function pickViewerShift(
   schedules: readonly MyShiftSchedule[],
   viewerId: string,
@@ -162,22 +198,45 @@ function pickViewerShift(
     (row) =>
       row.user_id === viewerId &&
       isWorkShift(row) &&
-      overlapsToday(row.start_time, row.end_time, now) &&
-      checklistAreaFromShift(row) !== null,
+      overlapsToday(row.start_time, row.end_time, now),
   );
-  if (mine.length === 0) return null;
-  const nowMs = now.getTime();
-  const covering = mine.find((row) => {
-    const startMs = new Date(row.start_time ?? "").getTime();
-    const endMs = row.end_time
-      ? new Date(row.end_time).getTime()
-      : startMs + 60 * 60 * 1000;
-    return startMs <= nowMs && nowMs <= endMs;
+  const mapped = mine.filter((row) => checklistAreaFromShift(row) !== null);
+  return chooseCoveringShift(mapped.length > 0 ? mapped : mine, now);
+}
+
+export function shiftTaskMarkDoneAllowed(
+  status: string | null | undefined,
+): boolean {
+  return status !== "done" && status !== "completed" && status !== "cancelled";
+}
+
+export function shiftTasksForSchedule(
+  tasks: readonly MyShiftTaskRow[],
+  scheduleId: string,
+): MyShiftShiftCard[] {
+  return tasks.flatMap((task) => {
+    if (readShiftWeekdayTask(task.links)) return [];
+    if (!task.links || typeof task.links !== "object" || Array.isArray(task.links)) {
+      return [];
+    }
+    const scheduleIdOnTask = (task.links as { schedule_id?: unknown }).schedule_id;
+    if (typeof scheduleIdOnTask !== "string" || scheduleIdOnTask !== scheduleId) {
+      return [];
+    }
+    const schedule = readTaskSchedule(task.links);
+    return [
+      {
+        id: task.id,
+        title: task.title?.trim() || "",
+        description: task.description?.trim() || "",
+        formId: readFormId(task.links),
+        startsAt: schedule.startsAt,
+        endsAt: schedule.endsAt,
+        assigneeCount: readAssigneeIds(task.links, task.assigned_to).length,
+        status: task.status ?? null,
+      },
+    ];
   });
-  const pool = covering ? [covering] : mine;
-  return [...pool].sort((left, right) =>
-    `${left.start_time ?? ""}`.localeCompare(`${right.start_time ?? ""}`),
-  )[0];
 }
 
 function openingNotes(input: {
@@ -280,8 +339,16 @@ export function assembleMyShift(input: {
   const shift = pickViewerShift(input.schedules, input.viewerId, input.now);
   if (!shift) return hasShift ? { kind: "unmapped" } : { kind: "empty" };
   const area = checklistAreaFromShift(shift);
+  const shiftTasks = shiftTasksForSchedule(input.tasks, shift.id);
   if (!area || !shift.start_time) {
-    return { kind: "unmapped" };
+    if (shiftTasks.length === 0) return { kind: "unmapped" };
+    return {
+      kind: "ready",
+      view: { area: null, lists: [], weekdayTasks: [], shiftTasks },
+      shiftTitle: shift.title?.trim() || shift.role?.trim() || "",
+      shiftStartsAt: shift.start_time ?? "",
+      shiftEndsAt: shift.end_time,
+    };
   }
 
   const lists = listsForShift(input.forms, area);
@@ -332,6 +399,7 @@ export function assembleMyShift(input: {
         items,
       };
     }),
+    shiftTasks,
     weekdayTasks: input.tasks.flatMap((task) => {
       const weekdayTask = readShiftWeekdayTask(task.links);
       if (!weekdayTask || weekdayTask.area !== area) return [];

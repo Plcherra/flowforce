@@ -168,7 +168,7 @@ export function TaskActivityFeed() {
   const getActorMeta = (activity: TaskActivityWithActor) => {
     const first = activity.actor?.first_name ?? "";
     const last = activity.actor?.last_name ?? "";
-    const name = `${first} ${last}`.trim() || "Task activity";
+    const name = `${first} ${last}`.trim() || t("tasks.taskActivity");
     const initialsCandidate = `${first.charAt(0)}${last.charAt(0)}`
       .trim()
       .toUpperCase();
@@ -282,9 +282,10 @@ export function TaskActivityFeed() {
                               {(activity.metadata as any).old_value &&
                                 (activity.metadata as any).new_value && (
                                   <span>
-                                    Changed from &quot;
-                                    {(activity.metadata as any).old_value}&quot; to &quot;
-                                    {(activity.metadata as any).new_value}&quot;
+                                    {t("tasks.changedFrom", {
+                                      from: (activity.metadata as any).old_value,
+                                      to: (activity.metadata as any).new_value,
+                                    })}
                                   </span>
                                 )}
                               {(activity.metadata as any).task_title && (

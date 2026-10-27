@@ -4,6 +4,7 @@ import { getProductRolePermissions } from "@/features/roles/constants/productRol
 import {
   diffsForTaskCreateLevel,
   retainTaskCreateDiffs,
+  taskCreateDialogProps,
   taskCreateLevelFromDiffs,
 } from "./taskCreateAccess";
 
@@ -49,4 +50,30 @@ export function runTaskCreateAccessTests() {
   );
   assert.equal(staffEffective["tasks.checklist.create_self"], true);
   assert.equal(staffEffective["tasks.checklist.create_others"], undefined);
+
+  const scope = { self: true, levels: [2], userIds: [] };
+  assert.equal(
+    taskCreateDialogProps({ permissionsLoading: true, level: "others", scope }),
+    null,
+  );
+  assert.equal(
+    taskCreateDialogProps({ permissionsLoading: false, level: "none", scope: null }),
+    null,
+  );
+  assert.deepEqual(
+    taskCreateDialogProps({ permissionsLoading: false, level: "self", scope: null }),
+    { createLevel: "self", scope: null },
+  );
+  assert.deepEqual(
+    taskCreateDialogProps({ permissionsLoading: false, level: "others", scope }),
+    { createLevel: "others", scope },
+  );
+  assert.deepEqual(
+    taskCreateDialogProps({
+      permissionsLoading: false,
+      level: "others",
+      scope: null,
+    }),
+    { createLevel: "others", scope: null },
+  );
 }

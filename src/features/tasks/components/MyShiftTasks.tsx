@@ -5,7 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import type { ChecklistSlot } from "@/features/forms/utils/checklistForms";
 import type { StoreStation } from "@/features/tasks/utils/shiftWeekdayTask";
-import type { AssembledShift, MyShiftListView } from "@/features/tasks/utils/myShiftView";
+import {
+  shiftTaskMarkDoneAllowed,
+  type AssembledShift,
+  type MyShiftListView,
+  type MyShiftShiftCard,
+} from "@/features/tasks/utils/myShiftView";
+import { formatTaskWindow } from "@/features/tasks/utils/taskSchedule";
 
 const SLOT_KEYS: Record<ChecklistSlot, string> = {
   opening: "tasks.openingList",
@@ -23,6 +29,8 @@ interface MyShiftTasksProps {
   onOpenList: (formId: string) => void;
   onToggleItem?: (formId: string, itemId: string, done: boolean) => void;
   onSaveClosingNote?: (formId: string, note: string) => void;
+  onFillForm?: (formId: string) => void;
+  onCompleteTask?: (taskId: string) => void;
 }
 
 export function MyShiftTasks({
@@ -30,6 +38,8 @@ export function MyShiftTasks({
   onOpenList,
   onToggleItem,
   onSaveClosingNote,
+  onFillForm,
+  onCompleteTask,
 }: MyShiftTasksProps) {
   const { t } = useTranslation();
 
@@ -63,14 +73,28 @@ export function MyShiftTasks({
   }
 
   const areaLabel =
-    board.view.area === "cashier" ? t("tasks.areaCashier") : t("tasks.areaSupervisor");
+    board.view.area === "cashier"
+      ? t("tasks.areaCashier")
+      : board.view.area === "supervisor"
+        ? t("tasks.areaSupervisor")
+        : null;
 
   return (
     <section className="space-y-3" data-testid="my-shift-tasks">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold">{areaLabel}</h2>
-        <p className="text-sm text-muted-foreground">{board.shiftTitle}</p>
+        <h2 className="text-lg font-semibold">{areaLabel ?? board.shiftTitle}</h2>
+        {areaLabel ? (
+          <p className="text-sm text-muted-foreground">{board.shiftTitle}</p>
+        ) : null}
       </div>
+      {board.view.shiftTasks.map((task) => (
+        <ShiftTaskCard
+          key={task.id}
+          task={task}
+          onFillForm={onFillForm}
+          onCompleteTask={onCompleteTask}
+        />
+      ))}
       {board.view.lists.map((list) => (
         <ShiftList
           key={list.slot}
@@ -200,5 +224,65 @@ function ShiftList({
         {t("tasks.openList")}
       </Button>
     </div>
+  );
+}
+
+function ShiftTaskCard({
+  task,
+  onFillForm,
+  onCompleteTask,
+}: {
+  task: MyShiftShiftCard;
+  onFillForm?: (formId: string) => void;
+  onCompleteTask?: (taskId: string) => void;
+}) {
+  const { t } = useTranslation();
+  const windowLabel = formatTaskWindow(task.startsAt, task.endsAt);
+  const cancelled = task.status === "cancelled";
+  const canMarkDone = shiftTaskMarkDoneAllowed(task.status);
+  return (
+    <article
+      className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+      data-testid={`my-shift-task-${task.id}`}
+    >
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold">{task.title}</h3>
+        {task.description ? (
+          <p className="text-sm text-muted-foreground">{task.description}</p>
+        ) : null}
+        <p className="text-xs text-muted-foreground">
+          {t("people.selectedCount", { count: task.assigneeCount })}
+          {windowLabel ? ` · ${windowLabel}` : ""}
+        </p>
+      </div>
+      {canMarkDone ? (
+        <Button
+          type="button"
+          className="min-h-11 w-full"
+          data-testid={`my-shift-task-done-${task.id}`}
+          onClick={() => onCompleteTask?.(task.id)}
+        >
+          {t("tasks.markDone")}
+        </Button>
+      ) : (
+        <p
+          className="text-sm text-muted-foreground"
+          data-testid={`my-shift-task-closed-${task.id}`}
+        >
+          {cancelled ? t("tasks.statusCancelled") : t("tasks.statusDone")}
+        </p>
+      )}
+      {task.formId ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 w-full"
+          data-testid={`my-shift-task-fill-${task.id}`}
+          onClick={() => onFillForm?.(task.formId ?? "")}
+        >
+          {t("tasks.fillAndSend")}
+        </Button>
+      ) : null}
+    </article>
   );
 }

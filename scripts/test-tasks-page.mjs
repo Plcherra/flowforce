@@ -37,6 +37,9 @@ const { runTomorrowShiftTests } = importTs(
 const { runTaskCreateAccessTests } = importTs(
   "../src/features/tasks/utils/taskCreateAccess.test.ts",
 );
+const { runExecutionUpdateTests } = importTs(
+  "../src/features/tasks/utils/executionUpdate.test.ts",
+);
 const { runListIssueTests } = importTs(
   "../src/features/tasks/utils/listIssues.test.ts",
 );
@@ -81,6 +84,9 @@ const { runDraftInboxTests } = importTs(
 );
 const { runTaskAssigneeScopeTests } = importTs(
   "../src/features/tasks/utils/taskAssigneeScope.test.ts",
+);
+const { runTaskAudienceTests } = importTs(
+  "../src/features/tasks/utils/taskAudience.test.ts",
 );
 const { runTaskCreateGrantStoreTests } = importTs(
   "../src/features/roles/constants/taskCreateGrantStore.test.ts",
@@ -128,6 +134,7 @@ runHandoverTaskTests();
 runTaskScheduleTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
+runExecutionUpdateTests();
 runListIssueTests();
 runTaskPointsTotalTests();
 runListIssueInsertTests();
@@ -143,6 +150,7 @@ runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();
 runDraftInboxTests();
 runTaskAssigneeScopeTests();
+runTaskAudienceTests();
 runTaskCreateGrantStoreTests();
 runMyShiftReloadTests();
 runFormShiftLinkTests();
