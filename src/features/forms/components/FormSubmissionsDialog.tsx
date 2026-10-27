@@ -16,6 +16,12 @@ import { useForms } from "@/features/forms/hooks/useForms";
 import { useFormAnswerTranslations } from "@/features/forms/hooks/useFormAnswerTranslations";
 import FormFillDialog from "./FormFillDialog";
 import { FormSubmission, FormField } from "@/types/common";
+import {
+  submissionCsvCell,
+  submissionDisplayText,
+  submissionHasAnswer,
+  submissionIsFile,
+} from "@/features/forms/utils/submissionValue";
 
 interface FormSubmissionsDialogProps {
   open: boolean;
@@ -79,8 +85,8 @@ export default function FormSubmissionsDialog({
 
     // Create CSV headers
     const headers = [
-      "Submission Date",
-      "Submitted By",
+      t("forms.submissionDate"),
+      t("forms.submittedBy"),
       ...fields.map((f) => f.label),
     ];
 
@@ -88,15 +94,18 @@ export default function FormSubmissionsDialog({
     const rows = submissions.map((submission) => {
       const submitterName = submission.submittedprofile
         ? `${submission.submittedprofile.first_name} ${submission.submittedprofile.last_name}`
-        : "Anonymous";
+        : t("forms.anonymous");
 
       const row = [
         new Date(submission.submitted_at).toLocaleString(),
         submitterName,
-        ...fields.map((field) => {
-          const value = submission.submissiondata[field.id];
-          return Array.isArray(value) ? value.join(", ") : value || "";
-        }),
+        ...fields.map((field) =>
+          submissionCsvCell(field.field_type, submission.submissiondata[field.id], {
+            yes: t("forms.yes"),
+            no: t("forms.no"),
+            uploaded: t("forms.fileUploaded"),
+          }),
+        ),
       ];
       return row;
     });
@@ -189,7 +198,7 @@ export default function FormSubmissionsDialog({
                             <User className="h-4 w-4" />
                             {submission.submittedprofile
                               ? `${submission.submittedprofile.first_name} ${submission.submittedprofile.last_name}`
-                              : "Anonymous"}
+                              : t("forms.anonymous")}
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
@@ -202,12 +211,19 @@ export default function FormSubmissionsDialog({
                       <div className="grid gap-4">
                         {fields.map((field) => {
                           const value = submission.submissiondata[field.id];
-                          if (!value && value !== 0) return null;
+                          if (value == null || value === "") return null;
                           const translatedAnswer =
                             typeof value === "string"
                               ? answerTranslations.get(submission.id)?.answers[field.id]
                               : undefined;
-                          const shown = translatedAnswer ?? value;
+                          const shown =
+                            typeof value === "boolean"
+                              ? t(value ? "forms.yes" : "forms.no")
+                              : (translatedAnswer ?? submissionDisplayText(value));
+                          const uploaded =
+                            submissionIsFile(field.field_type) &&
+                            submissionHasAnswer(value);
+                          if (!shown && !uploaded) return null;
 
                           return (
                             <div key={field.id}>
@@ -215,18 +231,13 @@ export default function FormSubmissionsDialog({
                                 {field.label}
                               </label>
                               <div className="mt-1">
-                                {Array.isArray(shown) ? (
-                                  <div className="flex flex-wrap gap-1">
-                                    {shown.map((item, i) => (
-                                      <Badge key={i} variant="secondary">
-                                        {item}
-                                      </Badge>
-                                    ))}
+                                {uploaded ? (
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="outline">{t("forms.fileUploaded")}</Badge>
+                                    {shown ? <p className="text-sm break-all">{shown}</p> : null}
                                   </div>
-                                ) : field.field_type === "file" ? (
-                                  <Badge variant="outline">{t("forms.fileUploaded")}</Badge>
                                 ) : (
-                                  <p className="text-sm">{String(shown)}</p>
+                                  <p className="text-sm">{shown}</p>
                                 )}
                               </div>
                             </div>

@@ -26,6 +26,19 @@ export function useFormListActions() {
     }
   };
 
+  const setStatus = async (formId: string, status: "archived" | "draft" | "published") => {
+    const result = await updateForm(formId, { status }, { quiet: true });
+    if (result.error) return;
+    toast({
+      title:
+        status === "archived"
+          ? t("forms.formArchived")
+          : status === "published"
+            ? t("forms.formPublished")
+            : t("forms.formRestored"),
+    });
+  };
+
   const confirmDelete = async () => {
     if (!deleteId) return;
     setPending(true);
@@ -42,6 +55,8 @@ export function useFormListActions() {
     setDeleteId,
     pending,
     publishForm,
+    archiveForm: (formId: string) => setStatus(formId, "archived"),
+    restoreForm: (formId: string) => setStatus(formId, "draft"),
     confirmDelete,
   };
 }

@@ -59,12 +59,14 @@ import {
 interface FormFieldRendererProps {
   field: FormFieldDataLocal;
   form: UseFormReturn<Record<string, any>>;
+  formulaData?: Record<string, unknown>;
   translation?: FormFieldContentTranslation | null;
 }
 
 export function FormFieldRenderer({
   field: storedField,
   form,
+  formulaData = {},
   translation = null,
 }: FormFieldRendererProps) {
   const { t } = useTranslation();
@@ -85,7 +87,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem>
@@ -125,7 +127,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem>
@@ -159,7 +161,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem>
@@ -193,7 +195,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem>
@@ -226,7 +228,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem>
@@ -259,7 +261,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem>
@@ -302,7 +304,7 @@ export function FormFieldRenderer({
           control={form.control}
           name={fieldName}
           rules={{
-            required: field.is_required ? "This field is required" : false,
+            required: field.is_required ? t("forms.fieldRequired") : false,
           }}
           render={({ field: formField }) => (
             <FormItem className="space-y-3">
@@ -639,6 +641,8 @@ export function FormFieldRenderer({
               <FormulaField
                 label={field.label}
                 description={field.description}
+                formula={field.formula_expression ?? ""}
+                formData={formulaData}
                 onChange={formField.onChange}
               />
             </FormItem>

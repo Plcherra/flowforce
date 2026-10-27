@@ -6,43 +6,16 @@ import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { withFormSourceLocale } from "@/features/forms/formContentFields";
 import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
 import { logger } from "@/utils/logger";
-import { fieldsFromCsv } from "@/features/forms/utils/csvFormFields";
+import {
+  fieldLabelsFromImport,
+  looksLikeReadableText,
+} from "@/features/forms/utils/importFormFields";
 
 export interface FormImportResult {
   form: Tables<"forms">;
   documentId?: string;
   storagePath?: string;
-}
-
-interface CreateFieldInput {
-  form_id: string;
-  label: string;
-  field_type: Tables<"form_fields">["field_type"];
-  field_order: number;
-  description?: string | null;
-  placeholder?: string | null;
-}
-
-async function createDefaultFields(formId: string, documentTitle: string) {
-  const fields: CreateFieldInput[] = [
-    {
-      form_id: formId,
-      label: `${documentTitle} summary`,
-      field_type: "textarea",
-      field_order: 1,
-      description: `Insights automatically linked from ${documentTitle}.`,
-      placeholder: "Record observations or additional comments…",
-    },
-    {
-      form_id: formId,
-      label: "Follow-up owner",
-      field_type: "text",
-      field_order: 2,
-      description: "Who is accountable for closing the loop?",
-    },
-  ];
-
-  await supabase.from("form_fields").insert(fields);
+  fieldCount: number;
 }
 
 export async function importFormFromFile(
@@ -55,9 +28,16 @@ export async function importFormFromFile(
   let documentId: string | undefined;
   let storagePath: string | undefined;
   let extractedSnippet: string | undefined;
-  const csvLabels = file.name.toLowerCase().endsWith(".csv")
-    ? fieldsFromCsv(await file.text())
-    : [];
+  let fileText = "";
+  try {
+    fileText = await file.text();
+  } catch (error) {
+    logger.warn("Unable to read the imported file as text", {
+      error,
+      tags: ["warning"],
+    });
+  }
+  const importedLabels = fieldLabelsFromImport(file.name, fileText);
 
   try {
     const { document, storagePath: storedPath } = await uploadReportFile(file, {
@@ -68,14 +48,8 @@ export async function importFormFromFile(
     documentId = document.id;
     storagePath = storedPath;
 
-    try {
-      const text = await file.text();
-      extractedSnippet = text.slice(0, 2000);
-    } catch (error) {
-      logger.warn("Unable to extract raw text from uploaded file", {
-        error,
-        tags: ["warning"],
-      });
+    if (looksLikeReadableText(fileText)) {
+      extractedSnippet = fileText.slice(0, 2000);
     }
   } catch (error) {
     logger.warn(
@@ -84,7 +58,7 @@ export async function importFormFromFile(
     );
   }
 
-  const description = extractedSnippet ? `Imported from ${file.name}` : null;
+  const description = null;
   const importedSettings = documentId
     ? {
         sourceDocumentId: documentId,
@@ -122,17 +96,16 @@ export async function importFormFromFile(
     });
   }
 
-  if (csvLabels.length > 0) {
-    await supabase.from("form_fields").insert(
-      csvLabels.map((label, index) => ({
+  if (importedLabels.length > 0) {
+    const { error: fieldError } = await supabase.from("form_fields").insert(
+      importedLabels.map((label, index) => ({
         form_id: form.id,
         label,
         field_type: "text" as const,
         field_order: index + 1,
       })),
     );
-  } else {
-    await createDefaultFields(form.id, baseName);
+    if (fieldError) throw fieldError;
   }
 
   if (documentId && extractedSnippet) {
@@ -154,5 +127,6 @@ export async function importFormFromFile(
     form,
     documentId,
     storagePath,
+    fieldCount: importedLabels.length,
   } satisfies FormImportResult;
 }
