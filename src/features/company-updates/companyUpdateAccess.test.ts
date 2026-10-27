@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 
 import {
+  applyEngagementCounts,
   canManageCompanyUpdates,
   companyUpdateGoesLiveAt,
   companyUpdateLoadMessage,
   isCompanyUpdateDue,
   normalizeCompanyUpdateViewMode,
+  plainUpdateText,
   readCompanyUpdateCount,
   sanitizeUpdateSearch,
 } from "./companyUpdateAccess";
@@ -139,4 +141,32 @@ export function runCompanyUpdateAccessTests() {
     companyUpdateLoadMessage(new Error("permission denied"), "Please try again."),
     "permission denied",
   );
+
+  assert.equal(
+    plainUpdateText(
+      "<p>This is an urgent announcement that requires immediate attention</p>",
+    ),
+    "This is an urgent announcement that requires immediate attention",
+  );
+  assert.equal(plainUpdateText("A &amp; B"), "A & B");
+
+  const [counted] = applyEngagementCounts(
+    [
+      {
+        id: "update-1",
+        likes_count: 0,
+        comments_count: 0,
+        views_count: 0,
+      },
+    ],
+    [
+      { update_id: "update-1", reaction_type: "like" },
+      { update_id: "update-1", reaction_type: "view" },
+      { update_id: "other", reaction_type: "like" },
+    ],
+    [{ update_id: "update-1" }, { update_id: "update-1" }],
+  );
+  assert.equal(counted?.likes_count, 1);
+  assert.equal(counted?.views_count, 1);
+  assert.equal(counted?.comments_count, 2);
 }

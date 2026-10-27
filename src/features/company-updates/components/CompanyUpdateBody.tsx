@@ -1,3 +1,4 @@
+import { plainUpdateText } from "@/features/company-updates/companyUpdateAccess";
 import { TranslatedRecord } from "@/features/i18n/TranslatedRecord";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 
@@ -41,8 +42,8 @@ export function CompanyUpdateBody({
             id: "body",
             as: "p" as const,
             className: bodyClass,
-            original: update.body,
-            translated: translated?.body ?? update.body,
+            original: plainUpdateText(update.body),
+            translated: plainUpdateText(translated?.body ?? update.body),
           },
         ]),
   ];

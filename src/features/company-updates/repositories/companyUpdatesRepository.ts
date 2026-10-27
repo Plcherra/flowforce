@@ -4,6 +4,7 @@ import type { CompanyUpdate } from "@/types/companyUpdates";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { requestContentTranslation } from "@/features/i18n/requestContentTranslation";
 import {
+  applyEngagementCounts,
   readCompanyUpdateCount,
   sanitizeUpdateSearch,
 } from "@/features/company-updates/companyUpdateAccess";
@@ -245,11 +246,58 @@ const listUpdates = async ({
     throw error;
   }
 
-  const parsed = parseCompanyUpdateRows(data);
+  const parsed = await withLiveEngagementCounts(
+    companyId,
+    parseCompanyUpdateRows(data),
+  );
   return {
     records: parsed,
     total: count ?? parsed.length,
   };
+};
+
+const withLiveEngagementCounts = async (
+  companyId: string,
+  records: CompanyUpdateRow[],
+) => {
+  const ids = records.map((record) => record.id);
+  if (ids.length === 0) return records;
+
+  const [reactions, comments] = await Promise.all([
+    supabase
+      .from("company_update_reactions")
+      .select("update_id, reaction_type")
+      .eq("company_id", companyId)
+      .in("update_id", ids),
+    supabase
+      .from("company_update_comments")
+      .select("update_id")
+      .eq("company_id", companyId)
+      .in("update_id", ids),
+  ]);
+  if (reactions.error || comments.error) return records;
+
+  const counted = applyEngagementCounts(
+    records.map((record) => ({
+      id: record.id,
+      likes_count: record.likes_count,
+      comments_count: record.comments_count,
+      views_count: record.views_count,
+    })),
+    reactions.data ?? [],
+    comments.data ?? [],
+  );
+  const byId = new Map(counted.map((row) => [row.id, row]));
+  return records.map((record) => {
+    const count = byId.get(record.id);
+    if (!count) return record;
+    return {
+      ...record,
+      likes_count: count.likes_count,
+      comments_count: count.comments_count,
+      views_count: count.views_count,
+    };
+  });
 };
 
 const listDraftUpdates = async ({ companyId }: ListDraftsParams) => {
