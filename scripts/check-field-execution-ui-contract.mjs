@@ -29,6 +29,7 @@ const migration = readText(
   "supabase/migrations/20260528001600_phase6_field_execution_ui.sql",
 );
 const service = readText("src/services/operations/fieldExecution.ts");
+const englishLocale = readText("src/locales/en.json");
 const panel = readText(
   "src/features/operations/components/FieldExecutionPanel.tsx",
 );
@@ -74,9 +75,14 @@ requireIncludes(
     "save_workflow_step_draft",
     "complete_workflow_step",
     "complete_workflow_run",
-    "Mobile Run Console",
+    "operations.mobileRunConsole",
   ],
   "Field execution panel",
+);
+requireIncludes(
+  englishLocale,
+  ["Mobile Run Console"],
+  "English field execution copy",
 );
 
 requireIncludes(hub, ["FieldExecutionPanel"], "Operations Hub");

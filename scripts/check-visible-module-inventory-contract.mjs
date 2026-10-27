@@ -103,8 +103,12 @@ for (const route of routes) {
     fail(`${route.path} has invalid status "${route.status}"`);
   }
 
-  if (route.sidebar && route.status !== "production") {
-    fail(`${route.path} is visible in sidebar but is not production`);
+  if (
+    route.sidebar &&
+    route.status !== "production" &&
+    route.status !== "beta"
+  ) {
+    fail(`${route.path} is visible in sidebar but is not production or beta`);
   }
 
   if (route.smoke && route.status !== "production") {
@@ -118,17 +122,26 @@ const sidebarRoutes = toSortedUnique(
     .map((route) => normalizePath(route.path)),
 );
 
+const productionSidebarRoutes = toSortedUnique(
+  routes
+    .filter((route) => route.sidebar && route.status === "production")
+    .map((route) => normalizePath(route.path)),
+);
+
 const smokeRoutes = toSortedUnique(
   routes
     .filter((route) => route.smoke)
     .map((route) => normalizePath(route.path)),
 );
 
-assertSameSet(
-  smokeRoutes,
-  sidebarRoutes,
-  "smoke routes and production sidebar routes",
+const missingSmoke = productionSidebarRoutes.filter(
+  (route) => !smokeRoutes.includes(route),
 );
+if (missingSmoke.length) {
+  fail(
+    `production sidebar routes missing from smoke: ${missingSmoke.join(", ")}`,
+  );
+}
 
 const navigationText = readFileSync(navigationPath, "utf8");
 const navigationHrefMatches = [

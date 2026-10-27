@@ -32,6 +32,7 @@ const migration = readText(
 const service = readText(
   "src/services/operations/executionQualityAnalytics.ts",
 );
+const englishLocale = readText("src/locales/en.json");
 const panel = readText(
   "src/features/operations/components/ExecutionQualityPanel.tsx",
 );
@@ -75,9 +76,14 @@ requireIncludes(
     "operations_execution_quality_summary_v",
     "operations_execution_quality_daily_v",
     "operations_execution_quality_coaching_v",
-    "Execution Quality",
+    "operations.executionQuality",
   ],
   "Execution quality panel",
+);
+requireIncludes(
+  englishLocale,
+  ["Execution Quality"],
+  "English execution quality copy",
 );
 
 requireIncludes(hub, ["ExecutionQualityPanel"], "Operations Hub");

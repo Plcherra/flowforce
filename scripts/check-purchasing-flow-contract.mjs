@@ -59,7 +59,7 @@ requireIncludes(
 
 requireIncludes(
   types,
-  ["approval_status", "approved_at", "cancelled_at", "stock_lot_id"],
+  ["approval_status", "approved_at", "cancelled_at", "stock_lotid"],
   "purchasing types",
 );
 

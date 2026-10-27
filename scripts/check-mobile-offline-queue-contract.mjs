@@ -28,6 +28,7 @@ const plan = readText("docs/roadmap/08-mobile-app-and-offline-mode.md");
 const master = readText("docs/roadmap/00-master-roadmap.md");
 const service = readText("src/services/mobile/mobileOfflineQueue.ts");
 const hook = readText("src/hooks/useMobileOfflineQueue.ts");
+const englishLocale = readText("src/locales/en.json");
 const component = readText("src/app-shell/mobile/MobileOfflineQueueStatus.tsx");
 const appShell = readText("src/app-shell/AppShell.tsx");
 const packageJson = readText("package.json");
@@ -90,10 +91,15 @@ requireIncludes(
     "pending",
     "failed",
     "conflict",
-    "Retry",
-    "Open queued workflow",
+    "shell.retry",
+    "shell.openQueuedWorkflow",
   ],
   "mobile offline queue status UI",
+);
+requireIncludes(
+  englishLocale,
+  ["Retry", "Open queued workflow"],
+  "English offline queue copy",
 );
 
 requireIncludes(

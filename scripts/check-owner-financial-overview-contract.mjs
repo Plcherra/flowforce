@@ -23,6 +23,7 @@ const migration = readText(
   "supabase/migrations/20260528000900_phase5_owner_financial_overview.sql",
 );
 const hook = readText("src/hooks/useFinancialManagement.ts");
+const englishLocale = readText("src/locales/en.json");
 const component = readText(
   "src/features/inventory/components/expenses/ManagerFinancialOverview.tsx",
 );
@@ -80,16 +81,27 @@ requireIncludes(
 requireIncludes(
   component,
   [
-    "Owner Financial Overview",
-    "Actual, imported, and estimated operating data kept separate",
-    "Export summary",
+    "inventory.ownerFinancialOverview",
+    "inventory.actualImportedAndEstimatedOperatingDataKeptSeparate",
+    "inventory.exportSummary",
     "Actual revenue",
     "Imported cost",
     "Estimated cost",
+    "inventory.paymentApprovals",
+    "inventory.totalPending",
+  ],
+  "manager financial overview component",
+);
+requireIncludes(
+  englishLocale,
+  [
+    "Owner Financial Overview",
+    "Actual, imported, and estimated operating data kept separate",
+    "Export summary",
     "Payment Approvals",
     "Total Pending",
   ],
-  "manager financial overview component",
+  "English owner financial copy",
 );
 
 if (
