@@ -131,6 +131,18 @@ export function useChannelMessages(channelId: string | null) {
     },
   });
 
+  const appendMessage = useCallback((message: Message) => {
+    setMessages((prev) => {
+      const safePrev = asArray(prev);
+      const withoutDuplicate = safePrev.filter((item) => item.id !== message.id);
+      return [...withoutDuplicate, message].sort(
+        (left, right) =>
+          new Date(left.created_at ?? 0).getTime() -
+          new Date(right.created_at ?? 0).getTime(),
+      );
+    });
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
   const loadMoreMessages = useCallback(() => {
@@ -149,6 +161,7 @@ export function useChannelMessages(channelId: string | null) {
       lastMessageTimestampRef.current = null;
       return fetchMessages(channelId, false);
     },
+    appendMessage,
     loadMoreMessages,
     hasMore: safeArrayLength(safeMessages) >= INITIAL_MESSAGE_LIMIT, // Simple check - can be enhanced
     error,

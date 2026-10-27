@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "@/lib/router-adapter";
 import { cn } from "@/lib/utils";
 import type { MessageChannel } from "@/types/messages";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
@@ -38,7 +39,7 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
         </div>
         <div className="w-full sm:w-56">
           <Label htmlFor="message-roster-search" className="sr-only">
-            {t("messages.searchMessages")} </Label>
+            {t("messages.searchChats")} </Label>
           <Input
             id="message-roster-search"
             value={vm.query}
@@ -46,9 +47,15 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
             placeholder={t("nav.search")}
           />
         </div>
+        <Button variant="ghost" asChild>
+          <Link to="/app/company-updates">{t("common.companyUpdates")}</Link>
+        </Button>
         <Button
           variant={vm.showDirectMessageDialog ? "default" : "outline"}
-          onClick={() => vm.setShowDirectMessageDialog(true)}
+          onClick={() => {
+            vm.closeThread();
+            vm.setShowDirectMessageDialog(true);
+          }}
         >
           {t("messages.newChat")} </Button>
       </div>
@@ -73,8 +80,9 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
                     : "bg-background hover:border-foreground/40",
                 )}
               >
-                {channel.name}
-                {!isDirect(channel) ? " · group" : ""}
+                {isDirect(channel)
+                  ? channel.name
+                  : t("messages.groupChip", { name: channel.name })}
               </button>
             );
           })}

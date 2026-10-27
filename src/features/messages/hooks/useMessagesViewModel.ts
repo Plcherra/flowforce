@@ -7,6 +7,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "@/lib/router-adapter";
 
 import { useMessages } from "@/hooks/useMessages";
@@ -19,13 +20,13 @@ import type {
   MessageChannel,
   ThreadMessage,
 } from "@/types/messages";
+import { threadReplyDraft } from "@/features/messages/threadReplies";
 import { logger } from "@/utils/logger";
 import { useAvailabilityStatus } from "./useAvailabilityStatus";
 import { useChannelActions } from "./useChannelActions";
 import { useMessageActions } from "./useMessageActions";
 
 type FilterType = "all" | "unread" | "teams";
-type CallType = "video" | "audio";
 type ProfileDetails = ReturnType<typeof useProfile>["profile"];
 
 interface MessagesViewModelState {
@@ -49,17 +50,11 @@ interface MessagesViewModelState {
   setShowChannelSettings: Dispatch<SetStateAction<boolean>>;
   showMessageSearch: boolean;
   setShowMessageSearch: Dispatch<SetStateAction<boolean>>;
-  showCreateAnnouncement: boolean;
-  setShowCreateAnnouncement: Dispatch<SetStateAction<boolean>>;
-  isVideoCallOpen: boolean;
-  callType: CallType | null;
-  handleStartVideoCall: (type: CallType) => void;
-  handleCloseVideoCall: () => void;
-  handleScheduleMessage: (content: string, scheduledFor: Date) => void;
   handleSendMessage: (
     content: string,
     attachments: MessageAttachment[],
   ) => Promise<void>;
+  handleSendThreadReply: (content: string, parentId?: string) => Promise<void>;
   threadMessage: ThreadMessage | null;
   isThreadOpen: boolean;
   closeThread: () => void;
@@ -100,10 +95,12 @@ export function useMessagesViewModel(): MessagesViewModelState {
     createChannel,
     refetchChannels,
     refetchMessages,
+    appendMessage,
     error: messagesError,
     clearError: clearMessagesError,
   } = useMessages();
   const { profile } = useProfile();
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -125,8 +122,6 @@ export function useMessagesViewModel(): MessagesViewModelState {
   const [showChannelMembers, setShowChannelMembers] = useState(false);
   const [showChannelSettings, setShowChannelSettings] = useState(false);
   const [showMessageSearch, setShowMessageSearch] = useState(false);
-  const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
-  const [callType, setCallType] = useState<CallType | null>(null);
   const [threadMessage, setThreadMessage] = useState<ThreadMessage | null>(
     null,
   );
@@ -210,12 +205,12 @@ export function useMessagesViewModel(): MessagesViewModelState {
 
     logger.error("Messages module error", { error: messagesError });
     toast({
-      title: "Something went wrong",
-      description: messagesError.message ?? "Please try again shortly.",
+      title: t("common.somethingWentWrong"),
+      description: messagesError.message ?? t("messages.pleaseTryAgainShortly"),
       variant: "destructive",
     });
     clearMessagesError();
-  }, [clearMessagesError, messagesError, toast]);
+  }, [clearMessagesError, messagesError, t, toast]);
 
   const canToggleAvailability = useMemo(() => {
     const role = (profile?.role ?? "").toLowerCase();
@@ -271,33 +266,40 @@ export function useMessagesViewModel(): MessagesViewModelState {
       attachments: MessageAttachment[],
     ): Promise<void> => {
       if (!currentChannelId) return;
-      await sendMessageAction(currentChannelId, content, {
+      const sent = await sendMessageAction(currentChannelId, content, {
         attachments,
       });
+      appendMessage(sent);
     },
-    [currentChannelId, sendMessageAction],
+    [appendMessage, currentChannelId, sendMessageAction],
   );
 
-  const handleStartVideoCall = useCallback((type: CallType): void => {
-    setCallType(type);
-  }, []);
-
-  const handleCloseVideoCall = useCallback((): void => {
-    setCallType(null);
-  }, []);
-
-  const handleScheduleMessage = useCallback(
-    (content: string, scheduledFor: Date): void => {
-      logger.debug("Scheduled message", {
-        context: { content, scheduledFor },
+  const handleSendThreadReply = useCallback(
+    async (content: string, parentId?: string): Promise<void> => {
+      if (!currentChannelId || !threadMessage) return;
+      const draft = threadReplyDraft(content, threadMessage.id, parentId);
+      if (!draft) return;
+      const sent = await sendMessageAction(currentChannelId, draft.content, {
+        replyToId: draft.replyToId,
       });
+      appendMessage(sent);
     },
-    [],
+    [appendMessage, currentChannelId, sendMessageAction, threadMessage],
   );
 
   const handleThreadMessage = useCallback((message: ThreadMessage): void => {
     setThreadMessage(message);
   }, []);
+
+  useEffect(() => {
+    setThreadMessage(null);
+  }, [currentChannelId]);
+
+  useEffect(() => {
+    if (!threadMessage) return;
+    const stillVisible = messages.some((message) => message.id === threadMessage.id);
+    if (!stillVisible) setThreadMessage(null);
+  }, [messages, threadMessage]);
 
   const closeThread = useCallback((): void => {
     setThreadMessage(null);
@@ -361,18 +363,18 @@ export function useMessagesViewModel(): MessagesViewModelState {
       const channelName =
         `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
         user.email ||
-        "Direct message";
+        t("messages.directMessage2");
       const { data, error } = await createChannel({
         name: channelName,
-        description: `Direct message with ${channelName}`,
+        description: t("messages.directMessageWith", { name: channelName }),
         type: "direct",
         is_private: true,
         memberids: [user.id],
       });
       if (error) {
         toast({
-          title: "Could not start chat",
-          description: error.message || "Try again in a moment.",
+          title: t("messages.couldNotStartChat"),
+          description: error.message || t("messages.tryAgainMoment"),
           variant: "destructive",
         });
         return;
@@ -383,7 +385,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
       setShowDirectMessageDialog(false);
       setShowMobileSidebar(false);
     },
-    [channels, createChannel, setCurrentChannelId, toast],
+    [channels, createChannel, setCurrentChannelId, t, toast],
   );
 
   const startGroupChat = useCallback(
@@ -398,8 +400,8 @@ export function useMessagesViewModel(): MessagesViewModelState {
       });
       if (error) {
         toast({
-          title: "Could not start group",
-          description: error.message || "Try again in a moment.",
+          title: t("messages.couldNotStartGroup"),
+          description: error.message || t("messages.tryAgainMoment"),
           variant: "destructive",
         });
         return;
@@ -410,7 +412,7 @@ export function useMessagesViewModel(): MessagesViewModelState {
       setShowDirectMessageDialog(false);
       setShowMobileSidebar(false);
     },
-    [createChannel, setCurrentChannelId, toast],
+    [createChannel, setCurrentChannelId, t, toast],
   );
 
   const handleDeleteMessage = useCallback(
@@ -457,14 +459,8 @@ export function useMessagesViewModel(): MessagesViewModelState {
     setShowChannelSettings,
     showMessageSearch,
     setShowMessageSearch,
-    showCreateAnnouncement,
-    setShowCreateAnnouncement,
-    isVideoCallOpen: callType !== null,
-    callType,
-    handleStartVideoCall,
-    handleCloseVideoCall,
-    handleScheduleMessage,
     handleSendMessage,
+    handleSendThreadReply,
     threadMessage,
     isThreadOpen: Boolean(threadMessage),
     closeThread,

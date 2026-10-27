@@ -12,6 +12,12 @@ interface CompanyUpdatesListSectionProps {
   canCreateUpdate: boolean;
   wizardOpen: boolean;
   onCreate: () => void;
+  onLike: (updateId: string, currentlyLiked: boolean) => void;
+  onOpenComments: (update: CompanyUpdate) => void;
+  onEdit: (update: CompanyUpdate) => void;
+  onArchive: (updateId: string) => void;
+  onDelete: (updateId: string) => void;
+  onPublish: (updateId: string) => void;
 }
 
 export function CompanyUpdatesListSection({
@@ -22,13 +28,30 @@ export function CompanyUpdatesListSection({
   canCreateUpdate,
   wizardOpen,
   onCreate,
+  onLike,
+  onOpenComments,
+  onEdit,
+  onArchive,
+  onDelete,
+  onPublish,
 }: CompanyUpdatesListSectionProps) {
   if (loading) {
     return <ListSkeleton />;
   }
 
   if (safeArrayLength(updates) > 0) {
-    return <UpdateListView updates={updates} />;
+    return (
+      <UpdateListView
+        updates={updates}
+        canManage={canCreateUpdate}
+        onLike={onLike}
+        onOpenComments={onOpenComments}
+        onEdit={onEdit}
+        onArchive={onArchive}
+        onDelete={onDelete}
+        onPublish={onPublish}
+      />
+    );
   }
 
   return (

@@ -29,6 +29,7 @@ import {
   Zap,
 } from "lucide-react";
 import { format } from "date-fns";
+import { dateLocaleForLanguage } from "@/features/company-updates/dateLocale";
 import { WizardFormData } from "../CreateUpdateWizard";
 
 interface PublishSettingsStepProps {
@@ -40,7 +41,8 @@ export function PublishSettingsStep({
   formData,
   updateFormData,
 }: PublishSettingsStepProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleForLanguage(i18n.language);
   const updatePublishingSettings = (
     updates: Partial<typeof formData.publishingSettings>,
   ) => {
@@ -141,6 +143,9 @@ export function PublishSettingsStep({
                     <CalendarIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     <h4 className="font-semibold">{t("updates.schedule")}</h4>
                     <p className="text-sm text-muted-foreground">{t("updates.sendLater")}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("updates.scheduledHeld")}
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -164,8 +169,9 @@ export function PublishSettingsStep({
                                     formData.publishingSettings.scheduledDate,
                                   ),
                                   "PPP",
+                                  { locale: dateLocale },
                                 )
-                              : "Select date"}
+                              : t("updates.selectDate")}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -237,6 +243,9 @@ export function PublishSettingsStep({
             <CardHeader>
               <CardTitle className="text-base">
                 {t("updates.notificationPreferences")} </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {t("updates.notificationChoicesSaved")}
+              </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">

@@ -56,10 +56,10 @@ export function MessagesHeader({
             <h3 className="truncate text-base font-semibold">{channel.name}</h3>
             <p className="truncate text-xs text-muted-foreground">
               {isDirect
-                ? "Chat"
+                ? t("messages.chatLabel")
                 : memberCount > 0
-                  ? `${memberCount} people`
-                  : "Group"}
+                  ? t("messages.peopleCount", { count: memberCount })
+                  : t("messages.groupLabel")}
             </p>
           </div>
         </div>
