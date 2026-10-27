@@ -73,6 +73,10 @@ export function companyUpdateWriteColumns(
   copy("isPinned", "is_pinned");
   copy("is_pinned", "is_pinned");
   copy("status", "status");
+  copy("scheduledDate", "scheduled_date");
+  copy("scheduled_date", "scheduled_date");
+  copy("publishDate", "publish_date");
+  copy("publish_date", "publish_date");
   copy("author_id", "author_id");
   copy("author_name", "author_name");
   copy("author_role", "author_role");

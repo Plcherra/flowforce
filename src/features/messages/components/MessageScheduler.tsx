@@ -46,28 +46,9 @@ export function MessageScheduler({
   const [content, setContent] = useState("");
   const [scheduledFor, setScheduledFor] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
-  const [scheduledMessages, setScheduledMessages] = useState<
-    ScheduledMessage[]
-  >([
-    {
-      id: "1",
-      content: "Don't forget about tomorrow's team meeting at 10 AM!",
-      channelId: "channel-1",
-      channelName: "General",
-      scheduledFor: addHours(new Date(), 2),
-      status: "pending",
-      createdAt: new Date(),
-    },
-    {
-      id: "2",
-      content: "Weekly report is due by end of day Friday",
-      channelId: "channel-1",
-      channelName: "General",
-      scheduledFor: addDays(new Date(), 1),
-      status: "pending",
-      createdAt: new Date(),
-    },
-  ]);
+  const [scheduledMessages, setScheduledMessages] = useState<ScheduledMessage[]>(
+    [],
+  );
 
   const handleSchedule = () => {
     if (!content.trim() || !scheduledFor || !scheduledTime) {

@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@/lib/router-adapter";
 import type { Message, MessageChannel } from "@/types/messages";
 import { buildCommunicationReadinessSummary } from "@/features/messages/utils/communicationReadiness";
 
@@ -21,7 +22,6 @@ interface CommunicationReadinessPanelProps {
   messages: Message[];
   userId?: string | null;
   onCreateChannel: () => void;
-  onCreateAnnouncement: () => void;
 }
 
 const reviewTone: Record<string, string> = {
@@ -36,7 +36,6 @@ export function CommunicationReadinessPanel({
   messages,
   userId,
   onCreateChannel,
-  onCreateAnnouncement,
 }: CommunicationReadinessPanelProps) {
   const { t } = useTranslation();
   const summary = useMemo(
@@ -92,9 +91,12 @@ export function CommunicationReadinessPanel({
               {t("messages.channelsReadsAttachmentsAndAnnouncementsAreMonitoredHere")} </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" onClick={onCreateAnnouncement}>
-              <Megaphone className="mr-2 h-4 w-4" />
-              {t("dashboard.announcement")} </Button>
+            <Button type="button" variant="outline" asChild>
+              <Link to="/app/company-updates">
+                <Megaphone className="mr-2 h-4 w-4" />
+                {t("common.companyUpdates")}
+              </Link>
+            </Button>
             <Button type="button" onClick={onCreateChannel}>
               {t("messages.createChannel")} </Button>
           </div>

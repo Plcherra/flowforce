@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "@/lib/router-adapter";
 
+import { normalizeCompanyUpdateViewMode } from "@/features/company-updates/companyUpdateAccess";
+
 const STORAGE_KEY = "company-updates:filters";
 
 export type ViewMode = "feed" | "grid" | "list";
@@ -27,10 +29,9 @@ export function useCompanyUpdateFilters() {
       pageSize: Number(
         searchParams.get("pageSize") ?? fromStorage?.pageSize ?? 10,
       ),
-      viewMode:
-        (searchParams.get("view") as ViewMode) ??
-        fromStorage?.viewMode ??
-        "feed",
+      viewMode: normalizeCompanyUpdateViewMode(
+        searchParams.get("view") ?? fromStorage?.viewMode,
+      ),
     };
   };
 

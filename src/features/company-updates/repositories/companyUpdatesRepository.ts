@@ -4,6 +4,11 @@ import type { CompanyUpdate } from "@/types/companyUpdates";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { requestContentTranslation } from "@/features/i18n/requestContentTranslation";
 import {
+  applyEngagementCounts,
+  readCompanyUpdateCount,
+  sanitizeUpdateSearch,
+} from "@/features/company-updates/companyUpdateAccess";
+import {
   companyUpdateTouchesContent,
   companyUpdateTranslationFields,
   companyUpdateWriteColumns,
@@ -104,7 +109,7 @@ const engagementSchema = z.object({
 
 const engagementRowSchema = z.object({
   id: z.string(),
-  updateid: z.string(),
+  update_id: z.string(),
   company_id: z.string(),
   likes_count: z.number().nullable().optional(),
   comments_count: z.number().nullable().optional(),
@@ -136,10 +141,23 @@ const companyUpdateRowSchema = z.object({
   author_avatar: z.string().nullable().optional(),
   publish_date: z.string().nullable().optional(),
   scheduled_date: z.string().nullable().optional(),
-  is_pinned: z.boolean(),
-  likes_count: z.number(),
-  comments_count: z.number(),
-  views_count: z.number(),
+  is_pinned: z
+    .boolean()
+    .nullable()
+    .optional()
+    .transform((value) => value === true),
+  likes_count: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform(readCompanyUpdateCount),
+  comments_count: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform(readCompanyUpdateCount),
+  views_count: z
+    .union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform(readCompanyUpdateCount),
   created_by: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -148,13 +166,13 @@ const companyUpdateRowSchema = z.object({
 });
 
 const reactionRowSchema = z.object({
-  updateid: z.string(),
+  update_id: z.string(),
   reaction_type: z.union([z.literal("like"), z.literal("view")]),
 });
 
 const commentRowSchema = z.object({
   id: z.string(),
-  updateid: z.string(),
+  update_id: z.string(),
   company_id: z.string(),
   author_id: z.string(),
   content: z.string(),
@@ -164,9 +182,15 @@ const commentRowSchema = z.object({
   author: profileSchema,
 });
 
-const parseSupabaseData = <T>(schema: z.ZodType<T>, data: unknown): T => {
+const parseSupabaseData = <T extends z.ZodTypeAny>(
+  schema: T,
+  data: unknown,
+): z.output<T> => {
   return schema.parse(data);
 };
+
+export const parseCompanyUpdateRows = (data: unknown) =>
+  parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
 
 export type CompanyUpdateRow = z.infer<typeof companyUpdateRowSchema>;
 export type ReactionRow = z.infer<typeof reactionRowSchema>;
@@ -209,8 +233,11 @@ const listUpdates = async ({
     }
   }
 
-  if (searchTerm) {
-    query = query.or(`title.ilike.%${searchTerm}%,body.ilike.%${searchTerm}%`);
+  const safeSearch = sanitizeUpdateSearch(searchTerm ?? "");
+  if (safeSearch) {
+    query = query.or(
+      `title.ilike.%${safeSearch}%,body.ilike.%${safeSearch}%`,
+    );
   }
 
   const { data, error, count } = await query.range(from, to);
@@ -219,11 +246,58 @@ const listUpdates = async ({
     throw error;
   }
 
-  const parsed = parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
+  const parsed = await withLiveEngagementCounts(
+    companyId,
+    parseCompanyUpdateRows(data),
+  );
   return {
     records: parsed,
     total: count ?? parsed.length,
   };
+};
+
+const withLiveEngagementCounts = async (
+  companyId: string,
+  records: CompanyUpdateRow[],
+) => {
+  const ids = records.map((record) => record.id);
+  if (ids.length === 0) return records;
+
+  const [reactions, comments] = await Promise.all([
+    supabase
+      .from("company_update_reactions")
+      .select("update_id, reaction_type")
+      .eq("company_id", companyId)
+      .in("update_id", ids),
+    supabase
+      .from("company_update_comments")
+      .select("update_id")
+      .eq("company_id", companyId)
+      .in("update_id", ids),
+  ]);
+  if (reactions.error || comments.error) return records;
+
+  const counted = applyEngagementCounts(
+    records.map((record) => ({
+      id: record.id,
+      likes_count: record.likes_count,
+      comments_count: record.comments_count,
+      views_count: record.views_count,
+    })),
+    reactions.data ?? [],
+    comments.data ?? [],
+  );
+  const byId = new Map(counted.map((row) => [row.id, row]));
+  return records.map((record) => {
+    const count = byId.get(record.id);
+    if (!count) return record;
+    return {
+      ...record,
+      likes_count: count.likes_count,
+      comments_count: count.comments_count,
+      views_count: count.views_count,
+    };
+  });
 };
 
 const listDraftUpdates = async ({ companyId }: ListDraftsParams) => {
@@ -238,7 +312,7 @@ const listDraftUpdates = async ({ companyId }: ListDraftsParams) => {
     throw error;
   }
 
-  return parseSupabaseData(z.array(companyUpdateRowSchema), data ?? []);
+  return parseCompanyUpdateRows(data);
 };
 
 const listEngagementSummaries = async ({
@@ -268,17 +342,23 @@ const listReactions = async ({
 
   const { data, error } = await supabase
     .from("company_update_reactions")
-    .select("updateid, reaction_type")
+    .select("update_id, reaction_type")
     .eq("company_id", companyId)
     .eq("user_id", userId)
-    .in("updateid", updateIds);
+    .in("update_id", updateIds);
 
   if (error) {
     throw error;
   }
 
-  return parseSupabaseData(z.array(reactionRowSchema), data ?? []);
+  return parseCompanyUpdateReactions(data);
 };
+
+export const parseCompanyUpdateReactions = (data: unknown) =>
+  (Array.isArray(data) ? data : []).flatMap((row) => {
+    const parsed = reactionRowSchema.safeParse(row);
+    return parsed.success ? [parsed.data] : [];
+  });
 
 const listComments = async ({ companyId, updateIds }: ListCommentsParams) => {
   if (updateIds.length === 0) {
@@ -291,7 +371,7 @@ const listComments = async ({ companyId, updateIds }: ListCommentsParams) => {
       "*, author:profiles!company_update_comments_author_id_fkey (id, first_name, last_name, avatar_url)",
     )
     .eq("company_id", companyId)
-    .in("updateid", updateIds)
+    .in("update_id", updateIds)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -346,6 +426,10 @@ const createUpdate = async ({
       const { error } = await supabase.from("company_updates").insert({
         id,
         company_id: companyId,
+        likes_count: 0,
+        comments_count: 0,
+        views_count: 0,
+        is_pinned: false,
         ...columns,
         status: columns.status ?? "published",
       });
@@ -471,15 +555,27 @@ const upsertReaction = async ({
   userId,
   reactionType,
 }: ReactionMutationParams) => {
-  const { error } = await supabase.from("company_update_reactions").upsert(
-    {
-      company_id: companyId,
-      updateid: updateId,
-      user_id: userId,
-      reaction_type: reactionType,
-    },
-    { onConflict: "updateid,user_id,reaction_type" },
-  );
+  const existing = await supabase
+    .from("company_update_reactions")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("update_id", updateId)
+    .eq("user_id", userId)
+    .eq("reaction_type", reactionType)
+    .limit(1);
+  if (existing.error) {
+    throw existing.error;
+  }
+  if ((existing.data ?? []).length > 0) {
+    return;
+  }
+
+  const { error } = await supabase.from("company_update_reactions").insert({
+    company_id: companyId,
+    update_id: updateId,
+    user_id: userId,
+    reaction_type: reactionType,
+  });
 
   if (error) {
     throw error;
@@ -496,7 +592,7 @@ const deleteReaction = async ({
     .from("company_update_reactions")
     .delete()
     .eq("company_id", companyId)
-    .eq("updateid", updateId)
+    .eq("update_id", updateId)
     .eq("user_id", userId)
     .eq("reaction_type", reactionType);
 
@@ -518,7 +614,7 @@ const createComment = async ({
       const { error } = await supabase.from("company_update_comments").insert({
         id,
         company_id: companyId,
-        updateid: updateId,
+        update_id: updateId,
         author_id: userId,
         content,
       });

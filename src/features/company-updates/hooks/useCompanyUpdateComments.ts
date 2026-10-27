@@ -34,13 +34,13 @@ export function useCompanyUpdateComments(updateIds: string[]) {
 
     return commentsQuery.data.reduce<Record<string, UpdateComment[]>>(
       (acc, row) => {
-        if (!acc[row.updateid]) {
-          acc[row.updateid] = [];
+        if (!acc[row.update_id]) {
+          acc[row.update_id] = [];
         }
 
-        acc[row.updateid].push({
+        acc[row.update_id].push({
           id: row.id,
-          updateId: row.updateid,
+          updateId: row.update_id,
           companyId: row.company_id,
           content: row.content,
           likes: row.likes_count ?? 0,
@@ -48,10 +48,9 @@ export function useCompanyUpdateComments(updateIds: string[]) {
           updatedAt: row.updated_at,
           author: {
             id: row.author_id,
-            name:
-              [row.author?.first_name, row.author?.last_name]
-                .filter(Boolean)
-                .join(" ") || "Team Member",
+            name: [row.author?.first_name, row.author?.last_name]
+              .filter(Boolean)
+              .join(" "),
             avatar: row.author?.avatar_url ?? null,
           },
         });
