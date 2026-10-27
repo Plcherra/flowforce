@@ -90,6 +90,61 @@ export function sanitizeUpdateSearch(term: string): string {
   return term.replace(/[%_,.()]/g, " ").replace(/\s+/g, " ").trim();
 }
 
+/** Grid and list show the description as text. The editor stores HTML. */
+export function plainUpdateText(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function applyEngagementCounts<
+  T extends {
+    id: string;
+    likes_count: number;
+    comments_count: number;
+    views_count: number;
+  },
+>(
+  records: T[],
+  reactions: Array<{ update_id?: string | null; reaction_type?: string | null }>,
+  comments: Array<{ update_id?: string | null }>,
+): T[] {
+  const counts = new Map<
+    string,
+    { likes: number; comments: number; views: number }
+  >();
+  for (const record of records) {
+    counts.set(record.id, { likes: 0, comments: 0, views: 0 });
+  }
+  for (const reaction of reactions) {
+    const bucket = reaction.update_id ? counts.get(reaction.update_id) : undefined;
+    if (!bucket) continue;
+    if (reaction.reaction_type === "like") bucket.likes += 1;
+    if (reaction.reaction_type === "view") bucket.views += 1;
+  }
+  for (const comment of comments) {
+    const bucket = comment.update_id ? counts.get(comment.update_id) : undefined;
+    if (bucket) bucket.comments += 1;
+  }
+  return records.map((record) => {
+    const count = counts.get(record.id);
+    if (!count) return record;
+    return {
+      ...record,
+      likes_count: count.likes,
+      comments_count: count.comments,
+      views_count: count.views,
+    };
+  });
+}
+
 /** Stored counts are nullable numerics. A missing count is zero. */
 export function readCompanyUpdateCount(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;

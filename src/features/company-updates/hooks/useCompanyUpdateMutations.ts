@@ -7,11 +7,13 @@ import {
   companyUpdatesRepository,
   type CompanyUpdateRow,
   type CommentRow,
+  type ReactionRow,
 } from "@/features/company-updates/repositories/companyUpdatesRepository";
 import type { CreateCompanyUpdateInput } from "@/types/companyUpdates";
 
 const UPDATES_QUERY_KEY = "company-updates";
 const COMMENTS_QUERY_KEY = "company-update-comments";
+const REACTIONS_QUERY_KEY = "company-update-reactions";
 
 type CachedUpdateRow = CompanyUpdateRow & {
   viewerHasLiked?: boolean;
@@ -48,6 +50,22 @@ export function useCompanyUpdateMutations() {
   const invalidateUpdates = () => {
     queryClient.invalidateQueries({ queryKey: [UPDATES_QUERY_KEY] });
     queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY] });
+    queryClient.invalidateQueries({ queryKey: [REACTIONS_QUERY_KEY] });
+  };
+
+  const setLikedInCache = (updateId: string, liked: boolean) => {
+    queryClient.setQueriesData<ReactionRow[]>(
+      { queryKey: [REACTIONS_QUERY_KEY] },
+      (current) => {
+        if (!current) return current;
+        const without = current.filter(
+          (row) =>
+            !(row.update_id === updateId && row.reaction_type === "like"),
+        );
+        if (!liked) return without;
+        return [...without, { update_id: updateId, reaction_type: "like" }];
+      },
+    );
   };
 
   const applyUpdateToQueries = (
@@ -191,6 +209,7 @@ export function useCompanyUpdateMutations() {
     },
     onMutate: async ({ updateId, currentlyLiked }) => {
       const delta = currentlyLiked ? -1 : 1;
+      setLikedInCache(updateId, !currentlyLiked);
       applyUpdateToQueries((data) => {
         if (!data) return data;
         return {
