@@ -2,11 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { summarizeItemStock } from "@/features/inventory/utils/stockPosition";
 import i18n from "@/i18n/config";
 import { KpiCard } from "../components/KpiCard";
 import { OperationsSignalsCard } from "../components/OperationsSignalsCard";
+import { fetchAllPages } from "./fetchAllPages";
 import {
   buildOperationsHub,
+  itemsWithStockOnHand,
   type OperationsHubSource,
 } from "./operationsHubMetrics";
 import { buildOperationsSuggestion } from "./operationsHubSuggestion";
@@ -58,51 +61,66 @@ export async function runOperationsHubMetricTests() {
   assert.equal(tasks.tasks.severity, "critical");
   assert.equal(tasks.tasks.trendPoints, -50);
 
+  const stockedItems = itemsWithStockOnHand(
+    [
+      {
+        id: "yeast",
+        name: "Yeast",
+        min_stock_level: 10,
+        is_active: true,
+        location_name: "Bar",
+      },
+      {
+        id: "flour",
+        name: "Flour",
+        min_stock_level: 10,
+        is_active: true,
+        location_name: null,
+      },
+      {
+        id: "oil",
+        name: "Oil",
+        min_stock_level: 10,
+        is_active: true,
+        location_name: "Dry",
+      },
+      {
+        id: "salt",
+        name: "Salt",
+        min_stock_level: 0,
+        is_active: true,
+        location_name: null,
+      },
+      {
+        id: "retired",
+        name: "Retired",
+        min_stock_level: 5,
+        is_active: false,
+        location_name: null,
+      },
+      {
+        id: "ghost",
+        name: "Ghost",
+        min_stock_level: 4,
+        is_active: true,
+        location_name: null,
+      },
+    ],
+    summarizeItemStock([
+      { item_id: "yeast", location_id: "bar", quantity_on_hand: 3 },
+      { item_id: "yeast", location_id: "dry", quantity_on_hand: 5 },
+      { item_id: "flour", location_id: "dry", quantity_on_hand: 10 },
+      { item_id: "oil", location_id: "dry", quantity_on_hand: 11 },
+      { item_id: "salt", location_id: "dry", quantity_on_hand: 40 },
+    ]),
+  );
+  assert.equal(stockedItems[0].on_hand, 8);
+  assert.equal(stockedItems.find((item) => item.id === "ghost")?.on_hand, 0);
+
   const inventory = buildOperationsHub(
     {
       ...emptySource(),
-      items: [
-        {
-          id: "yeast",
-          name: "Yeast",
-          unit_quantity: 8,
-          min_stock_level: 10,
-          is_active: true,
-          location_name: "Bar",
-        },
-        {
-          id: "flour",
-          name: "Flour",
-          unit_quantity: 10,
-          min_stock_level: 10,
-          is_active: true,
-          location_name: null,
-        },
-        {
-          id: "oil",
-          name: "Oil",
-          unit_quantity: 11,
-          min_stock_level: 10,
-          is_active: true,
-          location_name: "Dry",
-        },
-        {
-          id: "salt",
-          name: "Salt",
-          unit_quantity: 0,
-          min_stock_level: 0,
-          is_active: true,
-          location_name: null,
-        },
-        {
-          id: "retired",
-          name: "Retired",
-          unit_quantity: 0,
-          min_stock_level: 5,
-          is_active: false,
-          location_name: null,
-        },
-      ],
+      items: stockedItems.filter((item) => item.id !== "ghost"),
     },
     now,
   );
@@ -114,6 +132,19 @@ export async function runOperationsHubMetricTests() {
     ["yeast", "flour"],
   );
   assert.equal(inventory.lowStock[0].percentOfMinimum, 80);
+
+  const missingPosition = buildOperationsHub(
+    {
+      ...emptySource(),
+      items: stockedItems.filter((item) => item.id === "ghost"),
+    },
+    now,
+  );
+  assert.equal(missingPosition.inventory.percent, 0);
+  assert.deepEqual(
+    missingPosition.lowStock.map((item) => item.id),
+    ["ghost"],
+  );
 
   const labor = buildOperationsHub(
     {
@@ -226,8 +257,24 @@ export async function runOperationsHubMetricTests() {
     },
     now,
   );
-  assert.equal(noShifts.labor.percent, 0);
-  assert.equal(noShifts.labor.laborBasis, "schedule");
+  assert.equal(noShifts.labor.available, false);
+  assert.equal(noShifts.labor.percent, null);
+  assert.equal(noShifts.labor.laborBasis, null);
+  assert.equal(noShifts.labor.emptyReason, "no_labor");
+
+  const recordedWithoutSchedule = buildOperationsHub(
+    {
+      ...emptySource(),
+      sales: [
+        { transaction_type: "sale", total_amount: 100, created_at: "2026-10-22T12:00:00Z" },
+      ],
+      laborEntries: [{ labor_cost: 25, work_date: "2026-10-22" }],
+    },
+    now,
+  );
+  assert.equal(recordedWithoutSchedule.labor.percent, 25);
+  assert.equal(recordedWithoutSchedule.labor.laborBasis, "recorded");
+  assert.equal(recordedWithoutSchedule.labor.severity, "normal");
 
   const signals = buildOperationsHub(
     {
@@ -273,6 +320,43 @@ export async function runOperationsHubMetricTests() {
   assert.equal(suggestion.script.steps[1].type, "create_task");
   assert.match(suggestion.suggestion_summary, /50%/);
 
+  const paged = await fetchAllPages(
+    async (from) => {
+      const all = [1, 2, 3, 4, 5];
+      return { data: all.slice(from, from + 2), error: null };
+    },
+    { pageSize: 2 },
+  );
+  assert.deepEqual(paged.data, [1, 2, 3, 4, 5]);
+  assert.equal(paged.error, null);
+
+  const failedPage = await fetchAllPages(
+    async (from) => {
+      if (from > 0) return { data: null, error: { message: "page failed" } };
+      return { data: [1, 2], error: null };
+    },
+    { pageSize: 2 },
+  );
+  assert.deepEqual(failedPage.data, []);
+  assert.equal(failedPage.error?.message, "page failed");
+
+  const capped = await fetchAllPages(
+    async () => ({ data: [1, 2], error: null }),
+    { pageSize: 2, maxRows: 4 },
+  );
+  assert.deepEqual(capped.data, []);
+  assert.match(capped.error?.message ?? "", /row limit/);
+
+  const hookSource = readFileSync(
+    "src/features/operations/hooks/useOperationsHubMetrics.ts",
+    "utf8",
+  );
+  assert.equal(hookSource.includes(".limit("), false);
+  assert.match(hookSource, /inv_stock_positions/);
+  assert.match(hookSource, /summarizeItemStock/);
+  assert.match(hookSource, /ilike\("transaction_type", "sale"\)/);
+  assert.equal(hookSource.includes("unit_quantity"), false);
+
   const banned = ["92%", "78%", "31.4%", "3 shifts", "12 items", "Cold brew", "Ciabatta"];
   const files = [
     "src/features/operations/components/KpiCard.tsx",
@@ -315,6 +399,19 @@ export async function runOperationsHubMetricTests() {
   assert.match(readyMarkup, /16%/);
   assert.match(readyMarkup, /Fix automatically/);
   assert.equal(readyMarkup.includes("31.4%"), false);
+
+  const noLaborMarkup = renderToStaticMarkup(
+    createElement(KpiCard, {
+      kpiKey: "labor_vs_sales",
+      loading: false,
+      failed: false,
+      result: noShifts.labor,
+      saving: false,
+      onSuggest: async () => undefined,
+    }),
+  );
+  assert.match(noLaborMarkup, /No scheduled shifts or recorded labor/);
+  assert.equal(noLaborMarkup.includes("Fix automatically"), false);
 
   const signalMarkup = renderToStaticMarkup(
     createElement(OperationsSignalsCard, {

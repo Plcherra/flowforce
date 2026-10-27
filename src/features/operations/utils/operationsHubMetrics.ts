@@ -10,13 +10,16 @@ export type HubTaskRow = {
   completed_at: string | null;
 };
 
-export type HubItemRow = {
+export type HubCatalogItem = {
   id: string;
   name: string | null;
-  unit_quantity: number | null;
   min_stock_level: number | null;
   is_active: boolean | null;
   location_name: string | null;
+};
+
+export type HubItemRow = HubCatalogItem & {
+  on_hand: number | null;
 };
 
 export type HubScheduleRow = {
@@ -73,7 +76,7 @@ export type DayWindows = {
 
 export type LaborBasis = "schedule" | "recorded";
 
-export type LaborEmptyReason = "no_sales" | "no_labor_rate";
+export type LaborEmptyReason = "no_sales" | "no_labor" | "no_labor_rate";
 
 export type KpiResult = {
   available: boolean;
@@ -203,8 +206,22 @@ function isScoredItem(item: HubItemRow): boolean {
   return Number.isFinite(minimum) && minimum > 0;
 }
 
+export function itemsWithStockOnHand(
+  items: HubCatalogItem[],
+  stockByItem: Record<string, { onHand: number }>,
+): HubItemRow[] {
+  return items.map((item) => ({
+    id: item.id,
+    name: item.name,
+    on_hand: stockByItem[item.id]?.onHand ?? 0,
+    min_stock_level: item.min_stock_level,
+    is_active: item.is_active,
+    location_name: item.location_name,
+  }));
+}
+
 function onHand(item: HubItemRow): number {
-  const quantity = Number(item.unit_quantity ?? 0);
+  const quantity = Number(item.on_hand ?? 0);
   return Number.isFinite(quantity) ? quantity : 0;
 }
 

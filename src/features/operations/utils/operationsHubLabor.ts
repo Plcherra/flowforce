@@ -22,10 +22,10 @@ function activeShifts(shifts: HubScheduleRow[], start: string, end: string) {
 }
 
 function scheduledLabor(shifts: HubScheduleRow[]): {
-  complete: boolean;
+  basis: "none" | "incomplete" | "complete";
   cost: number;
 } {
-  if (shifts.length === 0) return { complete: true, cost: 0 };
+  if (shifts.length === 0) return { basis: "none", cost: 0 };
   let cost = 0;
   let complete = true;
   for (const shift of shifts) {
@@ -44,7 +44,7 @@ function scheduledLabor(shifts: HubScheduleRow[]): {
       cost += calculated.plannedLaborCost;
     }
   }
-  return { complete, cost };
+  return { basis: complete ? "complete" : "incomplete", cost };
 }
 
 function recordedLabor(
@@ -88,7 +88,7 @@ export function laborWindow(
     };
   }
   const scheduled = scheduledLabor(activeShifts(source.schedules, start, end));
-  if (scheduled.complete) {
+  if (scheduled.basis === "complete") {
     return {
       available: true,
       percent: round1((scheduled.cost / sales) * 100),
@@ -109,7 +109,7 @@ export function laborWindow(
     available: false,
     percent: null,
     laborBasis: null,
-    emptyReason: "no_labor_rate",
+    emptyReason: scheduled.basis === "none" ? "no_labor" : "no_labor_rate",
   };
 }
 

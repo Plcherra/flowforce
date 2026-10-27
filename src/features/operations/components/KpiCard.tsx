@@ -67,6 +67,7 @@ function detailKey(kpiKey: HubKpiKey, result: KpiResult): string {
       : "operations.hubInventoryHealthEmpty";
   }
   if (result.laborBasis === "recorded") return "operations.hubLaborVsSalesRecordedDetail";
+  if (result.emptyReason === "no_labor") return "operations.hubLaborVsSalesNoLabor";
   if (result.emptyReason === "no_labor_rate") return "operations.hubLaborVsSalesNoRate";
   if (result.emptyReason === "no_sales") return "operations.hubLaborVsSalesNoSales";
   return "operations.hubLaborVsSalesDetail";
