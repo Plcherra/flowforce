@@ -24,6 +24,7 @@ import {
   DrawerClose,
 } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -38,6 +39,25 @@ import {
 import { logger } from "@/utils/logger";
 import { LearningRecordCopy } from "@/features/learning/components/LearningRecordCopy";
 import { useOpsIssueTranslations } from "@/features/i18n/hooks/useRemainingTextTranslations";
+import { notifyOperationsSuggestionsChanged } from "../utils/operationsHubSuggestion";
+import { normalizeOpsViewRows } from "../utils/opsViewRow";
+
+const ISSUE_STATUS_KEYS: Record<IncidentIssueStatus, string> = {
+  open: "operations.issueStatusOpen",
+  acknowledged: "operations.issueStatusAcknowledged",
+  in_progress: "operations.issueStatusInProgress",
+  blocked: "operations.issueStatusBlocked",
+  resolved: "operations.issueStatusResolved",
+  cancelled: "operations.issueStatusCancelled",
+};
+
+const ISSUE_SLA_KEYS: Record<IncidentIssueQueueRow["sla_status"], string> = {
+  unscheduled: "operations.issueSlaUnscheduled",
+  on_track: "operations.issueSlaOnTrack",
+  due_soon: "operations.issueSlaDueSoon",
+  overdue: "operations.issueSlaOverdue",
+  resolved: "operations.issueSlaResolved",
+};
 
 function opsIssueId(issue: IncidentIssueQueueRow & { issue_id?: string | null }) {
   return issue.issue_id || issue.issueid || "";
@@ -80,6 +100,9 @@ export function IssuesStream() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit = !permissionLoading && can("editTasks");
+  const canSuggest = !permissionLoading && can("ai.actions.suggest");
   const [issues, setIssues] = useState<IncidentIssueQueueRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -137,7 +160,7 @@ export function IssuesStream() {
       });
       setIssues([]);
     } else {
-      setIssues((data ?? []) as IncidentIssueQueueRow[]);
+      setIssues(normalizeOpsViewRows<IncidentIssueQueueRow>(data));
     }
 
     setLoading(false);
@@ -166,7 +189,7 @@ export function IssuesStream() {
           p_due_at: null,
           p_resolution_notes:
             status === "resolved"
-              ? resolutionNotes[issue.issueid] || "Resolved from Operations Hub."
+              ? resolutionNotes[issue.issueid] || t("operations.resolvedFromOperationsHub")
               : null,
         },
       );
@@ -174,11 +197,14 @@ export function IssuesStream() {
       if (error) throw error;
 
       const result = (data ?? {}) as IssueRpcResult;
+      const statusKey = ISSUE_STATUS_KEYS[result.status as IncidentIssueStatus];
       toast({
-        title: "Issue updated",
+        title: t("operations.issueUpdated"),
         description: result.status
-          ? `Status moved to ${result.status}.`
-          : "Lifecycle state saved.",
+          ? t("operations.issueStatusMoved", {
+              status: statusKey ? t(statusKey) : result.status,
+            })
+          : t("operations.issueLifecycleSaved"),
       });
       await loadIssues();
     } catch (error) {
@@ -188,9 +214,9 @@ export function IssuesStream() {
       });
       toast({
         variant: "destructive",
-        title: "Issue update failed",
+        title: t("operations.issueUpdateFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected issue error.",
+          error instanceof Error ? error.message : t("operations.issueUnexpected"),
       });
     } finally {
       setActing(null);
@@ -210,7 +236,7 @@ export function IssuesStream() {
       const token = sessionData.session?.access_token;
 
       if (!token) {
-        throw new Error("Sign in again to generate automation.");
+        throw new Error(t("operations.signInToGenerateAutomation"));
       }
 
       const response = await fetch(
@@ -226,11 +252,14 @@ export function IssuesStream() {
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to generate automation (${response.status})`);
+        throw new Error(
+          t("operations.automationGenerateFailed", { status: response.status }),
+        );
       }
 
       const payload = (await response.json()) as AutomationSuggestionResponse;
       setDrawerResult(payload);
+      notifyOperationsSuggestionsChanged();
     } catch (error) {
       logger.error("[IssuesStream] automation generation failed", {
         error,
@@ -239,7 +268,7 @@ export function IssuesStream() {
       setDrawerError(
         error instanceof Error
           ? error.message
-          : "Unable to generate suggestion",
+          : t("operations.unableToGenerateSuggestion"),
       );
     } finally {
       setDrawerLoading(false);
@@ -285,7 +314,7 @@ export function IssuesStream() {
                   <div>
                     <LearningRecordCopy
                       recordId={opsIssueId(issue)}
-                      title={issue.title ?? "Operational issue"}
+                      title={issue.title ?? t("operations.operationalIssue")}
                       description={issue.description}
                       translation={
                         issueTranslations.get(opsIssueId(issue))
@@ -294,7 +323,7 @@ export function IssuesStream() {
                               title:
                                 issueTranslations.get(opsIssueId(issue))!.values.title ??
                                 issue.title ??
-                                "Operational issue",
+                                t("operations.operationalIssue"),
                               description: issue.description
                                 ? issueTranslations.get(opsIssueId(issue))!.values.description ??
                                   issue.description
@@ -305,12 +334,14 @@ export function IssuesStream() {
                       titleClassName="text-sm font-semibold"
                     />
                     <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
-                      {issue.issue_type ?? "general"}
+                      {issue.issue_type ?? t("operations.issueTypeGeneral")}
                       {issue.owner_name ? ` | ${issue.owner_name}` : ""}
                     </p>
                   </div>
                   <Badge variant="outline">
-                    {incidentIssueStatusLabels[issue.status] ?? issue.status}
+                    {t(ISSUE_STATUS_KEYS[issue.status] ?? issue.status, {
+                      defaultValue: incidentIssueStatusLabels[issue.status] ?? issue.status,
+                    })}
                   </Badge>
                 </div>
 
@@ -321,7 +352,9 @@ export function IssuesStream() {
                     className={slaClasses[issue.sla_status]}
                   >
                     <Clock className="mr-1 h-3 w-3" />
-                    {incidentIssueSlaLabels[issue.sla_status]}
+                    {t(ISSUE_SLA_KEYS[issue.sla_status] ?? issue.sla_status, {
+                      defaultValue: incidentIssueSlaLabels[issue.sla_status],
+                    })}
                   </Badge>
                   {issue.task_id && (
                     <Badge variant="secondary">
@@ -336,7 +369,7 @@ export function IssuesStream() {
                   )}
                 </div>
 
-                {!closed && (
+                {!closed && canEdit && (
                   <Textarea
                     className="mt-3 min-h-[64px]"
                     placeholder={t("operations.resolutionNotes")}
@@ -351,6 +384,8 @@ export function IssuesStream() {
                 )}
 
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {canEdit ? (
+                  <>
                   <Button
                     size="sm"
                     variant="outline"
@@ -381,6 +416,9 @@ export function IssuesStream() {
                     <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
                     {t("operations.resolve")}
                   </Button>
+                  </>
+                  ) : null}
+                  {canSuggest ? (
                   <Button
                     size="sm"
                     variant="outline"
@@ -389,6 +427,7 @@ export function IssuesStream() {
                     <Bot className="mr-2 h-3.5 w-3.5" />
                     {t("operations.ai")}
                   </Button>
+                  ) : null}
                 </div>
               </motion.div>
             );
@@ -397,7 +436,7 @@ export function IssuesStream() {
       </ScrollArea>
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [acting, loading, resolutionNotes, sortedIssues]);
+  }, [acting, canEdit, canSuggest, loading, resolutionNotes, sortedIssues, t]);
 
   return (
     <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
@@ -430,8 +469,9 @@ export function IssuesStream() {
           <DrawerHeader>
             <DrawerTitle>{t("operations.automationSuggestion")}</DrawerTitle>
             <DrawerDescription>
-              FlowForce will design a sequence tailored to &quot;
-              {drawerIssue?.title ?? "this issue"}&quot;.
+              {t("operations.automationSuggestionForIssue", {
+              title: drawerIssue?.title ?? t("operations.thisIssue"),
+            })}
             </DrawerDescription>
           </DrawerHeader>
           <div className="space-y-3 px-4 pb-4 text-sm">

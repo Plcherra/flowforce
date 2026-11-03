@@ -10,11 +10,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  reviewActionLabels,
-  reviewPriorityLabels,
   sortReviewQueue,
   summarizeReviewQueue,
   type ManagerReviewQueueRow,
@@ -22,11 +21,15 @@ import {
   type WorkflowReviewStatus,
 } from "@/services/operations/managerReviewQueue";
 import { logger } from "@/utils/logger";
+import { reviewPriorityLabel } from "../utils/operationsHubLabels";
+import { normalizeOpsViewRows } from "../utils/opsViewRow";
 
 export function ManagerReviewQueuePanel() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit = !permissionLoading && can("editTasks");
   const [rows, setRows] = useState<ManagerReviewQueueRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
@@ -55,7 +58,7 @@ export function ManagerReviewQueuePanel() {
         throw error;
       }
 
-      setRows((data ?? []) as ManagerReviewQueueRow[]);
+      setRows(normalizeOpsViewRows<ManagerReviewQueueRow>(data));
     } catch (error) {
       logger.error("[ManagerReviewQueuePanel] queue load failed", {
         error,
@@ -63,14 +66,14 @@ export function ManagerReviewQueuePanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to load review queue",
+        title: t("operations.unableToLoadReviewQueue"),
         description:
-          error instanceof Error ? error.message : "Unexpected review error.",
+          error instanceof Error ? error.message : t("operations.unexpectedReviewError"),
       });
     } finally {
       setLoading(false);
     }
-  }, [companyId, toast]);
+  }, [companyId, t, toast]);
 
   useEffect(() => {
     void loadQueue();
@@ -83,8 +86,8 @@ export function ManagerReviewQueuePanel() {
     if (!companyId) {
       toast({
         variant: "destructive",
-        title: "Company context missing",
-        description: "Connect your profile to a company before reviewing.",
+        title: t("operations.companyContextMissing"),
+        description: t("operations.connectProfileBeforeReview"),
       });
       return;
     }
@@ -98,8 +101,8 @@ export function ManagerReviewQueuePanel() {
         p_review_status: reviewStatus,
         p_comments:
           reviewStatus === "approved"
-            ? "Approved from manager review queue."
-            : "Flagged from manager review queue.",
+            ? t("operations.approvedFromReviewQueue")
+            : t("operations.flaggedFromReviewQueue"),
       });
 
       if (error) {
@@ -110,8 +113,10 @@ export function ManagerReviewQueuePanel() {
       await loadQueue();
 
       toast({
-        title: `Workflow ${result.review_status ?? reviewStatus}`,
-        description: "The review decision was audited.",
+        title: t("operations.workflowReviewTitle", {
+          status: result.review_status ?? reviewStatus,
+        }),
+        description: t("operations.reviewWasAudited"),
       });
     } catch (error) {
       logger.error("[ManagerReviewQueuePanel] review action failed", {
@@ -120,9 +125,9 @@ export function ManagerReviewQueuePanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to review workflow",
+        title: t("operations.unableToReviewWorkflow"),
         description:
-          error instanceof Error ? error.message : "Unexpected review action.",
+          error instanceof Error ? error.message : t("operations.unexpectedReviewAction"),
       });
     } finally {
       setReviewingId(null);
@@ -175,15 +180,15 @@ export function ManagerReviewQueuePanel() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">
-                    {row.workflow_name ?? "Workflow run"}
+                    {row.workflow_name ?? t("operations.workflowRunLabel")}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {row.scheduled_for ?? "Unscheduled"} ·{" "}
+                    {row.scheduled_for ?? t("operations.unscheduledLabel")} ·{" "}
                     {row.open_exception_count} {t("operations.exceptions")}
                   </p>
                 </div>
                 <Badge variant="secondary" className="shrink-0">
-                  {reviewPriorityLabels[row.review_priority]}
+                  {reviewPriorityLabel(t, row.review_priority)}
                 </Badge>
               </div>
 
@@ -199,14 +204,14 @@ export function ManagerReviewQueuePanel() {
                   onClick={() =>
                     handleReview(row.workflow_instanceid, "approved")
                   }
-                  disabled={reviewingId !== null}
+                  disabled={reviewingId !== null || !canEdit}
                 >
                   {reviewingId === `${row.workflow_instanceid}:approved` ? (
                     <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
                   )}
-                  {reviewActionLabels.approved}
+                  {t("operations.approveReview")}
                 </Button>
                 <Button
                   size="sm"
@@ -214,7 +219,7 @@ export function ManagerReviewQueuePanel() {
                   onClick={() =>
                     handleReview(row.workflow_instanceid, "needs_changes")
                   }
-                  disabled={reviewingId !== null}
+                  disabled={reviewingId !== null || !canEdit}
                 >
                   <AlertTriangle className="mr-2 h-3.5 w-3.5" />
                   {t("operations.needsChanges")}
@@ -225,7 +230,7 @@ export function ManagerReviewQueuePanel() {
                   onClick={() =>
                     handleReview(row.workflow_instanceid, "rejected")
                   }
-                  disabled={reviewingId !== null}
+                  disabled={reviewingId !== null || !canEdit}
                 >
                   <ThumbsDown className="mr-2 h-3.5 w-3.5" />
                   {t("schedule.reject")}

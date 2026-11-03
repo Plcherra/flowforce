@@ -1,7 +1,6 @@
 import { useMemo, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { MOCK_IDEA_KPI_SUMMARY } from "@/mock/kpi_insights";
 import type { DateRange, IdeaKpiInsight } from "./useIdeaInsights";
 import { formatRangeAsPgDate } from "@/features/operations/utils/dateRange";
 import { buildRangeWindows } from "@/features/operations/utils/ideaMetrics";
@@ -9,7 +8,6 @@ import {
   parseIdeaKpiInsights,
   type IdeaKpiInsightRecord,
 } from "../data/ideaRepository";
-import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
 export interface IdeaAssessmentMetric {
@@ -40,26 +38,10 @@ async function fetchKpiSnapshot(
   });
 
   if (error) {
-    if (error.message?.includes("function public.get_kpi_summary")) {
-      if (appEnv.DEV) {
-        logger.warn(
-          "[useIdeaAssessments] RPC get_kpi_summary unavailable, returning mock IDEA KPI summary",
-          { context: { errorMessage: error.message }, tags: ["warning"] },
-        );
-      }
-      return MOCK_IDEA_KPI_SUMMARY.map(
-        (item) =>
-          ({
-            id: item.id,
-            label: item.label,
-            metric: item.label,
-            value: item.value,
-            unit: item.unit,
-            delta: item.delta,
-            trend: item.trend,
-          }) satisfies IdeaKpiInsightRecord,
-      );
-    }
+    logger.error("[useIdeaAssessments] KPI summary failed", {
+      error,
+      tags: ["error"],
+    });
     throw error;
   }
 

@@ -40,7 +40,7 @@ export async function generateAutomationSuggestion({
     .from("ops_issues")
     .select("*")
     .eq("id", issueId)
-    .eq("org_id", orgId)
+    .eq("company_id", orgId)
     .single();
 
   if (error || !issue) {
@@ -92,8 +92,9 @@ export async function generateAutomationSuggestion({
   const { data: suggestion, error: insertError } = await client
     .from("ops_automation_suggestions")
     .insert({
+      company_id: orgId,
       org_id: orgId,
-      issueid: issueId,
+      issue_id: issueId,
       suggestion_title: issue.title,
       suggestion_summary: `Automation for ${issue.issue_type ?? "ops"} (${issue.severity ?? "normal"})`,
       script: parsed,

@@ -400,6 +400,19 @@ export async function runOperationsHubMetricTests() {
   assert.match(readyMarkup, /Fix automatically/);
   assert.equal(readyMarkup.includes("31.4%"), false);
 
+  const blockedMarkup = renderToStaticMarkup(
+    createElement(KpiCard, {
+      kpiKey: "labor_vs_sales",
+      loading: false,
+      failed: false,
+      result: labor.labor,
+      saving: false,
+      canFix: false,
+      onSuggest: async () => undefined,
+    }),
+  );
+  assert.equal(blockedMarkup.includes("Fix automatically"), false);
+
   const noLaborMarkup = renderToStaticMarkup(
     createElement(KpiCard, {
       kpiKey: "labor_vs_sales",

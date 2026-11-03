@@ -117,6 +117,25 @@ for (const pattern of [
   );
 }
 
+const automationRunRoute = readText("app/api/ops/automations/run/route.ts");
+for (const pattern of [
+  "getBearerToken",
+  "supabaseAdmin.auth.getUser",
+  "actorCanRunAutomation",
+  "runStoredAutomation",
+]) {
+  assertIncludes(
+    automationRunRoute,
+    pattern,
+    `automation run route must include ${pattern}`,
+  );
+}
+assertIncludes(
+  readText("src/server/automation/adapters/flowforceOperationsAdapter.ts"),
+  "POST /api/ops/automations/run",
+  "browser automation adapter must point at the server route",
+);
+
 const automationGenerator = readText(
   "src/server/ops/suggestions/generateAutomationSuggestion.ts",
 );

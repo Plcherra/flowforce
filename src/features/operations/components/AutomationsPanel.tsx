@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
-import { dispatchAutomationToFlowForce } from "@/server/automation/adapters/flowforceOperationsAdapter";
-import type { AutomationScript } from "@/server/automation/validateScript";
 import { logger } from "@/utils/logger";
 import { OPS_SUGGESTIONS_CHANGED } from "../utils/operationsHubSuggestion";
 
@@ -17,15 +17,27 @@ interface AutomationSuggestion {
   suggestion_title: string;
   suggestion_summary?: string | null;
   status: string;
-  script: AutomationScript;
 }
 
 const sectionTitleClass =
   "text-xs uppercase tracking-[0.4em] text-muted-foreground";
 
+const RUN_RESULT_KEYS: Record<string, string> = {
+  ran: "operations.sendToFlowForceRan",
+  already_active: "operations.sendToFlowForceAlreadyActive",
+  forbidden: "operations.sendToFlowForceForbidden",
+  unsupported: "operations.sendToFlowForceUnsupported",
+  storage_unavailable: "operations.sendToFlowForceStorage",
+  conflict: "operations.sendToFlowForceConflict",
+};
+
 export function AutomationsPanel() {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { profile } = useProfile();
+  const { can, isLoading: permissionLoading } = useCan();
+  const companyId = profile?.companyId ?? profile?.company_id ?? null;
+  const canRun = !permissionLoading && can("ai.actions.automate");
   const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [dispatching, setDispatching] = useState<string | null>(null);
@@ -34,9 +46,17 @@ export function AutomationsPanel() {
     let active = true;
     async function load() {
       setLoading(true);
+      if (!companyId) {
+        if (active) {
+          setSuggestions([]);
+          setLoading(false);
+        }
+        return;
+      }
       const { data, error } = await supabase
         .from("ops_automation_suggestions")
-        .select("id,suggestion_title,suggestion_summary,status,script")
+        .select("id,suggestion_title,suggestion_summary,status")
+        .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .limit(10);
       if (!active) return;
@@ -61,7 +81,7 @@ export function AutomationsPanel() {
       active = false;
       window.removeEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     };
-  }, []);
+  }, [companyId]);
 
   const activeAutomations = suggestions.filter(
     (suggestion) =>
@@ -75,27 +95,42 @@ export function AutomationsPanel() {
   async function handleDispatch(suggestion: AutomationSuggestion) {
     setDispatching(suggestion.id);
     try {
-      const result = await dispatchAutomationToFlowForce(suggestion.script);
-      if (!result.dispatched) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
         toast({
           variant: "destructive",
-          title: t("operations.sendToFlowForceUnavailable"),
+          title: t("operations.sendToFlowForceForbidden"),
         });
         return;
       }
-      const { error } = await supabase
-        .from("ops_automation_suggestions")
-        .update({ status: "active" })
-        .eq("id", suggestion.id);
-      if (error) throw error;
-      setSuggestions((current) =>
-        current.map((row) =>
-          row.id === suggestion.id ? { ...row, status: "active" } : row,
-        ),
-      );
-      toast({ title: t("operations.sendToFlowForceSaved") });
+      const response = await fetch("/api/ops/automations/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ suggestionId: suggestion.id }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        code?: string;
+      } | null;
+      const code = payload?.code ?? "run_failed";
+      if (code === "ran" || code === "already_active") {
+        setSuggestions((current) =>
+          current.map((row) =>
+            row.id === suggestion.id ? { ...row, status: "active" } : row,
+          ),
+        );
+        toast({ title: t(RUN_RESULT_KEYS[code]) });
+        return;
+      }
+      toast({
+        variant: "destructive",
+        title: t(RUN_RESULT_KEYS[code] ?? "operations.sendToFlowForceFailed"),
+      });
     } catch (error) {
-      logger.error("[AutomationsPanel] Failed to dispatch automation", {
+      logger.error("[AutomationsPanel] Failed to run automation", {
         error,
         tags: ["error"],
       });
@@ -181,17 +216,23 @@ export function AutomationsPanel() {
                         {automation.suggestion_summary}
                       </p>
                     )}
-                    <Button
-                      className="mt-3"
-                      size="sm"
-                      variant="outline"
-                      disabled={dispatching === automation.id}
-                      onClick={() => void handleDispatch(automation)}
-                    >
-                      {dispatching === automation.id
-                        ? t("operations.sendToFlowForceWorking")
-                        : t("operations.sendToFlowForce")}
-                    </Button>
+                    {permissionLoading ? null : canRun ? (
+                      <Button
+                        className="mt-3"
+                        size="sm"
+                        variant="outline"
+                        disabled={dispatching === automation.id}
+                        onClick={() => void handleDispatch(automation)}
+                      >
+                        {dispatching === automation.id
+                          ? t("operations.sendToFlowForceWorking")
+                          : t("operations.sendToFlowForce")}
+                      </Button>
+                    ) : (
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        {t("operations.sendToFlowForceNoPermission")}
+                      </p>
+                    )}
                   </motion.div>
                 ))}
               </div>

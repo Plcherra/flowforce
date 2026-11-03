@@ -47,6 +47,7 @@ interface KpiCardProps {
   failed: boolean;
   result: KpiResult | null;
   saving: boolean;
+  canFix?: boolean;
   onSuggest: (input: {
     kpiKey: HubKpiKey;
     title: string;
@@ -79,6 +80,7 @@ export function KpiCard({
   failed,
   result,
   saving,
+  canFix = true,
   onSuggest,
 }: KpiCardProps) {
   const { t } = useTranslation();
@@ -115,7 +117,7 @@ export function KpiCard({
         : severity === "normal"
           ? t("operations.hubSeverityNormal")
           : null;
-  const canSuggest = Boolean(result?.available && valueLabel);
+  const canSuggest = Boolean(canFix && result?.available && valueLabel);
 
   async function generate() {
     if (!valueLabel) return;
