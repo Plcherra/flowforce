@@ -11,8 +11,8 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 import { supabase } from "@/integrations/supabase/client";
-// Initialize i18next before using it
-import "@/i18n/config";
+// Initialize i18next, including the React binding, before using it.
+import "@/i18n/client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   // Debug logging for dev

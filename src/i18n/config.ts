@@ -1,5 +1,4 @@
 import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
 // Import translation files
@@ -25,10 +24,10 @@ const resources = {
   pt: { translation: { ...pt, literals: ptLiterals } },
 };
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
+// Do not import react-i18next here. Route handlers import this module, and
+// react-i18next calls createContext at load time. The client binding lives
+// in ./client and is loaded from the browser provider.
+i18n.use(LanguageDetector).init({
     resources,
     fallbackLng: "en",
     supportedLngs: ["en", "es", "pt", "fr", "it", "de"],

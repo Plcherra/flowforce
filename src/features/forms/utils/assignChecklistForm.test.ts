@@ -1,4 +1,4 @@
-import "@/i18n/config";
+import "@/i18n/client";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";

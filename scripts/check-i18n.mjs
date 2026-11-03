@@ -56,6 +56,14 @@ for (const code of codes) {
   process.stdout.write(`${code} ${localeSets[code].length}\n`);
 }
 
+const configSource = readFileSync(path.join(root, "src/i18n/config.ts"), "utf8");
+if (/from\s+["']react-i18next["']|require\(\s*["']react-i18next["']\s*\)/.test(configSource)) {
+  process.stderr.write(
+    "src/i18n/config.ts must not import react-i18next. Server routes import it, and that package calls React.createContext while loading.\n",
+  );
+  process.exit(1);
+}
+
 const keyProblems = compareLocaleKeySets(localeSets);
 const files = [];
 for (const dir of ["src", "app"]) walk(path.join(root, dir), files);
