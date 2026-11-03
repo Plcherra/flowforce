@@ -1,4 +1,3 @@
-import i18n from "@/i18n/config";
 import { appEnv } from "@/lib/env";
 type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -312,7 +311,7 @@ export function captureError(
   meta?: LogMeta & { message?: string },
 ) {
   const message =
-    meta?.message || (error instanceof Error ? error.message : i18n.t("literals.unknownError"));
+    meta?.message || (error instanceof Error ? error.message : "Unknown error");
   logger.error(message, { ...(meta || {}), error });
 }
 
