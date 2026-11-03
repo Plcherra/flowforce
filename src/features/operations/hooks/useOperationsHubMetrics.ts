@@ -13,7 +13,6 @@ import {
   rollingDayWindows,
   type HubCatalogItem,
   type HubCountRow,
-  type HubKpiKey,
   type HubLaborEntryRow,
   type HubSaleRow,
   type HubScheduleRow,
@@ -21,11 +20,6 @@ import {
   type HubWasteRow,
   type OperationsHubModel,
 } from "../utils/operationsHubMetrics";
-import {
-  buildOperationsSuggestion,
-  notifyOperationsSuggestionsChanged,
-} from "../utils/operationsHubSuggestion";
-
 type LoadFlag = "ok" | "error";
 
 export type OperationsHubErrors = {
@@ -42,13 +36,6 @@ const CLEAR_ERRORS: OperationsHubErrors = {
   labor: "ok",
   counts: "ok",
   waste: "ok",
-};
-
-type SuggestionInput = {
-  kpiKey: HubKpiKey;
-  title: string;
-  summary: string;
-  valueLabel: string;
 };
 
 function asRequirements(value: unknown): Record<string, unknown> | null {
@@ -98,7 +85,6 @@ export function useOperationsHubMetrics() {
   const [currency, setCurrency] = useState("USD");
   const [model, setModel] = useState<OperationsHubModel | null>(null);
   const [errors, setErrors] = useState<OperationsHubErrors>(CLEAR_ERRORS);
-  const [savingKey, setSavingKey] = useState<HubKpiKey | null>(null);
   const requestId = useRef(0);
 
   const load = useCallback(async () => {
@@ -311,37 +297,12 @@ export function useOperationsHubMetrics() {
     void load();
   }, [load]);
 
-  const saveSuggestion = useCallback(
-    async (input: SuggestionInput) => {
-      if (!companyId) throw new Error("Missing company");
-      setSavingKey(input.kpiKey);
-      try {
-        const draft = buildOperationsSuggestion(input);
-        const { error } = await supabase.from("ops_automation_suggestions").insert({
-          company_id: companyId,
-          org_id: companyId,
-          suggestion_title: draft.suggestion_title,
-          suggestion_summary: draft.suggestion_summary,
-          script: draft.script,
-          status: draft.status,
-        });
-        if (error) throw error;
-        notifyOperationsSuggestionsChanged();
-      } finally {
-        setSavingKey(null);
-      }
-    },
-    [companyId],
-  );
-
   return {
     companyId,
     loading,
     currency,
     model,
     errors,
-    savingKey,
-    saveSuggestion,
     reload: load,
   };
 }

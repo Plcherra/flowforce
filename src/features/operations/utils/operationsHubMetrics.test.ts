@@ -12,7 +12,6 @@ import {
   itemsWithStockOnHand,
   type OperationsHubSource,
 } from "./operationsHubMetrics";
-import { buildOperationsSuggestion } from "./operationsHubSuggestion";
 
 const now = new Date("2026-10-26T15:00:00.000Z");
 
@@ -309,17 +308,6 @@ export async function runOperationsHubMetricTests() {
   assert.equal(freshWaste.waste.cost, 40);
   assert.equal(freshWaste.waste.percentChange, null);
 
-  const suggestion = buildOperationsSuggestion({
-    kpiKey: "tasks_compliance",
-    title: "Raise on-time task completion",
-    summary: "50% of tasks due in the last 7 days were completed on time.",
-    valueLabel: "50%",
-  });
-  assert.equal(suggestion.status, "pending");
-  assert.equal(suggestion.script.steps.length, 3);
-  assert.equal(suggestion.script.steps[1].type, "create_task");
-  assert.match(suggestion.suggestion_summary, /50%/);
-
   const paged = await fetchAllPages(
     async (from) => {
       const all = [1, 2, 3, 4, 5];
@@ -378,8 +366,6 @@ export async function runOperationsHubMetricTests() {
       loading: false,
       failed: false,
       result: empty.tasks,
-      saving: false,
-      onSuggest: async () => undefined,
     }),
   );
   assert.match(markup, /No tasks were due in the last 7 days/);
@@ -392,26 +378,11 @@ export async function runOperationsHubMetricTests() {
       loading: false,
       failed: false,
       result: labor.labor,
-      saving: false,
-      onSuggest: async () => undefined,
     }),
   );
   assert.match(readyMarkup, /16%/);
-  assert.match(readyMarkup, /Fix automatically/);
+  assert.equal(readyMarkup.includes("Fix automatically"), false);
   assert.equal(readyMarkup.includes("31.4%"), false);
-
-  const blockedMarkup = renderToStaticMarkup(
-    createElement(KpiCard, {
-      kpiKey: "labor_vs_sales",
-      loading: false,
-      failed: false,
-      result: labor.labor,
-      saving: false,
-      canFix: false,
-      onSuggest: async () => undefined,
-    }),
-  );
-  assert.equal(blockedMarkup.includes("Fix automatically"), false);
 
   const noLaborMarkup = renderToStaticMarkup(
     createElement(KpiCard, {
@@ -419,8 +390,6 @@ export async function runOperationsHubMetricTests() {
       loading: false,
       failed: false,
       result: noShifts.labor,
-      saving: false,
-      onSuggest: async () => undefined,
     }),
   );
   assert.match(noLaborMarkup, /No scheduled shifts or recorded labor/);

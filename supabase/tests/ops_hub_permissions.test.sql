@@ -2,23 +2,11 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(8);
+select plan(4);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
 
-delete from public.ops_automation_run_steps where company_id in (
-  '7b000000-0000-4000-8000-000000000001',
-  '7b000000-0000-4000-8000-000000000002'
-);
-delete from public.ops_automation_runs where company_id in (
-  '7b000000-0000-4000-8000-000000000001',
-  '7b000000-0000-4000-8000-000000000002'
-);
-delete from public.ops_automation_suggestions where company_id in (
-  '7b000000-0000-4000-8000-000000000001',
-  '7b000000-0000-4000-8000-000000000002'
-);
 delete from public.ops_issues where company_id in (
   '7b000000-0000-4000-8000-000000000001',
   '7b000000-0000-4000-8000-000000000002'
@@ -77,16 +65,6 @@ values (
   'open'
 );
 
-insert into public.ops_automation_suggestions (id, company_id, suggestion_title, status)
-values
-  ('7b300000-0000-4000-8000-000000000001', '7b000000-0000-4000-8000-000000000001', 'Suggestion A', 'pending'),
-  ('7b300000-0000-4000-8000-000000000002', '7b000000-0000-4000-8000-000000000002', 'Suggestion B', 'pending');
-
-insert into public.ops_automation_runs (company_id, suggestion_id, actor_id, status)
-values
-  ('7b000000-0000-4000-8000-000000000001', '7b300000-0000-4000-8000-000000000001', '7b100000-0000-4000-8000-000000000002', 'succeeded'),
-  ('7b000000-0000-4000-8000-000000000002', '7b300000-0000-4000-8000-000000000002', '7b100000-0000-4000-8000-000000000003', 'succeeded');
-
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '7b100000-0000-4000-8000-000000000001', true);
@@ -99,11 +77,6 @@ select ok(
   public.current_user_has_permission('7b000000-0000-4000-8000-000000000001', 'viewOwnTasks'),
   'staff can view their own tasks'
 );
-select is(
-  (select count(*) from public.ops_automation_runs),
-  1::bigint,
-  'staff sees only this company automation run log'
-);
 select throws_ok(
   $$ select public.update_operational_issue_status(
     '7b000000-0000-4000-8000-000000000001',
@@ -114,14 +87,6 @@ select throws_ok(
   'Not allowed to update this issue',
   'staff cannot update an operational issue'
 );
-select throws_ok(
-  $$ update public.ops_automation_suggestions
-     set status = 'active'
-     where id = '7b300000-0000-4000-8000-000000000001' $$,
-  'P0001',
-  'automation status and script are server-owned',
-  'a member cannot mark a suggestion active'
-);
 
 select set_config('request.jwt.claim.sub', '7b100000-0000-4000-8000-000000000002', true);
 select lives_ok(
@@ -131,21 +96,6 @@ select lives_ok(
     'acknowledged'
   ) $$,
   'a manager can update an operational issue'
-);
-
-select set_config('request.jwt.claim.role', 'service_role', true);
-select set_config('request.jwt.claim.sub', '', true);
-reset role;
-select lives_ok(
-  $$ update public.ops_automation_suggestions
-     set status = 'active'
-     where id = '7b300000-0000-4000-8000-000000000001' $$,
-  'the server role can mark a suggestion active after a run'
-);
-select is(
-  (select status from public.ops_automation_suggestions where id = '7b300000-0000-4000-8000-000000000001'),
-  'active',
-  'the suggestion is active after the server update'
 );
 
 select * from finish();

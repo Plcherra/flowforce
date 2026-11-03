@@ -101,49 +101,6 @@ for (const pattern of [
   );
 }
 
-const automationRoute = readText(
-  "app/api/ops/issues/[issueId]/suggest-automation/route.ts",
-);
-for (const pattern of [
-  "getBearerToken",
-  "supabaseAdmin.auth.getUser",
-  "userCanAccessOrg",
-  "client: supabaseAdmin",
-]) {
-  assertIncludes(
-    automationRoute,
-    pattern,
-    `automation suggestion route must include ${pattern}`,
-  );
-}
-
-const automationRunRoute = readText("app/api/ops/automations/run/route.ts");
-for (const pattern of [
-  "getBearerToken",
-  "supabaseAdmin.auth.getUser",
-  "actorCanRunAutomation",
-  "runStoredAutomation",
-]) {
-  assertIncludes(
-    automationRunRoute,
-    pattern,
-    `automation run route must include ${pattern}`,
-  );
-}
-assertIncludes(
-  readText("src/server/automation/adapters/flowforceOperationsAdapter.ts"),
-  "POST /api/ops/automations/run",
-  "browser automation adapter must point at the server route",
-);
-
-const automationGenerator = readText(
-  "src/server/ops/suggestions/generateAutomationSuggestion.ts",
-);
-assertIncludes(
-  automationGenerator,
-  "serverEnv.XAI_API_KEY",
-  "automation generator must use the server-only xAI key",
-);
 assertIncludes(
   readText("src/lib/env.ts"),
   "OPENAI_API_KEY: process.env.OPENAI_API_KEY",

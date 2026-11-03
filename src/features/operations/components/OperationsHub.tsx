@@ -1,11 +1,9 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { useCan } from "@/hooks/useCan";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { IssuesStream } from "./IssuesStream";
-import { AutomationsPanel } from "./AutomationsPanel";
 import { SopChecklistBuilderPanel } from "./SopChecklistBuilderPanel";
 import { RecurringOperationsCalendarPanel } from "./RecurringOperationsCalendarPanel";
 import { FieldExecutionPanel } from "./FieldExecutionPanel";
@@ -26,8 +24,6 @@ const kpiKeys: HubKpiKey[] = [
 export function OperationsHub() {
   const { t } = useTranslation();
   const hub = useOperationsHubMetrics();
-  const { can, isLoading: permissionLoading } = useCan();
-  const canSuggest = !permissionLoading && can("ai.actions.suggest");
   const results = {
     tasks_compliance: hub.model?.tasks ?? null,
     inventory_health: hub.model?.inventory ?? null,
@@ -80,9 +76,6 @@ export function OperationsHub() {
                     : hub.errors.labor === "error"
               }
               result={results[key]}
-              saving={hub.savingKey === key}
-              canFix={canSuggest}
-              onSuggest={hub.saveSuggestion}
             />
           ))}
         </motion.section>
@@ -116,7 +109,6 @@ export function OperationsHub() {
           <CompliancePacksPanel />
           <WorkflowAutomationHooksPanel />
           <ExecutionQualityPanel />
-          <AutomationsPanel />
         </section>
       </div>
     </div>

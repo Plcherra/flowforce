@@ -13,10 +13,6 @@ const importTs = jiti(import.meta.url, {
 const { runOperationsHubMetricTests } = importTs(
   "../src/features/operations/utils/operationsHubMetrics.test.ts",
 );
-const { runAutomationRunnerTests } = importTs(
-  "../src/server/automation/automationRunner.test.ts",
-);
 
 await runOperationsHubMetricTests();
-await runAutomationRunnerTests();
 console.log("operations hub metrics tests passed");

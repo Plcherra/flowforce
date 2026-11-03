@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   AlertCircle,
-  Bot,
   CheckCircle2,
   Clock,
   Loader2,
@@ -14,15 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerClose,
-} from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
@@ -39,7 +29,6 @@ import {
 import { logger } from "@/utils/logger";
 import { LearningRecordCopy } from "@/features/learning/components/LearningRecordCopy";
 import { useOpsIssueTranslations } from "@/features/i18n/hooks/useRemainingTextTranslations";
-import { notifyOperationsSuggestionsChanged } from "../utils/operationsHubSuggestion";
 import { normalizeOpsViewRows } from "../utils/opsViewRow";
 
 const ISSUE_STATUS_KEYS: Record<IncidentIssueStatus, string> = {
@@ -84,12 +73,6 @@ const slaClasses: Record<IncidentIssueQueueRow["sla_status"], string> = {
   resolved: "border-success/40 text-success",
 };
 
-interface AutomationSuggestionResponse {
-  suggestionId: string;
-  status: string;
-  script: unknown;
-}
-
 type IssueRpcResult = {
   issueid?: string;
   task_id?: string | null;
@@ -102,17 +85,9 @@ export function IssuesStream() {
   const { toast } = useToast();
   const { can, isLoading: permissionLoading } = useCan();
   const canEdit = !permissionLoading && can("editTasks");
-  const canSuggest = !permissionLoading && can("ai.actions.suggest");
   const [issues, setIssues] = useState<IncidentIssueQueueRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
-  const [drawerIssue, setDrawerIssue] = useState<IncidentIssueQueueRow | null>(
-    null,
-  );
-  const [drawerLoading, setDrawerLoading] = useState(false);
-  const [drawerError, setDrawerError] = useState<string | null>(null);
-  const [drawerResult, setDrawerResult] =
-    useState<AutomationSuggestionResponse | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState<Record<string, string>>(
     {},
   );
@@ -220,58 +195,6 @@ export function IssuesStream() {
       });
     } finally {
       setActing(null);
-    }
-  };
-
-  const openAutomationDrawer = async (issue: IncidentIssueQueueRow) => {
-    if (!companyId) return;
-
-    setDrawerIssue(issue);
-    setDrawerLoading(true);
-    setDrawerError(null);
-    setDrawerResult(null);
-
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-
-      if (!token) {
-        throw new Error(t("operations.signInToGenerateAutomation"));
-      }
-
-      const response = await fetch(
-        `/api/ops/issues/${issue.issueid}/suggest-automation`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ orgId: companyId }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          t("operations.automationGenerateFailed", { status: response.status }),
-        );
-      }
-
-      const payload = (await response.json()) as AutomationSuggestionResponse;
-      setDrawerResult(payload);
-      notifyOperationsSuggestionsChanged();
-    } catch (error) {
-      logger.error("[IssuesStream] automation generation failed", {
-        error,
-        tags: ["error"],
-      });
-      setDrawerError(
-        error instanceof Error
-          ? error.message
-          : t("operations.unableToGenerateSuggestion"),
-      );
-    } finally {
-      setDrawerLoading(false);
     }
   };
 
@@ -418,16 +341,6 @@ export function IssuesStream() {
                   </Button>
                   </>
                   ) : null}
-                  {canSuggest ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void openAutomationDrawer(issue)}
-                  >
-                    <Bot className="mr-2 h-3.5 w-3.5" />
-                    {t("operations.ai")}
-                  </Button>
-                  ) : null}
                 </div>
               </motion.div>
             );
@@ -436,7 +349,7 @@ export function IssuesStream() {
       </ScrollArea>
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [acting, canEdit, canSuggest, loading, resolutionNotes, sortedIssues, t]);
+  }, [acting, canEdit, loading, resolutionNotes, sortedIssues, t]);
 
   return (
     <div className="rounded-3xl border bg-background/95 p-4 shadow-sm">
@@ -454,42 +367,6 @@ export function IssuesStream() {
         </div>
       </div>
       <div className="mt-4">{issueList}</div>
-
-      <Drawer
-        open={Boolean(drawerIssue)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDrawerIssue(null);
-            setDrawerResult(null);
-            setDrawerError(null);
-          }
-        }}
-      >
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>{t("operations.automationSuggestion")}</DrawerTitle>
-            <DrawerDescription>
-              {t("operations.automationSuggestionForIssue", {
-              title: drawerIssue?.title ?? t("operations.thisIssue"),
-            })}
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="space-y-3 px-4 pb-4 text-sm">
-            {drawerLoading && <p>{t("operations.generatingAutomationScript")}</p>}
-            {drawerError && <p className="text-destructive">{drawerError}</p>}
-            {drawerResult && (
-              <pre className="max-h-64 overflow-auto rounded-xl bg-muted/60 p-3 text-xs">
-                {JSON.stringify(drawerResult.script, null, 2)}
-              </pre>
-            )}
-          </div>
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="ghost">{t("common.close")}</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 }

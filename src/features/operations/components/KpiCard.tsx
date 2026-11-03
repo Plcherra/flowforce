@@ -1,21 +1,9 @@
 import { useTranslation } from "react-i18next";
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerTrigger,
-  DrawerClose,
-} from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
 import {
   formatPercent,
   formatSignedPoints,
@@ -29,31 +17,11 @@ const TITLE_KEYS: Record<HubKpiKey, string> = {
   labor_vs_sales: "operations.hubLaborVsSales",
 };
 
-const SUGGESTION_TITLE_KEYS: Record<HubKpiKey, string> = {
-  tasks_compliance: "operations.hubSuggestionTitleTasks",
-  inventory_health: "operations.hubSuggestionTitleInventory",
-  labor_vs_sales: "operations.hubSuggestionTitleLabor",
-};
-
-const SUGGESTION_SUMMARY_KEYS: Record<HubKpiKey, string> = {
-  tasks_compliance: "operations.hubSuggestionSummaryTasks",
-  inventory_health: "operations.hubSuggestionSummaryInventory",
-  labor_vs_sales: "operations.hubSuggestionSummaryLabor",
-};
-
 interface KpiCardProps {
   kpiKey: HubKpiKey;
   loading: boolean;
   failed: boolean;
   result: KpiResult | null;
-  saving: boolean;
-  canFix?: boolean;
-  onSuggest: (input: {
-    kpiKey: HubKpiKey;
-    title: string;
-    summary: string;
-    valueLabel: string;
-  }) => Promise<void>;
 }
 
 function detailKey(kpiKey: HubKpiKey, result: KpiResult): string {
@@ -79,14 +47,8 @@ export function KpiCard({
   loading,
   failed,
   result,
-  saving,
-  canFix = true,
-  onSuggest,
 }: KpiCardProps) {
   const { t } = useTranslation();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [drawerError, setDrawerError] = useState<string | null>(null);
   const title = t(TITLE_KEYS[kpiKey]);
 
   if (loading) {
@@ -117,30 +79,7 @@ export function KpiCard({
         : severity === "normal"
           ? t("operations.hubSeverityNormal")
           : null;
-  const canSuggest = Boolean(canFix && result?.available && valueLabel);
-
-  async function generate() {
-    if (!valueLabel) return;
-    setDrawerError(null);
-    try {
-      await onSuggest({
-        kpiKey,
-        title: t(SUGGESTION_TITLE_KEYS[kpiKey]),
-        summary: t(SUGGESTION_SUMMARY_KEYS[kpiKey], { value: valueLabel }),
-        valueLabel,
-      });
-      setOpen(false);
-      toast({
-        title: t("operations.generateSuggestionSaved"),
-      });
-    } catch (error) {
-      setDrawerError(
-        error instanceof Error && error.message
-          ? error.message
-          : t("operations.generateSuggestionFailed"),
-      );
-    }
-  }
+  const showProgress = Boolean(result?.available && valueLabel);
 
   return (
     <motion.div
@@ -174,53 +113,12 @@ export function KpiCard({
       </div>
       <p className="mt-3 text-sm text-muted-foreground">{detail}</p>
 
-      {canSuggest && valueLabel ? (
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Progress
-            value={Math.max(0, Math.min(result?.percent ?? 0, 100))}
-            aria-label={valueLabel}
-            className="w-full"
-          />
-          <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full shrink-0 sm:w-auto"
-              >
-                {t("operations.fixAutomatically")}
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent>
-              <DrawerHeader>
-                <DrawerTitle>{t("operations.suggestAutomation")}</DrawerTitle>
-                <DrawerDescription>
-                  {t("operations.hubSuggestionBody", { metric: title })}
-                </DrawerDescription>
-              </DrawerHeader>
-              <div className="space-y-3 px-4 pb-4 text-sm">
-                <p>
-                  {t("operations.hubCurrentValue", {
-                    metric: title,
-                    value: valueLabel,
-                  })}
-                </p>
-                {trendLabel ? <p>{trendLabel}</p> : null}
-                {drawerError ? (
-                  <p className="text-destructive">{drawerError}</p>
-                ) : null}
-              </div>
-              <DrawerFooter>
-                <Button disabled={saving} onClick={() => void generate()}>
-                  {t("operations.generateSuggestion")}
-                </Button>
-                <DrawerClose asChild>
-                  <Button variant="ghost">{t("common.cancel")}</Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
-        </div>
+      {showProgress && valueLabel ? (
+        <Progress
+          value={Math.max(0, Math.min(result?.percent ?? 0, 100))}
+          aria-label={valueLabel}
+          className="mt-4 w-full"
+        />
       ) : null}
     </motion.div>
   );

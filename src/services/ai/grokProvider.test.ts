@@ -289,8 +289,7 @@ export async function runGrokProviderTests() {
 
   const insights = read("supabase/functions/ai-insights/index.ts");
   const engagement = read("supabase/functions/ai-analyze-updates/index.ts");
-  const automation = read("src/server/ops/suggestions/generateAutomationSuggestion.ts");
-  for (const source of [insights, engagement, automation]) {
+  for (const source of [insights, engagement]) {
     assert.equal(source.includes("api.openai.com"), false);
     assert.equal(source.includes("gpt-4o-mini"), false);
   }
