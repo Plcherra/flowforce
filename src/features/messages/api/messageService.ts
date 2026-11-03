@@ -30,8 +30,8 @@ export async function updateMessage(
   return messagesRepository.updateMessage(messageId, senderId, content, source);
 }
 
-export async function deleteMessage(messageId: string, senderId: string) {
-  await messagesRepository.deleteMessage(messageId, senderId);
+export async function deleteMessage(messageId: string) {
+  await messagesRepository.deleteMessage(messageId);
 }
 
 export async function searchMessages(

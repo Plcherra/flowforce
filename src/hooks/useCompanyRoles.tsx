@@ -7,6 +7,7 @@ import { logger } from "@/utils/logger";
 import {
   canDeactivateClass,
   clampPermissionsToProductLevel,
+  fillMissingProductRoleDefaults,
   inferProductLevel,
   isCloneableProductLevel,
   isOwnerClass,
@@ -178,7 +179,10 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
         return {
           ...role,
           product_level: productLevel,
-          permissions: clampPermissionsToProductLevel(productLevel, permissions),
+          permissions: clampPermissionsToProductLevel(
+            productLevel,
+            fillMissingProductRoleDefaults(productLevel, permissions),
+          ),
         };
       });
 

@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(18);
+select plan(31);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -69,7 +69,17 @@ insert into public.company_roles (
 )
 values
   ('b22e0000-0000-4000-8000-000000000041', 'b22e0000-0000-4000-8000-000000000001', 'Staff', 1, 'staff', '{}'::jsonb, true, true),
-  ('b22e0000-0000-4000-8000-000000000042', 'b22e0000-0000-4000-8000-000000000001', 'Manager', 2, 'manager', '{}'::jsonb, true, true);
+  ('b22e0000-0000-4000-8000-000000000042', 'b22e0000-0000-4000-8000-000000000001', 'Manager', 2, 'manager', '{}'::jsonb, true, true),
+  (
+    'b22e0000-0000-4000-8000-000000000043',
+    'b22e0000-0000-4000-8000-000000000001',
+    'Legacy staff',
+    1,
+    'staff',
+    '{"viewOwnProfile": true, "messages.send": false}'::jsonb,
+    false,
+    true
+  );
 
 update public.profiles
 set role_id = 'b22e0000-0000-4000-8000-000000000041'
@@ -124,6 +134,59 @@ values (
   'Manager only'
 );
 
+insert into public.form_fields (id, company_id, form_id, label, field_type, field_order)
+values (
+  'b22e0000-0000-4000-8000-000000000053',
+  'b22e0000-0000-4000-8000-000000000001',
+  'b22e0000-0000-4000-8000-000000000051',
+  'Temperature',
+  'text',
+  1
+);
+
+insert into public.message_channels (id, company_id, name, type, created_by)
+values
+  (
+    'b22e0000-0000-4000-8000-000000000063',
+    'b22e0000-0000-4000-8000-000000000001',
+    'Floor',
+    'team',
+    'b22e0000-0000-4000-8000-000000000020'
+  ),
+  (
+    'b22e0000-0000-4000-8000-000000000064',
+    'b22e0000-0000-4000-8000-000000000001',
+    'Private',
+    'team',
+    'b22e0000-0000-4000-8000-000000000020'
+  );
+
+insert into public.channel_members (id, company_id, channel_id, user_id, role)
+values
+  (
+    'b22e0000-0000-4000-8000-000000000066',
+    'b22e0000-0000-4000-8000-000000000001',
+    'b22e0000-0000-4000-8000-000000000063',
+    'b22e0000-0000-4000-8000-000000000030',
+    'member'
+  ),
+  (
+    'b22e0000-0000-4000-8000-000000000067',
+    'b22e0000-0000-4000-8000-000000000001',
+    'b22e0000-0000-4000-8000-000000000063',
+    'b22e0000-0000-4000-8000-000000000020',
+    'admin'
+  );
+
+insert into public.messages (id, company_id, channel_id, sender_id, content)
+values (
+  'b22e0000-0000-4000-8000-000000000065',
+  'b22e0000-0000-4000-8000-000000000001',
+  'b22e0000-0000-4000-8000-000000000063',
+  'b22e0000-0000-4000-8000-000000000030',
+  'Staff note'
+);
+
 insert into public.company_updates (id, company_id, title, body, status, author_id)
 values (
   'b22e0000-0000-4000-8000-000000000071',
@@ -159,6 +222,38 @@ values (
   'b22e0000-0000-4000-8000-000000000030',
   'in_progress',
   'pending'
+);
+
+select public.backfill_product_role_permission_defaults();
+
+select is(
+  (
+    select permissions->>'forms.submit'
+    from public.company_roles
+    where id = 'b22e0000-0000-4000-8000-000000000043'
+  ),
+  'true',
+  'Missing form submit default is filled for an existing staff class'
+);
+
+select is(
+  (
+    select permissions->>'messages.send'
+    from public.company_roles
+    where id = 'b22e0000-0000-4000-8000-000000000043'
+  ),
+  'false',
+  'An explicit message deny stays denied'
+);
+
+select is(
+  (
+    select permissions ? 'forms.submissions.read'
+    from public.company_roles
+    where id = 'b22e0000-0000-4000-8000-000000000043'
+  ),
+  false,
+  'A grantable extra stays off when it was not stored'
 );
 
 set local role authenticated;
@@ -314,6 +409,32 @@ select throws_ok(
   'Staff cannot write a workflow review'
 );
 
+select throws_ok(
+  $$ update public.channel_members
+     set channel_id = 'b22e0000-0000-4000-8000-000000000064'
+     where id = 'b22e0000-0000-4000-8000-000000000066' $$,
+  '42501',
+  'Channel membership updates cannot change the channel',
+  'Staff cannot move their membership onto another channel'
+);
+
+select lives_ok(
+  $$ update public.channel_members
+     set last_read_at = now()
+     where id = 'b22e0000-0000-4000-8000-000000000066' $$,
+  'Staff can update their own read marker'
+);
+
+select is(
+  (
+    select channel_id::text
+    from public.channel_members
+    where id = 'b22e0000-0000-4000-8000-000000000066'
+  ),
+  'b22e0000-0000-4000-8000-000000000063',
+  'A read-marker update keeps the same channel'
+);
+
 select set_config('request.jwt.claim.sub', 'b22e0000-0000-4000-8000-000000000020', true);
 
 select is(
@@ -354,6 +475,40 @@ select lives_ok(
        'role'
      ) $$,
   'Manager can assign a workflow'
+);
+
+select lives_ok(
+  $$ delete from public.form_fields
+     where id = 'b22e0000-0000-4000-8000-000000000053' $$,
+  'A form editor can delete fields while replacing a template'
+);
+
+select is(
+  (select count(*) from public.form_fields where id = 'b22e0000-0000-4000-8000-000000000053'),
+  0::bigint,
+  'The replaced form field is gone'
+);
+
+select lives_ok(
+  $$ delete from public.forms where id = 'b22e0000-0000-4000-8000-000000000051' $$,
+  'Template delete is attempted without manageForms'
+);
+
+select is(
+  (select count(*) from public.forms where id = 'b22e0000-0000-4000-8000-000000000051'),
+  1::bigint,
+  'Deleting a template still needs manageForms'
+);
+
+select lives_ok(
+  $$ delete from public.messages where id = 'b22e0000-0000-4000-8000-000000000065' $$,
+  'A manager can delete another person''s message'
+);
+
+select is(
+  (select count(*) from public.messages where id = 'b22e0000-0000-4000-8000-000000000065'),
+  0::bigint,
+  'The moderated message is gone'
 );
 
 select * from finish();

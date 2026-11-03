@@ -103,6 +103,42 @@ export function applyOwnerMajorPermissions(
   return next;
 }
 
+function storedPermissionRecord(permissions: unknown): Record<string, boolean> {
+  if (Array.isArray(permissions)) {
+    return Object.fromEntries(
+      permissions
+        .filter((key): key is string => typeof key === "string")
+        .map((key) => [key, true]),
+    );
+  }
+  if (!permissions || typeof permissions !== "object") return {};
+  const next: Record<string, boolean> = {};
+  for (const [key, value] of Object.entries(permissions)) {
+    if (typeof value === "boolean") next[key] = value;
+  }
+  return next;
+}
+
+/**
+ * Stored class packs from before a key existed omit that key.
+ * SQL treats a missing key as the product default and an explicit false as a deny.
+ * Fill only the missing defaults so the screens match that rule.
+ */
+export function fillMissingProductRoleDefaults(
+  level: ProductLevel,
+  permissions?: unknown,
+): Record<string, boolean> {
+  const stored = storedPermissionRecord(permissions);
+  const defaults = getProductRolePermissions(level);
+  for (const [key, enabled] of Object.entries(defaults)) {
+    if (!enabled) continue;
+    if (!Object.prototype.hasOwnProperty.call(stored, key)) {
+      stored[key] = true;
+    }
+  }
+  return stored;
+}
+
 export function clampPermissionsToProductLevel(
   level: ProductLevel,
   permissions?: Record<string, boolean> | null,

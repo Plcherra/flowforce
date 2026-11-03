@@ -297,11 +297,13 @@ with check (
   )
 );
 
-create policy "Form managers can delete form fields"
+create policy "Form editors can delete form fields"
 on public.form_fields
 for delete
 to authenticated
-using (public.current_user_has_permission(company_id, 'manageForms'));
+using (
+  public.current_user_has_any_permission(company_id, array['createForms', 'manageForms'])
+);
 
 create policy "Readers can read form rules"
 on public.form_access_rules
@@ -988,6 +990,53 @@ with check (
   user_id = auth.uid()
   or public.current_user_has_permission(company_id, 'messages.manage')
 );
+
+-- Self-service may change read state (last_read_at) only.
+-- Moving channel_id onto a private channel would make
+-- current_user_is_channel_member true and open that history.
+create or replace function public.protect_channel_member_assignment()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null
+    or coalesce(auth.role(), '') = 'service_role'
+    or coalesce(current_setting('request.jwt.claim.role', true), '') = 'service_role'
+  then
+    return new;
+  end if;
+
+  if public.current_user_has_permission(
+    coalesce(old.company_id, new.company_id),
+    'messages.manage'
+  ) then
+    return new;
+  end if;
+
+  if new.channel_id is distinct from old.channel_id
+    or new.user_id is distinct from old.user_id
+    or new.company_id is distinct from old.company_id
+    or new.role is distinct from old.role
+    or new.id is distinct from old.id
+    or new.joined_at is distinct from old.joined_at
+  then
+    raise exception 'Channel membership updates cannot change the channel'
+      using errcode = '42501';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.protect_channel_member_assignment() from public, anon, authenticated;
+grant execute on function public.protect_channel_member_assignment() to authenticated, service_role;
+
+drop trigger if exists protect_channel_member_assignment on public.channel_members;
+create trigger protect_channel_member_assignment
+before update on public.channel_members
+for each row execute function public.protect_channel_member_assignment();
 
 create policy "Managers can delete channel members"
 on public.channel_members
@@ -1948,5 +1997,70 @@ using (
       )
   )
 );
+
+-- Existing class packs omit keys added after they were saved.
+-- Missing means the product default. Explicit false stays a deny.
+create or replace function public.backfill_product_role_permission_defaults()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  role_row record;
+  level text;
+  allowed jsonb;
+  next_permissions jsonb;
+  permission_key text;
+begin
+  for role_row in
+    select id, product_level, name, hierarchy_level, permissions
+    from public.company_roles
+  loop
+    level := role_row.product_level;
+    if level is null or level not in ('owner', 'admin', 'manager', 'staff') then
+      level := public.infer_company_role_product_level(role_row.name, role_row.hierarchy_level);
+    end if;
+
+    if role_row.permissions is null then
+      next_permissions := '{}'::jsonb;
+    elsif jsonb_typeof(role_row.permissions) = 'object' then
+      next_permissions := role_row.permissions;
+    elsif jsonb_typeof(role_row.permissions) = 'array' then
+      next_permissions := '{}'::jsonb;
+      for permission_key in
+        select jsonb_array_elements_text(role_row.permissions)
+      loop
+        next_permissions := next_permissions || jsonb_build_object(permission_key, true);
+      end loop;
+    else
+      next_permissions := '{}'::jsonb;
+    end if;
+
+    if level is distinct from 'owner' then
+      allowed := public.product_level_allowed_permissions(level);
+      if allowed is not null then
+        for permission_key in
+          select jsonb_array_elements_text(allowed)
+        loop
+          if public.product_role_default_allows(level, permission_key)
+             and not (next_permissions ? permission_key) then
+            next_permissions := next_permissions || jsonb_build_object(permission_key, true);
+          end if;
+        end loop;
+      end if;
+    end if;
+
+    update public.company_roles
+    set permissions = public.clamp_permissions_to_product_level(level, next_permissions)
+    where id = role_row.id;
+  end loop;
+end;
+$$;
+
+revoke all on function public.backfill_product_role_permission_defaults() from public, anon, authenticated;
+grant execute on function public.backfill_product_role_permission_defaults() to service_role;
+
+select public.backfill_product_role_permission_defaults();
 
 notify pgrst, 'reload schema';

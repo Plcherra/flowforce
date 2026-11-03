@@ -27,10 +27,10 @@ Levels are the product roles: owner, admin, manager, staff. Owner holds every ke
 | Forms: submit own | Yes `forms.submit` | Yes | Yes | `submitted_by` must be the signed-in person |
 | Forms: read others' submissions | Grant `forms.submissions.read` | Yes | Yes | Also `approveFormSubmissions` or `manageForms` |
 | Forms: create template | No | Yes `createForms` | Yes | |
-| Forms: edit or delete template | No | No `manageForms` | Yes | Delete is `manageForms` |
+| Forms: edit or delete template | No | Edit with `createForms`. Delete template is `manageForms` | Yes | Replacing fields deletes the old field rows with `createForms` or `manageForms` |
 | Forms: approve submission | No | Yes `approveFormSubmissions` | Yes | |
 | Messages: read | Participants | Participants | Participants | Not the rest of the company |
-| Messages: send and start a channel | Yes `messages.send` | Yes | Yes | Can add coworkers only to a channel you created |
+| Messages: send and start a channel | Yes `messages.send` | Yes | Yes | Can add coworkers only to a channel you created. A member can update their own read marker. Changing the channel needs `messages.manage` |
 | Messages: manage channels and others' messages | No | Yes `messages.manage` | Yes | Does not reveal non-member threads |
 | Goals: view | Yes `goals.view` | Yes | Yes | |
 | Goals: create, edit, delete | No | Yes `goals.manage` | Yes | Creator with `goals.view` may update their goal |
