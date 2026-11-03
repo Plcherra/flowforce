@@ -36,9 +36,9 @@ export function useReports() {
 }
 
 export function useCreateReport() {
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { i18n } = useTranslation();
   const { profile } = useProfile();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -68,14 +68,14 @@ export function useCreateReport() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast({
-        title: "Success",
-        description: "Report created successfully",
+        title: t("literals.success"),
+        description: t("literals.reportCreatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create report: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToCreateReport", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -83,9 +83,9 @@ export function useCreateReport() {
 }
 
 export function useUpdateReport() {
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { i18n } = useTranslation();
   const { profile } = useProfile();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -121,14 +121,14 @@ export function useUpdateReport() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast({
-        title: "Success",
-        description: "Report updated successfully",
+        title: t("literals.success"),
+        description: t("literals.reportUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update report: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateReport", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -136,6 +136,7 @@ export function useUpdateReport() {
 }
 
 export function useDeleteReport() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -151,14 +152,14 @@ export function useDeleteReport() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast({
-        title: "Success",
-        description: "Report deleted successfully",
+        title: t("literals.success"),
+        description: t("literals.reportDeletedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to delete report: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToDeleteReport", { message: error.message }),
         variant: "destructive",
       });
     },

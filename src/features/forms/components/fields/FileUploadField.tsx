@@ -112,8 +112,8 @@ export function FileUploadField({
       // Check file count limit
       if (value.length + files.length > maxFiles) {
         toast({
-          title: "Error",
-          description: `Maximum ${maxFiles} files allowed`,
+          title: t("literals.error"),
+          description: t("literals.maximumFilesAllowed", { maxFiles: maxFiles }),
           variant: "destructive",
         });
         return;
@@ -123,8 +123,8 @@ export function FileUploadField({
       for (const file of files) {
         if (file.size > maxSize * 1024 * 1024) {
           toast({
-            title: "Error",
-            description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+            title: t("literals.error"),
+            description: t("literals.fileIsTooLargeMaximumSizeIsMb", { name: file.name, maxSize: maxSize }),
             variant: "destructive",
           });
           return;
@@ -135,8 +135,8 @@ export function FileUploadField({
           !acceptedTypes.some((type) => file.type.includes(type))
         ) {
           toast({
-            title: "Error",
-            description: `File ${file.name} type is not allowed`,
+            title: t("literals.error"),
+            description: t("literals.fileTypeIsNotAllowed", { name: file.name }),
             variant: "destructive",
           });
           return;
@@ -157,15 +157,15 @@ export function FileUploadField({
         if (successfulUploads.length > 0) {
           onChange([...value, ...successfulUploads]);
           toast({
-            title: "Success",
-            description: `${successfulUploads.length} file(s) uploaded successfully`,
+            title: t("literals.success"),
+            description: t("literals.fileSUploadedSuccessfully", { length: successfulUploads.length }),
           });
         }
 
         if (failedUploads > 0) {
           toast({
-            title: "Warning",
-            description: `${failedUploads} file(s) failed to upload`,
+            title: t("literals.warning"),
+            description: t("literals.fileSFailedToUpload", { failedUploads: failedUploads }),
             variant: "destructive",
           });
         }
@@ -265,7 +265,7 @@ export function FileUploadField({
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {formatFileSize(fileData.size ?? 0)} •{" "}
-                      {fileData.type.split("/")[1]?.toUpperCase() || "File"}
+                      {fileData.type.split("/")[1]?.toUpperCase() || t("literals.file")}
                     </p>
                   </div>
                   <div className="flex gap-1">
@@ -300,8 +300,8 @@ export function FileUploadField({
           <FileIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
             {value.length === 0
-              ? "No files uploaded yet"
-              : `${value.length} of ${maxFiles} files uploaded`}
+              ? t("literals.noFilesUploadedYet")
+              : t("literals.ofFilesUploaded", { length: value.length, maxFiles: maxFiles })}
           </p>
           <Button
             type="button"
@@ -311,7 +311,7 @@ export function FileUploadField({
             className="min-w-[120px]"
           >
             <Upload className="h-4 w-4 mr-2" />
-            {uploading ? "Uploading..." : "Upload Files"}
+            {uploading ? t("literals.uploading") : t("literals.uploadFiles")}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
             {t("forms.maxFilesEach", { count: maxFiles, size: maxSize })}

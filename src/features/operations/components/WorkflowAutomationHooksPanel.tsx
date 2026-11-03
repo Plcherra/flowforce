@@ -80,8 +80,8 @@ export function WorkflowAutomationHooksPanel() {
 
       const result = (data ?? {}) as WorkflowAutomationRpcResult;
       toast({
-        title: "Automation hooks checked",
-        description: `${result.created_count ?? 0} notification hooks created, ${result.skipped_count ?? 0} already handled.`,
+        title: t("literals.automationHooksChecked"),
+        description: t("literals.notificationHooksCreatedAlreadyHandled", { value0: result.created_count ?? 0, value1: result.skipped_count ?? 0 }),
       });
       await loadHooks();
     } catch (error) {
@@ -91,9 +91,9 @@ export function WorkflowAutomationHooksPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Automation hook failed",
+        title: t("literals.automationHookFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected automation error.",
+          error instanceof Error ? error.message : t("literals.unexpectedAutomationError"),
       });
     } finally {
       setRunning(false);
@@ -168,7 +168,7 @@ export function WorkflowAutomationHooksPanel() {
                     {workflowAutomationHookLabels[hook.hook_type]}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {hook.workflow_name ?? hook.exception_title ?? "Workflow run"}
+                    {hook.workflow_name ?? hook.exception_title ?? t("literals.workflowRun")}
                   </p>
                 </div>
                 <Badge variant={hook.status === "failed" ? "destructive" : "outline"}>

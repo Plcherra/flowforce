@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +66,7 @@ export function useInventoryTransactions() {
 }
 
 export function useCreateInventoryTransaction() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { profile } = useProfile();
@@ -96,14 +98,14 @@ export function useCreateInventoryTransaction() {
       queryClient.invalidateQueries({ queryKey: ["inventory-transactions"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Success",
-        description: "Transaction recorded successfully",
+        title: t("literals.success"),
+        description: t("literals.transactionRecordedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to record transaction",
+        title: t("literals.error"),
+        description: t("literals.failedToRecordTransaction"),
         variant: "destructive",
       });
       logger.error("Create transaction error", { error, tags: ["error"] });

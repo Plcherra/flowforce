@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "../../../_server/supabaseAdmin";
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, email, inviteId });
   } catch (error) {
     scopedLogger.error("Unexpected invite activation error", { error });
-    const message = error instanceof Error ? error.message : "Unable to activate this invite.";
+    const message = error instanceof Error ? error.message : i18n.t("literals.unableToActivateThisInvite");
     return jsonError(message, 500);
   }
 }

@@ -34,7 +34,7 @@ export function RoleSummarySidebar({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          Role &amp; permission snapshot
+          {t("literals.rolePermissionSnapshot")}
         </CardTitle>
         <CardDescription>{t("admin.trackCoverageAcrossRolesAndEnsurePermissionsReflect")}</CardDescription>
       </CardHeader>
@@ -52,7 +52,7 @@ export function RoleSummarySidebar({
                 <div>
                   <div className="font-medium text-foreground">{role.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {role.permissionCount} permission
+                    {role.permissionCount} {t("literals.permission")}
                     {role.permissionCount === 1 ? "" : "s"}
                   </div>
                 </div>
@@ -62,7 +62,7 @@ export function RoleSummarySidebar({
                     color: role.color,
                   }}
                 >
-                  {role.members} member{role.members === 1 ? "" : "s"}
+                  {role.members} {t("literals.member")}{role.members === 1 ? "" : "s"}
                 </Badge>
               </div>
             ))
@@ -89,7 +89,7 @@ export function RoleSummarySidebar({
                     {position.role}
                   </div>
                 </div>
-                <Badge>{position.employees} assigned</Badge>
+                <Badge>{position.employees} {t("literals.assigned")}</Badge>
               </div>
             ))
           )}

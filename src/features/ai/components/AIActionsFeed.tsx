@@ -184,16 +184,16 @@ export function AIActionsFeed({ className }: { className?: string }) {
       case "create_task": {
         if (!user) {
           toast({
-            title: "Sign-in required",
-            description: "Log in to capture follow-up tasks from the feed.",
+            title: t("literals.signInRequired"),
+            description: t("literals.logInToCaptureFollowUpTasksFrom"),
             variant: "destructive",
           });
           return;
         }
         if (!createTask) {
           toast({
-            title: "Task creation unavailable",
-            description: "Task services are temporarily unreachable.",
+            title: t("literals.taskCreationUnavailable"),
+            description: t("literals.taskServicesAreTemporarilyUnreachable"),
             variant: "destructive",
           });
           return;
@@ -231,26 +231,26 @@ export function AIActionsFeed({ className }: { className?: string }) {
 
           if (error) {
             toast({
-              title: "Unable to create task",
+              title: t("literals.unableToCreateTask"),
               description:
                 error instanceof Error
                   ? error.message
-                  : "Unknown error occurred.",
+                  : t("literals.unknownErrorOccurred"),
               variant: "destructive",
             });
           } else {
             toast({
-              title: "Follow-up scheduled",
-              description: `"${taskPayload.title}" added to your task list.`,
+              title: t("literals.followUpScheduled"),
+              description: t("literals.addedToYourTaskList", { title: taskPayload.title }),
             });
           }
         } catch (error) {
           toast({
-            title: "Unable to create task",
+            title: t("literals.unableToCreateTask"),
             description:
               error instanceof Error
                 ? error.message
-                : "Unexpected error occurred.",
+                : t("literals.unexpectedErrorOccurred"),
             variant: "destructive",
           });
         } finally {
@@ -277,16 +277,16 @@ export function AIActionsFeed({ className }: { className?: string }) {
             action.payload.minutes,
           );
           toast({
-            title: "Reminder snoozed",
-            description: `We will remind you again in ${action.payload.minutes} minutes.`,
+            title: t("literals.reminderSnoozed"),
+            description: t("literals.weWillRemindYouAgainInMinutes", { minutes: action.payload.minutes }),
           });
         } catch (error) {
           toast({
-            title: "Unable to snooze reminder",
+            title: t("literals.unableToSnoozeReminder"),
             description:
               error instanceof Error
                 ? error.message
-                : "Unexpected error occurred.",
+                : t("literals.unexpectedErrorOccurred"),
             variant: "destructive",
           });
         } finally {
@@ -300,8 +300,8 @@ export function AIActionsFeed({ className }: { className?: string }) {
         try {
           await markNotificationsRead();
           toast({
-            title: "Notifications cleared",
-            description: "All task alerts marked as read.",
+            title: t("literals.notificationsCleared"),
+            description: t("literals.allTaskAlertsMarkedAsRead"),
           });
         } finally {
           setPendingAction(null);
@@ -345,7 +345,7 @@ export function AIActionsFeed({ className }: { className?: string }) {
           disabled={refreshing}
         >
           {refreshing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Refresh feed
+          {t("literals.refreshFeed")}
         </Button>
       </div>
     );
@@ -430,7 +430,7 @@ export function AIActionsFeed({ className }: { className?: string }) {
                   </div>
                   {item.timestamp && (
                     <span className="text-[11px] text-muted-foreground/70">
-                      Updated {new Date(item.timestamp).toLocaleString()}
+                      {t("literals.updated")} {new Date(item.timestamp).toLocaleString()}
                     </span>
                   )}
                 </div>

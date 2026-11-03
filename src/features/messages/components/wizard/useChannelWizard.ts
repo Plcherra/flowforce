@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback } from "react";
 import { useMessageChannels } from "@/features/messages/hooks/useMessageChannels";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ export interface WizardUser {
 }
 
 export function useChannelWizard(open: boolean) {
+  const { t } = useTranslation();
   const { createChannel } = useMessageChannels();
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
@@ -120,8 +122,8 @@ export function useChannelWizard(open: boolean) {
         if (!cancelled) {
           setMemberOptions([]);
           toast({
-            title: "Unable to load teammates",
-            description: "We could not fetch the user list. Try again shortly.",
+            title: t("literals.unableToLoadTeammates"),
+            description: t("literals.weCouldNotFetchTheUserListTry"),
             variant: "destructive",
           });
         }
@@ -178,8 +180,8 @@ export function useChannelWizard(open: boolean) {
         if (error) throw error;
 
         toast({
-          title: "Group created",
-          description: "You can start messaging this group.",
+          title: t("literals.groupCreated"),
+          description: t("literals.youCanStartMessagingThisGroup"),
         });
 
         if (onChannelCreated && data?.id) {
@@ -222,7 +224,7 @@ export function useChannelWizard(open: boolean) {
             : supabaseError.message || "Failed to create channel";
 
         toast({
-          title: "Error",
+          title: t("literals.error"),
           description: userMessage,
           variant: "destructive",
         });

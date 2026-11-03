@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
@@ -587,8 +588,8 @@ export async function recordVendorInvoice(
 
   const referenceNumber = purchaseOrder.po_number;
   const description = payload.invoiceNumber
-    ? `Invoice ${payload.invoiceNumber} for PO ${purchaseOrder.po_number}`
-    : `Invoice for PO ${purchaseOrder.po_number}`;
+    ? i18n.t("literals.invoiceForPo", { invoiceNumber: payload.invoiceNumber, po_number: purchaseOrder.po_number })
+    : i18n.t("literals.invoiceForPo2", { po_number: purchaseOrder.po_number });
   const combinedNotes = [
     payload.invoiceNumber ? `Invoice #${payload.invoiceNumber}` : null,
     payload.notes ?? null,

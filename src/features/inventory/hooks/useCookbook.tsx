@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -84,6 +85,7 @@ interface ProductionEventRecord {
   prep_date?: string | null;
 }
 export function useCookbook() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -238,8 +240,8 @@ export function useCookbook() {
       }));
       setCounts((prev) => [...payload, ...prev]);
       toast({
-        title: "Daily count saved",
-        description: "Inventory counts have been recorded for today",
+        title: t("literals.dailyCountSaved"),
+        description: t("literals.inventoryCountsHaveBeenRecordedForToday"),
       });
       return payload;
     },
@@ -251,8 +253,8 @@ export function useCookbook() {
       const recipe = recipeMap.get(item_id);
       if (!recipe) {
         toast({
-          title: "Recipe not linked",
-          description: "This prep item is not linked to a cookbook recipe yet.",
+          title: t("literals.recipeNotLinked"),
+          description: t("literals.thisPrepItemIsNotLinkedToA"),
           variant: "destructive",
         });
         return null;
@@ -269,8 +271,8 @@ export function useCookbook() {
         queryClient.invalidateQueries({ queryKey: ["cookbook-production"] });
         queryClient.invalidateQueries({ queryKey: ["inventory-adjustments"] });
         toast({
-          title: "Production logged",
-          description: `${recipe.item.name} production recorded with smart inventory deduction.`,
+          title: t("literals.productionLogged"),
+          description: t("literals.productionRecordedWithSmartInventoryDeduction", { name: recipe.item.name }),
         });
       } catch (err) {
         logger.warn("Failed to log production, falling back to demo mode", {
@@ -278,9 +280,9 @@ export function useCookbook() {
           tags: ["warning"],
         });
         toast({
-          title: "Demo mode: production simulated",
+          title: t("literals.demoModeProductionSimulated"),
           description:
-            "Production events will be tracked locally until Supabase tables are available.",
+            t("literals.productionEventsWillBeTrackedLocallyUntilSupabase"),
         });
       }
 
@@ -342,8 +344,8 @@ export function useCookbook() {
         });
         queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
         toast({
-          title: "Waste recorded",
-          description: "Waste event captured and inventory updated.",
+          title: t("literals.wasteRecorded"),
+          description: t("literals.wasteEventCapturedAndInventoryUpdated"),
         });
       } catch (err) {
         logger.warn("Failed to record waste, falling back to demo mode", {
@@ -351,9 +353,9 @@ export function useCookbook() {
           tags: ["warning"],
         });
         toast({
-          title: "Demo mode: waste logged locally",
+          title: t("literals.demoModeWasteLoggedLocally"),
           description:
-            "Waste tracking will sync once Supabase tables are available.",
+            t("literals.wasteTrackingWillSyncOnceSupabaseTablesAre"),
         });
       }
     },

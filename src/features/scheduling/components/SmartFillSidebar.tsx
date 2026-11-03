@@ -202,8 +202,8 @@ export function SmartFillSidebar({
               {scheduler.draftShifts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   {hasGenerated
-                    ? "No additional shifts needed for this week."
-                    : "Run Smart Fill to draft shifts from templates."}
+                    ? t("literals.noAdditionalShiftsNeededForThisWeek")
+                    : t("literals.runSmartFillToDraftShiftsFromTemplates")}
                 </p>
               ) : (
                 <ul className="space-y-2">
@@ -222,14 +222,13 @@ export function SmartFillSidebar({
                         {shift.scheduleDate} · {shift.location}
                       </p>
                       <p className="mt-1 text-xs">
-                        {shift.employeeName ?? "Open shift"} · from template
+                        {shift.employeeName ?? t("literals.openShift")} {t("literals.fromTemplate")}
                       </p>
                     </li>
                   ))}
                   {scheduler.draftShifts.length > 12 ? (
                     <p className="text-xs text-muted-foreground">
-                      +{scheduler.draftShifts.length - 12} more suggested
-                      shifts
+                      +{scheduler.draftShifts.length - 12} {t("literals.moreSuggestedShifts")}
                     </p>
                   ) : null}
                 </ul>
@@ -250,7 +249,7 @@ export function SmartFillSidebar({
                       >
                         <p className="text-sm font-medium">{gap.role}</p>
                         <p className="text-xs text-muted-foreground">
-                          {gap.location} · {gap.scheduleDate} · missing{" "}
+                          {gap.location} · {gap.scheduleDate} {t("literals.missing")}{" "}
                           {gap.missingCount}
                         </p>
                       </li>
@@ -358,6 +357,7 @@ function CompactStatus({
   loading: boolean;
   onSuggestFills: () => void;
 }) {
+  const { t } = useTranslation();
   const statusMessage =
     needsAttention > 0
       ? `${needsAttention} shift${needsAttention === 1 ? "" : "s"} need coverage`
@@ -377,9 +377,9 @@ function CompactStatus({
       </p>
       {(unassignedCount > 0 || understaffedCount > 0) && (
         <p className="text-xs text-muted-foreground">
-          {unassignedCount > 0 ? `${unassignedCount} unassigned` : null}
+          {unassignedCount > 0 ? t("literals.unassigned2", { unassignedCount: unassignedCount }) : null}
           {unassignedCount > 0 && understaffedCount > 0 ? " · " : null}
-          {understaffedCount > 0 ? `${understaffedCount} understaffed` : null}
+          {understaffedCount > 0 ? t("literals.understaffed", { understaffedCount: understaffedCount }) : null}
         </p>
       )}
       <Button
@@ -389,7 +389,7 @@ function CompactStatus({
         disabled={loading}
       >
         <Sparkles className="mr-2 h-4 w-4" />
-        {loading ? "Building suggestions…" : "Suggest fills"}
+        {loading ? t("literals.buildingSuggestions") : t("literals.suggestFills")}
       </Button>
     </div>
   );
@@ -448,7 +448,7 @@ function SummaryList({ summary }: { summary: ScheduleSummary }) {
     <div className="space-y-3 text-sm">
       <div className="flex items-center justify-between">
         <span className="text-muted-foreground">{t("schedule.suggestedHours")}</span>
-        <span className="font-medium">{summary.totalHours.toFixed(1)} hrs</span>
+        <span className="font-medium">{summary.totalHours.toFixed(1)} {t("literals.hrs")}</span>
       </div>
       {employeeEntries.length > 0 ? (
         <div className="space-y-2">
@@ -461,8 +461,8 @@ function SummaryList({ summary }: { summary: ScheduleSummary }) {
                 key={employeeId}
                 className="flex items-center justify-between text-xs text-muted-foreground"
               >
-                <span>Employee {employeeId.slice(0, 6)}</span>
-                <span className="text-foreground">{hours.toFixed(1)} hrs</span>
+                <span>{t("literals.employee")} {employeeId.slice(0, 6)}</span>
+                <span className="text-foreground">{hours.toFixed(1)} {t("literals.hrs")}</span>
               </li>
             ))}
           </ul>

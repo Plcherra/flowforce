@@ -62,7 +62,7 @@ export function DescriptionFieldEditor({
 
   const getPreviewText = () => {
     if (!field.content)
-      return 'Click "Edit Content" to add rich text content...';
+      return t("literals.clickEditContentToAddRichTextContent");
     const text = stripHtml(field.content);
     return text.length > 100 ? text.substring(0, 100) + "..." : text;
   };

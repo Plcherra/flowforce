@@ -77,17 +77,17 @@ export function TenantSetupRequired({
       await supabase.auth.refreshSession();
       await profileState.refreshProfile();
       toast({
-        title: "Workspace repaired",
-        description: "Your account is connected to a company workspace.",
+        title: t("literals.workspaceRepaired"),
+        description: t("literals.yourAccountIsConnectedToACompanyWorkspace"),
       });
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Unable to repair workspace setup.";
+          : t("literals.unableToRepairWorkspaceSetup");
       setRepairError(message);
       toast({
-        title: "Repair failed",
+        title: t("literals.repairFailed"),
         description: message,
         variant: "destructive",
       });
@@ -130,7 +130,7 @@ export function TenantSetupRequired({
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{t("shell.workspaceLinkMissing")}</AlertTitle>
               <AlertDescription>
-                {reason} Reference {supportCode} for support. Account: {email}
+                {reason} {t("literals.reference")} {supportCode} {t("literals.forSupportAccount")} {email}
               </AlertDescription>
             </Alert>
 
@@ -150,7 +150,7 @@ export function TenantSetupRequired({
                 className="w-full"
               >
                 <RotateCcw className="h-4 w-4" />
-                {repairing ? "Repairing..." : "Repair workspace"}
+                {repairing ? t("literals.repairing") : t("literals.repairWorkspace")}
               </Button>
               <Button
                 type="button"

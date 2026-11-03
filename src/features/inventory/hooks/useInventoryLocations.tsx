@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
@@ -20,6 +21,7 @@ export function useInventoryLocations() {
 }
 
 export function useCreateInventoryLocation() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { profile } = useProfile();
@@ -45,14 +47,14 @@ export function useCreateInventoryLocation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-locations"] });
       toast({
-        title: "Success",
-        description: "Location created successfully",
+        title: t("literals.success"),
+        description: t("literals.locationCreatedSuccessfully"),
       });
     },
     onError: (error: any) => {
-      const message = error?.message || "Failed to create location";
+      const message = error?.message || t("literals.failedToCreateLocation");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -62,6 +64,7 @@ export function useCreateInventoryLocation() {
 }
 
 export function useUpdateInventoryLocation() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -75,14 +78,14 @@ export function useUpdateInventoryLocation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-locations"] });
       toast({
-        title: "Success",
-        description: "Location updated",
+        title: t("literals.success"),
+        description: t("literals.locationUpdated"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error?.message || "Failed to update location",
+        title: t("literals.error"),
+        description: error?.message || t("literals.failedToUpdateLocation"),
         variant: "destructive",
       });
       logger.error("Update location error", { error, tags: ["error"] });
@@ -91,6 +94,7 @@ export function useUpdateInventoryLocation() {
 }
 
 export function useDeleteInventoryLocation() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -101,14 +105,14 @@ export function useDeleteInventoryLocation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-locations"] });
       toast({
-        title: "Success",
-        description: "Location deleted successfully",
+        title: t("literals.success"),
+        description: t("literals.locationDeletedSuccessfully"),
       });
     },
     onError: (error: any) => {
-      const message = error?.message || "Failed to delete location";
+      const message = error?.message || t("literals.failedToDeleteLocation");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });

@@ -71,17 +71,17 @@ export default function RoleManager({
       });
 
       toast({
-        title: "Success",
-        description: `${userName}'s class is now ${selectedRole.name}`,
+        title: t("literals.success"),
+        description: t("literals.sClassIsNow", { userName: userName, name: selectedRole.name }),
       });
 
       onRoleChange?.(selectedRole.name);
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
+        error instanceof Error ? error.message : t("literals.unknownErrorOccurred2");
       toast({
-        title: "Error",
-        description: `Failed to update role: ${errorMessage}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateRole", { errorMessage: errorMessage }),
         variant: "destructive",
       });
     } finally {

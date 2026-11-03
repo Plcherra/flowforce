@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "./useProfile";
@@ -162,6 +163,7 @@ type PermissionFlag = (typeof SUPPORTED_PERMISSION_KEYS)[number];
 type RolePermissionSet = TeamRole;
 
 export function usePermissionFlags() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const queryClient = useQueryClient();
@@ -230,18 +232,18 @@ export function usePermissionFlags() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["permission-flags"] });
       toast({
-        title: "Permissions updated",
-        description: "Role permissions saved successfully.",
+        title: t("literals.permissionsUpdated"),
+        description: t("literals.rolePermissionsSavedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Unable to update permissions",
+        title: t("literals.unableToUpdatePermissions"),
         description:
           error instanceof Error
             ? error.message
-            : "Please try again in a moment.",
+            : t("literals.pleaseTryAgainInAMoment"),
       });
     },
   });

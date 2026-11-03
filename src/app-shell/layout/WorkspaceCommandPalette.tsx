@@ -71,11 +71,11 @@ export function WorkspaceCommandPalette() {
         <CommandInput placeholder={t("nav.jumpToAPage")} />
         <CommandList>
           <CommandEmpty>{t("nav.noMatchingPages")}</CommandEmpty>
-          <CommandGroup heading="You">
+          <CommandGroup heading={t("literals.you")}>
             <CommandItem onSelect={() => go("/app/dashboard")}>{t("nav.dashboard")}</CommandItem>
             <CommandItem onSelect={() => go("/app/profile")}>{t("nav.profile")}</CommandItem>
             <CommandItem onSelect={() => go("/app/settings")}>
-              {can("systemSettings") ? "Settings" : "Account"}
+              {can("systemSettings") ? t("common.settings") : t("literals.account")}
             </CommandItem>
           </CommandGroup>
           {sections.map((section) => {

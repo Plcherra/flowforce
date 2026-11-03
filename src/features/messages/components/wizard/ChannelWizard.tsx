@@ -208,7 +208,7 @@ export function ChannelWizard({
                 className="flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
-                <span>{loading ? "Creating…" : "Create group"}</span>
+                <span>{loading ? "Creating…" : t("literals.createGroup")}</span>
               </Button>
             )}
           </div>

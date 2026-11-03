@@ -233,8 +233,7 @@ export function InvitePersonCardForm({
         {selectedClass ? (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              {selectedClass.name} is painted. Give or take only boxes you
-              can grant.
+              {selectedClass.name} {t("literals.isPaintedGiveOrTakeOnlyBoxesYou")}
             </p>
             <OperatorAccessGrid
               level={level}

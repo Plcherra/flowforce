@@ -59,7 +59,7 @@ type ExpenseInput = Omit<
 >;
 
 export function useExpenses() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { profile, loading: profileLoading } = useProfile();
@@ -119,14 +119,14 @@ export function useExpenses() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast({
-        title: "Success",
-        description: "Expense created successfully",
+        title: t("literals.success"),
+        description: t("literals.expenseCreatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create expense: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToCreateExpense", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -165,14 +165,14 @@ export function useExpenses() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast({
-        title: "Success",
-        description: "Expense updated successfully",
+        title: t("literals.success"),
+        description: t("literals.expenseUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update expense: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateExpense", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -187,6 +187,7 @@ export function useExpenses() {
 }
 
 export function useCreateExpense() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -216,14 +217,14 @@ export function useCreateExpense() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast({
-        title: "Success",
-        description: "Expense created successfully",
+        title: t("literals.success"),
+        description: t("literals.expenseCreatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create expense: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToCreateExpense", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -231,6 +232,7 @@ export function useCreateExpense() {
 }
 
 export function useUpdateExpense() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -262,14 +264,14 @@ export function useUpdateExpense() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast({
-        title: "Success",
-        description: "Expense updated successfully",
+        title: t("literals.success"),
+        description: t("literals.expenseUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update expense: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateExpense", { message: error.message }),
         variant: "destructive",
       });
     },

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +126,7 @@ export function useUserEffectivePermissions(
 
 // Hook to save user permission overrides
 export function useSaveUserPermissions() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -238,14 +240,14 @@ export function useSaveUserPermissions() {
         queryKey: ["user-effective-permissions", variables.userId],
       });
       toast({
-        title: "Success",
-        description: "User permissions updated successfully",
+        title: t("literals.success"),
+        description: t("literals.userPermissionsUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update permissions: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdatePermissions", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -254,6 +256,7 @@ export function useSaveUserPermissions() {
 
 // Hook to update user role
 export function useUpdateUserRole() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -283,14 +286,14 @@ export function useUpdateUserRole() {
         queryKey: ["user-effective-permissions"],
       });
       toast({
-        title: "Success",
-        description: "User role updated successfully",
+        title: t("literals.success"),
+        description: t("literals.userRoleUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update user role: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateUserRole", { message: error.message }),
         variant: "destructive",
       });
     },

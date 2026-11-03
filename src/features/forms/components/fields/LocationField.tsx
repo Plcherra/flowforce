@@ -38,8 +38,8 @@ export function LocationField({
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       toast({
-        title: "Error",
-        description: "Geolocation is not supported by this browser",
+        title: t("literals.error"),
+        description: t("literals.geolocationIsNotSupportedByThisBrowser"),
         variant: "destructive",
       });
       return;
@@ -76,8 +76,8 @@ export function LocationField({
 
           onChange(locationData);
           toast({
-            title: "Success",
-            description: "Location captured successfully",
+            title: t("literals.success"),
+            description: t("literals.locationCapturedSuccessfully"),
           });
         } catch (error) {
           logger.error("Error getting address:", { error, tags: ["error"] });
@@ -93,8 +93,8 @@ export function LocationField({
 
           onChange(locationData);
           toast({
-            title: "Success",
-            description: "Location captured (address lookup failed)",
+            title: t("literals.success"),
+            description: t("literals.locationCapturedAddressLookupFailed"),
           });
         } finally {
           setLoading(false);
@@ -102,7 +102,7 @@ export function LocationField({
       },
       (error) => {
         setLoading(false);
-        let message = "Failed to get location";
+        let message = t("literals.failedToGetLocation");
 
         switch (error.code) {
           case error.PERMISSION_DENIED:
@@ -117,7 +117,7 @@ export function LocationField({
         }
 
         toast({
-          title: "Error",
+          title: t("literals.error"),
           description: message,
           variant: "destructive",
         });
@@ -185,7 +185,7 @@ export function LocationField({
                 onClick={getCurrentLocation}
                 disabled={loading}
               >
-                {loading ? "Getting Location..." : "Update Location"}
+                {loading ? t("literals.gettingLocation") : t("literals.updateLocation")}
               </Button>
               <Button
                 type="button"
@@ -209,7 +209,7 @@ export function LocationField({
             disabled={loading}
             className="min-w-[140px]"
           >
-            {loading ? "Getting Location..." : "Get Current Location"}
+            {loading ? t("literals.gettingLocation") : t("literals.getCurrentLocation")}
           </Button>
         </div>
       )}

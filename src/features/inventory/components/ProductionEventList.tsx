@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,7 @@ const unitLabel = (
   if (!unit) return "units";
   const { name, abbreviation } = unit;
   return abbreviation
-    ? `${name ?? abbreviation} (${abbreviation})`
+    ? i18n.t("literals.text12", { value0: name ?? abbreviation, abbreviation: abbreviation })
     : (name ?? "units");
 };
 
@@ -102,7 +103,7 @@ export function ProductionEventList() {
             <CardHeader className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <CardTitle className="flex flex-wrap items-center gap-2">
-                  {event.item?.name ?? "Production Event"}
+                  {event.item?.name ?? t("literals.productionEvent")}
                   <Badge variant="outline">{event.production_type}</Badge>
                   <Badge variant={approvalBadgeVariant(event.approval_status)}>
                     {event.approval_status}
@@ -112,7 +113,7 @@ export function ProductionEventList() {
                   {t("inventory.recordedOn")}{" "}
                   {event.produced_at
                     ? dateFormatter.format(new Date(event.produced_at))
-                    : "N/A"}
+                    : t("literals.nA")}
                 </p>
               </div>
               <div className="flex flex-col items-end text-right">
@@ -176,7 +177,7 @@ export function ProductionEventList() {
                           key={`${event.id}-${material.ingredient_item_id}`}
                         >
                           <TableCell>
-                            {material.ingredient?.name ?? "Ingredient"}
+                            {material.ingredient?.name ?? t("literals.ingredient")}
                           </TableCell>
                           <TableCell className="text-right">
                             {material.quantity_used?.toLocaleString(undefined, {

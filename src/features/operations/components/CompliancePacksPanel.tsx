@@ -66,9 +66,9 @@ export function CompliancePacksPanel() {
       setPacks([]);
       toast({
         variant: "destructive",
-        title: "Unable to load compliance packs",
+        title: t("literals.unableToLoadCompliancePacks"),
         description:
-          error instanceof Error ? error.message : "Unexpected compliance error.",
+          error instanceof Error ? error.message : t("literals.unexpectedComplianceError"),
       });
     } finally {
       setLoading(false);
@@ -94,10 +94,10 @@ export function CompliancePacksPanel() {
 
       const result = (data ?? {}) as CompliancePackRpcResult;
       toast({
-        title: "Compliance pack installed",
+        title: t("literals.compliancePackInstalled"),
         description: result.workflowid
-          ? "Template workflow and evidence rules are ready."
-          : "Pack is ready.",
+          ? t("literals.templateWorkflowAndEvidenceRulesAreReady")
+          : t("literals.packIsReady"),
       });
       await loadPacks();
     } catch (error) {
@@ -107,9 +107,9 @@ export function CompliancePacksPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Compliance install failed",
+        title: t("literals.complianceInstallFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected compliance error.",
+          error instanceof Error ? error.message : t("literals.unexpectedComplianceError"),
       });
     } finally {
       setActing(null);
@@ -142,10 +142,10 @@ export function CompliancePacksPanel() {
 
       const result = (data ?? {}) as CompliancePackRpcResult;
       toast({
-        title: "Audit export ready",
+        title: t("literals.auditExportReady"),
         description: result.exportid
-          ? `Export ${result.exportid.slice(0, 8)} created.`
-          : "Compliance snapshot created.",
+          ? t("literals.exportCreated", { value0: result.exportid.slice(0, 8) })
+          : t("literals.complianceSnapshotCreated"),
       });
     } catch (error) {
       logger.error("[CompliancePacksPanel] export failed", {
@@ -154,9 +154,9 @@ export function CompliancePacksPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Audit export failed",
+        title: t("literals.auditExportFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected compliance error.",
+          error instanceof Error ? error.message : t("literals.unexpectedComplianceError"),
       });
     } finally {
       setActing(null);
@@ -212,7 +212,7 @@ export function CompliancePacksPanel() {
                   </p>
                 </div>
                 <Badge variant={installed ? "default" : "outline"}>
-                  {installed ? "Installed" : "Template"}
+                  {installed ? t("literals.installed") : t("literals.template")}
                 </Badge>
               </div>
 
@@ -244,7 +244,7 @@ export function CompliancePacksPanel() {
                 ) : (
                   <ClipboardList className="mr-2 h-3.5 w-3.5" />
                 )}
-                {installed ? "Export" : "Install"}
+                {installed ? t("literals.export") : t("literals.install")}
               </Button>
             </div>
           );

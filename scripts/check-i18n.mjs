@@ -1,14 +1,17 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import jiti from "jiti";
+import { createJiti } from "jiti";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const importTs = jiti(import.meta.url, {
+const jiti = createJiti(import.meta.url, {
   alias: { "@": path.join(root, "src") },
 });
 const { compareHardcodedLiterals, compareLocaleKeySets, extractHardcodedLiterals } =
-  importTs("../src/i18n/i18nCheck.ts");
+  jiti("../src/i18n/i18nCheck.ts");
+const { runI18nCheckTests } = jiti("../src/i18n/i18nCheck.test.ts");
+
+runI18nCheckTests();
 
 const codes = ["en", "es", "pt", "fr", "it", "de"];
 
@@ -31,16 +34,25 @@ function walk(dir, files) {
       walk(full, files);
       continue;
     }
+    if (/\.(test|spec)\.(tsx|ts|jsx|js)$/.test(entry)) continue;
     if (/\.(tsx|jsx|ts|js)$/.test(entry)) files.push(full);
   }
 }
 
+function readJson(relativePath) {
+  return JSON.parse(readFileSync(path.join(root, relativePath), "utf8"));
+}
+
 const localeSets = {};
 for (const code of codes) {
-  const file = JSON.parse(
-    readFileSync(path.join(root, "src/locales", `${code}.json`), "utf8"),
-  );
-  localeSets[code] = flatKeys(file);
+  const base = readJson(`src/locales/${code}.json`);
+  const literalPath = `src/locales/literals/${code}.json`;
+  if (!existsSync(path.join(root, literalPath))) {
+    process.stderr.write(`${code} literal catalog is missing\n`);
+    process.exit(1);
+  }
+  const literals = readJson(literalPath);
+  localeSets[code] = flatKeys({ ...base, literals });
   process.stdout.write(`${code} ${localeSets[code].length}\n`);
 }
 
@@ -51,6 +63,7 @@ for (const dir of ["src", "app"]) walk(path.join(root, dir), files);
 const found = [];
 for (const file of files) {
   const relative = path.relative(root, file).split(path.sep).join("/");
+  if (relative.startsWith("src/i18n/") || relative.startsWith("src/locales/")) continue;
   const source = readFileSync(file, "utf8");
   found.push(...extractHardcodedLiterals(source, relative));
 }

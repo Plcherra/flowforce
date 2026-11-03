@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 
 interface ExportData {
@@ -52,7 +53,7 @@ export const generateWhatsAppMessage = (
   const weekEnd = endOfWeek(weekDate);
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
-  let message = `📅 *Schedule for ${format(weekStart, "MMM d")} - ${format(weekEnd, "MMM d, yyyy")}*\n\n`;
+  let message = i18n.t("literals.scheduleFor", { value0: format(weekStart, "MMM d"), value1: format(weekEnd, "MMM d, yyyy") });
 
   weekDays.forEach((day) => {
     const dayName = format(day, "EEEE");

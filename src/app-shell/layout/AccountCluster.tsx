@@ -34,7 +34,7 @@ export function AccountCluster() {
           variant="ghost"
           size="icon"
           className="relative h-9 w-9 rounded-full"
-          aria-label={unreadCount > 0 ? `Account, ${unreadCount} unread` : "Account"}
+          aria-label={unreadCount > 0 ? t("literals.accountUnread", { unreadCount: unreadCount }) : t("literals.account")}
           data-testid="account-cluster"
         >
           <Avatar className="h-8 w-8">
@@ -63,7 +63,7 @@ export function AccountCluster() {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{name || "Account"}</p>
+            <p className="truncate text-sm font-medium">{name || t("literals.account")}</p>
             <Badge className={`mt-1 text-xs ${getRoleBadgeColor(role)}`}>
               {getRoleLabel(role)}
             </Badge>
@@ -86,7 +86,7 @@ export function AccountCluster() {
             onClick={() => navigate("/app/settings")}
           >
             <Settings className="h-4 w-4" />
-            {can("systemSettings") ? "Settings" : "Account"}
+            {can("systemSettings") ? t("common.settings") : t("literals.account")}
           </Button>
           <Button
             variant="ghost"

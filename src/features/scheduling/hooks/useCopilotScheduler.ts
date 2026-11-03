@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { useProfile } from "@/hooks/useProfile";
@@ -50,6 +51,7 @@ export function useCopilotScheduler({
   autoGenerate = false,
   onPublished,
 }: UseCopilotSchedulerOptions) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [state, setState] = useState<CopilotSchedulerState>(INITIAL_STATE);
@@ -170,10 +172,10 @@ export function useCopilotScheduler({
     } catch (error) {
       const message =
         (error as PostgrestError)?.message ??
-        (error instanceof Error ? error.message : "Failed to build schedule");
+        (error instanceof Error ? error.message : t("literals.failedToBuildSchedule"));
       setState((prev) => ({ ...prev, loading: false, error: message }));
       toast({
-        title: "Smart Fill failed",
+        title: t("literals.smartFillFailed"),
         description: message,
         variant: "destructive",
       });
@@ -203,8 +205,8 @@ export function useCopilotScheduler({
       if (!companyId || !actorUserId) return { success: false };
       if (actions.length === 0) {
         toast({
-          title: `No ${label}`,
-          description: "There are no actions to queue.",
+          title: t("literals.no2", { label: label }),
+          description: t("literals.thereAreNoActionsToQueue"),
         });
         return { success: true };
       }
@@ -222,17 +224,17 @@ export function useCopilotScheduler({
 
       if (error) {
         toast({
-          title: `Failed to queue ${label}`,
+          title: t("literals.failedToQueue", { label: label }),
           description:
-            error.message ?? "Unknown error while queueing actions.",
+            error.message ?? t("literals.unknownErrorWhileQueueingActions"),
           variant: "destructive",
         });
         return { success: false, error };
       }
 
       toast({
-        title: `Queued ${label}`,
-        description: `${actions.length} action${actions.length === 1 ? "" : "s"} queued.`,
+        title: t("literals.queued2", { label: label }),
+        description: t("literals.actionQueued", { length: actions.length, value1: actions.length === 1 ? "" : "s" }),
       });
       return { success: true };
     },
@@ -253,8 +255,8 @@ export function useCopilotScheduler({
     if (!companyId || !actorUserId) return;
     if (state.draftShifts.length === 0) {
       toast({
-        title: "No draft shifts",
-        description: "Generate a draft schedule before publishing.",
+        title: t("literals.noDraftShifts"),
+        description: t("literals.generateADraftScheduleBeforePublishing"),
       });
       return;
     }
@@ -317,9 +319,9 @@ export function useCopilotScheduler({
     }
 
     toast({
-      title: "Draft shifts added",
+      title: t("literals.draftShiftsAdded"),
       description:
-        "Suggested shifts were saved as drafts on the schedule board.",
+        t("literals.suggestedShiftsWereSavedAsDraftsOnThe"),
     });
 
     if (typeof onPublished === "function") {

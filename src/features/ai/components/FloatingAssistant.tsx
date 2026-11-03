@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Bot, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export function FloatingAssistant({
   context,
   onTriggerAction,
 }: FloatingAssistantProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleAssistant = () => setIsOpen((prev) => !prev);
@@ -36,7 +38,7 @@ export function FloatingAssistant({
         onClick={toggleAssistant}
       >
         <Bot className="h-4 w-4" />
-        {isOpen ? "Hide Co-Pilot" : "Co-Pilot Live"}
+        {isOpen ? t("literals.hideCoPilot") : t("literals.coPilotLive")}
         <Sparkles className="h-3 w-3 text-warning" />
       </Button>
     </div>

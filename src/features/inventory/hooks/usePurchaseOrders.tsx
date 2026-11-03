@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createPurchaseOrder,
@@ -36,6 +37,7 @@ export function usePurchaseOrder(poId?: string) {
 }
 
 export function useCreatePurchaseOrder() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -45,18 +47,18 @@ export function useCreatePurchaseOrder() {
     onSuccess: (po) => {
       queryClient.invalidateQueries({ queryKey: ["purchase-orders"] });
       toast({
-        title: "Purchase order created",
+        title: t("literals.purchaseOrderCreated"),
         description: po
-          ? `PO ${po.po_number} has been created.`
-          : "Purchase order created successfully.",
+          ? t("literals.poHasBeenCreated", { po_number: po.po_number })
+          : t("literals.purchaseOrderCreatedSuccessfully"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to create purchase order",
+        title: t("literals.failedToCreatePurchaseOrder"),
         description:
           error.message ||
-          "An unexpected error occurred while creating the purchase order.",
+          t("literals.anUnexpectedErrorOccurredWhileCreatingThePurchase"),
         variant: "destructive",
       });
     },
@@ -64,6 +66,7 @@ export function useCreatePurchaseOrder() {
 }
 
 export function useUpdatePurchaseOrder() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -81,16 +84,16 @@ export function useUpdatePurchaseOrder() {
         queryClient.invalidateQueries({ queryKey: ["purchase-orders", po.id] });
       }
       toast({
-        title: "Purchase order updated",
+        title: t("literals.purchaseOrderUpdated"),
         description: po
-          ? `PO ${po.po_number} has been updated.`
-          : "Purchase order changes saved.",
+          ? t("literals.poHasBeenUpdated", { po_number: po.po_number })
+          : t("literals.purchaseOrderChangesSaved"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Update failed",
-        description: error.message || "Unable to update purchase order.",
+        title: t("literals.updateFailed2"),
+        description: error.message || t("literals.unableToUpdatePurchaseOrder"),
         variant: "destructive",
       });
     },
@@ -98,6 +101,7 @@ export function useUpdatePurchaseOrder() {
 }
 
 export function useReceivePurchaseOrder() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -115,18 +119,18 @@ export function useReceivePurchaseOrder() {
         queryClient.invalidateQueries({ queryKey: ["purchase-orders", po.id] });
       }
       toast({
-        title: "Purchase order received",
+        title: t("literals.purchaseOrderReceived"),
         description: po
-          ? `Receiving for PO ${po.po_number} has been recorded.`
-          : "Receiving data saved successfully.",
+          ? t("literals.receivingForPoHasBeenRecorded", { po_number: po.po_number })
+          : t("literals.receivingDataSavedSuccessfully"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Receiving failed",
+        title: t("literals.receivingFailed"),
         description:
           error.message ||
-          "Unable to record receiving for this purchase order.",
+          t("literals.unableToRecordReceivingForThisPurchaseOrder"),
         variant: "destructive",
       });
     },
@@ -134,6 +138,7 @@ export function useReceivePurchaseOrder() {
 }
 
 export function useRecordVendorInvoice() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -148,14 +153,14 @@ export function useRecordVendorInvoice() {
         });
       }
       toast({
-        title: "Invoice logged",
-        description: "Vendor invoice has been recorded.",
+        title: t("literals.invoiceLogged"),
+        description: t("literals.vendorInvoiceHasBeenRecorded"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Invoice logging failed",
-        description: error.message || "Unable to record vendor invoice.",
+        title: t("literals.invoiceLoggingFailed"),
+        description: error.message || t("literals.unableToRecordVendorInvoice"),
         variant: "destructive",
       });
     },
@@ -173,6 +178,7 @@ export function useVendorInvoices(poNumber?: string) {
 }
 
 export function useSupplierIntegrationLink() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -192,16 +198,16 @@ export function useSupplierIntegrationLink() {
         });
       }
       toast({
-        title: "Supplier linked",
+        title: t("literals.supplierLinked"),
         description: supplier
-          ? `${supplier.name} is now linked to ${supplier.integration?.provider ?? "the selected provider"}.`
-          : "Supplier integration updated.",
+          ? t("literals.isNowLinkedTo", { name: supplier.name, value1: supplier.integration?.provider ?? "the selected provider" })
+          : t("literals.supplierIntegrationUpdated"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Integration failed",
-        description: error.message || "Unable to link supplier integration.",
+        title: t("literals.integrationFailed"),
+        description: error.message || t("literals.unableToLinkSupplierIntegration"),
         variant: "destructive",
       });
     },

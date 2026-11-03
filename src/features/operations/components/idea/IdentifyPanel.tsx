@@ -73,7 +73,7 @@ export function IdentifyPanel({
                   delta={insight.delta ?? undefined}
                   unit={insight.unit ?? undefined}
                   description={
-                    insight.trend ? `Trend: ${insight.trend}` : undefined
+                    insight.trend ? t("literals.trend", { trend: insight.trend }) : undefined
                   }
                 />
               ))}

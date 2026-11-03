@@ -110,14 +110,14 @@ export default function UserManagement() {
     try {
       await navigator.clipboard?.writeText(generatedInviteLink);
       toast({
-        title: "Copied invite link",
+        title: t("literals.copiedInviteLink"),
         description:
-          "Share this link with the employee to complete their setup.",
+          t("literals.shareThisLinkWithTheEmployeeToComplete"),
       });
     } catch {
       toast({
-        title: "Unable to copy link",
-        description: "Copy the link manually from the field below.",
+        title: t("literals.unableToCopyLink"),
+        description: t("literals.copyTheLinkManuallyFromTheFieldBelow"),
         variant: "destructive",
       });
     }

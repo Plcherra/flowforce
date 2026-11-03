@@ -44,8 +44,8 @@ export function SopChecklistBuilderPanel() {
     if (!selectedTemplate || !companyId) {
       toast({
         variant: "destructive",
-        title: "Company context missing",
-        description: "Connect your profile to a company before publishing.",
+        title: t("literals.companyContextMissing"),
+        description: t("literals.connectYourProfileToACompanyBeforePublishing"),
       });
       return;
     }
@@ -69,8 +69,8 @@ export function SopChecklistBuilderPanel() {
 
       setCreatedTemplate((data ?? {}) as CreatedTemplate);
       toast({
-        title: "Checklist published",
-        description: `${selectedTemplate.name} is ready for assignment.`,
+        title: t("literals.checklistPublished"),
+        description: t("literals.isReadyForAssignment", { name: selectedTemplate.name }),
       });
     } catch (error) {
       logger.error("[SopChecklistBuilderPanel] publish failed", {
@@ -79,9 +79,9 @@ export function SopChecklistBuilderPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to publish checklist",
+        title: t("literals.unableToPublishChecklist"),
         description:
-          error instanceof Error ? error.message : "Unexpected builder error.",
+          error instanceof Error ? error.message : t("literals.unexpectedBuilderError"),
       });
     } finally {
       setSaving(false);
@@ -147,7 +147,7 @@ export function SopChecklistBuilderPanel() {
                 <p className="font-medium">{step.label}</p>
                 <p className="text-xs text-muted-foreground">
                   {step.stepType} · {step.fieldType}
-                  {step.evidenceRequired ? " · evidence" : ""}
+                  {step.evidenceRequired ? t("literals.evidence") : ""}
                 </p>
               </div>
               {step.required ? (

@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import {
   BarChart3,
   Calculator,
@@ -226,22 +227,22 @@ export const getRoleIcon = (role: string) => {
 export const getRoleLabel = (role: string) => {
   switch (normalizeRole(role)) {
     case "owner":
-      return "Owner";
+      return i18n.t("literals.owner");
     case "company_admin":
-      return "Company Admin";
+      return i18n.t("literals.companyAdmin");
     case "administrator":
-      return "Administrator";
+      return i18n.t("literals.administrator");
     case "admin":
-      return "Admin";
+      return i18n.t("common.admin");
     case "manager":
-      return "Manager";
+      return i18n.t("literals.manager");
     case "supervisor":
-      return "Supervisor";
+      return i18n.t("literals.supervisor");
     case "staff":
-      return "Staff";
+      return i18n.t("literals.staff");
     case "employee":
-      return "Employee";
+      return i18n.t("literals.employee");
     default:
-      return "Staff";
+      return i18n.t("literals.staff");
   }
 };

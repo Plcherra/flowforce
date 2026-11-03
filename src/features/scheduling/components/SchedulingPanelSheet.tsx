@@ -156,7 +156,7 @@ export function SchedulingPanelSheet({
             <FeatureUnavailableCard
               icon={Users}
               title={t("schedule.teamRequestsNeedALiveConnection")}
-              description="We need live staff data to process swaps and time-off requests."
+              description={t("literals.weNeedLiveStaffDataToProcessSwaps")}
               actionLabel="Retry data sync"
               onAction={onRetry}
               disabled={retryDisabled}
@@ -169,7 +169,7 @@ export function SchedulingPanelSheet({
             <FeatureUnavailableCard
               icon={Users}
               title={t("schedule.teamRequestsAreLimited")}
-              description="Approving other people's swaps and time off needs schedule or approval permission. Your own requests stay under My time off and My swaps."
+              description={t("literals.approvingOtherPeopleSSwapsAndTimeOff")}
             />
           )
         ) : null}
@@ -179,7 +179,7 @@ export function SchedulingPanelSheet({
             <FeatureUnavailableCard
               icon={Clock}
               title={t("schedule.availabilityPreviewMode")}
-              description="Employee availability updates are read-only until the live connection is restored."
+              description={t("literals.employeeAvailabilityUpdatesAreReadOnlyUntilThe")}
               actionLabel="Retry data sync"
               onAction={onRetry}
               disabled={retryDisabled}
@@ -217,7 +217,7 @@ export function SchedulingPanelSheet({
             <FeatureUnavailableCard
               icon={Calendar}
               title={t("schedule.timeOffUnavailable")}
-              description="Time off requests resume once scheduling data is back online."
+              description={t("literals.timeOffRequestsResumeOnceSchedulingDataIs")}
               actionLabel="Retry data sync"
               onAction={onRetry}
               disabled={retryDisabled}
@@ -234,7 +234,7 @@ export function SchedulingPanelSheet({
             <FeatureUnavailableCard
               icon={ArrowRightLeft}
               title={t("schedule.shiftSwapsUnavailable")}
-              description="Shift swap requests resume once scheduling data is back online."
+              description={t("literals.shiftSwapRequestsResumeOnceSchedulingDataIs")}
               actionLabel="Retry data sync"
               onAction={onRetry}
               disabled={retryDisabled}

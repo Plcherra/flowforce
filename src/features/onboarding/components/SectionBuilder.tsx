@@ -279,7 +279,7 @@ export default function SectionBuilder({
 
       {/* Existing Sections */}
       <div className="space-y-4">
-        <h4 className="font-medium">Your Sections ({sections.length})</h4>
+        <h4 className="font-medium">{t("literals.yourSections")}{sections.length})</h4>
 
         {sections.map((section) => (
           <Card key={section.id}>

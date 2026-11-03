@@ -269,9 +269,9 @@ export function TimeOffRequestPanel({
   const handleSubmitRequest = async () => {
     if (!employeeId) {
       toast({
-        title: "Profile missing",
+        title: t("literals.profileMissing"),
         description:
-          "We could not resolve your profile. Refresh and try again.",
+          t("literals.weCouldNotResolveYourProfileRefreshAnd"),
         variant: "destructive",
       });
       return;
@@ -279,9 +279,9 @@ export function TimeOffRequestPanel({
 
     if (!requestStart || !requestEnd) {
       toast({
-        title: "Dates required",
+        title: t("literals.datesRequired"),
         description:
-          "Select both a start and end date for your time off request.",
+          t("literals.selectBothAStartAndEndDateFor"),
         variant: "destructive",
       });
       return;
@@ -292,8 +292,8 @@ export function TimeOffRequestPanel({
 
     if (endDate < startDate) {
       toast({
-        title: "Invalid range",
-        description: "End date must be after the start date.",
+        title: t("literals.invalidRange"),
+        description: t("literals.endDateMustBeAfterTheStartDate"),
         variant: "destructive",
       });
       return;
@@ -321,8 +321,8 @@ export function TimeOffRequestPanel({
 
       if (success) {
         toast({
-          title: "Time off requested",
-          description: "Your request has been submitted for approval.",
+          title: t("literals.timeOffRequested"),
+          description: t("literals.yourRequestHasBeenSubmittedForApproval"),
         });
         setRequestDialogOpen(false);
         setRequestStart("");
@@ -331,15 +331,15 @@ export function TimeOffRequestPanel({
         setRequestType("vacation");
       } else {
         toast({
-          title: "Unable to submit request",
-          description: "Please try again later.",
+          title: t("literals.unableToSubmitRequest"),
+          description: t("literals.pleaseTryAgainLater"),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error submitting request",
-        description: error instanceof Error ? error.message : "Please try again later.",
+        title: t("literals.errorSubmittingRequest"),
+        description: error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     } finally {
@@ -357,8 +357,7 @@ export function TimeOffRequestPanel({
         </CardHeader>
         <CardContent>
           <div className="rounded-md border border-dashed border-muted-foreground/40 p-4 text-sm text-muted-foreground">
-            Scheduling data is in preview mode, so we can&apos;t show live
-            balance or request history yet.
+            {t("literals.schedulingDataIsInPreviewModeSoWe")}
           </div>
         </CardContent>
       </Card>
@@ -477,7 +476,7 @@ export function TimeOffRequestPanel({
                 onClick={handleSubmitRequest}
                 disabled={submitting || loading}
               >
-                {submitting ? "Submitting..." : "Submit request"}
+                {submitting ? t("literals.submitting") : t("literals.submitRequest")}
               </Button>
             </div>
           </DialogContent>
@@ -529,7 +528,7 @@ export function TimeOffRequestPanel({
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("availability.requestHistory")}</h3>
             {personalRequests.length > 0 && (
               <span className="text-xs text-muted-foreground">
-                Updated&nbsp;
+                {t("literals.updated")}
                 {format(
                   new Date(personalRequests[0].created_at ?? new Date()),
                   "MMM d, yyyy",
@@ -571,16 +570,16 @@ export function TimeOffRequestPanel({
                             >
                               {TIME_OFF_TYPE_LABEL[
                                 (request.type as TimeOffType) ?? "other"
-                              ] ?? "Other"}
+                              ] ?? t("literals.other")}
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {dayCount(request.start_date, request.end_date)} day
+                            {dayCount(request.start_date, request.end_date)} {t("literals.day")}
                             {dayCount(request.start_date, request.end_date) ===
                             1
                               ? ""
                               : "s"}{" "}
-                            · Requested{" "}
+                            {t("literals.requested")}{" "}
                             {format(
                               new Date(
                                 request.created_at ?? request.start_date,
@@ -621,7 +620,7 @@ export function TimeOffRequestPanel({
                                 className="flex justify-between gap-2"
                               >
                                 <span className="truncate">
-                                  {shift.title ?? "Scheduled shift"} ·{" "}
+                                  {shift.title ?? t("literals.scheduledShift")} ·{" "}
                                   {format(new Date(shift.start_time!), "MMM d")}
                                 </span>
                                 <span className="text-muted-foreground">

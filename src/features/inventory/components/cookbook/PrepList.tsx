@@ -111,7 +111,7 @@ export function PrepList({
                   {item.name}
                 </span>
                 <Badge variant={priority > 0 ? "destructive" : "outline"}>
-                  {priority > 0 ? "Needs prep" : "In stock"}
+                  {priority > 0 ? t("literals.needsPrep") : t("literals.inStock")}
                 </Badge>
               </CardTitle>
               {recipe && (
@@ -151,7 +151,7 @@ export function PrepList({
                         className="flex items-center justify-between"
                       >
                         <span className="truncate">
-                          {line.ingredient?.name ?? "Unknown"}
+                          {line.ingredient?.name ?? t("literals.unknown")}
                         </span>
                         <span>
                           {(

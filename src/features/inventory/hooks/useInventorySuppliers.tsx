@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +36,7 @@ export function useInventorySuppliers(companyId?: string | null) {
 }
 
 export function useCreateSupplier() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -78,15 +80,15 @@ export function useCreateSupplier() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] });
       toast({
-        title: "Success",
-        description: "Supplier created successfully",
+        title: t("literals.success"),
+        description: t("literals.supplierCreatedSuccessfully"),
       });
     },
     onError: (error: Error) => {
       logger.error("Create supplier error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: error.message || "Failed to create supplier",
+        title: t("literals.error"),
+        description: error.message || t("literals.failedToCreateSupplier"),
         variant: "destructive",
       });
     },
@@ -94,6 +96,7 @@ export function useCreateSupplier() {
 }
 
 export function useUpdateSupplier() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -112,14 +115,14 @@ export function useUpdateSupplier() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] });
       toast({
-        title: "Success",
-        description: "Supplier updated",
+        title: t("literals.success"),
+        description: t("literals.supplierUpdated"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update supplier",
+        title: t("literals.error"),
+        description: error.message || t("literals.failedToUpdateSupplier"),
         variant: "destructive",
       });
     },
@@ -127,6 +130,7 @@ export function useUpdateSupplier() {
 }
 
 export function useDeleteSupplier() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -142,14 +146,14 @@ export function useDeleteSupplier() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-suppliers"] });
       toast({
-        title: "Success",
-        description: "Supplier removed",
+        title: t("literals.success"),
+        description: t("literals.supplierRemoved"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete supplier",
+        title: t("literals.error"),
+        description: error.message || t("literals.failedToDeleteSupplier"),
         variant: "destructive",
       });
     },

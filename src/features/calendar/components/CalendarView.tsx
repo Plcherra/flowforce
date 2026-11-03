@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useMemo } from "react";
 import {
   addDays,
@@ -79,7 +80,7 @@ const EventChip = ({
   >
     <div className="flex items-center justify-between gap-2">
       <span className="font-semibold text-foreground">
-        {event.title || "Untitled"}
+        {event.title || i18n.t("literals.untitled")}
       </span>
       {event.type && (
         <Badge variant="outline" className="text-[10px] capitalize">
@@ -266,14 +267,14 @@ export function CalendarView({
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">
-                    {event.title || "Untitled"}
+                    {event.title || t("literals.untitled")}
                   </h3>
                   <p className="text-xs text-muted-foreground">
                     {renderSummary(event)}
                   </p>
                   {event.location && (
                     <p className="text-xs text-muted-foreground">
-                      Location: {event.location}
+                      {t("literals.location")} {event.location}
                     </p>
                   )}
                 </div>

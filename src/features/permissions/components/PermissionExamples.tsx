@@ -58,20 +58,20 @@ export function PermissionExamples() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Badge variant={can("manageUsers") ? "default" : "secondary"}>
-                    Manage Users: {can("manageUsers") ? "Yes" : "No"}
+                    {t("literals.manageUsers")} {can("manageUsers") ? t("literals.yes") : t("literals.no")}
                   </Badge>
                   <Badge variant="outline">
-                    Source: {getSource("manageUsers")}
+                    {t("literals.source")} {getSource("manageUsers")}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={can("viewTeamProfiles") ? "default" : "secondary"}
                   >
-                    View Team: {can("viewTeamProfiles") ? "Yes" : "No"}
+                    {t("literals.viewTeam")} {can("viewTeamProfiles") ? t("literals.yes") : t("literals.no")}
                   </Badge>
                   <Badge variant="outline">
-                    Source: {getSource("viewTeamProfiles")}
+                    {t("literals.source")} {getSource("viewTeamProfiles")}
                   </Badge>
                 </div>
               </div>
@@ -81,10 +81,10 @@ export function PermissionExamples() {
               <h4 className="font-semibold mb-2">{t("permissions.specializedHooks")}</h4>
               <div className="space-y-2">
                 <Badge variant={canManageUsers ? "default" : "secondary"}>
-                  useCanCheck: {canManageUsers ? "Yes" : "No"}
+                  {t("literals.usecancheck")} {canManageUsers ? t("literals.yes") : t("literals.no")}
                 </Badge>
                 <Badge variant={canViewOrEdit ? "default" : "secondary"}>
-                  useCanMultiple (ANY): {canViewOrEdit ? "Yes" : "No"}
+                  {t("literals.usecanmultipleAny")} {canViewOrEdit ? t("literals.yes") : t("literals.no")}
                 </Badge>
                 <Badge
                   variant={
@@ -93,10 +93,10 @@ export function PermissionExamples() {
                       : "secondary"
                   }
                 >
-                  canAll (View & Edit):{" "}
+                  {t("literals.canallViewEdit")}{" "}
                   {canAll(["viewTeamProfiles", "editTeamProfiles"])
-                    ? "Yes"
-                    : "No"}
+                    ? t("literals.yes")
+                    : t("literals.no")}
                 </Badge>
               </div>
             </div>
@@ -213,7 +213,7 @@ export function PermissionExamples() {
                   <span className="text-sm font-medium">{permission}</span>
                   <div className="flex items-center gap-2">
                     <Badge variant={hasPermission ? "default" : "secondary"}>
-                      {hasPermission ? "Yes" : "No"}
+                      {hasPermission ? t("literals.yes") : t("literals.no")}
                     </Badge>
                     <Badge variant="outline" className="text-xs">
                       {getSource(permission as any)}
@@ -241,11 +241,11 @@ function BaseProtectedComponent({
     className={`p-4 border rounded-lg ${hasPermission ? "bg-success-muted border-success/40" : "bg-destructive/10 border-destructive/40"}`}
   >
     <h4 className="font-semibold">{t("permissions.protectedComponent")}</h4>
-    <p>Permission Status: {hasPermission ? "✓ Allowed" : "✗ Denied"}</p>
-    <p>Source: {permissionSource}</p>
+    <p>{t("literals.permissionStatus")} {hasPermission ? t("literals.allowed") : t("literals.denied")}</p>
+    <p>{t("literals.source")} {permissionSource}</p>
     <p>
-      Can also check other permissions:{" "}
-      {canCheck("viewTeamProfiles") ? "Can view team" : "Cannot view team"}
+      {t("literals.canAlsoCheckOtherPermissions")}{" "}
+      {canCheck("viewTeamProfiles") ? t("literals.canViewTeam") : t("literals.cannotViewTeam")}
     </p>
   </div>
 );

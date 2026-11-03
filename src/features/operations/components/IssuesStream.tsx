@@ -175,10 +175,10 @@ export function IssuesStream() {
 
       const result = (data ?? {}) as IssueRpcResult;
       toast({
-        title: "Issue updated",
+        title: t("literals.issueUpdated"),
         description: result.status
-          ? `Status moved to ${result.status}.`
-          : "Lifecycle state saved.",
+          ? t("literals.statusMovedTo", { status: result.status })
+          : t("literals.lifecycleStateSaved"),
       });
       await loadIssues();
     } catch (error) {
@@ -188,9 +188,9 @@ export function IssuesStream() {
       });
       toast({
         variant: "destructive",
-        title: "Issue update failed",
+        title: t("literals.issueUpdateFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected issue error.",
+          error instanceof Error ? error.message : t("literals.unexpectedIssueError"),
       });
     } finally {
       setActing(null);
@@ -285,7 +285,7 @@ export function IssuesStream() {
                   <div>
                     <LearningRecordCopy
                       recordId={opsIssueId(issue)}
-                      title={issue.title ?? "Operational issue"}
+                      title={issue.title ?? t("literals.operationalIssue")}
                       description={issue.description}
                       translation={
                         issueTranslations.get(opsIssueId(issue))
@@ -305,8 +305,8 @@ export function IssuesStream() {
                       titleClassName="text-sm font-semibold"
                     />
                     <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
-                      {issue.issue_type ?? "general"}
-                      {issue.owner_name ? ` | ${issue.owner_name}` : ""}
+                      {issue.issue_type ?? t("literals.general")}
+                      {issue.owner_name ? t("literals.text15", { owner_name: issue.owner_name }) : ""}
                     </p>
                   </div>
                   <Badge variant="outline">
@@ -325,7 +325,7 @@ export function IssuesStream() {
                   </Badge>
                   {issue.task_id && (
                     <Badge variant="secondary">
-                      {t("forms.task")} {issue.task_status ?? "open"}
+                      {t("forms.task")} {issue.task_status ?? t("literals.open")}
                     </Badge>
                   )}
                   {issue.workflow_name && (
@@ -430,8 +430,8 @@ export function IssuesStream() {
           <DrawerHeader>
             <DrawerTitle>{t("operations.automationSuggestion")}</DrawerTitle>
             <DrawerDescription>
-              FlowForce will design a sequence tailored to &quot;
-              {drawerIssue?.title ?? "this issue"}&quot;.
+              {t("literals.flowforceWillDesignASequenceTailoredTo")}
+              {drawerIssue?.title ?? t("literals.thisIssue")}&quot;.
             </DrawerDescription>
           </DrawerHeader>
           <div className="space-y-3 px-4 pb-4 text-sm">

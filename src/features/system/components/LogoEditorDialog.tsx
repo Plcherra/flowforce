@@ -269,7 +269,7 @@ export function LogoEditorDialog({
             onClick={() => void handleConfirm()}
             disabled={!sourceUrl || exporting}
           >
-            {exporting ? "Preparing…" : "Use this logo"}
+            {exporting ? "Preparing…" : t("literals.useThisLogo")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -152,7 +152,7 @@ export default function RoleConfigurationTab() {
                       border: `1px solid ${role.color}40`,
                     }}
                   >
-                    {PRODUCT_ROLE_LABELS[productLevel]} level
+                    {PRODUCT_ROLE_LABELS[productLevel]} {t("literals.level3")}
                   </Badge>
                   {role.is_system_role && (
                     <Badge variant="secondary">{t("roles.systemRole")}</Badge>
@@ -162,7 +162,7 @@ export default function RoleConfigurationTab() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {role.description || "No description provided"}
+                  {role.description || t("literals.noDescriptionProvided")}
                 </p>
                 <ClassJobBoxList
                   level={productLevel}

@@ -40,7 +40,7 @@ export default function EventsCalendarPage() {
       <div className="p-6">
         <EmptyStateCard
           title={t("calendar.waitingForEmployeeRoster")}
-          description="Calendar access unlocks after your organization and employee data finish loading."
+          description={t("literals.calendarAccessUnlocksAfterYourOrganizationAndEmployee")}
           icon={<CalendarDays className="h-5 w-5" />}
         />
       </div>

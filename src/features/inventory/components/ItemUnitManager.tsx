@@ -204,7 +204,7 @@ export function ItemUnitManager({
                           variant="outline"
                           onClick={() => togglePrimary(unit.id)}
                         >
-                          {unit.is_primary ? "Remove Primary" : "Set Primary"}
+                          {unit.is_primary ? t("literals.removePrimary") : t("literals.setPrimary")}
                         </Button>
                       </div>
                     </div>
@@ -270,8 +270,8 @@ export function ItemUnitManager({
                       {t("inventory.conversionFactor")} <div className="text-xs text-muted-foreground">
                         {t("inventory.howMany")}{" "}
                         {sortedUnits.length > 0
-                          ? "of the previous level"
-                          : "base units"}{" "}
+                          ? t("literals.ofThePreviousLevel")
+                          : t("literals.baseUnits")}{" "}
                         {t("inventory.thisContains")} </div>
                     </Label>
                     <Input

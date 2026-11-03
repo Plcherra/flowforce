@@ -79,7 +79,7 @@ export function RequestsQueue({
         {!isLoading && requests.length === 0 && (
           <EmptyState
             title={t("availability.noAvailabilityRequestsYet")}
-            description="As soon as someone submits a change, it will land here for review."
+            description={t("literals.asSoonAsSomeoneSubmitsAChangeIt")}
           />
         )}
       </CardContent>
@@ -102,6 +102,7 @@ function RequestsTable({
   onDeny: (request: ManagerAvailabilityRequest, note: string) => void;
   pending: boolean;
 }) {
+  const { t } = useTranslation();
   const filtered = useMemo(
     () => requests.filter((request) => request.status === tab),
     [requests, tab],
@@ -110,11 +111,11 @@ function RequestsTable({
   if (filtered.length === 0) {
     return (
       <EmptyState
-        title={`No ${tab} requests`}
+        title={t("literals.noRequests", { tab: tab })}
         description={
           tab === "pending"
-            ? "Pending requests will appear here when employees submit changes."
-            : `Nothing in the ${tab} queue right now.`
+            ? t("literals.pendingRequestsWillAppearHereWhenEmployeesSubmit")
+            : t("literals.nothingInTheQueueRightNow", { tab: tab })
         }
       />
     );
@@ -191,7 +192,7 @@ function RequestRow({
               request.employeeName}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Week of {dayjs(request.weekStart).format("MMM D, YYYY")} · Submitted{" "}
+            {t("literals.weekOf")} {dayjs(request.weekStart).format("MMM D, YYYY")} {t("literals.submitted")}{" "}
             {dayjs(request.createdAt).fromNow()}
           </p>
         </div>
@@ -200,7 +201,7 @@ function RequestRow({
             variant="outline"
             className="flex items-center gap-1 text-xs uppercase"
           >
-            Impact score: {request.impactScore}
+            {t("literals.impactScore")} {request.impactScore}
           </Badge>
           <Badge
             variant={
@@ -262,7 +263,7 @@ function RequestRow({
                 )}
               >
                 {hoursDiff >= 0 ? "+" : ""}
-                {hoursDiff} hrs
+                {hoursDiff} {t("literals.hrs")}
               </dd>
             </div>
             <div>
@@ -298,18 +299,18 @@ function RequestRow({
             {request.status === "approved" ? (
               <span className="flex items-center gap-1 text-success">
                 <CheckCircle2 className="h-3 w-3" />
-                Approved by {request.managerId ?? "manager"}
+                {t("literals.approvedBy")} {request.managerId ?? t("literals.manager2")}
               </span>
             ) : (
               <span className="flex items-center gap-1 text-destructive">
                 <XCircle className="h-3 w-3" />
-                Denied by {request.managerId ?? "manager"}
+                {t("literals.deniedBy")} {request.managerId ?? t("literals.manager2")}
               </span>
             )}
           </span>
           {request.decisionNote && (
             <span className="text-xs text-muted-foreground">
-              Note: {request.decisionNote}
+              {t("literals.note")} {request.decisionNote}
             </span>
           )}
         </div>

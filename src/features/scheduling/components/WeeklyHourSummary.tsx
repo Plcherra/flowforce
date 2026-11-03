@@ -83,7 +83,7 @@ export function WeeklyHourSummary({
               {hoursSummary.averageShiftHours > 0
                 ? hoursSummary.averageShiftHours.toFixed(1)
                 : "0.0"}{" "}
-              hrs
+              {t("literals.hrs")}
             </p>
           </div>
           <div>
@@ -105,15 +105,15 @@ export function WeeklyHourSummary({
             <div className="flex flex-wrap gap-4 text-sm">
               <span className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-success" />
-                Filled&nbsp;({hoursSummary.filledCount})
+                {t("literals.filled")}{hoursSummary.filledCount})
               </span>
               <span className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-warning" />
-                Partial&nbsp;({hoursSummary.partialCount})
+                {t("literals.partial")}{hoursSummary.partialCount})
               </span>
               <span className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent" />
-                Open&nbsp;({hoursSummary.unfilledCount})
+                {t("literals.open4")}{hoursSummary.unfilledCount})
               </span>
             </div>
           </div>
@@ -152,7 +152,7 @@ export function WeeklyHourSummary({
                 >
                   <p className="text-xs text-muted-foreground">{label}</p>
                   <p className="mt-1 text-lg font-semibold">
-                    {hours.toFixed(1)} hrs
+                    {hours.toFixed(1)} {t("literals.hrs")}
                   </p>
                 </div>
               ))}

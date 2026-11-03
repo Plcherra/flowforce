@@ -93,8 +93,8 @@ export function AvailabilityChoiceEditor({
     },
     onSuccess: async () => {
       toast({
-        title: "Availability choice saved",
-        description: "Open or fixed, and the schedule window weekdays, are saved.",
+        title: t("literals.availabilityChoiceSaved"),
+        description: t("literals.openOrFixedAndTheScheduleWindowWeekdays"),
       });
       await queryClient.invalidateQueries({
         queryKey: ["org-prefs-availability-choice", orgId],
@@ -102,9 +102,9 @@ export function AvailabilityChoiceEditor({
     },
     onError: (error) => {
       toast({
-        title: "Unable to save availability choice",
+        title: t("literals.unableToSaveAvailabilityChoice"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },

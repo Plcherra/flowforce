@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { draftTasksFromClosingNotes } from "@/features/tasks/utils/closingNoteDrafts";
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json({ drafts, requestId: randomUUID() });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to draft tasks.";
+    const message = error instanceof Error ? error.message : i18n.t("literals.unableToDraftTasks");
     const status = message.includes("not configured") ? 503 : 502;
     return NextResponse.json({ message }, { status });
   }

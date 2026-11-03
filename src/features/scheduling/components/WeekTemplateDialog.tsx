@@ -136,14 +136,14 @@ export function WeekTemplateDialog({
       setNewTemplate({ name: "", description: "" });
       setActiveTab("load");
       toast({
-        title: "Template saved",
-        description: `"${newTemplate.name}" saved with ${currentTemplateData.metadata.total_shifts} shifts.`,
+        title: t("literals.templateSaved"),
+        description: t("literals.savedWithShifts", { name: newTemplate.name, total_shifts: currentTemplateData.metadata.total_shifts }),
       });
     } catch (error) {
       toast({
-        title: "Error saving template",
+        title: t("literals.errorSavingTemplate"),
         description:
-          error instanceof Error ? error.message : "Failed to save template",
+          error instanceof Error ? error.message : t("literals.failedToSaveTemplate"),
         variant: "destructive",
       });
     } finally {
@@ -154,8 +154,8 @@ export function WeekTemplateDialog({
   const handleLoadTemplate = async (template: Tables<"week_templates">) => {
     if (!canApply) {
       toast({
-        title: "Templates unavailable",
-        description: "Open the schedule board to load week templates.",
+        title: t("literals.templatesUnavailable"),
+        description: t("literals.openTheScheduleBoardToLoadWeekTemplates"),
         variant: "destructive",
       });
       return;
@@ -177,16 +177,16 @@ export function WeekTemplateDialog({
         refetchAll: refetchAll!,
       });
       toast({
-        title: "Template loaded",
-        description: `"${template.name}" applied to the current week.`,
+        title: t("literals.templateLoaded"),
+        description: t("literals.appliedToTheCurrentWeek", { name: template.name }),
       });
       onApplied?.();
       onOpenChange(false);
     } catch (error) {
       toast({
-        title: "Failed to load template",
+        title: t("literals.failedToLoadTemplate"),
         description:
-          error instanceof Error ? error.message : "Could not apply template",
+          error instanceof Error ? error.message : t("literals.couldNotApplyTemplate"),
         variant: "destructive",
       });
     } finally {
@@ -200,13 +200,13 @@ export function WeekTemplateDialog({
     const { error } = await deleteTemplate(id);
     if (error) {
       toast({
-        title: "Delete failed",
+        title: t("literals.deleteFailed"),
         variant: "destructive",
       });
       return;
     }
     if (previewId === id) setPreviewId(null);
-    toast({ title: "Template deleted" });
+    toast({ title: t("literals.templateDeleted") });
   };
 
   return (
@@ -229,7 +229,7 @@ export function WeekTemplateDialog({
             {previewData && previewTemplate ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">{previewTemplate.name} — Preview</h4>
+                  <h4 className="font-medium">{previewTemplate.name} {t("literals.preview")}</h4>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -270,7 +270,7 @@ export function WeekTemplateDialog({
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-lg">{template.name}</CardTitle>
                           <Badge variant="outline">
-                            {getTemplateShiftCount(template.template_data)} shifts
+                            {getTemplateShiftCount(template.template_data)} {t("literals.shifts")}
                           </Badge>
                         </div>
                         {template.description ? (
@@ -280,7 +280,7 @@ export function WeekTemplateDialog({
                       <CardContent className="pt-0">
                         <div className="flex items-center justify-between">
                           <div className="text-sm text-muted-foreground">
-                            Created{" "}
+                            {t("literals.created")}{" "}
                             {new Date(template.created_at).toLocaleDateString()}
                           </div>
                           <div className="flex space-x-2">
@@ -383,7 +383,7 @@ export function WeekTemplateDialog({
                 data-testid="week-template-save"
               >
                 <Save className="mr-2 h-4 w-4" />
-                {loading ? "Saving..." : "Save as Template"}
+                {loading ? t("literals.saving") : t("literals.saveAsTemplate")}
               </Button>
             </div>
           </TabsContent>

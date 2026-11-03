@@ -84,7 +84,7 @@ export function GoalProgressSection({
               <span className="text-xs capitalize text-muted-foreground">
                 {goal.status.replace(/_/g, " ")}
                 {goal.targetDate
-                  ? ` · due ${new Date(goal.targetDate).toLocaleDateString()}`
+                  ? t("literals.due2", { value0: new Date(goal.targetDate).toLocaleDateString() })
                   : ""}
               </span>
             </div>

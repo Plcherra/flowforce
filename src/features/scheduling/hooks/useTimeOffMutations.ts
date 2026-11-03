@@ -32,8 +32,8 @@ export function useTimeOffMutations({
   refetchAll,
   teamMembers,
 }: UseTimeOffMutationsProps) {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  const { i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
   const addUnavailability = useCallback(
@@ -59,9 +59,9 @@ export function useTimeOffMutations({
       );
       if (!isCompanyMember) {
         toast({
-          title: "Unavailability rejected",
+          title: t("literals.unavailabilityRejected"),
           description:
-            "You can only submit availability updates for members of your company.",
+            t("literals.youCanOnlySubmitAvailabilityUpdatesForMembers"),
           variant: "destructive",
         });
         return false;
@@ -81,15 +81,15 @@ export function useTimeOffMutations({
         if (insertError) throw insertError;
         await refetchAll();
         toast({
-          title: "Unavailability added",
-          description: "The unavailability has been recorded.",
+          title: t("literals.unavailabilityAdded"),
+          description: t("literals.theUnavailabilityHasBeenRecorded"),
         });
         return true;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to add unavailability";
+          err instanceof Error ? err.message : t("literals.failedToAddUnavailability");
         toast({
-          title: "Unavailability error",
+          title: t("literals.unavailabilityError"),
           description: message,
           variant: "destructive",
         });
@@ -122,8 +122,8 @@ export function useTimeOffMutations({
         const policy = policies.find((item) => item.id === payload.policyId);
         if (!policy) {
           toast({
-            title: "Choose a policy",
-            description: "Pick the time off policy this request uses.",
+            title: t("literals.chooseAPolicy"),
+            description: t("literals.pickTheTimeOffPolicyThisRequestUses"),
             variant: "destructive",
           });
           return false;
@@ -140,7 +140,7 @@ export function useTimeOffMutations({
         const reason = "reason" in fit ? fit.reason : null;
         if (reason) {
           toast({
-            title: "Request does not fit the policy",
+            title: t("literals.requestDoesNotFitThePolicy"),
             description: reason,
             variant: "destructive",
           });
@@ -179,15 +179,15 @@ export function useTimeOffMutations({
         }
         await refetchAll();
         toast({
-          title: "Time off requested",
-          description: "Time off request submitted.",
+          title: t("literals.timeOffRequested"),
+          description: t("literals.timeOffRequestSubmitted"),
         });
         return true;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to request time off";
+          err instanceof Error ? err.message : t("literals.failedToRequestTimeOff");
         toast({
-          title: "Request failed",
+          title: t("literals.requestFailed"),
           description: message,
           variant: "destructive",
         });
@@ -227,17 +227,17 @@ export function useTimeOffMutations({
 
         await refetchAll();
         toast({
-          title: "Time off approved",
-          description: "The time off request has been approved.",
+          title: t("literals.timeOffApproved"),
+          description: t("literals.theTimeOffRequestHasBeenApproved"),
         });
         return true;
       } catch (err) {
         const message =
           err instanceof Error
             ? err.message
-            : "Failed to approve time off request";
+            : t("literals.failedToApproveTimeOffRequest");
         toast({
-          title: "Approval failed",
+          title: t("literals.approvalFailed"),
           description: message,
           variant: "destructive",
         });

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -116,6 +117,7 @@ export function useRoles() {
 }
 
 export function useUpdateRole() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -138,14 +140,14 @@ export function useUpdateRole() {
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
       queryClient.invalidateQueries({ queryKey: ["admin-profiles"] });
       toast({
-        title: "Success",
-        description: "User role updated successfully",
+        title: t("literals.success"),
+        description: t("literals.userRoleUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update role: ${error.message}`,
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateRole2", { message: error.message }),
         variant: "destructive",
       });
     },
@@ -153,6 +155,7 @@ export function useUpdateRole() {
 }
 
 export function useAssignRole() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -209,15 +212,15 @@ export function useAssignRole() {
         queryKey: ["employee-access", variables.employeeId],
       });
       toast({
-        title: "Role updated",
-        description: "The employee role was updated successfully.",
+        title: t("literals.roleUpdated"),
+        description: t("literals.theEmployeeRoleWasUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description:
-          error instanceof Error ? error.message : "Failed to update role",
+          error instanceof Error ? error.message : t("literals.failedToUpdateRole3"),
         variant: "destructive",
       });
     },

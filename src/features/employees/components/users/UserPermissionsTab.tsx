@@ -198,15 +198,15 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
       ]);
       setHasChanges(false);
       toast({
-        title: "Access saved",
-        description: "Class and give/take changes are on this person.",
+        title: t("literals.accessSaved"),
+        description: t("literals.classAndGiveTakeChangesAreOnThis"),
       });
     } catch (error) {
       logger.error("Error saving changes:", { error, tags: ["error"] });
       toast({
-        title: "Unable to save access",
+        title: t("literals.unableToSaveAccess"),
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgain"),
         variant: "destructive",
       });
     } finally {
@@ -255,8 +255,8 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
           {selectedRole ? (
             <p className="text-sm text-muted-foreground">
               {canEditAccess
-                ? `${selectedRole.name} paints the boxes. Give or take only what you can grant.`
-                : `${selectedRole.name} is above what you can grant. You can look, not change.`}
+                ? t("literals.paintsTheBoxesGiveOrTakeOnlyWhat", { name: selectedRole.name })
+                : t("literals.isAboveWhatYouCanGrantYouCan", { name: selectedRole.name })}
             </p>
           ) : null}
         </CardContent>
@@ -300,7 +300,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
             />
           ) : (
             <p className="text-sm text-muted-foreground">
-              Choose a class to paint this person&apos;s access.
+              {t("literals.chooseAClassToPaintThisPersonS")}
             </p>
           )}
 
@@ -312,7 +312,7 @@ export function UserPermissionsTab({ user }: UserPermissionsTabProps) {
               }
             >
               <Save className="mr-2 h-4 w-4" />
-              {isSaving ? "Saving..." : "Save changes"}
+              {isSaving ? t("literals.saving") : t("literals.saveChanges")}
             </Button>
           </div>
         </CardContent>

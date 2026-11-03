@@ -42,6 +42,7 @@ requireIncludes(
     "- main",
     "supabase db reset",
     "npm run check:supabase",
+    "npm run check:i18n",
     "npm run test:db:security",
     "npm run typecheck:src",
     "npm run typecheck",

@@ -80,7 +80,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
               <div>
                 <p className="text-sm font-medium">{t("onboarding.userInfo.fields.phone")}</p>
                 <p className="text-sm text-muted-foreground">
-                  {user.phone || "Not provided"}
+                  {user.phone || t("literals.notProvided")}
                 </p>
               </div>
             </div>
@@ -90,7 +90,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
               <div>
                 <p className="text-sm font-medium">{t("dashboard.profile.employeeId")}</p>
                 <p className="text-sm text-muted-foreground">
-                  {user.employee_id || "Not assigned"}
+                  {user.employee_id || t("literals.notAssigned")}
                 </p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
                 <p className="text-sm text-muted-foreground">
                   {user.birth_date
                     ? formatDate(user.birth_date)
-                    : "Not provided"}
+                    : t("literals.notProvided")}
                 </p>
               </div>
             </div>
@@ -118,7 +118,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {typeof user.address === "string"
                       ? user.address
-                      : "Not provided"}
+                      : t("literals.notProvided")}
                   </p>
                 </div>
               </div>
@@ -140,7 +140,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div>
               <p className="text-sm font-medium">{t("messages.role")}</p>
               <Badge variant="outline" className="mt-1 capitalize">
-                {user.role ?? "Unassigned"}
+                {user.role ?? t("literals.unassigned")}
               </Badge>
             </div>
 
@@ -152,7 +152,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
                 }
                 className="mt-1 capitalize"
               >
-                {user.employment_status ?? "Unknown"}
+                {user.employment_status ?? t("literals.unknown")}
               </Badge>
             </div>
 
@@ -177,15 +177,15 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
             <div>
               <p className="text-sm font-medium">{t("employees.skillLevel")}</p>
               <p className="text-sm text-muted-foreground">
-                {user.skillLevel ? `Level ${user.skillLevel}` : "Not assessed"}
+                {user.skillLevel ? t("literals.level", { skillLevel: user.skillLevel }) : t("literals.notAssessed")}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium">{t("common.certifications")}</p>
               <p className="text-sm text-muted-foreground">
                 {user.badges?.length
-                  ? `${user.badges.length} on file`
-                  : "None on file"}
+                  ? t("literals.onFile", { length: user.badges.length })
+                  : t("literals.noneOnFile")}
               </p>
             </div>
             <div>
@@ -193,7 +193,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
               <p className="text-sm text-muted-foreground">
                 {typeof user.reliability === "number"
                   ? `${user.reliability}%`
-                  : "No performance data"}
+                  : t("literals.noPerformanceData")}
               </p>
             </div>
           </div>
@@ -206,7 +206,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
                 <p className="text-sm text-muted-foreground whitespace-pre-line">
                   {typeof user.emergency_contact === "string"
                     ? user.emergency_contact
-                    : "Not provided"}
+                    : t("literals.notProvided")}
                 </p>
               </div>
             </>

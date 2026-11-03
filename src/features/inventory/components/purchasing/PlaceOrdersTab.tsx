@@ -234,7 +234,7 @@ export function PlaceOrdersTab({
             <div className="text-sm text-muted-foreground">
               {t("inventory.needRecurringOrdersCreateTemplatesFromTheOrderHistoryTab")} </div>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Create Purchase Order"}
+              {isSubmitting ? t("literals.saving") : t("inventory.createPurchaseOrder")}
             </Button>
           </CardFooter>
         </Card>

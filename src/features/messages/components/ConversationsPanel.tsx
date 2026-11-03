@@ -140,7 +140,7 @@ export function ConversationsPanel({
               title={
                 hasTeammates
                   ? undefined
-                  : "Invite teammates to start a new chat"
+                  : t("literals.inviteTeammatesToStartANewChat")
               }
             >
               <Plus className="mr-1 h-4 w-4" />
@@ -187,9 +187,9 @@ export function ConversationsPanel({
                   <p>
                     {hasTeammates
                       ? totalConversations === 0
-                        ? "No conversations yet"
-                        : "No conversations match the current filters"
-                      : "Invite teammates to start your first conversation"}
+                        ? t("literals.noConversationsYet")
+                        : t("literals.noConversationsMatchTheCurrentFilters")
+                      : t("literals.inviteTeammatesToStartYourFirstConversation2")}
                   </p>
                 </div>
               )}

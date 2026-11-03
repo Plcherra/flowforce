@@ -460,9 +460,9 @@ export default function InventoryItemForm({
     e.preventDefault();
     if (!profile?.company_id) {
       toast({
-        title: "Missing company information",
+        title: t("literals.missingCompanyInformation"),
         description:
-          "Please sign in again to continue creating inventory items.",
+          t("literals.pleaseSignInAgainToContinueCreatingInventory"),
         variant: "destructive",
       });
       return;
@@ -478,8 +478,8 @@ export default function InventoryItemForm({
     const selectedUnitId = formData.unitid || unitLevels[0]?.unitid;
     if (!selectedUnitId) {
       toast({
-        title: "Unit required",
-        description: "Select a catalog unit such as Pound (lb) before saving.",
+        title: t("literals.unitRequired"),
+        description: t("literals.selectACatalogUnitSuchAsPoundLb"),
         variant: "destructive",
       });
       return;
@@ -644,7 +644,7 @@ export default function InventoryItemForm({
       <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {editItem ? "Edit Inventory Item" : "Add New Inventory Item"}
+            {editItem ? t("literals.editInventoryItem") : t("literals.addNewInventoryItem")}
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
             {t("inventory.clickOnFieldLabelsToEnableDisableThem")} </p>
@@ -974,8 +974,8 @@ export default function InventoryItemForm({
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-muted-foreground">
                           {index === 0
-                            ? "Conversion Factor"
-                            : "Conversion Factor (Base Units)"}
+                            ? t("literals.conversionFactor")
+                            : t("literals.conversionFactorBaseUnits")}
                         </Label>
                         <Input
                           placeholder="1"
@@ -1011,7 +1011,7 @@ export default function InventoryItemForm({
                             unit.conversion_factor &&
                             unitLevels[0].cost_per_unit && (
                               <span className="text-xs text-primary ml-1">
-                                (Auto)
+                                {t("literals.auto")}
                               </span>
                             )}
                         </Label>
@@ -1061,8 +1061,7 @@ export default function InventoryItemForm({
 
                     {index > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        Set the number of base units contained in this unit
-                        (e.g., 1 Case = 12 Each).
+                        {t("literals.setTheNumberOfBaseUnitsContainedIn")}
                       </p>
                     )}
                   </div>
@@ -1311,10 +1310,10 @@ export default function InventoryItemForm({
               disabled={createItem.isPending || updateItem.isPending}
             >
               {createItem.isPending || updateItem.isPending
-                ? "Saving..."
+                ? t("literals.saving")
                 : editItem
-                  ? "Update Item"
-                  : "Add Item"}
+                  ? t("literals.updateItem")
+                  : t("literals.addItem")}
             </Button>
           </div>
         </form>

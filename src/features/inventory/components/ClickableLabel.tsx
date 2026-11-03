@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { forwardRef } from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,7 @@ const ClickableLabel = forwardRef<HTMLLabelElement, ClickableLabelProps>(
               : "text-muted-foreground",
           )}
         >
-          {enabled ? "On" : "Off"}
+          {enabled ? i18n.t("literals.on") : i18n.t("literals.off")}
         </span>
       </Label>
     );

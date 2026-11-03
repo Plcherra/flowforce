@@ -180,7 +180,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                         month: "short",
                         day: "numeric",
                       })
-                    : "Never"}
+                    : t("literals.never")}
                 </p>
                 <p className="text-sm text-muted-foreground">{t("employees.lastActivity")}</p>
               </div>
@@ -263,14 +263,14 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                           <Avatar className="h-6 w-6">
                             <AvatarFallback className="text-xs">
                               {log.performed_byprofile
-                                ? `${log.performed_byprofile.first_name[0]}${log.performed_byprofile.last_name[0]}`
+                                ? t("literals.text25", { value0: log.performed_byprofile.first_name[0], value1: log.performed_byprofile.last_name[0] })
                                 : "SY"}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm">
                             {log.performed_byprofile
-                              ? `${log.performed_byprofile.first_name} ${log.performed_byprofile.last_name}`
-                              : "System"}
+                              ? t("literals.text", { first_name: log.performed_byprofile.first_name, last_name: log.performed_byprofile.last_name })
+                              : t("literals.system")}
                           </span>
                         </div>
                       </TableCell>
@@ -286,7 +286,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
 
                       <TableCell>
                         <div className="text-sm text-muted-foreground max-w-xs truncate">
-                          {log.table_name} • Record ID:{" "}
+                          {log.table_name} {t("literals.recordId")}{" "}
                           {log.record_id?.slice(0, 8)}...
                         </div>
                       </TableCell>
@@ -297,8 +297,8 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                 {filteredLogs.length === 0 && !isLoading && (
                   <TableCaption>
                     {searchTerm || actionFilter !== "all"
-                      ? "No activities match your filters."
-                      : "No activity recorded for this user."}
+                      ? t("literals.noActivitiesMatchYourFilters")
+                      : t("literals.noActivityRecordedForThisUser")}
                   </TableCaption>
                 )}
               </Table>

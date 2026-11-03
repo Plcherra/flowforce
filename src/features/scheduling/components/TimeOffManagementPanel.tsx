@@ -150,13 +150,13 @@ export function TimeOffManagementPanel({
         queryKey: ["timeoff-requests", companyId],
       });
       toast({
-        title: `Time off request ${action === "approve" ? "approved" : "denied"}`,
-        description: "Employee has been notified",
+        title: t("literals.timeOffRequest", { value0: action === "approve" ? "approved" : "denied" }),
+        description: t("literals.employeeHasBeenNotified"),
       });
     } catch {
       toast({
-        title: "Error processing request",
-        description: "Please try again",
+        title: t("literals.errorProcessingRequest"),
+        description: t("literals.pleaseTryAgain2"),
         variant: "destructive",
       });
     }
@@ -249,7 +249,7 @@ export function TimeOffManagementPanel({
           </p>
           {pendingCount > 0 && (
             <Badge variant="secondary" className="mt-2">
-              {pendingCount} pending
+              {pendingCount} {t("literals.pending")}
             </Badge>
           )}
         </div>
@@ -375,13 +375,13 @@ export function TimeOffManagementPanel({
             <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
             <h3 className="mb-2 text-lg font-semibold">
               {normalizedSearch
-                ? "No time off requests match your search"
-                : "No time off requests"}
+                ? t("literals.noTimeOffRequestsMatchYourSearch")
+                : t("literals.noTimeOffRequests")}
             </h3>
             <p className="text-muted-foreground">
               {normalizedSearch
-                ? "Try adjusting your search keywords."
-                : "All time off requests are processed."}
+                ? t("literals.tryAdjustingYourSearchKeywords")
+                : t("literals.allTimeOffRequestsAreProcessed")}
             </p>
           </CardContent>
         </Card>

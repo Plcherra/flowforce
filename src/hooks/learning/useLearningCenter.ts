@@ -88,7 +88,7 @@ const adminEnrollmentsResponseSchema = z.object({
 });
 
 export function useLearningCenter() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
@@ -184,9 +184,9 @@ export function useLearningCenter() {
               tags: ["error"],
             });
             toast({
-              title: "Progress unavailable",
+              title: t("literals.progressUnavailable"),
               description:
-                "Some progress history could not be loaded. Please try refreshing.",
+                t("literals.someProgressHistoryCouldNotBeLoadedPlease"),
               variant: "destructive",
             });
             return {
@@ -361,8 +361,8 @@ export function useLearningCenter() {
     },
     onSuccess: (course) => {
       toast({
-        title: "Course created",
-        description: `'${course.title}' has been added to the catalog.`,
+        title: t("literals.courseCreated"),
+        description: t("literals.hasBeenAddedToTheCatalog", { title: course.title }),
       });
       queryClient.invalidateQueries({
         queryKey: learningKeys.catalog(companyKey),
@@ -373,9 +373,9 @@ export function useLearningCenter() {
     },
     onError: (err: Error) => {
       toast({
-        title: "Failed to create course",
+        title: t("literals.failedToCreateCourse"),
         description:
-          err.message ?? "Please try again or contact an administrator.",
+          err.message ?? t("literals.pleaseTryAgainOrContactAnAdministrator"),
         variant: "destructive",
       });
     },
@@ -391,9 +391,9 @@ export function useLearningCenter() {
     async (courseId: string) => {
       if (!profileId || !companyId) {
         toast({
-          title: "Profile missing",
+          title: t("literals.profileMissing"),
           description:
-            "We could not find your profile. Please refresh and try again.",
+            t("literals.weCouldNotFindYourProfilePleaseRefresh"),
           variant: "destructive",
         });
         return null;
@@ -402,9 +402,9 @@ export function useLearningCenter() {
       try {
         const enrollment = await enrollInCourse(courseId, profileId, companyId);
         toast({
-          title: "Enrolled",
+          title: t("literals.enrolled"),
           description:
-            "You are enrolled in this course. Progress will sync automatically.",
+            t("literals.youAreEnrolledInThisCourseProgressWill"),
         });
         learningInvalidators.enrollments(queryClient, companyKey, profileKey);
         learningInvalidators.progress(queryClient, companyKey, profileKey);
@@ -415,8 +415,8 @@ export function useLearningCenter() {
           tags: ["error"],
         });
         toast({
-          title: "Enrollment failed",
-          description: "Unable to enroll in the selected course.",
+          title: t("literals.enrollmentFailed"),
+          description: t("literals.unableToEnrollInTheSelectedCourse"),
           variant: "destructive",
         });
         return null;
@@ -506,8 +506,8 @@ export function useLearningCenter() {
           tags: ["error"],
         });
         toast({
-          title: "Progress update failed",
-          description: "Could not mark the module as completed.",
+          title: t("literals.progressUpdateFailed"),
+          description: t("literals.couldNotMarkTheModuleAsCompleted"),
           variant: "destructive",
         });
       }
@@ -592,8 +592,8 @@ export function useLearningCenter() {
           tags: ["error"],
         });
         toast({
-          title: "Unable to load more progress",
-          description: "Please check your connection and try again.",
+          title: t("literals.unableToLoadMoreProgress"),
+          description: t("literals.pleaseCheckYourConnectionAndTryAgain"),
           variant: "destructive",
         });
       }

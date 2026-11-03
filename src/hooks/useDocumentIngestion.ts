@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
@@ -60,6 +61,7 @@ export function useDocumentInbox(options: DocumentListOptions = {}) {
 }
 
 export function useUploadDocument() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -75,13 +77,13 @@ export function useUploadDocument() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY });
       toast({
-        title: "Upload complete",
-        description: "Report is queued for parsing.",
+        title: t("literals.uploadComplete"),
+        description: t("literals.reportIsQueuedForParsing"),
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Upload failed",
+        title: t("literals.uploadFailed"),
         description: error.message,
         variant: "destructive",
       });
@@ -90,6 +92,7 @@ export function useUploadDocument() {
 }
 
 export function useDocumentProcessingActions() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -100,7 +103,7 @@ export function useDocumentProcessingActions() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to update status",
+        title: t("literals.failedToUpdateStatus"),
         description: error.message,
         variant: "destructive",
       });
@@ -112,11 +115,11 @@ export function useDocumentProcessingActions() {
       markDocumentReady(documentId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY });
-      toast({ title: "Document ready", description: "Extraction data saved." });
+      toast({ title: t("literals.documentReady"), description: t("literals.extractionDataSaved") });
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to finalize document",
+        title: t("literals.failedToFinalizeDocument"),
         description: error.message,
         variant: "destructive",
       });
@@ -131,7 +134,7 @@ export function useDocumentProcessingActions() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to record error",
+        title: t("literals.failedToRecordError"),
         description: error.message,
         variant: "destructive",
       });
@@ -142,6 +145,7 @@ export function useDocumentProcessingActions() {
 }
 
 export function usePersistDocumentEvents() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -166,7 +170,7 @@ export function usePersistDocumentEvents() {
     },
     onError: (error) => {
       toast({
-        title: "Failed to save events",
+        title: t("literals.failedToSaveEvents"),
         description: error.message,
         variant: "destructive",
       });

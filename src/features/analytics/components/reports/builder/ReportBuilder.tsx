@@ -141,7 +141,7 @@ export default function ReportBuilder({
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t("common.back")}
           </Button>
-          <CardTitle>{report ? "Edit Report" : "Create New Report"}</CardTitle>
+          <CardTitle>{report ? t("literals.editReport") : t("literals.createNewReport")}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -242,7 +242,7 @@ export default function ReportBuilder({
               type="submit"
               disabled={createReport.isPending || updateReport.isPending}
             >
-              {report ? "Update Report" : "Create Report"}
+              {report ? t("literals.updateReport") : t("literals.createReport")}
             </Button>
           </div>
         </form>

@@ -62,8 +62,8 @@ export default function InventoryActionsPage() {
   useEffect(() => {
     if (itemsError) {
       toast({
-        title: "Unable to load items",
-        description: itemsError instanceof Error ? itemsError.message : "Please refresh the page.",
+        title: t("literals.unableToLoadItems"),
+        description: itemsError instanceof Error ? itemsError.message : t("literals.pleaseRefreshThePage"),
         variant: "destructive",
       });
     }
@@ -72,8 +72,8 @@ export default function InventoryActionsPage() {
   useEffect(() => {
     if (locationsError) {
       toast({
-        title: "Unable to load locations",
-        description: locationsError instanceof Error ? locationsError.message : "Please refresh the page.",
+        title: t("literals.unableToLoadLocations"),
+        description: locationsError instanceof Error ? locationsError.message : t("literals.pleaseRefreshThePage"),
         variant: "destructive",
       });
     }
@@ -256,7 +256,7 @@ export default function InventoryActionsPage() {
             <Alert variant="destructive">
               <AlertTitle>{t("inventory.unableToLoadInventoryData")}</AlertTitle>
               <AlertDescription>
-                {loadError.message ?? "Please refresh and try again."}
+                {loadError.message ?? t("literals.pleaseRefreshAndTryAgain")}
               </AlertDescription>
             </Alert>
           )}
@@ -351,8 +351,8 @@ export default function InventoryActionsPage() {
                               <SelectValue
                                 placeholder={
                                   itemOptions.length
-                                    ? "Select item"
-                                    : "No items available"
+                                    ? t("literals.selectItem")
+                                    : t("literals.noItemsAvailable")
                                 }
                               />
                             </SelectTrigger>
@@ -389,8 +389,8 @@ export default function InventoryActionsPage() {
                               <SelectValue
                                 placeholder={
                                   locationOptions.length
-                                    ? "Select location"
-                                    : "No locations yet"
+                                    ? t("literals.selectLocation")
+                                    : t("literals.noLocationsYet")
                                 }
                               />
                             </SelectTrigger>
@@ -496,7 +496,7 @@ export default function InventoryActionsPage() {
                           className="flex-1"
                           disabled={wasteFormDisabled}
                         >
-                          {createWaste.isPending ? "Recording..." : "Log Waste"}
+                          {createWaste.isPending ? t("literals.recording") : t("literals.logWaste")}
                         </Button>
                       </div>
                     </form>
@@ -539,8 +539,8 @@ export default function InventoryActionsPage() {
                               <SelectValue
                                 placeholder={
                                   itemOptions.length
-                                    ? "Select item"
-                                    : "No items available"
+                                    ? t("literals.selectItem")
+                                    : t("literals.noItemsAvailable")
                                 }
                               />
                             </SelectTrigger>
@@ -582,8 +582,8 @@ export default function InventoryActionsPage() {
                               <SelectValue
                                 placeholder={
                                   locationOptions.length
-                                    ? "Select location"
-                                    : "No locations yet"
+                                    ? t("literals.selectLocation")
+                                    : t("literals.noLocationsYet")
                                 }
                               />
                             </SelectTrigger>
@@ -701,8 +701,8 @@ export default function InventoryActionsPage() {
                           disabled={adjustmentFormDisabled}
                         >
                           {createAdjustment.isPending
-                            ? "Applying..."
-                            : "Apply Adjustment"}
+                            ? t("literals.applying")
+                            : t("literals.applyAdjustment")}
                         </Button>
                       </div>
                     </form>

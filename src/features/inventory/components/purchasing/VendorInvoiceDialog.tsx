@@ -128,7 +128,7 @@ export function VendorInvoiceDialog({
             >
               {t("common.cancel")} </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Invoice"}
+              {isSubmitting ? t("literals.saving") : t("literals.saveInvoice")}
             </Button>
           </DialogFooter>
         </form>

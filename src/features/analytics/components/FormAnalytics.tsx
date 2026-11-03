@@ -552,7 +552,7 @@ export default function FormAnalytics({
                         : "secondary"
                     }
                   >
-                    {analyticsData.completionRate > 80 ? "Excellent" : "Good"}
+                    {analyticsData.completionRate > 80 ? t("literals.excellent") : t("literals.good")}
                   </Badge>
                 </CardContent>
               </Card>

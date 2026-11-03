@@ -48,13 +48,13 @@ export function ChannelWizardForm({
               <div className="flex justify-between gap-3">
                 <span className="text-muted-foreground">{t("auth.name")}</span>
                 <span className="text-foreground font-medium">
-                  {channelData.name || "Not set"}
+                  {channelData.name || t("literals.notSet")}
                 </span>
               </div>
               <div className="flex justify-between gap-3">
                 <span className="text-muted-foreground">{t("messages.privacy2")}</span>
                 <span className="text-foreground">
-                  {channelData.is_private ? "Private" : "Public"}
+                  {channelData.is_private ? t("literals.private") : t("literals.public")}
                 </span>
               </div>
               <div className="flex justify-between gap-3">

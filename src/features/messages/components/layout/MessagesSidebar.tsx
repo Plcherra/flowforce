@@ -126,6 +126,7 @@ function ChatSection({
   onChannelSelect: (channelId: string) => void;
   emptyLabel: string;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="space-y-1">
       <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -148,7 +149,7 @@ function ChatSection({
               )}
               onClick={() => onChannelSelect(channel.id)}
               aria-pressed={currentChannelId === channel.id}
-              aria-label={`Open chat with ${channel.name}`}
+              aria-label={t("literals.openChatWith", { name: channel.name })}
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 {direct ? (
@@ -162,7 +163,7 @@ function ChatSection({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{channel.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {direct ? "Direct message" : "Group"}
+                  {direct ? t("literals.directMessage") : t("literals.group")}
                 </p>
               </div>
               {channel.unread_count && channel.unread_count > 0 ? (

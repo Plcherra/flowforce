@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -110,6 +111,7 @@ const getErrorMessage = (error: unknown, fallback: string) =>
       : fallback;
 
 export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
+  const { t } = useTranslation();
   const { onboarding = false } = options;
   const { user } = useAuth();
   const [roles, setRoles] = useState<CompanyRole[]>([]);
@@ -277,15 +279,15 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Role created successfully",
+        title: t("literals.success"),
+        description: t("literals.roleCreatedSuccessfully"),
       });
       fetchRoles();
     },
     onError: (error: unknown) => {
       logger.error("Create role mutation error", { error, tags: ["error"] });
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: getErrorMessage(error, "Failed to create role"),
         variant: "destructive",
       });
@@ -361,15 +363,15 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Role updated successfully",
+        title: t("literals.success"),
+        description: t("literals.roleUpdatedSuccessfully"),
       });
       fetchRoles();
     },
     onError: (error: unknown) => {
       logger.error("Update role mutation error", { error, tags: ["error"] });
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: getErrorMessage(error, "Failed to update role"),
         variant: "destructive",
       });
@@ -397,15 +399,15 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     },
     onSuccess: () => {
       toast({
-        title: "Class archived",
-        description: "It is hidden from invite and the Roles list.",
+        title: t("literals.classArchived"),
+        description: t("literals.itIsHiddenFromInviteAndTheRoles"),
       });
       fetchRoles();
     },
     onError: (error: unknown) => {
       logger.error("Delete role mutation error", { error, tags: ["error"] });
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: getErrorMessage(error, "Failed to archive class"),
         variant: "destructive",
       });
@@ -426,15 +428,15 @@ export function useCompanyRoles(options: UseCompanyRolesOptions = {}) {
     },
     onSuccess: () => {
       toast({
-        title: "Class restored",
-        description: "It is available for invite and Roles again.",
+        title: t("literals.classRestored"),
+        description: t("literals.itIsAvailableForInviteAndRolesAgain"),
       });
       fetchRoles();
     },
     onError: (error: unknown) => {
       logger.error("Restore role mutation error", { error, tags: ["error"] });
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: getErrorMessage(error, "Failed to restore class"),
         variant: "destructive",
       });

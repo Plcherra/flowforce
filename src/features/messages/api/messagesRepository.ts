@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { z } from "zod";
 import type { AppLanguage } from "@/i18n/resolveLanguage";
 import { scheduleMessageTranslation } from "@/features/messages/scheduleMessage";
@@ -245,7 +246,7 @@ async function addChannelMembers(
     if (error) {
       // Create a proper Error object with Supabase error details
       const errorMessage =
-        error.message || `Failed to add member ${member.user_id} to channel`;
+        error.message || i18n.t("literals.failedToAddMemberToChannel", { user_id: member.user_id });
       const channelError = new Error(errorMessage);
       (
         channelError as Error & {

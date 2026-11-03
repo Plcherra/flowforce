@@ -170,12 +170,12 @@ export default function HrDevelopment() {
             badges={summaryBadges}
             columns={2}
             title={t("gamification.badgeJourney")}
-            description="Live snapshot of earned badges plus upcoming tiers."
+            description={t("literals.liveSnapshotOfEarnedBadgesPlusUpcomingTiers")}
           />
           <RecognitionFeed
             events={recognitionDemoFeed}
             title={t("gamification.liveRecognitionFeed")}
-            description="Recent milestones and onboarding wins."
+            description={t("literals.recentMilestonesAndOnboardingWins")}
             className="h-full"
           />
         </div>
@@ -183,7 +183,7 @@ export default function HrDevelopment() {
         <GamificationLeaderboard
           entries={leaderboardShowcase}
           title={t("gamification.xpLeaderboardPreview")}
-          description="Top talent by XP and completed goals for the current quarter."
+          description={t("literals.topTalentByXpAndCompletedGoalsFor")}
         />
       </div>
     </div>

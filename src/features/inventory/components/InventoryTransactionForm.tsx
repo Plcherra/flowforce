@@ -195,7 +195,7 @@ export default function InventoryTransactionForm() {
       const message =
         error instanceof Error
           ? error.message
-          : "Failed to create inventory transaction.";
+          : t("literals.failedToCreateInventoryTransaction");
       setFormError(message);
       logger.error("Failed to create inventory transaction:", {
         error,
@@ -232,7 +232,7 @@ export default function InventoryTransactionForm() {
             <Alert variant="destructive">
               <AlertTitle>{t("inventory.unableToLoadInventoryItems")}</AlertTitle>
               <AlertDescription>
-                {itemsError?.message || "Please refresh and try again."}
+                {itemsError?.message || t("literals.pleaseRefreshAndTryAgain")}
               </AlertDescription>
             </Alert>
           )}
@@ -295,18 +295,18 @@ export default function InventoryTransactionForm() {
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={itemsLoading ? "Loading items…" : "Select item"}
+                  placeholder={itemsLoading ? t("literals.loadingItems") : t("literals.selectItem")}
                 />
               </SelectTrigger>
               <SelectContent>
                 {items.length > 0 ? (
                   items.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
-                      {item.name} (Stock: {item.min_stock_level || 0} {t("inventory.units2")} </SelectItem>
+                      {item.name} {t("literals.stock")} {item.min_stock_level || 0} {t("inventory.units2")} </SelectItem>
                   ))
                 ) : (
                   <SelectItem value="" disabled>
-                    {itemsError ? "Inventory unavailable" : "No items found"}
+                    {itemsError ? t("literals.inventoryUnavailable") : t("literals.noItemsFound")}
                   </SelectItem>
                 )}
               </SelectContent>
@@ -389,7 +389,7 @@ export default function InventoryTransactionForm() {
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      selectedItem ? "Select unit" : "Select item first"
+                      selectedItem ? t("literals.selectUnit") : t("literals.selectItemFirst")
                     }
                   />
                 </SelectTrigger>
@@ -398,18 +398,18 @@ export default function InventoryTransactionForm() {
                     itemUnits.length > 0 ? (
                       itemUnits.map((unit) => (
                         <SelectItem key={unit.id} value={unit.unitid}>
-                          {unit.unit?.name || "Unit"}
+                          {unit.unit?.name || t("literals.unit")}
                           {unit.unit?.abbreviation
-                            ? ` (${unit.unit.abbreviation})`
+                            ? t("literals.text28", { abbreviation: unit.unit.abbreviation })
                             : ""}
                           {unit.unit_level > 1
-                            ? ` · ${unit.conversion_factor}× base`
+                            ? t("literals.base", { conversion_factor: unit.conversion_factor })
                             : ""}
                         </SelectItem>
                       ))
                     ) : (
                       <SelectItem value={selectedItem.unitid || ""}>
-                        {selectedItem.unit?.name || "Default unit"}
+                        {selectedItem.unit?.name || t("literals.defaultUnit")}
                       </SelectItem>
                     )
                   ) : (
@@ -490,7 +490,7 @@ export default function InventoryTransactionForm() {
             >
               {t("common.cancel")} </Button>
             <Button type="submit" disabled={isSubmitDisabled}>
-              {submitInFlight ? "Recording..." : "Record Transaction"}
+              {submitInFlight ? t("literals.recording") : t("literals.recordTransaction")}
             </Button>
           </div>
         </form>

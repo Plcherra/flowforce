@@ -8,8 +8,8 @@ export function QuickActions() {
 
   const handleQuickAction = (action: string) => {
     toast({
-      title: `${action} Started`,
-      description: `${action} dialog would open here`,
+      title: t("literals.started", { action: action }),
+      description: t("literals.dialogWouldOpenHere", { action: action }),
     });
   };
 

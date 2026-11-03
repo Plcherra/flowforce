@@ -54,23 +54,23 @@ export function EventDetailsPanel({
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="text-lg">
-              {event.title || "Untitled session"}
+              {event.title || t("literals.untitledSession")}
             </CardTitle>
             <div className="text-sm text-muted-foreground">
               {formatDateTime(event.start)}
-              {event.end ? ` – ${format(new Date(event.end), "HH:mm")}` : ""}
+              {event.end ? t("literals.text2", { value0: format(new Date(event.end), "HH:mm") }) : ""}
             </div>
           </div>
           <Badge
             style={{ backgroundColor: event.color ?? undefined }}
             className="capitalize text-primary-foreground"
           >
-            {TYPE_LABEL[type as keyof typeof TYPE_LABEL] ?? "Event"}
+            {TYPE_LABEL[type as keyof typeof TYPE_LABEL] ?? t("literals.event")}
           </Badge>
         </div>
         {event.location && (
           <div className="text-sm text-muted-foreground">
-            Location:{" "}
+            {t("literals.location")}{" "}
             <span className="font-medium text-foreground">
               {event.location}
             </span>
@@ -117,12 +117,12 @@ export function EventDetailsPanel({
               {relatedShifts.map((shift) => (
                 <div key={shift.id} className="rounded-md border p-2">
                   <div className="text-sm font-medium text-foreground">
-                    {shift.title || shift.job_position?.name || "Shift"}
+                    {shift.title || shift.job_position?.name || t("literals.shift")}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {formatDateTime(shift.start_time)} –{" "}
                     {format(new Date(shift.end_time), "HH:mm")}
-                    {shift.location ? ` • ${shift.location}` : ""}
+                    {shift.location ? t("literals.text3", { location: shift.location }) : ""}
                   </div>
                   {onViewShift && (
                     <Button
@@ -151,7 +151,7 @@ export function EventDetailsPanel({
                     <div className="text-foreground">{item.text}</div>
                     {item.who && (
                       <div className="text-xs text-muted-foreground">
-                        Owner: {item.who}
+                        {t("literals.owner2")} {item.who}
                       </div>
                     )}
                   </div>

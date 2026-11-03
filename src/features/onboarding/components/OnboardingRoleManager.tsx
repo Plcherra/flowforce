@@ -195,7 +195,7 @@ export default function OnboardingRoleManager({
             variant={rolesOpen ? "secondary" : "default"}
             onClick={() => setRolesOpen((open) => !open)}
           >
-            {rolesOpen ? "Done editing" : "Open roles"}
+            {rolesOpen ? t("literals.doneEditing") : t("literals.openRoles")}
           </Button>
           {rolesOpen && (
             <Button onClick={handleAddRole}>
@@ -237,7 +237,7 @@ export default function OnboardingRoleManager({
                             border: `1px solid ${role.color}40`,
                           }}
                         >
-                          {PRODUCT_ROLE_LABELS[productLevel]} level
+                          {PRODUCT_ROLE_LABELS[productLevel]} {t("literals.level3")}
                         </Badge>
                         {role.is_system_role && (
                           <Badge variant="secondary">{t("sections.system")}</Badge>
@@ -247,7 +247,7 @@ export default function OnboardingRoleManager({
                         )}
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {role.description || "No description provided"}
+                        {role.description || t("literals.noDescriptionProvided")}
                       </p>
                       <ClassJobBoxList
                         level={productLevel}
@@ -282,7 +282,7 @@ export default function OnboardingRoleManager({
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="mr-1 h-4 w-4" />
-                          {role.is_system_role ? "Archive" : "Delete"}
+                          {role.is_system_role ? t("literals.archive") : t("common.delete")}
                         </Button>
                       ) : null}
                     </div>

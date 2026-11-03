@@ -2,6 +2,7 @@
  * Hook for drag and drop handlers in scheduling calendar
  */
 
+import { useTranslation } from "react-i18next";
 import { useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -65,6 +66,7 @@ export function useDragDropHandlers({
   getCellAvailability,
   locationFilter,
 }: UseDragDropHandlersProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const draggedTemplateRef = useRef<ShiftTemplate | null>(null);
   const draggedVendorRef = useRef<VendorPaletteItem | null>(null);
@@ -127,9 +129,9 @@ export function useDragDropHandlers({
           });
           if (validation.severity === "blocking") {
             toast({
-              title: "Cannot assign shift",
+              title: t("literals.cannotAssignShift"),
               description:
-                validation.reasons[0] ?? "Employee is unavailable for this shift.",
+                validation.reasons[0] ?? t("literals.employeeIsUnavailableForThisShift"),
               variant: "destructive",
             });
             draggedTemplateRef.current = null;
@@ -138,9 +140,9 @@ export function useDragDropHandlers({
           }
           if (validation.severity === "warning") {
             toast({
-              title: "Assigned with warning",
+              title: t("literals.assignedWithWarning"),
               description:
-                validation.reasons[0] ?? "Employee has a scheduling conflict.",
+                validation.reasons[0] ?? t("literals.employeeHasASchedulingConflict"),
             });
           }
         }
@@ -180,14 +182,14 @@ export function useDragDropHandlers({
           await assign(scheduleId, userId, "assigned");
           await refetchAll();
           toast({
-            title: "Shift created and assigned!",
-            description: `${draggedTemplate.name} assigned to ${format(day, "EEE, MMM d")}`,
+            title: t("literals.shiftCreatedAndAssigned"),
+            description: t("literals.assignedTo", { name: draggedTemplate.name, value1: format(day, "EEE, MMM d") }),
           });
         } catch (error) {
           toast({
-            title: "Error creating shift",
+            title: t("literals.errorCreatingShift"),
             description:
-              error instanceof Error ? error.message : "Please try again",
+              error instanceof Error ? error.message : t("literals.pleaseTryAgain2"),
             variant: "destructive",
           });
         } finally {
@@ -281,14 +283,14 @@ export function useDragDropHandlers({
 
           await refetchAll();
           toast({
-            title: "Shift created!",
-            description: `${draggedTemplate.name} added to ${format(day, "EEE, MMM d")}`,
+            title: t("literals.shiftCreated"),
+            description: t("literals.addedTo", { name: draggedTemplate.name, value1: format(day, "EEE, MMM d") }),
           });
         } catch (error) {
           toast({
-            title: "Error creating shift",
+            title: t("literals.errorCreatingShift"),
             description:
-              error instanceof Error ? error.message : "Please try again",
+              error instanceof Error ? error.message : t("literals.pleaseTryAgain2"),
             variant: "destructive",
           });
         } finally {

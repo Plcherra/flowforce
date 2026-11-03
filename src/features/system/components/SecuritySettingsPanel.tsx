@@ -78,7 +78,7 @@ export function SecuritySettingsPanel() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-muted-foreground">{t("settings.passwordPolicy")}</h3>
             <Badge variant="outline">
-              min {state.passwordPolicy.minLength} chars
+              {t("literals.min2")} {state.passwordPolicy.minLength} {t("literals.chars")}
             </Badge>
           </div>
           <div className="grid gap-3 md:grid-cols-2">

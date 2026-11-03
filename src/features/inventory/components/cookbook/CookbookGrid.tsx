@@ -78,7 +78,7 @@ export function CookbookGrid({
                   }
                   onClick={() => onToggleFavorite(recipe.item.id)}
                   aria-label={
-                    isFavorite ? "Remove from favorites" : "Add to favorites"
+                    isFavorite ? t("literals.removeFromFavorites") : t("literals.addToFavorites")
                   }
                 >
                   {isFavorite ? (
@@ -106,7 +106,7 @@ export function CookbookGrid({
                   {topIngredients.map((line) => (
                     <li key={line.id} className="flex justify-between gap-4">
                       <span className="truncate">
-                        {line.ingredient?.name ?? "Unknown ingredient"}
+                        {line.ingredient?.name ?? t("literals.unknownIngredient")}
                       </span>
                       <span className="text-muted-foreground">
                         {line.quantity_needed}{" "}

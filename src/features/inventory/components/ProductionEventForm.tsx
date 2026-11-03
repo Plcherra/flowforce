@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,7 @@ const currencyFormatter = new Intl.NumberFormat(undefined, {
 
 const unitLabel = (unit?: InventoryUnit | null) => {
   if (!unit) return "units";
-  return unit.abbreviation ? `${unit.name} (${unit.abbreviation})` : unit.name;
+  return unit.abbreviation ? i18n.t("literals.text11", { name: unit.name, abbreviation: unit.abbreviation }) : unit.name;
 };
 
 export function ProductionEventForm() {
@@ -271,7 +272,7 @@ export function ProductionEventForm() {
           >
             <SelectTrigger>
               <SelectValue
-                placeholder={itemsLoading ? "Loading items..." : "Select item"}
+                placeholder={itemsLoading ? t("literals.loadingItems2") : t("literals.selectItem")}
               />
             </SelectTrigger>
             <SelectContent>
@@ -336,7 +337,7 @@ export function ProductionEventForm() {
           >
             <SelectTrigger>
               <SelectValue
-                placeholder={unitsLoading ? "Loading units..." : "Select unit"}
+                placeholder={unitsLoading ? t("literals.loadingUnits") : t("literals.selectUnit")}
               />
             </SelectTrigger>
             <SelectContent>
@@ -623,11 +624,11 @@ export function ProductionEventForm() {
                       <TableCell>
                         <div className="flex flex-col">
                           <span>
-                            {material.ingredient?.name || "Ingredient"}
+                            {material.ingredient?.name || t("literals.ingredient")}
                           </span>
                           {material.conversionFactor == null && (
                             <span className="text-xs text-muted-foreground">
-                              Using recipe unit (
+                              {t("literals.usingRecipeUnit")}
                               {unitLabel(material.recipeUnit)})
                             </span>
                           )}

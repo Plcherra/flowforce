@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ export interface TestResults {
 }
 
 export function useAccountDeletionTests() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [testEmail, setTestEmail] = useState("");
   const [testPassword, setTestPassword] = useState("");
@@ -24,9 +26,9 @@ export function useAccountDeletionTests() {
   const runDeletionTests = async () => {
     if (!testEmail || !testPassword) {
       toast({
-        title: "Missing Credentials",
+        title: t("literals.missingCredentials"),
         description:
-          "Please provide test email and password for a deleted account.",
+          t("literals.pleaseProvideTestEmailAndPasswordForA"),
         variant: "destructive",
       });
       return;
@@ -79,14 +81,14 @@ export function useAccountDeletionTests() {
       setTestResults((prev) => ({ ...prev, tokenRefreshAttempt: "success" }));
 
       toast({
-        title: "Deletion Tests Complete",
+        title: t("literals.deletionTestsComplete"),
         description:
-          "Check the results below to verify account deletion is working properly.",
+          t("literals.checkTheResultsBelowToVerifyAccountDeletion"),
       });
     } catch (_error) {
       toast({
-        title: "Test Error",
-        description: "An error occurred while running deletion tests.",
+        title: t("literals.testError"),
+        description: t("literals.anErrorOccurredWhileRunningDeletionTests"),
         variant: "destructive",
       });
     } finally {

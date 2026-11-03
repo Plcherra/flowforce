@@ -167,7 +167,7 @@ export function ExecutionQualityPanel() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold">
-                    {trend.templatecategory ?? trend.workflow_kind ?? "Workflow"}
+                    {trend.templatecategory ?? trend.workflow_kind ?? t("literals.workflow")}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {trend.assigned_role} · {trend.metric_date}
@@ -191,7 +191,7 @@ export function ExecutionQualityPanel() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold">
-                  {row.employee_name ?? row.email ?? "Team member"}
+                  {row.employee_name ?? row.email ?? t("literals.teamMember")}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {row.role_name} · {row.coaching_signal}

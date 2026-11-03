@@ -107,7 +107,7 @@ export default function ProfileCard({ className }: ProfileCardProps = {}) {
             }
             className="text-xs"
           >
-            {profile?.employment_status || "active"}
+            {profile?.employment_status || t("literals.active3")}
           </Badge>
         </div>
         <div className="flex justify-between">

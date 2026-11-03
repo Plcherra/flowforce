@@ -79,7 +79,7 @@ export function DailyCountDialog({ items }: DailyCountDialogProps) {
           <Button variant="outline" onClick={() => setOpen(false)}>
             {t("common.cancel")} </Button>
           <Button onClick={submit} disabled={saving}>
-            {saving ? "Saving..." : "Save Count"}
+            {saving ? t("literals.saving") : t("literals.saveCount")}
           </Button>
         </div>
       </DialogContent>

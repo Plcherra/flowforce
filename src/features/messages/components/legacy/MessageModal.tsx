@@ -53,7 +53,7 @@ export function MessageModal({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{message?.subject || "Message"}</span>
+            <span>{message?.subject || t("literals.message")}</span>
             {message && (
               <div className="flex items-center gap-2">
                 <Badge

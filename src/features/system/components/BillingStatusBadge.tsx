@@ -77,11 +77,11 @@ export function BillingStatusActions({
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Checkout unavailable",
+        title: t("literals.checkoutUnavailable"),
         description:
           error instanceof Error
             ? error.message
-            : "Unable to start Stripe checkout.",
+            : t("literals.unableToStartStripeCheckout"),
       });
       setLoading(null);
     }
@@ -94,11 +94,11 @@ export function BillingStatusActions({
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Billing portal unavailable",
+        title: t("literals.billingPortalUnavailable"),
         description:
           error instanceof Error
             ? error.message
-            : "Unable to open Stripe billing portal.",
+            : t("literals.unableToOpenStripeBillingPortal"),
       });
       setLoading(null);
     }
@@ -112,7 +112,7 @@ export function BillingStatusActions({
           onClick={() => void handlePortal()}
           disabled={loading !== null}
         >
-          {loading === "portal" ? "Opening Stripe…" : "Manage billing"}
+          {loading === "portal" ? t("literals.openingStripe") : t("literals.manageBilling")}
         </Button>
         {showHelperText ? (
           <p className="text-sm text-muted-foreground">{t("settings.updatePaymentMethodInvoicesOrCancelThroughThe")}</p>
@@ -134,15 +134,15 @@ export function BillingStatusActions({
         onClick={() => void handleCheckout(currentPlan.key, intent)}
         disabled={loading !== null}
       >
-        {loading === currentPlan.key ? "Redirecting to Stripe…" : label}
+        {loading === currentPlan.key ? t("literals.redirectingToStripe") : label}
       </Button>
       {showHelperText ? (
         <p className="text-sm text-muted-foreground">
           {isDeactivated
-            ? "Choose a plan to restore scheduling, inventory, tasks, messaging, and reporting for your team."
+            ? t("literals.chooseAPlanToRestoreSchedulingInventoryTasks")
             : trialEndedWithoutUpgrade
-              ? "Your trial period has ended. Pick a plan to keep your workspace active."
-              : "Compare Starter, Growth, and Enterprise plans for your restaurant workspace."}{" "}
+              ? t("literals.yourTrialPeriodHasEndedPickAPlan")
+              : t("literals.compareStarterGrowthAndEnterprisePlansForYour")}{" "}
           <a href="/pricing" className="underline">{t("settings.viewAllPlans")}</a>
         </p>
       ) : null}

@@ -87,7 +87,7 @@ export function EmployeeTable({
               </TableCell>
               <TableCell className="hidden md:table-cell capitalize">
                 <Badge variant="outline">
-                  {employee.role ?? "Unassigned"}
+                  {employee.role ?? t("literals.unassigned")}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell">

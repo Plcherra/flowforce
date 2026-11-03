@@ -89,8 +89,8 @@ export function CreateRecipeDialog({
     event.preventDefault();
     if (!selectedItemId) {
       toast({
-        title: "Select a recipe item",
-        description: "Choose which inventory item this recipe produces.",
+        title: t("literals.selectARecipeItem"),
+        description: t("literals.chooseWhichInventoryItemThisRecipeProduces"),
         variant: "destructive",
       });
       return;
@@ -101,9 +101,9 @@ export function CreateRecipeDialog({
     );
     if (!validIngredients.length) {
       toast({
-        title: "Add ingredients",
+        title: t("literals.addIngredients"),
         description:
-          "Recipes require at least one ingredient linked to an inventory item.",
+          t("literals.recipesRequireAtLeastOneIngredientLinkedTo"),
         variant: "destructive",
       });
       return;
@@ -119,17 +119,17 @@ export function CreateRecipeDialog({
         nutrition,
       });
       toast({
-        title: "Recipe draft created",
+        title: t("literals.recipeDraftCreated"),
         description:
-          "The recipe is ready to sync with Supabase once migrations run.",
+          t("literals.theRecipeIsReadyToSyncWithSupabase"),
       });
       resetForm();
       onOpenChange(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : undefined;
       toast({
-        title: "Failed to create recipe",
-        description: message || "Please try again in a moment.",
+        title: t("literals.failedToCreateRecipe"),
+        description: message || t("literals.pleaseTryAgainInAMoment"),
         variant: "destructive",
       });
     } finally {
@@ -199,7 +199,7 @@ export function CreateRecipeDialog({
                 />
                 <Badge variant="outline">
                   {inventoryItems.find((item) => item.id === selectedItemId)
-                    ?.unit?.abbreviation || "unit"}
+                    ?.unit?.abbreviation || t("literals.unit2")}
                 </Badge>
               </div>
             </div>
@@ -355,7 +355,7 @@ export function CreateRecipeDialog({
             >
               {t("common.cancel")} </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? "Saving…" : "Create recipe"}
+              {saving ? "Saving…" : t("literals.createRecipe")}
             </Button>
           </DialogFooter>
         </form>

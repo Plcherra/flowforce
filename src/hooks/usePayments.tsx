@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -58,6 +59,7 @@ type PaymentWithUsers = Payment & {
 };
 
 export function usePayments() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { profile, loading: profileLoading } = useProfile();
@@ -134,14 +136,14 @@ export function usePayments() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       toast({
-        title: "Success",
-        description: "Payment created successfully",
+        title: t("literals.success"),
+        description: t("literals.paymentCreatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to create payment",
+        title: t("literals.error"),
+        description: t("literals.failedToCreatePayment"),
         variant: "destructive",
       });
       logger.error("Create payment error", { error, tags: ["error"] });
@@ -173,14 +175,14 @@ export function usePayments() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       toast({
-        title: "Success",
-        description: "Payment updated successfully",
+        title: t("literals.success"),
+        description: t("literals.paymentUpdatedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to update payment",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdatePayment"),
         variant: "destructive",
       });
       logger.error("Update payment error", { error, tags: ["error"] });

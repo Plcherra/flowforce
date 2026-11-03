@@ -53,8 +53,8 @@ export function MessageScheduler({
   const handleSchedule = () => {
     if (!content.trim() || !scheduledFor || !scheduledTime) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all fields",
+        title: t("literals.missingInformation2"),
+        description: t("literals.pleaseFillInAllFields"),
         variant: "destructive",
       });
       return;
@@ -64,8 +64,8 @@ export function MessageScheduler({
 
     if (scheduledDateTime <= new Date()) {
       toast({
-        title: "Invalid Date",
-        description: "Scheduled time must be in the future",
+        title: t("literals.invalidDate"),
+        description: t("literals.scheduledTimeMustBeInTheFuture"),
         variant: "destructive",
       });
       return;
@@ -85,8 +85,8 @@ export function MessageScheduler({
     onScheduleMessage(content, scheduledDateTime);
 
     toast({
-      title: "Message Scheduled",
-      description: `Message will be sent on ${format(scheduledDateTime, "MMM dd, yyyy at h:mm a")}`,
+      title: t("literals.messageScheduled"),
+      description: t("literals.messageWillBeSentOn", { value0: format(scheduledDateTime, "MMM dd, yyyy at h:mm a") }),
     });
 
     // Reset form
@@ -104,8 +104,8 @@ export function MessageScheduler({
     );
 
     toast({
-      title: "Message Cancelled",
-      description: "Scheduled message has been cancelled",
+      title: t("literals.messageCancelled"),
+      description: t("literals.scheduledMessageHasBeenCancelled"),
     });
   };
 
@@ -214,7 +214,7 @@ export function MessageScheduler({
             <div>
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Scheduled Messages ({pendingMessages.length})
+                {t("literals.scheduledMessages")}{pendingMessages.length})
               </h3>
 
               <div className="space-y-3 max-h-[300px] overflow-y-auto">

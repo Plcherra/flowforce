@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
@@ -92,7 +93,7 @@ function buildIdentity(
 }
 
 function summarizeText(text?: string | null) {
-  if (!text) return "No extracted text available yet.";
+  if (!text) return i18n.t("literals.noExtractedTextAvailableYet");
   const trimmed = text.trim();
   if (trimmed.length <= 600) return trimmed;
   return `${trimmed.slice(0, 600)}…`;
@@ -192,8 +193,8 @@ export default function ReportsPage() {
   const handleDownloadOriginal = async (document: DocumentWithRelations) => {
     if (!document.file?.storage_path) {
       toast({
-        title: "Download unavailable",
-        description: "This report does not have a stored source file.",
+        title: t("literals.downloadUnavailable"),
+        description: t("literals.thisReportDoesNotHaveAStoredSource"),
         variant: "destructive",
       });
       return;
@@ -205,11 +206,11 @@ export default function ReportsPage() {
       });
     } catch (error) {
       toast({
-        title: "Download unavailable",
+        title: t("literals.downloadUnavailable"),
         description:
           error instanceof Error
             ? error.message
-            : "Unable to create a secure file link.",
+            : t("literals.unableToCreateASecureFileLink"),
         variant: "destructive",
       });
     }
@@ -321,7 +322,7 @@ export default function ReportsPage() {
           <AlertTitle>{t("analytics.uploadFailed")}</AlertTitle>
           <AlertDescription>
             {(uploadMutation.error as Error)?.message ??
-              "An unexpected error occurred while uploading the file."}
+              t("literals.anUnexpectedErrorOccurredWhileUploadingTheFile")}
           </AlertDescription>
         </Alert>
       )}
@@ -387,7 +388,7 @@ export default function ReportsPage() {
             <CardDescription>
               {isFetching
                 ? "Refreshing…"
-                : `${documents.length} documents synced`}
+                : t("literals.documentsSynced", { length: documents.length })}
             </CardDescription>
           </div>
         </CardHeader>
@@ -438,11 +439,11 @@ export default function ReportsPage() {
                           <div className="font-medium text-foreground">
                             {doc.title ??
                               doc.file?.filename ??
-                              "Untitled report"}
+                              t("literals.untitledReport")}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {doc.source ?? "Uploaded"} ·{" "}
-                            {doc.file?.mime_type ?? "Unknown format"}
+                            {doc.source ?? t("literals.uploaded")} ·{" "}
+                            {doc.file?.mime_type ?? t("literals.unknownFormat")}
                           </div>
                         </div>
                       </TableCell>
@@ -475,7 +476,7 @@ export default function ReportsPage() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {doc.file?.uploaded_at
-                          ? `${formatDistanceToNow(new Date(doc.file.uploaded_at), { addSuffix: true })}`
+                          ? t("literals.text26", { value0: formatDistanceToNow(new Date(doc.file.uploaded_at), { addSuffix: true }) })
                           : "—"}
                       </TableCell>
                       <TableCell
@@ -519,10 +520,10 @@ export default function ReportsPage() {
                   <FileText className="h-5 w-5 text-primary" />
                   {selectedDocument.title ??
                     selectedDocument.file?.filename ??
-                    "Report details"}
+                    t("literals.reportDetails")}
                 </SheetTitle>
                 <SheetDescription>
-                  {t("analytics.source")} {selectedDocument.source ?? "Uploaded"} {t("analytics.status")}{" "}
+                  {t("analytics.source")} {selectedDocument.source ?? t("literals.uploaded")} {t("analytics.status")}{" "}
                   {
                     STATUS_META[selectedDocument.processing_state ?? "ready"]
                       .label
@@ -554,13 +555,13 @@ export default function ReportsPage() {
                             new Date(selectedDocument.file.uploaded_at),
                             "PPP h:mm a",
                           )
-                        : "unknown"}
+                        : t("literals.unknown2")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm text-muted-foreground">
                     <p>
                       <strong className="text-foreground">{t("analytics.language")}</strong>{" "}
-                      {selectedDocument.language ?? "Not detected"}
+                      {selectedDocument.language ?? t("literals.notDetected")}
                     </p>
                     <p>
                       <strong className="text-foreground">
@@ -568,7 +569,7 @@ export default function ReportsPage() {
                       </strong>{" "}
                       {selectedDocument.doc_date
                         ? format(new Date(selectedDocument.doc_date), "PPP")
-                        : "Not provided"}
+                        : t("literals.notProvided")}
                     </p>
                     {selectedDocument.file && (
                       <Button
@@ -608,8 +609,8 @@ export default function ReportsPage() {
                       </CardTitle>
                       <CardDescription>
                         {selectedDocument.events.length > 0
-                          ? "Review incidents flagged during ingestion."
-                          : "No events were extracted yet."}
+                          ? t("literals.reviewIncidentsFlaggedDuringIngestion")
+                          : t("literals.noEventsWereExtractedYet")}
                       </CardDescription>
                     </div>
                   </CardHeader>

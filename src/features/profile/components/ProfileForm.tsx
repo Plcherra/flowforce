@@ -70,17 +70,17 @@ export default function ProfileForm({
       if (error) throw error;
 
       toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
+        title: t("literals.profileUpdated"),
+        description: t("literals.yourProfileHasBeenSuccessfullyUpdated"),
       });
 
       setIsEditing(false);
       onProfileUpdate();
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
+        error instanceof Error ? error.message : t("literals.unknownErrorOccurred2");
       toast({
-        title: "Update Failed",
+        title: t("literals.updateFailed"),
         description: errorMessage,
         variant: "destructive",
       });

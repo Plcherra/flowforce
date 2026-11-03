@@ -139,10 +139,10 @@ export function LearningOverview({
                   className="rounded-xl border bg-muted/20 p-3"
                 >
                   <p className="text-sm font-semibold">
-                    Course #{rec.courseId.slice(0, 4)}
+                    {t("literals.course")}{rec.courseId.slice(0, 4)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {rec.reason} · Confidence {Math.round(rec.confidence * 100)}
+                    {rec.reason} {t("literals.confidence2")} {Math.round(rec.confidence * 100)}
                     %
                   </p>
                 </div>

@@ -86,8 +86,8 @@ export function ChannelMembers({
     } catch (error) {
       logger.error("Error fetching members:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to load channel members",
+        title: t("literals.error"),
+        description: t("literals.failedToLoadChannelMembers"),
         variant: "destructive",
       });
     } finally {
@@ -106,16 +106,16 @@ export function ChannelMembers({
       await messagesRepository.updateMemberRole(memberId, newRole);
 
       toast({
-        title: "Success",
-        description: "Member role updated successfully",
+        title: t("literals.success"),
+        description: t("literals.memberRoleUpdatedSuccessfully"),
       });
 
       fetchMembers(); // Refresh the list
     } catch (error) {
       logger.error("Error updating member role:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to update member role",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateMemberRole"),
         variant: "destructive",
       });
     }
@@ -136,8 +136,8 @@ export function ChannelMembers({
       await messagesRepository.removeMember(memberPendingRemoval.id);
 
       toast({
-        title: "Success",
-        description: `${memberPendingRemoval.name} has been removed from the group`,
+        title: t("literals.success"),
+        description: t("literals.hasBeenRemovedFromTheGroup", { name: memberPendingRemoval.name }),
       });
 
       setMemberPendingRemoval(null);
@@ -145,8 +145,8 @@ export function ChannelMembers({
     } catch (error) {
       logger.error("Error removing member:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to remove member",
+        title: t("literals.error"),
+        description: t("literals.failedToRemoveMember"),
         variant: "destructive",
       });
     }
@@ -335,7 +335,7 @@ export function ChannelMembers({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("messages.removeMember")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {`This will remove ${memberPendingRemoval?.name ?? "this person"} from ${channelName}. They will lose access to the group.`}
+              {t("literals.thisWillRemoveFromTheyWillLoseAccess", { value0: memberPendingRemoval?.name ?? "this person", channelName: channelName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

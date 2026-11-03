@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ interface TemplateCardProps {
 }
 
 export function TemplateCard({ templateKey, template }: TemplateCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -56,7 +58,7 @@ export function TemplateCard({ templateKey, template }: TemplateCardProps) {
           className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground group/btn transition-all duration-300"
           onClick={() => navigate(`/templates/${templateKey}`)}
         >
-          Explore {template.title}
+          {t("literals.explore")} {template.title}
           <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
         </Button>
       </CardContent>

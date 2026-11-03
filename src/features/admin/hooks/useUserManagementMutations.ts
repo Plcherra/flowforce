@@ -2,6 +2,7 @@
  * Hook for user management mutations
  */
 
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ interface UseUserManagementMutationsProps {
 export function useUserManagementMutations({
   onEmployeesRefetch,
 }: UseUserManagementMutationsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { resetPassword } = useAuth();
   const queryClient = useQueryClient();
@@ -62,15 +64,15 @@ export function useUserManagementMutations({
       onEmployeesRefetch();
       queryClientInvalidate("inactive-employees");
       toast({
-        title: "Role updated",
-        description: "The user's role has been changed successfully.",
+        title: t("literals.roleUpdated"),
+        description: t("literals.theUserSRoleHasBeenChangedSuccessfully"),
       });
     },
     onError: (error: unknown) => {
       const description =
-        error instanceof Error ? error.message : "Please try again later.";
+        error instanceof Error ? error.message : t("literals.pleaseTryAgainLater");
       toast({
-        title: "Unable to update role",
+        title: t("literals.unableToUpdateRole"),
         description,
         variant: "destructive",
       });
@@ -116,19 +118,19 @@ export function useUserManagementMutations({
       toast({
         title:
           variables.status === "inactive"
-            ? "User deactivated"
-            : "User reactivated",
+            ? t("literals.userDeactivated")
+            : t("literals.userReactivated"),
         description:
           variables.status === "inactive"
-            ? "They will no longer appear in active scheduling."
-            : "They are now available for active schedules and assignments.",
+            ? t("literals.theyWillNoLongerAppearInActiveScheduling")
+            : t("literals.theyAreNowAvailableForActiveSchedulesAnd"),
       });
     },
     onError: (error: unknown) => {
       const description =
-        error instanceof Error ? error.message : "Please try again later.";
+        error instanceof Error ? error.message : t("literals.pleaseTryAgainLater");
       toast({
-        title: "Unable to update status",
+        title: t("literals.unableToUpdateStatus"),
         description,
         variant: "destructive",
       });

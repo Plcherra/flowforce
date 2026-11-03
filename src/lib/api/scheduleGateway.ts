@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import type {
   Tables,
   TablesInsert,
@@ -75,7 +76,7 @@ async function request<T>(
 
     const response = await fetch(url, init);
     if (!response.ok) {
-      let errorMessage = `Request failed (${response.status})`;
+      let errorMessage = i18n.t("literals.requestFailed2", { status: response.status });
       try {
         const contentType = response.headers.get("content-type") ?? "";
         if (contentType.includes("application/json")) {

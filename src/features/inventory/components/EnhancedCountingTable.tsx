@@ -299,7 +299,7 @@ export function EnhancedCountingTable({
                             </div>
                           )}
                           <div className="text-xs text-muted-foreground">
-                            {t("updates.category")} {item.category || "Uncategorized"}
+                            {t("updates.category")} {item.category || t("literals.uncategorized")}
                           </div>
                           {item.location && (
                             <div className="text-xs text-muted-foreground">

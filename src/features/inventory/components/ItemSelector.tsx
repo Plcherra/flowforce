@@ -131,10 +131,10 @@ export function ItemSelector({
                         )}
                         <div className="flex flex-wrap gap-2 mt-1">
                           <span className="text-xs bg-muted px-2 py-0.5 rounded">
-                            {item.category || "Uncategorized"}
+                            {item.category || t("literals.uncategorized")}
                           </span>
                           <span className="text-xs bg-muted px-2 py-0.5 rounded">
-                            {item.unit?.name || "No unit"}
+                            {item.unit?.name || t("literals.noUnit")}
                           </span>
                           {item.location && (
                             <span className="text-xs bg-muted px-2 py-0.5 rounded">

@@ -253,7 +253,7 @@ export function TeamAvailabilityPanel({
             <AlertTitle>{t("schedule.somethingWentWrong")}</AlertTitle>
             <AlertDescription>
               {firstError.message ||
-                "We ran into an unexpected error while loading availability data."}
+                t("literals.weRanIntoAnUnexpectedErrorWhileLoading")}
             </AlertDescription>
           </Alert>
         </CardContent>

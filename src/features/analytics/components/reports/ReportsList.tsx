@@ -57,7 +57,7 @@ export function ReportsList({
                   <span className="font-medium">
                     {document.title ??
                       document.file?.filename ??
-                      "Untitled report"}
+                      t("literals.untitledReport")}
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
@@ -65,13 +65,13 @@ export function ReportsList({
                     ? formatDistanceToNow(new Date(document.updated_at), {
                         addSuffix: true,
                       })
-                    : "Unknown"}
+                    : t("literals.unknown")}
                 </span>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <span>{t("analytics.followUps3")} {tasks}</span>
                 <Separator orientation="vertical" className="h-3" />
-                <span>{t("analytics.source")} {document.source ?? "N/A"}</span>
+                <span>{t("analytics.source")} {document.source ?? t("literals.nA")}</span>
                 {accuracy !== null && (
                   <>
                     <Separator orientation="vertical" className="h-3" />

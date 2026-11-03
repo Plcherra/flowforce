@@ -109,7 +109,7 @@ export function BadgesGallery({
                     </div>
                     {earned ? (
                       <Badge variant="outline" className="text-[10px]">
-                        {badge.xpValue ? `+${badge.xpValue} XP` : "Unlocked"}
+                        {badge.xpValue ? t("literals.xp", { xpValue: badge.xpValue }) : t("literals.unlocked")}
                       </Badge>
                     ) : (
                       <Lock className="h-4 w-4 text-muted-foreground" />
@@ -123,7 +123,7 @@ export function BadgesGallery({
                   </div>
                   {earned && badge.earnedAt ? (
                     <p className="mt-auto text-[11px] uppercase tracking-wide text-success">
-                      Earned{" "}
+                      {t("literals.earned")}{" "}
                       {typeof badge.earnedAt === "string"
                         ? badge.earnedAt
                         : badge.earnedAt.toLocaleDateString()}
@@ -143,12 +143,12 @@ export function BadgesGallery({
                       </p>
                       {badge.xpValue ? (
                         <p className="mt-2 text-xs text-primary">
-                          Worth {badge.xpValue} XP
+                          {t("literals.worth")} {badge.xpValue} XP
                         </p>
                       ) : null}
                       {badge.earnedAt ? (
                         <p className="text-xs text-muted-foreground">
-                          Earned{" "}
+                          {t("literals.earned")}{" "}
                           {typeof badge.earnedAt === "string"
                             ? badge.earnedAt
                             : badge.earnedAt.toLocaleString()}

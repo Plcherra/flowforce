@@ -69,7 +69,7 @@ export function MobileCoreWorkflowActions() {
             >
               <Link
                 to={action.route}
-                aria-label={`${action.label}: ${action.description}`}
+                aria-label={t("literals.text4", { label: action.label, description: action.description })}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="min-w-0">

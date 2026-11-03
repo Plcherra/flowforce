@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
 import {
   Card,
@@ -84,11 +85,11 @@ const formatCountType = (type?: string | null) => {
 const getPeriodLabel = (period?: string | null) => {
   switch (period) {
     case "day_start":
-      return "Day Start";
+      return i18n.t("literals.dayStart");
     case "day_end":
-      return "Day End";
+      return i18n.t("literals.dayEnd");
     default:
-      return "Custom";
+      return i18n.t("common.custom");
   }
 };
 
@@ -115,13 +116,13 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
       try {
         await deleteCount(countId);
         toast({
-          title: "Success",
-          description: "Count deleted successfully",
+          title: t("literals.success"),
+          description: t("literals.countDeletedSuccessfully"),
         });
       } catch (_error) {
         toast({
-          title: "Error",
-          description: "Failed to delete count",
+          title: t("literals.error"),
+          description: t("literals.failedToDeleteCount"),
           variant: "destructive",
         });
       }
@@ -214,7 +215,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                       </h4>
                       <span className="text-xs text-muted-foreground">
                         {section.counts.length}{" "}
-                        {section.counts.length === 1 ? "count" : "counts"}
+                        {section.counts.length === 1 ? t("literals.count") : t("literals.counts")}
                       </span>
                     </div>
 
@@ -289,7 +290,7 @@ export function CountManagement({ onViewCount }: CountManagementProps) {
                                     ? new Date(
                                         count.completed_at,
                                       ).toLocaleString()
-                                    : "Not done yet"}
+                                    : t("literals.notDoneYet")}
                                 </div>
                               </div>
                             </div>

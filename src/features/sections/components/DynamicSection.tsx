@@ -50,6 +50,7 @@ const getSectionSlug = (
 };
 
 export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
+  const { t } = useTranslation();
   const { path, "*": pageSplat } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -188,10 +189,10 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
       }
 
       await refetch();
-      toast({ title: "Section updated" });
+      toast({ title: t("literals.sectionUpdated") });
     } catch (error) {
       logger.error("Failed to configure section", { error, tags: ["error"] });
-      toast({ title: "Failed to configure section", variant: "destructive" });
+      toast({ title: t("literals.failedToConfigureSection"), variant: "destructive" });
       throw error;
     }
   };
@@ -337,7 +338,7 @@ function GenericSectionRenderer({
               <div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-2xl font-bold text-foreground">
-                    {section.name || "Unnamed Section"}
+                    {section.name || t("literals.unnamedSection")}
                   </h1>
                   <Badge className={badgeClass}>{getSectionType()}</Badge>
                 </div>
@@ -450,10 +451,10 @@ function GenericSectionRenderer({
               </div>
               <CardTitle>{t("sections.noContentYet")}</CardTitle>
               <CardDescription>
-                This section doesn&apos;t have any pages or content set up yet.
+                {t("literals.thisSectionDoesnTHaveAnyPagesOr")}
                 {can("systemSettings")
-                  ? " You can add pages and configure this section to get started."
-                  : " Contact your administrator to set up this section."}
+                  ? t("literals.youCanAddPagesAndConfigureThisSection")
+                  : t("literals.contactYourAdministratorToSetUpThisSection")}
               </CardDescription>
             </CardHeader>
             {can("systemSettings") ? (
@@ -472,7 +473,7 @@ function GenericSectionRenderer({
               <CardContent className="text-center">
                 <p className="text-sm text-muted-foreground">
                   {section.description ||
-                    "Contact your administrator to set up this section."}
+                    t("literals.contactYourAdministratorToSetUpThisSection")}
                 </p>
               </CardContent>
             )}
@@ -535,8 +536,8 @@ function SectionPageView({
                   </h1>
                   <p className="text-muted-foreground text-sm">
                     {componentMeta
-                      ? `Powered by ${componentMeta.label}`
-                      : "Custom page configuration"}
+                      ? t("literals.poweredBy", { label: componentMeta.label })
+                      : t("literals.customPageConfiguration")}
                   </p>
                 </div>
               </div>

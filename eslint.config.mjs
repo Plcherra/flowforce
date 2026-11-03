@@ -1,9 +1,15 @@
 import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
+import i18next from "eslint-plugin-i18next";
 import reactPlugin from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import hardcodedBaseline from "./scripts/i18n-hardcoded-baseline.json" with { type: "json" };
+
+const openPrLiteralFiles = [
+  ...new Set(hardcodedBaseline.map((entry) => entry.split(": ")[0])),
+];
 
 export default tseslint.config(
   {
@@ -90,6 +96,31 @@ export default tseslint.config(
           format: ["PascalCase"],
         },
       ],
+    },
+  },
+  {
+    files: ["src/**/*.{jsx,tsx}", "app/**/*.{jsx,tsx}"],
+    plugins: { i18next },
+    rules: {
+      "i18next/no-literal-string": [
+        "error",
+        {
+          mode: "jsx-text-only",
+          "should-validate-template": false,
+          callees: {
+            exclude: ["i18n.t", "t", "cn", "clsx", "cva", "logger", "console"],
+          },
+          words: {
+            exclude: ["[^A-Za-z]*", "[A-Za-z]", "https?://\\S+", "XP", "ID", "NS", "KB"],
+          },
+        },
+      ],
+    },
+  },
+  {
+    files: openPrLiteralFiles,
+    rules: {
+      "i18next/no-literal-string": "off",
     },
   },
   eslintConfigPrettier,

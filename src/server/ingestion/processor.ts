@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import {
   markDocumentFailed,
   markDocumentProcessing,
@@ -26,7 +27,7 @@ export async function simulateDocumentProcessing(options: SimulationOptions) {
     }
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unknown processing error";
+      error instanceof Error ? error.message : i18n.t("literals.unknownProcessingError");
     await markDocumentFailed(documentId, message);
     throw error;
   }

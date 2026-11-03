@@ -306,13 +306,13 @@ export function DetailsTab({
             <div className="flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center space-x-1">
                 <Clock className="h-4 w-4" />
-                <span>{hours.total.toFixed(2)} Hours</span>
+                <span>{hours.total.toFixed(2)} {t("literals.hours")}</span>
               </div>
               {formData.breaks.some((item) => !item.is_paid) && (
                 <div className="flex items-center space-x-1">
                   <span>
                     {formData.breaks.filter((item) => !item.is_paid).length}{" "}
-                    Unpaid break
+                    {t("literals.unpaidBreak")}
                   </span>
                   <span>
                     {formatBreakTime(
@@ -324,7 +324,7 @@ export function DetailsTab({
                 </div>
               )}
               <div className="text-muted-foreground">
-                Estimated labor cost:{" "}
+                {t("literals.estimatedLaborCost")}{" "}
                 <span className="font-medium text-foreground">
                   ${laborCost.toFixed(2)}
                 </span>
@@ -460,12 +460,12 @@ export function DetailsTab({
         >
           <option value="">
             {shiftTemplates.length === 0
-              ? "No saved shift templates"
-              : "Choose a template"}
+              ? t("literals.noSavedShiftTemplates")
+              : t("literals.chooseATemplate")}
           </option>
           {shiftTemplates.map((template) => (
             <option key={template.id} value={template.id}>
-              {template.name ?? "Untitled template"}
+              {template.name ?? t("literals.untitledTemplate")}
             </option>
           ))}
         </select>

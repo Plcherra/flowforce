@@ -116,8 +116,8 @@ export function CreateDocumentTaskDialog({
       }
 
       toast({
-        title: "Task created",
-        description: "The follow-up task is now in your task list.",
+        title: t("literals.taskCreated"),
+        description: t("literals.theFollowUpTaskIsNowInYour"),
       });
       resetForm();
       onClose();
@@ -127,9 +127,9 @@ export function CreateDocumentTaskDialog({
         tags: ["error"],
       });
       const message =
-        err instanceof Error ? err.message : "Unable to create task.";
+        err instanceof Error ? err.message : t("literals.unableToCreateTask2");
       toast({
-        title: "Task creation failed",
+        title: t("literals.taskCreationFailed"),
         description: message,
         variant: "destructive",
       });
@@ -200,7 +200,7 @@ export function CreateDocumentTaskDialog({
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                    {dueDate ? format(dueDate, "PPP") : t("literals.pickADate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -225,7 +225,7 @@ export function CreateDocumentTaskDialog({
               {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={loading || !document}>
-              {loading ? "Creating…" : "Create Task"}
+              {loading ? "Creating…" : t("literals.createTask")}
             </Button>
           </DialogFooter>
         </form>

@@ -231,15 +231,13 @@ export function ManagerFinancialOverview() {
       });
 
       toast({
-        title: value ? "Auto-sync enabled" : "Auto-sync disabled",
-        description: `Integration '${integrationMetaById[id]?.name ?? id}' will ${
-          value ? "sync automatically" : "require manual sync"
-        } going forward.`,
+        title: value ? t("literals.autoSyncEnabled") : t("literals.autoSyncDisabled"),
+        description: t("literals.integrationWillGoingForward", { value0: integrationMetaById[id]?.name ?? id, value1: value ? "sync automatically" : "require manual sync" }),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : t("literals.unknownError");
       toast({
-        title: "Unable to update auto-sync",
+        title: t("literals.unableToUpdateAutoSync"),
         description: message,
         variant: "destructive",
       });
@@ -290,13 +288,13 @@ export function ManagerFinancialOverview() {
       });
 
       toast({
-        title: "Sync started",
-        description: `Triggered data synchronization for ${integrationMetaById[id]?.name ?? id}.`,
+        title: t("literals.syncStarted"),
+        description: t("literals.triggeredDataSynchronizationFor", { value0: integrationMetaById[id]?.name ?? id }),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : t("literals.unknownError");
       toast({
-        title: "Sync failed",
+        title: t("literals.syncFailed"),
         description: message,
         variant: "destructive",
       });
@@ -330,8 +328,8 @@ export function ManagerFinancialOverview() {
     URL.revokeObjectURL(url);
 
     toast({
-      title: "Owner summary exported",
-      description: "Downloaded the separated actual, imported, and estimated cost summary.",
+      title: t("literals.ownerSummaryExported"),
+      description: t("literals.downloadedTheSeparatedActualImportedAndEstimatedCost"),
     });
   };
 

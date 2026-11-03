@@ -379,7 +379,7 @@ export function SectionConfigurationWizard({
                               {p.title}
                             </CardTitle>
                             <Badge variant="outline" className="text-xs">
-                              {p.icon || "Page"}
+                              {p.icon || t("literals.page")}
                             </Badge>
                           </div>
                           {p.description && (
@@ -584,7 +584,7 @@ export function SectionConfigurationWizard({
               <CardContent className="space-y-4">
                 <div>
                   <h4 className="font-medium mb-2">
-                    Pages ({formData.pages.length})
+                    {t("literals.pages")}{formData.pages.length})
                   </h4>
                   <div className="space-y-1">
                     {formData.pages.map((page, index) => {
@@ -610,7 +610,7 @@ export function SectionConfigurationWizard({
 
                 <div>
                   <h4 className="font-medium mb-2">
-                    Permissions ({formData.permissions.length})
+                    {t("literals.permissions")}{formData.permissions.length})
                   </h4>
                   <div className="flex flex-wrap gap-1">
                     {formData.permissions.map((permission) => {

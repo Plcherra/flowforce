@@ -103,9 +103,9 @@ export function FieldExecutionPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to load field execution",
+        title: t("literals.unableToLoadFieldExecution"),
         description:
-          error instanceof Error ? error.message : "Unexpected execution error.",
+          error instanceof Error ? error.message : t("literals.unexpectedExecutionError"),
       });
     } finally {
       setLoading(false);
@@ -134,9 +134,9 @@ export function FieldExecutionPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Execution action failed",
+        title: t("literals.executionActionFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected execution error.",
+          error instanceof Error ? error.message : t("literals.unexpectedExecutionError"),
       });
     } finally {
       setActing(null);
@@ -260,7 +260,7 @@ export function FieldExecutionPanel() {
               void loadSteps(run.workflow_instanceid);
             }}
           >
-            {run.templatecategory ?? "Run"}
+            {run.templatecategory ?? t("literals.run")}
           </Button>
         ))}
       </div>
@@ -276,10 +276,10 @@ export function FieldExecutionPanel() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold">
-                  {selectedRun.workflow_name ?? "Workflow run"}
+                  {selectedRun.workflow_name ?? t("literals.workflowRun")}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t("inventory.due")} {selectedRun.due_at?.slice(0, 16) ?? "not scheduled"} ·{" "}
+                  {t("inventory.due")} {selectedRun.due_at?.slice(0, 16) ?? t("literals.notScheduled")} ·{" "}
                   {summary.remaining} {t("operations.remaining")}
                 </p>
               </div>
@@ -320,8 +320,8 @@ export function FieldExecutionPanel() {
                       {step.step_number}. {step.step_name}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {step.step_type ?? "task"}
-                      {step.evidence_required ? " · evidence required" : ""}
+                      {step.step_type ?? t("literals.task")}
+                      {step.evidence_required ? t("literals.evidenceRequired") : ""}
                     </p>
                   </div>
                   <Badge variant="outline">{step.step_status}</Badge>
@@ -331,8 +331,8 @@ export function FieldExecutionPanel() {
                   className="mt-3 min-h-[76px]"
                   placeholder={
                     stepNeedsEvidence(step)
-                      ? "Add required evidence or reading"
-                      : "Add note"
+                      ? t("literals.addRequiredEvidenceOrReading")
+                      : t("literals.addNote")
                   }
                   value={stepDrafts[step.step_instanceid] ?? ""}
                   onChange={(event) =>

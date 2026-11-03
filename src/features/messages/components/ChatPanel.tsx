@@ -72,7 +72,7 @@ export function ChatPanel({
         >
           {!isMine && (
             <div className="mb-1 text-xs font-medium text-foreground/80">
-              {author?.name ?? "Someone"}
+              {author?.name ?? t("literals.someone")}
             </div>
           )}
           <div className="allow-text-selection whitespace-pre-line leading-relaxed">
@@ -98,8 +98,8 @@ export function ChatPanel({
             <MessageSquare className="mx-auto h-10 w-10" />
             <p>
               {hasTeammates
-                ? "Select a conversation to view the chat history."
-                : "Invite teammates to start your first conversation."}
+                ? t("literals.selectAConversationToViewTheChatHistory")
+                : t("literals.inviteTeammatesToStartYourFirstConversation")}
             </p>
           </div>
         </CardContent>
@@ -119,7 +119,7 @@ export function ChatPanel({
           <div className="allow-text-selection">
             <CardTitle>
               {getConversationName(conversation, usersById, currentUserId) ||
-                "Conversation"}
+                t("literals.conversation")}
             </CardTitle>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <UsersIcon className="h-3.5 w-3.5" />

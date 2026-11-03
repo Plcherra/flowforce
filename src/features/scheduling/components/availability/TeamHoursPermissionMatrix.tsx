@@ -111,8 +111,8 @@ export function TeamHoursPermissionMatrix({
     },
     onSuccess: async () => {
       toast({
-        title: "Schedule permission saved",
-        description: "Reload shows the same schedule permissions.",
+        title: t("literals.schedulePermissionSaved"),
+        description: t("literals.reloadShowsTheSameSchedulePermissions"),
       });
       await queryClient.invalidateQueries({
         queryKey: ["team-hours-permission-matrix", orgId],
@@ -120,9 +120,9 @@ export function TeamHoursPermissionMatrix({
     },
     onError: (error) => {
       toast({
-        title: "Unable to save schedule permission",
+        title: t("literals.unableToSaveSchedulePermission"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },

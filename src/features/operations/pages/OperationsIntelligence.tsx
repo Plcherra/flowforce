@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   IdeaProvider,
   useIdeaContext,
@@ -16,6 +17,7 @@ export default function OperationsIntelligence() {
 }
 
 function IdeaRouteContent() {
+  const { t } = useTranslation();
   const { ready, loading, companyId } = useIdeaContext();
   const { toast } = useToast();
   const notifiedRef = useRef(false);
@@ -25,9 +27,9 @@ function IdeaRouteContent() {
       notifiedRef.current = true;
       toast({
         variant: "destructive",
-        title: "Company context missing",
+        title: t("literals.companyContextMissing"),
         description:
-          "Connect your profile to a company to activate Operations Intelligence.",
+          t("literals.connectYourProfileToACompanyToActivate"),
       });
     }
   }, [companyId, loading, toast]);

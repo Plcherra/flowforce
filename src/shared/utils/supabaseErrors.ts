@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 const SCHEMA_CACHE_ERROR_CODES = new Set(["PGRST200", "PGRST202", "PGRST205"]);
 
 export const getUnknownErrorMessage = (error: unknown) => {
@@ -93,7 +94,7 @@ export const getSupabaseSetupMessage = (
 ) => {
   const message = getUnknownErrorMessage(error);
   if (!message) {
-    return `${moduleName} is not fully set up in Supabase yet.`;
+    return i18n.t("literals.isNotFullySetUpInSupabaseYet", { moduleName: moduleName });
   }
 
   if (
@@ -101,7 +102,7 @@ export const getSupabaseSetupMessage = (
     isMissingRpcError(error) ||
     isMissingRelationshipError(error)
   ) {
-    return `${moduleName} is not fully set up in Supabase yet. Missing database resources need to be restored.`;
+    return i18n.t("literals.isNotFullySetUpInSupabaseYet2", { moduleName: moduleName });
   }
 
   return message;

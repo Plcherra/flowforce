@@ -280,7 +280,7 @@ export function ReceiveOrdersTab({
                     onClick={onReceive}
                     disabled={isReceiving}
                   >
-                    {isReceiving ? "Recording..." : "Record Receiving"}
+                    {isReceiving ? t("literals.recording") : t("literals.recordReceiving")}
                   </Button>
                 </div>
               </div>

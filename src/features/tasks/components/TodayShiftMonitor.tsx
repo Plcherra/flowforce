@@ -140,8 +140,8 @@ export function TodayShiftMonitor() {
               {row.lists.map((list) => (
                 <li key={list.slot} className="text-sm">
                   <span className="font-medium">{t(SLOT_KEYS[list.slot])}</span>
-                  {list.title ? ` · ${list.title}` : ""}
-                  {list.formId ? ` · ${t("tasks.listProgress", { done: list.done, total: list.total })}` : ""}
+                  {list.title ? t("literals.text23", { title: list.title }) : ""}
+                  {list.formId ? t("literals.text20", { value0: t("tasks.listProgress", { done: list.done, total: list.total }) }) : ""}
                   {list.note ? <span className="block text-muted-foreground">{list.note}</span> : null}
                 </li>
               ))}

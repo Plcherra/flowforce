@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import {
   timeOffPolicyForSubject,
   type CompanyPolicyRecord,
@@ -140,7 +141,7 @@ export function balanceLabel(balance: PolicyBalance): string {
   if (balance.year) {
     parts.push(`${formatAmount(balance.year.remaining, balance.policy.unit)} left this year`);
   }
-  if (parts.length === 0) return "No cap on this policy";
+  if (parts.length === 0) return i18n.t("literals.noCapOnThisPolicy");
   return parts.join(" · ");
 }
 

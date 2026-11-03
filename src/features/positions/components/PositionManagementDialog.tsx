@@ -131,7 +131,7 @@ export function PositionManagementDialog({
           {/* Position Form */}
           <div className="space-y-4">
             <h3 className="text-base sm:text-lg font-semibold">
-              {editingPosition ? "Edit Position" : "Create New Position"}
+              {editingPosition ? t("literals.editPosition") : t("literals.createNewPosition")}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -233,7 +233,7 @@ export function PositionManagementDialog({
 
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button type="submit" className="flex-1 text-sm">
-                  {editingPosition ? "Update Position" : "Create Position"}
+                  {editingPosition ? t("literals.updatePosition") : t("literals.createPosition")}
                 </Button>
                 {editingPosition && (
                   <Button

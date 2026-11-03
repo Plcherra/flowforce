@@ -27,7 +27,7 @@ export function FlagIssueControls({
               onCheckedChange={(checked) => onToggle(field.id, Boolean(checked))}
             />
             <Label htmlFor={`flag-issue-${field.id}`} className="text-sm font-normal">
-              {field.label?.trim() || "Item"}
+              {field.label?.trim() || t("literals.item")}
             </Label>
           </div>
         ))}

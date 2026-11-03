@@ -123,7 +123,7 @@ export function RoleManagerDialog({
               type="submit"
               disabled={!selectedEmployeeId || !selectedRoleId || isAssigning}
             >
-              {isAssigning ? "Saving…" : "Save changes"}
+              {isAssigning ? "Saving…" : t("literals.saveChanges")}
             </Button>
           </div>
         </form>

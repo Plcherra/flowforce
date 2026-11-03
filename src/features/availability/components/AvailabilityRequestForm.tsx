@@ -333,16 +333,16 @@ export function AvailabilityRequestForm({
     },
     onSuccess: () => {
       toast({
-        title: "Availability sent",
+        title: t("literals.availabilitySent"),
         description: sendAction?.helper,
       });
     },
     onError: (error) => {
       logger.error("Error sending availability", { error, tags: ["error"] });
       toast({
-        title: "Unable to send availability",
+        title: t("literals.unableToSendAvailability"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -373,7 +373,7 @@ export function AvailabilityRequestForm({
             <CardTitle className="text-lg font-semibold">{t("schedule.availability")}</CardTitle>
             <CardDescription>
               {availabilityIsOpen
-                ? "Open availability is any day and any time. The weekday grid is not required."
+                ? t("literals.openAvailabilityIsAnyDayAndAnyTime")
                 : t("availability.dayStateLegend")}
             </CardDescription>
           </div>
@@ -387,12 +387,12 @@ export function AvailabilityRequestForm({
               ) : (
                 <Unlock className="h-3 w-3" />
               )}
-              Current lock: {lockLabel}
+              {t("literals.currentLock")} {lockLabel}
             </Badge>
             {lockInfo?.baseMode === "auto" && nextLockFormatted && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                Next lock: {nextLockFormatted}
+                {t("literals.nextLock")} {nextLockFormatted}
               </span>
             )}
           </div>
@@ -401,7 +401,7 @@ export function AvailabilityRequestForm({
       <CardContent className="space-y-4">
         <div className="rounded-lg border border-border">
           <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <span>Week of {dayjs(weekStart).format("MMM D, YYYY")}</span>
+            <span>{t("literals.weekOf")} {dayjs(weekStart).format("MMM D, YYYY")}</span>
           </div>
           {availabilityIsOpen ? (
             <div className="space-y-2 p-4" data-testid="availability-open-notice">
@@ -435,7 +435,7 @@ export function AvailabilityRequestForm({
                     checked={selectedDays.includes(dayIndex)}
                     disabled={disabled}
                     data-testid={`availability-repeat-check-${label.toLowerCase()}`}
-                    aria-label={`${label} repeat`}
+                    aria-label={t("literals.repeat", { label: label })}
                     onCheckedChange={(checked) =>
                       toggleRepeatDay(dayIndex, checked === true)
                     }
@@ -499,7 +499,7 @@ export function AvailabilityRequestForm({
                       >{t("onboarding.from")}</Label>
                       <Input
                         id={`availability-${label}-from`}
-                        aria-label={`${label} from`}
+                        aria-label={t("literals.from", { label: label })}
                         type="time"
                         className="h-8 w-32"
                         disabled={disabled}
@@ -517,7 +517,7 @@ export function AvailabilityRequestForm({
                       >{t("onboarding.to")}</Label>
                       <Input
                         id={`availability-${label}-to`}
-                        aria-label={`${label} to`}
+                        aria-label={t("literals.to", { label: label })}
                         type="time"
                         className="h-8 w-32"
                         disabled={disabled}
@@ -543,7 +543,7 @@ export function AvailabilityRequestForm({
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <AlertCircle className="h-4 w-4 text-warning" />
             {availabilityIsOpen
-              ? "Open availability does not require the weekday grid."
+              ? t("literals.openAvailabilityDoesNotRequireTheWeekdayGrid")
               : sendAction
                 ? t("availability.appliesFrom", { date: sendAction.windowStart })
                 : null}

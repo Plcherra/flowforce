@@ -2,6 +2,7 @@
  * Hook for week-level operations (copy, clear, publish)
  */
 
+import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { publishSchedulesWeekWithValidation } from "@/features/scheduling/repositories/schedulingRepository";
@@ -26,6 +27,7 @@ export function useWeekMutations({
   bulkCreateShifts,
   ensureCompanyContext,
 }: UseWeekMutationsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const copyWeek = useCallback(
@@ -60,9 +62,9 @@ export function useWeekMutations({
         return await bulkCreateShifts(payloads);
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to copy week";
+          err instanceof Error ? err.message : t("literals.failedToCopyWeek");
         toast({
-          title: "Copy failed",
+          title: t("literals.copyFailed"),
           description: message,
           variant: "destructive",
         });
@@ -106,15 +108,15 @@ export function useWeekMutations({
 
         await refetchAll();
         toast({
-          title: "Week cleared",
-          description: "Shifts and vendor events removed.",
+          title: t("literals.weekCleared"),
+          description: t("literals.shiftsAndVendorEventsRemoved"),
         });
         return true;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to clear week";
+          err instanceof Error ? err.message : t("literals.failedToClearWeek");
         toast({
-          title: "Clear failed",
+          title: t("literals.clearFailed"),
           description: message,
           variant: "destructive",
         });
@@ -146,8 +148,8 @@ export function useWeekMutations({
       const knownBlocking = params.blockingConflictCount ?? 0;
       if (params.isPublished && knownBlocking > 0) {
         toast({
-          title: "Publish blocked",
-          description: `${knownBlocking} assignment${knownBlocking === 1 ? "" : "s"} conflict with staff availability. Fix conflicts in the readiness panel.`,
+          title: t("literals.publishBlocked"),
+          description: t("literals.assignmentConflictWithStaffAvailabilityFixConflictsIn", { knownBlocking: knownBlocking, value1: knownBlocking === 1 ? "" : "s" }),
           variant: "destructive",
         });
         return false;
@@ -164,27 +166,27 @@ export function useWeekMutations({
         if (!result.success) {
           const blockingCount = result.blocking_count ?? 0;
           toast({
-            title: "Publish blocked",
+            title: t("literals.publishBlocked"),
             description:
               blockingCount > 0
-                ? `${blockingCount} assignment${blockingCount === 1 ? "" : "s"} conflict with staff availability. Fix conflicts in the readiness panel.`
-                : "Unable to publish this week.",
+                ? t("literals.assignmentConflictWithStaffAvailabilityFixConflictsIn2", { blockingCount: blockingCount, value1: blockingCount === 1 ? "" : "s" })
+                : t("literals.unableToPublishThisWeek"),
             variant: "destructive",
           });
           return false;
         }
         await refetchAll();
         toast({
-          title: params.isPublished ? "Week published" : "Week unpublished",
+          title: params.isPublished ? t("literals.weekPublished") : t("literals.weekUnpublished"),
         });
         return true;
       } catch (err) {
         const message =
           err instanceof Error
             ? err.message
-            : "Failed to update publication status";
+            : t("literals.failedToUpdatePublicationStatus");
         toast({
-          title: "Action failed",
+          title: t("literals.actionFailed"),
           description: message,
           variant: "destructive",
         });

@@ -32,13 +32,13 @@ export function SchedulingNotifications() {
     const granted = await requestNotificationPermission();
     if (granted) {
       toast({
-        title: "Notifications enabled",
-        description: "You'll receive scheduling reminders on this device",
+        title: t("literals.notificationsEnabled"),
+        description: t("literals.youLlReceiveSchedulingRemindersOnThisDevice"),
       });
     } else {
       toast({
-        title: "Notifications denied",
-        description: "Please enable notifications in your browser settings",
+        title: t("literals.notificationsDenied"),
+        description: t("literals.pleaseEnableNotificationsInYourBrowserSettings"),
         variant: "destructive",
       });
     }
@@ -105,7 +105,7 @@ export function SchedulingNotifications() {
                   <div>
                     <div className="font-medium text-sm">{reminder.title}</div>
                     <div className="text-xs text-muted-foreground">
-                      {getDayDisplayName(reminder.day)} at {reminder.time}
+                      {getDayDisplayName(reminder.day)} {t("literals.at")} {reminder.time}
                     </div>
                   </div>
                   <Badge variant="secondary">
@@ -161,8 +161,8 @@ export function SchedulingNotifications() {
             size="sm"
             onClick={() => {
               toast({
-                title: "Test Notification",
-                description: "This is how your scheduling reminders will look",
+                title: t("literals.testNotification"),
+                description: t("literals.thisIsHowYourSchedulingRemindersWillLook"),
               });
             }}
             className="w-full"

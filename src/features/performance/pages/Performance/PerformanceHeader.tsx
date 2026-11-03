@@ -25,10 +25,10 @@ export function PerformanceHeader({
       <div className="flex items-center gap-3">
         <Badge variant="outline">
           {loading
-            ? "Refreshing data…"
+            ? t("literals.refreshingData")
             : lastUpdatedLabel
-              ? `Synced ${lastUpdatedLabel}`
-              : "Live data"}
+              ? t("literals.synced", { lastUpdatedLabel: lastUpdatedLabel })
+              : t("literals.liveData")}
         </Badge>
         <Button
           type="button"

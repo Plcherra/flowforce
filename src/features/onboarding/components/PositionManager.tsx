@@ -96,11 +96,10 @@ export default function PositionManager({
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Briefcase className="h-5 w-5" />
-              <span>Manage Positions for {role.name}</span>
+              <span>{t("literals.managePositionsFor")} {role.name}</span>
             </DialogTitle>
             <DialogDescription>
-              Add and configure specific positions within this role. Each
-              position inherits the role&apos;s base permissions.
+              {t("literals.addAndConfigureSpecificPositionsWithinThisRole")}
             </DialogDescription>
           </DialogHeader>
 
@@ -115,7 +114,7 @@ export default function PositionManager({
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-medium text-sm text-foreground">
-                  Current Positions ({rolePositions.length})
+                  {t("literals.currentPositions")}{rolePositions.length})
                 </h4>
                 <Button onClick={() => handleAddPosition()} size="sm">
                   <Plus className="h-4 w-4 mr-2" />

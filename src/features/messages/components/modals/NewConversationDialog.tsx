@@ -223,7 +223,7 @@ export function NewConversationDialog({
                                   onCheckedChange={() =>
                                     toggleParticipant(user.id)
                                   }
-                                  aria-label={`Select ${user.name}`}
+                                  aria-label={t("literals.select", { name: user.name })}
                                 />
                                 <div className="flex flex-col">
                                   <span className="font-medium">
@@ -254,9 +254,9 @@ export function NewConversationDialog({
                   <FormDescription>
                     {hasSelectableUsers
                       ? type === "direct"
-                        ? "Select exactly one teammate to start a private chat."
-                        : "Select at least two teammates to start a group conversation."
-                      : "Ask an administrator to register teammates so you can start chatting."}
+                        ? t("literals.selectExactlyOneTeammateToStartAPrivate")
+                        : t("literals.selectAtLeastTwoTeammatesToStartA")
+                      : t("literals.askAnAdministratorToRegisterTeammatesSoYou")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

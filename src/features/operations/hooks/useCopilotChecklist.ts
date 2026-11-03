@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -310,6 +311,7 @@ export function generateChecklistPlan({
 }
 
 export function useCopilotChecklist(date: Date, storeId: string | null) {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
   const [state, setState] = useState<ChecklistState>(INITIAL_STATE);
@@ -557,10 +559,10 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
     } catch (error) {
       const message =
         (error as PostgrestError)?.message ??
-        (error instanceof Error ? error.message : "Failed to load checklist");
+        (error instanceof Error ? error.message : t("literals.failedToLoadChecklist"));
       setState({ ...INITIAL_STATE, error: message });
       toast({
-        title: "Checklist sync failed",
+        title: t("literals.checklistSyncFailed"),
         description: message,
         variant: "destructive",
       });
@@ -583,8 +585,8 @@ export function useCopilotChecklist(date: Date, storeId: string | null) {
 
       if (error) {
         toast({
-          title: "Update failed",
-          description: error.message ?? "Unable to update task status.",
+          title: t("literals.updateFailed2"),
+          description: error.message ?? t("literals.unableToUpdateTaskStatus"),
           variant: "destructive",
         });
         return;

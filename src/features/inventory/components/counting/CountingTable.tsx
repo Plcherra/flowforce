@@ -169,7 +169,7 @@ export function CountingTable({
                     <TableCell className="p-4">
                       <div className="text-xs">
                         {item.shelf_life_days ? (
-                          `${item.shelf_life_days} days`
+                          t("literals.days", { shelf_life_days: item.shelf_life_days })
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
@@ -246,7 +246,7 @@ export function CountingTable({
                                 />
                                 <span className="text-xs font-medium text-muted-foreground">
                                   {unitLabel}
-                                  {unit.unit_level > 1 ? ` · ${factor}×` : ""}
+                                  {unit.unit_level > 1 ? t("literals.text13", { factor: factor }) : ""}
                                 </span>
                               </div>
                             );
@@ -276,7 +276,7 @@ export function CountingTable({
                       ) : (
                         <Badge variant="secondary" className="h-8 px-2">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
-                          {isCountCompleted ? "Locked" : "Saved"}
+                          {isCountCompleted ? t("literals.locked") : t("literals.saved")}
                         </Badge>
                       )}
                     </TableCell>

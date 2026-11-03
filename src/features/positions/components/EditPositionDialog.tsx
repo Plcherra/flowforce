@@ -171,8 +171,8 @@ export default function EditPositionDialog({
               <Button type="button" variant="outline" onClick={handleClose}>{t("common.cancel")}</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting
-                  ? "Updating..."
-                  : "Update Position"}
+                  ? t("literals.updating")
+                  : t("literals.updatePosition")}
               </Button>
             </div>
           </form>

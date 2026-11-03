@@ -95,7 +95,7 @@ export function StepSummary({
               >
                 <p className="font-medium text-foreground">{module.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {module.estimatedMinutes} minutes · {module.xpAward} XP
+                  {module.estimatedMinutes} {t("literals.minutes")} {module.xpAward} XP
                 </p>
               </li>
             ))}

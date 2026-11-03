@@ -59,8 +59,7 @@ export default function SectionsPermissions() {
             {t("common.accessDenied")}
           </h3>
           <p className="text-sm text-muted-foreground">
-            You don&apos;t have permission to access sections and permissions
-            management.
+            {t("literals.youDonTHavePermissionToAccessSections")}
           </p>
         </div>
       </div>

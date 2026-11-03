@@ -127,22 +127,22 @@ export default function Cookbook() {
         <StatCard
           title={t("inventory.linkedRecipes")}
           value={recipes.length}
-          subtitle="Inventory-backed and costed"
+          subtitle={t("literals.inventoryBackedAndCosted")}
         />
         <StatCard
           title={t("inventory.favorites")}
           value={favoriteIds.length}
-          subtitle="Go-to recipes for quick access"
+          subtitle={t("literals.goToRecipesForQuickAccess")}
         />
         <StatCard
           title={t("inventory.prepItems")}
           value={prepItems.length}
-          subtitle="Prep planner ready items"
+          subtitle={t("literals.prepPlannerReadyItems")}
         />
         <StatCard
           title={t("inventory.events7d")}
           value={productionEvents.length + wasteEvents.length}
-          subtitle={`${productionEvents.length} production • ${wasteEvents.length} waste`}
+          subtitle={t("literals.productionWaste", { length: productionEvents.length, length2: wasteEvents.length })}
         />
       </section>
 
@@ -164,10 +164,10 @@ export default function Cookbook() {
       <Tabs defaultValue="recipes" className="space-y-4">
         <TabsList>
           <TabsTrigger value="recipes">
-            Recipes ({filteredRecipes.length})
+            {t("literals.recipes")}{filteredRecipes.length})
           </TabsTrigger>
           <TabsTrigger value="favorites">
-            Favorites ({filteredFavorites.length})
+            {t("literals.favorites")}{filteredFavorites.length})
           </TabsTrigger>
         </TabsList>
         <TabsContent value="recipes">

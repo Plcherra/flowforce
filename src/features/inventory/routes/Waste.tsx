@@ -165,19 +165,19 @@ export default function WasteTrackingPage() {
                     {summary.topWasteType
                       ? wasteTypeLabels[summary.topWasteType] ??
                         summary.topWasteType
-                      : "None"}
+                      : t("literals.none")}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("inventory.item")}</span>
                   <span className="font-medium">
-                    {summary.topItemName ?? "None"}
+                    {summary.topItemName ?? t("literals.none")}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("schedule.location")}</span>
                   <span className="font-medium">
-                    {summary.topLocationName ?? "None"}
+                    {summary.topLocationName ?? t("literals.none")}
                   </span>
                 </div>
               </CardContent>
@@ -200,12 +200,12 @@ export default function WasteTrackingPage() {
                       >
                         <div>
                           <p className="font-medium">
-                            {record.item?.name || "Unknown Item"}
+                            {record.item?.name || t("literals.unknownItem2")}
                           </p>
                           <p className="text-muted-foreground">
                             {wasteTypeLabels[record.waste_type] ??
                               record.waste_type}{" "}
-                            · {record.location?.name ?? "No location"}
+                            · {record.location?.name ?? t("literals.noLocation")}
                           </p>
                         </div>
                         <div className="text-right">
@@ -249,7 +249,7 @@ export default function WasteTrackingPage() {
                           <div className="flex items-center gap-2">
                             <Package className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
-                              {record.item?.name || "Unknown Item"}
+                              {record.item?.name || t("literals.unknownItem2")}
                             </span>
                             <Badge
                               className={
@@ -269,7 +269,7 @@ export default function WasteTrackingPage() {
                                 {record.quantity}{" "}
                                 {record.unit?.name ||
                                   record.item?.unit?.name ||
-                                  "units"}
+                                  t("literals.units2")}
                               </span>
                             </div>
 

@@ -169,8 +169,8 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
             {locationId && !itemsLoading && (
               <p className="text-xs text-muted-foreground">
                 {scopedItems.length === 0
-                  ? "No items use this room yet. Add an item with this default room first."
-                  : `Includes ${scopedItems.map((item) => item.name).join(", ")}`}
+                  ? t("literals.noItemsUseThisRoomYetAddAn")
+                  : t("literals.includes", { value0: scopedItems.map((item) => item.name).join(", ") })}
               </p>
             )}
           </div>
@@ -198,7 +198,7 @@ export function NewCountWizard({ open, onOpenChange }: NewCountWizardProps) {
               onClick={() => void handleStart()}
               disabled={!canStart || creating}
             >
-              {creating ? "Starting..." : "Start count"}
+              {creating ? t("literals.starting") : t("literals.startCount")}
             </Button>
           </div>
         </div>

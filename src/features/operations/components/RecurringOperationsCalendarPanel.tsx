@@ -66,9 +66,9 @@ export function RecurringOperationsCalendarPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to load workload",
+        title: t("literals.unableToLoadWorkload"),
         description:
-          error instanceof Error ? error.message : "Unexpected workload error.",
+          error instanceof Error ? error.message : t("literals.unexpectedWorkloadError"),
       });
     } finally {
       setLoadingWorkload(false);
@@ -83,8 +83,8 @@ export function RecurringOperationsCalendarPanel() {
     if (!companyId) {
       toast({
         variant: "destructive",
-        title: "Company context missing",
-        description: "Connect your profile to a company before scheduling.",
+        title: t("literals.companyContextMissing"),
+        description: t("literals.connectYourProfileToACompanyBeforeScheduling"),
       });
       return;
     }
@@ -110,8 +110,8 @@ export function RecurringOperationsCalendarPanel() {
       await loadWorkload();
 
       toast({
-        title: "Operations calendar generated",
-        description: `${result.runs_created ?? 0} new runs created for the next seven days.`,
+        title: t("literals.operationsCalendarGenerated"),
+        description: t("literals.newRunsCreatedForTheNextSevenDays", { value0: result.runs_created ?? 0 }),
       });
     } catch (error) {
       logger.error("[RecurringOperationsCalendarPanel] generation failed", {
@@ -120,9 +120,9 @@ export function RecurringOperationsCalendarPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to generate calendar",
+        title: t("literals.unableToGenerateCalendar"),
         description:
-          error instanceof Error ? error.message : "Unexpected calendar error.",
+          error instanceof Error ? error.message : t("literals.unexpectedCalendarError"),
       });
     } finally {
       setGenerating(false);

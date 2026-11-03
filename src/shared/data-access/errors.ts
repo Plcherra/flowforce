@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import type { AppError } from "@/types/platform";
 
 export type DataAccessSource = "supabase" | "api" | "service" | "unknown";
@@ -43,7 +44,7 @@ export const normalizeDataAccessError = (
     readStringField(error, "message") ??
     (typeof error === "string" ? error : undefined) ??
     context.fallbackMessage ??
-    "Data access operation failed";
+    i18n.t("literals.dataAccessOperationFailed");
 
   return {
     message,

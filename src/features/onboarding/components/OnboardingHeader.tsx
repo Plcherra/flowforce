@@ -63,7 +63,7 @@ export default function OnboardingHeader({
           {/* Step Info */}
           <div className="text-right">
             <p className="text-sm font-medium text-foreground">
-              Step {currentStep} of {totalSteps}
+              {t("literals.step")} {currentStep} {t("literals.of")} {totalSteps}
             </p>
             <p className="text-xs text-muted-foreground">
               {steps[currentStep - 1]?.title}

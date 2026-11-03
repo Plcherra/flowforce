@@ -217,10 +217,10 @@ export default function SectionEditor({
         <DialogHeader>
           <DialogTitle>
             {section
-              ? "Edit Section"
+              ? t("literals.editSection")
               : template
-                ? `Create from ${template.name}`
-                : "Create Custom Section"}
+                ? t("literals.createFrom", { name: template.name })
+                : t("sections.createCustomSection")}
           </DialogTitle>
           <DialogDescription>
             {t("sections.configureYourSectionSettingsPagesAndPermissions")}
@@ -426,7 +426,7 @@ export default function SectionEditor({
             </Button>
             <Button onClick={handleSubmit} disabled={!formData.name || saving}>
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Section"}
+              {saving ? t("literals.saving") : t("literals.saveSection")}
             </Button>
           </div>
         </div>

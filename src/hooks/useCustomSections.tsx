@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +126,7 @@ const normalizeSectionRecord = (section: any): CustomSection => ({
 });
 
 export function useCustomSections() {
+  const { t } = useTranslation();
   const [sections, setSections] = useState<CustomSection[]>([]);
   const [templates, setTemplates] = useState<SectionTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,8 +161,8 @@ export function useCustomSections() {
         tags: ["error"],
       });
       toast({
-        title: "Error",
-        description: "Failed to load custom sections",
+        title: t("literals.error"),
+        description: t("literals.failedToLoadCustomSections"),
         variant: "destructive",
       });
     }
@@ -198,8 +200,8 @@ export function useCustomSections() {
         tags: ["error"],
       });
       toast({
-        title: "Error",
-        description: "Failed to load section templates",
+        title: t("literals.error"),
+        description: t("literals.failedToLoadSectionTemplates"),
         variant: "destructive",
       });
     }
@@ -225,9 +227,9 @@ export function useCustomSections() {
       if (templateId) {
         if (isQuickTasksString(templateId)) {
           toast({
-            title: "Template unavailable",
+            title: t("literals.templateUnavailable"),
             description:
-              "Quick Tasks have been merged into the main Tasks experience.",
+              t("literals.quickTasksHaveBeenMergedIntoTheMain"),
           });
           return null;
         }
@@ -300,8 +302,8 @@ export function useCustomSections() {
       if (existing) {
         const normalized = normalizeSectionRecord(existing);
         toast({
-          title: "Section already exists",
-          description: `${normalized.name} is already configured for this workspace`,
+          title: t("literals.sectionAlreadyExists"),
+          description: t("literals.isAlreadyConfiguredForThisWorkspace", { name: normalized.name }),
         });
         return normalized;
       }
@@ -370,16 +372,16 @@ export function useCustomSections() {
 
       await fetchSections();
       toast({
-        title: "Success",
-        description: "Section created successfully",
+        title: t("literals.success"),
+        description: t("literals.sectionCreatedSuccessfully"),
       });
 
       return normalizeSectionRecord({ ...section, pages: initialPages });
     } catch (error) {
       logger.error("Error creating section", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to create section",
+        title: t("literals.error"),
+        description: t("literals.failedToCreateSection"),
         variant: "destructive",
       });
       throw error;
@@ -397,14 +399,14 @@ export function useCustomSections() {
 
       await fetchSections();
       toast({
-        title: "Success",
-        description: "Section updated successfully",
+        title: t("literals.success"),
+        description: t("literals.sectionUpdatedSuccessfully"),
       });
     } catch (error) {
       logger.error("Error updating section", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to update section",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateSection"),
         variant: "destructive",
       });
       throw error;
@@ -422,14 +424,14 @@ export function useCustomSections() {
 
       await fetchSections();
       toast({
-        title: "Success",
-        description: "Section deleted successfully",
+        title: t("literals.success"),
+        description: t("literals.sectionDeletedSuccessfully"),
       });
     } catch (error) {
       logger.error("Error deleting section", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to delete section",
+        title: t("literals.error"),
+        description: t("literals.failedToDeleteSection"),
         variant: "destructive",
       });
       throw error;
@@ -456,8 +458,8 @@ export function useCustomSections() {
     } catch (error) {
       logger.error("Error updating section order", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to update section order",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateSectionOrder"),
         variant: "destructive",
       });
     }

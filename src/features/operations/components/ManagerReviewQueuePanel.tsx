@@ -63,9 +63,9 @@ export function ManagerReviewQueuePanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to load review queue",
+        title: t("literals.unableToLoadReviewQueue"),
         description:
-          error instanceof Error ? error.message : "Unexpected review error.",
+          error instanceof Error ? error.message : t("literals.unexpectedReviewError"),
       });
     } finally {
       setLoading(false);
@@ -83,8 +83,8 @@ export function ManagerReviewQueuePanel() {
     if (!companyId) {
       toast({
         variant: "destructive",
-        title: "Company context missing",
-        description: "Connect your profile to a company before reviewing.",
+        title: t("literals.companyContextMissing"),
+        description: t("literals.connectYourProfileToACompanyBeforeReviewing"),
       });
       return;
     }
@@ -110,8 +110,8 @@ export function ManagerReviewQueuePanel() {
       await loadQueue();
 
       toast({
-        title: `Workflow ${result.review_status ?? reviewStatus}`,
-        description: "The review decision was audited.",
+        title: t("literals.workflow2", { value0: result.review_status ?? reviewStatus }),
+        description: t("literals.theReviewDecisionWasAudited"),
       });
     } catch (error) {
       logger.error("[ManagerReviewQueuePanel] review action failed", {
@@ -120,9 +120,9 @@ export function ManagerReviewQueuePanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to review workflow",
+        title: t("literals.unableToReviewWorkflow"),
         description:
-          error instanceof Error ? error.message : "Unexpected review action.",
+          error instanceof Error ? error.message : t("literals.unexpectedReviewAction"),
       });
     } finally {
       setReviewingId(null);
@@ -175,10 +175,10 @@ export function ManagerReviewQueuePanel() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">
-                    {row.workflow_name ?? "Workflow run"}
+                    {row.workflow_name ?? t("literals.workflowRun")}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {row.scheduled_for ?? "Unscheduled"} ·{" "}
+                    {row.scheduled_for ?? t("literals.unscheduled")} ·{" "}
                     {row.open_exception_count} {t("operations.exceptions")}
                   </p>
                 </div>

@@ -93,7 +93,7 @@ export function SchedulingWorkflow() {
   const handleActionClick = (action: string, stepTitle: string) => {
     toast({
       title: action,
-      description: `Action for ${stepTitle}`,
+      description: t("literals.actionFor", { stepTitle: stepTitle }),
     });
   };
 

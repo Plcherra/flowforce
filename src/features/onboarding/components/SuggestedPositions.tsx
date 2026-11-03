@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
@@ -26,6 +27,7 @@ export default function SuggestedPositions({
   existingPositions,
   onAddPosition,
 }: SuggestedPositionsProps) {
+  const { t } = useTranslation();
   const suggestedPositions =
     selectedTemplate?.suggestedPositions?.[role.id.replace("custom-", "")] ||
     [];
@@ -37,7 +39,7 @@ export default function SuggestedPositions({
   return (
     <div>
       <h4 className="font-medium text-sm text-foreground mb-3">
-        Suggested Positions for {selectedTemplate?.name}
+        {t("literals.suggestedPositionsFor")} {selectedTemplate?.name}
       </h4>
       <div className="flex flex-wrap gap-2 mb-4">
         {suggestedPositions.map((suggestion) => (

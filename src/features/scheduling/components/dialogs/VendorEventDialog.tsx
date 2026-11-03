@@ -94,7 +94,7 @@ export function VendorEventDialog({
       onOpenChange(false);
     } catch {
       toast({
-        title: "Failed to schedule vendor",
+        title: t("literals.failedToScheduleVendor"),
         variant: "destructive",
       });
     }
@@ -209,7 +209,7 @@ export function VendorEventDialog({
                     )
                     .map((shift) => (
                       <SelectItem key={shift.id} value={shift.id}>
-                        {`${shift.title || shift.role || "Shift"} • ${format(new Date(shift.start_time), "HH:mm")} - ${format(new Date(shift.end_time), "HH:mm")}`}
+                        {t("literals.text19", { value0: shift.title || shift.role || "Shift", value1: format(new Date(shift.start_time), "HH:mm"), value2: format(new Date(shift.end_time), "HH:mm") })}
                       </SelectItem>
                     ))}
                 </SelectContent>

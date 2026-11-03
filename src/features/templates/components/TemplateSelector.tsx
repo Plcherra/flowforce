@@ -269,7 +269,7 @@ export default function TemplateSelector({
                         <AccordionTrigger className="py-2 text-sm font-medium hover:no-underline">
                           <div className="flex items-center space-x-2">
                             <span>
-                              Included Sections ({template.sections.length})
+                              {t("literals.includedSections")}{template.sections.length})
                             </span>
                           </div>
                         </AccordionTrigger>
@@ -294,7 +294,7 @@ export default function TemplateSelector({
                             <AccordionTrigger className="py-2 text-sm font-medium hover:no-underline">
                               <div className="flex items-center space-x-2">
                                 <span>
-                                  Default Roles ({template.defaultRoles.length})
+                                  {t("literals.defaultRoles")}{template.defaultRoles.length})
                                 </span>
                               </div>
                             </AccordionTrigger>
@@ -356,7 +356,7 @@ export default function TemplateSelector({
           <div className="flex items-center space-x-2">
             <CheckCircle className="h-5 w-5 text-success dark: " />
             <span className="text-success font-medium">
-              Template Selected:{" "}
+              {t("literals.templateSelected")}{" "}
               {(() => {
                 const template = BUSINESS_TEMPLATES.find(
                   (t) => t.id === selectedTemplateId,

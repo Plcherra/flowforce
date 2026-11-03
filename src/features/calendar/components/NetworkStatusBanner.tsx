@@ -37,7 +37,7 @@ export function NetworkStatusBanner({
     return (
       <div className={cn("max-w-4xl", className)} {...rest}>
         <FeatureSetupRequiredState
-          title={`${moduleName} module is not fully set up yet`}
+          title={t("literals.moduleIsNotFullySetUpYet", { moduleName: moduleName })}
           description={getSupabaseSetupMessage(errorMessage, moduleName)}
           icon={<CalendarDays className="h-5 w-5" />}
           setupDescription={
@@ -50,7 +50,7 @@ export function NetworkStatusBanner({
 
   return (
     <FeatureErrorState
-      title={`${moduleName} offline`}
+      title={t("literals.offline", { moduleName: moduleName })}
       description={errorMessage}
       className={cn("max-w-4xl", className)}
       {...rest}

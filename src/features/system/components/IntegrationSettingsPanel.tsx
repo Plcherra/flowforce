@@ -249,8 +249,8 @@ export function IntegrationSettingsPanel() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                   <p className="text-xs text-muted-foreground">
-                    Auth type:{" "}
-                    {provider.authType === "api_key" ? "API Key" : "OAuth"}
+                    {t("literals.authType")}{" "}
+                    {provider.authType === "api_key" ? t("literals.apiKey") : t("literals.oauth")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {isConnected ? (
@@ -267,8 +267,8 @@ export function IntegrationSettingsPanel() {
                         disabled={!canEdit || saving}
                       >
                         {provider.authType === "oauth"
-                          ? "Start OAuth"
-                          : "Connect"}
+                          ? t("literals.startOauth")
+                          : t("literals.connect")}
                       </Button>
                     )}
                     <Button variant="ghost" size="sm" asChild>
@@ -290,9 +290,7 @@ export function IntegrationSettingsPanel() {
             <div>
               <h3 className="text-sm font-semibold text-foreground">{t("settings.posSyncHealth")}</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Toast is the first POS foundation target. Health metadata is
-                tenant-scoped and client-visible only; credentials stay in
-                server-side custody.
+                {t("literals.toastIsTheFirstPosFoundationTargetHealth")}
               </p>
             </div>
             <Badge
@@ -322,7 +320,7 @@ export function IntegrationSettingsPanel() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium">{stream.label}</span>
                     <Badge variant={configured ? "default" : "outline"}>
-                      {configured ? "Ready" : "Needed"}
+                      {configured ? t("literals.ready") : t("literals.needed")}
                     </Badge>
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">
@@ -334,13 +332,13 @@ export function IntegrationSettingsPanel() {
           </div>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span>
-              Last success:{" "}
+              {t("literals.lastSuccess")}{" "}
               {posHealth.lastSuccessfulSyncAt
                 ? new Date(posHealth.lastSuccessfulSyncAt).toLocaleString()
-                : "none"}
+                : t("literals.none2")}
             </span>
-            <span>Failures: {posHealth.consecutiveFailures}</span>
-            <span>Error: {posHealth.lastErrorCode ?? "none"}</span>
+            <span>{t("literals.failures")} {posHealth.consecutiveFailures}</span>
+            <span>{t("literals.error2")} {posHealth.lastErrorCode ?? t("literals.none2")}</span>
           </div>
         </div>
 
@@ -489,7 +487,7 @@ export function IntegrationSettingsPanel() {
                     : "default"
               }
             >
-              {monitoringDashboard.failingCount} failing
+              {monitoringDashboard.failingCount} {t("literals.failing")}
             </Badge>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-4">
@@ -507,8 +505,8 @@ export function IntegrationSettingsPanel() {
                 </Badge>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Healthy {monitoringDashboard.healthyCount}; warning{" "}
-                {monitoringDashboard.warningCount}; retrying{" "}
+                {t("literals.healthy")} {monitoringDashboard.healthyCount}{t("literals.warning2")}{" "}
+                {monitoringDashboard.warningCount}{t("literals.retrying")}{" "}
                 {monitoringDashboard.retryingCount}.
               </p>
             </div>
@@ -695,7 +693,7 @@ export function IntegrationSettingsPanel() {
           <Dialog open onOpenChange={() => setActiveProvider(null)}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Connect {activeProvider.name}</DialogTitle>
+                <DialogTitle>{t("literals.connect")} {activeProvider.name}</DialogTitle>
               </DialogHeader>
               <p className="text-sm text-muted-foreground">{t("settings.rawApiKeysAreNeverStoredInBrowser")}</p>
               {activeProvider.authType === "api_key" ? (
@@ -720,8 +718,7 @@ export function IntegrationSettingsPanel() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Continue to {activeProvider.name} to authorize FlowForce. You
-                  will be redirected back automatically.
+                  {t("literals.continueTo")} {activeProvider.name} {t("literals.toAuthorizeFlowforceYouWillBeRedirectedBack")}
                 </p>
               )}
               <DialogFooter>
@@ -739,7 +736,7 @@ export function IntegrationSettingsPanel() {
                   {saving ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
-                  {activeProvider.authType === "oauth" ? "Continue" : "Connect"}
+                  {activeProvider.authType === "oauth" ? t("common.continue") : t("literals.connect")}
                 </Button>
               </DialogFooter>
             </DialogContent>

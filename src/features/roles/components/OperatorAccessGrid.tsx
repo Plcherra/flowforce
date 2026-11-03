@@ -83,7 +83,7 @@ export function OperatorAccessGrid({
                     {grantable ? (
                       <Switch
                         id={`${idPrefix}-${row.id}-${item.id}`}
-                        aria-label={`${labelFor(row)} ${item.label}`}
+                        aria-label={t("literals.text17", { value0: labelFor(row), label: item.label })}
                         checked={enabled}
                         disabled={disabled || locked || !grantable}
                         onCheckedChange={(checked) =>

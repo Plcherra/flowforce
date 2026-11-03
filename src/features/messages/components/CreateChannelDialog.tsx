@@ -59,8 +59,8 @@ export function CreateChannelDialog({
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Channel created successfully",
+        title: t("literals.success"),
+        description: t("literals.channelCreatedSuccessfully"),
       });
 
       setFormData({
@@ -73,8 +73,8 @@ export function CreateChannelDialog({
     } catch (error) {
       logger.error("Error creating channel:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to create channel",
+        title: t("literals.error"),
+        description: t("literals.failedToCreateChannel"),
         variant: "destructive",
       });
     } finally {
@@ -152,7 +152,7 @@ export function CreateChannelDialog({
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.cancel")} </Button>
             <Button type="submit" disabled={loading || !formData.name.trim()}>
-              {loading ? "Creating..." : "Create Channel"}
+              {loading ? t("literals.creating") : t("literals.createChannel")}
             </Button>
           </div>
         </form>

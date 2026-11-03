@@ -191,7 +191,7 @@ export function SchedulingFilters({
 
               {filters.status !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  Status: {filters.status}
+                  {t("literals.status")} {filters.status}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => handleFilterChange("status", "all")}
@@ -201,7 +201,7 @@ export function SchedulingFilters({
 
               {filters.published !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.published === "published" ? "Published" : "Draft"}
+                  {filters.published === "published" ? t("literals.published") : t("literals.draft")}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => handleFilterChange("published", "all")}

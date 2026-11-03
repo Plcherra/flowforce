@@ -129,8 +129,8 @@ export default function SectionPermissionsTab() {
     });
 
     toast({
-      title: "Suggestion applied",
-      description: `${ROLE_LABELS[suggestion.role]} now ${suggestion.recommendation ? "has" : "no longer has"} access to ${ROLE_MODULES.find((m) => m.id === suggestion.moduleId)?.label}.`,
+      title: t("literals.suggestionApplied"),
+      description: t("literals.nowAccessTo", { value0: ROLE_LABELS[suggestion.role], value1: suggestion.recommendation ? "has" : "no longer has", label: ROLE_MODULES.find((m) => m.id === suggestion.moduleId)?.label }),
     });
   };
 
@@ -151,7 +151,7 @@ export default function SectionPermissionsTab() {
                 disabled={saving}
               >{t("roles.resetAll")}</Button>
               <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t("literals.saving") : t("literals.saveChanges2")}
               </Button>
             </div>
           </div>

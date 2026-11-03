@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate } from "@/lib/router-adapter";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +53,7 @@ const createCompanySlug = (companyName: string) => {
 };
 
 export function useCompanyRegistration() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<RegistrationError | null>(null);
   const navigate = useNavigate();
@@ -350,8 +352,8 @@ export function useCompanyRegistration() {
 
       if (!setup.sessionActive) {
         toast({
-          title: "Confirm your email to enter FlowForce",
-          description: `${data.companyInfo.name} is set up. Open the confirmation link, then sign in. The dashboard stays locked until that session exists.`,
+          title: t("literals.confirmYourEmailToEnterFlowforce"),
+          description: t("literals.isSetUpOpenTheConfirmationLinkThen", { name: data.companyInfo.name }),
         });
         navigate(
           `/auth?email=${encodeURIComponent(data.userInfo.email.trim().toLowerCase())}`,
@@ -372,8 +374,8 @@ export function useCompanyRegistration() {
 
       // Success feedback
       toast({
-        title: "Welcome to FlowForce!",
-        description: `${data.companyInfo.name} has been set up successfully. Welcome to your new workspace!`,
+        title: t("literals.welcomeToFlowforce"),
+        description: t("literals.hasBeenSetUpSuccessfullyWelcomeToYour", { name: data.companyInfo.name }),
       });
 
       // Navigate to dashboard
@@ -383,7 +385,7 @@ export function useCompanyRegistration() {
       setError(registrationError);
 
       toast({
-        title: "Registration Failed",
+        title: t("literals.registrationFailed"),
         description: registrationError.message,
         variant: "destructive",
       });

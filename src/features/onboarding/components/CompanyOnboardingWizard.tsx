@@ -271,12 +271,12 @@ export default function CompanyOnboardingWizard({
             {t("onboarding.companyOnboarding")}
           </h2>
           <p className="text-muted-foreground mt-2">
-            Let&apos;s set up your business operations platform
+            {t("literals.letSSetUpYourBusinessOperationsPlatform")}
           </p>
           <div className="mt-4 max-w-md mx-auto">
             <Progress value={progress} className="h-2" />
             <p className="text-sm text-muted-foreground mt-2">
-              Step {currentStep} of {totalSteps}
+              {t("literals.step")} {currentStep} {t("literals.of")} {totalSteps}
             </p>
           </div>
         </div>

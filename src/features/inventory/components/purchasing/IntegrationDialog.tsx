@@ -120,7 +120,7 @@ export function IntegrationDialog({
             >
               {t("common.cancel")} </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Linking..." : "Save Integration"}
+              {isSubmitting ? t("literals.linking") : t("literals.saveIntegration")}
             </Button>
           </DialogFooter>
         </form>

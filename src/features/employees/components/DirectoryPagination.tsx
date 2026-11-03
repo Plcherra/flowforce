@@ -48,8 +48,8 @@ export function DirectoryPagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
       <div className="text-sm text-muted-foreground">
-        Showing {displayRangeStart} to {displayRangeEnd} of {totalRecords}{" "}
-        results
+        {t("literals.showing")} {displayRangeStart} {t("literals.to2")} {displayRangeEnd} {t("literals.of")} {totalRecords}{" "}
+        {t("literals.results")}
       </div>
 
       <div className="flex items-center gap-4">
