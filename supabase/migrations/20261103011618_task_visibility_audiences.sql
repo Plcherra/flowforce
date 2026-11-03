@@ -129,6 +129,7 @@ declare
   profile_role_id text;
   profile_position text;
   profile_department text;
+  member_role text;
 begin
   if uid is null then
     return false;
@@ -163,10 +164,25 @@ begin
     return false;
   end if;
 
-  select p.role, nullif(p.role_id, ''), p.position_id::text, p.department_id::text
+  select cm.role
+  into member_role
+  from public.company_members cm
+  where cm.user_id = auth.uid()
+    and cm.company_id = target_company_id
+  limit 1;
+
+  select
+    case when p.company_id = target_company_id then p.role end,
+    case when p.company_id = target_company_id then p.role_id::text end,
+    case when p.company_id = target_company_id then p.position_id::text end,
+    case when p.company_id = target_company_id then p.department_id::text end
   into profile_role, profile_role_id, profile_position, profile_department
   from public.profiles p
   where p.id = auth.uid();
+
+  if profile_role is null then
+    profile_role := member_role;
+  end if;
 
   if kind = 'people' then
     return coalesce(packed->'user_ids', '[]'::jsonb) ? uid;
@@ -599,7 +615,7 @@ using (
   exists (
     select 1
     from public.tasks task
-    where task.id::text = task_activities.task_id
+    where task.id = task_activities.task_id
       and task.company_id = task_activities.company_id
       and public.current_user_can_view_task(
         task.company_id,
@@ -622,7 +638,8 @@ with check (
     or exists (
       select 1
       from public.tasks task
-      where task.id::text = task_activities.task_id
+      where task.id = task_activities.task_id
+        and task.company_id = task_activities.company_id
         and public.current_user_can_view_task(
           task.company_id,
           task.created_by::text,
@@ -638,7 +655,19 @@ on public.task_activities
 for update
 to authenticated
 using (company_id in (select public.current_user_company_ids()) and user_id = auth.uid())
-with check (company_id in (select public.current_user_company_ids()) and user_id = auth.uid());
+with check (
+  company_id in (select public.current_user_company_ids())
+  and user_id = auth.uid()
+  and (
+    task_id is null
+    or exists (
+      select 1
+      from public.tasks task
+      where task.id = task_activities.task_id
+        and task.company_id = task_activities.company_id
+    )
+  )
+);
 
 create policy "Managers can delete task activities"
 on public.task_activities
@@ -648,7 +677,8 @@ using (
   exists (
     select 1
     from public.tasks task
-    where task.id::text = task_activities.task_id
+    where task.id = task_activities.task_id
+      and task.company_id = task_activities.company_id
       and public.current_user_can_delete_task(
         task.company_id,
         task.created_by::text,
@@ -673,6 +703,7 @@ using (
       select 1
       from public.tasks task
       where task.id::text = task_notifications.task_id
+        and task.company_id = task_notifications.company_id
         and public.current_user_can_view_task(
           task.company_id,
           task.created_by::text,
@@ -699,6 +730,7 @@ with check (
       select 1
       from public.tasks task
       where task.id::text = task_notifications.task_id
+        and task.company_id = task_notifications.company_id
         and public.current_user_can_view_task(
           task.company_id,
           task.created_by::text,

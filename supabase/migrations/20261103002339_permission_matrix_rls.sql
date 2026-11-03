@@ -270,11 +270,17 @@ begin
     return;
   end if;
 
-  select p.role, nullif(p.role_id, ''), pos.role
+  -- Home-company profile fields must not decide the class in another company.
+  -- Membership role is the fallback when profiles.company_id differs.
+  select
+    case when p.company_id = target_company_id then p.role end,
+    case when p.company_id = target_company_id then p.role_id::text end,
+    pos.role
   into profile_role, profile_role_id, position_role
   from public.profiles p
   left join public.positions pos
-    on pos.company_id = target_company_id
+    on p.company_id = target_company_id
+   and pos.company_id = target_company_id
    and pos.id::text = p.position_id::text
   where p.id = uid;
 
@@ -790,6 +796,15 @@ with check (
     company_id,
     array['editTasks', 'viewOwnTasks', 'viewTeamTasks']
   )
+  and (
+    task_id is null
+    or exists (
+      select 1
+      from public.tasks task
+      where task.id = task_activities.task_id
+        and task.company_id = task_activities.company_id
+    )
+  )
 );
 
 create policy "Actors can update task activities"
@@ -797,7 +812,19 @@ on public.task_activities
 for update
 to authenticated
 using (company_id in (select public.current_user_company_ids()) and user_id = auth.uid())
-with check (company_id in (select public.current_user_company_ids()) and user_id = auth.uid());
+with check (
+  company_id in (select public.current_user_company_ids())
+  and user_id = auth.uid()
+  and (
+    task_id is null
+    or exists (
+      select 1
+      from public.tasks task
+      where task.id = task_activities.task_id
+        and task.company_id = task_activities.company_id
+    )
+  )
+);
 
 create policy "Managers can delete task activities"
 on public.task_activities
@@ -839,6 +866,15 @@ with check (
     array['viewOwnTasks', 'viewTeamTasks', 'editTasks']
   )
   and (
+    task_id is null
+    or exists (
+      select 1
+      from public.tasks task
+      where task.id::text = task_notifications.task_id
+        and task.company_id = task_notifications.company_id
+    )
+  )
+  and (
     user_id = auth.uid()
     or exists (
       select 1
@@ -865,6 +901,15 @@ with check (
   and (
     user_id = auth.uid()
     or public.current_user_has_permission(company_id, 'editTasks')
+  )
+  and (
+    task_id is null
+    or exists (
+      select 1
+      from public.tasks task
+      where task.id::text = task_notifications.task_id
+        and task.company_id = task_notifications.company_id
+    )
   )
 );
 
@@ -1357,7 +1402,12 @@ create policy "Permissioned users can delete schedule assignments"
 on public.schedule_assignments
 for delete
 to authenticated
-using (public.current_user_has_permission(company_id, 'schedule.delete'));
+using (
+  public.current_user_has_any_permission(
+    company_id,
+    array['schedule.create', 'schedule.edit', 'editSchedules']
+  )
+);
 
 drop policy if exists "Company members can manage schedule shifts" on public.schedule_shifts;
 drop policy if exists "Company members can read schedule shifts" on public.schedule_shifts;
