@@ -39,7 +39,10 @@ export function StaffShiftManagement() {
         </TabsContent>
 
         <TabsContent value="timeoff" className="space-y-4">
-          <TimeOffManagementPanel canApprove={role.canApproveRequests} />
+          <TimeOffManagementPanel
+            canApprove={role.canApproveRequests}
+            staffOnly={!role.canApproveRequests}
+          />
         </TabsContent>
       </Tabs>
     </div>

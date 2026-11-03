@@ -4692,19 +4692,25 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string | null
+          employee_id: string | null
           id: string
+          reviewerid: string | null
           updated_at: string | null
         }
         Insert: {
           company_id?: string | null
           created_at?: string | null
+          employee_id?: string | null
           id?: string
+          reviewerid?: string | null
           updated_at?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
+          employee_id?: string | null
           id?: string
+          reviewerid?: string | null
           updated_at?: string | null
         }
         Relationships: []

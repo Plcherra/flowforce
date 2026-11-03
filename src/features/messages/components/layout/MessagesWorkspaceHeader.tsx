@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { useCan } from "@/hooks/useCan";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 
 interface MessagesWorkspaceHeaderProps {
@@ -10,6 +11,8 @@ interface MessagesWorkspaceHeaderProps {
 
 export function MessagesWorkspaceHeader({ vm }: MessagesWorkspaceHeaderProps) {
   const { t } = useTranslation();
+  const { can } = useCan();
+  const canSend = can("messages.send");
   return (
     <div className="flex flex-col gap-4 rounded-3xl border bg-background/95 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -20,6 +23,7 @@ export function MessagesWorkspaceHeader({ vm }: MessagesWorkspaceHeaderProps) {
         <p className="text-sm text-muted-foreground">
           {t("messages.minimalBoardForChannelsDirectMessagesAndAnnouncements")} </p>
       </div>
+      {canSend ? (
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="outline"
@@ -33,6 +37,7 @@ export function MessagesWorkspaceHeader({ vm }: MessagesWorkspaceHeaderProps) {
         >
           {t("messages.newChannel")} </Button>
       </div>
+      ) : null}
     </div>
   );
 }

@@ -6,7 +6,10 @@ import type { CompanyUpdate } from "@/types/companyUpdates";
 
 const MANAGE_LEVEL = PRODUCT_ROLE_HIERARCHY.manager;
 
-export type CompanyUpdatePermissionKey = "systemSettings" | "admin.settings";
+export type CompanyUpdatePermissionKey =
+  | "systemSettings"
+  | "admin.settings"
+  | "updates.manage";
 
 export const COMPANY_UPDATE_VIEW_MODES = ["feed", "grid", "list"] as const;
 
@@ -21,7 +24,11 @@ export function canManageCompanyUpdates(input: {
   role?: string | null;
   can?: (key: CompanyUpdatePermissionKey) => boolean;
 }): boolean {
-  if (input.can?.("systemSettings") || input.can?.("admin.settings")) {
+  if (
+    input.can?.("updates.manage") ||
+    input.can?.("systemSettings") ||
+    input.can?.("admin.settings")
+  ) {
     return true;
   }
 

@@ -236,9 +236,11 @@ export default function WasteTrackingPage() {
                     {t("inventory.noWasteRecordsFound")} </h3>
                   <p className="text-muted-foreground mb-4">
                     {t("inventory.startTrackingWasteEventsToMonitorYourInventoryLosses")} </p>
-                  <Button asChild>
-                    <Link to="/app/inventory/actions">{t("inventory.recordWaste")}</Link>
-                  </Button>
+                  <IfCan permission="inventory.waste.create">
+                    <Button asChild>
+                      <Link to="/app/inventory/actions">{t("inventory.recordWaste")}</Link>
+                    </Button>
+                  </IfCan>
                 </div>
               ) : (
                 <div className="space-y-4">

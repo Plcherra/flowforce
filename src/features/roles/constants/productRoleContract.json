@@ -87,7 +87,22 @@
         "billing.view",
         "admin.roles",
         "admin.permissions",
-        "admin.settings"
+        "admin.settings",
+        "forms.submit",
+        "messages.send",
+        "messages.manage",
+        "goals.view",
+        "goals.manage",
+        "updates.manage",
+        "documents.view",
+        "documents.manage",
+        "reviews.view_own",
+        "reviews.manage",
+        "timeoff.request",
+        "workflow.evidence",
+        "workflow.review",
+        "workflow.exceptions",
+        "workflow.assign"
       ]
     },
     {
@@ -150,7 +165,22 @@
         "inventory.waste.create",
         "inventory.prep.view",
         "inventory.prep.edit",
-        "reports.view"
+        "reports.view",
+        "forms.submit",
+        "messages.send",
+        "messages.manage",
+        "goals.view",
+        "goals.manage",
+        "updates.manage",
+        "documents.view",
+        "documents.manage",
+        "reviews.view_own",
+        "reviews.manage",
+        "timeoff.request",
+        "workflow.evidence",
+        "workflow.review",
+        "workflow.exceptions",
+        "workflow.assign"
       ]
     },
     {
@@ -166,7 +196,13 @@
         "viewOwnSchedules",
         "viewOwnTasks",
         "viewOwnExpenses",
-        "forms.submissions.read"
+        "forms.submit",
+        "messages.send",
+        "goals.view",
+        "documents.view",
+        "reviews.view_own",
+        "timeoff.request",
+        "workflow.evidence"
       ]
     }
   ],
@@ -220,9 +256,14 @@
       "min_product_level": "staff",
       "owner_locked_verbs": [],
       "verbs": {
-        "see": ["viewOwnTasks"],
-        "edit": [],
-        "create_delete": []
+        "see": ["viewOwnTasks", "goals.view", "documents.view", "reviews.view_own"],
+        "edit": ["messages.send", "messages.manage"],
+        "create_delete": [
+          "updates.manage",
+          "goals.manage",
+          "documents.manage",
+          "reviews.manage"
+        ]
       }
     },
     {
@@ -242,7 +283,12 @@
           "tasks.checklist.create_others",
           "tasks.custom.create_self",
           "tasks.custom.create_others",
-          "tasks.list_issues.act"
+          "tasks.list_issues.act",
+          "forms.submit",
+          "workflow.evidence",
+          "workflow.review",
+          "workflow.exceptions",
+          "workflow.assign"
         ],
         "create_delete": ["createForms", "manageForms"]
       }
@@ -268,7 +314,7 @@
       "verbs": {
         "see": [],
         "edit": ["approveTimeOff"],
-        "create_delete": []
+        "create_delete": ["timeoff.request"]
       }
     },
     {
@@ -379,7 +425,8 @@
       "tasks.custom.create_self",
       "tasks.custom.create_others",
       "tasks.list_issues.read",
-      "tasks.list_issues.act"
+      "tasks.list_issues.act",
+      "forms.submissions.read"
     ],
     "manager": [
       "tasks.list_issues.read",

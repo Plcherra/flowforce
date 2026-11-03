@@ -3576,6 +3576,7 @@
     "scheduled": "Geplant",
     "searchChats": "Chats suchen",
     "searchMessages": "Nachrichten suchen",
+    "sendingTurnedOff": "Senden ist für deinen Zugriff ausgeschaltet.",
     "searchMessagesAndChannels": "Nachrichten und Kanäle suchen...",
     "searchUsers": "Benutzer suchen...",
     "selectType": "Typ auswählen",
@@ -4756,7 +4757,18 @@
     "tabAi": "KI",
     "tabBilling": "Abrechnung",
     "accessCountApproval": "Zählungsfreigabe",
-    "accessReportsExport": "Berichtsexport"
+    "accessReportsExport": "Berichtsexport",
+    "accessTimeOff": "Abwesenheit",
+    "accessFormSubmit": "Formulare senden",
+    "accessMessages": "Nachrichten",
+    "accessGoals": "Ziele",
+    "accessUpdates": "Unternehmensmeldungen",
+    "accessDocuments": "Dokumente",
+    "accessReviews": "Leistungsbeurteilungen",
+    "accessWorkflowEvidence": "Ablaufnachweise",
+    "accessWorkflowReview": "Ablaufprüfungen",
+    "accessWorkflowExceptions": "Ablaufausnahmen",
+    "accessWorkflowAssign": "Ablaufzuweisungen"
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

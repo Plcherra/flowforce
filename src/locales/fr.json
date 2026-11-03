@@ -3576,6 +3576,7 @@
     "scheduled": "Planifié",
     "searchChats": "Rechercher des discussions",
     "searchMessages": "Rechercher des messages",
+    "sendingTurnedOff": "L'envoi est désactivé pour votre accès.",
     "searchMessagesAndChannels": "Rechercher des messages et des canaux...",
     "searchUsers": "Rechercher des utilisateurs...",
     "selectType": "Sélectionner le type",
@@ -4756,7 +4757,18 @@
     "tabAi": "IA",
     "tabBilling": "Facturation",
     "accessCountApproval": "Approbation des comptages",
-    "accessReportsExport": "Export des rapports"
+    "accessReportsExport": "Export des rapports",
+    "accessTimeOff": "Congés",
+    "accessFormSubmit": "Envoyer des formulaires",
+    "accessMessages": "Messages",
+    "accessGoals": "Objectifs",
+    "accessDocuments": "Documents",
+    "accessUpdates": "Actualités de l'entreprise",
+    "accessReviews": "Entretiens de performance",
+    "accessWorkflowEvidence": "Preuves du flux",
+    "accessWorkflowReview": "Revues du flux",
+    "accessWorkflowExceptions": "Exceptions du flux",
+    "accessWorkflowAssign": "Affectations du flux"
   },
   "roles": {
     "aiSuggestions": "Suggestions d'IA",

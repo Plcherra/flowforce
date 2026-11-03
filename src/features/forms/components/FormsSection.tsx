@@ -32,7 +32,7 @@ interface FormsSectionProps {
   canEdit?: boolean;
   emptyMessage?: string;
   translations?: Map<string, FormContentTranslation | null>;
-  onFill: (formId: string) => void;
+  onFill?: (formId: string) => void;
   onEdit: (formId: string) => void;
   onDelete?: (formId: string) => void;
   onPublish?: (formId: string) => void;
@@ -173,14 +173,16 @@ export function FormsSection({
                     <TableCell>{getOwnerName(form)}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap justify-end gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="min-h-11"
-                          onClick={() => onFill(form.id)}
-                        >
-                          {t("forms.fillForm")}
-                        </Button>
+                        {onFill ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="min-h-11"
+                            onClick={() => onFill(form.id)}
+                          >
+                            {t("forms.fillForm")}
+                          </Button>
+                        ) : null}
                         {onViewSubmissions ? (
                           <Button
                             variant="outline"

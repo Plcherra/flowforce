@@ -3576,6 +3576,7 @@
     "scheduled": "Scheduled",
     "searchChats": "Search chats",
     "searchMessages": "Search messages",
+    "sendingTurnedOff": "Sending is turned off for your access.",
     "searchMessagesAndChannels": "Search messages and channels...",
     "searchUsers": "Search users...",
     "selectType": "Select type",
@@ -4756,7 +4757,18 @@
     "tabAi": "AI",
     "tabBilling": "Billing",
     "accessCountApproval": "Count approval",
-    "accessReportsExport": "Reports export"
+    "accessReportsExport": "Reports export",
+    "accessTimeOff": "Time off",
+    "accessFormSubmit": "Submit forms",
+    "accessMessages": "Messages",
+    "accessGoals": "Goals",
+    "accessUpdates": "Company updates",
+    "accessDocuments": "Documents",
+    "accessReviews": "Performance reviews",
+    "accessWorkflowEvidence": "Workflow evidence",
+    "accessWorkflowReview": "Workflow reviews",
+    "accessWorkflowExceptions": "Workflow exceptions",
+    "accessWorkflowAssign": "Workflow assignments"
   },
   "roles": {
     "aiSuggestions": "AI Suggestions",

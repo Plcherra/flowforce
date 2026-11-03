@@ -49,6 +49,13 @@ export function runCompanyUpdateAccessTests() {
   assert.equal(
     canManageCompanyUpdates({
       role: "staff",
+      can: (key) => key === "updates.manage",
+    }),
+    true,
+  );
+  assert.equal(
+    canManageCompanyUpdates({
+      role: "staff",
       can: (key) => key === "systemSettings",
     }),
     true,

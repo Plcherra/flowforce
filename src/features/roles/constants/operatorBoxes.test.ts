@@ -53,7 +53,10 @@ export function runOperatorBoxTests() {
     "profile:edit",
     "my_schedule:see",
     "my_tasks:see",
+    "my_tasks:edit",
+    "run_lists:edit",
     "expenses:see",
+    "time_off:create_delete",
   ]);
 
   const staffWithSchedule = applyOperatorVerbsToPermissions("staff", [
