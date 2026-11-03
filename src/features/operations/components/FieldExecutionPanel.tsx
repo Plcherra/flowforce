@@ -33,7 +33,8 @@ export function FieldExecutionPanel() {
   const { profile } = useProfile();
   const { toast } = useToast();
   const { can, isLoading: permissionLoading } = useCan();
-  const canEdit = !permissionLoading && can("editTasks");
+  const canEdit =
+    !permissionLoading && (can("editTasks") || can("viewOwnTasks"));
   const [runs, setRuns] = useState<FieldExecutionRunRow[]>([]);
   const [steps, setSteps] = useState<FieldExecutionStepRow[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);

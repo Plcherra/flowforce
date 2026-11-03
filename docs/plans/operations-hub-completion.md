@@ -5,7 +5,8 @@ Scan of `/app/operations` on `cursor/operations-hub-live-data-65fc` after mergin
 ## Shipped on this branch
 
 - The plan below.
-- Migration for run logs and the suggestion write guard. Not applied to production.
+- Migration for run logs and the suggestion write guard. Not applied to production. The hub reads the latest run back after Send to FlowForce.
+- Issue and workflow writes require `editTasks` in the database. Assigned people with `viewOwnTasks` can still update their own workflow run. `current_user_has_permission` is used when that function already exists, and a compatible version is created otherwise.
 - `POST /api/ops/automations/run` with session, company, and `ai.actions.automate` checks. The browser no longer POSTs scripts.
 - View-column aliases so issue, run, step, and hook ids match the database.
 - Issue suggestions store `company_id` and `issue_id`.
@@ -60,19 +61,19 @@ Send to FlowForce must not POST a script from the browser.
 `supabase/migrations/20261103002422_ops_automation_runs.sql` adds:
 
 - `ops_automation_runs` and `ops_automation_run_steps`, with RLS, select for authenticated company members, and no anon grant.
-- The suggestion write guard described above.
+- The suggestion write guard. It trusts `auth.role()`, so a real service-role session can finish a run and a signed-in member cannot mark one active.
 
-Do not apply this file to production from the agent. Release Gates rebuild the local database from migrations, so the local gate still sees it. Deploy Readiness remote drift runs on `main` only. Applying it is Pedro's step: `supabase db push` for this file, then a refresh of flowforce.uk after the web deploy. Until then, Send to FlowForce on production returns the storage message and does not run.
+`supabase/migrations/20261103011747_ops_action_permissions.sql` adds the issue and workflow permission checks. Neither file is applied to production from this branch. Release Gates rebuild the local database from migrations. Applying them is Pedro's step: `supabase db push`, then a refresh of flowforce.uk after the web deploy. Until the run-log migration is applied, Send to FlowForce returns the storage message and does not run.
 
 ## Left for Pedro
 
-- Apply the migration, then try Send to FlowForce on a signed-in owner or admin account. A pending KPI suggestion should create a task assigned to nobody, notify the person who pressed the button, and move to Active. A second press should say it already ran. A manager without `ai.actions.automate` should see the permission message and the row should stay pending.
+- Apply both migrations, then try Send to FlowForce on a signed-in owner or admin account. A pending KPI suggestion should create a task assigned to nobody, notify the person who pressed the button, move to Active, and show the last run under that row. A second press should say it already ran. A manager without `ai.actions.automate` should see the permission message and the row should stay pending. A staff account should not be able to acknowledge an issue or publish a checklist, even by calling the database directly.
 - Decide whether managers should receive `ai.actions.automate`. Today only owner and admin have it. Granting it is a role change, not a code change.
 - Decide whether `db_insert` should ever be allowed. The allowlist stays empty until a table and its columns are named. `create_task` and `notify` are separate handlers, not allowlist rows.
 - Decide whether `branch` should learn a tiny comparison language. It is rejected on purpose.
 - `IfCan` is always true because it checks the function object. Fixing it changes every screen that uses it. That is outside this hub change.
 - Operations Intelligence still has its own diagnose, execute, and assess flows. Mock KPI numbers are removed when `get_kpi_summary` is missing, but the rest of that page was not rebuilt here.
 - Preset SOP, calendar, and compliance names are translated in the hub. The English source strings stay in the service files so the existing contract checks keep matching. Published checklist names follow the language of the person who presses Publish.
-- Issue, workflow, and compliance buttons are still company-member RPCs. The hub hides the write buttons without `editTasks` (and the AI button without `ai.actions.suggest`). The database policies were not narrowed to those keys.
+- The hub still hides the AI suggestion button without `ai.actions.suggest`. That route already checks company membership. It does not yet call `current_user_has_permission`.
 - View-column aliases fix the id mismatch in the hub panels. A later cleanup can rename the TypeScript fields to the real column names.
 - Preview deployments cannot sign in. Check the hub on a signed-in environment after the migration is applied.
