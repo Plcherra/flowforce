@@ -197,7 +197,7 @@ begin
     return jsonb_build_array(
       'viewOwnProfile', 'editOwnProfile', 'viewTeamProfiles', 'editTeamProfiles',
       'viewOwnSchedules', 'viewTeamSchedules', 'editSchedules',
-      'schedule.view', 'schedule.edit', 'schedule.create', 'schedule.grant',
+      'schedule.view', 'schedule.edit', 'schedule.create', 'schedule.delete', 'schedule.grant',
       'schedule.reminders.assign', 'schedule.reminders.grant_deactivate',
       'viewOwnTasks', 'viewTeamTasks', 'editTasks',
       'tasks.shift.create_self', 'tasks.shift.create_others',
