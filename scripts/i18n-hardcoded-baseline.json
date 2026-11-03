@@ -419,5 +419,6 @@
   "src/hooks/useEvents.tsx: Update failed",
   "src/hooks/useEvents.tsx: Vendor visit not saved",
   "src/sections/events/Calendar.tsx: New Event",
-  "src/sections/events/Meetings.tsx: No description provided."
+  "src/sections/events/Meetings.tsx: No description provided.",
+  "src/utils/logger.ts: Unknown error"
 ]
