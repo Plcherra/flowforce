@@ -67,9 +67,14 @@ language plpgsql
 set search_path = public
 as $$
 declare
-  jwt_role text := coalesce(auth.jwt() ->> 'role', '');
+  request_role text := coalesce(auth.role(), '');
 begin
-  if jwt_role = '' or jwt_role = 'service_role' then
+  -- Service-role runs, and SQL with no user (migrations and database tests),
+  -- may change status. A signed-in member may not.
+  if request_role = 'service_role' then
+    return new;
+  end if;
+  if request_role = '' and auth.uid() is null then
     return new;
   end if;
 

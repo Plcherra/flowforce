@@ -80,12 +80,17 @@ async function setSuggestionStatus(
   companyId: string,
   status: string,
 ) {
-  await admin
+  const result = await admin
     .from("ops_automation_suggestions")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", suggestionId)
     .eq("company_id", companyId)
-    .eq("status", "running");
+    .eq("status", "running")
+    .select("id")
+    .maybeSingle();
+  if (result.error || !result.data?.id) {
+    throw new Error(result.error?.message ?? "status_update_failed");
+  }
 }
 
 export async function runStoredAutomation(
@@ -194,18 +199,27 @@ export async function runStoredAutomation(
         if (inserted.error) throw new Error(inserted.error.message ?? "insert_failed");
       }
     }
+    await finish(admin, runId, input.companyId, "succeeded", null);
+    await writeSteps(admin, input.companyId, runId, plan.steps);
+    await setSuggestionStatus(admin, input.suggestionId, input.companyId, "active");
+    return { code: "ran", runId, taskIds };
   } catch (error) {
     await compensate(admin, input.companyId, taskIds, notificationIds);
-    await finish(admin, runId, input.companyId, "failed", error instanceof Error ? error.message : "run_failed");
+    await finish(
+      admin,
+      runId,
+      input.companyId,
+      "failed",
+      error instanceof Error ? error.message : "run_failed",
+    );
     await writeSteps(admin, input.companyId, runId, failedSteps(plan.effects, plan.steps));
-    await setSuggestionStatus(admin, input.suggestionId, input.companyId, "pending");
+    try {
+      await setSuggestionStatus(admin, input.suggestionId, input.companyId, "pending");
+    } catch {
+      // The failed run row remains for the company to read.
+    }
     return { code: "run_failed", runId };
   }
-
-  await finish(admin, runId, input.companyId, "succeeded", null);
-  await writeSteps(admin, input.companyId, runId, plan.steps);
-  await setSuggestionStatus(admin, input.suggestionId, input.companyId, "active");
-  return { code: "ran", runId, taskIds };
 }
 
 function failedSteps(effects: PlannedEffect[], steps: PlannedStep[]): PlannedStep[] {

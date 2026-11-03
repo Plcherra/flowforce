@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,23 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/utils/logger";
 import { OPS_SUGGESTIONS_CHANGED } from "../utils/operationsHubSuggestion";
+import {
+  automationRunReasonLabel,
+  automationRunStatusLabel,
+} from "../utils/operationsHubLabels";
 
 interface AutomationSuggestion {
   id: string;
   suggestion_title: string;
   suggestion_summary?: string | null;
   status: string;
+}
+
+interface AutomationRun {
+  id: string;
+  suggestion_id: string;
+  status: string;
+  error: string | null;
 }
 
 const sectionTitleClass =
@@ -39,49 +50,71 @@ export function AutomationsPanel() {
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const canRun = !permissionLoading && can("ai.actions.automate");
   const [suggestions, setSuggestions] = useState<AutomationSuggestion[]>([]);
+  const [runs, setRuns] = useState<AutomationRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [dispatching, setDispatching] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      setLoading(true);
-      if (!companyId) {
-        if (active) {
-          setSuggestions([]);
-          setLoading(false);
-        }
-        return;
-      }
-      const { data, error } = await supabase
-        .from("ops_automation_suggestions")
-        .select("id,suggestion_title,suggestion_summary,status")
-        .eq("company_id", companyId)
-        .order("created_at", { ascending: false })
-        .limit(10);
-      if (!active) return;
-      if (error) {
-        logger.error("[AutomationsPanel] failed to load suggestions", {
-          error,
-          tags: ["error"],
-        });
-        setSuggestions([]);
-      } else {
-        setSuggestions((data ?? []) as AutomationSuggestion[]);
-      }
+  const load = useCallback(async () => {
+    setLoading(true);
+    if (!companyId) {
+      setSuggestions([]);
+      setRuns([]);
       setLoading(false);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("ops_automation_suggestions")
+      .select("id,suggestion_title,suggestion_summary,status")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (error) {
+      logger.error("[AutomationsPanel] failed to load suggestions", {
+        error,
+        tags: ["error"],
+      });
+      setSuggestions([]);
+    } else {
+      setSuggestions((data ?? []) as AutomationSuggestion[]);
     }
 
+    const runResult = await supabase
+      .from("ops_automation_runs")
+      .select("id,suggestion_id,status,error,created_at")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    const runCode = (runResult.error as { code?: string; message?: string } | null)?.code;
+    const runMessage = (runResult.error as { message?: string } | null)?.message ?? "";
+    if (
+      runResult.error &&
+      runCode !== "PGRST205" &&
+      runCode !== "42P01" &&
+      !/schema cache|does not exist|Could not find the table/i.test(runMessage)
+    ) {
+      logger.error("[AutomationsPanel] failed to load automation runs", {
+        error: runResult.error,
+        tags: ["error"],
+      });
+    }
+    setRuns(runResult.error ? [] : ((runResult.data ?? []) as AutomationRun[]));
+    setLoading(false);
+  }, [companyId]);
+
+  useEffect(() => {
     void load();
     const refresh = () => {
       void load();
     };
     window.addEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     return () => {
-      active = false;
       window.removeEventListener(OPS_SUGGESTIONS_CHANGED, refresh);
     };
-  }, [companyId]);
+  }, [load]);
+
+  function latestRun(suggestionId: string) {
+    return runs.find((run) => run.suggestion_id === suggestionId) ?? null;
+  }
 
   const activeAutomations = suggestions.filter(
     (suggestion) =>
@@ -117,11 +150,7 @@ export function AutomationsPanel() {
       } | null;
       const code = payload?.code ?? "run_failed";
       if (code === "ran" || code === "already_active") {
-        setSuggestions((current) =>
-          current.map((row) =>
-            row.id === suggestion.id ? { ...row, status: "active" } : row,
-          ),
-        );
+        await load();
         toast({ title: t(RUN_RESULT_KEYS[code]) });
         return;
       }
@@ -187,6 +216,7 @@ export function AutomationsPanel() {
                         {automation.suggestion_summary}
                       </p>
                     )}
+                    <RunNote run={latestRun(automation.id)} />
                   </motion.div>
                 ))}
               </div>
@@ -216,6 +246,7 @@ export function AutomationsPanel() {
                         {automation.suggestion_summary}
                       </p>
                     )}
+                    <RunNote run={latestRun(automation.id)} />
                     {permissionLoading ? null : canRun ? (
                       <Button
                         className="mt-3"
@@ -241,5 +272,19 @@ export function AutomationsPanel() {
         </div>
       )}
     </div>
+  );
+}
+
+function RunNote({ run }: { run: AutomationRun | null }) {
+  const { t } = useTranslation();
+  if (!run) return null;
+  const reason = automationRunReasonLabel(t, run.error);
+  return (
+    <p className="mt-2 text-xs text-muted-foreground">
+      {t("operations.runLogLabel", {
+        status: automationRunStatusLabel(t, run.status),
+      })}
+      {reason ? ` ${reason}` : ""}
+    </p>
   );
 }

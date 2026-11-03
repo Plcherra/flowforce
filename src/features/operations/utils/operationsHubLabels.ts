@@ -78,3 +78,31 @@ const REVIEW_PRIORITY_KEYS: Record<string, string> = {
 export function reviewPriorityLabel(t: Translate, priority: string) {
   return t(REVIEW_PRIORITY_KEYS[priority] ?? "operations.reviewPriorityPending");
 }
+
+const RUN_STATUS_KEYS: Record<string, string> = {
+  succeeded: "operations.runStatusSucceeded",
+  failed: "operations.runStatusFailed",
+  rejected: "operations.runStatusRejected",
+  running: "operations.runStatusRunning",
+};
+
+const RUN_REASON_KEYS: Record<string, string> = {
+  branch_not_supported: "operations.runReasonBranch",
+  insert_not_allowlisted: "operations.runReasonInsert",
+  insert_value_rejected: "operations.runReasonInsert",
+  query_not_allowlisted: "operations.runReasonQuery",
+  notify_channel_rejected: "operations.runReasonNotify",
+  notify_message_required: "operations.runReasonNotify",
+  invalid_script: "operations.runReasonInvalid",
+  too_many_steps: "operations.runReasonInvalid",
+  task_title_required: "operations.runReasonInvalid",
+};
+
+export function automationRunStatusLabel(t: Translate, status: string) {
+  return t(RUN_STATUS_KEYS[status] ?? "operations.runStatusRunning");
+}
+
+export function automationRunReasonLabel(t: Translate, error: string | null) {
+  if (!error) return null;
+  return t(RUN_REASON_KEYS[error] ?? "operations.runReasonGeneric");
+}
