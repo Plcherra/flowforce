@@ -6,6 +6,7 @@ import { DndContext } from "@dnd-kit/core";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
 import { WeekGrid } from "@/features/scheduling/components/drag-drop/WeekGrid";
+import { BulkShiftPositionField } from "@/features/scheduling/components/drag-drop/BulkShiftPositionField";
 import {
   MobileWeekBoard,
   usePhoneScheduleLayout,
@@ -30,6 +31,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useScheduleBoard } from "@/features/scheduling/hooks/useScheduleBoard";
+import {
+  bulkShiftPositionFields,
+  type ShiftPositionChoice,
+} from "@/features/scheduling/utils/shiftDraftRole";
 import type { PendingVendorEvent, ShiftTemplate } from "./drag-drop/types";
 import {
   ROLE_TEMPLATES,
@@ -120,6 +125,9 @@ export function DragDropScheduleCalendar({
   const [multiEnd, setMultiEnd] = useState("17:00");
   const [multiDays, setMultiDays] = useState<number[]>([]);
   const [multiHeadcount, setMultiHeadcount] = useState(1);
+  const [multiPosition, setMultiPosition] = useState<ShiftPositionChoice | null>(
+    null,
+  );
   // Unavailability state
   const [uaUserId, setUaUserId] = useState<string>("");
   const [uaStart, setUaStart] = useState("");
@@ -460,6 +468,10 @@ export function DragDropScheduleCalendar({
                 onChange={(e) => setMultiTitle(e.target.value)}
               />
             </div>
+            <BulkShiftPositionField
+              value={multiPosition}
+              onChange={setMultiPosition}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("schedule.start")}</Label>
@@ -520,6 +532,10 @@ export function DragDropScheduleCalendar({
                 onClick={async () => {
                   const startParts = multiStart.split(":");
                   const endParts = multiEnd.split(":");
+                  const positionFields = bulkShiftPositionFields(
+                    multiPosition,
+                    t("schedule.unassignedPosition"),
+                  );
                   const payloads = multiDays.map((index) => {
                     const day = weekDays[index];
                     const start = new Date(day);
@@ -538,7 +554,7 @@ export function DragDropScheduleCalendar({
                     );
                     return {
                       title: multiTitle,
-                      role: "Staff",
+                      role: positionFields.role,
                       color: "#3b82f6",
                       start_time: start.toISOString(),
                       end_time: end.toISOString(),
@@ -554,7 +570,7 @@ export function DragDropScheduleCalendar({
                       is_published: false,
                       is_template: false,
                       template_id: null,
-                      position_id: null,
+                      position_id: positionFields.position_id,
                       status: "scheduled",
                       user_id: null,
                       requirements: [],
@@ -565,6 +581,7 @@ export function DragDropScheduleCalendar({
                   if (success) {
                     setShowMultiAdd(false);
                     setMultiDays([]);
+                    setMultiPosition(null);
                   }
                 }}
                 disabled={multiDays.length === 0}

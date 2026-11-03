@@ -229,7 +229,10 @@ export function ShiftWizardDialog({
       id: "draft-shift",
       company_id: companyId,
       title: formData.title || "Draft shift",
-      role: formData.job_position_input || "Staff",
+      role: shiftDraftRole(
+        formData.job_position_input,
+        t("schedule.unassignedPosition"),
+      ),
       start_time: getShiftWindow().start.toISOString(),
       end_time: getShiftWindow().end.toISOString(),
       location: formData.location || null,
@@ -263,7 +266,7 @@ export function ShiftWizardDialog({
         confirmed_at: null,
       })),
     }),
-    [companyId, formData, getShiftWindow, user?.id],
+    [companyId, formData, getShiftWindow, t, user?.id],
   );
 
   const draftWarnings = useMemo(
@@ -417,7 +420,10 @@ export function ShiftWizardDialog({
         is_template: false,
         template_id: null,
         position_id: formData.job_position_id || null,
-        role: shiftDraftRole(formData.job_position_input),
+        role: shiftDraftRole(
+          formData.job_position_input,
+          t("schedule.unassignedPosition"),
+        ),
         status: "scheduled",
         user_id: null,
         requirements: [],

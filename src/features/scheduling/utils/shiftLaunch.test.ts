@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { shiftIsOpen } from "./shiftChipPaint";
-import { shiftDraftRole } from "./shiftDraftRole";
+import { groupPositionsByDepartment } from "./groupPositionsByDepartment";
+import { bulkShiftPositionFields, shiftDraftRole } from "./shiftDraftRole";
 import {
   scheduleBoardIsReadOnly,
   scheduleQueryFailureMode,
@@ -10,10 +11,71 @@ import { monthGridRange } from "./monthGrid";
 import { translateScheduleReason } from "./translateScheduleReason";
 
 export function runShiftLaunchTests() {
-  assert.equal(shiftDraftRole("  Barista "), "Barista");
-  assert.equal(shiftDraftRole(""), "Staff");
-  assert.equal(shiftDraftRole("   "), "Staff");
-  assert.equal(shiftDraftRole(null), "Staff");
+  const unassigned = "Unassigned position";
+  assert.equal(shiftDraftRole("  Barista ", unassigned), "Barista");
+  assert.equal(shiftDraftRole("", unassigned), unassigned);
+  assert.equal(shiftDraftRole("   ", unassigned), unassigned);
+  assert.equal(shiftDraftRole(null, unassigned), unassigned);
+  assert.notEqual(shiftDraftRole(null, unassigned), "Staff");
+
+  const linked = bulkShiftPositionFields(
+    { id: "pos-1", name: "Barista" },
+    unassigned,
+  );
+  assert.equal(linked.role, "Barista");
+  assert.equal(linked.position_id, "pos-1");
+  assert.deepEqual(bulkShiftPositionFields(null, unassigned), {
+    role: unassigned,
+    position_id: null,
+  });
+  assert.deepEqual(
+    bulkShiftPositionFields({ id: "pos-2", name: "  " }, unassigned),
+    { role: unassigned, position_id: null },
+  );
+
+  const groups = groupPositionsByDepartment(
+    [
+      { id: "b", name: "Closer", department_id: "kitchen" },
+      { id: "a", name: "Barista", department_id: "front" },
+      { id: "c", name: "Host", department_id: "front" },
+      { id: "d", name: "Runner", department_id: null },
+      { id: "e", name: "  ", department_id: "front" },
+      { id: "f", name: "Porter", department_id: "missing" },
+    ],
+    [
+      { id: "kitchen", name: "Kitchen" },
+      { id: "front", name: "Front of house" },
+    ],
+  );
+  assert.deepEqual(
+    groups.map((group) => ({
+      departmentId: group.departmentId,
+      departmentName: group.departmentName,
+      names: group.positions.map((position) => position.name),
+    })),
+    [
+      {
+        departmentId: "front",
+        departmentName: "Front of house",
+        names: ["Barista", "Host"],
+      },
+      {
+        departmentId: "kitchen",
+        departmentName: "Kitchen",
+        names: ["Closer"],
+      },
+      {
+        departmentId: null,
+        departmentName: null,
+        names: ["Runner"],
+      },
+      {
+        departmentId: "missing",
+        departmentName: null,
+        names: ["Porter"],
+      },
+    ],
+  );
 
   assert.equal(
     shiftIsOpen({ assignments: [], required_headcount: 2 }),
