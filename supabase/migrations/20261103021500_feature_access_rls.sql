@@ -6,8 +6,11 @@
 -- Replace the permission lists from PR #20 so the new feature keys
 -- match src/features/roles/constants/productRoleContract.json.
 -- Owner still allows every key. List-issue keys stay grantable extras.
+-- 20261103011618 renamed these to *_base and wrapped them so tasks.view,
+-- tasks.update, and tasks.delete stay on the wrapper. Replace the base
+-- lists only. Replacing the wrapper would drop per-task audiences.
 
-create or replace function public.product_role_default_allows(
+create or replace function public.product_role_default_allows_base(
   level text,
   permission_key text
 )
@@ -76,7 +79,7 @@ as $$
   end;
 $$;
 
-create or replace function public.product_level_allowed_permissions(level text)
+create or replace function public.product_level_allowed_permissions_base(level text)
 returns jsonb
 language plpgsql
 immutable

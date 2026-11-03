@@ -2588,6 +2588,19 @@
   },
   "tasks": {
     "aTitleIsRequired": "O título é obrigatório.",
+    "whoCanView": "Quem pode ver",
+    "whoCanEdit": "Quem pode editar",
+    "audiencePrivate": "Apenas o responsável e quem criou",
+    "audiencePeople": "Pessoas específicas",
+    "audiencePosition": "Um cargo",
+    "audienceRole": "Um papel",
+    "audienceDepartment": "Um departamento",
+    "audienceCompany": "Toda a empresa",
+    "audienceNeedsAChoice": "Escolha pelo menos uma pessoa, um cargo, um papel ou um departamento.",
+    "saveVisibility": "Guardar visibilidade",
+    "savingVisibility": "A guardar visibilidade...",
+    "visibilitySaved": "Visibilidade guardada",
+    "visibilitySaveFailed": "Não foi possível guardar a visibilidade",
     "activityFeedUnavailable": "O feed de atividade não está disponível",
     "activityWillAppearHereAsYouWorkOn": "A atividade aparecerá aqui conforme você trabalhar nas tarefas",
     "activityWillAppearHereAsYouWorkOn2": "A atividade aparecerá aqui conforme você trabalhar nesta tarefa.",
@@ -4768,7 +4781,11 @@
     "accessWorkflowEvidence": "Evidência do fluxo",
     "accessWorkflowReview": "Revisões do fluxo",
     "accessWorkflowExceptions": "Exceções do fluxo",
-    "accessWorkflowAssign": "Atribuições do fluxo"
+    "accessWorkflowAssign": "Atribuições do fluxo",
+    "accessTaskRecord": "Registo da tarefa",
+    "accessView": "Ver",
+    "accessUpdate": "Atualizar",
+    "accessDelete": "Eliminar"
   },
   "roles": {
     "aiSuggestions": "Sugestões de IA",

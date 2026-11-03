@@ -15,6 +15,7 @@ export type AccessSwitchType = (typeof ACCESS_SWITCH_TYPES)[number];
 export type AccessSwitch = {
   id: AccessSwitchType;
   label: string;
+  labelKey?: string;
   keys: PermissionKey[];
   ownerLocked?: boolean;
 };
@@ -69,6 +70,11 @@ export const ACCESS_ROWS: AccessRow[] = [
   { id: "team_tasks", label: "Team tasks", switches: [
     { id: "read", label: "Read", keys: ["viewTeamTasks"] },
     { id: "edit", label: "Edit", keys: ["editTasks"] },
+  ]},
+  { id: "task_record", label: "Task record", labelKey: "settings.accessTaskRecord", switches: [
+    { id: "read", label: "View", labelKey: "settings.accessView", keys: ["tasks.view"] },
+    { id: "edit", label: "Update", labelKey: "settings.accessUpdate", keys: ["tasks.update"] },
+    { id: "delete", label: "Delete", labelKey: "settings.accessDelete", keys: ["tasks.delete"] },
   ]},
   { id: "submitted_forms", label: "Submitted forms", switches: [
     { id: "read", label: "Read", keys: ["forms.submissions.read"] },

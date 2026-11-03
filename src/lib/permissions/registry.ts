@@ -144,6 +144,24 @@ export const PERMISSION_DEFINITIONS = [
     category: "Tasks",
   },
   {
+    key: "tasks.view",
+    label: "Tasks: View",
+    description: "View tasks shared with you",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.update",
+    label: "Tasks: Update",
+    description: "Edit tasks shared with you for editing",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.delete",
+    label: "Tasks: Delete",
+    description: "Delete tasks you are allowed to see",
+    category: "Tasks",
+  },
+  {
     key: "tasks.shift.create_self",
     label: "Shift tasks: Create for self",
     description: "Create a shift task assigned to yourself",
