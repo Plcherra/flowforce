@@ -2588,6 +2588,19 @@
   },
   "tasks": {
     "aTitleIsRequired": "El título es obligatorio.",
+    "whoCanView": "Quién puede ver",
+    "whoCanEdit": "Quién puede editar",
+    "audiencePrivate": "Solo la persona asignada y quien la creó",
+    "audiencePeople": "Personas concretas",
+    "audiencePosition": "Un puesto",
+    "audienceRole": "Un rol",
+    "audienceDepartment": "Un departamento",
+    "audienceCompany": "Toda la empresa",
+    "audienceNeedsAChoice": "Elige al menos una persona, un puesto, un rol o un departamento.",
+    "saveVisibility": "Guardar visibilidad",
+    "savingVisibility": "Guardando visibilidad...",
+    "visibilitySaved": "Visibilidad guardada",
+    "visibilitySaveFailed": "No se pudo guardar la visibilidad",
     "activityFeedUnavailable": "El feed de actividad no está disponible",
     "activityWillAppearHereAsYouWorkOn": "La actividad aparecerá aquí a medida que trabajes en las tareas",
     "activityWillAppearHereAsYouWorkOn2": "La actividad aparecerá aquí a medida que trabajes en esta tarea.",
@@ -4756,7 +4769,11 @@
     "tabAi": "IA",
     "tabBilling": "Facturación",
     "accessCountApproval": "Aprobación de conteos",
-    "accessReportsExport": "Exportación de informes"
+    "accessReportsExport": "Exportación de informes",
+    "accessTaskRecord": "Registro de la tarea",
+    "accessView": "Ver",
+    "accessUpdate": "Actualizar",
+    "accessDelete": "Eliminar"
   },
   "roles": {
     "aiSuggestions": "Sugerencias de IA",

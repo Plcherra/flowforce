@@ -45,6 +45,9 @@ const { runPrimaryActionLabelTests } = importTs(
 const { runTaskCreateScopeTests } = importTs(
   "../src/features/roles/constants/taskCreateScope.test.ts",
 );
+const { runTaskAudienceTests } = importTs(
+  "../src/features/tasks/utils/taskAudience.test.ts",
+);
 
 await runProductRolesSetupTests();
 runProductLevelTests();
@@ -58,6 +61,7 @@ runPermissionGrantTests();
 runPageVersionTests();
 runPrimaryActionLabelTests();
 runTaskCreateScopeTests();
+runTaskAudienceTests();
 console.log("productRolesSetup tests passed");
 console.log("productLevels tests passed");
 console.log("operatorBoxes tests passed");
@@ -70,3 +74,4 @@ console.log("permissionGrant tests passed");
 console.log("pageVersion tests passed");
 console.log("primaryActionLabel tests passed");
 console.log("taskCreateScope tests passed");
+console.log("taskAudience tests passed");

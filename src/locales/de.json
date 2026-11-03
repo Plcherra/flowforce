@@ -2588,6 +2588,19 @@
   },
   "tasks": {
     "aTitleIsRequired": "Ein Titel ist erforderlich.",
+    "whoCanView": "Wer sehen kann",
+    "whoCanEdit": "Wer bearbeiten kann",
+    "audiencePrivate": "Nur zugewiesene Person und Ersteller",
+    "audiencePeople": "Bestimmte Personen",
+    "audiencePosition": "Eine Position",
+    "audienceRole": "Eine Rolle",
+    "audienceDepartment": "Eine Abteilung",
+    "audienceCompany": "Alle im Unternehmen",
+    "audienceNeedsAChoice": "Wähle mindestens eine Person, Position, Rolle oder Abteilung.",
+    "saveVisibility": "Sichtbarkeit speichern",
+    "savingVisibility": "Sichtbarkeit wird gespeichert...",
+    "visibilitySaved": "Sichtbarkeit gespeichert",
+    "visibilitySaveFailed": "Sichtbarkeit konnte nicht gespeichert werden",
     "activityFeedUnavailable": "Aktivitätsfeed nicht verfügbar",
     "activityWillAppearHereAsYouWorkOn": "Aktivität erscheint hier, während Sie an Aufgaben arbeiten",
     "activityWillAppearHereAsYouWorkOn2": "Aktivität erscheint hier, während Sie an dieser Aufgabe arbeiten.",
@@ -4756,7 +4769,11 @@
     "tabAi": "KI",
     "tabBilling": "Abrechnung",
     "accessCountApproval": "Zählungsfreigabe",
-    "accessReportsExport": "Berichtsexport"
+    "accessReportsExport": "Berichtsexport",
+    "accessTaskRecord": "Aufgabe",
+    "accessView": "Ansehen",
+    "accessUpdate": "Aktualisieren",
+    "accessDelete": "Löschen"
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

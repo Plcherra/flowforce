@@ -34,6 +34,9 @@
         "viewOwnTasks",
         "viewTeamTasks",
         "editTasks",
+        "tasks.view",
+        "tasks.update",
+        "tasks.delete",
         "tasks.shift.create_self",
         "tasks.shift.create_others",
         "tasks.checklist.create_self",
@@ -114,6 +117,9 @@
         "viewOwnTasks",
         "viewTeamTasks",
         "editTasks",
+        "tasks.view",
+        "tasks.update",
+        "tasks.delete",
         "tasks.shift.create_self",
         "tasks.shift.create_others",
         "tasks.checklist.create_self",
@@ -165,6 +171,7 @@
         "editOwnProfile",
         "viewOwnSchedules",
         "viewOwnTasks",
+        "tasks.view",
         "viewOwnExpenses",
         "forms.submissions.read"
       ]
@@ -220,8 +227,8 @@
       "min_product_level": "staff",
       "owner_locked_verbs": [],
       "verbs": {
-        "see": ["viewOwnTasks"],
-        "edit": [],
+        "see": ["viewOwnTasks", "tasks.view"],
+        "edit": ["tasks.update"],
         "create_delete": []
       }
     },
@@ -242,9 +249,10 @@
           "tasks.checklist.create_others",
           "tasks.custom.create_self",
           "tasks.custom.create_others",
-          "tasks.list_issues.act"
+          "tasks.list_issues.act",
+          "tasks.update"
         ],
-        "create_delete": ["createForms", "manageForms"]
+        "create_delete": ["createForms", "manageForms", "tasks.delete"]
       }
     },
     {
@@ -379,7 +387,9 @@
       "tasks.custom.create_self",
       "tasks.custom.create_others",
       "tasks.list_issues.read",
-      "tasks.list_issues.act"
+      "tasks.list_issues.act",
+      "tasks.update",
+      "tasks.delete"
     ],
     "manager": [
       "tasks.list_issues.read",

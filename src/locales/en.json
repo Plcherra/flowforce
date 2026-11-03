@@ -2588,6 +2588,19 @@
   },
   "tasks": {
     "aTitleIsRequired": "A title is required.",
+    "whoCanView": "Who can view",
+    "whoCanEdit": "Who can edit",
+    "audiencePrivate": "Only the assignee and creator",
+    "audiencePeople": "Specific people",
+    "audiencePosition": "A position",
+    "audienceRole": "A role",
+    "audienceDepartment": "A department",
+    "audienceCompany": "Everyone in the company",
+    "audienceNeedsAChoice": "Choose at least one person, position, role, or department.",
+    "saveVisibility": "Save visibility",
+    "savingVisibility": "Saving visibility...",
+    "visibilitySaved": "Visibility saved",
+    "visibilitySaveFailed": "Could not save visibility",
     "activityFeedUnavailable": "Activity feed unavailable",
     "activityWillAppearHereAsYouWorkOn": "Activity will appear here as you work on tasks",
     "activityWillAppearHereAsYouWorkOn2": "Activity will appear here as you work on this task.",
@@ -4756,7 +4769,11 @@
     "tabAi": "AI",
     "tabBilling": "Billing",
     "accessCountApproval": "Count approval",
-    "accessReportsExport": "Reports export"
+    "accessReportsExport": "Reports export",
+    "accessTaskRecord": "Task record",
+    "accessView": "View",
+    "accessUpdate": "Update",
+    "accessDelete": "Delete"
   },
   "roles": {
     "aiSuggestions": "AI Suggestions",
