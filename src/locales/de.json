@@ -2235,6 +2235,7 @@
     "eGStandardWeekHolidaySchedule": "z. B. Standardwoche, Feiertagsplan",
     "employee": "Mitarbeiter",
     "emptyThisWeek": "Diese Woche leeren",
+    "clearWeekNeedsDelete": "Zum Leeren dieser Woche fehlt die Berechtigung, Schichten zu löschen.",
     "enableBrowserNotifications": "Browser-Benachrichtigungen aktivieren",
     "enableNotifications": "Benachrichtigungen aktivieren",
     "enableUsersToClaimThisShift": "Personen dürfen diese Schicht übernehmen",

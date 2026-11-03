@@ -2235,6 +2235,7 @@
     "eGStandardWeekHolidaySchedule": "p. ex., Semana padrão, horário de feriado",
     "employee": "Funcionário",
     "emptyThisWeek": "Esvaziar esta semana",
+    "clearWeekNeedsDelete": "Você precisa de permissão para excluir turnos antes de esvaziar esta semana.",
     "enableBrowserNotifications": "Ativar notificações do navegador",
     "enableNotifications": "Ativar notificações",
     "enableUsersToClaimThisShift": "Permitir que as pessoas reivindiquem este turno",

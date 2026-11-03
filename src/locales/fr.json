@@ -2235,6 +2235,7 @@
     "eGStandardWeekHolidaySchedule": "p. ex., Semaine standard, planning de fête",
     "employee": "Employé",
     "emptyThisWeek": "Vider cette semaine",
+    "clearWeekNeedsDelete": "Il faut le droit de supprimer des quarts avant de vider cette semaine.",
     "enableBrowserNotifications": "Activer les notifications du navigateur",
     "enableNotifications": "Activer les notifications",
     "enableUsersToClaimThisShift": "Permettre aux personnes de réclamer ce quart",

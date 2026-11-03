@@ -2235,6 +2235,7 @@
     "eGStandardWeekHolidaySchedule": "e.g., Standard Week, Holiday Schedule",
     "employee": "Employee",
     "emptyThisWeek": "Empty this week",
+    "clearWeekNeedsDelete": "You need permission to delete shifts before this week can be cleared.",
     "enableBrowserNotifications": "Enable Browser Notifications",
     "enableNotifications": "Enable Notifications",
     "enableUsersToClaimThisShift": "Enable users to claim this shift",
