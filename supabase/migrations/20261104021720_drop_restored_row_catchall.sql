@@ -12,6 +12,30 @@ alter function public.product_level_allowed_permissions(text) set search_path = 
 alter function public.product_level_allowed_permissions_base(text) set search_path = public;
 alter function public.set_task_audience_default() set search_path = public;
 
+-- Feature access replaced the manager allow-list and dropped schedule.delete.
+-- A manager class can still keep an explicit schedule.delete grant. The default
+-- stays off when the pack does not mention the key.
+create or replace function public.product_level_allowed_permissions(level text)
+returns jsonb
+language plpgsql
+immutable
+set search_path = public
+as $$
+declare
+  base jsonb;
+  extra jsonb := jsonb_build_array('tasks.view', 'tasks.update', 'tasks.delete');
+begin
+  base := public.product_level_allowed_permissions_base(level);
+  if level = 'owner' or base is null then
+    return base;
+  end if;
+  if level = 'manager' then
+    extra := extra || jsonb_build_array('schedule.delete');
+  end if;
+  return base || extra;
+end;
+$$;
+
 revoke all on function public.current_user_can_manage_ops_issue(uuid, uuid) from public, anon;
 revoke all on function public.current_user_can_execute_workflow_run(uuid, uuid) from public, anon;
 grant execute on function public.current_user_can_manage_ops_issue(uuid, uuid) to authenticated, service_role;

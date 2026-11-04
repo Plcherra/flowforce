@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(19);
+select plan(21);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -65,6 +65,15 @@ values (
   'c22e0000-0000-4000-8000-000000000001',
   'Floor',
   'operations'
+);
+
+select ok(
+  public.product_level_allowed_permissions('manager') ? 'schedule.delete',
+  'a manager class can keep an explicit schedule delete grant'
+);
+select ok(
+  not (public.product_level_allowed_permissions('staff') ? 'schedule.delete'),
+  'staff cannot keep a schedule delete grant'
 );
 
 select is(
