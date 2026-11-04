@@ -1,6 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useScheduling } from "@/contexts/SchedulingContext";
@@ -158,29 +156,29 @@ function StaffReadinessPanel({
   const items: ReadinessPillItem[] = [
     {
       id: "shifts",
-      label: myShiftCount === 1 ? "shift" : "shifts",
+      label: myShiftCount === 1 ? t("schedule.pillShift") : t("schedule.pillShifts"),
       value: myShiftCount,
       actionTarget: "schedule",
       tone: myShiftCount > 0 ? "steady" : "watch",
     },
     {
       id: "hrs",
-      label: "hrs",
+      label: t("schedule.pillHrs"),
       value: myHours,
       actionTarget: "schedule",
       tone: Number(myHours) > 0 ? "steady" : "watch",
     },
     {
       id: "time off",
-      label: "time off",
+      label: t("schedule.pillTimeOff"),
       value: pendingTimeOff,
       actionTarget: "timeoff",
       tone: countTone(pendingTimeOff),
     },
     {
       id: "availability",
-      label: "availability",
-      value: "Update",
+      label: t("schedule.pillAvailability"),
+      value: t("schedule.pillUpdate"),
       actionTarget: "availability",
       tone: "steady",
     },
@@ -199,7 +197,7 @@ function StaffReadinessPanel({
 
         {(isFallbackData || error) && (
           <Badge variant={error ? "destructive" : "outline"} className="h-6">
-            {error ? "Data error" : "Preview"}
+            {error ? t("schedule.dataError") : t("schedule.readOnlyShort")}
           </Badge>
         )}
 
@@ -219,19 +217,6 @@ function StaffReadinessPanel({
           onOpenAvailability={onOpenAvailability}
         />
       </div>
-
-      {(isFallbackData || error) && (
-        <Alert variant={error ? "destructive" : "default"} className="mt-1 py-2">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle className="text-sm">
-            {error ? "Scheduling data needs attention" : "Preview mode"}
-          </AlertTitle>
-          <AlertDescription className="text-xs">
-            {error ??
-              "Live scheduling data is unavailable, so your schedule is read-only."}
-          </AlertDescription>
-        </Alert>
-      )}
     </section>
   );
 }
@@ -279,28 +264,34 @@ function ManagerReadinessPanel({
   const items: ReadinessPillItem[] = [
     {
       id: "drafts",
-      label: summary.draftCount === 1 ? "draft" : "drafts",
+      label:
+        summary.draftCount === 1
+          ? t("schedule.pillDraft")
+          : t("schedule.pillDrafts"),
       value: summary.draftCount,
       actionTarget: "schedule",
       tone: countTone(summary.draftCount, 1),
     },
     {
       id: "open",
-      label: "open",
+      label: t("schedule.pillOpen"),
       value: summary.unassignedCount,
-      actionTarget: "availability",
+      actionTarget: "schedule",
       tone: countTone(summary.unassignedCount),
     },
     {
       id: "conflicts",
-      label: summary.conflictCount === 1 ? "conflict" : "conflicts",
+      label:
+        summary.conflictCount === 1
+          ? t("schedule.pillConflict")
+          : t("schedule.pillConflicts"),
       value: summary.conflictCount,
       actionTarget: "timeoff",
       tone: countTone(summary.blockingConflictCount || summary.conflictCount),
     },
     {
       id: "hrs",
-      label: "hrs",
+      label: t("schedule.pillHrs"),
       value: summary.scheduledLaborHours.toFixed(1),
       actionTarget: "reports",
       externalHref: "/app/reports",
@@ -308,7 +299,7 @@ function ManagerReadinessPanel({
     },
     {
       id: "cost",
-      label: "cost",
+      label: t("schedule.pillCost"),
       value: moneyFormatter.format(summary.scheduledLaborCost),
       actionTarget: "schedule",
       tone: countTone(summary.missingRateCount, 1),
@@ -318,7 +309,7 @@ function ManagerReadinessPanel({
   if (hoursSummary && hoursSummary.shiftCount > 0) {
     items.push({
       id: "coverage",
-      label: "coverage",
+      label: t("schedule.pillCoverage"),
       value: `${hoursSummary.filledCount}/${hoursSummary.shiftCount}`,
       actionTarget: "schedule",
       tone:
@@ -346,20 +337,24 @@ function ManagerReadinessPanel({
             openItems > 0 ? toneStyles.watch.badge : toneStyles.steady.badge,
           )}
         >
-          {formatCount(summary.shiftCount, "shift")}
+          {formatCount(
+            summary.shiftCount,
+            t("schedule.pillShift"),
+            t("schedule.pillShifts"),
+          )}
         </Badge>
         {openItems > 0 && (
           <Badge
             variant="outline"
             className={cn("h-6 shrink-0 px-2 text-xs", toneStyles.urgent.badge)}
           >
-            {openItems} open
+            {t("schedule.openItemsCount", { count: openItems })}
           </Badge>
         )}
 
         {(isFallbackData || error) && (
           <Badge variant={error ? "destructive" : "outline"} className="h-6">
-            {error ? "Data error" : "Preview"}
+            {error ? t("schedule.dataError") : t("schedule.readOnlyShort")}
           </Badge>
         )}
 
@@ -380,19 +375,6 @@ function ManagerReadinessPanel({
           onOpenAvailability={onOpenAvailability}
         />
       </div>
-
-      {(isFallbackData || error) && (
-        <Alert variant={error ? "destructive" : "default"} className="mt-1 py-2">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle className="text-sm">
-            {error ? "Scheduling data needs attention" : "Preview mode"}
-          </AlertTitle>
-          <AlertDescription className="text-xs">
-            {error ??
-              "Live scheduling data is unavailable, so readiness checks are read-only."}
-          </AlertDescription>
-        </Alert>
-      )}
     </section>
   );
 }

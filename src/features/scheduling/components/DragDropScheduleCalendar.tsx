@@ -1,10 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { format } from "date-fns";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
 import { DndContext } from "@dnd-kit/core";
 import { AssignmentPanel } from "@/features/scheduling/components/drag-drop/AssignmentPanel";
 import { ScheduleToolbar } from "@/features/scheduling/components/drag-drop/ScheduleToolbar";
 import { WeekGrid } from "@/features/scheduling/components/drag-drop/WeekGrid";
+import { BulkShiftPositionField } from "@/features/scheduling/components/drag-drop/BulkShiftPositionField";
+import {
+  MobileWeekBoard,
+  usePhoneScheduleLayout,
+} from "@/features/scheduling/components/drag-drop/MobileWeekBoard";
 import { ShiftDetailsPanel } from "@/features/scheduling/components/ShiftDetailsPanel";
 import {
   ShiftWizardDialog,
@@ -25,6 +31,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useScheduleBoard } from "@/features/scheduling/hooks/useScheduleBoard";
+import {
+  bulkShiftPositionFields,
+  type ShiftPositionChoice,
+} from "@/features/scheduling/utils/shiftDraftRole";
 import type { PendingVendorEvent, ShiftTemplate } from "./drag-drop/types";
 import {
   ROLE_TEMPLATES,
@@ -44,6 +54,7 @@ interface DragDropScheduleCalendarProps {
   locationFilter?: string;
   onAutoScheduleClick?: () => void;
   autoScheduleDisabled?: boolean;
+  boardLocked?: boolean;
   readOnly?: boolean;
   profileId?: string | null;
   onOpenPanel?: (panel: import("../types/panels").SchedulingPanelId) => void;
@@ -77,6 +88,7 @@ export function DragDropScheduleCalendar({
   locationFilter,
   onAutoScheduleClick,
   autoScheduleDisabled = false,
+  boardLocked = false,
   readOnly = false,
   profileId = null,
   onOpenPanel,
@@ -84,7 +96,9 @@ export function DragDropScheduleCalendar({
   smartFillOpen = false,
   onToggleSmartFill,
 }: DragDropScheduleCalendarProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
+  const editsLocked = readOnly || boardLocked;
   const [draggedVendor, setDraggedVendor] = useState<VendorPaletteItem | null>(
     null,
   );
@@ -99,6 +113,8 @@ export function DragDropScheduleCalendar({
   const [showTemplates, setShowTemplates] = useState(false);
   const [showWeekTemplates, setShowWeekTemplates] = useState(false);
   const [showAddShift, setShowAddShift] = useState(false);
+  const [quickAddDate, setQuickAddDate] = useState<Date | null>(null);
+  const isPhone = usePhoneScheduleLayout();
   const [showImportShifts, setShowImportShifts] = useState(false);
   const [showMultiAdd, setShowMultiAdd] = useState(false);
   const [showAddUnavailability, setShowAddUnavailability] = useState(false);
@@ -109,6 +125,9 @@ export function DragDropScheduleCalendar({
   const [multiEnd, setMultiEnd] = useState("17:00");
   const [multiDays, setMultiDays] = useState<number[]>([]);
   const [multiHeadcount, setMultiHeadcount] = useState(1);
+  const [multiPosition, setMultiPosition] = useState<ShiftPositionChoice | null>(
+    null,
+  );
   // Unavailability state
   const [uaUserId, setUaUserId] = useState<string>("");
   const [uaStart, setUaStart] = useState("");
@@ -213,7 +232,7 @@ export function DragDropScheduleCalendar({
     handleDragEnd,
     dragOverlay,
   } = useShiftDragDrop({
-    enabled: !readOnly,
+    enabled: !editsLocked,
     updateSchedule,
     assign,
     unassign,
@@ -223,6 +242,13 @@ export function DragDropScheduleCalendar({
   });
 
   const openBlankShiftWizard = () => {
+    setQuickAddDate(null);
+    setWizardSeed(null);
+    setShowAddShift(true);
+  };
+
+  const openShiftOnDay = (day: Date) => {
+    setQuickAddDate(day);
     setWizardSeed(null);
     setShowAddShift(true);
   };
@@ -233,6 +259,7 @@ export function DragDropScheduleCalendar({
       startTime: template.startTime,
       endTime: template.endTime,
       role: template.role,
+      color: template.color,
     });
     setShowAddShift(true);
   };
@@ -305,9 +332,9 @@ export function DragDropScheduleCalendar({
             setShowDailyInfo={setShowDailyInfo}
             showAvailabilityLayer={showAvailabilityLayer}
             setShowAvailabilityLayer={setShowAvailabilityLayer}
-            readOnly={readOnly}
+            readOnly={editsLocked}
             onOpenTimeOffPanel={
-              onOpenPanel ? () => onOpenPanel("timeoff") : undefined
+              readOnly && onOpenPanel ? () => onOpenPanel("timeoff") : undefined
             }
             smartFillOpen={smartFillOpen}
             onToggleSmartFill={onToggleSmartFill}
@@ -319,7 +346,8 @@ export function DragDropScheduleCalendar({
               view="week"
               hasLocationFilter={Boolean(locationFilter)}
               readOnly={readOnly}
-              onSuggestFills={readOnly ? undefined : onSuggestFills}
+              unavailable={boardLocked}
+              onSuggestFills={editsLocked ? undefined : onSuggestFills}
               onOpenAvailability={
                 onOpenPanel ? () => onOpenPanel("availability") : undefined
               }
@@ -331,11 +359,20 @@ export function DragDropScheduleCalendar({
             data-testid="schedule-grid-scroll"
             className="min-h-0 flex-1 overflow-auto"
           >
-            <DndContext
-              sensors={sensors}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
+            {isPhone ? (
+              <MobileWeekBoard
+                weekDays={weekDays}
+                shifts={weekSchedules}
+                conflictByShiftId={boardConflictByShiftId}
+                onShiftClick={openShiftDetails}
+                onAddShift={editsLocked ? undefined : openShiftOnDay}
+              />
+            ) : (
+              <DndContext
+                sensors={sensors}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
               <WeekGrid
                 weekDays={weekDays}
                 employees={
@@ -354,16 +391,17 @@ export function DragDropScheduleCalendar({
                 dailyGridStats={boardDailyGridStats}
                 showAvailabilityLayer={showAvailabilityLayer}
                 showGridFooter={showDailyInfo}
-                enableShiftDrag={!readOnly}
+                enableShiftDrag={!editsLocked}
                 scrollContainerRef={gridScrollRef}
                 onShiftClick={openShiftDetails}
-                onDrop={readOnly ? undefined : handleBoardDrop}
-                onDragOver={readOnly ? undefined : handleDragOver}
+                onDrop={editsLocked ? undefined : handleBoardDrop}
+                onDragOver={editsLocked ? undefined : handleDragOver}
                 minimizedView={minimizedView}
                 timeOffRequests={timeOffRequests}
               />
               {dragOverlay}
-            </DndContext>
+              </DndContext>
+            )}
           </div>
         </div>
       </div>
@@ -401,8 +439,11 @@ export function DragDropScheduleCalendar({
       {/* Add Shift Dialog */}
       <ShiftWizardDialog
         open={showAddShift}
-        onOpenChange={setShowAddShift}
-        selectedDate={selectedDate}
+        onOpenChange={(open) => {
+          setShowAddShift(open);
+          if (!open) setQuickAddDate(null);
+        }}
+        selectedDate={quickAddDate || selectedDate}
         templateSeed={wizardSeed}
       />
 
@@ -427,6 +468,10 @@ export function DragDropScheduleCalendar({
                 onChange={(e) => setMultiTitle(e.target.value)}
               />
             </div>
+            <BulkShiftPositionField
+              value={multiPosition}
+              onChange={setMultiPosition}
+            />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("schedule.start")}</Label>
@@ -462,7 +507,7 @@ export function DragDropScheduleCalendar({
                       )
                     }
                   >
-                    {format(d, "EEE")}
+                    {format(d, "EEE", { locale })}
                   </Button>
                 ))}
               </div>
@@ -487,6 +532,10 @@ export function DragDropScheduleCalendar({
                 onClick={async () => {
                   const startParts = multiStart.split(":");
                   const endParts = multiEnd.split(":");
+                  const positionFields = bulkShiftPositionFields(
+                    multiPosition,
+                    t("schedule.unassignedPosition"),
+                  );
                   const payloads = multiDays.map((index) => {
                     const day = weekDays[index];
                     const start = new Date(day);
@@ -505,13 +554,15 @@ export function DragDropScheduleCalendar({
                     );
                     return {
                       title: multiTitle,
-                      role: "Staff",
+                      role: positionFields.role,
                       color: "#3b82f6",
                       start_time: start.toISOString(),
                       end_time: end.toISOString(),
                       location: locationFilter ?? "",
                       is_all_day: false,
-                      timezone: "UTC",
+                      timezone:
+                        Intl.DateTimeFormat().resolvedOptions().timeZone ||
+                        "UTC",
                       required_headcount: multiHeadcount,
                       notes: null,
                       break_minutes: 30,
@@ -519,7 +570,7 @@ export function DragDropScheduleCalendar({
                       is_published: false,
                       is_template: false,
                       template_id: null,
-                      position_id: null,
+                      position_id: positionFields.position_id,
                       status: "scheduled",
                       user_id: null,
                       requirements: [],
@@ -530,6 +581,7 @@ export function DragDropScheduleCalendar({
                   if (success) {
                     setShowMultiAdd(false);
                     setMultiDays([]);
+                    setMultiPosition(null);
                   }
                 }}
                 disabled={multiDays.length === 0}

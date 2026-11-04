@@ -8,9 +8,9 @@ import { SchedulingHeader } from "./SchedulingHeader";
 export type ScheduleRangeView = "month" | "week" | "staff";
 
 const VIEW_LABEL: Record<ScheduleRangeView, string> = {
-  month: "Month",
-  week: "Week",
-  staff: "Staff",
+  month: "schedule.month",
+  week: "schedule.week",
+  staff: "schedule.staff",
 };
 
 interface ScheduleRangeBarProps {
@@ -56,7 +56,7 @@ export function ScheduleRangeBar({
         <button
           type="button"
           className="min-w-0 touch-pan-y rounded-2xl px-2 py-1 text-left hover:bg-primary/5"
-          aria-label={`${rangeLabel}. Jump to today`}
+          aria-label={t("schedule.jumpToTodayRange", { range: rangeLabel })}
           onPointerDown={(event) => {
             swipe.current = { x: event.clientX, y: event.clientY };
           }}
@@ -117,7 +117,7 @@ export function ScheduleRangeBar({
                 )}
                 onClick={() => onViewChange(view)}
               >
-                {VIEW_LABEL[view]}
+                {t(VIEW_LABEL[view])}
               </button>
             );
           })}
