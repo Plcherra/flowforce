@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -91,6 +92,7 @@ export function useAvailabilityManagement({
   userId,
   refetchAll,
 }: UseAvailabilityManagementOptions) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [pendingMode, setPendingMode] = useState<AvailabilityLockMode>("open");
   const [pendingDay, setPendingDay] = useState("4");
@@ -291,8 +293,8 @@ export function useAvailabilityManagement({
     },
     onSuccess: async () => {
       toast({
-        title: "Lock settings updated",
-        description: "New availability lock configuration saved.",
+        title: t("literals.lockSettingsUpdated"),
+        description: t("literals.newAvailabilityLockConfigurationSaved"),
       });
       await invalidateAvailabilityQueries(queryClient, orgId);
       await refetchAll();
@@ -300,9 +302,9 @@ export function useAvailabilityManagement({
     onError: (error) => {
       logger.error("Unable to save lock settings", { error, tags: ["error"] });
       toast({
-        title: "Unable to save lock settings",
+        title: t("literals.unableToSaveLockSettings"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -385,8 +387,8 @@ export function useAvailabilityManagement({
     },
     onSuccess: async () => {
       toast({
-        title: "Request approved",
-        description: "Employee availability updated.",
+        title: t("literals.requestApproved"),
+        description: t("literals.employeeAvailabilityUpdated"),
       });
       await invalidateAvailabilityQueries(queryClient, orgId);
       await refetchAll();
@@ -394,9 +396,9 @@ export function useAvailabilityManagement({
     onError: (error) => {
       logger.error("Unable to approve request", { error, tags: ["error"] });
       toast({
-        title: "Unable to approve request",
+        title: t("literals.unableToApproveRequest"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -437,8 +439,8 @@ export function useAvailabilityManagement({
     },
     onSuccess: async () => {
       toast({
-        title: "Request denied",
-        description: "The employee has been notified.",
+        title: t("literals.requestDenied"),
+        description: t("literals.theEmployeeHasBeenNotified"),
       });
       await invalidateAvailabilityQueries(queryClient, orgId);
       await refetchAll();
@@ -446,9 +448,9 @@ export function useAvailabilityManagement({
     onError: (error) => {
       logger.error("Unable to deny request", { error, tags: ["error"] });
       toast({
-        title: "Unable to deny request",
+        title: t("literals.unableToDenyRequest"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -484,8 +486,8 @@ export function useAvailabilityManagement({
     },
     onSuccess: async () => {
       toast({
-        title: "Exception saved",
-        description: "The employee can edit availability during this period.",
+        title: t("literals.exceptionSaved"),
+        description: t("literals.theEmployeeCanEditAvailabilityDuringThisPeriod"),
       });
       setExceptionForm(createInitialExceptionForm());
       await invalidateAvailabilityQueries(queryClient, orgId);
@@ -494,9 +496,9 @@ export function useAvailabilityManagement({
     onError: (error) => {
       logger.error("Unable to save exception", { error, tags: ["error"] });
       toast({
-        title: "Unable to save exception",
+        title: t("literals.unableToSaveException"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },

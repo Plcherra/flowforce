@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { UserSelector } from "@/features/messages/components/UserSelector";
 import { useMessageChannels } from "@/features/messages/hooks/useMessageChannels";
@@ -23,6 +24,7 @@ export function DirectMessageDialog({
   onClose,
   onChannelCreated,
 }: DirectMessageDialogProps) {
+  const { t } = useTranslation();
   const { createChannel } = useMessageChannels();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -46,8 +48,8 @@ export function DirectMessageDialog({
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `Started conversation with ${user.first_name} ${user.last_name}`,
+        title: t("literals.success"),
+        description: t("literals.startedConversationWith", { first_name: user.first_name, last_name: user.last_name }),
       });
 
       if (data && onChannelCreated) {
@@ -58,8 +60,8 @@ export function DirectMessageDialog({
     } catch (error) {
       logger.error("Error creating DM channel:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to start conversation",
+        title: t("literals.error"),
+        description: t("literals.failedToStartConversation"),
         variant: "destructive",
       });
     } finally {

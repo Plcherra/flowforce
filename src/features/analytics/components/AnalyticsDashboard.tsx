@@ -139,8 +139,8 @@ export default function AnalyticsDashboard() {
                 }
               >
                 {analytics?.pendingTimeOffRequests === 0
-                  ? "All Clear"
-                  : "Needs Review"}
+                  ? t("literals.allClear")
+                  : t("literals.needsReview")}
               </Badge>
             </div>
           </CardContent>
@@ -169,8 +169,8 @@ export default function AnalyticsDashboard() {
                 className={`text-sm ${analytics?.overdueTasks === 0 ? "text-success" : "text-destructive"}`}
               >
                 {analytics?.overdueTasks === 0
-                  ? "Great work!"
-                  : "Needs attention"}
+                  ? t("literals.greatWork")
+                  : t("literals.needsAttention")}
               </span>
             </div>
           </CardContent>

@@ -62,7 +62,7 @@ export function LinkedRecordReminders({
             data-record-kind={reminder.kind}
             data-record-id={reminder.recordId}
             className="flex items-start justify-between gap-3 rounded-md border p-3 text-left hover:bg-muted/40"
-            aria-label={`Open ${reminder.recordTitle}`}
+            aria-label={t("literals.open2", { recordTitle: reminder.recordTitle })}
           >
             <span>
               <span className="block text-sm font-medium">{reminder.title}</span>
@@ -71,7 +71,7 @@ export function LinkedRecordReminders({
               </span>
             </span>
             <span className="text-xs font-medium text-primary">
-              Open {KIND_LABEL[reminder.kind]}
+              {t("literals.open3")} {KIND_LABEL[reminder.kind]}
             </span>
           </Link>
         ))}

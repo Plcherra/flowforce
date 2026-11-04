@@ -54,8 +54,7 @@ export default function PasswordResetForm({
         <CardTitle className="text-2xl font-bold text-center">
           {t("auth.setNewPassword")}</CardTitle>
         <CardDescription className="text-center">
-          Enter your new password below. Make sure it&apos;s at least 6 characters
-          long.
+          {t("literals.enterYourNewPasswordBelowMakeSureIt")}
         </CardDescription>
       </CardHeader>
       <CardContent>

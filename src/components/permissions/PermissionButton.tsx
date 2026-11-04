@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { useCan } from "@/hooks/useCan";
@@ -31,6 +32,7 @@ export function PermissionButton({
   disabled,
   ...props
 }: PermissionButtonProps) {
+  const { t } = useTranslation();
   const { can, isLoading } = useCan();
 
   if (isLoading) {
@@ -51,7 +53,7 @@ export function PermissionButton({
   // Show tooltip when permission denied and showTooltip is true
   if (!hasPermission && showTooltip) {
     const message =
-      tooltipMessage || `You don't have permission: ${permission}`;
+      tooltipMessage || t("literals.youDonTHavePermission", { permission: permission });
 
     return (
       <TooltipProvider>
@@ -100,6 +102,7 @@ export function MultiPermissionButton({
   disabled,
   ...props
 }: MultiPermissionButtonProps) {
+  const { t } = useTranslation();
   const { canAny, canAll, isLoading } = useCan();
 
   if (isLoading) {
@@ -122,7 +125,7 @@ export function MultiPermissionButton({
   if (!hasPermission && showTooltip) {
     const message =
       tooltipMessage ||
-      `You don't have required permissions: ${permissions.join(", ")}`;
+      t("literals.youDonTHaveRequiredPermissions", { value0: permissions.join(", ") });
 
     return (
       <TooltipProvider>

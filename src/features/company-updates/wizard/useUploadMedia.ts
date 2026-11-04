@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -16,6 +17,7 @@ const resolveMediaType = (file: File): UpdateMediaItem["type"] => {
 };
 
 export function useUploadMedia() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -80,7 +82,7 @@ export function useUploadMedia() {
       return uploaded;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Unable to upload media.";
+        err instanceof Error ? err.message : t("literals.unableToUploadMedia");
       setError(message);
       return [];
     } finally {

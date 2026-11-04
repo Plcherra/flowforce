@@ -50,16 +50,16 @@ export function EmployeeFixedAvailabilityStep({
     },
     onSuccess: () => {
       toast({
-        title: "Fixed availability sent",
-        description: "Your manager can review this availability request.",
+        title: t("literals.fixedAvailabilitySent"),
+        description: t("literals.yourManagerCanReviewThisAvailabilityRequest"),
       });
       onSent();
     },
     onError: (error) => {
       toast({
-        title: "Unable to send fixed availability",
+        title: t("literals.unableToSendFixedAvailability"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -122,7 +122,7 @@ export function EmployeeFixedAvailabilityStep({
                 <div className="flex flex-wrap items-center gap-2">
                   <Label className="text-xs text-muted-foreground">{t("onboarding.from")}</Label>
                   <Input
-                    aria-label={`${label} from`}
+                    aria-label={t("literals.from", { label: label })}
                     type="time"
                     className="h-8 w-32"
                     value={range.fromTime}
@@ -135,7 +135,7 @@ export function EmployeeFixedAvailabilityStep({
                   />
                   <Label className="text-xs text-muted-foreground">{t("onboarding.to")}</Label>
                   <Input
-                    aria-label={`${label} to`}
+                    aria-label={t("literals.to", { label: label })}
                     type="time"
                     className="h-8 w-32"
                     value={range.toTime}

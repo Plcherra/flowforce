@@ -55,8 +55,8 @@ export function EngagementPanel({
     ? `Level ${snapshot.level}`
     : "Disabled";
   const description = engagementFeatureEnabled
-    ? `${displayName ? `${displayName.split(" ")[0]}'s` : "Employee"} gamification progress`
-    : "Enable engagement metrics to start tracking gamification progress.";
+    ? t("literals.gamificationProgress", { value0: displayName ? `${displayName.split(" ")[0]}'s` : "Employee" })
+    : t("literals.enableEngagementMetricsToStartTrackingGamificationProgress");
 
   const renderLoadingState = () => (
     <div className="space-y-4">
@@ -84,8 +84,7 @@ export function EngagementPanel({
         {error}
       </div>
       <p className="text-sm text-muted-foreground">
-        We&apos;ll keep trying in the background and backfill engagement data
-        automatically once it becomes available.
+        {t("literals.weLlKeepTryingInTheBackgroundAnd")}
       </p>
     </div>
   );
@@ -147,7 +146,7 @@ export function EngagementPanel({
                     <p className="text-sm font-semibold">{badge.title}</p>
                     {badge.minLevel && (
                       <p className="text-[11px] uppercase text-muted-foreground">
-                        Req. L{badge.minLevel}
+                        {t("literals.reqL")}{badge.minLevel}
                       </p>
                     )}
                   </div>
@@ -158,7 +157,7 @@ export function EngagementPanel({
                   </p>
                 )}
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Awarded {formatDate(badge.awardedAt)}
+                  {t("literals.awarded")} {formatDate(badge.awardedAt)}
                 </p>
               </div>
             ))}

@@ -219,12 +219,12 @@ export default function SectionManager({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">
-            {isOnboarding ? "Choose Your Sections" : "Customize Your Sections"}
+            {isOnboarding ? t("literals.chooseYourSections") : t("onboarding.customizeYourSections")}
           </h3>
           <p className="text-muted-foreground mt-1">
             {isOnboarding
-              ? "Select the features and sections you want in your workspace"
-              : "Enable or disable sections based on your business needs"}
+              ? t("literals.selectTheFeaturesAndSectionsYouWantIn")
+              : t("literals.enableOrDisableSectionsBasedOnYourBusiness")}
           </p>
         </div>
         {can("systemSettings") && !isOnboarding && (

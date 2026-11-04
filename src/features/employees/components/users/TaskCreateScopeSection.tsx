@@ -55,7 +55,7 @@ export function TaskCreateScopeSection({
             <li key={grant.id} className="flex items-center justify-between gap-2">
               <p className="text-sm">
                 {grant.canGrant ? t("tasks.rightToGrant") : t("tasks.extraLevels")}
-                {grant.levels.length > 0 ? ` ${grant.levels.join(", ")}` : ""}
+                {grant.levels.length > 0 ? t("literals.text26", { value0: grant.levels.join(", ") }) : ""}
               </p>
               {canEdit ? (
                 <Button

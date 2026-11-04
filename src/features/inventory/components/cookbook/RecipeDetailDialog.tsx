@@ -99,7 +99,7 @@ export function RecipeDetailDialog({
                         className="grid grid-cols-12 items-center"
                       >
                         <span className="col-span-4 truncate">
-                          {line.ingredient?.name ?? "Unknown ingredient"}
+                          {line.ingredient?.name ?? t("literals.unknownIngredient")}
                         </span>
                         <span className="col-span-2 text-right">
                           {formatNumber(line.quantity_needed)}
@@ -175,9 +175,7 @@ export function RecipeDetailDialog({
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Add nutrition notes to the inventory item description
-                      (e.g., “Calories: 220; Protein: 12g”) to surface values
-                      here.
+                      {t("literals.addNutritionNotesToTheInventoryItemDescription")}
                     </p>
                   )}
                 </CardContent>

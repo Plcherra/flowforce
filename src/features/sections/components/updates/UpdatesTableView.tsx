@@ -155,14 +155,14 @@ export function UpdatesTableView({
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="published">
-            Active ({tabCounts.published})
+            {t("literals.active4")}{tabCounts.published})
           </TabsTrigger>
           <TabsTrigger value="scheduled">
-            Scheduled ({tabCounts.scheduled})
+            {t("literals.scheduled")}{tabCounts.scheduled})
           </TabsTrigger>
-          <TabsTrigger value="draft">Draft ({tabCounts.draft})</TabsTrigger>
+          <TabsTrigger value="draft">{t("literals.draft2")}{tabCounts.draft})</TabsTrigger>
           <TabsTrigger value="archived">
-            Archived ({tabCounts.archived})
+            {t("literals.archived2")}{tabCounts.archived})
           </TabsTrigger>
         </TabsList>
 
@@ -234,7 +234,7 @@ export function UpdatesTableView({
                     </TableCell>
                     <TableCell className="text-center">
                       {update.assignedEmployees.includes("all")
-                        ? "All"
+                        ? t("literals.all")
                         : update.assignedEmployees.length}
                     </TableCell>
                     <TableCell className="text-right">
@@ -257,7 +257,7 @@ export function UpdatesTableView({
                                 onClick={() => onTogglePin?.(update.id)}
                               >
                                 <Pin className="h-4 w-4 mr-2" />
-                                {update.isPinned ? "Unpin" : "Pin"}
+                                {update.isPinned ? t("literals.unpin") : t("literals.pin")}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"

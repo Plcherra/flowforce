@@ -227,7 +227,7 @@ export default function ExpenseForm({ onSubmit, onCancel }: ExpenseFormProps) {
         <Button type="button" variant="outline" onClick={onCancel}>
           {t("common.cancel")} </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Expense"}
+          {isSubmitting ? t("literals.creating") : t("literals.createExpense")}
         </Button>
       </div>
     </form>

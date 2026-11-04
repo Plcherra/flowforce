@@ -156,7 +156,7 @@ export function TaskCard({
                   {task.assignedprofile.first_name}{" "}
                   {task.assignedprofile.last_name}
                   {assigneeCount > 1
-                    ? ` · ${t("people.selectedCount", { count: assigneeCount })}`
+                    ? " " + t("literals.text20", { value0: t("people.selectedCount", { count: assigneeCount }) })
                     : ""}
                 </span>
               </div>

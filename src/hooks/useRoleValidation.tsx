@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { useProfile } from "./useProfile";
@@ -11,6 +12,7 @@ import { logger } from "@/utils/logger";
  * Ensures users have valid roles and company assignments
  */
 export function useRoleValidation() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile, refetchProfile } = useProfile();
   const { roles } = useCompanyRoles();
@@ -76,8 +78,8 @@ export function useRoleValidation() {
             await refetchProfile();
 
             toast({
-              title: "Role Assigned",
-              description: `You've been assigned the ${defaultRole.name} role.`,
+              title: t("literals.roleAssigned"),
+              description: t("literals.youVeBeenAssignedTheRole", { name: defaultRole.name }),
             });
 
             logger.info("[Role Validation] Auto-assigned default role", {

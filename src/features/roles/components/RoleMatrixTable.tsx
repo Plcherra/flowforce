@@ -55,8 +55,8 @@ export function RoleMatrixTable({
                     {ROLE_LABELS[role]}
                   </span>
                   <span className="text-xs font-normal opacity-80">
-                    {assignmentInfo?.positions.length || 0} positions ·{" "}
-                    {assignmentInfo?.employees.length || 0} employees
+                    {assignmentInfo?.positions.length || 0} {t("literals.positions2")}{" "}
+                    {assignmentInfo?.employees.length || 0} {t("literals.employees")}
                   </span>
                   {dirtyRoles.has(role) && (
                     <span className="mt-1 text-xs font-semibold text-primary">{t("roles.unsaved")}</span>
@@ -111,7 +111,7 @@ export function RoleMatrixTable({
                       }
                     />
                     <div className="text-xs text-muted-foreground">
-                      {value ? "Enabled" : "Disabled"}
+                      {value ? t("literals.enabled") : t("literals.disabled")}
                     </div>
                     {isHighRisk && (
                       <Badge variant="destructive" className="text-[10px]">{t("roles.elevatedRisk")}</Badge>

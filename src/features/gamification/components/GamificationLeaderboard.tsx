@@ -161,8 +161,8 @@ export function GamificationLeaderboard({
                               {entry.name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {entry.role ?? "Team member"}
-                              {entry.department ? ` · ${entry.department}` : ""}
+                              {entry.role ?? t("literals.teamMember")}
+                              {entry.department ? t("literals.text5", { department: entry.department }) : ""}
                             </p>
                           </div>
                         </div>

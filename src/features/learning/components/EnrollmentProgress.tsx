@@ -142,14 +142,14 @@ export function EnrollmentProgress({
               <div className="flex flex-wrap gap-6 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />{" "}
-                  {enrollment.hoursCompleted.toFixed(1)} hrs logged
+                  {enrollment.hoursCompleted.toFixed(1)} {t("literals.hrsLogged")}
                 </span>
                 <span className="flex items-center gap-1">
                   <LineChart className="h-3 w-3" /> {enrollment.level}
                 </span>
                 <span className="flex items-center gap-1">
                   <CheckSquare className="h-3 w-3" /> {enrollment.currentModule}
-                  /{course.modules.length} modules
+                  /{course.modules.length} {t("literals.modules")}
                 </span>
               </div>
 
@@ -158,10 +158,10 @@ export function EnrollmentProgress({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">
-                        Next up: {nextModule.title}
+                        {t("literals.nextUp")} {nextModule.title}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {nextModule.estimatedMinutes} min · {nextModule.xpAward}{" "}
+                        {nextModule.estimatedMinutes} {t("literals.min")} {nextModule.xpAward}{" "}
                         XP
                       </p>
                     </div>
@@ -217,8 +217,8 @@ export function EnrollmentProgress({
                         <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
                           <div className="space-y-1">
                             <div className="text-sm font-medium text-foreground">
-                              {snapshot.progressPercent.toFixed(0)}% complete ·{" "}
-                              {snapshot.timeSpentMinutes} min logged
+                              {snapshot.progressPercent.toFixed(0)}{t("literals.complete")}{" "}
+                              {snapshot.timeSpentMinutes} {t("literals.minLogged")}
                             </div>
                             {snapshot.aiRecommendation && (
                               <p className="text-muted-foreground">

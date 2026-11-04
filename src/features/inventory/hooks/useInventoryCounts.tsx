@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,6 +50,7 @@ const buildOfflineCountStub = (
   }) as unknown as InventoryCount;
 
 export function useInventoryCounts() {
+  const { t } = useTranslation();
   const [counts, setCounts] = useState<InventoryCount[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -64,8 +66,8 @@ export function useInventoryCounts() {
     } catch (error) {
       logger.error("Error fetching counts:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to load inventory counts",
+        title: t("literals.error"),
+        description: t("literals.failedToLoadInventoryCounts"),
         variant: "destructive",
       });
     } finally {
@@ -78,8 +80,8 @@ export function useInventoryCounts() {
       const created = await createInventoryCount(countData);
 
       toast({
-        title: "Success",
-        description: "Inventory count created successfully",
+        title: t("literals.success"),
+        description: t("literals.inventoryCountCreatedSuccessfully"),
       });
 
       fetchCounts();
@@ -99,8 +101,8 @@ export function useInventoryCounts() {
         );
         setCounts((current) => [offlineCount, ...current]);
         toast({
-          title: "Saved offline",
-          description: "Inventory count will sync when connection returns.",
+          title: t("literals.savedOffline"),
+          description: t("literals.inventoryCountWillSyncWhenConnectionReturns"),
         });
         return offlineCount;
       }
@@ -108,9 +110,9 @@ export function useInventoryCounts() {
       const message =
         error instanceof Error
           ? error.message
-          : "Failed to create inventory count";
+          : t("literals.failedToCreateInventoryCount");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -126,8 +128,8 @@ export function useInventoryCounts() {
       await updateInventoryCount(countId, updates);
 
       toast({
-        title: "Success",
-        description: "Count updated successfully",
+        title: t("literals.success"),
+        description: t("literals.countUpdatedSuccessfully"),
       });
 
       fetchCounts();
@@ -153,16 +155,16 @@ export function useInventoryCounts() {
           ),
         );
         toast({
-          title: "Saved offline",
-          description: "Count changes will sync when connection returns.",
+          title: t("literals.savedOffline"),
+          description: t("literals.countChangesWillSyncWhenConnectionReturns"),
         });
         return;
       }
 
       const message =
-        error instanceof Error ? error.message : "Failed to update count";
+        error instanceof Error ? error.message : t("literals.failedToUpdateCount");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -175,8 +177,8 @@ export function useInventoryCounts() {
       await completeCountRepository(countId);
 
       toast({
-        title: "Success",
-        description: "Count submitted for review",
+        title: t("literals.success"),
+        description: t("literals.countSubmittedForReview"),
       });
 
       fetchCounts();
@@ -201,16 +203,16 @@ export function useInventoryCounts() {
           ),
         );
         toast({
-          title: "Saved offline",
-          description: "Completed count will sync for review when online.",
+          title: t("literals.savedOffline"),
+          description: t("literals.completedCountWillSyncForReviewWhenOnline"),
         });
         return;
       }
 
       const message =
-        error instanceof Error ? error.message : "Failed to complete count";
+        error instanceof Error ? error.message : t("literals.failedToCompleteCount");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -223,17 +225,17 @@ export function useInventoryCounts() {
       await deleteInventoryCount(countId);
 
       toast({
-        title: "Success",
-        description: "Count deleted successfully",
+        title: t("literals.success"),
+        description: t("literals.countDeletedSuccessfully"),
       });
 
       fetchCounts();
     } catch (error: unknown) {
       logger.error("Error deleting count:", { error, tags: ["error"] });
       const message =
-        error instanceof Error ? error.message : "Failed to delete count";
+        error instanceof Error ? error.message : t("literals.failedToDeleteCount");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -245,8 +247,8 @@ export function useInventoryCounts() {
     try {
       await submitCountRepository(countId);
       toast({
-        title: "Submitted",
-        description: "Count sent for supervisor review",
+        title: t("literals.submitted2"),
+        description: t("literals.countSentForSupervisorReview"),
       });
       fetchCounts();
     } catch (error: unknown) {
@@ -270,8 +272,8 @@ export function useInventoryCounts() {
           ),
         );
         toast({
-          title: "Saved offline",
-          description: "Count review request will sync when online.",
+          title: t("literals.savedOffline"),
+          description: t("literals.countReviewRequestWillSyncWhenOnline"),
         });
         return;
       }
@@ -279,9 +281,9 @@ export function useInventoryCounts() {
       const message =
         error instanceof Error
           ? error.message
-          : "Failed to submit count for review";
+          : t("literals.failedToSubmitCountForReview");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -293,16 +295,16 @@ export function useInventoryCounts() {
     try {
       await approveCountRepository(countId, { notes });
       toast({
-        title: "Approved",
-        description: "Inventory count approved",
+        title: t("literals.approved"),
+        description: t("literals.inventoryCountApproved"),
       });
       fetchCounts();
     } catch (error: unknown) {
       logger.error("Error approving count:", { error, tags: ["error"] });
       const message =
-        error instanceof Error ? error.message : "Failed to approve count";
+        error instanceof Error ? error.message : t("literals.failedToApproveCount");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -314,8 +316,8 @@ export function useInventoryCounts() {
     try {
       await rejectCountRepository(countId, { notes });
       toast({
-        title: "Sent back",
-        description: "Count requires additional review",
+        title: t("literals.sentBack"),
+        description: t("literals.countRequiresAdditionalReview"),
       });
       fetchCounts();
     } catch (error: unknown) {
@@ -323,9 +325,9 @@ export function useInventoryCounts() {
       const message =
         error instanceof Error
           ? error.message
-          : "Failed to send count back for revisions";
+          : t("literals.failedToSendCountBackForRevisions");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -353,6 +355,7 @@ export function useInventoryCounts() {
 }
 
 export function useInventoryCountLines(countId?: string) {
+  const { t } = useTranslation();
   const [countLines, setCountLines] = useState<InventoryCountLine[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -374,8 +377,8 @@ export function useInventoryCountLines(countId?: string) {
     } catch (error) {
       logger.error("Error fetching count lines:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to load count details",
+        title: t("literals.error"),
+        description: t("literals.failedToLoadCountDetails"),
         variant: "destructive",
       });
     } finally {
@@ -391,16 +394,16 @@ export function useInventoryCountLines(countId?: string) {
     try {
       await addInventoryItemsToCount(countId, items);
       toast({
-        title: "Success",
+        title: t("literals.success"),
         description:
-          items.length > 1 ? "Items added to count" : "Item added to count",
+          items.length > 1 ? t("literals.itemsAddedToCount") : t("literals.itemAddedToCount"),
       });
       fetchCountLines();
     } catch (error) {
       logger.error("Error adding items to count:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to add items to count",
+        title: t("literals.error"),
+        description: t("literals.failedToAddItemsToCount"),
         variant: "destructive",
       });
       throw error;
@@ -445,15 +448,15 @@ export function useInventoryCountLines(countId?: string) {
           ),
         );
         toast({
-          title: "Saved offline",
-          description: "Count line will sync when connection returns.",
+          title: t("literals.savedOffline"),
+          description: t("literals.countLineWillSyncWhenConnectionReturns"),
         });
         return;
       }
 
       toast({
-        title: "Error",
-        description: "Failed to update count line",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateCountLine"),
         variant: "destructive",
       });
       throw error;
@@ -465,8 +468,8 @@ export function useInventoryCountLines(countId?: string) {
       await removeInventoryItemFromCount(lineId);
 
       toast({
-        title: "Success",
-        description: "Item removed from count",
+        title: t("literals.success"),
+        description: t("literals.itemRemovedFromCount"),
       });
 
       fetchCountLines();
@@ -476,8 +479,8 @@ export function useInventoryCountLines(countId?: string) {
         tags: ["error"],
       });
       toast({
-        title: "Error",
-        description: "Failed to remove item from count",
+        title: t("literals.error"),
+        description: t("literals.failedToRemoveItemFromCount"),
         variant: "destructive",
       });
       throw error;

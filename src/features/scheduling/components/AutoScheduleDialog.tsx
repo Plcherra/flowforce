@@ -168,7 +168,7 @@ export function AutoScheduleDialog({
               )}
               {selectedRuleSet && !rulesError && !selectionError && (
                 <p className="text-xs text-muted-foreground">
-                  {selectedRuleSet.employeeCount} active profiles • Templates:{" "}
+                  {selectedRuleSet.employeeCount} {t("literals.activeProfilesTemplates")}{" "}
                   {selectedRuleSet.weeklyCoverageTemplate}
                 </p>
               )}
@@ -225,8 +225,8 @@ export function AutoScheduleDialog({
                       : "secondary"
                   }
                 >
-                  {lastResult.summary.warningCounts.hard} blockers •{" "}
-                  {lastResult.summary.warningCounts.soft} soft alerts
+                  {lastResult.summary.warningCounts.hard} {t("literals.blockers")}{" "}
+                  {lastResult.summary.warningCounts.soft} {t("literals.softAlerts")}
                 </Badge>
               </div>
 

@@ -77,8 +77,8 @@ export function BillingSettingsPanel() {
               <AlertTitle>{t("settings.paymentFailed")}</AlertTitle>
               <AlertDescription>
                 {paymentGraceEndsAt
-                  ? `We could not charge your card. Update your payment method in Manage billing before ${formatDate(paymentGraceEndsAt)} to avoid interruption.`
-                  : "We could not charge your card. Update your payment method in Manage billing to avoid interruption."}
+                  ? t("literals.weCouldNotChargeYourCardUpdateYour", { value0: formatDate(paymentGraceEndsAt) })
+                  : t("literals.weCouldNotChargeYourCardUpdateYour2")}
               </AlertDescription>
             </Alert>
           ) : null}
@@ -87,20 +87,20 @@ export function BillingSettingsPanel() {
             <Alert variant="destructive">
               <AlertTitle>
                 {trialEnded
-                  ? "Trial ended"
+                  ? t("literals.trialEnded")
                   : adminDeactivated
-                    ? "Workspace deactivated"
-                    : "Access limited"}
+                    ? t("literals.workspaceDeactivated")
+                    : t("literals.accessLimited")}
               </AlertTitle>
               <AlertDescription className="space-y-2">
                 <p>
                   {trialEnded && tenant?.trialEndsAt
-                    ? `Your trial ended on ${formatDate(tenant.trialEndsAt)}. Choose a plan to restore full access for managers and staff.`
+                    ? t("literals.yourTrialEndedOnChooseAPlanTo", { value0: formatDate(tenant.trialEndsAt) })
                     : tenant?.paymentFailedAt
-                      ? "Your subscription payment failed and the grace period ended. Update billing to restore access."
+                      ? t("literals.yourSubscriptionPaymentFailedAndTheGracePeriod")
                       : adminDeactivated
-                        ? "This workspace was deactivated. Choose a plan to restore scheduling, inventory, tasks, messaging, and reporting."
-                        : "Operational features are currently limited. Reactivating restores full access for managers and staff."}
+                        ? t("literals.thisWorkspaceWasDeactivatedChooseAPlanTo")
+                        : t("literals.operationalFeaturesAreCurrentlyLimitedReactivatingRestoresFull")}
                 </p>
                 {!trialEnded && !adminDeactivated && !tenant?.paymentFailedAt ? (
                   <ul className="list-disc space-y-1 pl-5 text-sm">
@@ -118,7 +118,7 @@ export function BillingSettingsPanel() {
             <Alert>
               <AlertTitle>{t("settings.trialWorkspace")}</AlertTitle>
               <AlertDescription>
-                {`Your trial ends on ${formatDate(tenant.trialEndsAt)}. Upgrade before then to avoid interruption.`}
+                {t("literals.yourTrialEndsOnUpgradeBeforeThenTo", { value0: formatDate(tenant.trialEndsAt) })}
               </AlertDescription>
             </Alert>
           ) : status === "trial" ? (
@@ -139,13 +139,13 @@ export function BillingSettingsPanel() {
               <dd className="text-base font-medium">
                 {loading
                   ? "…"
-                  : `${tenant?.activeSeats ?? 0} / ${tenant?.maxSeats ?? plan.seatLimit}`}
+                  : t("literals.text22", { value0: tenant?.activeSeats ?? 0, value1: tenant?.maxSeats ?? plan.seatLimit })}
               </dd>
             </div>
             <div>
               <dt className="text-sm text-muted-foreground">{t("settings.billingContact")}</dt>
               <dd className="text-base font-medium">
-                {tenant?.billingEmail ?? tenant?.primaryOwnerEmail ?? "Not set"}
+                {tenant?.billingEmail ?? tenant?.primaryOwnerEmail ?? t("literals.notSet")}
               </dd>
             </div>
             <div>

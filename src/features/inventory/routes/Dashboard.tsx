@@ -63,8 +63,8 @@ export default function InventoryDashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {itemCount === 0 && !itemsLoading
-                    ? "No items yet"
-                    : "Active inventory items"}
+                    ? t("literals.noItemsYet2")
+                    : t("inventory.activeInventoryItems")}
                 </p>
               </CardContent>
             </Card>
@@ -80,8 +80,8 @@ export default function InventoryDashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {lowStockCount === 0
-                    ? "On-hand is at or above min"
-                    : "On-hand below min"}
+                    ? t("literals.onHandIsAtOrAboveMin")
+                    : t("literals.onHandBelowMin")}
                 </p>
               </CardContent>
             </Card>
@@ -97,8 +97,8 @@ export default function InventoryDashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {inventoryValue === 0
-                    ? "No count or receive yet"
-                    : "On-hand × cost basis"}
+                    ? t("literals.noCountOrReceiveYet")
+                    : t("literals.onHandCostBasis")}
                 </p>
               </CardContent>
             </Card>
@@ -114,8 +114,8 @@ export default function InventoryDashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {wasteThisMonth === 0 && !wasteLoading
-                    ? "No waste recorded"
-                    : "Logged waste cost"}
+                    ? t("literals.noWasteRecorded")
+                    : t("literals.loggedWasteCost")}
                 </p>
               </CardContent>
             </Card>

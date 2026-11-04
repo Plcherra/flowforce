@@ -2,6 +2,7 @@
  * Hook for vendor event mutations
  */
 
+import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +30,7 @@ export function useVendorMutations({
   upsertVendorEvent,
   ensureCompanyContext,
 }: UseVendorMutationsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const createVendorEvent = useCallback(
@@ -46,8 +48,8 @@ export function useVendorMutations({
         });
         if (event) {
           toast({
-            title: "Vendor visit scheduled",
-            description: "Vendor event has been created.",
+            title: t("literals.vendorVisitScheduled"),
+            description: t("literals.vendorEventHasBeenCreated"),
           });
         }
         return event;
@@ -55,9 +57,9 @@ export function useVendorMutations({
         const message =
           err instanceof Error
             ? err.message
-            : "Failed to schedule vendor event";
+            : t("literals.failedToScheduleVendorEvent");
         toast({
-          title: "Vendor scheduling failed",
+          title: t("literals.vendorSchedulingFailed"),
           description: message,
           variant: "destructive",
         });
@@ -91,15 +93,15 @@ export function useVendorMutations({
         if (deleteError) throw deleteError;
         await refetchAll();
         toast({
-          title: "Vendor visit removed",
-          description: "Vendor event has been deleted.",
+          title: t("literals.vendorVisitRemoved"),
+          description: t("literals.vendorEventHasBeenDeleted"),
         });
         return true;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to delete vendor event";
+          err instanceof Error ? err.message : t("literals.failedToDeleteVendorEvent");
         toast({
-          title: "Vendor removal failed",
+          title: t("literals.vendorRemovalFailed"),
           description: message,
           variant: "destructive",
         });

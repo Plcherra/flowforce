@@ -175,11 +175,11 @@ export default function RoleManagementDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{role ? "Edit class" : "Create class"}</DialogTitle>
+          <DialogTitle>{role ? t("literals.editClass") : t("literals.createClass")}</DialogTitle>
           <DialogDescription>
             {role
-              ? `This class sits on the locked ${PRODUCT_ROLE_LABELS[productLevel]} level.`
-              : "Start from a system role. The class can use that level’s access, never more."}
+              ? t("literals.thisClassSitsOnTheLockedLevel", { value0: PRODUCT_ROLE_LABELS[productLevel] })
+              : t("literals.startFromASystemRoleTheClassCan")}
           </DialogDescription>
         </DialogHeader>
 
@@ -207,7 +207,7 @@ export default function RoleManagementDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="start-from">
-                    {role ? "Locked level" : "Start from"}
+                    {role ? t("literals.lockedLevel") : t("literals.startFrom")}
                   </Label>
                   {role ? (
                     <div className="flex h-10 items-center rounded-md border bg-muted px-3 text-sm">
@@ -221,7 +221,7 @@ export default function RoleManagementDialog({
                       <SelectContent>
                         {CLONEABLE_PRODUCT_LEVELS.map((level) => (
                           <SelectItem key={level} value={`level:${level}`}>
-                            Start from {PRODUCT_ROLE_LABELS[level]}
+                            {t("literals.startFrom")} {PRODUCT_ROLE_LABELS[level]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -229,10 +229,10 @@ export default function RoleManagementDialog({
                   )}
                   <p className="text-xs text-muted-foreground">
                     {productLevel === "owner"
-                      ? "Owner always keeps team, roles, settings, and billing."
+                      ? t("literals.ownerAlwaysKeepsTeamRolesSettingsAndBilling")
                       : productLevel === "staff"
-                        ? "You can grant See on team schedule, run lists, and team. Edit, create/delete, settings, and billing stay off."
-                        : "Settings and billing stay off unless this class sits on Admin."}
+                        ? t("literals.youCanGrantSeeOnTeamScheduleRun")
+                        : t("literals.settingsAndBillingStayOffUnlessThisClass")}
                   </p>
                 </div>
               </div>
@@ -338,7 +338,7 @@ export default function RoleManagementDialog({
               onClick={() => onOpenChange(false)}
             >{t("common.cancel")}</Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : role ? "Update class" : "Create class"}
+              {isLoading ? t("literals.saving") : role ? t("literals.updateClass") : t("literals.createClass")}
             </Button>
           </DialogFooter>
         </form>

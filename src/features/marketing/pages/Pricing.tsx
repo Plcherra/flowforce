@@ -68,11 +68,11 @@ export default function Pricing() {
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Checkout unavailable",
+        title: t("literals.checkoutUnavailable"),
         description:
           error instanceof Error
             ? error.message
-            : "Unable to start Stripe checkout.",
+            : t("literals.unableToStartStripeCheckout"),
       });
       setLoadingPlan(null);
     }
@@ -122,7 +122,7 @@ export default function Pricing() {
                   <CardTitle>{plan.label}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                   <p className="text-sm text-muted-foreground">
-                    Up to {plan.seatLimit} seats
+                    {t("literals.upTo")} {plan.seatLimit} {t("literals.seats")}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -141,10 +141,10 @@ export default function Pricing() {
                     onClick={() => void handleSelectPlan(plan.key)}
                   >
                     {loadingPlan === plan.key
-                      ? "Redirecting to Stripe…"
+                      ? t("literals.redirectingToStripe")
                       : intent === "reactivate"
-                        ? `Reactivate with ${plan.label}`
-                        : `Upgrade to ${plan.label}`}
+                        ? t("literals.reactivateWith", { label: plan.label })
+                        : t("literals.upgradeTo", { label: plan.label })}
                   </Button>
                 </CardContent>
               </Card>

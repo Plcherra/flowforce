@@ -202,7 +202,7 @@ export default function SectionCustomizationStep({
                         <Badge variant="outline" className="mt-1 text-xs">
                           {typeof section.category === "string"
                             ? section.category
-                            : "Custom"}
+                            : t("common.custom")}
                         </Badge>
                       </div>
                     </div>

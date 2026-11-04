@@ -24,11 +24,11 @@ export default function DeletionTestResults({
   const getStatusText = (status: TestStatus) => {
     switch (status) {
       case "success":
-        return "Passed";
+        return t("literals.passed");
       case "failed":
-        return "Failed";
+        return t("literals.failed2");
       case "pending":
-        return "Pending";
+        return t("literals.pending2");
     }
   };
 

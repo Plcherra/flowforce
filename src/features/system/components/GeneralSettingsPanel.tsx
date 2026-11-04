@@ -104,10 +104,10 @@ export function GeneralSettingsPanel() {
                 onClick={() => chooseTheme(name)}
               >
                 {name === "flowforce"
-                  ? "FlowForce"
+                  ? t("literals.flowforce")
                   : name === "light"
-                    ? "Light"
-                    : "Dark"}
+                    ? t("literals.light")
+                    : t("literals.dark")}
               </Button>
             ))}
           </div>

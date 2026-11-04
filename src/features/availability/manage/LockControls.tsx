@@ -70,17 +70,17 @@ export function LockControls({
             <ModeOption
               value="open"
               title={t("schedule.open")}
-              description="Employees can edit availability anytime."
+              description={t("literals.employeesCanEditAvailabilityAnytime")}
             />
             <ModeOption
               value="auto"
               title={t("availability.auto")}
-              description="Lock automatically before each week."
+              description={t("literals.lockAutomaticallyBeforeEachWeek")}
             />
             <ModeOption
               value="lock"
               title={t("availability.lock")}
-              description="Only managers can approve changes."
+              description={t("literals.onlyManagersCanApproveChanges")}
             />
           </RadioGroup>
         </div>
@@ -122,7 +122,7 @@ export function LockControls({
               {lockStatePreview?.nextLock ? (
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Next lock (based on current settings):{" "}
+                  {t("literals.nextLockBasedOnCurrentSettings")}{" "}
                   {dayjsFormatted(lockStatePreview.nextLock)}
                 </div>
               ) : (
@@ -140,7 +140,7 @@ export function LockControls({
         <div className="flex justify-end">
           <Button onClick={onSave} disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save settings
+            {t("literals.saveSettings")}
           </Button>
         </div>
       </CardContent>

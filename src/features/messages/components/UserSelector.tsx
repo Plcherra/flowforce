@@ -35,6 +35,7 @@ interface UserSelectorProps {
 }
 
 export function useCompanyPeople(enabled: boolean) {
+  const { t } = useTranslation();
   const { user: currentUser } = useAuth();
   const currentUserId = currentUser?.id;
   const { profile: currentProfile } = useProfile();
@@ -102,8 +103,8 @@ export function useCompanyPeople(enabled: boolean) {
       } catch (error) {
         logger.error("Error fetching users:", { error, tags: ["error"] });
         toast({
-          title: "Error",
-          description: "Failed to load users",
+          title: t("literals.error"),
+          description: t("literals.failedToLoadUsers"),
           variant: "destructive",
         });
         setUsers([]);
@@ -191,8 +192,8 @@ export function UserSelector({
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 {searchQuery
-                  ? "No users found matching your search."
-                  : "No users available."}
+                  ? t("literals.noUsersFoundMatchingYourSearch")
+                  : t("literals.noUsersAvailable")}
               </div>
             ) : (
               <div className="space-y-2">
@@ -220,7 +221,7 @@ export function UserSelector({
                       className="w-full justify-start h-auto p-3 rounded-xl hover:bg-primary/10"
                       onClick={() => isSelectable && handleUserSelect(user)}
                       disabled={!isSelectable}
-                      title={isSelectable ? undefined : "Profile not available"}
+                      title={isSelectable ? undefined : t("literals.profileNotAvailable")}
                     >
                       <div className="flex items-center space-x-3 w-full">
                         <Avatar className="h-10 w-10">

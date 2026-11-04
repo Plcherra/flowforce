@@ -85,7 +85,7 @@ export function EmployeeCard({
           <Avatar className="h-12 w-12">
             <AvatarImage
               src={employee.avatar_url ?? undefined}
-              alt={`${employee.first_name} ${employee.last_name}`}
+              alt={t("literals.text", { first_name: employee.first_name, last_name: employee.last_name })}
             />
             <AvatarFallback>
               {buildInitials(employee.first_name, employee.last_name)}
@@ -122,7 +122,7 @@ export function EmployeeCard({
             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span>
                 <Building2 className="mr-1 inline h-3 w-3" />
-                {employee.department?.name ?? "Unassigned department"}
+                {employee.department?.name ?? t("literals.unassignedDepartment")}
               </span>
               {employee.position?.name && (
                 <span>
@@ -132,7 +132,7 @@ export function EmployeeCard({
               )}
               <span>
                 <BadgeCheck className="mr-1 inline h-3 w-3" />
-                {badgeCount} badge{badgeCount === 1 ? "" : "s"}
+                {badgeCount} {t("literals.badge")}{badgeCount === 1 ? "" : "s"}
               </span>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function EmployeeCard({
           </div>
           <div className="rounded-md border border-dashed border-border p-2">
             <div className="font-medium text-foreground">
-              {employee.noShowCount ?? 0} NS / {employee.lateCount ?? 0} late
+              {employee.noShowCount ?? 0} {t("literals.ns")} {employee.lateCount ?? 0} {t("literals.late")}
             </div>
             <div className="text-[11px] uppercase tracking-wide">{t("admin.attendance30d")}</div>
           </div>

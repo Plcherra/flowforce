@@ -69,7 +69,7 @@ export function RoleConfigPanel({
         <CardContent className="space-y-4">
           <div>
             <p className="text-sm text-muted-foreground">
-              Assign a new role to update this teammate&apos;s access.
+              {t("literals.assignANewRoleToUpdateThisTeammate")}
             </p>
           </div>
 

@@ -142,7 +142,7 @@ export default function InventoryReportsPage() {
                           <div>
                             <h3 className="font-semibold">{item.name}</h3>
                             <p className="text-sm text-muted-foreground">
-                              {t("inventory.current")} {item.current} {item.unit || "units"} {t("inventory.min")} {item.min}
+                              {t("inventory.current")} {item.current} {item.unit || t("literals.units2")} {t("inventory.min")} {item.min}
                             </p>
                           </div>
                           <div className="text-right">
@@ -150,7 +150,7 @@ export default function InventoryReportsPage() {
                               {item.current - item.min} {t("inventory.below")} </Badge>
                             <p className="text-xs text-muted-foreground mt-1">
                               {t("inventory.order")} {Math.abs(item.current - item.min)}{" "}
-                              {item.unit || "units"}
+                              {item.unit || t("literals.units2")}
                             </p>
                           </div>
                         </div>

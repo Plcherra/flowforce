@@ -128,7 +128,7 @@ export function RecognitionFeed({
                         ) : null}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {event.message ?? "Recognition unlocked"}
+                        {event.message ?? t("literals.recognitionUnlocked")}
                       </p>
                     </div>
                     <div className="text-right text-xs">

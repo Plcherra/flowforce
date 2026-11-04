@@ -43,15 +43,15 @@ export default function SectionCategoryGroup({
   const getCategoryTitle = (category: string) => {
     switch (category) {
       case "core":
-        return "Core Features";
+        return t("literals.coreFeatures");
       case "industry":
-        return "Industry-Specific";
+        return t("literals.industrySpecific");
       case "custom":
-        return "Custom Sections";
+        return t("literals.customSections");
       case "operations":
-        return "Operations";
+        return t("literals.operations");
       default:
-        return "Other";
+        return t("literals.other");
     }
   };
 

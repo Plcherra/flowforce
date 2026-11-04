@@ -158,7 +158,7 @@ export default function ReportViewer({ report, onBack }: ReportViewerProps) {
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant={report.is_public ? "default" : "secondary"}>
-              {report.is_public ? "Public" : "Private"}
+              {report.is_public ? t("literals.public") : t("literals.private")}
             </Badge>
             <Badge variant="outline">{report.report_type}</Badge>
           </div>

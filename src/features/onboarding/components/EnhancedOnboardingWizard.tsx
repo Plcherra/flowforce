@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import React, { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
@@ -255,7 +256,7 @@ const EnhancedOnboardingWizard = React.memo(function EnhancedOnboardingWizard({
       const message =
         error instanceof Error
           ? error.message
-          : "Unable to complete setup. Please review the form and try again.";
+          : i18n.t("literals.unableToCompleteSetupPleaseReviewTheForm");
       setCompletionError(message);
       setIsCreatingAccount(false);
     }

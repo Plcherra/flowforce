@@ -54,7 +54,7 @@ export function StepXPRewards({
               onChange={(event) => onManualXpChange(Number(event.target.value))}
             />
             <p className="text-xs text-muted-foreground">
-              Auto-calculated XP from modules: {totalXp}
+              {t("literals.autoCalculatedXpFromModules")} {totalXp}
             </p>
           </div>
           <div className="space-y-2 rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">

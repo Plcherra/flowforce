@@ -31,9 +31,9 @@ export default function AccountDeletionVerification() {
   const runVerificationTests = async () => {
     if (!testEmail || !testPassword) {
       toast({
-        title: "Missing Information",
+        title: t("literals.missingInformation2"),
         description:
-          "Please provide email and password for a deleted account to test.",
+          t("literals.pleaseProvideEmailAndPasswordForADeleted"),
         variant: "destructive",
       });
       return;
@@ -177,14 +177,14 @@ export default function AccountDeletionVerification() {
       const totalTests = tests.length;
 
       toast({
-        title: "Verification Complete",
-        description: `${passedTests}/${totalTests} tests passed. Check results below.`,
+        title: t("literals.verificationComplete"),
+        description: t("literals.testsPassedCheckResultsBelow", { passedTests: passedTests, totalTests: totalTests }),
         variant: passedTests === totalTests ? "default" : "destructive",
       });
     } catch (error: any) {
       toast({
-        title: "Test Error",
-        description: `Verification failed: ${error.message}`,
+        title: t("literals.testError"),
+        description: t("literals.verificationFailed", { message: error.message }),
         variant: "destructive",
       });
     } finally {
@@ -250,7 +250,7 @@ export default function AccountDeletionVerification() {
                 {t("profile.runningVerificationTests")}
               </>
             ) : (
-              "Run Deletion Verification"
+              t("literals.runDeletionVerification")
             )}
           </Button>
         </div>
@@ -280,7 +280,7 @@ export default function AccountDeletionVerification() {
             <strong>{t("profile.howToTest")}</strong>
           </p>
           <p>{t("profile.n1CreateATestAccountWithKnownCredentials")}</p>
-          <p>2. Delete that account using the &quot;Delete Account&quot; feature</p>
+          <p>{t("literals.text2DeleteThatAccountUsingTheDeleteAccount")}</p>
           <p>{t("profile.n3RunTheseVerificationTestsWithThoseCredentials")}</p>
           <p>{t("profile.n4AllTestsShouldPassIfDeletionIsWorkingCorrectly")}</p>
         </div>

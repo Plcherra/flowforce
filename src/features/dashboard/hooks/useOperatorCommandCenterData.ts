@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -175,6 +176,7 @@ async function fetchCostEngineSummary(params: {
 }
 
 export function useOperatorCommandCenterData() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const [data, setData] = useState<OperatorCommandCenterData>(DEFAULT_DATA);
@@ -310,7 +312,7 @@ export function useOperatorCommandCenterData() {
       const message =
         fetchError instanceof Error
           ? fetchError.message
-          : "Failed to load command center data";
+          : t("literals.failedToLoadCommandCenterData");
       logger.error("Failed to load operator command center data", {
         error: fetchError,
         tags: ["dashboard", "operator-command-center"],

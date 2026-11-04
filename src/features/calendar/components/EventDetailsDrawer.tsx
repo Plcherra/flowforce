@@ -142,7 +142,7 @@ export function EventDetailsDrawer({
             </DrawerTitle>
             <DrawerDescription className="text-sm text-muted-foreground">
               {event
-                ? `${formatDateTime(event.start)} • ${event.type ?? t("dashboard.event")}`
+                ? t("literals.text30", { value0: formatDateTime(event.start), value1: event.type ?? t("dashboard.event") })
                 : t("calendar.selectEventPrompt")}
             </DrawerDescription>
           </DrawerHeader>

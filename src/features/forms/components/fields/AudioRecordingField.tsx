@@ -103,8 +103,8 @@ export function AudioRecordingField({
   const startRecording = useCallback(async () => {
     if (value.length >= maxRecordings) {
       toast({
-        title: "Error",
-        description: `Maximum ${maxRecordings} recordings allowed`,
+        title: t("literals.error"),
+        description: t("literals.maximumRecordingsAllowed", { maxRecordings: maxRecordings }),
         variant: "destructive",
       });
       return;
@@ -138,13 +138,13 @@ export function AudioRecordingField({
         if (audioValue) {
           onChange([...value, audioValue]);
           toast({
-            title: "Success",
-            description: "Recording saved successfully",
+            title: t("literals.success"),
+            description: t("literals.recordingSavedSuccessfully"),
           });
         } else {
           toast({
-            title: "Error",
-            description: "Failed to save recording",
+            title: t("literals.error"),
+            description: t("literals.failedToSaveRecording"),
             variant: "destructive",
           });
         }
@@ -170,8 +170,8 @@ export function AudioRecordingField({
     } catch (error) {
       logger.error("Error starting recording:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to access microphone",
+        title: t("literals.error"),
+        description: t("literals.failedToAccessMicrophone"),
         variant: "destructive",
       });
     }
@@ -235,8 +235,8 @@ export function AudioRecordingField({
 
       if (value.length + files.length > maxRecordings) {
         toast({
-          title: "Error",
-          description: `Maximum ${maxRecordings} recordings allowed`,
+          title: t("literals.error"),
+          description: t("literals.maximumRecordingsAllowed", { maxRecordings: maxRecordings }),
           variant: "destructive",
         });
         return;
@@ -258,15 +258,15 @@ export function AudioRecordingField({
         if (successfulUploads.length > 0) {
           onChange([...value, ...successfulUploads]);
           toast({
-            title: "Success",
-            description: `${successfulUploads.length} audio file(s) uploaded successfully`,
+            title: t("literals.success"),
+            description: t("literals.audioFileSUploadedSuccessfully", { length: successfulUploads.length }),
           });
         }
       } catch (error) {
         logger.error("Error uploading files:", { error, tags: ["error"] });
         toast({
-          title: "Error",
-          description: "Failed to upload audio files",
+          title: t("literals.error"),
+          description: t("literals.failedToUploadAudioFiles"),
           variant: "destructive",
         });
       } finally {
@@ -386,8 +386,8 @@ export function AudioRecordingField({
             <>
               <p className="text-muted-foreground text-sm mb-4">
                 {value.length === 0
-                  ? "No recordings yet"
-                  : `${value.length} of ${maxRecordings} recordings`}
+                  ? t("literals.noRecordingsYet")
+                  : t("literals.ofRecordings", { length: value.length, maxRecordings: maxRecordings })}
               </p>
               <div className="flex gap-2 justify-center">
                 <Button

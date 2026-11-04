@@ -249,18 +249,18 @@ export function AIQuickActions({ className }: { className?: string }) {
       const result = await triggerCopilot(actions);
 
       toast({
-        title: "Co-Pilot automation queued",
-        description: `Created ${result.created} task${result.created === 1 ? "" : "s"} for automation follow-up.`,
+        title: t("literals.coPilotAutomationQueued"),
+        description: t("literals.createdTaskForAutomationFollowUp", { created: result.created, value1: result.created === 1 ? "" : "s" }),
       });
 
       await Promise.allSettled([refreshSimulator(), refetchTasks?.()]);
     } catch (error) {
       toast({
-        title: "Unable to trigger Co-Pilot",
+        title: t("literals.unableToTriggerCoPilot"),
         description:
           error instanceof Error
             ? error.message
-            : "Unexpected automation failure.",
+            : t("literals.unexpectedAutomationFailure"),
         variant: "destructive",
       });
     } finally {
@@ -271,8 +271,8 @@ export function AIQuickActions({ className }: { className?: string }) {
   const handleCreateBacklogTask = async () => {
     if (!user) {
       toast({
-        title: "Sign-in required",
-        description: "You must be signed in to assign follow-up tasks.",
+        title: t("literals.signInRequired"),
+        description: t("literals.youMustBeSignedInToAssignFollow"),
         variant: "destructive",
       });
       return;
@@ -280,8 +280,8 @@ export function AIQuickActions({ className }: { className?: string }) {
 
     if (!createTask) {
       toast({
-        title: "Task service unavailable",
-        description: "Unable to reach the task service right now.",
+        title: t("literals.taskServiceUnavailable"),
+        description: t("literals.unableToReachTheTaskServiceRightNow"),
         variant: "destructive",
       });
       return;
@@ -322,19 +322,19 @@ export function AIQuickActions({ className }: { className?: string }) {
       }
 
       toast({
-        title: "Follow-up task created",
+        title: t("literals.followUpTaskCreated"),
         description:
-          "Backlog recovery task assigned. Track progress from the task board.",
+          t("literals.backlogRecoveryTaskAssignedTrackProgressFromThe"),
       });
 
       await refetchTasks?.();
     } catch (error) {
       toast({
-        title: "Unable to create task",
+        title: t("literals.unableToCreateTask"),
         description:
           error instanceof Error
             ? error.message
-            : "Unexpected task creation error.",
+            : t("literals.unexpectedTaskCreationError"),
         variant: "destructive",
       });
     } finally {
@@ -368,17 +368,17 @@ export function AIQuickActions({ className }: { className?: string }) {
       } as any);
 
       toast({
-        title: "Reminder scheduled",
+        title: t("literals.reminderScheduled"),
         description:
-          "We will remind you shortly to close the loop on these insights.",
+          t("literals.weWillRemindYouShortlyToCloseThe"),
       });
 
       await refetchReminders?.();
     } catch (error) {
       toast({
-        title: "Unable to create reminder",
+        title: t("literals.unableToCreateReminder"),
         description:
-          error instanceof Error ? error.message : "Unexpected reminder error.",
+          error instanceof Error ? error.message : t("literals.unexpectedReminderError"),
         variant: "destructive",
       });
     } finally {

@@ -258,7 +258,7 @@ export function IssuesStream() {
                     />
                     <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
                       {issue.issue_type ?? t("operations.issueTypeGeneral")}
-                      {issue.owner_name ? ` | ${issue.owner_name}` : ""}
+                      {issue.owner_name ? " " + t("literals.text15", { owner_name: issue.owner_name }) : ""}
                     </p>
                   </div>
                   <Badge variant="outline">
@@ -281,7 +281,7 @@ export function IssuesStream() {
                   </Badge>
                   {issue.task_id && (
                     <Badge variant="secondary">
-                      {t("forms.task")} {issue.task_status ?? "open"}
+                      {t("forms.task")} {issue.task_status ?? t("literals.open")}
                     </Badge>
                   )}
                   {issue.workflow_name && (

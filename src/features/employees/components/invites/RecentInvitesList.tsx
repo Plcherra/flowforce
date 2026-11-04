@@ -79,8 +79,8 @@ export function RecentInvitesList({
                     <div className="flex items-center gap-3">
                       <div className="text-xs text-muted-foreground">
                         {invite.acceptedAt
-                          ? `Joined ${formatDistanceToNow(new Date(invite.acceptedAt), { addSuffix: true })}`
-                          : `Expires ${formatDistanceToNow(new Date(invite.expiresAt), { addSuffix: true })}`}
+                          ? t("literals.joined", { value0: formatDistanceToNow(new Date(invite.acceptedAt), { addSuffix: true }) })
+                          : t("literals.expires2", { value0: formatDistanceToNow(new Date(invite.expiresAt), { addSuffix: true }) })}
                       </div>
                       {invite.acceptedAt ? (
                         <Badge variant="secondary">{t("employees.accepted")}</Badge>

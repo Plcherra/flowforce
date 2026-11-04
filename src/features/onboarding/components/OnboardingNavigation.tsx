@@ -57,7 +57,7 @@ export default function OnboardingNavigation({
             disabled={!canProceed || isCreatingAccount}
             className="bg-gradient-to-r from-primary to-secondary hover:from-primary hover:to-secondary"
           >
-            {isCreatingAccount ? "Creating Account..." : "Complete Setup"}
+            {isCreatingAccount ? t("literals.creatingAccount") : t("literals.completeSetup")}
             <CheckCircle className="ml-2 h-4 w-4" />
           </Button>
         )}

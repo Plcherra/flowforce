@@ -222,7 +222,7 @@ export function EnhancedCalendarView({
         weekStart.setDate(selectedDate.getDate() - selectedDate.getDay());
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
-        return `${format(weekStart, "MMM d", { locale })} - ${format(weekEnd, "MMM d, yyyy", { locale })}`;
+        return t("literals.text18", { value0: format(weekStart, "MMM d", { locale }), value1: format(weekEnd, "MMM d, yyyy", { locale }) });
       }
       default:
         return "";

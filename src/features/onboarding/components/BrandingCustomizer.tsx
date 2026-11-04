@@ -67,7 +67,7 @@ export default function BrandingCustomizer({
       <div>
         <h3 className="text-xl font-semibold mb-2">{t("onboarding.branding.title")}</h3>
         <p className="text-muted-foreground">
-          Create a unique look and feel for your company&apos;s workspace
+          {t("onboarding.branding.description")}
         </p>
       </div>
 
@@ -135,16 +135,16 @@ export default function BrandingCustomizer({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Type className="h-5 w-5" />
-                Typography
+                {t("literals.typography")}
               </CardTitle>
               <CardDescription>
-                Choose fonts that reflect your brand personality
+                {t("onboarding.branding.typography.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label>Font Family</Label>
+                  <Label>{t("literals.fontFamily")}</Label>
                   <Select
                     value={branding.fontFamily}
                     onValueChange={(value) =>
@@ -197,7 +197,7 @@ export default function BrandingCustomizer({
                       </div>
                       <div className="mt-3 pt-2 border-t border-border">
                         <div className="text-xs text-muted-foreground">
-                          Font:{" "}
+                          {t("literals.font")}{" "}
                           <span style={{ fontFamily: branding.fontFamily }}>
                             {branding.fontFamily.split(",")[0]}
                           </span>
@@ -461,7 +461,7 @@ export default function BrandingCustomizer({
                     onChange={(e) =>
                       handleStyleChange("customCSS", e.target.value)
                     }
-                    placeholder="/* Add your custom CSS here */&#10;.my-custom-class {&#10; /* Custom styles */&#10;}"
+                    placeholder={t("literals.addYourCustomCssHere10MyCustom")}
                     rows={10}
                     className="font-mono text-sm"
                   />

@@ -146,29 +146,29 @@ export default function AIInsightsPanel({
       case "performance":
         navigate("/analytics");
         toast({
-          title: "Performance Analytics",
-          description: "Opening performance dashboard...",
+          title: t("literals.performanceAnalytics"),
+          description: t("literals.openingPerformanceDashboard"),
         });
         break;
       case "efficiency":
         navigate("/reports");
         toast({
-          title: "Efficiency Reports",
-          description: "Viewing efficiency metrics...",
+          title: t("literals.efficiencyReports"),
+          description: t("literals.viewingEfficiencyMetrics"),
         });
         break;
       case "issues":
         navigate("/tasks");
         toast({
-          title: "Task Management",
-          description: "Found 3 areas to improve - opening task management...",
+          title: t("literals.taskManagement"),
+          description: t("literals.found3AreasToImproveOpeningTaskManagement"),
         });
         break;
       case "trending":
         navigate("/analytics");
         toast({
-          title: "Trending Analytics",
-          description: "Viewing trending data and insights...",
+          title: t("literals.trendingAnalytics"),
+          description: t("literals.viewingTrendingDataAndInsights"),
         });
         break;
     }
@@ -177,23 +177,23 @@ export default function AIInsightsPanel({
   const handleViewDetailedAnalysis = () => {
     navigate("/ai-insights");
     toast({
-      title: "AI Insights",
-      description: "Opening detailed AI analysis...",
+      title: t("common.aiInsights"),
+      description: t("literals.openingDetailedAiAnalysis"),
     });
   };
 
   const getTypeLabel = () => {
     switch (type) {
       case "dashboard":
-        return "Operations Overview";
+        return t("literals.operationsOverview");
       case "scheduler":
-        return "Scheduling Insights";
+        return t("literals.schedulingInsights");
       case "expenses":
-        return "Financial Analysis";
+        return t("literals.financialAnalysis");
       case "reports":
-        return "Report Intelligence";
+        return t("literals.reportIntelligence");
       default:
-        return "AI Insights";
+        return t("common.aiInsights");
     }
   };
 
@@ -230,9 +230,9 @@ export default function AIInsightsPanel({
                 variant="outline"
                 onClick={() =>
                   toast({
-                    title: "Access requested",
+                    title: t("literals.accessRequested"),
                     description:
-                      "We let your workspace admins know you need AI insights.",
+                      t("literals.weLetYourWorkspaceAdminsKnowYouNeed"),
                   })
                 }
               >{t("ai.notifyAdmin")}</Button>
@@ -253,7 +253,7 @@ export default function AIInsightsPanel({
           <div className="flex flex-col space-y-2">
             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               {getTypeIcon()}
-              AI Insights
+              {t("common.aiInsights")}
             </CardTitle>
             <Badge variant="secondary" className="text-xs w-fit">
               {getTypeLabel()}
@@ -415,7 +415,7 @@ export default function AIInsightsPanel({
             {lastUpdated && (
               <div className="flex items-center justify-center pt-2 border-t border-border/50">
                 <div className="text-xs text-muted-foreground">
-                  Updated: {lastUpdated.toLocaleTimeString()}
+                  {t("literals.updated2")} {lastUpdated.toLocaleTimeString()}
                 </div>
               </div>
             )}

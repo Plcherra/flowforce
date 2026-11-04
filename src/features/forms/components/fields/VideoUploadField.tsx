@@ -92,8 +92,8 @@ export function VideoUploadField({
       // Check file count limit
       if (value.length + files.length > maxFiles) {
         toast({
-          title: "Error",
-          description: `Maximum ${maxFiles} videos allowed`,
+          title: t("literals.error"),
+          description: t("literals.maximumVideosAllowed", { maxFiles: maxFiles }),
           variant: "destructive",
         });
         return;
@@ -103,8 +103,8 @@ export function VideoUploadField({
       for (const file of files) {
         if (file.size > maxSize * 1024 * 1024) {
           toast({
-            title: "Error",
-            description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+            title: t("literals.error"),
+            description: t("literals.fileIsTooLargeMaximumSizeIsMb", { name: file.name, maxSize: maxSize }),
             variant: "destructive",
           });
           return;
@@ -112,8 +112,8 @@ export function VideoUploadField({
 
         if (!file.type.startsWith("video/")) {
           toast({
-            title: "Error",
-            description: `File ${file.name} is not a video`,
+            title: t("literals.error"),
+            description: t("literals.fileIsNotAVideo", { name: file.name }),
             variant: "destructive",
           });
           return;
@@ -134,23 +134,23 @@ export function VideoUploadField({
         if (successfulUploads.length > 0) {
           onChange([...value, ...successfulUploads]);
           toast({
-            title: "Success",
-            description: `${successfulUploads.length} video(s) uploaded successfully`,
+            title: t("literals.success"),
+            description: t("literals.videoSUploadedSuccessfully", { length: successfulUploads.length }),
           });
         }
 
         if (failedUploads > 0) {
           toast({
-            title: "Warning",
-            description: `${failedUploads} video(s) failed to upload`,
+            title: t("literals.warning"),
+            description: t("literals.videoSFailedToUpload", { failedUploads: failedUploads }),
             variant: "destructive",
           });
         }
       } catch (error) {
         logger.error("Error handling file upload:", { error, tags: ["error"] });
         toast({
-          title: "Error",
-          description: "Failed to upload videos",
+          title: t("literals.error"),
+          description: t("literals.failedToUploadVideos"),
           variant: "destructive",
         });
       } finally {
@@ -236,8 +236,8 @@ export function VideoUploadField({
           <Video className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
             {value.length === 0
-              ? "No videos uploaded yet"
-              : `${value.length} of ${maxFiles} videos uploaded`}
+              ? t("literals.noVideosUploadedYet")
+              : t("literals.ofVideosUploaded", { length: value.length, maxFiles: maxFiles })}
           </p>
           <Button
             type="button"
@@ -247,7 +247,7 @@ export function VideoUploadField({
             className="min-w-[120px]"
           >
             <Upload className="h-4 w-4 mr-2" />
-            {uploading ? "Uploading..." : "Upload Videos"}
+            {uploading ? t("literals.uploading") : t("literals.uploadVideos")}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
             {t("forms.maxVideosEach", { count: maxFiles, size: maxSize })}

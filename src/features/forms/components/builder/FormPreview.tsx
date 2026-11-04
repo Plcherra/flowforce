@@ -132,7 +132,7 @@ export default function FormPreview({
                     ? "tel"
                     : "text"
               }
-              placeholder={field.placeholder || "Enter your response..."}
+              placeholder={field.placeholder || t("literals.enterYourResponse")}
               className="mt-2"
             />
           </div>
@@ -147,7 +147,7 @@ export default function FormPreview({
               </p>
             )}
             <Textarea
-              placeholder={field.placeholder || "Enter your response..."}
+              placeholder={field.placeholder || t("literals.enterYourResponse")}
               className="mt-2"
             />
           </div>
@@ -163,7 +163,7 @@ export default function FormPreview({
             )}
             <Input
               type="number"
-              placeholder={field.placeholder || "Enter a number"}
+              placeholder={field.placeholder || t("literals.enterANumber")}
               className="mt-2"
             />
           </div>
@@ -319,7 +319,7 @@ export default function FormPreview({
         <div className="space-y-4">
           {/* Form title and description preview */}
           <div className="space-y-2 pb-4 border-b">
-            <h2 className="text-xl font-bold">{formTitle || "Form Title"}</h2>
+            <h2 className="text-xl font-bold">{formTitle || t("literals.formTitle")}</h2>
             {formDescription && (
               <p className="text-muted-foreground text-sm">{formDescription}</p>
             )}

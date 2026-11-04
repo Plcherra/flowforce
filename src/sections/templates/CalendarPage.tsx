@@ -18,7 +18,7 @@ export function CalendarPage({ title, description }: Props) {
       <CardContent>
         <div className="text-sm text-muted-foreground">
           {description ||
-            "This is a starter calendar view. Hook up your data source to show events."}
+            t("literals.thisIsAStarterCalendarViewHookUp")}
         </div>
         <div className="mt-4 grid grid-cols-7 gap-2 text-center text-xs text-muted-foreground">
           {Array.from({ length: 35 }).map((_, i) => (

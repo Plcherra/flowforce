@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryService } from "@/features/inventory/services/inventoryService";
@@ -14,6 +15,7 @@ export function useInventoryProductionEvents() {
 }
 
 export function useCreateProductionEvent() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -26,18 +28,18 @@ export function useCreateProductionEvent() {
 
       const description =
         warnings?.length && warnings.length > 0
-          ? `Recorded with ${warnings.length} warning${warnings.length > 1 ? "s" : ""}`
-          : "Production event recorded successfully";
+          ? t("literals.recordedWithWarning", { length: warnings.length, value1: warnings.length > 1 ? "s" : "" })
+          : t("literals.productionEventRecordedSuccessfully");
 
       toast({
-        title: "Production recorded",
+        title: t("literals.productionRecorded"),
         description,
       });
     },
     onError: (error: any) => {
-      const message = error?.message || "Failed to record production event";
+      const message = error?.message || t("literals.failedToRecordProductionEvent");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });

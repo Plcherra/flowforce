@@ -71,12 +71,12 @@ export function PerformanceTileDetail({
                   <div>
                     <div className="text-sm font-medium text-foreground">
                       {`${entry.first_name ?? ""} ${entry.last_name ?? ""}`.trim() ||
-                        `Teammate ${index + 1}`}
+                        t("literals.teammate", { value0: index + 1 })}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {(entry.tasks ?? 0) > 0
-                        ? `${entry.tasks} tasks owned`
-                        : "Task load syncing"}
+                        ? t("literals.tasksOwned", { tasks: entry.tasks })
+                        : t("literals.taskLoadSyncing")}
                     </div>
                   </div>
                   <Badge variant="secondary" className="text-[11px]">

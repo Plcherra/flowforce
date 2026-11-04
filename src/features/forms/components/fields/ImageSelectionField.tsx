@@ -51,8 +51,8 @@ export function ImageSelectionField({
       new URL(customImageUrl);
     } catch {
       toast({
-        title: "Error",
-        description: "Please enter a valid image URL",
+        title: t("literals.error"),
+        description: t("literals.pleaseEnterAValidImageUrl"),
         variant: "destructive",
       });
       return;
@@ -71,8 +71,8 @@ export function ImageSelectionField({
     setCustomImageUrl("");
 
     toast({
-      title: "Success",
-      description: "Image added successfully",
+      title: t("literals.success"),
+      description: t("literals.imageAddedSuccessfully"),
     });
   };
 
@@ -97,8 +97,8 @@ export function ImageSelectionField({
     } else {
       if (selectedImages.length >= maxSelection) {
         toast({
-          title: "Error",
-          description: `Maximum ${maxSelection} images can be selected`,
+          title: t("literals.error"),
+          description: t("literals.maximumImagesCanBeSelected", { maxSelection: maxSelection }),
           variant: "destructive",
         });
         return;
@@ -146,7 +146,7 @@ export function ImageSelectionField({
           <CardContent className="pt-4">
             <div className="flex items-center justify-between mb-3">
               <p className="font-medium text-foreground">
-                Selected Images ({selectedImages.length}/{maxSelection})
+                {t("literals.selectedImages")}{selectedImages.length}/{maxSelection})
               </p>
               <Button
                 type="button"
@@ -175,7 +175,7 @@ export function ImageSelectionField({
             <div className="text-center">
               <Image className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
               <p className="text-sm font-medium text-foreground">
-                Select Images ({selectedImages.length}/{maxSelection})
+                {t("literals.selectImages")}{selectedImages.length}/{maxSelection})
               </p>
             </div>
 
@@ -194,7 +194,7 @@ export function ImageSelectionField({
                       <div className="aspect-square">
                         <img
                           src={imageUrl}
-                          alt={`Option ${index + 1}`}
+                          alt={t("literals.option", { value0: index + 1 })}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =

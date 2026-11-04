@@ -86,7 +86,7 @@ export function ClosedLoopSummary({
         ) : error ? (
           <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
             <AlertTriangle className="h-4 w-4 shrink-0" />
-            <span>{error.message ?? "Unable to load closed loop status."}</span>
+            <span>{error.message ?? t("literals.unableToLoadClosedLoopStatus")}</span>
           </div>
         ) : state ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -97,18 +97,18 @@ export function ClosedLoopSummary({
                 {state.detection.summary}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                <Badge variant="outline">High {severity.high ?? 0}</Badge>
+                <Badge variant="outline">{t("literals.high")} {severity.high ?? 0}</Badge>
                 <Badge
                   variant="outline"
                   className="border-warning/40 text-warning"
                 >
-                  Medium {severity.medium ?? 0}
+                  {t("literals.medium")} {severity.medium ?? 0}
                 </Badge>
                 <Badge
                   variant="outline"
                   className="border-success/40 text-success"
                 >
-                  Low {severity.low ?? 0}
+                  {t("literals.low")} {severity.low ?? 0}
                 </Badge>
               </div>
             </section>
@@ -126,7 +126,7 @@ export function ClosedLoopSummary({
               </p>
               {themes.length > 0 && (
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Themes:{" "}
+                  {t("literals.themes")}{" "}
                   <span className="font-medium text-foreground">
                     {themes.slice(0, 3).join(", ")}
                   </span>
@@ -185,13 +185,13 @@ export function ClosedLoopSummary({
               </p>
               <ul className="mt-4 space-y-2 text-xs text-muted-foreground">
                 <li>
-                  Autopilot backlog:{" "}
+                  {t("literals.autopilotBacklog")}{" "}
                   <span className="font-medium text-foreground">
                     {state.execution.evidence.metrics.autopilotTasksPending}
                   </span>
                 </li>
                 <li>
-                  Unresolved critical signals:{" "}
+                  {t("literals.unresolvedCriticalSignals")}{" "}
                   <span className="font-medium text-foreground">
                     {state.execution.evidence.metrics.unresolvedCriticalEvents}
                   </span>
@@ -207,19 +207,19 @@ export function ClosedLoopSummary({
               </p>
               <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                 <p>
-                  Acknowledgement rate:{" "}
+                  {t("literals.acknowledgementRate")}{" "}
                   <span className="font-medium text-foreground">
-                    {ackRate != null ? `${Math.round(ackRate * 100)}%` : "N/A"}
+                    {ackRate != null ? `${Math.round(ackRate * 100)}%` : t("literals.nA")}
                   </span>
                 </p>
                 <p>
-                  Tasks completed:{" "}
+                  {t("literals.tasksCompleted")}{" "}
                   <span className="font-medium text-foreground">
                     {state.learning.completedTasks}
                   </span>
                 </p>
                 <p>
-                  Critical signals resolved:{" "}
+                  {t("literals.criticalSignalsResolved")}{" "}
                   <span className="font-medium text-foreground">
                     {state.learning.resolvedEvents}
                   </span>

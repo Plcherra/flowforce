@@ -83,7 +83,7 @@ export default function Analytics() {
   const handleCopilotAction = useCallback(
     (action: AssistantAction) => {
       toast({
-        title: "Co-Pilot action queued",
+        title: t("literals.coPilotActionQueued"),
         description: action.action,
       });
     },
@@ -105,7 +105,7 @@ export default function Analytics() {
                 : "text-3xl font-bold tracking-tight"
             }
           >
-            Analytics &amp; AI
+            {t("literals.analyticsAi")}
           </h1>
           <p className="text-muted-foreground">
             {t("analytics.consolidateFormsAndInternalReportsSurfaceAiPredictionsAndTriggerWorkflowActionsInOnePlace")}

@@ -63,8 +63,8 @@ export function TaskField({
   const createTask = () => {
     if (!taskTitle.trim()) {
       toast({
-        title: "Error",
-        description: "Task title is required",
+        title: t("literals.error"),
+        description: t("literals.taskTitleIsRequired"),
         variant: "destructive",
       });
       return;
@@ -86,8 +86,8 @@ export function TaskField({
     resetForm();
 
     toast({
-      title: "Success",
-      description: "Task created successfully",
+      title: t("literals.success"),
+      description: t("literals.taskCreatedSuccessfully"),
     });
   };
 

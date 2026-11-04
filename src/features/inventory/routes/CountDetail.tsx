@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "@/lib/router-adapter";
@@ -88,11 +89,11 @@ const formatCountType = (type?: string | null) => {
 const getPeriodLabel = (period?: string | null) => {
   switch (period) {
     case "day_start":
-      return "Day Start";
+      return i18n.t("literals.dayStart");
     case "day_end":
-      return "Day End";
+      return i18n.t("literals.dayEnd");
     default:
-      return "Custom";
+      return i18n.t("common.custom");
   }
 };
 
@@ -209,14 +210,14 @@ export default function CountDetailPage({
       await refetchCounts();
 
       toast({
-        title: "Count done",
-        description: "Saved and registered. Open it anytime to edit again.",
+        title: t("literals.countDone"),
+        description: t("literals.savedAndRegisteredOpenItAnytimeToEdit"),
       });
       navigate("/app/inventory/counts");
     } catch {
       toast({
-        title: "Error",
-        description: "Failed to save the count",
+        title: t("literals.error"),
+        description: t("literals.failedToSaveTheCount"),
         variant: "destructive",
       });
     } finally {
@@ -313,7 +314,7 @@ export default function CountDetailPage({
                 <IfCan permission="inventory.counts.edit">
                   <Button onClick={handleSaveAndDone} disabled={saving}>
                     <Save className="h-4 w-4 mr-2" />
-                    {saving ? "Saving..." : "Save & Done"}
+                    {saving ? t("literals.saving") : t("literals.saveDone")}
                   </Button>
                 </IfCan>
               </div>
@@ -519,7 +520,7 @@ export default function CountDetailPage({
                       <p>
                         {count.completed_at
                           ? new Date(count.completed_at).toLocaleString()
-                          : "Not done yet"}
+                          : t("literals.notDoneYet")}
                       </p>
                     </div>
                   </div>

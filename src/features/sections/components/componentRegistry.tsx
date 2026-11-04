@@ -72,7 +72,7 @@ function UpdatesFeedComponent() {
                 {update.title}
               </CardTitle>
               <Badge variant={update.isPinned ? "default" : "secondary"}>
-                {update.isPinned ? "Pinned" : "Update"}
+                {update.isPinned ? t("literals.pinned") : t("literals.update")}
               </Badge>
             </div>
             {update.createdAt && (
@@ -85,7 +85,7 @@ function UpdatesFeedComponent() {
           </CardHeader>
           <CardContent className="pt-0 space-y-3">
             <p className="text-sm text-muted-foreground leading-snug">
-              {update.body?.slice(0, 180) || "No content provided yet."}
+              {update.body?.slice(0, 180) || t("literals.noContentProvidedYet")}
             </p>
             <div className="flex items-center gap-3">
               <Button
@@ -168,7 +168,7 @@ function AnnouncementsBoardComponent() {
           <CardContent className="pt-0">
             <p className="text-sm text-muted-foreground leading-snug">
               {announcement.content?.slice(0, 220) ||
-                "No description provided."}
+                t("learning.noDescriptionProvided")}
             </p>
           </CardContent>
         </Card>
@@ -220,7 +220,7 @@ function EmployeeDirectoryComponent() {
               <div className="flex items-center justify-between">
                 <span className="font-medium">
                   {employee.fullName ||
-                    `${employee.firstName} ${employee.lastName}`}
+                    t("literals.text21", { firstName: employee.firstName, lastName: employee.lastName })}
                 </span>
                 {employee.position && (
                   <Badge variant="secondary" className="text-xs">
@@ -286,7 +286,7 @@ function EventsSnapshotComponent() {
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium text-sm">{event.title}</span>
                   <Badge variant="outline" className="text-xs capitalize">
-                    {event.type || "event"}
+                    {event.type || t("literals.event2")}
                   </Badge>
                 </div>
                 <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-2">

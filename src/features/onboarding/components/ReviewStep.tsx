@@ -50,14 +50,14 @@ export default function ReviewStep({
               {selectedTemplate.name}
             </Badge>
             <span className="text-sm text-muted-foreground">
-              {selectedTemplate.industry} industry
+              {selectedTemplate.industry} {t("literals.industry")}
             </span>
           </div>
         </div>
 
         <div className="p-4 border rounded-lg">
           <h4 className="font-medium text-foreground mb-3">
-            Enabled Sections ({enabledSections.length})
+            {t("literals.enabledSections")}{enabledSections.length})
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {enabledSections.map((sectionId) => (
@@ -70,13 +70,13 @@ export default function ReviewStep({
 
         <div className="p-4 border rounded-lg">
           <h4 className="font-medium text-foreground mb-3">
-            Your Company Roles ({customRoles.length})
+            {t("literals.yourCompanyRoles")}{customRoles.length})
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {customRoles.map((role) => (
               <Badge key={role.id} variant="secondary" className="text-xs">
                 {role.name}
-                {role.is_active === false ? " (archived)" : ""}
+                {role.is_active === false ? t("literals.archived") : ""}
               </Badge>
             ))}
           </div>
@@ -85,7 +85,7 @@ export default function ReviewStep({
         {positions.length > 0 && (
           <div className="p-4 border rounded-lg">
             <h4 className="font-medium text-foreground mb-3">
-              Positions ({positions.length})
+              {t("literals.positions3")}{positions.length})
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {positions.map((position) => (

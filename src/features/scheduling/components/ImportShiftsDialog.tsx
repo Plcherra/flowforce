@@ -140,7 +140,7 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
                     </span>
                   </div>
                   <p className="text-xs text-success mt-1">
-                    Ready to import • {Math.round(selectedFile.size / 1024)} KB
+                    {t("literals.readyToImport")} {Math.round(selectedFile.size / 1024)} KB
                   </p>
                 </div>
               )}
@@ -168,7 +168,7 @@ Evening Shift,2025-06-20,17:00,2025-06-21,01:00,Store A,1,Evening coverage`;
               {t("schedule.cancel")}
             </Button>
             <Button onClick={handleImport} disabled={!selectedFile || loading}>
-              {loading ? "Importing..." : "Import Shifts"}
+              {loading ? t("literals.importing") : t("literals.importShifts")}
             </Button>
           </div>
         </div>

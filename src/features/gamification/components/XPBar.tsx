@@ -74,8 +74,8 @@ export function XPBar({
         <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="h-4 w-4 text-primary" />{t("gamification.xpProgress")}</CardTitle>
         <CardDescription className="text-xs">
-          {previousMilestone ? `${previousMilestone.label} · ` : null}
-          Next milestone unlocks <strong>{nextMilestone.label}</strong>
+          {previousMilestone ? t("literals.text6", { label: previousMilestone.label }) : null}
+          {t("literals.nextMilestoneUnlocks")} <strong>{nextMilestone.label}</strong>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -85,7 +85,7 @@ export function XPBar({
             <span className="text-base text-muted-foreground">{t("analytics.xp")}</span>
           </div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Need {xpToGo.toLocaleString()} XP to reach {nextMilestone.label}
+            {t("literals.need")} {xpToGo.toLocaleString()} {t("literals.xpToReach")} {nextMilestone.label}
           </p>
         </div>
         <div className="relative h-4 rounded-full bg-muted/70">
@@ -120,16 +120,16 @@ export function XPBar({
               </p>
               <p>
                 {nextMilestone.description ??
-                  "Complete goals, tasks, and training to level up."}
+                  t("literals.completeGoalsTasksAndTrainingToLevelUp")}
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className="font-medium text-foreground">
-              {nextMilestone.xpRequired.toLocaleString()} XP goal
+              {nextMilestone.xpRequired.toLocaleString()} {t("literals.xpGoal")}
             </p>
             {baseline > 0 ? (
-              <p>Baseline {baseline.toLocaleString()} XP</p>
+              <p>{t("literals.baseline")} {baseline.toLocaleString()} XP</p>
             ) : null}
           </div>
         </div>

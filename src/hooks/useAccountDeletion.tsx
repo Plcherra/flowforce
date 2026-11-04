@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ export function useAccountDeletion({
   userId,
   onSignOut,
 }: UseAccountDeletionProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionProgress, setDeletionProgress] = useState(0);
@@ -121,8 +123,8 @@ export function useAccountDeletion({
 
       // Show comprehensive success message with detailed stats
       toast({
-        title: "Account Deleted Successfully",
-        description: `Your account and ${data.deletionStats?.totalRecordsDeleted || "all"} associated records have been permanently deleted across ${data.deletionStats?.deletedTables?.length || "multiple"} tables. Completed in ${Math.round((data.deletionStats?.executionTimeMs || 0) / 1000)}s.`,
+        title: t("profile.accountDeletedSuccessfully"),
+        description: t("literals.yourAccountAndAssociatedRecordsHaveBeenPermanently", { value0: data.deletionStats?.totalRecordsDeleted || "all", value1: data.deletionStats?.deletedTables?.length || "multiple", value2: Math.round((data.deletionStats?.executionTimeMs || 0) / 1000) }),
         duration: 8000,
       });
 
@@ -158,8 +160,8 @@ export function useAccountDeletion({
 
       // Show detailed error message
       toast({
-        title: "Deletion Error",
-        description: `${error.message || "Account deletion failed"}. You have been signed out for security. Execution time: ${Math.round(executionTime / 1000)}s. If your account still exists, please contact support.`,
+        title: t("literals.deletionError"),
+        description: t("literals.youHaveBeenSignedOutForSecurityExecution", { value0: error.message || "Account deletion failed", value1: Math.round(executionTime / 1000) }),
         variant: "destructive",
         duration: 10000,
       });

@@ -84,7 +84,7 @@ export default function PrepParPage() {
     const item = mockPrepItems.find((i) => i.id === itemId);
     toast({
       title: statusMessages[newStatus as keyof typeof statusMessages],
-      description: `Updated prep status for ${item?.name}`,
+      description: t("literals.updatedPrepStatusFor", { name: item?.name }),
     });
   };
 
@@ -117,7 +117,7 @@ export default function PrepParPage() {
                 <ChefHat className="h-8 w-8" />
                 {t("inventory.prepPar")} </h1>
               <p className="text-muted-foreground">
-                {isWeekend() ? "Weekend" : "Weekday"} {t("inventory.prepPlanning")}{" "}
+                {isWeekend() ? t("literals.weekend") : t("literals.weekday")} {t("inventory.prepPlanning")}{" "}
                 {new Date().toLocaleDateString()}
               </p>
             </div>

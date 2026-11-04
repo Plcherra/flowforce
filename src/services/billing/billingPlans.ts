@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import type { TenantManagementSettings } from "@/types/system-settings";
 
 export const BILLING_PLAN_KEYS = ["starter", "growth", "enterprise"] as const;
@@ -197,11 +198,11 @@ export function normalizeBillingStatus(value?: string | null): BillingStatus {
 export function getBillingStatusLabel(status: BillingStatus): string {
   switch (status) {
     case "trial":
-      return "Trial";
+      return i18n.t("literals.trial");
     case "active":
-      return "Active";
+      return i18n.t("literals.active2");
     case "deactivated":
-      return "Deactivated";
+      return i18n.t("literals.deactivated");
     default:
       return status;
   }

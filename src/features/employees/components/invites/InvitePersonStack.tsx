@@ -55,8 +55,8 @@ export function InvitePersonStack({
     if (ready.length === 0) {
       toast({
         variant: "destructive",
-        title: "Add a person",
-        description: "Each card needs a class and an email or phone number.",
+        title: t("literals.addAPerson"),
+        description: t("literals.eachCardNeedsAClassAndAnEmail"),
       });
       return;
     }
@@ -78,7 +78,7 @@ export function InvitePersonStack({
       if (failed.length > 0) {
         toast({
           variant: "destructive",
-          title: "Some invites did not send",
+          title: t("literals.someInvitesDidNotSend"),
           description: failed
             .map((item) => item.message)
             .filter(Boolean)
@@ -86,9 +86,9 @@ export function InvitePersonStack({
         });
       } else {
         toast({
-          title: ready.length === 1 ? "Invite sent" : "Invites sent",
+          title: ready.length === 1 ? t("literals.inviteSent") : t("literals.invitesSent"),
           description:
-            "The class is painted. Give or take on a card later if you need to.",
+            t("literals.theClassIsPaintedGiveOrTakeOn"),
         });
         setCards([createInvitePersonCard(defaultClass?.id ?? "")]);
         void queryClient.invalidateQueries({ queryKey: ["invites"] });
@@ -97,9 +97,9 @@ export function InvitePersonStack({
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Unable to send invite",
+        title: t("literals.unableToSendInvite"),
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgain"),
       });
     } finally {
       setIsSubmitting(false);
@@ -157,7 +157,7 @@ export function InvitePersonStack({
           onClick={handleSubmit}
           disabled={isSubmitting || isLoading}
         >
-          {isSubmitting ? "Sending..." : "Send invites"}
+          {isSubmitting ? t("literals.sending") : t("literals.sendInvites")}
         </Button>
       </div>
     </div>

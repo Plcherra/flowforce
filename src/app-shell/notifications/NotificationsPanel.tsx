@@ -66,19 +66,19 @@ export function NotificationsPanel({
   const getNotificationTitle = (notification: any) => {
     switch (notification.type) {
       case "task_assigned":
-        return "New Task Assignment";
+        return t("literals.newTaskAssignment");
       case "task_completed":
-        return "Task Completed";
+        return t("literals.taskCompleted");
       case "task_due_soon":
-        return "Task Due Soon";
+        return t("literals.taskDueSoon");
       case "task_overdue":
-        return "Task Overdue";
+        return t("literals.taskOverdue");
       case "task_status_changed":
-        return "Task Status Updated";
+        return t("literals.taskStatusUpdated");
       case "task_comment":
-        return "New Comment";
+        return t("literals.newComment");
       default:
-        return notification.title || "Notification";
+        return notification.title || t("literals.notification");
     }
   };
 

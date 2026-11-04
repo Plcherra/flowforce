@@ -85,8 +85,8 @@ function LeaderboardStats({
         <div>
           <p className="text-sm text-muted-foreground">{t("gamification.topDepartment")}</p>
           <p className="text-sm font-semibold">
-            {topDepartment?.name ?? "None"} ·{" "}
-            {topDepartment?.participantCount ?? 0} participant
+            {topDepartment?.name ?? t("literals.none")} ·{" "}
+            {topDepartment?.participantCount ?? 0} {t("literals.participant")}
             {topDepartment && topDepartment.participantCount === 1 ? "" : "s"}
           </p>
         </div>

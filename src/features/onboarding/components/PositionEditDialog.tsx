@@ -57,7 +57,7 @@ export default function PositionEditDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {position ? "Edit Position" : "Create New Position"}
+            {position ? t("literals.editPosition") : t("literals.createNewPosition")}
           </DialogTitle>
           <DialogDescription>{t("onboarding.configureThePositionDetails")}</DialogDescription>
         </DialogHeader>
@@ -101,7 +101,7 @@ export default function PositionEditDialog({
               {t("onboarding.wizard.cancel")}
             </Button>
             <Button type="submit">
-              {position ? "Update Position" : "Create Position"}
+              {position ? t("literals.updatePosition") : t("literals.createPosition")}
             </Button>
           </DialogFooter>
         </form>

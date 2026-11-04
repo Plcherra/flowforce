@@ -332,8 +332,8 @@ What specific aspect would you like to explore?`;
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        title: t("literals.error"),
+        description: t("literals.failedToGetAiResponsePleaseTryAgain"),
         variant: "destructive",
       });
     } finally {

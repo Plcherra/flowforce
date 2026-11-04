@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -126,6 +127,7 @@ export function useEnhancedInventoryItems() {
 }
 
 export function useCreateItemUnit() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -154,14 +156,14 @@ export function useCreateItemUnit() {
       queryClient.invalidateQueries({ queryKey: ["item-units"] });
       queryClient.invalidateQueries({ queryKey: ["enhanced-inventory-items"] });
       toast({
-        title: "Success",
-        description: "Item unit configuration added successfully",
+        title: t("literals.success"),
+        description: t("literals.itemUnitConfigurationAddedSuccessfully"),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to add item unit configuration",
+        title: t("literals.error"),
+        description: t("literals.failedToAddItemUnitConfiguration"),
         variant: "destructive",
       });
     },
@@ -169,6 +171,7 @@ export function useCreateItemUnit() {
 }
 
 export function useUpdateItemUnit() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -196,14 +199,14 @@ export function useUpdateItemUnit() {
       queryClient.invalidateQueries({ queryKey: ["item-units"] });
       queryClient.invalidateQueries({ queryKey: ["enhanced-inventory-items"] });
       toast({
-        title: "Success",
-        description: "Item unit configuration updated successfully",
+        title: t("literals.success"),
+        description: t("literals.itemUnitConfigurationUpdatedSuccessfully"),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update item unit configuration",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateItemUnitConfiguration"),
         variant: "destructive",
       });
     },
@@ -211,6 +214,7 @@ export function useUpdateItemUnit() {
 }
 
 export function useDeleteItemUnit() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -228,14 +232,14 @@ export function useDeleteItemUnit() {
       queryClient.invalidateQueries({ queryKey: ["enhanced-inventory-items"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Removed",
-        description: "Unit configuration removed",
+        title: t("literals.removed"),
+        description: t("literals.unitConfigurationRemoved"),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to remove unit configuration",
+        title: t("literals.error"),
+        description: t("literals.failedToRemoveUnitConfiguration"),
         variant: "destructive",
       });
     },

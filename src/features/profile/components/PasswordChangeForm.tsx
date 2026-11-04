@@ -92,7 +92,7 @@ export default function PasswordChangeForm() {
             <p
               className={`text-xs ${getPasswordStrengthColor(validationResult.strength)}`}
             >
-              Strength: {strengthLabel}
+              {t("literals.strength")} {strengthLabel}
             </p>
           )}
           {passwordTouched && newPassword && hasErrors && (

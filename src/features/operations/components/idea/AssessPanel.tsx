@@ -43,13 +43,13 @@ export function AssessPanel({
         "Captured automatically via IDEA cycle.",
       );
       toast({
-        title: "Assessment saved",
-        description: "Results have been stored for this IDEA cycle.",
+        title: t("literals.assessmentSaved"),
+        description: t("literals.resultsHaveBeenStoredForThisIdeaCycle"),
       });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Unable to save assessment",
+        title: t("literals.unableToSaveAssessment"),
         description: (error as Error).message,
       });
     } finally {
@@ -119,7 +119,7 @@ export function AssessPanel({
                 <CardDescription>
                   {t("operations.roi")}{" "}
                   {metric.roi === null
-                    ? "n/a"
+                    ? t("literals.nA2")
                     : `${metric.roi > 0 ? "+" : ""}${metric.roi.toFixed(1)}%`}
                 </CardDescription>
               </CardHeader>
@@ -128,14 +128,14 @@ export function AssessPanel({
                   <span>{t("operations.before")}</span>
                   <span>
                     {metric.before.toLocaleString()}
-                    {metric.unit ? ` ${metric.unit}` : ""}
+                    {metric.unit ? t("literals.text27", { unit: metric.unit }) : ""}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground">
                   <span>{t("operations.after")}</span>
                   <span>
                     {metric.after.toLocaleString()}
-                    {metric.unit ? ` ${metric.unit}` : ""}
+                    {metric.unit ? t("literals.text27", { unit: metric.unit }) : ""}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-foreground">
@@ -147,7 +147,7 @@ export function AssessPanel({
                   >
                     {metric.delta >= 0 ? "+" : ""}
                     {metric.delta.toFixed(2)}
-                    {metric.unit ? ` ${metric.unit}` : ""}
+                    {metric.unit ? t("literals.text27", { unit: metric.unit }) : ""}
                   </span>
                 </div>
               </CardContent>

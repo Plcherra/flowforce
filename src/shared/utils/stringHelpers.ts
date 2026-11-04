@@ -5,6 +5,7 @@
 /**
  * Convert string to URL-friendly slug
  */
+import i18n from "@/i18n/config";
 export function slugify(input: string): string {
   return input
     .toLowerCase()
@@ -30,7 +31,7 @@ export function buildInitials(
  * Format role label for display (capitalize and replace underscores)
  */
 export function formatRoleLabel(role?: string | null): string {
-  if (!role) return "Unassigned";
+  if (!role) return i18n.t("literals.unassigned");
   return role
     .replace(/_/g, " ")
     .split(" ")

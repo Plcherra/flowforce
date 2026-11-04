@@ -67,12 +67,12 @@ export function PurchaseOrderSummary({
               <div className="space-y-1">
                 <p className="font-medium">{selectedSupplier.name}</p>
                 <p className="text-muted-foreground">
-                  {selectedSupplier.contact_name || "No contact on file"}
+                  {selectedSupplier.contact_name || t("literals.noContactOnFile")}
                 </p>
               </div>
               <div className="space-y-1 text-muted-foreground">
-                <p>{selectedSupplier.email || "No email provided"}</p>
-                <p>{selectedSupplier.phone || "No phone provided"}</p>
+                <p>{selectedSupplier.email || t("literals.noEmailProvided")}</p>
+                <p>{selectedSupplier.phone || t("literals.noPhoneProvided")}</p>
               </div>
               <Separator />
               <div className="space-y-2">
@@ -82,7 +82,7 @@ export function PurchaseOrderSummary({
                   {selectedSupplierIntegration ? (
                     <Badge variant="default" className="gap-1">
                       <Link2 className="h-3 w-3" />
-                      Connected ({selectedSupplierIntegration.provider})
+                      {t("literals.connected")}{selectedSupplierIntegration.provider})
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="gap-1">

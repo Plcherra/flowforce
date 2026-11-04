@@ -111,7 +111,7 @@ export default function CustomSectionCard({
 
       <CardContent className="space-y-3">
         <CardDescription className="text-sm">
-          {section.description || "No description provided"}
+          {section.description || t("literals.noDescriptionProvided")}
         </CardDescription>
 
         <div className="flex items-center justify-between">

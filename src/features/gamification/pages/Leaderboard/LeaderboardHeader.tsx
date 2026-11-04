@@ -54,7 +54,7 @@ export function LeaderboardHeader({
         </ToggleGroup>
         <div className="flex items-center gap-3">
           <Badge variant="outline">
-            {lastUpdatedLabel ? `Synced ${lastUpdatedLabel}` : "Awaiting sync"}
+            {lastUpdatedLabel ? t("literals.synced", { lastUpdatedLabel: lastUpdatedLabel }) : t("literals.awaitingSync")}
           </Badge>
           <Button
             type="button"

@@ -119,7 +119,7 @@ export function RecognitionFeed({
               "Unknown employee"
             : "Unknown employee";
           const message =
-            recognition.reward_details?.message ?? "Recognition awarded";
+            recognition.reward_details?.message ?? t("literals.recognitionAwarded");
           const source = recognition.reward_details?.source ?? "manual";
 
           return (

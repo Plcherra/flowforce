@@ -84,13 +84,13 @@ export function LinkShiftsPanel({
                   </p>
                   {shift.location && (
                     <p className="text-xs text-muted-foreground">
-                      Location: {shift.location}
+                      {t("literals.location")} {shift.location}
                     </p>
                   )}
                 </div>
               </div>
               <div className="text-right text-xs text-muted-foreground">
-                <p>{shift.assignments?.length ?? 0} assigned</p>
+                <p>{shift.assignments?.length ?? 0} {t("literals.assigned")}</p>
                 {checked && <span className="text-primary">{t("calendar.linked")}</span>}
               </div>
             </label>

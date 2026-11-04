@@ -54,11 +54,11 @@ export function LearningAnalytics({
               >
                 <p className="text-sm font-semibold">{metric.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {metric.activeLearners} active · {metric.completions}{" "}
-                  completions
+                  {metric.activeLearners} {t("literals.active")} {metric.completions}{" "}
+                  {t("literals.completions")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Avg. progress{" "}
+                  {t("literals.avgProgress")}{" "}
                   {metric.avgProgress ? Math.round(metric.avgProgress) : 0}% ·{" "}
                   {metric.totalXpAwarded?.toLocaleString() ?? 0} XP
                 </p>

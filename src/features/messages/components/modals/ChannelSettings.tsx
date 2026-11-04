@@ -87,8 +87,8 @@ export function ChannelSettings({
       });
 
       toast({
-        title: "Success",
-        description: "Group updated",
+        title: t("literals.success"),
+        description: t("literals.groupUpdated"),
       });
 
       await onChannelUpdated?.();
@@ -96,8 +96,8 @@ export function ChannelSettings({
     } catch (error) {
       logger.error("Error updating channel:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to update channel settings",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateChannelSettings"),
         variant: "destructive",
       });
     } finally {
@@ -118,8 +118,8 @@ export function ChannelSettings({
     } catch (error) {
       logger.error("Error deleting channel:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to delete channel",
+        title: t("literals.error"),
+        description: t("literals.failedToDeleteChannel"),
         variant: "destructive",
       });
     } finally {
@@ -181,8 +181,8 @@ export function ChannelSettings({
                 {t("messages.privateGroup")} </Label>
               <p className="text-xs text-muted-foreground">
                 {formData.is_private
-                  ? "Only people in the group can see it"
-                  : "Everyone in the workspace can see this group"}
+                  ? t("literals.onlyPeopleInTheGroupCanSeeIt")
+                  : t("literals.everyoneInTheWorkspaceCanSeeThisGroup")}
               </p>
             </div>
             <Switch
@@ -208,7 +208,7 @@ export function ChannelSettings({
               <Button type="button" variant="outline" onClick={onClose}>
                 {t("common.cancel")} </Button>
               <Button type="submit" disabled={loading || !formData.name.trim()}>
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? t("literals.saving") : t("literals.saveChanges2")}
               </Button>
             </div>
           </div>

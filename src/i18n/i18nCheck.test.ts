@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   compareHardcodedLiterals,
   compareLocaleKeySets,
+  extractHardcodedLiterals,
 } from "./i18nCheck";
 
 export function runI18nCheckTests() {
@@ -42,4 +43,27 @@ export function runI18nCheckTests() {
     ["src/App.tsx: Save changes"],
   );
   assert.deepEqual(matchedLiterals, []);
+
+  const source = `
+    export function StatusLabel(ok: boolean) {
+      return ok ? "Saved" : "pending";
+    }
+    export function Panel() {
+      return <button aria-label="Close dialog">Save</button>;
+    }
+    function toast(input) { return input; }
+    function save() {
+      const message = "Could not save";
+      toast({ title: "Error", description: message });
+      console.error("Failed in console");
+    }
+  `;
+  const found = extractHardcodedLiterals(source, "src/Panel.tsx");
+  assert.ok(found.some((line) => line.endsWith("Saved")), found.join("\n"));
+  assert.ok(found.some((line) => line.endsWith("Close dialog")), found.join("\n"));
+  assert.ok(found.some((line) => line.endsWith("Save")), found.join("\n"));
+  assert.ok(found.some((line) => line.endsWith("Error")), found.join("\n"));
+  assert.ok(found.some((line) => line.endsWith("Could not save")), found.join("\n"));
+  assert.equal(found.some((line) => line.includes("pending")), false);
+  assert.equal(found.some((line) => line.includes("console")), false);
 }

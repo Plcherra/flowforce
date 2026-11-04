@@ -409,7 +409,7 @@ function CalendarView({
                         <div key={ev.id} className="relative">
                           <div
                             className="group bg-primary/10 border border-primary/20 rounded px-2 py-1 text-xs cursor-pointer hover:shadow-lg transition-shadow"
-                            aria-label={`${ev.title} ${ev.location || ""}`}
+                            aria-label={t("literals.text24", { title: ev.title, value1: ev.location || "" })}
                           >
                             <div className="font-semibold truncate">
                               {ev.title}

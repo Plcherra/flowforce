@@ -148,14 +148,14 @@ export function MarketManCountingInterface({
         scanType: "barcode",
       });
       toast({
-        title: "Scan Logged",
-        description: "Barcode has been recorded for this count.",
+        title: t("literals.scanLogged"),
+        description: t("literals.barcodeHasBeenRecordedForThisCount"),
       });
     } catch (error) {
       logger.error("Error logging barcode scan:", { error, tags: ["error"] });
       toast({
-        title: "Scan Failed",
-        description: "Unable to record the barcode scan.",
+        title: t("literals.scanFailed"),
+        description: t("literals.unableToRecordTheBarcodeScan"),
         variant: "destructive",
       });
     }
@@ -190,7 +190,7 @@ export function MarketManCountingInterface({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-lg font-semibold">
-                {line.item?.name ?? "Unknown item"}
+                {line.item?.name ?? t("literals.unknownItem")}
               </p>
               <p className="text-sm text-muted-foreground">{unitLabel}</p>
             </div>
@@ -281,7 +281,7 @@ export function MarketManCountingInterface({
               </div>
               <div>
                 <p className="text-xs uppercase text-muted-foreground">
-                  Each pack is ({unitLabel})
+                  {t("literals.eachPackIs")}{unitLabel})
                 </p>
                 <Input
                   type="number"
@@ -299,9 +299,7 @@ export function MarketManCountingInterface({
                 />
               </div>
               <p className="col-span-2 text-xs text-muted-foreground">
-                {t("inventory.countedAs")} {currentQuantity} {unitLabel}. The item name stays
-                the same; update brand or pack on the item later if this
-                delivery should become the new standard.
+                {t("inventory.countedAs")} {currentQuantity} {unitLabel}{t("literals.theItemNameStaysTheSameUpdateBrand")}
               </p>
             </div>
           )}

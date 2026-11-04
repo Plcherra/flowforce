@@ -144,8 +144,8 @@ export default function CreatePositionDialog({
               >{t("common.cancel")}</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting
-                  ? "Creating..."
-                  : "Create Position"}
+                  ? t("literals.creating")
+                  : t("literals.createPosition")}
               </Button>
             </div>
           </form>

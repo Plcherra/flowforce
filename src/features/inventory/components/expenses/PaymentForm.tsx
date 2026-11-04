@@ -233,7 +233,7 @@ export default function PaymentForm() {
             >
               {t("common.cancel")} </Button>
             <Button type="submit" disabled={createPayment.isPending}>
-              {createPayment.isPending ? "Creating..." : "Create Payment"}
+              {createPayment.isPending ? t("literals.creating") : t("literals.createPayment")}
             </Button>
           </div>
         </form>

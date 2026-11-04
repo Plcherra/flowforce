@@ -137,13 +137,13 @@ export function ShiftSwapsPanel({
         queryKey: ["shift-swaps", companyId],
       });
       toast({
-        title: `Shift swap ${action}d`,
-        description: "Staff have been notified of the decision",
+        title: t("literals.shiftSwapD", { action: action }),
+        description: t("literals.staffHaveBeenNotifiedOfTheDecision"),
       });
     } catch {
       toast({
-        title: "Error processing request",
-        description: "Please try again",
+        title: t("literals.errorProcessingRequest"),
+        description: t("literals.pleaseTryAgain2"),
         variant: "destructive",
       });
     }
@@ -195,12 +195,12 @@ export function ShiftSwapsPanel({
         <div>
           <p className="text-sm text-muted-foreground">
             {staffOnly
-              ? "Your shift swap requests and offers."
-              : "Review and approve team shift swap requests."}
+              ? t("literals.yourShiftSwapRequestsAndOffers")
+              : t("literals.reviewAndApproveTeamShiftSwapRequests")}
           </p>
           {pendingCount > 0 && (
             <Badge variant="secondary" className="mt-2">
-              {pendingCount} pending
+              {pendingCount} {t("literals.pending")}
             </Badge>
           )}
         </div>
@@ -257,15 +257,15 @@ export function ShiftSwapsPanel({
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="text-right text-sm">
                     <div className="font-medium">
-                      {swap.schedule?.title || "Shift details"}
+                      {swap.schedule?.title || t("literals.shiftDetails")}
                     </div>
                     <div className="text-muted-foreground">
                       {swap.schedule?.start_time
-                        ? `${format(new Date(swap.schedule.start_time), "MMM d, HH:mm")} - ${format(
+                        ? t("literals.text18", { value0: format(new Date(swap.schedule.start_time), "MMM d, HH:mm"), value1: format(
                             new Date(swap.schedule.end_time),
                             "HH:mm",
-                          )}`
-                        : "Timing to be confirmed"}
+                          ) })
+                        : t("literals.timingToBeConfirmed")}
                     </div>
                   </div>
 
@@ -319,17 +319,17 @@ export function ShiftSwapsPanel({
             <ArrowRightLeft className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
             <h3 className="mb-2 text-lg font-semibold">
               {normalizedSearch
-                ? "No shift swaps match your search"
+                ? t("literals.noShiftSwapsMatchYourSearch")
                 : staffOnly
-                  ? "No shift swap requests"
-                  : "No shift swap requests"}
+                  ? t("literals.noShiftSwapRequests")
+                  : t("literals.noShiftSwapRequests")}
             </h3>
             <p className="text-muted-foreground">
               {normalizedSearch
-                ? "Try a different name or keyword."
+                ? t("literals.tryADifferentNameOrKeyword")
                 : staffOnly
-                  ? "When you request a swap it will appear here."
-                  : "All shift swap requests are up to date."}
+                  ? t("literals.whenYouRequestASwapItWillAppear")
+                  : t("literals.allShiftSwapRequestsAreUpToDate")}
             </p>
           </CardContent>
         </Card>

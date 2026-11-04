@@ -17,6 +17,7 @@
  * ```
  */
 
+import { useTranslation } from "react-i18next";
 import { useEffect, useState, useCallback } from "react";
 import { differenceInCalendarDays, endOfWeek, startOfWeek } from "date-fns";
 import type { PostgrestError } from "@supabase/supabase-js";
@@ -157,6 +158,7 @@ const clampPercent = (value: number, cap = 150) =>
  * ```
  */
 export function useDashboardData() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -430,7 +432,7 @@ export function useDashboardData() {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Failed to load dashboard data";
+          : t("literals.failedToLoadDashboardData");
       logger.error("Error fetching dashboard data", {
         error,
         tags: ["dashboard", "data-fetch"],
@@ -438,8 +440,8 @@ export function useDashboardData() {
       setError(errorMessage);
       setStats(FALLBACK_STATS);
       toast({
-        title: "Error loading dashboard",
-        description: `${errorMessage}. Showing sample data for now.`,
+        title: t("literals.errorLoadingDashboard"),
+        description: t("literals.showingSampleDataForNow", { errorMessage: errorMessage }),
         variant: "destructive",
       });
     } finally {

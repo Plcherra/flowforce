@@ -232,11 +232,11 @@ export function VendorInvoicesTab({
                               <p className="font-medium">
                                 {invoiceNumber ??
                                   invoice.reference_number ??
-                                  "Invoice"}
+                                  t("literals.invoice")}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {invoice.payment_method ??
-                                  "Payment method not set"}
+                                  t("literals.paymentMethodNotSet")}
                               </p>
                             </div>
                           </TableCell>
@@ -251,7 +251,7 @@ export function VendorInvoicesTab({
                               variant={getPaymentStatusVariant(invoice.status)}
                               className="capitalize"
                             >
-                              {invoice.status ?? "pending"}
+                              {invoice.status ?? t("literals.pending")}
                             </Badge>
                           </TableCell>
                           <TableCell>{formatDate(invoice.due_date)}</TableCell>

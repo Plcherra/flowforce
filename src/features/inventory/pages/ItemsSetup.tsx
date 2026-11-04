@@ -231,8 +231,8 @@ export default function ItemsSetup() {
               {t("inventory.readyForCounts")} </p>
             <p className="mt-2 text-lg font-semibold">
               {readyForCounts
-                ? "Catalog has a unit and at least one room"
-                : "Add a storage room and an item unit before starting a count"}
+                ? t("literals.catalogHasAUnitAndAtLeastOne")
+                : t("literals.addAStorageRoomAndAnItemUnit")}
             </p>
           </CardContent>
         </Card>
@@ -278,7 +278,7 @@ export default function ItemsSetup() {
 
         <Tabs defaultValue="items" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="items">Items ({items.length})</TabsTrigger>
+            <TabsTrigger value="items">{t("literals.items")}{items.length})</TabsTrigger>
             <TabsTrigger value="categories">{t("inventory.categories")}</TabsTrigger>
             <TabsTrigger value="suppliers">{t("inventory.suppliers")}</TabsTrigger>
             <TabsTrigger value="locations">{t("inventory.locations")}</TabsTrigger>
@@ -337,13 +337,13 @@ export default function ItemsSetup() {
                   <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">
                     {searchTerm || selectedCategory !== "all"
-                      ? "No Items Found"
-                      : "No Items Yet"}
+                      ? t("literals.noItemsFound2")
+                      : t("literals.noItemsYet")}
                   </h3>
                   <p className="text-muted-foreground mb-4">
                     {searchTerm || selectedCategory !== "all"
-                      ? "Try adjusting your search or filters"
-                      : "Create your first inventory item to get started"}
+                      ? t("literals.tryAdjustingYourSearchOrFilters")
+                      : t("literals.createYourFirstInventoryItemToGetStarted")}
                   </p>
                   {!searchTerm && selectedCategory === "all" && (
                     <Button onClick={handleNewItem}>
@@ -403,8 +403,8 @@ export default function ItemsSetup() {
                                 <span className="font-medium">
                                   {t("inventory.skuBarcode")} </span>
                                 <p className="text-muted-foreground">
-                                  {item.sku || "N/A"}
-                                  {item.barcode ? ` • ${item.barcode}` : ""}
+                                  {item.sku || t("literals.nA")}
+                                  {item.barcode ? t("literals.text14", { barcode: item.barcode }) : ""}
                                 </p>
                               </div>
                               <div>
@@ -455,7 +455,7 @@ export default function ItemsSetup() {
                                 <span className="font-medium">
                                   {t("inventory.locationUnit")} </span>
                                 <p className="text-muted-foreground">
-                                  {item.location?.name || "No location set"}
+                                  {item.location?.name || t("literals.noLocationSet")}
                                 </p>
                                 <p className="text-muted-foreground">
                                   {t("inventory.unit")} {primaryUnit}
@@ -523,7 +523,7 @@ export default function ItemsSetup() {
           <TabsContent value="categories" className="space-y-4">
             <CatalogCrudPanel
               title={t("inventory.categories")}
-              description="Organize items into categories"
+              description={t("literals.organizeItemsIntoCategories")}
               emptyLabel="No categories yet"
               items={categories.map((category) => ({
                 id: category.id,
@@ -544,7 +544,7 @@ export default function ItemsSetup() {
           <TabsContent value="suppliers" className="space-y-4">
             <CatalogCrudPanel
               title={t("inventory.suppliers")}
-              description="Preferred vendors for purchasing"
+              description={t("literals.preferredVendorsForPurchasing")}
               emptyLabel="No suppliers yet"
               items={suppliers.map((supplier) => ({
                 id: supplier.id,
@@ -565,7 +565,7 @@ export default function ItemsSetup() {
           <TabsContent value="locations" className="space-y-4">
             <CatalogCrudPanel
               title={t("inventory.storageRooms")}
-              description="Walk-in, freezer, dry storage, and other count rooms"
+              description={t("literals.walkInFreezerDryStorageAndOtherCount")}
               emptyLabel="No storage rooms yet. Add one before counts."
               createLabel="Add room"
               items={locations.map((location) => ({
@@ -637,8 +637,8 @@ export default function ItemsSetup() {
                 <p>{t("inventory.itemsWithAUnit")} {items.filter((item) => item.unitid).length}</p>
                 <p>
                   {readyForCounts
-                    ? "This catalog can stand a count."
-                    : "Not ready for counts yet."}
+                    ? t("literals.thisCatalogCanStandACount")
+                    : t("literals.notReadyForCountsYet")}
                 </p>
               </CardContent>
             </Card>

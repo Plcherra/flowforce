@@ -269,14 +269,14 @@ export function ScheduleRemindersPanel({
                   onCheckedChange={(checked) =>
                     personal.toggleReminder(reminder.id, checked)
                   }
-                  aria-label={`Toggle ${reminder.title}`}
+                  aria-label={t("literals.toggle", { title: reminder.title })}
                 />
                 <Button
                   type="button"
                   size="icon"
                   variant="ghost"
                   className="h-8 w-8"
-                  aria-label={`Remove ${reminder.title}`}
+                  aria-label={t("literals.remove", { title: reminder.title })}
                   onClick={() => personal.removeReminder(reminder.id)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -396,7 +396,7 @@ export function ScheduleRemindersPanel({
                     <p className="text-xs text-muted-foreground">{reminder.description}</p>
                   ) : null}
                   <p className="text-xs text-muted-foreground">
-                    {canAssignReminders ? `${target} · ` : ""}
+                    {canAssignReminders ? t("literals.text33", { target: target }) + " " : ""}
                     {when}
                   </p>
                   <p className="text-xs text-muted-foreground" data-testid="assigned-reminder-time">

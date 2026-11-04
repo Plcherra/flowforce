@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryService } from "@/features/inventory/services/inventoryService";
@@ -83,6 +84,7 @@ export function useInventoryWaste() {
 
 // Create waste record
 export function useCreateWaste() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -95,15 +97,15 @@ export function useCreateWaste() {
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-adjustments"] });
       toast({
-        title: "Waste Recorded",
-        description: "Waste entry has been successfully logged",
+        title: t("literals.wasteRecorded2"),
+        description: t("literals.wasteEntryHasBeenSuccessfullyLogged"),
       });
     },
     onError: (error) => {
       logger.error("Error creating waste record", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to record waste. Please try again.",
+        title: t("literals.error"),
+        description: t("literals.failedToRecordWastePleaseTryAgain"),
         variant: "destructive",
       });
     },
@@ -111,6 +113,7 @@ export function useCreateWaste() {
 }
 
 export function useCreateInventoryAdjustment() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -122,8 +125,8 @@ export function useCreateInventoryAdjustment() {
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-adjustments"] });
       toast({
-        title: "Adjustment recorded",
-        description: "Inventory adjustment has been applied.",
+        title: t("literals.adjustmentRecorded"),
+        description: t("literals.inventoryAdjustmentHasBeenApplied"),
       });
     },
     onError: (error) => {
@@ -132,8 +135,8 @@ export function useCreateInventoryAdjustment() {
         tags: ["error"],
       });
       toast({
-        title: "Adjustment failed",
-        description: "Failed to record adjustment. Please try again.",
+        title: t("literals.adjustmentFailed"),
+        description: t("literals.failedToRecordAdjustmentPleaseTryAgain"),
         variant: "destructive",
       });
     },
@@ -142,6 +145,7 @@ export function useCreateInventoryAdjustment() {
 
 // Update waste record
 export function useUpdateWaste() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -155,15 +159,15 @@ export function useUpdateWaste() {
       queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: "Updated",
-        description: "Waste record has been updated",
+        title: t("literals.updated"),
+        description: t("literals.wasteRecordHasBeenUpdated"),
       });
     },
     onError: (error) => {
       logger.error("Error updating waste record", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to update waste record. Please try again.",
+        title: t("literals.error"),
+        description: t("literals.failedToUpdateWasteRecordPleaseTryAgain"),
         variant: "destructive",
       });
     },
@@ -172,6 +176,7 @@ export function useUpdateWaste() {
 
 // Delete waste record
 export function useDeleteWaste() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -181,15 +186,15 @@ export function useDeleteWaste() {
       queryClient.invalidateQueries({ queryKey: ["inventory-waste"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: "Deleted",
-        description: "Waste record has been deleted",
+        title: t("literals.deleted"),
+        description: t("literals.wasteRecordHasBeenDeleted"),
       });
     },
     onError: (error) => {
       logger.error("Error deleting waste record", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to delete waste record. Please try again.",
+        title: t("literals.error"),
+        description: t("literals.failedToDeleteWasteRecordPleaseTryAgain"),
         variant: "destructive",
       });
     },

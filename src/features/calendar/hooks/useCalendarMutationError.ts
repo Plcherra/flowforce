@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import type { CalendarErrorCode } from "@/features/calendar/types";
 
 const DEFAULT_MESSAGES: Record<string, string> = {
@@ -22,7 +23,7 @@ export function normalizeCalendarError(error: unknown): {
     const message =
       DEFAULT_MESSAGES[code ?? ""] ??
       supabaseError.message ??
-      "An unexpected error occurred.";
+      i18n.t("literals.anUnexpectedErrorOccurred2");
     return { message, code };
   }
 

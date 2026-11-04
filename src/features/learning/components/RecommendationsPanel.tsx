@@ -63,10 +63,10 @@ export function RecommendationsPanel({
                 </p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Lightbulb className="h-3 w-3" /> Confidence{" "}
+                    <Lightbulb className="h-3 w-3" /> {t("literals.confidence")}{" "}
                     {(recommendation.confidence * 100).toFixed(0)}%
                   </span>
-                  <span>{course.modules.length} modules</span>
+                  <span>{course.modules.length} {t("literals.modules")}</span>
                   <span>{course.xpReward} XP</span>
                 </div>
               </div>

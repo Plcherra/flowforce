@@ -94,8 +94,8 @@ export function ImageUploadField({
       // Check file count limit
       if (value.length + files.length > maxFiles) {
         toast({
-          title: "Error",
-          description: `Maximum ${maxFiles} images allowed`,
+          title: t("literals.error"),
+          description: t("literals.maximumImagesAllowed", { maxFiles: maxFiles }),
           variant: "destructive",
         });
         return;
@@ -105,8 +105,8 @@ export function ImageUploadField({
       for (const file of files) {
         if (file.size > maxSize * 1024 * 1024) {
           toast({
-            title: "Error",
-            description: `File ${file.name} is too large. Maximum size is ${maxSize}MB`,
+            title: t("literals.error"),
+            description: t("literals.fileIsTooLargeMaximumSizeIsMb", { name: file.name, maxSize: maxSize }),
             variant: "destructive",
           });
           return;
@@ -114,8 +114,8 @@ export function ImageUploadField({
 
         if (!file.type.startsWith("image/")) {
           toast({
-            title: "Error",
-            description: `File ${file.name} is not an image`,
+            title: t("literals.error"),
+            description: t("literals.fileIsNotAnImage", { name: file.name }),
             variant: "destructive",
           });
           return;
@@ -136,23 +136,23 @@ export function ImageUploadField({
         if (successfulUploads.length > 0) {
           onChange([...value, ...successfulUploads]);
           toast({
-            title: "Success",
-            description: `${successfulUploads.length} image(s) uploaded successfully`,
+            title: t("literals.success"),
+            description: t("literals.imageSUploadedSuccessfully", { length: successfulUploads.length }),
           });
         }
 
         if (failedUploads > 0) {
           toast({
-            title: "Warning",
-            description: `${failedUploads} image(s) failed to upload`,
+            title: t("literals.warning"),
+            description: t("literals.imageSFailedToUpload", { failedUploads: failedUploads }),
             variant: "destructive",
           });
         }
       } catch (error) {
         logger.error("Error handling file upload:", { error, tags: ["error"] });
         toast({
-          title: "Error",
-          description: "Failed to upload images",
+          title: t("literals.error"),
+          description: t("literals.failedToUploadImages"),
           variant: "destructive",
         });
       } finally {
@@ -206,7 +206,7 @@ export function ImageUploadField({
                 <div className="aspect-square relative overflow-hidden rounded-lg">
                   <SignedImagePreview
                     value={item}
-                    alt={`Upload ${index + 1}`}
+                    alt={t("literals.upload", { value0: index + 1 })}
                   />
                   <Button
                     type="button"
@@ -229,8 +229,8 @@ export function ImageUploadField({
           <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground text-sm mb-4">
             {value.length === 0
-              ? "No images uploaded yet"
-              : `${value.length} of ${maxFiles} images uploaded`}
+              ? t("literals.noImagesUploadedYet")
+              : t("literals.ofImagesUploaded", { length: value.length, maxFiles: maxFiles })}
           </p>
           <div className="flex gap-2 justify-center">
             <Button
@@ -241,7 +241,7 @@ export function ImageUploadField({
               className="min-w-[120px]"
             >
               <Upload className="h-4 w-4 mr-2" />
-              {uploading ? "Uploading..." : "Upload Images"}
+              {uploading ? t("literals.uploading") : t("literals.uploadImages")}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">

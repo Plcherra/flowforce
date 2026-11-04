@@ -256,7 +256,7 @@ export function ShiftTasksPanel({
                   <p className="font-medium">{task.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("people.selectedCount", { count: task.assigneeIds.length })}
-                    {task.startsAt ? ` · ${toDatetimeLocalValue(task.startsAt).replace("T", " ")}` : ""}
+                    {task.startsAt ? t("literals.text20", { value0: toDatetimeLocalValue(task.startsAt).replace("T", " ") }) : ""}
                   </p>
                   {task.formId ? (
                     <Link to={`/app/forms?form=${task.formId}`} className="text-xs underline">

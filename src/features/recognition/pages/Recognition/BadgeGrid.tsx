@@ -96,7 +96,7 @@ export function BadgeGrid({ badges, loading }: BadgeGridProps) {
               </div>
               <Progress value={percent} />
               <p className="text-xs text-muted-foreground">
-                {badge.current}/{badge.required} actions completed
+                {badge.current}/{badge.required} {t("literals.actionsCompleted")}
               </p>
             </div>
           );

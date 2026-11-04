@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryService } from "@/features/inventory/services/inventoryService";
@@ -20,6 +21,7 @@ export function useInventoryItems() {
 }
 
 export function useCreateInventoryItem() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,15 +31,15 @@ export function useCreateInventoryItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Success",
-        description: "Inventory item created successfully",
+        title: t("literals.success"),
+        description: t("literals.inventoryItemCreatedSuccessfully"),
       });
     },
     onError: (error: Error) => {
       logger.error("Create inventory item error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: error.message || "Failed to create inventory item",
+        title: t("literals.error"),
+        description: error.message || t("literals.failedToCreateInventoryItem"),
         variant: "destructive",
       });
     },
@@ -45,6 +47,7 @@ export function useCreateInventoryItem() {
 }
 
 export function useUpdateInventoryItem() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -59,15 +62,15 @@ export function useUpdateInventoryItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Success",
-        description: "Inventory item updated successfully",
+        title: t("literals.success"),
+        description: t("literals.inventoryItemUpdatedSuccessfully"),
       });
     },
     onError: (error: Error) => {
       logger.error("Update inventory item error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: error.message || "Failed to update inventory item",
+        title: t("literals.error"),
+        description: error.message || t("literals.failedToUpdateInventoryItem"),
         variant: "destructive",
       });
     },
@@ -75,6 +78,7 @@ export function useUpdateInventoryItem() {
 }
 
 export function useDeleteInventoryItem() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -83,15 +87,15 @@ export function useDeleteInventoryItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Success",
-        description: "Inventory item deleted successfully",
+        title: t("literals.success"),
+        description: t("literals.inventoryItemDeletedSuccessfully"),
       });
     },
     onError: (error: Error) => {
       logger.error("Delete inventory item error", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete inventory item",
+        title: t("literals.error"),
+        description: error.message || t("literals.failedToDeleteInventoryItem"),
         variant: "destructive",
       });
     },

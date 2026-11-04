@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +14,7 @@ import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
 
 export function useChannelActions() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -29,17 +31,17 @@ export function useChannelActions() {
       try {
         const channel = await createChannelService(channelData, userId);
         toast({
-          title: "Channel created",
-          description: `#${channel.name} is ready to use.`,
+          title: t("literals.channelCreated"),
+          description: t("literals.isReadyToUse", { name: channel.name }),
         });
         return channel;
       } catch (error) {
         toast({
-          title: "Unable to create channel",
+          title: t("literals.unableToCreateChannel"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;
@@ -54,16 +56,16 @@ export function useChannelActions() {
       try {
         await joinChannelService(channelId, userId);
         toast({
-          title: "Joined channel",
-          description: "You can now see updates in this channel.",
+          title: t("literals.joinedChannel"),
+          description: t("literals.youCanNowSeeUpdatesInThisChannel"),
         });
       } catch (error) {
         toast({
-          title: "Unable to join channel",
+          title: t("literals.unableToJoinChannel"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;
@@ -82,16 +84,16 @@ export function useChannelActions() {
       try {
         await updateChannelService(channelId, payload);
         toast({
-          title: "Channel updated",
-          description: "Your changes were saved.",
+          title: t("literals.channelUpdated"),
+          description: t("literals.yourChangesWereSaved"),
         });
       } catch (error) {
         toast({
-          title: "Unable to update channel",
+          title: t("literals.unableToUpdateChannel"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;
@@ -106,16 +108,16 @@ export function useChannelActions() {
       try {
         await deleteChannelService(channelId, userId);
         toast({
-          title: "Channel deleted",
-          description: "The channel and its messages were removed.",
+          title: t("literals.channelDeleted"),
+          description: t("literals.theChannelAndItsMessagesWereRemoved"),
         });
       } catch (error) {
         toast({
-          title: "Unable to delete channel",
+          title: t("literals.unableToDeleteChannel"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;

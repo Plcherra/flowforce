@@ -84,10 +84,10 @@ export function AISuggestionsPanel({
                     >
                       {suggestion.risk.charAt(0).toUpperCase() +
                         suggestion.risk.slice(1)}{" "}
-                      risk
+                      {t("literals.risk")}
                     </Badge>
                     <Badge variant="secondary">
-                      {(suggestion.confidence * 100).toFixed(0)}% confidence
+                      {(suggestion.confidence * 100).toFixed(0)}{t("literals.confidence3")}
                     </Badge>
                   </div>
                   <p className="mt-2 text-sm text-foreground">

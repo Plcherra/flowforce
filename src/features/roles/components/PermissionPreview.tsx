@@ -52,7 +52,7 @@ export function PermissionPreview({
               size="sm"
               onClick={() => onResetRole(selectedRole)}
             >
-              Reset {ROLE_LABELS[selectedRole]}
+              {t("literals.reset")} {ROLE_LABELS[selectedRole]}
             </Button>
           )}
         </div>
@@ -82,7 +82,7 @@ export function PermissionPreview({
 
         <div className="mt-6 space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Permissions granted ({activePermissions.length})
+            {t("literals.permissionsGranted")}{activePermissions.length})
           </p>
           {activePermissions.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("roles.toggleModulesOnToGrantFeatureAccessFor")}</p>
@@ -100,7 +100,7 @@ export function PermissionPreview({
                 ))}
                 {activePermissions.length > 24 && (
                   <Badge variant="outline" className="text-[11px]">
-                    +{activePermissions.length - 24} more
+                    +{activePermissions.length - 24} {t("common.more")}
                   </Badge>
                 )}
               </div>

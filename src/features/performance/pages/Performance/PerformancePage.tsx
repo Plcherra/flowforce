@@ -160,12 +160,12 @@ function LatestReviewsCard({
             <div className="flex-1">
               <p className="text-sm font-semibold">{review.employeeName}</p>
               <p className="text-xs text-muted-foreground">
-                {review.summary ?? "No summary provided"} ·{" "}
+                {review.summary ?? t("literals.noSummaryProvided")} ·{" "}
                 {new Date(review.date).toLocaleDateString()}
               </p>
             </div>
             <span className="text-sm font-semibold">
-              {review.score?.toFixed(1) ?? "n/a"}
+              {review.score?.toFixed(1) ?? t("literals.nA2")}
             </span>
           </div>
         ))}

@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import {
   createContext,
   useContext,
@@ -273,7 +274,7 @@ async function loadProfileState({
     if (signal?.cancelled) return;
 
     const message =
-      error instanceof Error ? error.message : "Failed to load profile";
+      error instanceof Error ? error.message : i18n.t("literals.failedToLoadProfile");
 
     if (ALLOW_PROFILE_PLACEHOLDER) {
       const placeholder = buildProfilePlaceholder(user);

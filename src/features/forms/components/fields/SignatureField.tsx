@@ -163,8 +163,8 @@ export function SignatureField({
       if (uploadError) {
         logger.error("Upload error:", { error: uploadError, tags: ["error"] });
         toast({
-          title: "Error",
-          description: "Failed to save signature",
+          title: t("literals.error"),
+          description: t("literals.failedToSaveSignature"),
           variant: "destructive",
         });
         return;
@@ -180,14 +180,14 @@ export function SignatureField({
 
       onChange(signature);
       toast({
-        title: "Success",
-        description: "Signature saved successfully",
+        title: t("literals.success"),
+        description: t("literals.signatureSavedSuccessfully"),
       });
     } catch (error) {
       logger.error("Error saving signature:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to save signature",
+        title: t("literals.error"),
+        description: t("literals.failedToSaveSignature"),
         variant: "destructive",
       });
     } finally {
@@ -322,7 +322,7 @@ export function SignatureField({
                 className="flex-1"
               >
                 <Check className="h-3 w-3 mr-1" />
-                {uploading ? "Saving..." : "Save Signature"}
+                {uploading ? t("literals.saving") : t("literals.saveSignature")}
               </Button>
             </div>
           </CardContent>

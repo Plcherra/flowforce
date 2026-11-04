@@ -33,7 +33,7 @@ export function PropagationSummary({
       <CardHeader>
         <CardTitle>{t("roles.propagationSummary")}</CardTitle>
         <CardDescription>
-          Automatically syncs with positions and employees assigned to{" "}
+          {t("literals.automaticallySyncsWithPositionsAndEmployeesAssignedTo")}{" "}
           {ROLE_LABELS[selectedRole]}.
         </CardDescription>
       </CardHeader>
@@ -49,7 +49,7 @@ export function PropagationSummary({
                 <li key={position.id}>{position.name}</li>
               ))}
               {positions.length > 3 && (
-                <li>+{positions.length - 3} more positions</li>
+                <li>+{positions.length - 3} {t("literals.morePositions")}</li>
               )}
             </ul>
           )}
@@ -66,7 +66,7 @@ export function PropagationSummary({
                 <li key={`${employee}-${index}`}>{employee}</li>
               ))}
               {employees.length > 4 && (
-                <li>+{employees.length - 4} more employees</li>
+                <li>+{employees.length - 4} {t("literals.moreEmployees")}</li>
               )}
             </ul>
           )}
@@ -77,7 +77,7 @@ export function PropagationSummary({
           <p className="mt-1 text-sm text-foreground">{t("roles.changesPublishInstantlyThroughPositionManagementSoTeam")}</p>
           {dirtySelectedRole ? (
             <p className="mt-2 text-xs font-medium text-primary">
-              Pending save – press &quot;Save Changes&quot; to sync updates.
+              {t("literals.pendingSavePressSaveChangesToSyncUpdates")}
             </p>
           ) : (
             <p className="mt-2 text-xs text-muted-foreground">{t("roles.upToDateLastSyncedWithPositionManagement")}</p>

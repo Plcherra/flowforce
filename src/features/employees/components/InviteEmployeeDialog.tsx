@@ -55,13 +55,13 @@ export function InviteEmployeeDialog({
     try {
       await navigator.clipboard.writeText(link);
       toast({
-        title: "Link copied",
-        description: "Share this invite link with the teammate.",
+        title: t("literals.linkCopied"),
+        description: t("literals.shareThisInviteLinkWithTheTeammate"),
       });
     } catch {
       toast({
-        title: "Unable to copy link",
-        description: "Copy the link manually if needed.",
+        title: t("literals.unableToCopyLink"),
+        description: t("literals.copyTheLinkManuallyIfNeeded"),
         variant: "destructive",
       });
     }

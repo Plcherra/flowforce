@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -15,6 +16,7 @@ export type TeamRole = {
 };
 
 export function useTeamManagement() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const queryClient = useQueryClient();
@@ -88,16 +90,16 @@ export function useTeamManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
       toast({
-        title: "Role updated",
-        description: "The teammate now has the selected permissions.",
+        title: t("literals.roleUpdated"),
+        description: t("literals.theTeammateNowHasTheSelectedPermissions"),
       });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Unable to update role",
+        title: t("literals.unableToUpdateRole"),
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgain"),
       });
     },
   });
@@ -127,16 +129,16 @@ export function useTeamManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team-management-roles"] });
       toast({
-        title: "Permissions updated",
-        description: "Role permissions saved successfully.",
+        title: t("literals.permissionsUpdated"),
+        description: t("literals.rolePermissionsSavedSuccessfully"),
       });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Unable to update permissions",
+        title: t("literals.unableToUpdatePermissions"),
         description:
-          error instanceof Error ? error.message : "Please try again.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgain"),
       });
     },
   });

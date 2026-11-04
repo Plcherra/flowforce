@@ -76,7 +76,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
                 className={`bg-gradient-to-r ${template.gradient} text-primary-foreground px-8 py-4`}
                 onClick={() => navigate(`/register?template=${templateId}`)}
               >
-                Get Started with {template.title}
+                {t("literals.getStartedWith")} {template.title}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="px-8 py-4">
@@ -151,9 +151,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
               {t("onboarding.readyToGetStarted")}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Set up your {template.title.toLowerCase()} in minutes with our
-              pre-configured template. Customize it to match your specific
-              workflow needs.
+              {t("literals.setUpYour")} {template.title.toLowerCase()} {t("literals.inMinutesWithOurPreConfiguredTemplateCustomize")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -161,7 +159,7 @@ export function TemplateDetail({ templateId, template }: TemplateDetailProps) {
                 className={`bg-gradient-to-r ${template.gradient} text-primary-foreground px-8 py-4`}
                 onClick={() => navigate(`/register?template=${templateId}`)}
               >
-                Start with {template.title}
+                {t("literals.startWith")} {template.title}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="outline" size="lg" className="px-8 py-4">

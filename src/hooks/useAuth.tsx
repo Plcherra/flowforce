@@ -17,6 +17,7 @@
  * ```
  */
 
+import { useTranslation } from "react-i18next";
 import {
   useState,
   useEffect,
@@ -91,6 +92,7 @@ const normalizeAuthError = (error: unknown): AuthError => {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -240,7 +242,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             "Supabase is not configured. Please create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. See SETUP_SUPABASE.md for details.",
         };
         toast({
-          title: "Configuration Error",
+          title: t("literals.configurationError"),
           description: error.message,
           variant: "destructive",
         });
@@ -264,7 +266,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         toast({
-          title: "Sign In Failed",
+          title: t("literals.signInFailed"),
           description: errorMessage,
           variant: "destructive",
         });
@@ -275,7 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: "Sign In Failed",
+        title: t("literals.signInFailed"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -328,7 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         toast({
-          title: "Sign Up Failed",
+          title: t("literals.signUpFailed"),
           description: error.message,
           variant: "destructive",
         });
@@ -336,16 +338,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: "Check your email",
+        title: t("literals.checkYourEmail"),
         description:
-          "We've sent you a confirmation link to complete your registration.",
+          t("literals.weVeSentYouAConfirmationLinkTo"),
       });
 
       return { error: null };
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: "Sign Up Failed",
+        title: t("literals.signUpFailed"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -361,7 +363,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         toast({
-          title: "Reset Failed",
+          title: t("literals.resetFailed"),
           description: error.message,
           variant: "destructive",
         });
@@ -369,15 +371,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: "Check your email",
-        description: "We've sent you a password reset link.",
+        title: t("literals.checkYourEmail"),
+        description: t("literals.weVeSentYouAPasswordResetLink"),
       });
 
       return { error: null };
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: "Reset Failed",
+        title: t("literals.resetFailed"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -391,7 +393,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         toast({
-          title: "Password Update Failed",
+          title: t("literals.passwordUpdateFailed"),
           description: error.message,
           variant: "destructive",
         });
@@ -399,15 +401,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: "Password Updated",
-        description: "Your password has been successfully updated.",
+        title: t("literals.passwordUpdated"),
+        description: t("literals.yourPasswordHasBeenSuccessfullyUpdated"),
       });
 
       return { error: null };
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: "Password Update Failed",
+        title: t("literals.passwordUpdateFailed"),
         description: normalizedError.message,
         variant: "destructive",
       });
@@ -423,8 +425,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
+        title: t("literals.signedOut"),
+        description: t("literals.youHaveBeenSuccessfullySignedOut"),
       });
 
       // Ensure we leave any protected UI after logout.
@@ -432,7 +434,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       const normalizedError = normalizeAuthError(err);
       toast({
-        title: "Sign out failed",
+        title: t("literals.signOutFailed"),
         description: normalizedError.message,
         variant: "destructive",
       });

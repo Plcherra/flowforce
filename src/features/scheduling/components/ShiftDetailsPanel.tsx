@@ -576,7 +576,7 @@ export function ShiftDetailsPanel({
                     <div>
                       <p className="text-sm font-semibold">{t("schedule.aiCopilotDraft")}</p>
                       <p className="text-xs text-muted-foreground">
-                        Run {copilotMeta.runId?.slice?.(0, 8) ?? "—"} •{" "}
+                        {t("literals.run")} {copilotMeta.runId?.slice?.(0, 8) ?? "—"} •{" "}
                         {copilotMeta.status ?? "draft-only"}
                       </p>
                     </div>

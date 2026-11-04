@@ -169,7 +169,7 @@ export default function AccountDeletionDialog({
                     {t("profile.realTimeDeletionProgressTracking")}
                     <br />
                     {t("profile.comprehensiveVerificationSystem")}
-                    <br />• Optimized for {`<1`} second completion
+                    <br />{t("literals.optimizedFor")} {`<1`} {t("literals.secondCompletion")}
                   </p>
                 </div>
 

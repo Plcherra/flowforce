@@ -62,7 +62,7 @@ export function DayView({
         >
           {format(selectedDate, isMobile ? "EEE, MMM d" : "EEEE, MMMM d, yyyy")}
         </h2>
-        <p className="text-muted-foreground">{dayShifts.length} shifts scheduled</p>
+        <p className="text-muted-foreground">{dayShifts.length} {t("literals.shiftsScheduled2")}</p>
       </div>
 
       {dayEvents.length > 0 ? (
@@ -157,8 +157,7 @@ export function DayView({
               {!hideShiftActions && (
                 <>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Add shifts for {format(selectedDate, "MMMM d")} to get
-                    started
+                    {t("literals.addShiftsFor")} {format(selectedDate, "MMMM d")} {t("literals.toGetStarted")}
                   </p>
                   <Button onClick={() => setShowAddShift(true)}>
                     <Plus className="mr-2 h-4 w-4" />
@@ -187,7 +186,7 @@ export function DayView({
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <h4 className="font-medium">
-                      {shift.title || shift.job_position?.name || "Shift"}
+                      {shift.title || shift.job_position?.name || t("literals.shift")}
                     </h4>
                     <Badge
                       style={{
@@ -195,7 +194,7 @@ export function DayView({
                         color: "white",
                       }}
                     >
-                      {shift.job_position?.role || "Staff"}
+                      {shift.job_position?.role || t("literals.staff")}
                     </Badge>
                   </div>
 
@@ -220,7 +219,7 @@ export function DayView({
                       <div className="flex items-center mb-1">
                         <Users className="h-4 w-4 mr-1" />
                         <span className="font-medium">
-                          Staff ({shift.assignments?.length || 0}/
+                          {t("literals.staff2")}{shift.assignments?.length || 0}/
                           {shift.required_headcount || 1}):
                         </span>
                       </div>
@@ -260,7 +259,7 @@ export function DayView({
                     <Badge
                       variant={shift.is_published ? "default" : "secondary"}
                     >
-                      {shift.is_published ? "Published" : "Draft"}
+                      {shift.is_published ? t("literals.published") : t("literals.draft")}
                     </Badge>
                   </div>
                 </div>

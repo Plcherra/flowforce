@@ -98,10 +98,10 @@ export function PurchaseOrderLineItems({
                             <div className="flex flex-col text-left">
                               <span>{item.name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {item.category || "Uncategorized"} ·{" "}
+                                {item.category || t("literals.uncategorized")} ·{" "}
                                 {item.cost_per_unit
                                   ? formatCurrency(item.cost_per_unit, currency)
-                                  : "No cost set"}
+                                  : t("literals.noCostSet")}
                               </span>
                             </div>
                           </SelectItem>

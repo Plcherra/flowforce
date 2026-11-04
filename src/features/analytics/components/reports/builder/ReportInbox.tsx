@@ -171,17 +171,17 @@ export function ReportInbox() {
     },
     onSuccess: () => {
       toast({
-        title: "Report submitted",
-        description: "The report has been recorded.",
+        title: t("literals.reportSubmitted"),
+        description: t("literals.theReportHasBeenRecorded"),
       });
       setFormValues((prev) => ({ ...prev, notes: "", attachment: undefined }));
       queryClient.invalidateQueries({ queryKey: ["report-inbox-reports"] });
     },
     onError: (error) => {
       toast({
-        title: "Unable to create report",
+        title: t("literals.unableToCreateReport"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -207,16 +207,16 @@ export function ReportInbox() {
     },
     onSuccess: () => {
       toast({
-        title: "Summary generated",
-        description: "Weekly summary ready for review.",
+        title: t("literals.summaryGenerated"),
+        description: t("literals.weeklySummaryReadyForReview"),
       });
       queryClient.invalidateQueries({ queryKey: ["report-inbox-summaries"] });
     },
     onError: (error) => {
       toast({
-        title: "Unable to generate summary",
+        title: t("literals.unableToGenerateSummary"),
         description:
-          error instanceof Error ? error.message : "Please try again later.",
+          error instanceof Error ? error.message : t("literals.pleaseTryAgainLater"),
         variant: "destructive",
       });
     },
@@ -231,11 +231,11 @@ export function ReportInbox() {
       });
     } catch (error) {
       toast({
-        title: "Attachment unavailable",
+        title: t("literals.attachmentUnavailable"),
         description:
           error instanceof Error
             ? error.message
-            : "Unable to create a secure attachment link.",
+            : t("literals.unableToCreateASecureAttachmentLink"),
         variant: "destructive",
       });
     }
@@ -488,7 +488,7 @@ export function ReportInbox() {
                       }
                     >
                       <Download className="h-4 w-4" />
-                      {report.attachment.name ?? "Download attachment"}
+                      {report.attachment.name ?? t("literals.downloadAttachment")}
                     </Button>
                   )}
                 </div>

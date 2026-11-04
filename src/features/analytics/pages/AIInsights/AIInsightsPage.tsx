@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
 import { Suspense, lazy } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -152,7 +153,7 @@ function PredictionTable({
                 </TableCell>
                 <TableCell>{row.forecast}</TableCell>
                 <TableCell>
-                  {row.confidence ? `${row.confidence}%` : "n/a"}
+                  {row.confidence ? `${row.confidence}%` : t("literals.nA2")}
                 </TableCell>
                 <TableCell>
                   {row.reviewDate
@@ -270,7 +271,7 @@ function buildRecommendations(
     const progress = review.goalProgress ?? 0;
     let badgeLabel = "Focus Goal";
     let badgeClassName = "bg-muted text-muted-foreground";
-    let message = "Align next steps with managers to maintain trajectory.";
+    let message = i18n.t("literals.alignNextStepsWithManagersToMaintainTrajectory");
 
     if (progress >= 80) {
       badgeLabel = "Accelerate";

@@ -2,6 +2,7 @@
  * Hook for invite mutations
  */
 
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { sendCompanyInvites } from "../utils/sendCompanyInvites";
@@ -42,6 +43,7 @@ function matchNamedId<T extends { id: string; name: string }>(
 export function useInviteMutations({
   onInvitesCreated,
 }: UseInviteMutationsProps = {}) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -73,17 +75,17 @@ export function useInviteMutations({
       queryClient.invalidateQueries({ queryKey: COMPANY_INVITES_QUERY_KEY });
       onInvitesCreated?.();
       toast({
-        title: "Invite ready",
-        description: "The class is painted. Share the invite if email is off.",
+        title: t("literals.inviteReady"),
+        description: t("literals.theClassIsPaintedShareTheInviteIf"),
       });
     },
     onError: (error: unknown) => {
       toast({
-        title: "Unable to create invite",
+        title: t("literals.unableToCreateInvite"),
         description:
           error instanceof Error
             ? error.message
-            : "Please verify the details and try again.",
+            : t("literals.pleaseVerifyTheDetailsAndTryAgain"),
         variant: "destructive",
       });
     },
@@ -133,19 +135,19 @@ export function useInviteMutations({
       onInvitesCreated?.();
       const failed = results.filter((result) => result.status === "error").length;
       toast({
-        title: "Bulk invites processed",
+        title: t("literals.bulkInvitesProcessed"),
         description:
           failed > 0
-            ? `${results.length - failed} invites ready. ${failed} need a review.`
-            : "Invitation links generated. Review any rows with issues below.",
+            ? t("literals.invitesReadyNeedAReview", { value0: results.length - failed, failed: failed })
+            : t("literals.invitationLinksGeneratedReviewAnyRowsWithIssues"),
         variant: failed > 0 ? "destructive" : undefined,
       });
     },
     onError: (error: unknown) => {
       toast({
-        title: "Bulk invite failed",
+        title: t("literals.bulkInviteFailed"),
         description:
-          error instanceof Error ? error.message : "Check the CSV format and try again.",
+          error instanceof Error ? error.message : t("literals.checkTheCsvFormatAndTryAgain"),
         variant: "destructive",
       });
     },

@@ -2,6 +2,7 @@
  * Shift templates and vendor palette constants
  */
 
+import i18n from "@/i18n/config";
 import type {
   ShiftTemplate,
   VendorPaletteItem,
@@ -119,7 +120,7 @@ const VENDOR_PALETTE_MAP = new Map(
  * Get vendor label by type
  */
 export function getVendorLabel(vendorType: string | null | undefined): string {
-  if (!vendorType) return "Vendor";
+  if (!vendorType) return i18n.t("literals.vendor");
   return (
     VENDOR_PALETTE_MAP.get(vendorType)?.label ?? vendorType.replace(/_/g, " ")
   );

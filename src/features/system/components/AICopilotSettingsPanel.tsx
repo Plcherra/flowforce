@@ -98,7 +98,7 @@ export function AICopilotSettingsPanel() {
             <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
               {state.lastAuditAt
                 ? new Date(state.lastAuditAt).toLocaleString()
-                : "No audits yet"}
+                : t("literals.noAuditsYet")}
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export function AICopilotSettingsPanel() {
                     (!canEdit || loading) && "cursor-not-allowed opacity-60",
                   )}
                 >
-                  {restricted ? "Blocked: " : "Allow: "}
+                  {restricted ? t("literals.blocked") : t("literals.allow")}
                   <Badge variant="outline" className="ml-1">
                     {scope}
                   </Badge>

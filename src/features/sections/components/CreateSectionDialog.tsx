@@ -123,8 +123,8 @@ export function CreateSectionDialog({
       });
 
       toast({
-        title: "Section Created",
-        description: `${data.name} has been created successfully`,
+        title: t("literals.sectionCreated"),
+        description: t("literals.hasBeenCreatedSuccessfully", { name: data.name }),
       });
 
       form.reset();
@@ -310,7 +310,7 @@ export function CreateSectionDialog({
                 {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={isCreating} className="flex-1">
-                {isCreating ? "Creating..." : "Create Section"}
+                {isCreating ? t("literals.creating") : t("literals.createSection")}
               </Button>
             </div>
           </form>

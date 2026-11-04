@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { applyManagedUserAccess } from "../../_server/inviteAccess";
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
         ? Number((error as { status?: number }).status)
         : 500;
     const message =
-      error instanceof Error ? error.message : "Unable to save access.";
+      error instanceof Error ? error.message : i18n.t("literals.unableToSaveAccess2");
     if (status >= 500) {
       scopedLogger.error("Unexpected employee access error", { error });
     }

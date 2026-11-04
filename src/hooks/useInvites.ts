@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "./useProfile";
@@ -17,6 +18,7 @@ type InviteResult = { success: true } | { success: false; message: string };
 const INVITE_EXPIRATION_DAYS = 14;
 
 export function useInvites() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const [isSending, setIsSending] = useState(false);
 
@@ -72,7 +74,7 @@ export function useInvites() {
       return { success: true };
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to send invite";
+        error instanceof Error ? error.message : t("literals.failedToSendInvite");
       logger.error("Unexpected error sending invite", { error, tags: ["error"] });
       return { success: false, message };
     } finally {

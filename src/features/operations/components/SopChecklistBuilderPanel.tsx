@@ -154,7 +154,7 @@ export function SopChecklistBuilderPanel() {
                 <p className="font-medium">{step.label}</p>
                 <p className="text-xs text-muted-foreground">
                   {step.stepType} · {step.fieldType}
-                  {step.evidenceRequired ? ` · ${t("operations.evidenceWord")}` : ""}
+                  {step.evidenceRequired ? " " + t("literals.text20", { value0: t("operations.evidenceWord") }) : ""}
                 </p>
               </div>
               {step.required ? (

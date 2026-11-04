@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { isFuture, isPast } from "date-fns";
 import type { CompanyUpdate } from "@/types/companyUpdates";
 
@@ -19,7 +20,7 @@ export interface CompanyUpdateReadinessSummary {
 }
 
 function updateTitle(update: CompanyUpdate) {
-  return update.title?.trim() || "Untitled update";
+  return update.title?.trim() || i18n.t("literals.untitledUpdate");
 }
 
 export function buildCompanyUpdateReadinessSummary(

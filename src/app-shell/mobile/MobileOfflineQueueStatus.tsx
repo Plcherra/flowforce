@@ -44,24 +44,24 @@ export function MobileOfflineQueueStatus() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="text-sm font-semibold leading-tight">
-              {online ? "Sync queue" : "Offline mode"}
+              {online ? t("literals.syncQueue") : t("literals.offlineMode")}
             </p>
             {summary.pending > 0 ? (
-              <Badge variant="secondary">{summary.pending} pending</Badge>
+              <Badge variant="secondary">{summary.pending} {t("literals.pending")}</Badge>
             ) : null}
             {summary.failed > 0 ? (
-              <Badge variant="destructive">{summary.failed} failed</Badge>
+              <Badge variant="destructive">{summary.failed} {t("literals.failed")}</Badge>
             ) : null}
             {summary.conflict > 0 ? (
-              <Badge variant="outline">{summary.conflict} conflict</Badge>
+              <Badge variant="outline">{summary.conflict} {t("literals.conflict")}</Badge>
             ) : null}
           </div>
           <p className="truncate text-xs text-muted-foreground">
             {hasProblems
-              ? "Review failed or conflicting mobile work before closing shift."
+              ? t("literals.reviewFailedOrConflictingMobileWorkBeforeClosing")
               : online
-                ? "Queued mobile work will sync through its workflow."
-                : "Tasks, forms, and counts are saved to this device first."}
+                ? t("literals.queuedMobileWorkWillSyncThroughItsWorkflow")
+                : t("literals.tasksFormsAndCountsAreSavedToThis")}
           </p>
         </div>
         {hasProblems ? (

@@ -334,7 +334,7 @@ export default function FieldEditor({
     <div className="flex-1 min-h-0">
       <div className="h-full flex flex-col space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Form Fields ({fields.length})</h3>
+          <h3 className="font-semibold">{t("literals.formFields")}{fields.length})</h3>
           <div className="flex gap-2">
             <Button
               variant={isCompactView ? "default" : "outline"}
@@ -347,7 +347,7 @@ export default function FieldEditor({
               ) : (
                 <LayoutGrid className="h-4 w-4" />
               )}
-              {isCompactView ? "List View" : "Card View"}
+              {isCompactView ? t("literals.listView") : t("literals.cardView")}
             </Button>
             <Button variant="outline" size="sm">
               {t("schedule.preview")}</Button>
@@ -378,7 +378,7 @@ export default function FieldEditor({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-medium truncate">
-                      {field.label || `Field ${index + 1}`}
+                      {field.label || t("literals.field", { value0: index + 1 })}
                     </span>
                     {field.is_required && (
                       <Badge variant="secondary" className="text-xs">
@@ -443,7 +443,7 @@ export default function FieldEditor({
                       <div>
                         <CardTitle className="text-base flex items-center gap-2">
                           {getFieldIcon(field.field_type)}
-                          {field.label || `Field ${index + 1}`}
+                          {field.label || t("literals.field", { value0: index + 1 })}
                           {field.is_required && (
                             <Badge variant="secondary" className="text-xs">
                               {t("forms.required")}</Badge>
@@ -590,7 +590,7 @@ export default function FieldEditor({
                             {t("forms.formulaConfiguration")}</label>
                           <FormulaField
                             label={t("forms.formulaBuilder")}
-                            description="Build your formula using available fields"
+                            description={t("literals.buildYourFormulaUsingAvailableFields")}
                             formula={field.formula_expression || ""}
                             availableFields={fields
                               .filter((f) => f.field_type === "number")

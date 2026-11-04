@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import useEmblaCarousel, {
@@ -138,7 +139,7 @@ const Carousel = React.forwardRef<
           onKeyDownCapture={handleKeyDown}
           className={cn("relative", className)}
           role="region"
-          aria-roledescription="carousel"
+          aria-roledescription={i18n.t("literals.carousel")}
           {...props}
         >
           {children}
@@ -181,7 +182,7 @@ const CarouselItem = React.forwardRef<
     <div
       ref={ref}
       role="group"
-      aria-roledescription="slide"
+      aria-roledescription={i18n.t("literals.slide")}
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
         orientation === "horizontal" ? "pl-4" : "pt-4",

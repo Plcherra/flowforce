@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { differenceInCalendarDays, isPast, isToday } from "date-fns";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import type { ReminderRecord } from "@/features/tasks/repositories/remindersRepository";
@@ -76,7 +77,7 @@ function hasConnection(task: TaskWithRelations) {
 }
 
 function taskTitle(task: TaskWithRelations) {
-  return task.title?.trim() || "Untitled task";
+  return task.title?.trim() || i18n.t("literals.untitledTask");
 }
 
 export function buildTaskExecutionSummary({

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -37,6 +38,7 @@ export interface PositionAssignment {
 }
 
 export function usePositions() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [positions, setPositions] = useState<Position[]>([]);
@@ -81,8 +83,8 @@ export function usePositions() {
       logger.error("Error fetching positions:", { error, tags: ["error"] });
       toast({
         variant: "destructive",
-        title: "Unable to load positions",
-        description: "Refresh and try again.",
+        title: t("literals.unableToLoadPositions"),
+        description: t("literals.refreshAndTryAgain"),
       });
     } finally {
       setLoading(false);
@@ -186,16 +188,16 @@ export function usePositions() {
 
       setPositions((prev) => [...prev, mappedData]);
       toast({
-        title: "Position created",
-        description: `${mappedData.name} is now available for assignments.`,
+        title: t("literals.positionCreated"),
+        description: t("literals.isNowAvailableForAssignments", { name: mappedData.name }),
       });
       return { data, error: null };
     } catch (error) {
       logger.error("Error creating position:", { error, tags: ["error"] });
       toast({
         variant: "destructive",
-        title: "Unable to create position",
-        description: "Check the form fields and try again.",
+        title: t("literals.unableToCreatePosition"),
+        description: t("literals.checkTheFormFieldsAndTryAgain"),
       });
       return { data: null, error };
     }
@@ -230,16 +232,16 @@ export function usePositions() {
         prev.map((p) => (p.id === id ? { ...p, ...mappedData } : p)),
       );
       toast({
-        title: "Position updated",
-        description: `${mappedData.name} has been refreshed.`,
+        title: t("literals.positionUpdated"),
+        description: t("literals.hasBeenRefreshed", { name: mappedData.name }),
       });
       return { data, error: null };
     } catch (error) {
       logger.error("Error updating position:", { error, tags: ["error"] });
       toast({
         variant: "destructive",
-        title: "Unable to update position",
-        description: "Please try again.",
+        title: t("literals.unableToUpdatePosition"),
+        description: t("literals.pleaseTryAgain"),
       });
       return { data: null, error };
     }
@@ -256,16 +258,16 @@ export function usePositions() {
 
       setPositions((prev) => prev.filter((p) => p.id !== id));
       toast({
-        title: "Position archived",
-        description: "It will no longer appear in new assignments.",
+        title: t("literals.positionArchived"),
+        description: t("literals.itWillNoLongerAppearInNewAssignments"),
       });
       return { error: null };
     } catch (error) {
       logger.error("Error deleting position:", { error, tags: ["error"] });
       toast({
         variant: "destructive",
-        title: "Unable to delete position",
-        description: "Please try again.",
+        title: t("literals.unableToDeletePosition"),
+        description: t("literals.pleaseTryAgain"),
       });
       return { error };
     }
@@ -304,8 +306,8 @@ export function usePositions() {
 
       setAssignments((prev) => [...prev, data as any]);
       toast({
-        title: "User assigned",
-        description: "The teammate now holds this position.",
+        title: t("literals.userAssigned"),
+        description: t("literals.theTeammateNowHoldsThisPosition"),
       });
       return { data, error: null };
     } catch (error) {
@@ -315,8 +317,8 @@ export function usePositions() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to assign user",
-        description: "Please try again.",
+        title: t("literals.unableToAssignUser"),
+        description: t("literals.pleaseTryAgain"),
       });
       return { data: null, error };
     }
@@ -338,8 +340,8 @@ export function usePositions() {
         ),
       );
       toast({
-        title: "User removed",
-        description: "The teammate no longer holds this position.",
+        title: t("literals.userRemoved"),
+        description: t("literals.theTeammateNoLongerHoldsThisPosition"),
       });
       return { error: null };
     } catch (error) {
@@ -349,8 +351,8 @@ export function usePositions() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to remove user",
-        description: "Please try again.",
+        title: t("literals.unableToRemoveUser"),
+        description: t("literals.pleaseTryAgain"),
       });
       return { error };
     }

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryService } from "@/features/inventory/services/inventoryService";
@@ -12,6 +13,7 @@ export function useInventoryRecipes(itemId?: string) {
 }
 
 export function useUpsertRecipeLine(itemId?: string) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -28,15 +30,15 @@ export function useUpsertRecipeLine(itemId?: string) {
       });
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Recipe updated",
-        description: "Ingredient saved successfully.",
+        title: t("literals.recipeUpdated"),
+        description: t("literals.ingredientSavedSuccessfully"),
       });
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : undefined;
       toast({
-        title: "Failed to update recipe",
-        description: message || "Unable to save ingredient. Please try again.",
+        title: t("literals.failedToUpdateRecipe"),
+        description: message || t("literals.unableToSaveIngredientPleaseTryAgain"),
         variant: "destructive",
       });
     },
@@ -44,6 +46,7 @@ export function useUpsertRecipeLine(itemId?: string) {
 }
 
 export function useDeleteRecipeLine(itemId?: string) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -55,16 +58,16 @@ export function useDeleteRecipeLine(itemId?: string) {
       });
       queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       toast({
-        title: "Ingredient removed",
-        description: "Recipe ingredient deleted.",
+        title: t("literals.ingredientRemoved"),
+        description: t("literals.recipeIngredientDeleted"),
       });
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : undefined;
       toast({
-        title: "Failed to remove ingredient",
+        title: t("literals.failedToRemoveIngredient"),
         description:
-          message || "Unable to delete ingredient. Please try again.",
+          message || t("literals.unableToDeleteIngredientPleaseTryAgain"),
         variant: "destructive",
       });
     },

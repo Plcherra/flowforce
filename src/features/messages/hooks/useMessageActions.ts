@@ -12,9 +12,9 @@ import {
 } from "@/features/messages/api/messageService";
 
 export function useMessageActions() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
   const { toast } = useToast();
@@ -41,11 +41,11 @@ export function useMessageActions() {
         });
       } catch (error) {
         toast({
-          title: "Unable to send message",
+          title: t("literals.unableToSendMessage"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;
@@ -66,11 +66,11 @@ export function useMessageActions() {
         );
       } catch (error) {
         toast({
-          title: "Unable to update message",
+          title: t("literals.unableToUpdateMessage"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;
@@ -85,16 +85,16 @@ export function useMessageActions() {
       try {
         await deleteMessageService(messageId);
         toast({
-          title: "Message deleted",
-          description: "Your message was removed.",
+          title: t("literals.messageDeleted"),
+          description: t("literals.yourMessageWasRemoved"),
         });
       } catch (error) {
         toast({
-          title: "Unable to delete message",
+          title: t("literals.unableToDeleteMessage"),
           description:
             error instanceof Error
               ? error.message
-              : "Please try again shortly.",
+              : t("messages.pleaseTryAgainShortly"),
           variant: "destructive",
         });
         throw error;

@@ -272,8 +272,8 @@ export default function InventoryPurchasingPage() {
     event.preventDefault();
     if (!selectedSupplier) {
       toast({
-        title: "Supplier required",
-        description: "Select a supplier before creating a purchase order.",
+        title: t("literals.supplierRequired"),
+        description: t("literals.selectASupplierBeforeCreatingAPurchaseOrder"),
         variant: "destructive",
       });
       return;
@@ -288,8 +288,8 @@ export default function InventoryPurchasingPage() {
 
     if (validLines.length === 0) {
       toast({
-        title: "No line items",
-        description: "Add at least one item with quantity greater than zero.",
+        title: t("literals.noLineItems"),
+        description: t("literals.addAtLeastOneItemWithQuantityGreater"),
         variant: "destructive",
       });
       return;
@@ -372,9 +372,9 @@ export default function InventoryPurchasingPage() {
 
     if (!payloadItems.length) {
       toast({
-        title: "Nothing to receive",
+        title: t("literals.nothingToReceive"),
         description:
-          "Enter at least one quantity above zero to record receiving.",
+          t("literals.enterAtLeastOneQuantityAboveZeroTo"),
         variant: "destructive",
       });
       return;
@@ -398,8 +398,8 @@ export default function InventoryPurchasingPage() {
     const amount = Number(vendorInvoicesHook.invoiceForm.amount);
     if (!amount || amount <= 0) {
       toast({
-        title: "Amount required",
-        description: "Enter an amount greater than zero for the invoice.",
+        title: t("literals.amountRequired"),
+        description: t("literals.enterAnAmountGreaterThanZeroForThe"),
         variant: "destructive",
       });
       return;
@@ -761,13 +761,13 @@ export default function InventoryPurchasingPage() {
                                                       <span>{item.name}</span>
                                                       <span className="text-xs text-muted-foreground">
                                                         {item.category ||
-                                                          "Uncategorized"}{" "}
+                                                          t("literals.uncategorized")}{" "}
                                                         ·{" "}
                                                         {item.cost_per_unit
                                                           ? formatCurrency(
                                                               item.cost_per_unit,
                                                             )
-                                                          : "No cost set"}
+                                                          : t("literals.noCostSet")}
                                                       </span>
                                                     </div>
                                                   </SelectItem>
@@ -867,17 +867,17 @@ export default function InventoryPurchasingPage() {
                                     </p>
                                     <p className="text-muted-foreground">
                                       {selectedSupplier.contact_name ||
-                                        "No contact on file"}
+                                        t("literals.noContactOnFile")}
                                     </p>
                                   </div>
                                   <div className="space-y-1 text-muted-foreground">
                                     <p>
                                       {selectedSupplier.email ||
-                                        "No email provided"}
+                                        t("literals.noEmailProvided")}
                                     </p>
                                     <p>
                                       {selectedSupplier.phone ||
-                                        "No phone provided"}
+                                        t("literals.noPhoneProvided")}
                                     </p>
                                   </div>
                                   <Separator />
@@ -891,7 +891,7 @@ export default function InventoryPurchasingPage() {
                                           className="gap-1"
                                         >
                                           <Link2 className="h-3 w-3" />
-                                          Connected (
+                                          {t("literals.connected")}
                                           {selectedSupplierIntegration.provider}
                                           )
                                         </Badge>
@@ -1010,8 +1010,8 @@ export default function InventoryPurchasingPage() {
                         {t("inventory.needRecurringOrdersCreateTemplatesFromTheOrderHistoryTab")} </div>
                       <Button type="submit" disabled={createOrder.isPending}>
                         {createOrder.isPending
-                          ? "Saving..."
-                          : "Create Purchase Order"}
+                          ? t("literals.saving")
+                          : t("inventory.createPurchaseOrder")}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1373,8 +1373,8 @@ export default function InventoryPurchasingPage() {
                               disabled={receiveOrder.isPending}
                             >
                               {receiveOrder.isPending
-                                ? "Recording..."
-                                : "Record Receiving"}
+                                ? t("literals.recording")
+                                : t("literals.recordReceiving")}
                             </Button>
                           </div>
                         </div>
@@ -1801,11 +1801,11 @@ export default function InventoryPurchasingPage() {
                                           <p className="font-medium">
                                             {invoiceNumber ??
                                               invoice.reference_number ??
-                                              "Invoice"}
+                                              t("literals.invoice")}
                                           </p>
                                           <p className="text-xs text-muted-foreground">
                                             {invoice.payment_method ??
-                                              "Payment method not set"}
+                                              t("literals.paymentMethodNotSet")}
                                           </p>
                                         </div>
                                       </TableCell>
@@ -1823,7 +1823,7 @@ export default function InventoryPurchasingPage() {
                                           )}
                                           className="capitalize"
                                         >
-                                          {invoice.status ?? "pending"}
+                                          {invoice.status ?? t("literals.pending")}
                                         </Badge>
                                       </TableCell>
                                       <TableCell>

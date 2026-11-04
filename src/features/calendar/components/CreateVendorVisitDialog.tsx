@@ -166,7 +166,7 @@ export function CreateVendorVisitDialog({
 
       toast({
         title: t("calendar.vendorVisitCreated"),
-        description: `${vendorName.trim()} · ${startIso.toLocaleString()}`,
+        description: t("literals.text29", { value0: vendorName.trim(), value1: startIso.toLocaleString() }),
       });
       onOpenChange(false);
     } catch {
@@ -256,9 +256,9 @@ export function CreateVendorVisitDialog({
                 />
                 <span className="truncate">
                   {sh.title || sh.job_position?.name || t("calendar.shiftFallback")} –{" "}
-                  {new Date(sh.start_time).toLocaleTimeString()} to{" "}
+                  {new Date(sh.start_time).toLocaleTimeString()} {t("literals.to2")}{" "}
                   {new Date(sh.end_time).toLocaleTimeString()}{" "}
-                  {sh.location ? `• ${sh.location}` : ""}
+                  {sh.location ? t("literals.text3", { location: sh.location }) : ""}
                 </span>
               </label>
             ))}

@@ -81,13 +81,13 @@ export function InviteEmployeesModal({
     try {
       await navigator.clipboard.writeText(link);
       toast({
-        title: "Link copied",
-        description: "Share this invite link with the employee.",
+        title: t("literals.linkCopied"),
+        description: t("literals.shareThisInviteLinkWithTheEmployee"),
       });
     } catch {
       toast({
-        title: "Unable to copy link",
-        description: "Copy the link manually if needed.",
+        title: t("literals.unableToCopyLink"),
+        description: t("literals.copyTheLinkManuallyIfNeeded"),
         variant: "destructive",
       });
     }

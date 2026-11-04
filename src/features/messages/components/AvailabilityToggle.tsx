@@ -24,7 +24,7 @@ export function AvailabilityToggle() {
           {t("messages.showAsAvailableToPickUpHelpDeskTickets")} </div>
       </div>
       <div className="flex items-center gap-2">
-        <Label htmlFor="available">{available ? "On" : "Off"}</Label>
+        <Label htmlFor="available">{available ? t("literals.on") : t("literals.off")}</Label>
         <Switch
           id="available"
           checked={available}

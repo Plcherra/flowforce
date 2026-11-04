@@ -104,7 +104,7 @@ export function EmployeeSelector({
   if (error) {
     return (
       <div className="text-sm text-destructive">
-        Error loading employees: {error}
+        {t("literals.errorLoadingEmployees")} {error}
       </div>
     );
   }
@@ -132,7 +132,7 @@ export function EmployeeSelector({
                   {assignment.user?.first_name} {assignment.user?.last_name}
                 </span>
                 <Badge variant="outline" className="text-xs">
-                  {assignment.status || "assigned"}
+                  {assignment.status || t("literals.assigned")}
                 </Badge>
               </div>
               <Button

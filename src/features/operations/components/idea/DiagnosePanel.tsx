@@ -112,7 +112,7 @@ export function DiagnosePanel({
                       {anomaly.unit ?? ""}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {t("operations.trend")} {anomaly.trend ?? "unknown"}
+                      {t("operations.trend")} {anomaly.trend ?? t("literals.unknown2")}
                     </div>
                   </div>
                 );

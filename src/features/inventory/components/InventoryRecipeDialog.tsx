@@ -168,7 +168,7 @@ export function InventoryRecipeDialog({
                           <TableCell>
                             <div className="flex flex-col">
                               <span className="font-medium text-sm">
-                                {ingredient && 'name' in ingredient ? (ingredient.name as string) : "Unknown ingredient"}
+                                {ingredient && 'name' in ingredient ? (ingredient.name as string) : t("literals.unknownIngredient")}
                               </span>
                               {ingredient && 'sku' in ingredient && ingredient.sku && (
                                 <span className="text-xs text-muted-foreground">
@@ -181,7 +181,7 @@ export function InventoryRecipeDialog({
                             {line.quantity_needed}
                           </TableCell>
                           <TableCell className="text-sm">
-                            {unit?.abbreviation || unit?.name || "unit"}
+                            {unit?.abbreviation || unit?.name || t("literals.unit2")}
                           </TableCell>
                           <TableCell className="text-right text-sm font-mono">
                             {formatCurrency(lineCost)}
@@ -224,7 +224,7 @@ export function InventoryRecipeDialog({
                   <SelectContent className="max-h-60">
                     {ingredientOptions.map((option) => (
                       <SelectItem key={option.id} value={option.id}>
-                        {option.name} {option.sku ? `· ${option.sku}` : ""}
+                        {option.name} {option.sku ? t("literals.text7", { sku: option.sku }) : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

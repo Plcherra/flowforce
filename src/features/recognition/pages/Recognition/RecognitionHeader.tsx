@@ -30,7 +30,7 @@ export function RecognitionHeader({
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <Badge variant="outline">
-          {totalRecognitions} recognitions tracked
+          {totalRecognitions} {t("literals.recognitionsTracked")}
         </Badge>
         <Button
           type="button"

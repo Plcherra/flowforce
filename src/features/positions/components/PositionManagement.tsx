@@ -520,13 +520,13 @@ export default function PositionManagement() {
                             >
                               <div>
                                 <div className="text-sm font-medium">
-                                  {template.name || "New shift template"}
+                                  {template.name || t("literals.newShiftTemplate")}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                   {positionName}{" "}
                                   {linkedRole
-                                    ? `• ${ROLE_LABELS[linkedRole]}`
-                                    : "• Link required"}
+                                    ? t("literals.text16", { value0: ROLE_LABELS[linkedRole] })
+                                    : t("literals.linkRequired")}
                                 </div>
                               </div>
                               {linkedRole ? (
@@ -547,7 +547,7 @@ export default function PositionManagement() {
                       )}
                       {shiftTemplates.length > 5 && (
                         <div className="text-xs text-muted-foreground">
-                          +{shiftTemplates.length - 5} additional templates
+                          +{shiftTemplates.length - 5} {t("literals.additionalTemplates")}
                         </div>
                       )}
                     </div>
@@ -609,10 +609,10 @@ export default function PositionManagement() {
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{summary.name}</span>
                           <Badge variant="outline" className="text-xs">
-                            Level {summary.hierarchyLevel}
+                            {t("literals.level2")} {summary.hierarchyLevel}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {summary.positionCount} position template
+                            {summary.positionCount} {t("literals.positionTemplate")}
                             {summary.positionCount === 1 ? "" : "s"}
                           </span>
                         </div>
@@ -634,7 +634,7 @@ export default function PositionManagement() {
                           )}
                           {summary.accessibleSections.length > 5 && (
                             <Badge variant="outline" className="text-xs">
-                              +{summary.accessibleSections.length - 5} more
+                              +{summary.accessibleSections.length - 5} {t("common.more")}
                             </Badge>
                           )}
                         </div>
@@ -668,20 +668,18 @@ export default function PositionManagement() {
                             {label}
                           </Badge>
                           <span className="text-base font-medium text-foreground">
-                            {label} Positions
+                            {label} {t("literals.positions")}
                           </span>
                         </CardTitle>
                         <CardDescription>
-                          {rolePositions.length} position template
-                          {rolePositions.length === 1 ? "" : "s"} configured
+                          {rolePositions.length} {t("literals.positionTemplate")}
+                          {rolePositions.length === 1 ? "" : "s"} {t("literals.configured")}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {rolePositions.length === 0 ? (
                           <div className="text-sm text-muted-foreground">
-                            No {label.toLowerCase()} position templates yet.
-                            Create one to unlock role defaults and scheduling
-                            coverage.
+                            {t("literals.no")} {label.toLowerCase()} {t("literals.positionTemplatesYetCreateOneToUnlockRole")}
                           </div>
                         ) : (
                           rolePositions.map((position) => (
@@ -706,7 +704,7 @@ export default function PositionManagement() {
                                     {shiftTemplatesByPositionId.get(
                                       position.id,
                                     ) ?? 0}{" "}
-                                    linked shift template
+                                    {t("literals.linkedShiftTemplate")}
                                     {(shiftTemplatesByPositionId.get(
                                       position.id,
                                     ) ?? 0) === 1
@@ -715,7 +713,7 @@ export default function PositionManagement() {
                                     •{" "}
                                     {assignmentsByPosition.get(position.id) ??
                                       0}{" "}
-                                    active assignment
+                                    {t("literals.activeAssignment")}
                                     {(assignmentsByPosition.get(position.id) ??
                                       0) === 1
                                       ? ""
@@ -740,9 +738,8 @@ export default function PositionManagement() {
                                       <AlertDialogHeader>
                                         <AlertDialogTitle>{t("positions.deletePosition")}</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                          Are you sure you want to delete the “
-                                          {position.name}” position? This action
-                                          cannot be undone.
+                                          {t("literals.areYouSureYouWantToDeleteThe")}
+                                          {position.name}{t("literals.positionThisActionCannotBeUndone")}
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
@@ -796,7 +793,7 @@ export default function PositionManagement() {
                                       {Object.values(
                                         position.permissions,
                                       ).filter(Boolean).length - 4}{" "}
-                                      more
+                                      {t("common.more")}
                                     </Badge>
                                   )}
                               </div>
@@ -843,18 +840,18 @@ export default function PositionManagement() {
                               {summary.name}
                             </span>
                             <Badge variant="secondary" className="text-xs">
-                              Level {summary.hierarchyLevel}
+                              {t("literals.level2")} {summary.hierarchyLevel}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
-                              {summary.positionCount} position template
+                              {summary.positionCount} {t("literals.positionTemplate")}
                               {summary.positionCount === 1 ? "" : "s"}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {summary.accessibleSections.length} section
+                              {summary.accessibleSections.length} {t("literals.section")}
                               {summary.accessibleSections.length === 1
                                 ? ""
                                 : "s"}{" "}
-                              enabled
+                              {t("literals.enabled2")}
                             </span>
                           </div>
 
@@ -878,7 +875,7 @@ export default function PositionManagement() {
                               )}
                               {activePermissions.length > 6 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{activePermissions.length - 6} more
+                                  +{activePermissions.length - 6} {t("common.more")}
                                 </Badge>
                               )}
                             </div>
@@ -904,7 +901,7 @@ export default function PositionManagement() {
                               )}
                               {summary.accessibleSections.length > 6 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{summary.accessibleSections.length - 6} more
+                                  +{summary.accessibleSections.length - 6} {t("common.more")}
                                 </Badge>
                               )}
                             </div>

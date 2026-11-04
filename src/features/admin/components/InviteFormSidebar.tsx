@@ -89,10 +89,10 @@ export function InviteFormSidebar({
                       </Badge>
                     </div>
                     <div className="mt-1 text-muted-foreground">
-                      Created {formatDateTimeLocale(invite.created_at)}
+                      {t("literals.created")} {formatDateTimeLocale(invite.created_at)}
                     </div>
                     <div className="text-muted-foreground">
-                      Expires {formatDateTimeLocale(invite.expires_at)}
+                      {t("literals.expires")} {formatDateTimeLocale(invite.expires_at)}
                     </div>
                   </div>
                 ))}

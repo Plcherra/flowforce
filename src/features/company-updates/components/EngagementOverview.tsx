@@ -77,8 +77,8 @@ export default function EngagementOverview() {
               <h3 className="font-medium">{update.title}</h3>
               <p className="text-xs text-muted-foreground">
                 {update.lastAnalyzed
-                  ? `Last analyzed ${formatDistanceToNow(new Date(update.lastAnalyzed), { addSuffix: true })}`
-                  : "Awaiting AI analysis"}
+                  ? t("literals.lastAnalyzed", { value0: formatDistanceToNow(new Date(update.lastAnalyzed), { addSuffix: true }) })
+                  : t("literals.awaitingAiAnalysis")}
               </p>
             </div>
             <Sparkline
@@ -91,7 +91,7 @@ export default function EngagementOverview() {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            {update.aiSummary ?? "Analyzing engagement intelligence…"}
+            {update.aiSummary ?? t("literals.analyzingEngagementIntelligence")}
           </p>
 
           <div className="text-xs text-muted-foreground flex flex-wrap gap-4">

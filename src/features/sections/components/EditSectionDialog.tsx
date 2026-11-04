@@ -206,8 +206,7 @@ export function EditSectionDialog({
                 <AlertDialogHeader>
                   <AlertDialogTitle>{t("sections.areYouSure")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete the &quot;{section.name}&quot; section
-                    and all its data. This action cannot be undone.
+                    {t("literals.thisWillPermanentlyDeleteThe")}{section.name}{t("literals.sectionAndAllItsDataThisActionCannot")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -219,7 +218,7 @@ export function EditSectionDialog({
                     disabled={deleteLoading}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {deleteLoading ? "Deleting..." : "Delete Section"}
+                    {deleteLoading ? t("literals.deleting") : t("literals.deleteSection")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -238,7 +237,7 @@ export function EditSectionDialog({
                 type="submit"
                 disabled={loading || deleteLoading || !name.trim()}
               >
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? t("literals.saving") : t("literals.saveChanges2")}
               </Button>
             </div>
           </div>

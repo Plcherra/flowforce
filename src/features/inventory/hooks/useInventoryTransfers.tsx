@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createInventoryTransfer,
@@ -51,6 +52,7 @@ export function useInventoryTransfers() {
 }
 
 export function useCreateInventoryTransfer() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -84,14 +86,14 @@ export function useCreateInventoryTransfer() {
       queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: "Transfer Requested",
-        description: "The fulfiller will be notified of this transfer.",
+        title: t("literals.transferRequested"),
+        description: t("literals.theFulfillerWillBeNotifiedOfThisTransfer"),
       });
     },
     onError: (error: any) => {
-      const message = error?.message ?? "Failed to create transfer.";
+      const message = error?.message ?? t("literals.failedToCreateTransfer");
       toast({
-        title: "Transfer Failed",
+        title: t("literals.transferFailed"),
         description: message,
         variant: "destructive",
       });
@@ -101,6 +103,7 @@ export function useCreateInventoryTransfer() {
 }
 
 export function useUpdateInventoryTransferStatus() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -127,14 +130,14 @@ export function useUpdateInventoryTransferStatus() {
       queryClient.invalidateQueries({ queryKey: ["inventory-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["inventory-dashboard"] });
       toast({
-        title: "Transfer Updated",
-        description: "Transfer status has been updated.",
+        title: t("literals.transferUpdated"),
+        description: t("literals.transferStatusHasBeenUpdated"),
       });
     },
     onError: (error: any) => {
-      const message = error?.message ?? "Failed to update transfer status.";
+      const message = error?.message ?? t("literals.failedToUpdateTransferStatus");
       toast({
-        title: "Update Failed",
+        title: t("literals.updateFailed"),
         description: message,
         variant: "destructive",
       });

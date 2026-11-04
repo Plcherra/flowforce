@@ -17,7 +17,7 @@ export const DefaultMetricCard = () => {
       value={152430}
       delta={12.5}
       unit="USD"
-      description="Sales volume over the last IDEA cycle."
+      description={t("literals.salesVolumeOverTheLastIdeaCycle")}
     />
   </div>
 );

@@ -58,7 +58,7 @@ export default function DeletionTestForm({
             {t("profile.runningTests")}
           </>
         ) : (
-          "Run Deletion Tests"
+          t("literals.runDeletionTests")
         )}
       </Button>
     </div>

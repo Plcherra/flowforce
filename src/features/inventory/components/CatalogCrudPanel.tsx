@@ -81,7 +81,7 @@ export function CatalogCrudPanel({
           <Input
             value={newName}
             onChange={(event) => setNewName(event.target.value)}
-            placeholder={`${createLabel} name`}
+            placeholder={t("literals.name", { createLabel: createLabel })}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();

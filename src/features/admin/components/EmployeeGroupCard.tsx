@@ -2,6 +2,7 @@
  * Employee group card component
  */
 
+import { useTranslation } from "react-i18next";
 import { LayoutGrid } from "lucide-react";
 import {
   Card,
@@ -35,6 +36,7 @@ export function EmployeeGroupCard({
   onNavigateToEmployee,
   onNavigateToPerformance,
 }: EmployeeGroupCardProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
@@ -43,7 +45,7 @@ export function EmployeeGroupCard({
             <LayoutGrid className="h-4 w-4 text-muted-foreground" />
             {groupName}
           </CardTitle>
-          <CardDescription>{members.length} team member(s)</CardDescription>
+          <CardDescription>{members.length} {t("literals.teamMemberS")}</CardDescription>
         </div>
         <Badge variant="outline">{members.length}</Badge>
       </CardHeader>

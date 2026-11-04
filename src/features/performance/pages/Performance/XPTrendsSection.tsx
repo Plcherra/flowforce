@@ -97,7 +97,7 @@ export function XPTrendsSection({
             <div key={entry.id} className="rounded-xl border bg-muted/30 p-3">
               <p className="text-sm font-semibold">{entry.name}</p>
               <p className="text-xs text-muted-foreground">
-                {entry.department ?? "No department"} ·{" "}
+                {entry.department ?? t("literals.noDepartment")} ·{" "}
                 {entry.xp.toLocaleString()} XP
               </p>
             </div>

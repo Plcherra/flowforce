@@ -408,8 +408,8 @@ export function InventoryTransfersPanel() {
       !form.recipientId
     ) {
       toast({
-        title: "Missing details",
-        description: "Select locations and both fulfiller and recipient.",
+        title: t("literals.missingDetails"),
+        description: t("literals.selectLocationsAndBothFulfillerAndRecipient"),
         variant: "destructive",
       });
       return;
@@ -417,8 +417,8 @@ export function InventoryTransfersPanel() {
 
     if (form.fromLocationId === form.toLocationId) {
       toast({
-        title: "Invalid locations",
-        description: "From and To locations must be different.",
+        title: t("literals.invalidLocations"),
+        description: t("literals.fromAndToLocationsMustBeDifferent"),
         variant: "destructive",
       });
       return;
@@ -426,8 +426,8 @@ export function InventoryTransfersPanel() {
 
     if (!validateLineItems()) {
       toast({
-        title: "Select units",
-        description: "Choose a unit for each transfer item before submitting.",
+        title: t("literals.selectUnits"),
+        description: t("literals.chooseAUnitForEachTransferItemBefore"),
         variant: "destructive",
       });
       return;
@@ -436,8 +436,8 @@ export function InventoryTransfersPanel() {
     const payloadItems = buildLineItemPayload();
     if (payloadItems.length === 0) {
       toast({
-        title: "Add items",
-        description: "Include at least one valid item with quantity.",
+        title: t("literals.addItems"),
+        description: t("literals.includeAtLeastOneValidItemWithQuantity"),
         variant: "destructive",
       });
       return;
@@ -489,8 +489,8 @@ export function InventoryTransfersPanel() {
 
     if (statusDialog.requireNote && !note) {
       toast({
-        title: "Add a note",
-        description: "Please include a note when rejecting a transfer.",
+        title: t("literals.addANote"),
+        description: t("literals.pleaseIncludeANoteWhenRejectingATransfer"),
         variant: "destructive",
       });
       return;
@@ -556,8 +556,8 @@ export function InventoryTransfersPanel() {
                     <SelectValue
                       placeholder={
                         locationsLoading
-                          ? "Loading locations..."
-                          : "Select location"
+                          ? t("schedule.loadingLocations")
+                          : t("literals.selectLocation")
                       }
                     />
                   </SelectTrigger>
@@ -585,8 +585,8 @@ export function InventoryTransfersPanel() {
                     <SelectValue
                       placeholder={
                         locationsLoading
-                          ? "Loading locations..."
-                          : "Select location"
+                          ? t("schedule.loadingLocations")
+                          : t("literals.selectLocation")
                       }
                     />
                   </SelectTrigger>
@@ -616,8 +616,8 @@ export function InventoryTransfersPanel() {
                     <SelectValue
                       placeholder={
                         employeesLoading
-                          ? "Loading team..."
-                          : "Select fulfiller"
+                          ? t("literals.loadingTeam")
+                          : t("literals.selectFulfiller")
                       }
                     />
                   </SelectTrigger>
@@ -648,8 +648,8 @@ export function InventoryTransfersPanel() {
                     <SelectValue
                       placeholder={
                         employeesLoading
-                          ? "Loading team..."
-                          : "Select recipient"
+                          ? t("literals.loadingTeam")
+                          : t("literals.selectRecipient")
                       }
                     />
                   </SelectTrigger>
@@ -751,8 +751,8 @@ export function InventoryTransfersPanel() {
                             <SelectValue
                               placeholder={
                                 itemsLoading
-                                  ? "Loading items..."
-                                  : "Select item"
+                                  ? t("literals.loadingItems2")
+                                  : t("literals.selectItem")
                               }
                             />
                           </SelectTrigger>
@@ -761,7 +761,7 @@ export function InventoryTransfersPanel() {
                               <SelectItem key={entry.id} value={entry.id}>
                                 {entry.name}
                                 {entry.unit?.name
-                                  ? ` · ${entry.unit?.name}`
+                                  ? t("literals.text8", { name: entry.unit?.name })
                                   : ""}
                               </SelectItem>
                             ))}
@@ -782,10 +782,10 @@ export function InventoryTransfersPanel() {
                             <SelectValue
                               placeholder={
                                 !item
-                                  ? "Select item first"
+                                  ? t("literals.selectItemFirst")
                                   : hasUnitChoices
-                                    ? "Select unit"
-                                    : "No units configured"
+                                    ? t("literals.selectUnit")
+                                    : t("literals.noUnitsConfigured")
                               }
                             />
                           </SelectTrigger>
@@ -800,20 +800,20 @@ export function InventoryTransfersPanel() {
                                     key={unit.id}
                                     value={unit.unitid}
                                   >
-                                    {unit.unit?.name || "Unit"}
+                                    {unit.unit?.name || t("literals.unit")}
                                     {unit.unit?.abbreviation
-                                      ? ` (${unit.unit.abbreviation})`
+                                      ? t("literals.text28", { abbreviation: unit.unit.abbreviation })
                                       : ""}
                                     {unit.unit_level > 1
-                                      ? ` · ${unit.conversion_factor}× base`
+                                      ? t("literals.base", { conversion_factor: unit.conversion_factor })
                                       : ""}
                                   </SelectItem>
                                 ))}
                                 {includeBaseUnitOption && item?.unitid ? (
                                   <SelectItem value={item.unitid}>
-                                    {item.unit?.name || "Default unit"}
+                                    {item.unit?.name || t("literals.defaultUnit")}
                                     {item.unit?.abbreviation
-                                      ? ` (${item.unit.abbreviation})`
+                                      ? t("literals.text28", { abbreviation: item.unit.abbreviation })
                                       : ""}
                                   </SelectItem>
                                 ) : null}
@@ -901,7 +901,7 @@ export function InventoryTransfersPanel() {
               >
                 {t("shell.clear")} </Button>
               <Button type="submit" disabled={createTransfer.isPending}>
-                {createTransfer.isPending ? "Submitting..." : "Submit transfer"}
+                {createTransfer.isPending ? t("literals.submitting") : t("literals.submitTransfer")}
               </Button>
             </div>
           </form>
@@ -948,8 +948,8 @@ export function InventoryTransfersPanel() {
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-semibold">
-                            {transfer.from_location?.name ?? "Unknown"} →{" "}
-                            {transfer.to_location?.name ?? "Unknown"}
+                            {transfer.from_location?.name ?? t("literals.unknown")} →{" "}
+                            {transfer.to_location?.name ?? t("literals.unknown")}
                           </h3>
                           <Badge className={cn(statusStyles[transfer.status])}>
                             {statusLabels[transfer.status]}
@@ -982,7 +982,7 @@ export function InventoryTransfersPanel() {
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {Number.isFinite(Number(transfer.total_quantity))
-                            ? `${Number(transfer.total_quantity).toFixed(2)} units`
+                            ? t("literals.units", { value0: Number(transfer.total_quantity).toFixed(2) })
                             : "—"}
                         </div>
                       </div>
@@ -1021,7 +1021,7 @@ export function InventoryTransfersPanel() {
                             return (
                               <tr key={line.id}>
                                 <td className="px-3 py-2 text-foreground">
-                                  {line.item?.name ?? "Unknown item"}
+                                  {line.item?.name ?? t("literals.unknownItem")}
                                 </td>
                                 <td className="px-3 py-2 text-muted-foreground">
                                   {Number(line.quantity).toFixed(2)}{" "}
@@ -1063,7 +1063,7 @@ export function InventoryTransfersPanel() {
                                   </span>{" "}
                                   — {actionLabels[entry.action] || entry.action}{" "}
                                   {t("inventory.by")} {actor}
-                                  {entry.note ? ` · ${entry.note}` : ""}
+                                  {entry.note ? t("literals.text9", { note: entry.note }) : ""}
                                 </div>
                               );
                             })
@@ -1133,9 +1133,7 @@ export function InventoryTransfersPanel() {
           <div className="space-y-3">
             <div className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
               {statusDialog.transfer
-                ? `${statusDialog.transfer.from_location?.name ?? "Unknown"} → ${
-                    statusDialog.transfer.to_location?.name ?? "Unknown"
-                  }`
+                ? t("literals.text10", { value0: statusDialog.transfer.from_location?.name ?? "Unknown", value1: statusDialog.transfer.to_location?.name ?? "Unknown" })
                 : ""}
             </div>
             <div className="space-y-2">
@@ -1156,7 +1154,7 @@ export function InventoryTransfersPanel() {
               onClick={handleStatusSubmit}
               disabled={updateTransferStatus.isPending}
             >
-              {updateTransferStatus.isPending ? "Updating…" : "Confirm"}
+              {updateTransferStatus.isPending ? "Updating…" : t("literals.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

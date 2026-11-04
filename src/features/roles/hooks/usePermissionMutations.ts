@@ -2,6 +2,7 @@
  * Hook for permission mutations
  */
 
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { Position } from "@/hooks/usePositions";
@@ -40,14 +41,15 @@ export function usePermissionMutations({
   dirtyRoles,
   setDirtyRoles,
 }: UsePermissionMutationsProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (dirtyRoles.size === 0) {
       toast({
-        title: "No changes detected",
-        description: "Adjust the role matrix before saving.",
+        title: t("literals.noChangesDetected"),
+        description: t("literals.adjustTheRoleMatrixBeforeSaving"),
       });
       return;
     }
@@ -91,15 +93,15 @@ export function usePermissionMutations({
       await refetchRoles();
       setDirtyRoles(() => new Set());
       toast({
-        title: "Permissions updated",
+        title: t("literals.permissionsUpdated"),
         description:
-          "Role access changes propagated to linked positions and employees.",
+          t("literals.roleAccessChangesPropagatedToLinkedPositionsAnd"),
       });
     } catch (error) {
       logger.error("Failed to save role matrix", { error, tags: ["error"] });
       toast({
-        title: "Save failed",
-        description: "We could not sync the updated permissions. Please retry.",
+        title: t("literals.saveFailed"),
+        description: t("literals.weCouldNotSyncTheUpdatedPermissionsPlease"),
         variant: "destructive",
       });
     } finally {

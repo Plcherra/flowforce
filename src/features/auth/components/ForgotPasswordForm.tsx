@@ -42,8 +42,7 @@ export default function ForgotPasswordForm({
         <CardTitle className="text-2xl font-bold text-center">
           {t("auth.resetPassword")}</CardTitle>
         <CardDescription className="text-center">
-          Enter your email address and we&apos;ll send you a link to reset your
-          password.
+          {t("literals.enterYourEmailAddressAndWeLlSend")}
         </CardDescription>
       </CardHeader>
       <CardContent>

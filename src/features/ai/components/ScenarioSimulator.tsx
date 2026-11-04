@@ -167,8 +167,8 @@ export default function ScenarioSimulator({
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>
             {isUsingFallback
-              ? "Using simulator defaults"
-              : "Scenario simulator issue"}
+              ? t("literals.usingSimulatorDefaults")
+              : t("literals.scenarioSimulatorIssue")}
           </AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -181,7 +181,7 @@ export default function ScenarioSimulator({
               <div>
                 <CardTitle>{t("ai.baselineSnapshot")}</CardTitle>
                 <CardDescription>
-                  Generated {new Date(baseline.generatedAt).toLocaleString()}
+                  {t("literals.generated")} {new Date(baseline.generatedAt).toLocaleString()}
                 </CardDescription>
               </div>
               {isUsingFallback && <Badge variant="secondary">{t("ai.simulated")}</Badge>}
@@ -199,8 +199,8 @@ export default function ScenarioSimulator({
                 value={baseline.scheduling.coverageRate * 100}
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                {baseline.scheduling.totalShifts} shifts scheduled ·{" "}
-                {baseline.scheduling.openShifts} open
+                {baseline.scheduling.totalShifts} {t("literals.shiftsScheduled")}{" "}
+                {baseline.scheduling.openShifts} {t("literals.open")}
               </p>
             </div>
 
@@ -211,7 +211,7 @@ export default function ScenarioSimulator({
               </div>
               <div className="mt-2 text-2xl font-semibold">{backlogLabel}</div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {baseline.tasks.overdue} overdue · avg age{" "}
+                {baseline.tasks.overdue} {t("literals.overdueAvgAge")}{" "}
                 {baseline.tasks.avgAgeDays.toFixed(1)}d
               </p>
             </div>
@@ -223,7 +223,7 @@ export default function ScenarioSimulator({
               </div>
               <div className="mt-2 text-2xl font-semibold">{goalProgress}</div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {baseline.goals.active} active · {baseline.goals.atRisk} at risk
+                {baseline.goals.active} {t("literals.active")} {baseline.goals.atRisk} {t("literals.atRisk")}
               </p>
             </div>
 
@@ -236,8 +236,7 @@ export default function ScenarioSimulator({
                 {trailingRevenue}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Margin {percent(baseline.revenue.marginRate, 1)} · Operating
-                cost {formatCurrency(baseline.revenue.operatingCost30)}
+                {t("literals.margin")} {percent(baseline.revenue.marginRate, 1)} {t("literals.operatingCost")} {formatCurrency(baseline.revenue.operatingCost30)}
               </p>
             </div>
           </CardContent>
@@ -256,7 +255,7 @@ export default function ScenarioSimulator({
                   riskStyles[outcome.risk],
                 )}
               >
-                {outcome.risk} risk
+                {outcome.risk} {t("literals.risk")}
               </Badge>
             </div>
           </CardHeader>
@@ -372,11 +371,11 @@ export default function ScenarioSimulator({
                           : "text-destructive"
                       }
                     >
-                      {`${outcome.deltas.backlog >= 0 ? "+" : ""}${Math.round(outcome.deltas.backlog)}`}
+                      {t("literals.text25", { value0: outcome.deltas.backlog >= 0 ? "+" : "", value1: Math.round(outcome.deltas.backlog) })}
                     </span>
                   </div>
                   <div className="mt-1 text-lg font-semibold">
-                    {Math.round(outcome.predicted.backlog)} tasks
+                    {Math.round(outcome.predicted.backlog)} {t("literals.tasks")}
                   </div>
                 </div>
 
@@ -390,7 +389,7 @@ export default function ScenarioSimulator({
                           : "text-destructive"
                       }
                     >
-                      {`${outcome.deltas.goalConfidence >= 0 ? "+" : ""}${outcome.deltas.goalConfidence.toFixed(0)} pts`}
+                      {t("literals.pts", { value0: outcome.deltas.goalConfidence >= 0 ? "+" : "", value1: outcome.deltas.goalConfidence.toFixed(0) })}
                     </span>
                   </div>
                   <div className="mt-1 text-lg font-semibold">
@@ -416,7 +415,7 @@ export default function ScenarioSimulator({
                     {formatCurrency(outcome.predicted.revenueForecast)}
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Margin {percent(outcome.predicted.marginRate, 1)} (
+                    {t("literals.margin")} {percent(outcome.predicted.marginRate, 1)} (
                     {formatDeltaPercent(outcome.deltas.marginRate)})
                   </p>
                 </div>
@@ -449,7 +448,7 @@ export default function ScenarioSimulator({
                 ) : (
                   <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                Trigger Co-Pilot
+                {t("literals.triggerCoPilot")}
               </Button>
             </div>
             {lastTriggeredTaskIds.length > 0 && (
@@ -460,9 +459,8 @@ export default function ScenarioSimulator({
                 <div className="flex-1">
                   <AlertTitle>{t("ai.automationQueued")}</AlertTitle>
                   <AlertDescription>
-                    Co-Pilot created {lastTriggeredTaskIds.length} task
-                    {lastTriggeredTaskIds.length === 1 ? "" : "s"} from this
-                    scenario.
+                    {t("literals.coPilotCreated")} {lastTriggeredTaskIds.length} {t("literals.task")}
+                    {lastTriggeredTaskIds.length === 1 ? "" : "s"} {t("literals.fromThisScenario")}
                   </AlertDescription>
                 </div>
                 <Button size="sm" onClick={() => navigate("/tasks?tab=queue")}>{t("ai.reviewTasks")}</Button>
@@ -471,9 +469,9 @@ export default function ScenarioSimulator({
             {(lastTriggeredAt || lastGeneratedActions.length > 0) && (
               <p className="text-xs text-muted-foreground">
                 {lastTriggeredAt
-                  ? `Last pushed ${lastTriggeredCount ?? 0} action${(lastTriggeredCount ?? 0) === 1 ? "" : "s"} ` +
-                    `${new Date(lastTriggeredAt).toLocaleString()}`
-                  : "Actions prepared — push to Co-Pilot when ready."}
+                  ? t("literals.lastPushedAction", { value0: lastTriggeredCount ?? 0, value1: (lastTriggeredCount ?? 0) === 1 ? "" : "s" }) +
+                    t("literals.text26", { value0: new Date(lastTriggeredAt).toLocaleString() })
+                  : t("literals.actionsPreparedPushToCoPilotWhenReady")}
               </p>
             )}
           </CardContent>
@@ -510,10 +508,10 @@ export default function ScenarioSimulator({
                               : "border-success/40 bg-success-muted text-success"
                         }
                       >
-                        {action.impact} impact
+                        {action.impact} {t("literals.impact")}
                       </Badge>
                       <Badge variant="outline">
-                        Confidence {(action.confidence * 100).toFixed(0)}%
+                        {t("literals.confidence")} {(action.confidence * 100).toFixed(0)}%
                       </Badge>
                     </div>
                     <h4 className="mt-2 text-base font-semibold">
@@ -524,7 +522,7 @@ export default function ScenarioSimulator({
                     </p>
                   </div>
                   <div className="text-xs text-muted-foreground sm:text-right">
-                    Due {new Date(action.suggestedDueDate).toLocaleDateString()}
+                    {t("literals.due")} {new Date(action.suggestedDueDate).toLocaleDateString()}
                   </div>
                 </div>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">

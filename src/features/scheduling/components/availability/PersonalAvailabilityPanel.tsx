@@ -265,7 +265,7 @@ export function PersonalAvailabilityPanel({
           </CardDescription>
         </div>
         <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 px-3 py-2 text-xs text-primary">
-          Week of {dayjs(weekStart).format("MMM D, YYYY")}
+          {t("literals.weekOf")} {dayjs(weekStart).format("MMM D, YYYY")}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -278,8 +278,8 @@ export function PersonalAvailabilityPanel({
           <CalendarCheck className="h-5 w-5 text-primary" />
           <AlertTitle>
             {(availabilityQuery.data?.length ?? 0) === 0
-              ? "No availability saved yet"
-              : "Update as needed"}
+              ? t("literals.noAvailabilitySavedYet")
+              : t("literals.updateAsNeeded")}
           </AlertTitle>
           <AlertDescription>
             {t("schedule.chooseTheHoursYouPreferToWorkEach")}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +27,7 @@ export function useInventoryCategories() {
 }
 
 export function useCreateInventoryCategory() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { profile } = useProfile();
@@ -56,14 +58,14 @@ export function useCreateInventoryCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-categories"] });
       toast({
-        title: "Success",
-        description: "Category created successfully",
+        title: t("literals.success"),
+        description: t("literals.categoryCreatedSuccessfully"),
       });
     },
     onError: (error: any) => {
-      const message = error?.message || "Failed to create category";
+      const message = error?.message || t("literals.failedToCreateCategory");
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });
@@ -73,6 +75,7 @@ export function useCreateInventoryCategory() {
 }
 
 export function useUpdateInventoryCategory() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,14 +101,14 @@ export function useUpdateInventoryCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-categories"] });
       toast({
-        title: "Success",
-        description: "Category updated",
+        title: t("literals.success"),
+        description: t("literals.categoryUpdated"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error?.message || "Failed to update category",
+        title: t("literals.error"),
+        description: error?.message || t("literals.failedToUpdateCategory"),
         variant: "destructive",
       });
       logger.error("Update category error", { error, tags: ["error"] });
@@ -114,6 +117,7 @@ export function useUpdateInventoryCategory() {
 }
 
 export function useDeleteInventoryCategory() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -129,12 +133,12 @@ export function useDeleteInventoryCategory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory-categories"] });
       toast({
-        title: "Success",
-        description: "Category deleted successfully",
+        title: t("literals.success"),
+        description: t("literals.categoryDeletedSuccessfully"),
       });
     },
     onError: (error: any) => {
-      let message = "Failed to delete category";
+      let message = t("literals.failedToDeleteCategory");
 
       // Handle specific error cases
       if (error?.code === "PGRST301") {
@@ -147,7 +151,7 @@ export function useDeleteInventoryCategory() {
       }
 
       toast({
-        title: "Error",
+        title: t("literals.error"),
         description: message,
         variant: "destructive",
       });

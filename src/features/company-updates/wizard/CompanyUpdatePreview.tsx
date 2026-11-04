@@ -53,7 +53,7 @@ export function CompanyUpdatePreview({
               isMobile ? "text-xl" : isCompact ? "text-base" : "text-2xl",
             )}
           >
-            {data.title || "Untitled update"}
+            {data.title || t("literals.untitledUpdate")}
           </h2>
         </div>
       </div>
@@ -115,8 +115,8 @@ export function CompanyUpdatePreview({
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
             <span>
               {data.publishingSettings.authorAttribution
-                ? `By ${data.publishingSettings.authorName || "You"}`
-                : "Sent anonymously"}
+                ? t("literals.by", { value0: data.publishingSettings.authorName || "You" })
+                : t("literals.sentAnonymously")}
             </span>
           </div>
         )}

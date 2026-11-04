@@ -195,8 +195,8 @@ export default function AddSection() {
       }
 
       toast({
-        title: "Section Configured",
-        description: `${updates.name || newSection.name} is now ready`,
+        title: t("literals.sectionConfigured"),
+        description: t("literals.isNowReady", { value0: updates.name || newSection.name }),
       });
 
       // 3) Navigate to new section
@@ -367,7 +367,7 @@ export default function AddSection() {
                             handleCreateFromTemplate(template.id);
                           }}
                         >
-                          {isCreating ? "Adding..." : "Add Section"}
+                          {isCreating ? t("literals.adding") : t("literals.addSection")}
                         </Button>
                       </CardContent>
                     </Card>

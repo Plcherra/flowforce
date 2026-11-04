@@ -32,7 +32,7 @@ export default function DashboardHeader() {
           {greeting}, {displayName}!
         </h1>
         <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-          Today&apos;s labor, inventory, task, schedule, and risk command center.
+          {t("literals.todaySLaborInventoryTaskScheduleAndRisk")}
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">

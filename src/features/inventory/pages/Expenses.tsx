@@ -267,7 +267,7 @@ function ExpenseReportsTab() {
           <DialogTrigger asChild>
             <Button size={isMobile ? "sm" : "default"}>
               <Plus className="mr-2 h-4 w-4" />
-              {isMobile ? "Expense" : "New Expense"}
+              {isMobile ? t("literals.expense") : t("literals.newExpense")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
@@ -407,8 +407,8 @@ function ExpenseReportsTab() {
           <CardTitle>{t("inventory.expenseReports")}</CardTitle>
           <CardDescription>
             {filteredExpenses.length > 0
-              ? `Showing ${filteredExpenses.length} expense record${filteredExpenses.length === 1 ? "" : "s"}`
-              : "No expenses found with the current filters"}
+              ? t("literals.showingExpenseRecord", { length: filteredExpenses.length, value1: filteredExpenses.length === 1 ? "" : "s" })
+              : t("literals.noExpensesFoundWithTheCurrentFilters")}
           </CardDescription>
         </CardHeader>
         <CardContent>

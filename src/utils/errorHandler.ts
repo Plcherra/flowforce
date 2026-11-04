@@ -1,4 +1,5 @@
 // Centralized error handling utilities
+import i18n from "@/i18n/config";
 import { toast } from "@/hooks/use-toast";
 import { captureError } from "@/utils/logger";
 
@@ -45,7 +46,7 @@ function extractErrorMessage(error: unknown): string {
   if (typeof error === "string") {
     return error;
   }
-  return "An unexpected error occurred";
+  return i18n.t("literals.anUnexpectedErrorOccurred");
 }
 
 /**
@@ -90,7 +91,7 @@ export function showErrorToast(error: unknown, context?: string) {
   const appError = handleError(error, context);
 
   toast({
-    title: "Error",
+    title: i18n.t("literals.error"),
     description: appError.message,
     variant: "destructive",
   });
@@ -98,7 +99,7 @@ export function showErrorToast(error: unknown, context?: string) {
 
 export function showSuccessToast(message: string) {
   toast({
-    title: "Success",
+    title: i18n.t("literals.success"),
     description: message,
   });
 }

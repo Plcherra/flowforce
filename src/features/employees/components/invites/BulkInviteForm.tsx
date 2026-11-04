@@ -107,7 +107,7 @@ export function BulkInviteForm({
             onClick={onProcess}
             disabled={preview.length === 0 || isPending}
           >
-            {isPending ? "Processing..." : "Send list"}
+            {isPending ? t("literals.processing") : t("literals.sendList")}
           </Button>
         </div>
 
@@ -123,7 +123,7 @@ export function BulkInviteForm({
             <div className="flex items-center gap-2 text-sm">
               <FileSpreadsheet className="h-4 w-4" />
               <span className="font-medium">
-                {preview.length} invite{preview.length === 1 ? "" : "s"} ready
+                {preview.length} {t("literals.invite")}{preview.length === 1 ? "" : "s"} {t("literals.ready2")}
               </span>
             </div>
             <ScrollArea className="h-32 rounded-md border">

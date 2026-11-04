@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany, getDemoCompany, type Company } from "@/hooks/useCompany";
@@ -12,6 +13,7 @@ export interface UseOrganizationResult {
 }
 
 export function useOrganization(): UseOrganizationResult {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const companyState = useCompany();
   const [refreshing, setRefreshing] = useState(false);
@@ -29,7 +31,7 @@ export function useOrganization(): UseOrganizationResult {
       const message =
         unknownError instanceof Error
           ? unknownError.message
-          : "Unable to refresh organization.";
+          : t("literals.unableToRefreshOrganization");
       setRefreshError(message);
     } finally {
       setRefreshing(false);

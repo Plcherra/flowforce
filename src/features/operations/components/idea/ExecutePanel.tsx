@@ -81,7 +81,7 @@ export function ExecutePanel({
       setCycleError(normalized);
       toast({
         variant: "destructive",
-        title: "Unable to start IDEA cycle",
+        title: t("literals.unableToStartIdeaCycle"),
         description: normalized.message,
       });
     } finally {
@@ -128,9 +128,9 @@ export function ExecutePanel({
       if (!activeCycleId) {
         toast({
           variant: "destructive",
-          title: "Cycle not ready",
+          title: t("literals.cycleNotReady"),
           description:
-            "Please wait for the IDEA cycle to initialize before queuing actions.",
+            t("literals.pleaseWaitForTheIdeaCycleToInitialize"),
         });
         return;
       }
@@ -146,7 +146,7 @@ export function ExecutePanel({
         setCycleError(normalized);
         toast({
           variant: "destructive",
-          title: "Unable to queue action",
+          title: t("literals.unableToQueueAction"),
           description: normalized.message,
         });
       }
@@ -159,8 +159,8 @@ export function ExecutePanel({
       if (!activeCycleId) {
         toast({
           variant: "destructive",
-          title: "Cycle not ready",
-          description: "Create or resume the cycle before executing actions.",
+          title: t("literals.cycleNotReady"),
+          description: t("literals.createOrResumeTheCycleBeforeExecutingActions"),
         });
         return;
       }
@@ -175,7 +175,7 @@ export function ExecutePanel({
         setCycleError(normalized);
         toast({
           variant: "destructive",
-          title: "Unable to execute action",
+          title: t("literals.unableToExecuteAction"),
           description: normalized.message,
         });
       }
@@ -201,8 +201,8 @@ export function ExecutePanel({
     }
 
     toast({
-      title: "No cycle selected",
-      description: "Start or resume a cycle to review assessment results.",
+      title: t("literals.noCycleSelected"),
+      description: t("literals.startOrResumeACycleToReviewAssessment"),
     });
   };
 
@@ -334,7 +334,7 @@ export function ExecutePanel({
                           {recommendation.action}
                         </div>
                         <Badge variant="outline" className="text-xs capitalize">
-                          {queued ? "Queued" : "Suggested"}
+                          {queued ? t("literals.queued") : t("literals.suggested")}
                         </Badge>
                       </div>
                       <div className="mt-2 text-xs text-muted-foreground">

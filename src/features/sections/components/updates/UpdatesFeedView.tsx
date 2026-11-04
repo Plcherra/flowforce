@@ -133,7 +133,7 @@ export function UpdatesFeedView({
       clearComment(updateId);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Unable to post comment.";
+        error instanceof Error ? error.message : t("literals.unableToPostComment");
       setCommentError(updateId, message);
     }
   };

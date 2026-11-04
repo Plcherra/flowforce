@@ -77,8 +77,8 @@ export function ExceptionsTable({
                 <SelectValue
                   placeholder={
                     employeeOptions.length
-                      ? "Select employee"
-                      : "No employees found"
+                      ? t("literals.selectEmployee")
+                      : t("literals.noEmployeesFound")
                   }
                 />
               </SelectTrigger>
@@ -137,7 +137,7 @@ export function ExceptionsTable({
         <div className="flex justify-end">
           <Button onClick={onSubmit} disabled={saving || !form.employeeId}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save exception
+            {t("literals.saveException")}
           </Button>
         </div>
 
@@ -180,7 +180,7 @@ export function ExceptionsTable({
           ) : (
             <EmptyState
               title={t("availability.noExceptionsConfigured")}
-              description="Employees will follow lock settings unless you create a temporary exception."
+              description={t("literals.employeesWillFollowLockSettingsUnlessYouCreate")}
             />
           )}
         </div>

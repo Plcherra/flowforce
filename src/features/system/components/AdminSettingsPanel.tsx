@@ -331,25 +331,25 @@ export function AdminSettingsPanel({
             variant="outline"
           >
             {syncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Refresh snapshot
+            {t("literals.refreshSnapshot")}
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
             <span>
-              Locations:{" "}
+              {t("literals.locations")}{" "}
               <Badge variant="outline">
                 {state.businessStructure.locations.length}
               </Badge>
             </span>
             <span>
-              Departments:{" "}
+              {t("literals.departments")}{" "}
               <Badge variant="outline">
                 {state.businessStructure.departments.length}
               </Badge>
             </span>
             <span>
-              Role templates:{" "}
+              {t("literals.roleTemplates")}{" "}
               <Badge variant="outline">{state.roleTemplates.length}</Badge>
             </span>
           </div>
@@ -368,7 +368,7 @@ export function AdminSettingsPanel({
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>{t("settings.confirmationRequired")}</AlertTitle>
             <AlertDescription>{t("dashboard.type")}<span className="font-semibold">{confirmationPhrase}</span>{" "}
-              to unlock high-risk actions for this workspace.
+              {t("literals.toUnlockHighRiskActionsForThisWorkspace")}
             </AlertDescription>
           </Alert>
 
@@ -460,7 +460,7 @@ export function AdminSettingsPanel({
                     <TableCell>
                       {entry.performed_byprofile?.email ??
                         entry.performed_by ??
-                        "Unknown"}
+                        t("literals.unknown")}
                     </TableCell>
                     <TableCell>
                       {new Date(entry.created_at).toLocaleString()}
