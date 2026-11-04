@@ -326,7 +326,7 @@ export function FieldExecutionPanel() {
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {step.step_type ?? t("operations.stepTypeTask")}
-                      {step.evidence_required ? ` · ${t("operations.evidenceRequiredInline")}` : ""}
+                      {step.evidence_required ? " " + t("literals.text20", { value0: t("operations.evidenceRequiredInline") }) : ""}
                     </p>
                   </div>
                   <Badge variant="outline">{step.step_status}</Badge>

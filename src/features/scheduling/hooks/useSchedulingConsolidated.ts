@@ -436,9 +436,9 @@ export function useSchedulingConsolidated(
         return event;
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Unable to save vendor event.";
+          err instanceof Error ? err.message : t("literals.unableToSaveVendorEvent");
         toast({
-          title: "Vendor event error",
+          title: t("literals.vendorEventError"),
           description: message,
           variant: "destructive",
         });

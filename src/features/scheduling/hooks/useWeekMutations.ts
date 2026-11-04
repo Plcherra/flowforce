@@ -2,7 +2,6 @@
  * Hook for week-level operations (copy, clear, publish)
  */
 
-import { useTranslation } from "react-i18next";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +27,6 @@ export function useWeekMutations({
   bulkCreateShifts,
   ensureCompanyContext,
 }: UseWeekMutationsProps) {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const { t } = useTranslation();
 

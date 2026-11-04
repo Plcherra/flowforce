@@ -197,7 +197,7 @@ export default function FormSubmissionsDialog({
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
                             {submission.submittedprofile
-                              ? `${submission.submittedprofile.first_name} ${submission.submittedprofile.last_name}`
+                              ? t("literals.text", { first_name: submission.submittedprofile.first_name, last_name: submission.submittedprofile.last_name })
                               : t("forms.anonymous")}
                           </div>
                           <div className="flex items-center gap-1">

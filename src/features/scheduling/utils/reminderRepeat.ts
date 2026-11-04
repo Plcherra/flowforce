@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 export const REMINDER_REPEAT_OPTIONS = [
   { value: "daily", label: "Daily" },
   { value: "weekly", label: "Weekly" },
@@ -16,7 +17,7 @@ export function repeatLabel(
 ): string {
   const match = REMINDER_REPEAT_OPTIONS.find((option) => option.value === interval);
   if (match) return labels?.[match.value] ?? match.label;
-  if (!interval) return labels?.once ?? "Once";
+  if (!interval) return labels?.once ?? i18n.t("literals.once");
   return interval.charAt(0).toUpperCase() + interval.slice(1);
 }
 

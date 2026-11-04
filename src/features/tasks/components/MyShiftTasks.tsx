@@ -252,7 +252,7 @@ function ShiftTaskCard({
         ) : null}
         <p className="text-xs text-muted-foreground">
           {t("people.selectedCount", { count: task.assigneeCount })}
-          {windowLabel ? ` · ${windowLabel}` : ""}
+          {windowLabel ? " " + t("literals.text34", { windowLabel: windowLabel }) : ""}
         </p>
       </div>
       {canMarkDone ? (

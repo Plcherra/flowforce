@@ -121,7 +121,7 @@ export function ShiftChip({
           <div data-testid="shift-chip-duration" className="text-[10px] opacity-80">
             {durationLabel}
             {schedule.required_headcount
-              ? ` · ${t("schedule.requiredShort", { count: schedule.required_headcount })}`
+              ? " " + t("literals.text20", { value0: t("schedule.requiredShort", { count: schedule.required_headcount }) })
               : ""}
           </div>
         </>

@@ -350,7 +350,7 @@ export function ShiftWizardDialog({
         await insertTask({ ...row, links: row.links as Json });
       } catch (err) {
         const message =
-          err instanceof Error ? err.message : "Failed to save shift task";
+          err instanceof Error ? err.message : t("literals.failedToSaveShiftTask");
         logger.error("Failed to save shift task", {
           error: err,
           tags: ["error"],
@@ -375,7 +375,7 @@ export function ShiftWizardDialog({
         }
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to assign user to shift";
+          err instanceof Error ? err.message : t("literals.failedToAssignUserToShift");
         logger.error("Failed to assign user to shift", {
           error: err,
           tags: ["error"],
@@ -547,12 +547,12 @@ export function ShiftWizardDialog({
                 <AlertDescription>
                   {draftWarnings[0]?.message}
                   {draftWarnings.length > 1
-                    ? ` ${t(
+                    ? " " + t("literals.text26", { value0: t(
                         draftWarnings.length === 2
                           ? "schedule.moreConflict"
                           : "schedule.moreConflicts",
                         { count: draftWarnings.length - 1 },
-                      )}`
+                      ) })
                     : ""}
                 </AlertDescription>
               </Alert>

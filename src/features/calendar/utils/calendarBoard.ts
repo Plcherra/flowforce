@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import {
   addDays,
   addMonths,
@@ -84,7 +85,7 @@ export function formatCalendarHeading(
     month: "short",
     day: "numeric",
   });
-  return `${formatter.format(start)} – ${formatter.format(end)}`;
+  return i18n.t("literals.text31", { value0: formatter.format(start), value1: formatter.format(end) });
 }
 
 export function eventOccursOnDay(

@@ -97,8 +97,8 @@ const capitalizeFallback = (value: string) =>
  * ```
  */
 export function useTasks() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const queryClient = useQueryClient();
   const [tasksError, setTasksError] = useState<string | null>(null);
@@ -162,7 +162,7 @@ export function useTasks() {
       return { data: createdTask, error: null };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create task";
+        error instanceof Error ? error.message : t("literals.failedToCreateTask");
       logger.error("Error creating task:", { error, tags: ["error"] });
       return { data: null, error: errorMessage };
     }
@@ -275,7 +275,7 @@ export function useTasks() {
       []) as readonly TaskStatus[];
 
     if (!allowedTransitions.includes(nextStatus)) {
-      const message = `Invalid status transition from ${current} to ${nextStatus}`;
+      const message = t("literals.invalidStatusTransitionFromTo", { current: current, nextStatus: nextStatus });
       logger.warn("Invalid status transition", {
         context: { current, nextStatus, taskId },
         tags: ["warning"],

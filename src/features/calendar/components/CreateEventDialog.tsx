@@ -280,7 +280,7 @@ export function CreateEventDialog({
           sessionType === "meeting"
             ? t("calendar.meetingScheduled")
             : t("calendar.eventCreated"),
-        description: `${title.trim()} · ${startIso.toLocaleString()}`,
+        description: t("literals.text29", { value0: title.trim(), value1: startIso.toLocaleString() }),
       });
 
       onOpenChange(false);
@@ -444,7 +444,7 @@ export function CreateEventDialog({
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                      {shift.location ? ` • ${shift.location}` : ""}
+                      {shift.location ? " " + t("literals.text3", { location: shift.location }) : ""}
                     </div>
                   </div>
                 </label>

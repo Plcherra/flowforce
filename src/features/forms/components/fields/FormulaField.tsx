@@ -188,7 +188,7 @@ export function FormulaField({
       <div>
         <strong>{t("forms.example")}</strong>
         <code className="block mt-1 p-2 bg-muted rounded">
-          {`{quantity} * {price} * 1.1`}
+          {t("literals.quantityPrice11")}
         </code>
         <p className="text-xs text-muted-foreground mt-1">
           {t("forms.calculatesQuantityPriceWith10Markup")}</p>

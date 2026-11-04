@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 
 export type FormFieldReadinessRow = {
@@ -72,7 +73,7 @@ const mediaFieldTypes = new Set([
 ]);
 
 function formTitle(form: FormWithMeta) {
-  return form.title?.trim() || "Untitled form";
+  return form.title?.trim() || i18n.t("literals.untitledForm");
 }
 
 export function buildFormsReadinessSummary({

@@ -76,7 +76,7 @@ export default function EventsCalendarPage() {
               </div>
               <Button size={isMobile ? "sm" : "default"}>
                 <Plus className="h-4 w-4 mr-2" />
-                {isMobile ? "" : "New Event"}
+                {isMobile ? "" : t("literals.newEvent")}
               </Button>
             </div>
           </div>

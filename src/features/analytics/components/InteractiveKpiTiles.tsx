@@ -76,7 +76,7 @@ export default function InteractiveKpiTiles() {
 
   const triggerCopilotAutomation = (tile: TileId) => {
     toast({
-      title: "Co-Pilot automation queued",
+      title: t("literals.coPilotAutomationQueued"),
       description: automationMessages[tile],
     });
   };
@@ -133,7 +133,7 @@ export default function InteractiveKpiTiles() {
                   {ActiveTileIcon ? (
                     <ActiveTileIcon className="h-5 w-5 text-primary" />
                   ) : null}
-                  {activeTileDescriptor?.title ?? "Interactive insight"}
+                  {activeTileDescriptor?.title ?? t("literals.interactiveInsight")}
                 </SheetTitle>
                 <SheetDescription>
                   {t("analytics.poweredByCoPilotDrillIntoRealtimeMetricsAndTriggerTheRightNextAction")}

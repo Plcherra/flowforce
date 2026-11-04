@@ -73,8 +73,8 @@ export function OperatorAccessGrid({
                 const diffLabel =
                   classPermissions && enabled !== classOn
                     ? enabled
-                      ? "Given"
-                      : "Taken"
+                      ? t("literals.given")
+                      : t("literals.taken")
                     : null;
                 return (
                   <label
@@ -84,7 +84,7 @@ export function OperatorAccessGrid({
                     {grantable ? (
                       <Switch
                         id={`${idPrefix}-${row.id}-${item.id}`}
-                        aria-label={`${labelFor(row)} ${switchLabel}`}
+                        aria-label={t("literals.text32", { value0: labelFor(row), switchLabel: switchLabel })}
                         checked={enabled}
                         disabled={disabled || locked || !grantable}
                         onCheckedChange={(checked) =>
