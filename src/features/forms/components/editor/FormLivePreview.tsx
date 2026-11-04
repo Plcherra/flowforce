@@ -12,8 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
+import { evaluateArithmeticFormula, formulaAnswerMap } from "@/features/forms/utils/formulaValue";
 
 export function FormLivePreview() {
   const { t } = useTranslation();
@@ -105,7 +107,7 @@ export function FormLivePreview() {
                             <SelectTrigger>
                               <SelectValue
                                 placeholder={
-                                  field.placeholder ?? "Select an option"
+                                  field.placeholder ?? t("forms.selectAnOption")
                                 }
                               />
                             </SelectTrigger>
@@ -184,7 +186,81 @@ export function FormLivePreview() {
                           </div>
                         </div>
                       );
-                    default:
+                    case "yes_no":
+                      return (
+                        <div key={field.id} className="space-y-2">
+                          <Label className="text-sm font-medium text-foreground">
+                            {field.label}
+                          </Label>
+                          <div className="flex gap-2">
+                            {[true, false].map((choice) => (
+                              <Button
+                                key={String(choice)}
+                                type="button"
+                                size="sm"
+                                variant={value === choice ? "default" : "outline"}
+                                onClick={() => handleValueChange(field.id, choice)}
+                              >
+                                {t(choice ? "forms.yes" : "forms.no")}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    case "formula": {
+                      const answers = formulaAnswerMap(
+                        section.fields.map((item) => ({
+                          id: item.id,
+                          label: item.label,
+                        })),
+                        formState,
+                      );
+                      const result = evaluateArithmeticFormula(
+                        field.formula_expression ?? "",
+                        answers,
+                      );
+                      return (
+                        <div key={field.id} className="space-y-2">
+                          <Label className="text-sm font-medium text-foreground">
+                            {field.label}
+                          </Label>
+                          <Input
+                            readOnly
+                            value={result == null ? "" : String(result)}
+                            placeholder={t("forms.calculatedAutomatically")}
+                          />
+                        </div>
+                      );
+                    }
+                    case "signature":
+                    case "scanner":
+                    case "file_upload":
+                    case "image_upload":
+                    case "location":
+                    case "rating":
+                      return (
+                        <div key={field.id} className="space-y-1">
+                          <Label className="text-sm font-medium text-foreground">
+                            {field.label}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {t("forms.previewCapturedOnFill")}
+                          </p>
+                        </div>
+                      );
+                    default: {
+                      const inputType =
+                        field.type === "number"
+                          ? "number"
+                          : field.type === "date"
+                            ? "date"
+                            : field.type === "datetime"
+                              ? "datetime-local"
+                              : field.type === "email"
+                                ? "email"
+                                : field.type === "phone"
+                                  ? "tel"
+                                  : "text";
                       return (
                         <div key={field.id} className="space-y-2">
                           <Label className="text-sm font-medium text-foreground">
@@ -194,7 +270,7 @@ export function FormLivePreview() {
                             )}
                           </Label>
                           <Input
-                            type={field.type === "number" ? "number" : "text"}
+                            type={inputType}
                             placeholder={field.placeholder}
                             value={String(value ?? "")}
                             onChange={(event) =>
@@ -203,6 +279,7 @@ export function FormLivePreview() {
                           />
                         </div>
                       );
+                    }
                   }
                 })}
               </div>

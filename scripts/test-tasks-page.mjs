@@ -118,6 +118,24 @@ const { runFormFieldRowTests } = importTs(
 const { runFormTemplateTests } = importTs(
   "../src/features/forms/utils/formTemplates.test.ts",
 );
+const { runImportFormFieldTests } = importTs(
+  "../src/features/forms/utils/importFormFields.test.ts",
+);
+const { runFormEditorLayoutTests } = importTs(
+  "../src/features/forms/utils/formEditorLayout.test.ts",
+);
+const { runFormulaValueTests } = importTs(
+  "../src/features/forms/utils/formulaValue.test.ts",
+);
+const { runSubmissionValueTests } = importTs(
+  "../src/features/forms/utils/submissionValue.test.ts",
+);
+const { runFormTemplateCopyTests } = importTs(
+  "../src/features/forms/utils/formTemplateCopy.test.ts",
+);
+const { runFormsReadinessTests } = importTs(
+  "../src/features/forms/utils/formsReadiness.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -155,4 +173,10 @@ runPeoplePickerFilterTests();
 runFormLifecycleTests();
 runFormFieldRowTests();
 runFormTemplateTests();
+runImportFormFieldTests();
+runFormEditorLayoutTests();
+runFormulaValueTests();
+runSubmissionValueTests();
+runFormTemplateCopyTests();
+runFormsReadinessTests();
 console.log("tasks page tests passed");

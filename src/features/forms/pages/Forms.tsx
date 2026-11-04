@@ -182,7 +182,7 @@ export default function Forms() {
     ? asArray(forms).find((form) => form.id === builderFormId)
     : null;
   const builderInitialTitle =
-    builderForm?.title ?? builderFallback?.title ?? "New Form";
+    builderForm?.title ?? builderFallback?.title ?? t("forms.newForm");
   const builderInitialDescription =
     builderForm?.description ?? builderFallback?.description ?? "";
 
@@ -230,11 +230,11 @@ export default function Forms() {
       isLoading={isInitialLoading}
       error={formsError}
       onRetry={handleRetry}
-      loadingTitle="Loading Forms"
-      loadingDescription="Preparing your workspace forms…"
+      loadingTitle={t("forms.loadingForms")}
+      loadingDescription={t("forms.preparingForms")}
     >
-      <div className="w-full space-y-3 px-1 py-3 sm:px-2">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="w-full min-w-0 space-y-3 px-1 py-3 sm:px-2">
+        <div className="sticky top-0 z-20 flex flex-col gap-2 bg-background/95 py-1 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-foreground">{t("common.forms")}</h1>
             <p className="text-sm text-muted-foreground">
@@ -317,6 +317,8 @@ export default function Forms() {
                       onEdit={handleOpenBuilder}
                       onDelete={listActions.setDeleteId}
                       onPublish={(formId) => void listActions.publishForm(formId)}
+                      onArchive={(formId) => void listActions.archiveForm(formId)}
+                      onRestore={(formId) => void listActions.restoreForm(formId)}
                       onViewSubmissions={setSubmissionsFormId}
                     />
                   </ErrorBoundary>
@@ -338,7 +340,10 @@ export default function Forms() {
               onFormCreated={(formId, meta) => {
                 setCreateDialogOpen(false);
                 setDiscardEmptyId(meta?.discardIfEmpty ? formId : null);
-                setBuilderFallback({ title: "New Form", description: "" });
+                setBuilderFallback({
+                  title: meta?.title ?? t("forms.newForm"),
+                  description: meta?.description ?? "",
+                });
                 setBuilderFormId(formId);
                 void refetchForms();
               }}
@@ -367,6 +372,7 @@ export default function Forms() {
                 formId={builderFormId}
                 initialTitle={builderInitialTitle}
                 initialDescription={builderInitialDescription}
+                initialSettings={builderForm?.settings}
                 discardIfEmpty={discardEmptyId === builderFormId}
               />
             </ErrorBoundary>
