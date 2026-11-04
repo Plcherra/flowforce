@@ -4,21 +4,25 @@ import { BellRing, Bot, Loader2, RefreshCw, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
   sortWorkflowAutomationHooks,
   summarizeWorkflowAutomationHooks,
-  workflowAutomationHookLabels,
   type WorkflowAutomationHookRow,
   type WorkflowAutomationRpcResult,
 } from "@/services/operations/workflowAutomationHooks";
 import { logger } from "@/utils/logger";
+import { workflowHookLabel } from "../utils/operationsHubLabels";
+import { normalizeOpsViewRows } from "../utils/opsViewRow";
 
 export function WorkflowAutomationHooksPanel() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit = !permissionLoading && can("editTasks");
   const [hooks, setHooks] = useState<WorkflowAutomationHookRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
@@ -55,7 +59,7 @@ export function WorkflowAutomationHooksPanel() {
       }
       setHooks([]);
     } else {
-      setHooks((data ?? []) as WorkflowAutomationHookRow[]);
+      setHooks(normalizeOpsViewRows<WorkflowAutomationHookRow>(data));
     }
 
     setLoading(false);
@@ -80,8 +84,11 @@ export function WorkflowAutomationHooksPanel() {
 
       const result = (data ?? {}) as WorkflowAutomationRpcResult;
       toast({
-        title: "Automation hooks checked",
-        description: `${result.created_count ?? 0} notification hooks created, ${result.skipped_count ?? 0} already handled.`,
+        title: t("operations.automationHooksChecked"),
+        description: t("operations.automationHooksCheckedDetail", {
+          created: result.created_count ?? 0,
+          skipped: result.skipped_count ?? 0,
+        }),
       });
       await loadHooks();
     } catch (error) {
@@ -91,9 +98,9 @@ export function WorkflowAutomationHooksPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Automation hook failed",
+        title: t("operations.automationHookFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected automation error.",
+          error instanceof Error ? error.message : t("operations.unexpectedAutomationError"),
       });
     } finally {
       setRunning(false);
@@ -134,7 +141,7 @@ export function WorkflowAutomationHooksPanel() {
         size="sm"
         variant="outline"
         className="mt-4 w-full"
-        disabled={!companyId || running}
+        disabled={!companyId || running || !canEdit}
         onClick={() => void runOverdueCheck()}
       >
         {running ? (
@@ -165,10 +172,10 @@ export function WorkflowAutomationHooksPanel() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold">
-                    {workflowAutomationHookLabels[hook.hook_type]}
+                    {workflowHookLabel(t, hook.hook_type)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {hook.workflow_name ?? hook.exception_title ?? "Workflow run"}
+                    {hook.workflow_name ?? hook.exception_title ?? t("operations.workflowRunLabel")}
                   </p>
                 </div>
                 <Badge variant={hook.status === "failed" ? "destructive" : "outline"}>

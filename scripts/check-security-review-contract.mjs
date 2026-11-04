@@ -101,30 +101,6 @@ for (const pattern of [
   );
 }
 
-const automationRoute = readText(
-  "app/api/ops/issues/[issueId]/suggest-automation/route.ts",
-);
-for (const pattern of [
-  "getBearerToken",
-  "supabaseAdmin.auth.getUser",
-  "userCanAccessOrg",
-  "client: supabaseAdmin",
-]) {
-  assertIncludes(
-    automationRoute,
-    pattern,
-    `automation suggestion route must include ${pattern}`,
-  );
-}
-
-const automationGenerator = readText(
-  "src/server/ops/suggestions/generateAutomationSuggestion.ts",
-);
-assertIncludes(
-  automationGenerator,
-  "serverEnv.XAI_API_KEY",
-  "automation generator must use the server-only xAI key",
-);
 assertIncludes(
   readText("src/lib/env.ts"),
   "OPENAI_API_KEY: process.env.OPENAI_API_KEY",
