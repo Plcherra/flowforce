@@ -21,6 +21,7 @@ const requireIncludes = (text, needles, label) => {
 const doc = readText("docs/recipe-production-costing.md");
 const production = readText("src/lib/inventory/production.ts");
 const service = readText("src/features/inventory/services/inventoryService.ts");
+const englishLocale = readText("src/locales/en.json");
 const form = readText(
   "src/features/inventory/components/ProductionEventForm.tsx",
 );
@@ -72,7 +73,7 @@ requireIncludes(
     "inv_adjustments",
     "production_consumption",
     "inv_waste",
-    "production_waste",
+    "productionwaste",
     "reference_number",
   ],
   "production service",
@@ -83,11 +84,16 @@ requireIncludes(
   [
     "preview?.canRecord",
     "preview.blockingIssues",
-    "Production cannot be recorded yet",
+    "inventory.productionCannotBeRecordedYet",
     "material.warning",
     "calculateProductionMaterials",
   ],
   "production form",
+);
+requireIncludes(
+  englishLocale,
+  ["Production cannot be recorded yet"],
+  "English production form copy",
 );
 
 requireIncludes(

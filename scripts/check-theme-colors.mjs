@@ -92,6 +92,8 @@ function loadBaseline() {
 // and the vendor list. Phase 2 locks the viewport theme color. Decision 4 locks
 // the logo plate. Role colors match the colors planted in the database.
 // Signature ink and printable schedules use real colors outside the theme.
+// Shift paint and calendar event blocks keep stored shift colors and the ink
+// on those blocks. Locale files keep color placeholders, not theme classes.
 const allowedFiles = new Set([
   "app/globals.css",
   "app/layout.tsx",
@@ -127,6 +129,17 @@ const allowedFiles = new Set([
   "src/hooks/useCompany.tsx",
   "src/hooks/useCompanyRoles.tsx",
   "src/hooks/useEvents.tsx",
+  "src/features/company-updates/companyUpdateTranslation.test.ts",
+  "src/features/scheduling/components/CalendarEventBlock.tsx",
+  "src/features/scheduling/scheduleTextTranslation.test.ts",
+  "src/features/scheduling/utils/shiftChipPaint.test.ts",
+  "src/features/scheduling/utils/shiftChipPaint.ts",
+  "src/locales/de.json",
+  "src/locales/en.json",
+  "src/locales/es.json",
+  "src/locales/fr.json",
+  "src/locales/it.json",
+  "src/locales/pt.json",
 ]);
 
 const found = scanTree();

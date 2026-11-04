@@ -25,7 +25,7 @@ We have to change this:
 - Actions
 - Add
 
-This is the same layout as the Connecteam app, and we have to differ from it: somehow have the same power to do the work, without copying that layout.
+This is the same layout as the workforce scheduling app we are replacing, and we have to differ from it: somehow have the same power to do the work, without copying that layout.
 
 For example, copy last week is duplicated. It has a button beside Add first shift, and it is also inside the Actions button.
 
