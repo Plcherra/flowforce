@@ -85,20 +85,20 @@ export function CreateTaskDialog({
           })),
         })
       : [];
+  const scopePending = createLevel === "others" && !scope;
   const onlySelf =
     createLevel === "self" ||
-    !scope ||
-    allowedAssignees.every((person) => person.id === user?.id);
+    (scope != null &&
+      allowedAssignees.every((person) => person.id === user?.id));
 
   useEffect(() => {
     if (!optionsError) return;
     toast({
-      title: "Unable to load options",
-      description:
-        "Some fields may be unavailable right now. Please try again later.",
+      title: t("tasks.unableToLoadOptions"),
+      description: t("tasks.optionsUnavailable"),
       variant: "destructive",
     });
-  }, [optionsError, toast]);
+  }, [optionsError, t, toast]);
 
   const clearError = (field: string) => {
     setErrors((prev) => {
@@ -208,14 +208,13 @@ export function CreateTaskDialog({
 
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to create task. Please try again.",
+          title: t("tasks.errorTitle"),
+          description: t("tasks.createFailed"),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Success",
-          description: "Task created successfully.",
+          title: t("tasks.taskCreated"),
         });
 
         // If user wants to create reminder, show reminder dialog
@@ -229,8 +228,8 @@ export function CreateTaskDialog({
     } catch (error) {
       logger.error("Error creating task:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -240,7 +239,7 @@ export function CreateTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] overflow-y-auto p-4 sm:max-w-[500px] sm:p-6">
         <DialogHeader>
           <DialogTitle>{t("tasks.createNewTask")}</DialogTitle>
           <DialogDescription>
@@ -283,7 +282,7 @@ export function CreateTaskDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="priority">{t("tasks.priority")}</Label>
               <Select
@@ -339,14 +338,14 @@ export function CreateTaskDialog({
                     value === "none" ? "" : value,
                   )
                 }
-                disabled={optionsLoading}
+                disabled={optionsLoading || scopePending}
               >
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      optionsLoading
-                        ? "Loading team members…"
-                        : "Select team member"
+                      optionsLoading || scopePending
+                        ? t("tasks.loadingTeam")
+                        : t("tasks.selectTeamMember")
                     }
                   />
                 </SelectTrigger>
@@ -451,8 +450,12 @@ export function CreateTaskDialog({
             >
               {t("tasks.cancel")}
             </Button>
-            <Button type="submit" disabled={loading || !formData.title.trim()}>
-              {loading ? "Creating..." : "Create Task"}
+            <Button
+              type="submit"
+              className="min-h-11"
+              disabled={loading || scopePending || !formData.title.trim()}
+            >
+              {loading ? t("tasks.creating") : t("tasks.createTask")}
             </Button>
           </DialogFooter>
         </form>

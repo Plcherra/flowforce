@@ -5,10 +5,8 @@ import type {
   TaskStatusFilter,
 } from "@/features/tasks/types/filters";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
-import {
-  READINESS_DEFINITIONS,
-  type ReadinessFilter,
-} from "@/features/tasks/utils/readinessFilters";
+import type { ReadinessFilter } from "@/features/tasks/utils/readinessFilters";
+import { translatedReadinessHint } from "@/features/tasks/utils/taskCopy";
 import type { StatusTabItem } from "@/features/tasks/utils/statusTabLayout";
 import { TaskFilters } from "./TaskFilters";
 import { TaskStatusTabs } from "./TaskStatusTabs";
@@ -31,10 +29,10 @@ interface TaskViewSectionProps {
   readinessCounts: Record<ReadinessFilter, number>;
 }
 
-const readinessItems: Array<{ key: ReadinessFilter; label: string }> = [
-  { key: "overdue", label: "Overdue" },
-  { key: "unassigned", label: "Unassigned" },
-  { key: "due", label: "Due" },
+const readinessItems: Array<{ key: ReadinessFilter; labelKey: string }> = [
+  { key: "overdue", labelKey: "tasks.overdue" },
+  { key: "unassigned", labelKey: "tasks.unassigned" },
+  { key: "due", labelKey: "tasks.readinessDue" },
 ];
 
 export function TaskViewSection({
@@ -93,10 +91,10 @@ export function TaskViewSection({
             <button
               key={item.key}
               type="button"
-              title={READINESS_DEFINITIONS[item.key]}
+              title={translatedReadinessHint(t, item.key)}
               aria-pressed={pressed}
               data-testid={`tasks-readiness-${item.key}`}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm ${
+              className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3 py-1 text-sm ${
                 pressed
                   ? "border-primary bg-primary/10"
                   : "border-border bg-muted/40"
@@ -105,7 +103,7 @@ export function TaskViewSection({
                 onReadinessFilterChange(pressed ? null : item.key)
               }
             >
-              <span>{item.label}</span>
+              <span>{t(item.labelKey)}</span>
               <span className="text-xs font-medium tabular-nums">
                 {readinessCounts[item.key]}
               </span>

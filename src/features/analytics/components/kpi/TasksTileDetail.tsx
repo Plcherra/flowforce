@@ -14,6 +14,7 @@ interface TasksTileDetailProps {
   copilotMessage: string;
   onAutomation: () => void;
   onCreateTask: () => void;
+  canCreateTask?: boolean;
   onNavigateToTasks: () => void;
 }
 
@@ -22,6 +23,7 @@ export function TasksTileDetail({
   copilotMessage,
   onAutomation,
   onCreateTask,
+  canCreateTask = true,
   onNavigateToTasks,
 }: TasksTileDetailProps) {
   const { t } = useTranslation();
@@ -86,11 +88,15 @@ export function TasksTileDetail({
         message={copilotMessage}
         actions={[
           { label: "Deploy automation", onClick: onAutomation },
-          {
-            label: "Create improvement task",
-            onClick: onCreateTask,
-            variant: "outline",
-          },
+          ...(canCreateTask
+            ? [
+                {
+                  label: "Create improvement task",
+                  onClick: onCreateTask,
+                  variant: "outline" as const,
+                },
+              ]
+            : []),
           {
             label: "Open task workspace",
             onClick: onNavigateToTasks,

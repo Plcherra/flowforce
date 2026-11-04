@@ -17,6 +17,13 @@ import { useEmployeePerformance } from "@/hooks/useAnalytics";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CreateTaskDialog } from "@/features/tasks/components/CreateTaskDialog";
+import { useCan } from "@/hooks/useCan";
+import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
+import {
+  taskCreateDialogProps,
+  taskCreateKeysAreSet,
+} from "@/features/tasks/utils/taskCreateAccess";
+import { useTaskAssigneeScope } from "@/features/tasks/hooks/useTaskAssigneeScope";
 import { useKpiMetrics } from "@/features/analytics/hooks/useKpiMetrics";
 import { useKpiTiles } from "@/features/analytics/hooks/useKpiTiles";
 import { KpiTile, TileDetailPanel } from "@/features/analytics/components/kpi";
@@ -36,6 +43,18 @@ export default function InteractiveKpiTiles() {
 
   const [activeTile, setActiveTile] = useState<TileId | null>(null);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
+  const { can, getSource, isLoading: permissionsLoading } = useCan();
+  const assigneeScope = useTaskAssigneeScope();
+  const createDialog = taskCreateDialogProps({
+    permissionsLoading,
+    level: taskCreateLevel({
+      createOthers: can("tasks.custom.create_others"),
+      createSelf: can("tasks.custom.create_self"),
+      legacyEdit: can("editTasks"),
+      keysSet: taskCreateKeysAreSet("custom", getSource),
+    }),
+    scope: assigneeScope,
+  });
 
   const isLoading =
     tasksLoading || schedulingLoading || performanceLoading;
@@ -129,7 +148,10 @@ export default function InteractiveKpiTiles() {
                   performanceMetrics={metrics.performanceMetrics}
                   copilotMessages={copilotMessages}
                   onAutomation={triggerCopilotAutomation}
-                  onCreateTask={() => setShowTaskDialog(true)}
+                  onCreateTask={() => {
+                    if (createDialog) setShowTaskDialog(true);
+                  }}
+                  canCreateTask={Boolean(createDialog)}
                   onNavigate={(path) => navigate(path)}
                   onClose={() => setActiveTile(null)}
                 />
@@ -139,10 +161,14 @@ export default function InteractiveKpiTiles() {
         </SheetContent>
       </Sheet>
 
-      <CreateTaskDialog
-        open={showTaskDialog}
-        onClose={() => setShowTaskDialog(false)}
-      />
+      {createDialog ? (
+        <CreateTaskDialog
+          open={showTaskDialog}
+          onClose={() => setShowTaskDialog(false)}
+          createLevel={createDialog.createLevel}
+          scope={createDialog.scope}
+        />
+      ) : null}
     </>
   );
 }

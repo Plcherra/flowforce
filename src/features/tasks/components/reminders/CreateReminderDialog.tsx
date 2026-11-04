@@ -25,20 +25,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  CalendarIcon,
-  Clock,
-  Bell,
-  Volume2,
-  Mail,
-  Smartphone,
-  Monitor,
-} from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { useReminders } from "@/features/tasks/hooks/useReminders";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { logger } from "@/utils/logger";
 
 interface CreateReminderDialogProps {
@@ -64,13 +55,7 @@ export function CreateReminderDialog({
     description: "",
     type: "custom",
     priority: "medium",
-    sound_enabled: true,
-    sound_type: "default",
-    notification_methods: ["in_app", "browser"],
-    repeat_enabled: false,
-    repeat_interval: "none",
     snooze_enabled: true,
-    auto_complete: false,
   });
 
   const calculateReminderDate = () => {
@@ -90,15 +75,6 @@ export function CreateReminderDialog({
     return new Date(
       now.getTime() + intervals[reminderInterval as keyof typeof intervals],
     );
-  };
-
-  const toggleNotificationMethod = (method: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      notification_methods: prev.notification_methods.includes(method)
-        ? prev.notification_methods.filter((m) => m !== method)
-        : [...prev.notification_methods, method],
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,21 +99,20 @@ export function CreateReminderDialog({
         type: formData.type,
         priority: formData.priority,
         task_id: taskId || null,
-        sound_enabled: formData.sound_enabled,
-        sound_type: formData.sound_type,
-        notification_methods: formData.notification_methods,
-        repeat_enabled: formData.repeat_enabled,
-        repeat_interval: formData.repeat_interval,
+        sound_enabled: false,
+        sound_type: "default",
+        notification_methods: ["in_app"],
+        repeat_enabled: false,
+        repeat_interval: "none",
         snooze_enabled: formData.snooze_enabled,
-        auto_complete: formData.auto_complete,
+        auto_complete: false,
         snooze_count: 0,
         last_triggered_at: null,
         next_reminder_at: null,
       });
 
       toast({
-        title: "Success",
-        description: "Reminder created successfully.",
+        title: t("tasks.reminderCreated"),
       });
 
       // Reset form
@@ -146,13 +121,7 @@ export function CreateReminderDialog({
         description: "",
         type: "custom",
         priority: "medium",
-        sound_enabled: true,
-        sound_type: "default",
-        notification_methods: ["in_app", "browser"],
-        repeat_enabled: false,
-        repeat_interval: "none",
         snooze_enabled: true,
-        auto_complete: false,
       });
       setReminderDate(undefined);
       setReminderTime("09:00");
@@ -161,8 +130,8 @@ export function CreateReminderDialog({
     } catch (error) {
       logger.error("Error creating reminder:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "Failed to create reminder. Please try again.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.reminderFailed"),
         variant: "destructive",
       });
     } finally {
@@ -172,7 +141,7 @@ export function CreateReminderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] overflow-y-auto p-4 sm:max-w-[500px] sm:p-6">
         <DialogHeader>
           <DialogTitle>{t("tasks.createReminder")}</DialogTitle>
           <DialogDescription>
@@ -210,7 +179,7 @@ export function CreateReminderDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t("tasks.reminderTime")}</Label>
               <Select
@@ -255,7 +224,7 @@ export function CreateReminderDialog({
           </div>
 
           {reminderInterval === "custom" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("tasks.reminderDate")}</Label>
                 <Popover>
@@ -267,7 +236,7 @@ export function CreateReminderDialog({
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {reminderDate
                         ? format(reminderDate, "PPP")
-                        : "Pick a date"}
+                        : t("tasks.pickDate")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -298,231 +267,22 @@ export function CreateReminderDialog({
             </div>
           )}
 
-          {/* Sound Settings */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">
-              {t("tasks.soundNotifications")}
-            </Label>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-sm">{t("tasks.enableSound")}</Label>
-                <p className="text-xs text-muted-foreground">
-                  {t("tasks.playSoundWhenReminderTriggers")}
-                </p>
-              </div>
-              <Switch
-                checked={formData.sound_enabled}
-                onCheckedChange={(checked) =>
-                  setFormData((prev) => ({ ...prev, sound_enabled: checked }))
-                }
-              />
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label className="text-sm">{t("tasks.enableSnooze")}</Label>
+              <p className="text-xs text-muted-foreground">
+                {t("tasks.allowSnoozingThisReminder")}
+              </p>
             </div>
-
-            {formData.sound_enabled && (
-              <div className="space-y-2">
-                <Label htmlFor="sound-type">{t("tasks.soundType")}</Label>
-                <Select
-                  value={formData.sound_type}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, sound_type: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("tasks.selectSound")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="default">
-                      {t("tasks.defaultNotification")}
-                    </SelectItem>
-                    <SelectItem value="chime">{t("tasks.softChime")}</SelectItem>
-                    <SelectItem value="bell">{t("tasks.bell")}</SelectItem>
-                    <SelectItem value="alert">{t("tasks.alertTone")}</SelectItem>
-                    <SelectItem value="gentle">{t("tasks.gentleReminder")}</SelectItem>
-                    <SelectItem value="urgent">{t("tasks.urgentAlert")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-
-          {/* Notification Methods */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">
-              {t("tasks.notificationMethods")}
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              {t("tasks.chooseHowYouWantToReceiveThisReminder")}
-            </p>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div
-                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                  formData.notification_methods.includes("in_app")
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-foreground"
-                }`}
-                onClick={() => toggleNotificationMethod("in_app")}
-              >
-                <div className="flex items-center space-x-2">
-                  <Bell className="h-4 w-4" />
-                  <span className="text-sm font-medium">{t("tasks.inApp")}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tasks.showInNotificationsPanel")}
-                </p>
-              </div>
-
-              <div
-                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                  formData.notification_methods.includes("browser")
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-foreground"
-                }`}
-                onClick={() => toggleNotificationMethod("browser")}
-              >
-                <div className="flex items-center space-x-2">
-                  <Monitor className="h-4 w-4" />
-                  <span className="text-sm font-medium">{t("tasks.browserPush")}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tasks.browserNotificationPopup")}
-                </p>
-              </div>
-
-              <div
-                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                  formData.notification_methods.includes("email")
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-foreground"
-                }`}
-                onClick={() => toggleNotificationMethod("email")}
-              >
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4" />
-                  <span className="text-sm font-medium">{t("tasks.email")}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tasks.sendEmailReminder")}
-                </p>
-              </div>
-
-              <div
-                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                  formData.notification_methods.includes("mobile")
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-foreground"
-                }`}
-                onClick={() => toggleNotificationMethod("mobile")}
-              >
-                <div className="flex items-center space-x-2">
-                  <Smartphone className="h-4 w-4" />
-                  <span className="text-sm font-medium">{t("tasks.mobilePush")}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tasks.mobileAppNotification")}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-1 mt-2">
-              {formData.notification_methods.map((method) => (
-                <Badge key={method} variant="secondary" className="text-xs">
-                  {method === "in_app"
-                    ? "In-App"
-                    : method === "browser"
-                      ? "Browser"
-                      : method === "email"
-                        ? "Email"
-                        : "Mobile"}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Advanced Options */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">{t("tasks.advancedOptions")}</Label>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">{t("tasks.repeatReminder")}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t("tasks.repeatThisReminderAtIntervals")}
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.repeat_enabled}
-                  onCheckedChange={(checked) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      repeat_enabled: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              {formData.repeat_enabled && (
-                <div className="space-y-2">
-                  <Label htmlFor="repeat-interval">{t("tasks.repeatEvery")}</Label>
-                  <Select
-                    value={formData.repeat_interval}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        repeat_interval: value,
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("tasks.selectInterval")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5min">{t("tasks.text5Minutes")}</SelectItem>
-                      <SelectItem value="15min">{t("tasks.text15Minutes")}</SelectItem>
-                      <SelectItem value="30min">{t("tasks.text30Minutes")}</SelectItem>
-                      <SelectItem value="1hour">{t("tasks.text1Hour")}</SelectItem>
-                      <SelectItem value="daily">{t("tasks.daily")}</SelectItem>
-                      <SelectItem value="weekly">{t("tasks.weekly")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">{t("tasks.enableSnooze")}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t("tasks.allowSnoozingThisReminder")}
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.snooze_enabled}
-                  onCheckedChange={(checked) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      snooze_enabled: checked,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-sm">{t("tasks.autoComplete")}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t("tasks.markAsCompletedWhenTaskIsDone")}
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.auto_complete}
-                  onCheckedChange={(checked) =>
-                    setFormData((prev) => ({ ...prev, auto_complete: checked }))
-                  }
-                />
-              </div>
-            </div>
+            <Switch
+              checked={formData.snooze_enabled}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  snooze_enabled: checked,
+                }))
+              }
+            />
           </div>
 
           <DialogFooter>
@@ -538,11 +298,10 @@ export function CreateReminderDialog({
               disabled={
                 loading ||
                 !formData.title.trim() ||
-                (reminderInterval === "custom" && !reminderDate) ||
-                formData.notification_methods.length === 0
+                (reminderInterval === "custom" && !reminderDate)
               }
             >
-              {loading ? "Creating..." : "Create Reminder"}
+              {loading ? t("tasks.creating") : t("tasks.createReminder")}
             </Button>
           </DialogFooter>
         </form>

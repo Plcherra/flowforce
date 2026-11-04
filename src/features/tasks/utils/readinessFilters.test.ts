@@ -70,6 +70,18 @@ export function runReadinessFilterTests() {
   assert.equal(readinessCounts(doneOnly).overdue, 0);
   assert.equal(readinessCounts(doneOnly).due, 0);
   assert.equal(readinessCounts(doneOnly).unassigned, 1);
+  assert.equal(
+    readinessCounts([
+      {
+        id: "shared",
+        status: "todo",
+        due_date: null,
+        assigned_to: null,
+        links: { assignee_ids: ["ada", "ben"] },
+      },
+    ]).unassigned,
+    0,
+  );
 
   assert.equal(
     READINESS_DEFINITIONS.overdue,

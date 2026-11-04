@@ -16,7 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { TaskPriorityFilter } from "../types/filters";
-import { TASK_KIND_LABELS, type TaskKindFilter } from "../utils/taskKind";
+import type { TaskKindFilter } from "../utils/taskKind";
+import { translatedKindLabel, translatedPriorityLabel } from "../utils/taskCopy";
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -86,7 +87,7 @@ export function TaskFilters({
           <SelectContent>
             {priorityOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
-                {option.label}
+                {translatedPriorityLabel(t, option.value, option.label)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -105,15 +106,15 @@ export function TaskFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("tasks.allTypes")}</SelectItem>
-            <SelectItem value="shift">{TASK_KIND_LABELS.shift}</SelectItem>
-            <SelectItem value="checklist">{TASK_KIND_LABELS.checklist}</SelectItem>
-            <SelectItem value="custom">{TASK_KIND_LABELS.custom}</SelectItem>
+            <SelectItem value="shift">{translatedKindLabel(t, "shift")}</SelectItem>
+            <SelectItem value="checklist">{translatedKindLabel(t, "checklist")}</SelectItem>
+            <SelectItem value="custom">{translatedKindLabel(t, "custom")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {filtersActive && (
-        <Button variant="ghost" size="sm" onClick={onResetFilters}>
+        <Button variant="ghost" size="sm" className="min-h-11" onClick={onResetFilters}>
           {t("tasks.clearFilters")}
         </Button>
       )}
