@@ -28,6 +28,7 @@ const helpers = readText(
   "src/features/inventory/routes/inventoryActionsHelpers.ts",
 );
 const wastePage = readText("src/features/inventory/routes/Waste.tsx");
+const englishLocale = readText("src/locales/en.json");
 const intelligence = readText(
   "src/features/inventory/utils/wasteIntelligence.ts",
 );
@@ -68,7 +69,7 @@ requireIncludes(
   [
     "useCreateInventoryAdjustment",
     "CreateAdjustmentData",
-    "reason_category",
+    "reasoncategory",
     "metadata",
   ],
   "waste hook",
@@ -95,11 +96,16 @@ requireIncludes(
   [
     "summarizeWasteIntelligence",
     "calculateWasteOutliers",
-    "7-Day Trend",
-    "Highest Impact",
+    "inventory.7DayTrend",
+    "inventory.highestImpact",
     "Outliers",
   ],
   "waste page",
+);
+requireIncludes(
+  englishLocale,
+  ["7-Day Trend", "Highest Impact"],
+  "English waste page copy",
 );
 
 requireIncludes(

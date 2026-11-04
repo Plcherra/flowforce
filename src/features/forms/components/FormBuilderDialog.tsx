@@ -12,8 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForms, type FormFieldRow } from "@/features/forms/hooks/useForms";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/public-types";
 import { deleteFormRow, updateFormRow } from "@/features/forms/repositories/formsRepository";
 import { canKeepForm, shouldDiscardEmptyDraft } from "@/features/forms/utils/formLifecycle";
+import {
+  mergeFormEditorLayout,
+  readFormEditorLayout,
+  splitFieldsByLayout,
+} from "@/features/forms/utils/formEditorLayout";
 import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +39,7 @@ interface FormBuilderDialogProps {
   formId: string;
   initialTitle?: string;
   initialDescription?: string;
+  initialSettings?: unknown;
   discardIfEmpty?: boolean;
 }
 
@@ -49,8 +57,9 @@ export default function FormBuilderDialog({
   open,
   onOpenChange,
   formId,
-  initialTitle = "New Form",
+  initialTitle,
   initialDescription = "",
+  initialSettings,
   discardIfEmpty = false,
 }: FormBuilderDialogProps) {
   const { t, i18n } = useTranslation();
@@ -65,7 +74,7 @@ export default function FormBuilderDialog({
   const addField = useFormSchemaStore((state) => state.addField);
   const resetSchema = useFormSchemaStore((state) => state.reset);
 
-  const [formTitle, setFormTitle] = useState(initialTitle);
+  const [formTitle, setFormTitle] = useState(initialTitle ?? "");
   const [formDescription, setFormDescription] = useState(initialDescription);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +87,7 @@ export default function FormBuilderDialog({
   }, [open, resetSchema]);
 
   useEffect(() => {
-    setFormTitle(initialTitle);
+    setFormTitle(initialTitle ?? "");
     setFormDescription(initialDescription);
   }, [initialTitle, initialDescription]);
 
@@ -92,8 +101,8 @@ export default function FormBuilderDialog({
       if (cancelled) return;
       if (error) {
         toast({
-          title: "Error",
-          description: "Unable to load form fields",
+          title: t("forms.errorTitle"),
+          description: t("forms.unableToLoadFields"),
           variant: "destructive",
         });
         setLoading(false);
@@ -105,47 +114,55 @@ export default function FormBuilderDialog({
       );
 
       savedFieldCountRef.current = rows.length;
+      const layout = readFormEditorLayout(initialSettings);
+      const mappedFields = rows.map((row) => ({
+        id: row.id ?? randomId(),
+        type: (row.field_type ?? "text") as FormField["type"],
+        label: row.label ?? t("forms.untitledField"),
+        description: row.description ?? undefined,
+        placeholder: row.placeholder ?? undefined,
+        required: Boolean(row.is_required),
+        options: Array.isArray(row.options)
+          ? row.options.map((option) => String(option))
+          : [],
+        validation:
+          (row.validation_rules as FormField["validation"]) ?? undefined,
+        min_value: row.min_value ?? undefined,
+        max_value: row.max_value ?? undefined,
+        step_value: row.step_value ?? undefined,
+        formula_expression: row.formula_expression ?? undefined,
+        dependent_fields: Array.isArray(row.dependent_fields)
+          ? (row.dependent_fields as string[])
+          : undefined,
+        rating_config:
+          (row.rating_config as FormField["rating_config"]) ?? undefined,
+        scan_config:
+          (row.scan_config as FormField["scan_config"]) ?? undefined,
+        media_config:
+          (row.media_config as FormField["media_config"]) ?? undefined,
+        content: undefined,
+      }));
+      const groups = splitFieldsByLayout(mappedFields, layout.sections);
       loadSchema({
         id: formId,
-        title: initialTitle ?? "Untitled form",
-        sections: [
-          {
-            id: randomId(),
-            title: "Main section",
-            fields: rows.map((row) => ({
-              id: row.id ?? randomId(),
-              type: (row.field_type ?? "text") as FormField["type"],
-              label: row.label ?? "Untitled field",
-              description: row.description ?? undefined,
-              placeholder: row.placeholder ?? undefined,
-              required: Boolean(row.is_required),
-              options: Array.isArray(row.options)
-                ? row.options.map((option) => String(option))
-                : [],
-              validation:
-                (row.validation_rules as FormField["validation"]) ?? undefined,
-              min_value: row.min_value ?? undefined,
-              max_value: row.max_value ?? undefined,
-              step_value: row.step_value ?? undefined,
-              formula_expression: row.formula_expression ?? undefined,
-              dependent_fields: Array.isArray(row.dependent_fields)
-                ? (row.dependent_fields as string[])
-                : undefined,
-              rating_config:
-                (row.rating_config as FormField["rating_config"]) ?? undefined,
-              scan_config:
-                (row.scan_config as FormField["scan_config"]) ?? undefined,
-              media_config:
-                (row.media_config as FormField["media_config"]) ?? undefined,
-              content: undefined,
-            })),
-          },
-        ],
-        formulas: [],
+        title: initialTitle ?? t("forms.untitledForm"),
+        sections: groups.map((group) => ({
+          id: randomId(),
+          title: group.title || t("forms.mainSection"),
+          fields: group.fields,
+        })),
+        formulas: mappedFields
+          .filter((field) => field.formula_expression)
+          .map((field) => ({
+            id: field.id,
+            name: field.label,
+            expression: field.formula_expression ?? "",
+            targetFieldId: field.id,
+          })),
         validations: undefined,
-        metadata: {},
+        metadata: { ownerOnly: layout.ownerOnly },
       });
-      setFormTitle(initialTitle ?? "Untitled form");
+      setFormTitle(initialTitle ?? t("forms.untitledForm"));
       setFormDescription(initialDescription ?? "");
       setLoading(false);
     };
@@ -160,7 +177,9 @@ export default function FormBuilderDialog({
     getFormFields,
     initialTitle,
     initialDescription,
+    initialSettings,
     loadSchema,
+    t,
     toast,
   ]);
 
@@ -174,7 +193,7 @@ export default function FormBuilderDialog({
         template.type === "select" ||
         template.type === "checkbox" ||
         template.type === "radio"
-          ? ["Option 1"]
+          ? [t("forms.option1")]
           : [],
     });
   };
@@ -202,8 +221,8 @@ export default function FormBuilderDialog({
 
     if (!formTitle.trim()) {
       toast({
-        title: "Form title required",
-        description: "Please provide a title before saving.",
+        title: t("forms.formTitleRequired"),
+        description: t("forms.formTitleRequiredHelp"),
         variant: "destructive",
       });
       return;
@@ -219,8 +238,8 @@ export default function FormBuilderDialog({
     }
     if (fields.some((field) => !field.label.trim())) {
       toast({
-        title: "Field label required",
-        description: "All fields must have a label.",
+        title: t("forms.fieldLabelRequired"),
+        description: t("forms.fieldLabelRequiredHelp"),
         variant: "destructive",
       });
       return;
@@ -231,26 +250,50 @@ export default function FormBuilderDialog({
       const companyId = profile?.companyId ?? profile?.company_id ?? null;
       if (!companyId) {
         toast({
-          title: "Save failed",
-          description: "Unable to update form details.",
+          title: t("forms.saveFailed"),
+          description: t("forms.unableToUpdateForm"),
           variant: "destructive",
         });
         return;
       }
+      const { data: currentRow, error: settingsError } = await supabase
+        .from("forms")
+        .select("settings")
+        .eq("id", formId)
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (settingsError) {
+        toast({
+          title: t("forms.saveFailed"),
+          description: t("forms.unableToUpdateForm"),
+          variant: "destructive",
+        });
+        return;
+      }
+      const settings = mergeFormEditorLayout(currentRow?.settings, {
+        ownerOnly: Boolean(current.metadata?.ownerOnly),
+        sections: current.sections
+          .filter((section) => section.fields.length > 0)
+          .map((section) => ({
+            title: section.title,
+            fieldCount: section.fields.length,
+          })),
+      });
       const updated = await updateFormRow(
         companyId,
         formId,
         {
           title: formTitle,
           description: formDescription || null,
+          settings: settings as Json,
         },
         appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
       );
 
       if (!updated) {
         toast({
-          title: "Save failed",
-          description: "Unable to update form details.",
+          title: t("forms.saveFailed"),
+          description: t("forms.unableToUpdateForm"),
           variant: "destructive",
         });
         return;
@@ -260,6 +303,9 @@ export default function FormBuilderDialog({
         FormFieldRow,
         "id" | "form_id" | "created_at" | "updated_at"
       >;
+      const formulaByTarget = new Map(
+        current.formulas.map((formula) => [formula.targetFieldId, formula.expression]),
+      );
       const payload: SaveField[] = fields.map((field, index) => ({
         field_order: index + 1,
         field_type: field.type,
@@ -273,18 +319,19 @@ export default function FormBuilderDialog({
         min_value: field.min_value ?? null,
         max_value: field.max_value ?? null,
         step_value: field.step_value ?? null,
-        formula_expression: field.formula_expression ?? null,
+        formula_expression:
+          formulaByTarget.get(field.id) || field.formula_expression || null,
         dependent_fields: field.dependent_fields ?? null,
         rating_config: field.rating_config ?? null,
         scan_config: field.scan_config ?? null,
         media_config: field.media_config ? (field.media_config as unknown as Record<string, unknown>) : null,
       }));
 
-      const { error } = await saveFormFields(formId, payload);
+      const { error } = await saveFormFields(formId, payload, { quiet: true });
       if (error) {
         toast({
-          title: "Save failed",
-          description: "Unable to save form changes.",
+          title: t("forms.saveFailed"),
+          description: t("forms.unableToSaveChanges"),
           variant: "destructive",
         });
         return;
@@ -380,8 +427,8 @@ export default function FormBuilderDialog({
             <span>{formTitle}</span>
             <span>
               {loading
-                ? "Loading form content…"
-                : "Live preview updates automatically."}
+                ? t("forms.loadingFormContent")
+                : t("forms.livePreviewUpdates")}
             </span>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">

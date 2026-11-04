@@ -31,12 +31,16 @@ import { useToast } from "@/hooks/use-toast";
 import { importFormFromFile } from "@/features/forms/services/formImportService";
 import { deleteFormRow } from "@/features/forms/repositories/formsRepository";
 import { formTemplates, type TemplateField } from "@/features/forms/utils/formTemplates";
+import { translateTemplateCopy } from "@/features/forms/utils/formTemplateCopy";
 import { logger } from "@/utils/logger";
 
 interface CreateFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onFormCreated?: (formId: string, meta?: { discardIfEmpty?: boolean }) => void;
+  onFormCreated?: (
+    formId: string,
+    meta?: { discardIfEmpty?: boolean; title?: string; description?: string },
+  ) => void;
   preferredMethod?: "blank" | "template" | "upload";
   onPreferredMethodHandled?: () => void;
 }
@@ -85,7 +89,7 @@ export default function CreateFormDialog({
 
   const createFormAndStartBuilder = useCallback(
     async (
-      title: string = "New Form",
+      title: string = "",
       description: string = "",
       options?: { file?: File; templateFields?: TemplateField[] },
     ) => {
@@ -94,47 +98,53 @@ export default function CreateFormDialog({
         const importedFile = options?.file;
         if (importedFile) {
           if (!user) {
-            throw new Error(
-              "You must be signed in to import forms from files.",
-            );
+            throw new Error("IMPORT_SIGN_IN");
           }
           const companyId = profile?.companyId ?? profile?.company_id ?? null;
           if (!companyId) {
-            throw new Error("Company context is required to import forms.");
+            throw new Error("IMPORT_COMPANY");
           }
 
-          const { form } = await importFormFromFile(
+          const { form, fieldCount } = await importFormFromFile(
             importedFile,
             user.id,
             companyId,
             appLanguageFromTag(i18n.resolvedLanguage || i18n.language),
           );
-          onFormCreated?.(form.id);
+          onFormCreated?.(form.id, {
+            discardIfEmpty: fieldCount === 0,
+            title: importedFile.name.replace(/\.[^/.]+$/, ""),
+          });
           resetDialog();
           onOpenChange(false);
           toast({
             title: t("forms.formImported"),
-            description: t("forms.fileReadyToEdit", { name: importedFile.name }),
+            description:
+              fieldCount > 0
+                ? t("forms.fileReadyToEdit", { name: importedFile.name })
+                : t("forms.importNeedsFields", { name: importedFile.name }),
           });
           return;
         }
 
+        const resolvedTitle = title.trim() || t("forms.newForm");
         const formData = {
-          title,
+          title: resolvedTitle,
           description: description || undefined,
           departmentid: undefined,
           is_anonymous: false,
         };
 
-        const { data, error } = await createForm(formData);
+        const { data, error } = await createForm(formData, { quiet: true });
         if (error || !data) {
-          throw error ?? new Error("Failed to create form");
+          throw error ?? new Error("CREATE_FAILED");
         }
 
         if (options?.templateFields?.length) {
           const { error: fieldError } = await saveFormFields(
             data.id,
             options.templateFields,
+            { quiet: true },
           );
           if (fieldError) {
             const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -147,17 +157,25 @@ export default function CreateFormDialog({
 
         onFormCreated?.(data.id, {
           discardIfEmpty: !options?.templateFields?.length,
+          title: resolvedTitle,
+          description,
         });
         resetDialog();
         onOpenChange(false);
       } catch (error) {
         logger.error("Unable to create form", { error, tags: ["error"] });
+        const code = error instanceof Error ? error.message : "";
+        const description =
+          code === "IMPORT_SIGN_IN"
+            ? t("forms.importSignIn")
+            : code === "IMPORT_COMPANY"
+              ? t("forms.importCompany")
+              : code === "CREATE_FAILED"
+                ? t("forms.formCreationFailed")
+                : t("forms.unexpectedError");
         toast({
-          title: "Form creation failed",
-          description:
-            error instanceof Error
-              ? error.message
-              : "Unexpected error occurred.",
+          title: t("forms.formCreationFailed"),
+          description,
           variant: "destructive",
         });
       } finally {
@@ -251,8 +269,12 @@ export default function CreateFormDialog({
                     <li key={template.id} className="flex items-center gap-2 px-3 py-2">
                       <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{template.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{template.description}</p>
+                        <p className="truncate text-sm font-medium">
+                          {translateTemplateCopy(template.name, t)}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {translateTemplateCopy(template.description, t)}
+                        </p>
                       </div>
                       {template.popular ? (
                         <Badge variant="secondary" className="hidden sm:inline-flex">
@@ -267,9 +289,24 @@ export default function CreateFormDialog({
                         disabled={creating}
                         onClick={() =>
                           void createFormAndStartBuilder(
-                            template.name,
-                            template.description,
-                            { templateFields: template.fields },
+                            translateTemplateCopy(template.name, t),
+                            translateTemplateCopy(template.description, t),
+                            {
+                              templateFields: template.fields.map((field) => ({
+                                ...field,
+                                label: translateTemplateCopy(field.label ?? "", t),
+                                placeholder: field.placeholder
+                                  ? translateTemplateCopy(field.placeholder, t)
+                                  : field.placeholder,
+                                options: Array.isArray(field.options)
+                                  ? field.options.map((option) =>
+                                      typeof option === "string"
+                                        ? translateTemplateCopy(option, t)
+                                        : option,
+                                    )
+                                  : field.options,
+                              })),
+                            },
                           )
                         }
                       >

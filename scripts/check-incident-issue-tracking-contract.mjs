@@ -72,8 +72,7 @@ requireIncludes(
     "operations_incident_issue_queue_v",
     "update_operational_issue_status",
     "incidentIssueSlaLabels",
-    "openAutomationDrawer",
-    "Resolve",
+    "operations.resolve",
   ],
   "Operations issue panel",
 );

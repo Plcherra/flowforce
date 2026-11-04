@@ -1,113 +1,187 @@
-import { useMemo, useState } from "react";
-import { addDays, endOfDay, startOfDay, subDays } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Plus, Search, Wrench } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { SchedulingProvider } from "@/contexts/SchedulingContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { CreateEventDialog } from "@/features/calendar/components/CreateEventDialog";
 import { CreateVendorVisitDialog } from "@/features/calendar/components/CreateVendorVisitDialog";
+import { EditEventDialog } from "@/features/calendar/components/EditEventDialog";
 import { EventDetailsDrawer } from "@/features/calendar/components/EventDetailsDrawer";
-import { SchedulingCalendar } from "@/features/scheduling/components/SchedulingCalendar";
+import { EventsCalendarBoard } from "@/features/calendar/components/EventsCalendarBoard";
+import {
+  calendarQuery,
+  eventMatchesQuery,
+  parseCalendarDate,
+  type CalendarBoardView,
+} from "@/features/calendar/utils/calendarBoard";
+import { useEvents, type AppEvent } from "@/hooks/useEvents";
+import {
+  mapAppEventToCalendarEvent,
+  type CalendarEvent,
+} from "@/hooks/useCalendarEvents";
+import { useSearchParams } from "@/lib/router-adapter";
 import { FeatureErrorState } from "@/shared/components/FeatureErrorState";
 import { FeatureSetupRequiredState } from "@/shared/components/FeatureSetupRequiredState";
-import {
-  useCalendarEvents,
-  mapAppEventToCalendarEvent,
-} from "@/hooks/useCalendarEvents";
-import { useEvents } from "@/hooks/useEvents";
 import {
   getSupabaseSetupMessage,
   isMissingTableError,
 } from "@/shared/utils/supabaseErrors";
-import { useTranslation } from "react-i18next";
+
+const VIEWS = new Set<CalendarBoardView>(["day", "week", "month"]);
+
+function initialView(requested: string | null): CalendarBoardView {
+  if (requested && VIEWS.has(requested as CalendarBoardView)) {
+    return requested as CalendarBoardView;
+  }
+  return "week";
+}
+
+function eventTypeLabel(
+  type: string | null | undefined,
+  t: (key: string) => string,
+) {
+  if (type === "meeting") return t("sections.meeting");
+  if (type === "vendor_visit") return t("calendar.vendorVisit");
+  return t("dashboard.event");
+}
 
 export default function EventsHubPage() {
-  const { t } = useTranslation();
-  const isMobile = useIsMobile();
+  const { t, i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
+  const [date, setDate] = useState(
+    () => parseCalendarDate(searchParams.get("date")) ?? new Date(),
+  );
+  const [view, setView] = useState<CalendarBoardView>(() =>
+    initialView(searchParams.get("view")),
+  );
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(
+    searchParams.get("event"),
+  );
+  const [pinned, setPinned] = useState<CalendarEvent | null>(null);
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [vendorDialogOpen, setVendorDialogOpen] = useState(false);
 
-  const listRange = useMemo(
-    () => ({
-      start: startOfDay(subDays(new Date(), 30)),
-      end: endOfDay(addDays(new Date(), 90)),
-    }),
-    [],
-  );
-
-  const { events: cachedEvents, loading: cachedLoading, error: eventsError } =
-    useEvents();
-  const { events: rangeEvents, loading: rangeLoading, error: rangeError, refresh } =
-    useCalendarEvents({ range: listRange });
-
-  const loadError = rangeError ?? eventsError;
-  const calendarSetupMissing = isMissingTableError(loadError, [
+  const { events, loading, error } = useEvents();
+  const calendarSetupMissing = isMissingTableError(error, [
     "calendar_events_full",
     "calendar_events",
   ]);
 
-  const mergedEvents = useMemo(() => {
-    if (calendarSetupMissing) return [];
-    const source =
-      rangeEvents.length > 0
-        ? rangeEvents
-        : cachedEvents.map(mapAppEventToCalendarEvent);
-    const unique = new Map(source.map((event) => [event.id, event]));
-    return Array.from(unique.values());
-  }, [calendarSetupMissing, cachedEvents, rangeEvents]);
+  const calendarEvents = useMemo(() => {
+    const mapped = new Map(
+      events.map((event) => [event.id, mapAppEventToCalendarEvent(event)]),
+    );
+    if (pinned) mapped.set(pinned.id, pinned);
+    return Array.from(mapped.values());
+  }, [events, pinned]);
 
-  const selectedEvent = useMemo(
-    () => mergedEvents.find((event) => event.id === selectedEventId) ?? null,
-    [mergedEvents, selectedEventId],
+  const filtered = useMemo(
+    () => calendarEvents.filter((event) => eventMatchesQuery(event, search)),
+    [calendarEvents, search],
   );
 
-  const upcoming = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const listed = useMemo(() => {
     const now = Date.now();
-    return mergedEvents
-      .filter((event) => {
-        const time = safeTime(event.start);
-        if (!time || time < now) return false;
-        return query ? (event.title || "").toLowerCase().includes(query) : true;
-      })
-      .sort((a, b) => (safeTime(a.start) ?? 0) - (safeTime(b.start) ?? 0))
-      .slice(0, 6);
-  }, [mergedEvents, search]);
+    const source = search.trim()
+      ? filtered
+      : filtered.filter((event) => {
+          const time = Date.parse(event.start);
+          return !Number.isNaN(time) && time >= now;
+        });
+    return [...source]
+      .sort((left, right) => Date.parse(left.start) - Date.parse(right.start))
+      .slice(0, 8);
+  }, [filtered, search]);
 
-  const handleEventCreated = (id: string) => {
-    setSelectedEventId(id);
-    setDetailsOpen(true);
-    void refresh();
+  const selectedEvent = useMemo(() => {
+    if (pinned && pinned.id === selectedEventId) return pinned;
+    return calendarEvents.find((event) => event.id === selectedEventId) ?? null;
+  }, [calendarEvents, pinned, selectedEventId]);
+
+  const remember = (nextDate: Date, eventId?: string | null) => {
+    setDate(nextDate);
+    setSearchParams(calendarQuery(searchParams, nextDate, eventId));
   };
 
-  const handleVendorCreated = () => {
-    void refresh();
-  };
+  useEffect(() => {
+    const parsed = parseCalendarDate(searchParams.get("date"));
+    if (!parsed) return;
+    setDate((current) =>
+      current.getFullYear() === parsed.getFullYear() &&
+      current.getMonth() === parsed.getMonth() &&
+      current.getDate() === parsed.getDate()
+        ? current
+        : parsed,
+    );
+  }, [searchParams]);
 
-  const handleSelectEvent = (eventId: string) => {
+  useEffect(() => {
+    const eventId = searchParams.get("event");
+    if (!eventId || loading) return;
+    const match = calendarEvents.find((event) => event.id === eventId);
+    if (!match) return;
     setSelectedEventId(eventId);
     setDetailsOpen(true);
+    if (!searchParams.get("date")) {
+      const start = new Date(match.start);
+      if (!Number.isNaN(start.getTime())) setDate(start);
+    }
+  }, [calendarEvents, loading, searchParams]);
+
+  const openEvent = (eventId: string, nextDate?: Date) => {
+    const match = calendarEvents.find((event) => event.id === eventId);
+    const start = nextDate ?? (match ? new Date(match.start) : date);
+    const resolved = Number.isNaN(start.getTime()) ? date : start;
+    setSelectedEventId(eventId);
+    setDetailsOpen(true);
+    remember(resolved, eventId);
   };
+
+  const handleCreated = (event: AppEvent) => {
+    const mapped = mapAppEventToCalendarEvent(event);
+    setPinned(mapped);
+    setSelectedEventId(mapped.id);
+    setDetailsOpen(true);
+    const start = new Date(mapped.start);
+    if (!Number.isNaN(start.getTime())) remember(start, mapped.id);
+  };
+
+  const handleSaved = (event: AppEvent) => {
+    setPinned(mapAppEventToCalendarEvent(event));
+  };
+
+  useEffect(() => {
+    if (!pinned) return;
+    const match = events.find((event) => event.id === pinned.id);
+    if (!match) return;
+    if (
+      match.title === pinned.title &&
+      match.start === pinned.start &&
+      (match.end ?? null) === (pinned.end ?? null)
+    ) {
+      setPinned(null);
+    }
+  }, [events, pinned]);
 
   const handleDetailsOpenChange = (open: boolean) => {
     setDetailsOpen(open);
     if (!open) {
       setSelectedEventId(null);
+      setSearchParams(calendarQuery(searchParams, date, null));
     }
   };
 
-  const handleOverlayEventSelect = (eventId: string | null) => {
-    setSelectedEventId(eventId);
-    setDetailsOpen(Boolean(eventId));
-  };
-
-  const isLoading = cachedLoading || rangeLoading;
+  const locale = i18n.resolvedLanguage || i18n.language || "en";
+  const timeFormatter = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 
   return (
     <SchedulingProvider>
@@ -115,38 +189,43 @@ export default function EventsHubPage() {
         <header className="sticky top-0 z-10 border-b border-border bg-card">
           <div className="flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                 <CalendarDays className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">{t("common.calendar")}</h1>
-                <p className="text-sm text-muted-foreground">{t("calendar.scheduleMeetingsEventsAndVendorVisitsInOne")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("calendar.scheduleMeetingsEventsAndVendorVisitsInOne")}
+                </p>
               </div>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-10"
                   placeholder={t("calendar.searchUpcomingEvents")}
+                  aria-label={t("calendar.searchEvents")}
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(change) => setSearch(change.target.value)}
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
-                  size={isMobile ? "sm" : "default"}
+                  data-testid="calendar-add"
                   onClick={() => setSessionDialogOpen(true)}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  {isMobile ? "Add" : "Add to calendar"}
+                  {t("calendar.addToCalendar")}
                 </Button>
                 <Button
                   variant="outline"
-                  size={isMobile ? "sm" : "default"}
+                  data-testid="calendar-vendor"
                   onClick={() => setVendorDialogOpen(true)}
                 >
-                  <Wrench className="mr-2 h-4 w-4" />{t("schedule.vendorVisit")}</Button>
+                  <Wrench className="mr-2 h-4 w-4" />
+                  {t("schedule.vendorVisit")}
+                </Button>
               </div>
             </div>
           </div>
@@ -158,68 +237,86 @@ export default function EventsHubPage() {
               {calendarSetupMissing ? (
                 <FeatureSetupRequiredState
                   title={t("calendar.calendarModuleIsNotFullySetUpYet")}
-                  description={getSupabaseSetupMessage(loadError, "Calendar")}
+                  description={getSupabaseSetupMessage(error, "Calendar")}
                   icon={<CalendarDays className="h-5 w-5" />}
                   setupDescription={
-                    <>{t("calendar.missingTable")}<code>{t("schedule.calendarEventsFull")}</code>{t("calendar.restoreTheCalendarMigrationsThenRefreshThisPage")}</>
+                    <>
+                      {t("calendar.missingTable")}
+                      <code>{t("schedule.calendarEventsFull")}</code>
+                      {t("calendar.restoreTheCalendarMigrationsThenRefreshThisPage")}
+                    </>
                   }
                 />
-              ) : loadError ? (
+              ) : error && calendarEvents.length === 0 ? (
                 <FeatureErrorState
                   title={t("calendar.unableToLoadCalendar")}
-                  description={loadError}
+                  description={error}
                 />
               ) : (
-                <SchedulingCalendar
-                  mode="events"
-                  externalDetails
-                  onOverlayEventSelect={handleOverlayEventSelect}
-                />
+                <>
+                  {error ? (
+                    <p className="text-sm text-destructive" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+                  <EventsCalendarBoard
+                    events={filtered}
+                    loading={loading && calendarEvents.length === 0}
+                    date={date}
+                    view={view}
+                    selectedEventId={selectedEventId}
+                    onDateChange={(next) => remember(next, selectedEventId)}
+                    onViewChange={setView}
+                    onSelectEvent={(eventId) => openEvent(eventId)}
+                  />
+                </>
               )}
             </section>
 
             <aside className="space-y-4">
               <Card>
                 <CardHeader className="px-4 py-3">
-                  <h3 className="text-sm font-medium">{t("tasks.upcoming")}</h3>
+                  <h3 className="text-sm font-medium">
+                    {search.trim() ? t("calendar.searchEvents") : t("tasks.upcoming")}
+                  </h3>
                 </CardHeader>
                 <CardContent className="space-y-2 p-3">
-                  {isLoading && (
-                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">{t("calendar.loadingEvents")}</div>
-                  )}
-                  {!isLoading && upcoming.length === 0 && (
-                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">{t("calendar.noUpcomingItemsUseAddToCalendarTo")}</div>
-                  )}
-                  {upcoming.map((event) => (
-                    <button
-                      key={event.id}
-                      type="button"
-                      onClick={() => handleSelectEvent(event.id)}
-                      className="w-full rounded-md border bg-card p-3 text-left transition hover:border-primary"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">
-                            {event.title || "Untitled"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatPreview(event.start)}
-                          </p>
+                  {loading && calendarEvents.length === 0 ? (
+                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+                      {t("calendar.loadingEvents")}
+                    </div>
+                  ) : null}
+                  {!loading && listed.length === 0 ? (
+                    <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+                      {t("calendar.noUpcomingItemsUseAddToCalendarTo")}
+                    </div>
+                  ) : null}
+                  {listed.map((event) => {
+                    const start = new Date(event.start);
+                    const when = Number.isNaN(start.getTime())
+                      ? t("calendar.unknownTime")
+                      : timeFormatter.format(start);
+                    return (
+                      <button
+                        key={event.id}
+                        type="button"
+                        onClick={() => openEvent(event.id, start)}
+                        className="w-full rounded-md border bg-card p-3 text-left transition hover:border-primary"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-foreground">
+                              {event.title || t("calendar.untitledEvent")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{when}</p>
+                          </div>
+                          <Badge variant="outline" className="shrink-0 text-[11px]">
+                            {eventTypeLabel(event.type, t)}
+                          </Badge>
                         </div>
-                        <Badge
-                          variant="outline"
-                          className="text-[11px] capitalize"
-                        >
-                          {event.type ?? "event"}
-                        </Badge>
-                      </div>
-                      {event.description && (
-                        <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
-                          {event.description}
-                        </p>
-                      )}
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </CardContent>
               </Card>
             </aside>
@@ -230,30 +327,25 @@ export default function EventsHubPage() {
       <CreateEventDialog
         open={sessionDialogOpen}
         onOpenChange={setSessionDialogOpen}
-        onCreated={handleEventCreated}
+        onCreated={handleCreated}
       />
       <CreateVendorVisitDialog
         open={vendorDialogOpen}
         onOpenChange={setVendorDialogOpen}
-        onCreated={handleVendorCreated}
+        onCreated={handleCreated}
+      />
+      <EditEventDialog
+        event={selectedEvent}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={handleSaved}
       />
       <EventDetailsDrawer
         event={selectedEvent}
         open={detailsOpen}
         onOpenChange={handleDetailsOpenChange}
-        onRefresh={refresh}
+        onEdit={() => setEditOpen(true)}
       />
     </SchedulingProvider>
   );
 }
-
-const safeTime = (iso: string) => {
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? null : date.getTime();
-};
-
-const formatPreview = (iso: string) => {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "Unknown time";
-  return date.toLocaleString();
-};

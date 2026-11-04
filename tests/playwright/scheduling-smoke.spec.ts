@@ -517,7 +517,9 @@ test.describe('Scheduling smoke (Playwright)', () => {
 
   test('time off panel opens from query param', async ({ page }) => {
     await page.goto('/app/enhanced-scheduling?panel=timeoff');
-    await expect(page.getByRole('heading', { name: 'Time Off' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'My time off', exact: true }),
+    ).toBeVisible();
   });
 
   test('assigning an employee via shift details shows assignment chip', async ({ page }) => {
@@ -1049,7 +1051,9 @@ test.describe('Scheduling legacy redirects', () => {
   test('redirects /app/time-off to schedule timeoff panel', async ({ page }) => {
     await page.goto('/app/time-off');
     await page.waitForURL('**/app/enhanced-scheduling?panel=timeoff**', { timeout: 15_000 });
-    await expect(page.getByRole('heading', { name: 'Time Off' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'My time off', exact: true }),
+    ).toBeVisible();
   });
 
   test('redirects /app/availability to schedule availability panel', async ({ page }) => {

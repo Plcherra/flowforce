@@ -14,6 +14,7 @@ import {
   type ExecutionQualitySummaryRow,
 } from "@/services/operations/executionQualityAnalytics";
 import { logger } from "@/utils/logger";
+import { normalizeOpsViewRows } from "../utils/opsViewRow";
 
 export function ExecutionQualityPanel() {
   const { t } = useTranslation();
@@ -24,7 +25,10 @@ export function ExecutionQualityPanel() {
   const [loading, setLoading] = useState(true);
 
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-  const quality = useMemo(() => summarizeExecutionQuality(summary), [summary]);
+  const quality = useMemo(
+    () => (summary ? summarizeExecutionQuality(summary) : null),
+    [summary],
+  );
   const sortedTrends = useMemo(() => sortExecutionQualityTrends(trends), [trends]);
   const sortedCoaching = useMemo(
     () => sortExecutionQualityCoaching(coaching),
@@ -84,8 +88,8 @@ export function ExecutionQualityPanel() {
     }
 
     setSummary((summaryResult.data ?? null) as ExecutionQualitySummaryRow | null);
-    setTrends((trendResult.data ?? []) as ExecutionQualityDailyRow[]);
-    setCoaching((coachingResult.data ?? []) as ExecutionQualityCoachingRow[]);
+    setTrends(normalizeOpsViewRows<ExecutionQualityDailyRow>(trendResult.data));
+    setCoaching(normalizeOpsViewRows<ExecutionQualityCoachingRow>(coachingResult.data));
     setLoading(false);
   }, [companyId]);
 
@@ -104,38 +108,42 @@ export function ExecutionQualityPanel() {
         </div>
         <Badge
           variant={
-            (quality.execution_quality_score ?? 0) < 70
+            quality && (quality.execution_quality_score ?? 0) < 70
               ? "destructive"
               : "outline"
           }
         >
           <TrendingUp className="mr-1 h-3.5 w-3.5" />
-          {quality.execution_quality_score ?? 0}
+          {quality ? quality.execution_quality_score ?? 0 : t("common.notAvailable")}
         </Badge>
       </div>
 
-      <div className="mt-4">
-        <Progress value={quality.execution_quality_score ?? 0} className="h-2" />
-        <p className="mt-2 text-xs text-muted-foreground">
-          {quality.completed_runs}/{quality.total_runs} {t("operations.runsCompleted")}{" "}
-          {quality.exception_runs} {t("operations.withExceptions")}
-        </p>
-      </div>
+      {quality ? (
+        <>
+          <div className="mt-4">
+            <Progress value={quality.execution_quality_score ?? 0} className="h-2" />
+            <p className="mt-2 text-xs text-muted-foreground">
+              {quality.completed_runs}/{quality.total_runs} {t("operations.runsCompleted")}{" "}
+              {quality.exception_runs} {t("operations.withExceptions")}
+            </p>
+          </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-        <div className="rounded-2xl border p-2">
-          <p className="font-semibold">{quality.completion_rate ?? 0}%</p>
-          <p className="text-muted-foreground">{t("certifications.complete")}</p>
-        </div>
-        <div className="rounded-2xl border p-2">
-          <p className="font-semibold">{quality.overdue_runs}</p>
-          <p className="text-muted-foreground">{t("analytics.overdue")}</p>
-        </div>
-        <div className="rounded-2xl border p-2">
-          <p className="font-semibold">{quality.repeat_failure_runs}</p>
-          <p className="text-muted-foreground">{t("operations.repeat")}</p>
-        </div>
-      </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="rounded-2xl border p-2">
+              <p className="font-semibold">{quality.completion_rate ?? 0}%</p>
+              <p className="text-muted-foreground">{t("certifications.complete")}</p>
+            </div>
+            <div className="rounded-2xl border p-2">
+              <p className="font-semibold">{quality.overdue_runs}</p>
+              <p className="text-muted-foreground">{t("analytics.overdue")}</p>
+            </div>
+            <div className="rounded-2xl border p-2">
+              <p className="font-semibold">{quality.repeat_failure_runs}</p>
+              <p className="text-muted-foreground">{t("operations.repeat")}</p>
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <div className="mt-4 space-y-2">
         {loading && (
@@ -167,7 +175,7 @@ export function ExecutionQualityPanel() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold">
-                    {trend.templatecategory ?? trend.workflow_kind ?? "Workflow"}
+                    {trend.templatecategory ?? trend.workflow_kind ?? t("operations.workflowRunLabel")}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {trend.assigned_role} · {trend.metric_date}
@@ -191,7 +199,7 @@ export function ExecutionQualityPanel() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold">
-                  {row.employee_name ?? row.email ?? "Team member"}
+                  {row.employee_name ?? row.email ?? t("operations.teamMemberFallback")}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {row.role_name} · {row.coaching_signal}

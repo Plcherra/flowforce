@@ -24,12 +24,14 @@ export function YesNoField({
   value = null,
   required = false,
   variant = "switch",
-  yesLabel = "Yes",
-  noLabel = "No",
+  yesLabel,
+  noLabel,
   onChange,
   className = "",
 }: YesNoFieldProps) {
   const { t } = useTranslation();
+  const yesText = yesLabel ?? t("forms.yes");
+  const noText = noLabel ?? t("forms.no");
   const [currentValue, setCurrentValue] = useState<boolean | null>(value);
 
   const handleChange = (newValue: boolean | null) => {
@@ -46,10 +48,10 @@ export function YesNoField({
       />
       <Label htmlFor={`yesno-${label}`} className="text-sm">
         {currentValue === true
-          ? yesLabel
+          ? yesText
           : currentValue === false
-            ? noLabel
-            : "Select an option"}
+            ? noText
+            : t("forms.selectAnOption")}
       </Label>
     </div>
   );
@@ -63,7 +65,7 @@ export function YesNoField({
         className="flex-1"
       >
         <Check className="h-4 w-4 mr-2" />
-        {yesLabel}
+        {yesText}
       </Button>
       <Button
         type="button"
@@ -72,7 +74,7 @@ export function YesNoField({
         className="flex-1"
       >
         <X className="h-4 w-4 mr-2" />
-        {noLabel}
+        {noText}
       </Button>
     </div>
   );
@@ -93,7 +95,7 @@ export function YesNoField({
               currentValue === true ? "text-primary" : "text-muted-foreground"
             }`}
           />
-          <span className="font-medium">{yesLabel}</span>
+          <span className="font-medium">{yesText}</span>
         </CardContent>
       </Card>
 
@@ -111,7 +113,7 @@ export function YesNoField({
               currentValue === false ? "text-primary" : "text-muted-foreground"
             }`}
           />
-          <span className="font-medium">{noLabel}</span>
+          <span className="font-medium">{noText}</span>
         </CardContent>
       </Card>
     </div>

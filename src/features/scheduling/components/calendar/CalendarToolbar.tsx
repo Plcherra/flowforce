@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { differenceInMinutes } from "date-fns";
 import { ScheduleWeekDesk } from "@/features/scheduling/components/calendar/ScheduleWeekDesk";
 import { formatCount } from "@/features/scheduling/utils/pluralize";
@@ -31,6 +32,7 @@ type CalendarToolbarProps = {
 };
 
 export function CalendarToolbar(props: CalendarToolbarProps) {
+  const { t } = useTranslation();
   const { weekSchedules } = props;
   const uniqueUsers = new Set<string>();
   let totalMinutes = 0;
@@ -43,7 +45,20 @@ export function CalendarToolbar(props: CalendarToolbarProps) {
     );
   });
   const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
-  const summary = `${formatCount(weekSchedules.length, "shift")} · ${totalHours} hrs · ${uniqueUsers.size} people`;
+  const summary = t("schedule.weekDeskSummary", {
+    shifts: formatCount(
+      weekSchedules.length,
+      t("schedule.shiftSingular"),
+      t("schedule.shiftPlural"),
+    ),
+    hours: totalHours,
+    hoursLabel: t("schedule.hoursAbbrev"),
+    people: formatCount(
+      uniqueUsers.size,
+      t("schedule.personSingular"),
+      t("schedule.personPlural"),
+    ),
+  });
 
   return <ScheduleWeekDesk {...props} summary={summary} />;
 }

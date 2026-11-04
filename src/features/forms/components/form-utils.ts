@@ -9,15 +9,15 @@ export const formatDate = (value?: string | null) => {
   return date.toLocaleDateString();
 };
 
-export const getOwnerName = (form: FormWithMeta) => {
+export const getOwnerName = (form: FormWithMeta, missingLabel: string) => {
   const first = form.createdprofile?.first_name ?? "";
   const last = form.createdprofile?.last_name ?? "";
   const name = `${first} ${last}`.trim();
-  return name || "Unassigned";
+  return name || missingLabel;
 };
 
-export const getTypeLabel = (form: FormWithMeta) =>
-  form.department?.name ?? "General";
+export const getTypeLabel = (form: FormWithMeta, missingLabel: string) =>
+  form.department?.name ?? missingLabel;
 
 export const getStatusColor = (status: string) => {
   switch (status) {

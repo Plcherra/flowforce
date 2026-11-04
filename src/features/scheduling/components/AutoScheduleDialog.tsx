@@ -23,6 +23,7 @@ import { CalendarIcon, Loader2, ShieldAlert } from "lucide-react";
 import { useAutoScheduler } from "@/features/scheduling/hooks/useAutoScheduler";
 import { describeAvailableRuleSets } from "@/features/scheduling/services/autoScheduler";
 import { addDays, format, startOfWeek } from "date-fns";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
 
 interface AutoScheduleDialogProps {
   open: boolean;
@@ -37,7 +38,8 @@ export function AutoScheduleDialog({
   defaultLocationId,
   companyId,
 }: AutoScheduleDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
   const [ruleSets, setRuleSets] = useState<
     Array<{
       id: string;
@@ -77,13 +79,13 @@ export function AutoScheduleDialog({
         setRulesError(
           err instanceof Error
             ? err.message
-            : "Unable to load coverage templates.",
+            : t("schedule.unableToLoadCoverage"),
         );
       })
       .finally(() => {
         setRulesLoading(false);
       });
-  }, [companyId]);
+  }, [companyId, t]);
 
   useEffect(() => {
     if (locationId) return;
@@ -103,7 +105,7 @@ export function AutoScheduleDialog({
     const locationAllowed = ruleSets.some((rule) => rule.id === locationId);
     if (!locationAllowed) {
       setSelectionError(
-        "Select a valid location from your coverage templates.",
+        t("schedule.selectCoverageLocation"),
       );
       return;
     }
@@ -140,8 +142,8 @@ export function AutoScheduleDialog({
                   <SelectValue
                     placeholder={
                       rulesLoading
-                        ? "Loading locations..."
-                        : "Select a location"
+                        ? t("schedule.loadingLocations")
+                        : t("schedule.selectLocation")
                     }
                   />
                 </SelectTrigger>
@@ -184,8 +186,10 @@ export function AutoScheduleDialog({
                 onChange={(event) => setWeekStart(event.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Draft covers {format(new Date(weekStart), "MMM d")} –{" "}
-                {format(addDays(new Date(weekStart), 6), "MMM d")}.
+                {t("schedule.draftCoversRange", {
+                  start: format(new Date(weekStart), "MMM d", { locale }),
+                  end: format(addDays(new Date(weekStart), 6), "MMM d", { locale }),
+                })}
               </p>
             </div>
           </div>
@@ -198,7 +202,7 @@ export function AutoScheduleDialog({
               {(loading || rulesLoading) && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              {loading ? "Generating…" : "Generate draft week"}
+              {loading ? t("schedule.generating") : t("schedule.generateDraftWeek")}
             </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
@@ -207,10 +211,12 @@ export function AutoScheduleDialog({
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge variant="outline">
-                  Run {lastResult.runId.slice(0, 8)}
+                  {t("schedule.runLabel", { id: lastResult.runId.slice(0, 8) })}
                 </Badge>
                 <Badge variant="outline">
-                  {lastResult.schedulesCreated.length} shifts drafted
+                  {t("schedule.shiftsDrafted", {
+                    count: lastResult.schedulesCreated.length,
+                  })}
                 </Badge>
                 <Badge
                   variant={
@@ -264,8 +270,8 @@ export function AutoScheduleDialog({
                           <div>
                             <p className="font-medium text-sm">
                               {warning.severity === "hard"
-                                ? "Blocking"
-                                : "Advisory"}{" "}
+                                ? t("schedule.blockingLabel")
+                                : t("schedule.advisoryLabel")}{" "}
                               • {warning.code.replace(/_/g, " ")}
                             </p>
                             <p className="text-xs text-muted-foreground">

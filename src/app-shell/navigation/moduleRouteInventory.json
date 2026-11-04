@@ -581,6 +581,26 @@
       "owner": "src/features/permissions",
       "dataDependency": "none",
       "notes": "Internal demo route."
+    },
+    {
+      "label": "Goals",
+      "path": "/app/goals",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "app/app/goals/page.tsx",
+      "dataDependency": "none",
+      "notes": "Redirects to Tasks. The goals module is gone."
+    },
+    {
+      "label": "Help Desk",
+      "path": "/app/help-desk",
+      "status": "deprecated",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "app/app/help-desk/page.tsx",
+      "dataDependency": "none",
+      "notes": "Redirects to Messages. The help desk module is gone."
     }
   ]
 }

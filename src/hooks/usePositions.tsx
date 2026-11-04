@@ -15,6 +15,7 @@ export interface Position {
   created_at: string;
   updated_at: string;
   created_by: string;
+  department_id?: string | null;
   permissions?: any;
 }
 
@@ -71,6 +72,8 @@ export function usePositions() {
           created_at: item.created_at,
           updated_at: item.updated_at,
           created_by: item.created_by,
+          department_id:
+            typeof item.department_id === "string" ? item.department_id : null,
           permissions: item.permissions,
         })),
       );

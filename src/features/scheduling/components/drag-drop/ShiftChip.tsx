@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { differenceInMinutes, format } from "date-fns";
 import { AlertTriangle } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
@@ -6,20 +7,26 @@ import { cn } from "@/lib/utils";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
-export function formatShiftWindow(schedule: ShiftWithAssignments) {
-  if (!schedule.start_time || !schedule.end_time) return "Invalid time";
+export function formatShiftWindow(
+  schedule: ShiftWithAssignments,
+  invalidLabel = "Invalid time",
+) {
+  if (!schedule.start_time || !schedule.end_time) return invalidLabel;
   return `${format(new Date(schedule.start_time), "HH:mm")} - ${format(new Date(schedule.end_time), "HH:mm")}`;
 }
 
-export function formatShiftDuration(schedule: ShiftWithAssignments) {
-  if (!schedule.start_time || !schedule.end_time) return "0 hrs";
+export function formatShiftDuration(
+  schedule: ShiftWithAssignments,
+  hoursLabel = "hrs",
+) {
+  if (!schedule.start_time || !schedule.end_time) return `0 ${hoursLabel}`;
   const start = new Date(schedule.start_time);
   const end = new Date(schedule.end_time);
   const minutes = differenceInMinutes(end, start);
   const hours = Math.max(0, minutes / 60);
-  if (!Number.isFinite(hours) || hours <= 0) return "0 hrs";
+  if (!Number.isFinite(hours) || hours <= 0) return `0 ${hoursLabel}`;
   const rounded = hours >= 10 ? Math.round(hours) : Math.round(hours * 10) / 10;
-  return `${rounded.toFixed(rounded % 1 === 0 ? 0 : 1)} hrs`;
+  return `${rounded.toFixed(rounded % 1 === 0 ? 0 : 1)} ${hoursLabel}`;
 }
 
 interface ShiftChipProps {
@@ -28,6 +35,7 @@ interface ShiftChipProps {
   employeeId?: string | null;
   draggable?: boolean;
   variant?: "assigned" | "unassigned";
+  dragId?: string;
   minimized?: boolean;
   onShiftClick: (shiftId: string) => void;
 }
@@ -38,9 +46,11 @@ export function ShiftChip({
   employeeId = null,
   draggable = false,
   variant = "assigned",
+  dragId,
   minimized = false,
   onShiftClick,
 }: ShiftChipProps) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -48,7 +58,7 @@ export function ShiftChip({
     transform,
     isDragging,
   } = useDraggable({
-    id: `shift-${schedule.id}`,
+    id: dragId ?? `shift-${schedule.id}`,
     disabled: !draggable,
     data: {
       type: "shift",
@@ -64,6 +74,8 @@ export function ShiftChip({
 
   const paint = shiftChipPaint(schedule.color, variant);
   const roleLabel = schedule.job_position?.name || schedule.role || "";
+  const windowLabel = formatShiftWindow(schedule, t("schedule.invalidTime"));
+  const durationLabel = formatShiftDuration(schedule, t("schedule.hoursAbbrev"));
 
   return (
     <button
@@ -83,7 +95,7 @@ export function ShiftChip({
         isDragging && "opacity-40",
         draggable && "touch-none",
       )}
-      title={formatShiftWindow(schedule)}
+      title={windowLabel}
       onClick={() => onShiftClick(schedule.id)}
       {...(draggable ? { ...listeners, ...attributes } : {})}
     >
@@ -94,7 +106,7 @@ export function ShiftChip({
         {hasConflict ? (
           <AlertTriangle className="h-3 w-3 text-warning shrink-0" />
         ) : null}
-        {schedule.title ?? schedule.job_position?.name ?? "Shift"}
+        {schedule.title ?? schedule.job_position?.name ?? t("schedule.shiftSingular")}
       </div>
       {minimized ? null : (
         <>
@@ -104,12 +116,12 @@ export function ShiftChip({
             </div>
           ) : null}
           <div data-testid="shift-chip-time" className="text-xs opacity-75">
-            {formatShiftWindow(schedule)}
+            {windowLabel}
           </div>
           <div data-testid="shift-chip-duration" className="text-[10px] opacity-80">
-            {formatShiftDuration(schedule)}
+            {durationLabel}
             {schedule.required_headcount
-              ? ` · ${schedule.required_headcount} req.`
+              ? ` · ${t("schedule.requiredShort", { count: schedule.required_headcount })}`
               : ""}
           </div>
         </>
@@ -125,6 +137,7 @@ export function ShiftChipOverlay({
   schedule: ShiftWithAssignments;
   hasConflict?: boolean;
 }) {
+  const { t } = useTranslation();
   const paint = shiftChipPaint(schedule.color, "assigned");
   return (
     <div
@@ -139,14 +152,16 @@ export function ShiftChipOverlay({
         {hasConflict ? (
           <AlertTriangle className="h-3 w-3 text-warning shrink-0" />
         ) : null}
-        {schedule.title ?? schedule.job_position?.name ?? "Shift"}
+        {schedule.title ?? schedule.job_position?.name ?? t("schedule.shiftSingular")}
       </div>
       {schedule.job_position?.name || schedule.role ? (
         <div className="truncate font-medium">
           {schedule.job_position?.name || schedule.role}
         </div>
       ) : null}
-      <div className="text-xs opacity-75">{formatShiftWindow(schedule)}</div>
+      <div className="text-xs opacity-75">
+        {formatShiftWindow(schedule, t("schedule.invalidTime"))}
+      </div>
     </div>
   );
 }

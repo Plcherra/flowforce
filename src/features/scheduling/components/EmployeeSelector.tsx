@@ -46,17 +46,19 @@ export function EmployeeSelector({
         setOpen(false);
         if (outcome === true) {
           toast({
-            title: "Employee assigned",
-            description: "Employee has been assigned to this shift.",
+            title: t("schedule.employeeAssigned"),
+            description: t("schedule.employeeAssignedHelp"),
           });
         }
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to assign employee";
+        error instanceof Error
+          ? error.message
+          : t("schedule.failedToAssignEmployee");
       logger.error("Error assigning employee:", { error, tags: ["error"] });
       toast({
-        title: "Assignment failed",
+        title: t("schedule.assignmentFailed"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -68,16 +70,18 @@ export function EmployeeSelector({
       const success = await unassignUserFromShift(shiftId, employeeId);
       if (success) {
         toast({
-          title: "Employee unassigned",
-          description: "Employee has been removed from this shift.",
+          title: t("schedule.employeeUnassigned"),
+          description: t("schedule.employeeUnassignedHelp"),
         });
       }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to unassign employee";
+        error instanceof Error
+          ? error.message
+          : t("schedule.failedToUnassignEmployee");
       logger.error("Error unassigning employee:", { error, tags: ["error"] });
       toast({
-        title: "Unassignment failed",
+        title: t("schedule.unassignmentFailed"),
         description: errorMessage,
         variant: "destructive",
       });
@@ -194,7 +198,7 @@ export function EmployeeSelector({
                           {employee.first_name || ""} {employee.last_name || ""}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {employee.role || "Employee"}
+                          {employee.role || t("schedule.employee")}
                         </span>
                       </div>
                     </CommandItem>

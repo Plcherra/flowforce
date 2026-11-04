@@ -117,7 +117,7 @@ export function buildReviewSections(
   if (buckets.questions.length > 0) {
     sections.push({
       id: "section-questions",
-      title: "Checklist & Questions",
+      title: "forms.stepQuestions",
       content: (
         <div className="space-y-4">
           {buckets.questions.map(renderFieldValue)}
@@ -129,7 +129,7 @@ export function buildReviewSections(
   if (buckets.operations.length > 0) {
     sections.push({
       id: "section-operations",
-      title: "Operations & Impact",
+      title: "forms.stepOperations",
       content: (
         <div className="space-y-4">
           {buckets.operations.map(renderFieldValue)}
@@ -141,7 +141,7 @@ export function buildReviewSections(
   if (buckets.attachments.length > 0) {
     sections.push({
       id: "section-attachments",
-      title: "Attachments",
+      title: "forms.stepAttachments",
       content: (
         <div className="space-y-4">
           {buckets.attachments.map(renderFieldValue)}

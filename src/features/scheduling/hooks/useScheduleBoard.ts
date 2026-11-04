@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useScheduling } from "@/contexts/SchedulingContext";
@@ -25,6 +26,7 @@ import {
   chosenShiftIds,
   placeEventsOnDayShifts,
 } from "@/features/scheduling/services/placeDayEvents";
+import { shiftIsOpen } from "@/features/scheduling/utils/shiftChipPaint";
 
 interface LocationOption {
   id: string;
@@ -89,6 +91,7 @@ export function useScheduleBoard({
     publishWeek,
   } = mutations;
   const { profile } = useProfile();
+  const { t } = useTranslation();
 
   const companyId = profile?.companyId ?? null;
 
@@ -212,7 +215,7 @@ export function useScheduleBoard({
       shifts: weekSchedules.filter((schedule) => {
         const start = new Date(schedule.start_time);
         return (
-          isSameDay(start, day) && (schedule.assignments?.length ?? 0) === 0
+          isSameDay(start, day) && shiftIsOpen(schedule)
         );
       }),
     }));
@@ -239,25 +242,25 @@ export function useScheduleBoard({
   const weekCsvRows = useMemo(() => {
     return [
       [
-        "Title",
-        "Location",
-        "Start",
-        "End",
-        "Published",
-        "Required",
-        "Assigned",
+        t("schedule.csvTitle"),
+        t("schedule.csvLocation"),
+        t("schedule.csvStart"),
+        t("schedule.csvEnd"),
+        t("schedule.csvPublished"),
+        t("schedule.csvRequired"),
+        t("schedule.csvAssigned"),
       ],
       ...weekSchedules.map((schedule) => [
         schedule.title ?? "",
         schedule.location ?? "",
         format(new Date(schedule.start_time), "yyyy-MM-dd HH:mm"),
         format(new Date(schedule.end_time), "yyyy-MM-dd HH:mm"),
-        schedule.is_published ? "Yes" : "No",
+        schedule.is_published ? t("schedule.csvYes") : t("schedule.csvNo"),
         schedule.required_headcount ?? 1,
         schedule.assignments?.length ?? 0,
       ]),
     ];
-  }, [weekSchedules]);
+  }, [t, weekSchedules]);
 
   const weekCsvContent = useMemo(
     () =>
