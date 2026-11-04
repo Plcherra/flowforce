@@ -9,41 +9,44 @@ interface ScheduleEmptyStateProps {
   variant?: "banner" | "centered";
   hasLocationFilter?: boolean;
   readOnly?: boolean;
+  unavailable?: boolean;
   onSwitchToWeek?: () => void;
   onOpenStaffPanel?: () => void;
   onOpenAvailability?: () => void;
   onSuggestFills?: () => void;
 }
 
-const managerCopyByView: Record<
+const managerCopyKey: Record<
   ScheduleEmptyView,
   { title: string; description: string; hint: string }
 > = {
   week: {
-    title: "No shifts this week",
-    description:
-      "Use the plus button to add a shift, or open Week desk and run Coverage coach.",
-    hint: "Repeat previous week lives in the Week desk.",
+    title: "schedule.emptyWeekTitle",
+    description: "schedule.emptyWeekBody",
+    hint: "schedule.emptyWeekHint",
   },
   month: {
-    title: "No shifts this month",
-    description:
-      "Switch to the week board to drag in roles, copy a prior week, or add shifts one at a time.",
-    hint: "Week view is the fastest way to build a schedule from scratch.",
+    title: "schedule.emptyMonthTitle",
+    description: "schedule.emptyMonthBody",
+    hint: "schedule.emptyMonthHint",
   },
   staff: {
-    title: "No staff shifts to show",
-    description:
-      "Add shifts on the week board first, then assign teammates from the staff panel or by dragging.",
-    hint: "Open the more menu for swaps, time off, and availability.",
+    title: "schedule.emptyStaffTitle",
+    description: "schedule.emptyStaffBody",
+    hint: "schedule.emptyStaffHint",
   },
 };
 
-const staffCopy = {
-  title: "No shifts assigned yet",
-  description:
-    "When your manager publishes shifts for this week, they will appear here.",
-  hint: "Update your availability so managers can schedule you accurately.",
+const staffCopyKey = {
+  title: "schedule.emptyMineTitle",
+  description: "schedule.emptyMineBody",
+  hint: "schedule.emptyMineHint",
+};
+
+const unavailableCopyKey = {
+  title: "schedule.emptyUnavailableTitle",
+  description: "schedule.emptyUnavailableBody",
+  hint: "schedule.emptyUnavailableHint",
 };
 
 export function ScheduleEmptyState({
@@ -51,13 +54,23 @@ export function ScheduleEmptyState({
   variant = "centered",
   hasLocationFilter = false,
   readOnly = false,
+  unavailable = false,
   onSwitchToWeek,
   onOpenStaffPanel,
   onOpenAvailability,
   onSuggestFills,
 }: ScheduleEmptyStateProps) {
   const { t } = useTranslation();
-  const copy = readOnly ? staffCopy : managerCopyByView[view];
+  const copyKey = unavailable
+    ? unavailableCopyKey
+    : readOnly
+      ? staffCopyKey
+      : managerCopyKey[view];
+  const copy = {
+    title: t(copyKey.title),
+    description: t(copyKey.description),
+    hint: t(copyKey.hint),
+  };
 
   if (variant === "banner") {
     return (

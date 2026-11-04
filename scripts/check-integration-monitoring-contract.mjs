@@ -22,6 +22,7 @@ const requireIncludes = (text, needles, label) => {
 
 const service = readText("src/services/integrations/integrationMonitoring.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
+const englishLocale = readText("src/locales/en.json");
 const ui = readText(
   "src/features/system/components/IntegrationSettingsPanel.tsx",
 );
@@ -75,16 +76,27 @@ requireIncludes(
 requireIncludes(
   ui,
   [
-    "Integration monitoring",
+    "settings.integrationMonitoring",
     "buildIntegrationStatusDashboard",
     "buildIntegrationMonitoringReadiness",
     "buildIntegrationSupportDiagnostics",
+    "settings.statusDashboard",
+    "settings.criticalAlerts",
+    "settings.diagnostics",
+    "settings.simulatedFailures",
+  ],
+  "integration settings UI",
+);
+requireIncludes(
+  englishLocale,
+  [
+    "Integration monitoring",
     "Status dashboard",
     "Critical alerts",
     "Diagnostics",
     "Simulated failures",
   ],
-  "integration settings UI",
+  "English integration monitoring copy",
 );
 
 requireIncludes(

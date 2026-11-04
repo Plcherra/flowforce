@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -23,11 +24,14 @@ import {
   type CompliancePackRpcResult,
 } from "@/services/operations/compliancePacks";
 import { logger } from "@/utils/logger";
+import { compliancePackLabel } from "../utils/operationsHubLabels";
 
 export function CompliancePacksPanel() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit = !permissionLoading && can("editTasks");
   const [packs, setPacks] = useState<CompliancePackDashboardRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
@@ -66,14 +70,14 @@ export function CompliancePacksPanel() {
       setPacks([]);
       toast({
         variant: "destructive",
-        title: "Unable to load compliance packs",
+        title: t("operations.unableToLoadCompliancePacks"),
         description:
-          error instanceof Error ? error.message : "Unexpected compliance error.",
+          error instanceof Error ? error.message : t("operations.unexpectedComplianceError"),
       });
     } finally {
       setLoading(false);
     }
-  }, [companyId, toast]);
+  }, [companyId, t, toast]);
 
   useEffect(() => {
     void loadPacks();
@@ -94,10 +98,10 @@ export function CompliancePacksPanel() {
 
       const result = (data ?? {}) as CompliancePackRpcResult;
       toast({
-        title: "Compliance pack installed",
+        title: t("operations.complianceInstalledTitle"),
         description: result.workflowid
-          ? "Template workflow and evidence rules are ready."
-          : "Pack is ready.",
+          ? t("operations.compliancePackReadyDetail")
+          : t("operations.compliancePackReadyShort"),
       });
       await loadPacks();
     } catch (error) {
@@ -107,9 +111,9 @@ export function CompliancePacksPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Compliance install failed",
+        title: t("operations.complianceInstallFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected compliance error.",
+          error instanceof Error ? error.message : t("operations.unexpectedComplianceError"),
       });
     } finally {
       setActing(null);
@@ -142,10 +146,10 @@ export function CompliancePacksPanel() {
 
       const result = (data ?? {}) as CompliancePackRpcResult;
       toast({
-        title: "Audit export ready",
+        title: t("operations.auditExportReady"),
         description: result.exportid
-          ? `Export ${result.exportid.slice(0, 8)} created.`
-          : "Compliance snapshot created.",
+          ? t("operations.auditExportCreated", { id: result.exportid.slice(0, 8) })
+          : t("operations.complianceSnapshotCreated"),
       });
     } catch (error) {
       logger.error("[CompliancePacksPanel] export failed", {
@@ -154,9 +158,9 @@ export function CompliancePacksPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Audit export failed",
+        title: t("operations.auditExportFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected compliance error.",
+          error instanceof Error ? error.message : t("operations.unexpectedComplianceError"),
       });
     } finally {
       setActing(null);
@@ -206,13 +210,13 @@ export function CompliancePacksPanel() {
             <div key={pack.key} className="rounded-2xl border p-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold">{pack.label}</p>
+                  <p className="text-sm font-semibold">{compliancePackLabel(t, pack.key)}</p>
                   <p className="text-xs text-muted-foreground">
                     {Math.round(pack.retentionDays / 365)} {t("operations.yearRetention")}
                   </p>
                 </div>
                 <Badge variant={installed ? "default" : "outline"}>
-                  {installed ? "Installed" : "Template"}
+                  {installed ? t("operations.packInstalled") : t("operations.packTemplate")}
                 </Badge>
               </div>
 
@@ -232,7 +236,7 @@ export function CompliancePacksPanel() {
                 size="sm"
                 variant={installed ? "outline" : "default"}
                 className="mt-3 w-full"
-                disabled={Boolean(acting) || !companyId}
+                disabled={Boolean(acting) || !companyId || !canEdit}
                 onClick={() =>
                   installed ? void exportPack(pack.key) : void installPack(pack.key)
                 }
@@ -244,7 +248,7 @@ export function CompliancePacksPanel() {
                 ) : (
                   <ClipboardList className="mr-2 h-3.5 w-3.5" />
                 )}
-                {installed ? "Export" : "Install"}
+                {installed ? t("operations.packExport") : t("operations.packInstall")}
               </Button>
             </div>
           );

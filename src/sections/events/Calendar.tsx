@@ -9,21 +9,9 @@ import { SchedulingCalendar } from "@/features/scheduling/components/SchedulingC
 import { SchedulingProvider } from "@/contexts/SchedulingContext";
 import { useEvents } from "@/hooks/useEvents";
 
-function demoEvent() {
-  const start = new Date();
-  const end = new Date(start.getTime() + 1000 * 60 * 60);
-  return {
-    title: "Demo Company Event",
-    description: "A demo event created locally.",
-    start: start.toISOString(),
-    end: end.toISOString(),
-    type: "event" as const,
-  };
-}
-
 function EventsList() {
   const { t } = useTranslation();
-  const { events, createEvent } = useEvents();
+  const { events } = useEvents();
 
   return (
     <div className="space-y-3">
@@ -31,14 +19,6 @@ function EventsList() {
         <div className="text-sm text-muted-foreground">
           {events.length} {t("sections.events")}
         </div>
-        <button
-          className="text-primary text-sm underline"
-          onClick={async () => {
-            await createEvent(demoEvent());
-          }}
-        >
-          {t("sections.createDemoEvent")}
-        </button>
       </div>
 
       {events.length === 0 && (

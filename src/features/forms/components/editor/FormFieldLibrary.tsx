@@ -5,84 +5,36 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { FormFieldType } from "@/types/forms";
+import { formFieldCatalog } from "@/features/forms/utils/formFieldCatalog";
 
 interface FieldTemplate {
   type: FormFieldType;
   label: string;
   description: string;
-  category: "Basic" | "Choices" | "Advanced";
+  category: string;
 }
-
-const fieldTemplates: FieldTemplate[] = [
-  {
-    type: "text",
-    label: "Text Input",
-    description: "Single line text field",
-    category: "Basic",
-  },
-  {
-    type: "textarea",
-    label: "Paragraph",
-    description: "Multi-line text area",
-    category: "Basic",
-  },
-  {
-    type: "number",
-    label: "Number",
-    description: "Numeric input",
-    category: "Basic",
-  },
-  {
-    type: "date",
-    label: "Date",
-    description: "Pick a date",
-    category: "Basic",
-  },
-  {
-    type: "select",
-    label: "Dropdown",
-    description: "Choose one option",
-    category: "Choices",
-  },
-  {
-    type: "radio",
-    label: "Radio Group",
-    description: "Single choice options",
-    category: "Choices",
-  },
-  {
-    type: "checkbox",
-    label: "Checkboxes",
-    description: "Multiple selections",
-    category: "Choices",
-  },
-  {
-    type: "file_upload",
-    label: "File Upload",
-    description: "Upload files or documents",
-    category: "Advanced",
-  },
-  {
-    type: "signature",
-    label: "Signature",
-    description: "Capture signature input",
-    category: "Advanced",
-  },
-  {
-    type: "formula",
-    label: "Formula",
-    description: "Calculated field using expressions",
-    category: "Advanced",
-  },
-];
 
 interface FormFieldLibraryProps {
   onAddField: (template: FieldTemplate) => void;
+  allowDrag?: boolean;
 }
 
-export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
+export function FormFieldLibrary({
+  onAddField,
+  allowDrag = true,
+}: FormFieldLibraryProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
+  const fieldTemplates = useMemo(
+    () =>
+      formFieldCatalog.map((item) => ({
+        type: item.value,
+        label: t(item.labelKey),
+        description: t(item.descriptionKey),
+        category: t(item.categoryKey),
+      })),
+    [t],
+  );
 
   const filteredTemplates = useMemo(() => {
     if (!query.trim()) return fieldTemplates;
@@ -91,7 +43,7 @@ export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
         .toLowerCase()
         .includes(query.toLowerCase()),
     );
-  }, [query]);
+  }, [fieldTemplates, query]);
 
   const handleDragStart = (
     event: React.DragEvent<HTMLButtonElement>,
@@ -139,13 +91,16 @@ export function FormFieldLibrary({ onAddField }: FormFieldLibraryProps) {
                   onClick={() => onAddField(template)}
                 >
                   {t("tasks.add")}</Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  draggable
-                  onDragStart={(event) => handleDragStart(event, template)}
-                >
-                  {t("forms.drag")}</Button>
+                {allowDrag ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    draggable
+                    onDragStart={(event) => handleDragStart(event, template)}
+                  >
+                    {t("forms.drag")}
+                  </Button>
+                ) : null}
               </div>
             </div>
           ))}

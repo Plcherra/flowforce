@@ -33,12 +33,12 @@ const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow["status"]>> = {
 };
 
 export const TASK_STATUS_TRANSITIONS = {
-  todo: ["in_progress", "cancelled"],
-  in_progress: ["review", "blocked", "cancelled", "todo"],
-  review: ["completed", "todo", "cancelled"], // Use 'completed' instead of 'done'
-  blocked: ["in_progress", "cancelled"],
-  done: [], // Keep for backward compatibility but prefer 'completed'
-  completed: [], // Final state
+  todo: ["in_progress", "completed", "cancelled"],
+  in_progress: ["review", "completed", "blocked", "cancelled", "todo"],
+  review: ["completed", "todo", "cancelled"],
+  blocked: ["in_progress", "completed", "cancelled"],
+  done: ["todo"],
+  completed: ["todo"],
   cancelled: ["todo"],
 } as const;
 

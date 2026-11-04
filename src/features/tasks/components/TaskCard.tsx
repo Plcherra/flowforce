@@ -13,25 +13,39 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  getTaskStatusBadgeClass,
-  getTaskStatusLabel,
-} from "@/constants/taskStatus";
+import { getTaskStatusBadgeClass } from "@/constants/taskStatus";
 import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
 import type { TaskWithRelations } from "@/hooks/useTasks";
 import type { TaskContentTranslation } from "../taskContentFields";
 import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
+import { Button } from "@/components/ui/button";
 import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
-import { readAssigneeIds } from "../utils/shiftTaskWrite";
-import { readTaskKind, TASK_KIND_LABELS } from "../utils/taskKind";
+import { readAssigneeIds, readFormId } from "../utils/shiftTaskWrite";
+import { readTaskKind } from "../utils/taskKind";
+import {
+  translatedKindLabel,
+  translatedPriorityLabel,
+  translatedPublishLabel,
+  translatedStatusLabel,
+} from "../utils/taskCopy";
 import {
   formatTaskWindow,
   readTaskPoints,
   readTaskSchedule,
-  taskPublishLabel,
 } from "../utils/taskSchedule";
 import type { SelectionHandlers } from "../hooks/useTaskSelection";
+import type { TFunction } from "i18next";
+
+function dueBadgeText(t: TFunction, label: string): string {
+  if (label === "Completed") return t("tasks.statusDone");
+  if (label === "Overdue") return t("tasks.overdue");
+  if (label === "Due Soon") return t("tasks.dueSoon");
+  if (label.startsWith("Due ")) {
+    return t("tasks.dueOn", { date: label.slice(4) });
+  }
+  return label;
+}
 
 interface TaskCardProps {
   task: TaskWithRelations;
@@ -39,6 +53,7 @@ interface TaskCardProps {
   highlighted: boolean;
   selectionHandlers: SelectionHandlers;
   translation?: TaskContentTranslation | null;
+  onFillForm?: (formId: string) => void;
 }
 
 export function TaskCard({
@@ -47,7 +62,9 @@ export function TaskCard({
   highlighted,
   selectionHandlers,
   translation = null,
+  onFillForm,
 }: TaskCardProps) {
+  const { t } = useTranslation();
   const display = useFormContentDisplay({
     recordId: task.id,
     title: task.title,
@@ -55,12 +72,12 @@ export function TaskCard({
     translation,
   });
   const scheduleLink = readScheduleTaskLink(task);
-  const kindLabel = TASK_KIND_LABELS[readTaskKind(task)];
+  const kindLabel = translatedKindLabel(t, readTaskKind(task));
+  const formId = readFormId(task.links);
   const schedule = readTaskSchedule(task.links);
   const windowLabel = formatTaskWindow(schedule.startsAt, schedule.endsAt);
-  const publishLabel = taskPublishLabel(schedule.publishState);
+  const publishLabel = translatedPublishLabel(t, schedule.publishState);
   const points = readTaskPoints(task.links);
-  const { t } = useTranslation();
   const assigneeCount = readAssigneeIds(task.links, task.assigned_to).length;
 
   return (
@@ -71,7 +88,7 @@ export function TaskCard({
       data-highlighted={highlighted}
       role="button"
       tabIndex={0}
-      aria-label={`Open task ${task.title}`}
+      aria-label={t("tasks.openTask", { title: display.title })}
       onClick={selectionHandlers.onClick}
       onKeyDown={selectionHandlers.onKeyDown}
       className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
@@ -79,8 +96,8 @@ export function TaskCard({
       }`}
     >
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-1">
             <CardTitle className="text-lg">{display.title}</CardTitle>
             {display.description ? (
               <CardDescription className="line-clamp-2">
@@ -101,13 +118,13 @@ export function TaskCard({
               </button>
             ) : null}
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <div className="flex flex-wrap items-center gap-2">
               <div
                 className={`h-2.5 w-2.5 rounded-full ${getPriorityColor(task.priority)}`}
               />
               <Badge className={getTaskStatusBadgeClass(task.status)}>
-                {getTaskStatusLabel(task.status)}
+                {translatedStatusLabel(t, task.status ?? "", task.status ?? "")}
               </Badge>
               <Badge variant="outline" data-testid="task-kind-badge">
                 {kindLabel}
@@ -123,7 +140,7 @@ export function TaskCard({
                 variant="outline"
                 className={`text-xs ${dueBadge.className}`}
               >
-                {dueBadge.label}
+                {dueBadgeText(t, dueBadge.label)}
               </Badge>
             )}
           </div>
@@ -146,9 +163,7 @@ export function TaskCard({
             )}
             {points != null ? (
               <div className="flex items-center gap-1" data-testid="task-points">
-                <span>
-                  {points} {points === 1 ? "point" : "points"}
-                </span>
+                <span>{t("tasks.pointsCount", { count: points })}</span>
               </div>
             ) : null}
             {windowLabel ? (
@@ -165,7 +180,11 @@ export function TaskCard({
             )}
             <div className="flex items-center gap-1">
               <Flag className="h-4 w-4" />
-              <span className="capitalize">{task.priority ?? "not set"}</span>
+              <span className="capitalize">
+                {task.priority
+                  ? translatedPriorityLabel(t, task.priority, task.priority)
+                  : t("tasks.notSet")}
+              </span>
             </div>
             {scheduleLink ? (
               <div className="flex items-center gap-1">
@@ -185,9 +204,26 @@ export function TaskCard({
             )}
           </div>
           <div className="text-xs">
-            Created {format(new Date(task.created_at), "MMM dd, yyyy")}
+            {t("tasks.createdOn", {
+              date: format(new Date(task.created_at), "MMM dd, yyyy"),
+            })}
           </div>
         </div>
+        {formId ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 min-h-11 w-full sm:w-auto"
+            data-testid={`task-fill-${task.id}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              onFillForm?.(formId);
+            }}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {t("tasks.fillAndSend")}
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   );

@@ -29,6 +29,7 @@ const migration = readText(
   "supabase/migrations/20260528001900_phase6_workflow_automation_hooks.sql",
 );
 const service = readText("src/services/operations/workflowAutomationHooks.ts");
+const englishLocale = readText("src/locales/en.json");
 const panel = readText(
   "src/features/operations/components/WorkflowAutomationHooksPanel.tsx",
 );
@@ -73,9 +74,14 @@ requireIncludes(
     "WorkflowAutomationHooksPanel",
     "operations_workflow_automation_hooks_v",
     "run_overdue_critical_workflow_notifications",
-    "Check overdue critical runs",
+    "operations.checkOverdueCriticalRuns",
   ],
   "Workflow automation hooks panel",
+);
+requireIncludes(
+  englishLocale,
+  ["Check overdue critical runs"],
+  "English workflow automation copy",
 );
 
 requireIncludes(hub, ["WorkflowAutomationHooksPanel"], "Operations Hub");

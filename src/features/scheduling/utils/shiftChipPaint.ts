@@ -42,6 +42,16 @@ export interface ShiftChipPaint {
   opaque: boolean;
 }
 
+/** Still short of the people this shift needs. Null headcount means one person. */
+export function shiftIsOpen(schedule: {
+  assignments?: readonly unknown[] | null;
+  required_headcount?: number | null;
+}): boolean {
+  const assigned = schedule.assignments?.length ?? 0;
+  const required = Math.max(1, schedule.required_headcount ?? 1);
+  return assigned < required;
+}
+
 /** Full color block. Assigned stays an opaque fill. Open shifts use a strong wash plus a thick bar. */
 export function shiftChipPaint(
   color: string | null | undefined,

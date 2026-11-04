@@ -33,7 +33,7 @@ export interface FormsReadinessSummary {
   mediaFieldCoverage: number;
   reviewItems: Array<{
     id: string;
-    label: string;
+    labelKey: string;
     detail: string;
     severity: "critical" | "warning" | "info";
   }>;
@@ -43,22 +43,31 @@ const advancedFieldTypes = new Set([
   "file",
   "file_upload",
   "image",
+  "image_upload",
+  "image_selection",
   "video",
+  "video_upload",
   "audio",
+  "audio_recording",
   "signature",
   "scanner",
   "scan",
   "rating",
   "location",
   "task",
+  "formula",
+  "number_slider",
 ]);
 
 const mediaFieldTypes = new Set([
   "file",
   "file_upload",
   "image",
+  "image_upload",
   "video",
+  "video_upload",
   "audio",
+  "audio_recording",
   "signature",
 ]);
 
@@ -121,19 +130,13 @@ export function buildFormsReadinessSummary({
   const reviewItems = [
     ...formsWithoutFields.slice(0, 4).map((form) => ({
       id: `fields-${form.id}`,
-      label: "Form has no fields",
+      labelKey: "forms.reviewNoFields",
       detail: formTitle(form),
       severity: "critical" as const,
     })),
-    ...formsWithoutReviewers.slice(0, 4).map((form) => ({
-      id: `reviewer-${form.id}`,
-      label: "No reviewer rule",
-      detail: formTitle(form),
-      severity: "warning" as const,
-    })),
     ...formsWithoutSubmissions.slice(0, 4).map((form) => ({
       id: `submission-${form.id}`,
-      label: "No submissions yet",
+      labelKey: "forms.reviewNoSubmissions",
       detail: formTitle(form),
       severity: "info" as const,
     })),

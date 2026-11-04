@@ -79,15 +79,6 @@ export const apiBoundaryDefinitions: ApiBoundaryDefinition[] = [
       "Requires SUPPORT_ADMIN_TOKEN, writes support_tool_runs, and blocks impersonation for v1.",
   },
   {
-    name: "Automation suggestion route",
-    kind: "next_route",
-    security: "authenticated",
-    mutationPolicy: "server_verified_write",
-    owner: "app/api/ops/issues/[issueId]/suggest-automation/route.ts",
-    notes:
-      "Requires bearer session, verifies tenant membership server-side, and keeps OpenAI keys server-only.",
-  },
-  {
     name: "Company setup and invite RPCs",
     kind: "supabase_rpc",
     security: "tenant_scoped",

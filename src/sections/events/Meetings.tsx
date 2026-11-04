@@ -2,29 +2,14 @@ import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search, Video } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useEvents } from "@/hooks/useEvents";
-
-function demoMeeting() {
-  const start = new Date();
-  const end = new Date(start.getTime() + 1000 * 60 * 30);
-  return {
-    title: "Demo Team Meeting",
-    description: "A demo meeting created locally.",
-    start: start.toISOString(),
-    end: end.toISOString(),
-    type: "meeting" as const,
-  };
-}
 
 export default function EventsMeetingsPage() {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const [query, setQuery] = useState("");
 
-  const { events, createEvent } = useEvents();
+  const { events } = useEvents();
   const meetings = events.filter((e) => e.type === "meeting");
   const filtered = meetings.filter((m) =>
     m.title.toLowerCase().includes(query.toLowerCase()),
@@ -34,7 +19,7 @@ export default function EventsMeetingsPage() {
     <div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-card border border-border rounded-md mb-6 sticky top-4 z-20">
-          <div className="px-4 py-4 flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                 <Video className="h-6 w-6 text-primary" />
@@ -47,17 +32,14 @@ export default function EventsMeetingsPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t("sections.searchMeetings")}
-                  className="pl-10 w-56"
-                />
-              </div>
-              <Button size={isMobile ? "sm" : "default"}>{t("sections.newMeeting2")}</Button>
+            <div className="relative w-full max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("sections.searchMeetings")}
+                className="pl-10"
+              />
             </div>
           </div>
         </div>
@@ -73,18 +55,10 @@ export default function EventsMeetingsPage() {
                     {new Date(m.start).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    {t("sections.join")}
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    {t("schedule.details")}
-                  </Button>
-                </div>
               </CardHeader>
               <CardContent className="px-4 py-2">
                 <p className="text-sm text-muted-foreground">
-                  {m.description || "No description provided."}
+                  {m.description || t("calendar.noDescription")}
                 </p>
               </CardContent>
             </Card>
@@ -97,14 +71,6 @@ export default function EventsMeetingsPage() {
                 <p className="text-sm text-muted-foreground">
                   {t("sections.noMeetingsFound")}
                 </p>
-                <div className="mt-3">
-                  <button
-                    className="text-primary underline text-sm"
-                    onClick={async () => await createEvent(demoMeeting())}
-                  >
-                    {t("sections.createDemoMeeting")}
-                  </button>
-                </div>
               </CardContent>
             </Card>
           )}

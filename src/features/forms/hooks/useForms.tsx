@@ -117,7 +117,7 @@ const buildMetaFromRow = (
 });
 
 export function useForms() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { profile } = useProfile();
@@ -197,18 +197,21 @@ export function useForms() {
     await queryClient.refetchQueries({ queryKey: formsQueryKey, exact: true });
   }, [queryClient, formsQueryKey]);
 
-  const createForm = async (formData: {
-    title: string;
-    description?: string;
-    departmentid?: string;
-    is_anonymous?: boolean;
-  }) => {
+  const createForm = async (
+    formData: {
+      title: string;
+      description?: string;
+      departmentid?: string;
+      is_anonymous?: boolean;
+    },
+    options?: { quiet?: boolean },
+  ) => {
     if (!user) return { data: null, error: "User not authenticated" };
     if (!companyId) {
       const error = new Error("Company context unavailable");
       toast({
-        title: "Error",
-        description: error.message,
+        title: t("forms.errorTitle"),
+        description: t("forms.companyMissing"),
         variant: "destructive",
       });
       return { data: null, error };
@@ -241,10 +244,12 @@ export function useForms() {
         ...current,
       ]);
 
-      toast({
-        title: "Success",
-        description: "Form created successfully",
-      });
+      if (!options?.quiet) {
+        toast({
+          title: t("forms.saved"),
+          description: t("forms.formCreated"),
+        });
+      }
 
       return { data: created, error: null };
     } catch (error) {
@@ -252,11 +257,13 @@ export function useForms() {
         error,
         tags: ["forms", "create"],
       });
-      toast({
-        title: "Error",
-        description: "Failed to create form",
-        variant: "destructive",
-      });
+      if (!options?.quiet) {
+        toast({
+          title: t("forms.errorTitle"),
+          description: t("forms.formCreationFailed"),
+          variant: "destructive",
+        });
+      }
       return { data: null, error };
     }
   };
@@ -269,8 +276,8 @@ export function useForms() {
     if (!companyId) {
       const error = new Error("Company context unavailable");
       toast({
-        title: "Error",
-        description: error.message,
+        title: t("forms.errorTitle"),
+        description: t("forms.companyMissing"),
         variant: "destructive",
       });
       return { error };
@@ -295,10 +302,10 @@ export function useForms() {
       }
 
       if (!options?.quiet) {
-        toast({
-          title: "Success",
-          description: "Form updated successfully",
-        });
+      toast({
+        title: t("forms.saved"),
+        description: t("forms.formUpdated"),
+      });
       }
 
       return { error: null };
@@ -308,8 +315,8 @@ export function useForms() {
         tags: ["forms", "update"],
       });
       toast({
-        title: "Error",
-        description: "Failed to update form",
+        title: t("forms.errorTitle"),
+        description: t("forms.unableToUpdateForm"),
         variant: "destructive",
       });
       return { error };
@@ -320,8 +327,8 @@ export function useForms() {
     if (!companyId) {
       const error = new Error("Company context unavailable");
       toast({
-        title: "Error",
-        description: error.message,
+        title: t("forms.errorTitle"),
+        description: t("forms.companyMissing"),
         variant: "destructive",
       });
       return { error };
@@ -334,8 +341,8 @@ export function useForms() {
       );
 
       toast({
-        title: "Success",
-        description: "Form deleted successfully",
+        title: t("forms.saved"),
+        description: t("forms.formDeleted"),
       });
 
       return { error: null };
@@ -345,8 +352,8 @@ export function useForms() {
         tags: ["forms", "delete"],
       });
       toast({
-        title: "Error",
-        description: "Failed to delete form",
+        title: t("forms.errorTitle"),
+        description: t("forms.unableToDeleteForm"),
         variant: "destructive",
       });
       return { error };
@@ -396,12 +403,13 @@ export function useForms() {
       FormFieldRow,
       "id" | "form_id" | "created_at" | "updated_at"
     >[],
+    options?: { quiet?: boolean },
   ) => {
     if (!companyId) {
       const error = new Error("Company context unavailable");
       toast({
-        title: "Error",
-        description: error.message,
+        title: t("forms.errorTitle"),
+        description: t("forms.companyMissing"),
         variant: "destructive",
       });
       return { error };
@@ -409,21 +417,25 @@ export function useForms() {
 
     try {
       await repositoryReplaceFormFields(companyId, formId, fields, sourceLocale);
-      toast({
-        title: "Success",
-        description: "Form fields saved successfully",
-      });
+      if (!options?.quiet) {
+        toast({
+          title: t("forms.saved"),
+          description: t("forms.formSavedHelp"),
+        });
+      }
       return { error: null };
     } catch (error) {
       logger.error("Error saving form fields", {
         error,
         tags: ["forms", "save"],
       });
-      toast({
-        title: "Error",
-        description: "Failed to save form fields",
-        variant: "destructive",
-      });
+      if (!options?.quiet) {
+        toast({
+          title: t("forms.errorTitle"),
+          description: t("forms.unableToSaveFields"),
+          variant: "destructive",
+        });
+      }
       return { error };
     }
   };
@@ -450,12 +462,13 @@ export function useForms() {
     formId: string,
     submissionData: Record<string, unknown>,
     answerFields?: Array<{ id: string; field_type?: string | null }>,
+    options?: { quiet?: boolean },
   ) => {
     if (!companyId) {
       const error = new Error("Company context unavailable");
       toast({
-        title: "Error",
-        description: error.message,
+        title: t("forms.errorTitle"),
+        description: t("forms.companyMissing"),
         variant: "destructive",
       });
       return { data: null, error };
@@ -494,12 +507,14 @@ export function useForms() {
         ),
       );
 
-      toast({
-        title: "Success",
-        description: "Form submitted successfully",
-      });
+      if (!options?.quiet) {
+        toast({
+          title: t("forms.saved"),
+          description: t("forms.formSubmitted"),
+        });
+      }
 
-      return { data: submission, error: null };
+      return { data: submission, error: null, offline: false };
     } catch (error) {
       logger.error("Error submitting form", {
         error,
@@ -541,20 +556,24 @@ export function useForms() {
           ),
         );
 
-        toast({
-          title: "Saved offline",
-          description: "Form response will sync when connection returns.",
-        });
+        if (!options?.quiet) {
+          toast({
+            title: t("forms.savedOffline"),
+            description: t("forms.savedOfflineHelp"),
+          });
+        }
 
-        return { data: offlineSubmission, error: null };
+        return { data: offlineSubmission, error: null, offline: true };
       }
 
-      toast({
-        title: "Error",
-        description: "Failed to submit form",
-        variant: "destructive",
-      });
-      return { data: null, error };
+      if (!options?.quiet) {
+        toast({
+          title: t("forms.errorTitle"),
+          description: t("forms.unableToSubmit"),
+          variant: "destructive",
+        });
+      }
+      return { data: null, error, offline: false };
     }
   };
 

@@ -29,6 +29,7 @@ const migration = readText(
   "supabase/migrations/20260528001500_phase6_manager_review_queue.sql",
 );
 const service = readText("src/services/operations/managerReviewQueue.ts");
+const englishLocale = readText("src/locales/en.json");
 const panel = readText(
   "src/features/operations/components/ManagerReviewQueuePanel.tsx",
 );
@@ -67,9 +68,14 @@ requireIncludes(
     "operations_manager_review_queue_v",
     "review_workflow_run",
     "Approve",
-    "Reject",
+    "schedule.reject",
   ],
   "Manager review queue panel",
+);
+requireIncludes(
+  englishLocale,
+  ['"reject": "Reject"'],
+  "English manager review copy",
 );
 
 requireIncludes(hub, ["ManagerReviewQueuePanel"], "Operations Hub");

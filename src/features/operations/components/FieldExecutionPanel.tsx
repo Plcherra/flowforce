@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -25,11 +26,15 @@ import {
   type FieldExecutionStepRow,
 } from "@/services/operations/fieldExecution";
 import { logger } from "@/utils/logger";
+import { normalizeOpsViewRows } from "../utils/opsViewRow";
 
 export function FieldExecutionPanel() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit =
+    !permissionLoading && (can("editTasks") || can("viewOwnTasks"));
   const [runs, setRuns] = useState<FieldExecutionRunRow[]>([]);
   const [steps, setSteps] = useState<FieldExecutionStepRow[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
@@ -58,7 +63,7 @@ export function FieldExecutionPanel() {
         throw error;
       }
 
-      setSteps((data ?? []) as FieldExecutionStepRow[]);
+      setSteps(normalizeOpsViewRows<FieldExecutionStepRow>(data));
     },
     [],
   );
@@ -83,7 +88,7 @@ export function FieldExecutionPanel() {
         throw error;
       }
 
-      const loadedRuns = (data ?? []) as FieldExecutionRunRow[];
+      const loadedRuns = normalizeOpsViewRows<FieldExecutionRunRow>(data);
       setRuns(loadedRuns);
       const nextRunId =
         selectedRunId ??
@@ -103,14 +108,14 @@ export function FieldExecutionPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Unable to load field execution",
+        title: t("operations.unableToLoadFieldExecution"),
         description:
-          error instanceof Error ? error.message : "Unexpected execution error.",
+          error instanceof Error ? error.message : t("operations.unexpectedExecutionError"),
       });
     } finally {
       setLoading(false);
     }
-  }, [companyId, loadSteps, selectedRunId, toast]);
+  }, [companyId, loadSteps, selectedRunId, t, toast]);
 
   useEffect(() => {
     void loadRuns();
@@ -134,9 +139,9 @@ export function FieldExecutionPanel() {
       });
       toast({
         variant: "destructive",
-        title: "Execution action failed",
+        title: t("operations.executionActionFailed"),
         description:
-          error instanceof Error ? error.message : "Unexpected execution error.",
+          error instanceof Error ? error.message : t("operations.unexpectedExecutionError"),
       });
     } finally {
       setActing(null);
@@ -154,7 +159,7 @@ export function FieldExecutionPanel() {
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
       },
-      "Workflow run resumed",
+      t("operations.workflowRunResumed"),
     );
 
   const saveStepDraft = (step: FieldExecutionStepRow) =>
@@ -171,7 +176,7 @@ export function FieldExecutionPanel() {
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
       },
-      "Step draft saved",
+      t("operations.stepDraftSaved"),
     );
 
   const completeStep = (step: FieldExecutionStepRow) =>
@@ -193,7 +198,7 @@ export function FieldExecutionPanel() {
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
       },
-      "Step completed",
+      t("operations.stepCompleted"),
     );
 
   const failStep = (step: FieldExecutionStepRow) =>
@@ -212,7 +217,7 @@ export function FieldExecutionPanel() {
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
       },
-      "Step failed and escalated",
+      t("operations.stepFailedEscalated"),
     );
 
   const completeRun = (workflowInstanceId: string) =>
@@ -226,7 +231,7 @@ export function FieldExecutionPanel() {
         if (error) throw error;
         return (data ?? {}) as FieldExecutionRpcResult;
       },
-      "Workflow run completed",
+      t("operations.workflowRunCompleted"),
     );
 
   return (
@@ -260,7 +265,7 @@ export function FieldExecutionPanel() {
               void loadSteps(run.workflow_instanceid);
             }}
           >
-            {run.templatecategory ?? "Run"}
+            {run.templatecategory ?? t("operations.runLabel")}
           </Button>
         ))}
       </div>
@@ -276,10 +281,10 @@ export function FieldExecutionPanel() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold">
-                  {selectedRun.workflow_name ?? "Workflow run"}
+                  {selectedRun.workflow_name ?? t("operations.workflowRunLabel")}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t("inventory.due")} {selectedRun.due_at?.slice(0, 16) ?? "not scheduled"} ·{" "}
+                  {t("inventory.due")} {selectedRun.due_at?.slice(0, 16) ?? t("operations.notScheduled")} ·{" "}
                   {summary.remaining} {t("operations.remaining")}
                 </p>
               </div>
@@ -290,7 +295,7 @@ export function FieldExecutionPanel() {
               <Button
                 size="sm"
                 onClick={() => startRun(selectedRun.workflow_instanceid)}
-                disabled={acting !== null || !companyId}
+                disabled={acting !== null || !companyId || !canEdit}
               >
                 <Play className="mr-2 h-3.5 w-3.5" />
                 {t("schedule.start")}
@@ -299,7 +304,7 @@ export function FieldExecutionPanel() {
                 size="sm"
                 variant="outline"
                 onClick={() => completeRun(selectedRun.workflow_instanceid)}
-                disabled={acting !== null || !companyId}
+                disabled={acting !== null || !companyId || !canEdit}
               >
                 <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
                 {t("operations.completeRun")}
@@ -320,8 +325,8 @@ export function FieldExecutionPanel() {
                       {step.step_number}. {step.step_name}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {step.step_type ?? "task"}
-                      {step.evidence_required ? " · evidence required" : ""}
+                      {step.step_type ?? t("operations.stepTypeTask")}
+                      {step.evidence_required ? ` · ${t("operations.evidenceRequiredInline")}` : ""}
                     </p>
                   </div>
                   <Badge variant="outline">{step.step_status}</Badge>
@@ -331,8 +336,8 @@ export function FieldExecutionPanel() {
                   className="mt-3 min-h-[76px]"
                   placeholder={
                     stepNeedsEvidence(step)
-                      ? "Add required evidence or reading"
-                      : "Add note"
+                      ? t("operations.addRequiredEvidence")
+                      : t("operations.addNote")
                   }
                   value={stepDrafts[step.step_instanceid] ?? ""}
                   onChange={(event) =>
@@ -360,7 +365,7 @@ export function FieldExecutionPanel() {
                     size="sm"
                     variant="outline"
                     onClick={() => saveStepDraft(step)}
-                    disabled={acting !== null || !companyId}
+                    disabled={acting !== null || !companyId || !canEdit}
                   >
                     <Save className="mr-2 h-3.5 w-3.5" />
                     {t("tasks.draft")}
@@ -368,7 +373,7 @@ export function FieldExecutionPanel() {
                   <Button
                     size="sm"
                     onClick={() => completeStep(step)}
-                    disabled={acting !== null || !companyId}
+                    disabled={acting !== null || !companyId || !canEdit}
                   >
                     <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
                     {t("inventory.complete")}
@@ -377,7 +382,7 @@ export function FieldExecutionPanel() {
                     size="sm"
                     variant="outline"
                     onClick={() => failStep(step)}
-                    disabled={acting !== null || !companyId}
+                    disabled={acting !== null || !companyId || !canEdit}
                   >
                     <AlertTriangle className="mr-2 h-3.5 w-3.5" />
                     {t("operations.fail")}

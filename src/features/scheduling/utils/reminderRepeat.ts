@@ -10,10 +10,13 @@ export function isReminderRepeat(value: string): value is ReminderRepeat {
   return REMINDER_REPEAT_OPTIONS.some((option) => option.value === value);
 }
 
-export function repeatLabel(interval: string | null | undefined): string {
+export function repeatLabel(
+  interval: string | null | undefined,
+  labels?: Partial<Record<ReminderRepeat | "once", string>>,
+): string {
   const match = REMINDER_REPEAT_OPTIONS.find((option) => option.value === interval);
-  if (match) return match.label;
-  if (!interval) return "Once";
+  if (match) return labels?.[match.value] ?? match.label;
+  if (!interval) return labels?.once ?? "Once";
   return interval.charAt(0).toUpperCase() + interval.slice(1);
 }
 

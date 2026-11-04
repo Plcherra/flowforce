@@ -37,6 +37,9 @@ const { runTomorrowShiftTests } = importTs(
 const { runTaskCreateAccessTests } = importTs(
   "../src/features/tasks/utils/taskCreateAccess.test.ts",
 );
+const { runExecutionUpdateTests } = importTs(
+  "../src/features/tasks/utils/executionUpdate.test.ts",
+);
 const { runListIssueTests } = importTs(
   "../src/features/tasks/utils/listIssues.test.ts",
 );
@@ -82,6 +85,9 @@ const { runDraftInboxTests } = importTs(
 const { runTaskAssigneeScopeTests } = importTs(
   "../src/features/tasks/utils/taskAssigneeScope.test.ts",
 );
+const { runTaskAudienceTests } = importTs(
+  "../src/features/tasks/utils/taskAudience.test.ts",
+);
 const { runTaskCreateGrantStoreTests } = importTs(
   "../src/features/roles/constants/taskCreateGrantStore.test.ts",
 );
@@ -118,6 +124,24 @@ const { runFormFieldRowTests } = importTs(
 const { runFormTemplateTests } = importTs(
   "../src/features/forms/utils/formTemplates.test.ts",
 );
+const { runImportFormFieldTests } = importTs(
+  "../src/features/forms/utils/importFormFields.test.ts",
+);
+const { runFormEditorLayoutTests } = importTs(
+  "../src/features/forms/utils/formEditorLayout.test.ts",
+);
+const { runFormulaValueTests } = importTs(
+  "../src/features/forms/utils/formulaValue.test.ts",
+);
+const { runSubmissionValueTests } = importTs(
+  "../src/features/forms/utils/submissionValue.test.ts",
+);
+const { runFormTemplateCopyTests } = importTs(
+  "../src/features/forms/utils/formTemplateCopy.test.ts",
+);
+const { runFormsReadinessTests } = importTs(
+  "../src/features/forms/utils/formsReadiness.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -128,6 +152,7 @@ runHandoverTaskTests();
 runTaskScheduleTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
+runExecutionUpdateTests();
 runListIssueTests();
 runTaskPointsTotalTests();
 runListIssueInsertTests();
@@ -143,6 +168,7 @@ runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();
 runDraftInboxTests();
 runTaskAssigneeScopeTests();
+runTaskAudienceTests();
 runTaskCreateGrantStoreTests();
 runMyShiftReloadTests();
 runFormShiftLinkTests();
@@ -155,4 +181,10 @@ runPeoplePickerFilterTests();
 runFormLifecycleTests();
 runFormFieldRowTests();
 runFormTemplateTests();
+runImportFormFieldTests();
+runFormEditorLayoutTests();
+runFormulaValueTests();
+runSubmissionValueTests();
+runFormTemplateCopyTests();
+runFormsReadinessTests();
 console.log("tasks page tests passed");

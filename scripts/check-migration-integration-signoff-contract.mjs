@@ -23,6 +23,7 @@ const requireIncludes = (text, needles, label) => {
 const service = readText(
   "src/services/integrations/migrationIntegrationSignoff.ts",
 );
+const englishLocale = readText("src/locales/en.json");
 const ui = readText(
   "src/features/system/components/IntegrationSettingsPanel.tsx",
 );
@@ -57,16 +58,21 @@ requireIncludes(
 requireIncludes(
   ui,
   [
-    "Migration and integration signoff",
+    "settings.migrationAndIntegrationSignoff",
     "buildMigrationIntegrationSignoffReadiness",
     "buildTestTenantPopulationPlan",
     "getCustomerMigrationPlaybook",
     "getSampleDataPacks",
     "getDemoMigrationFlow",
-    "Plan 09 signoff",
-    "Test tenant",
+    "settings.plan09Signoff",
+    "settings.testTenant",
   ],
   "integration settings UI",
+);
+requireIncludes(
+  englishLocale,
+  ["Migration and integration signoff", "Plan 09 signoff", "Test tenant"],
+  "English migration signoff copy",
 );
 
 requireIncludes(

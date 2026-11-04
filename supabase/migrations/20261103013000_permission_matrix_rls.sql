@@ -926,11 +926,18 @@ using (
 );
 
 -- Workflow definitions and runs ----------------------------------------
+-- The operations hub migration runs first and installs editor policies on
+-- these tables. Drop those names too, or Postgres would OR them with the
+-- matrix policies and a task editor could delete a workflow.
 drop policy if exists "Company members can manage workflows" on public.workflows;
 drop policy if exists "Company members can read workflows" on public.workflows;
 drop policy if exists "Permissioned users can insert workflows" on public.workflows;
 drop policy if exists "Permissioned users can update workflows" on public.workflows;
 drop policy if exists "Managers can delete workflows" on public.workflows;
+drop policy if exists "Editors can write workflows" on public.workflows;
+drop policy if exists "Editors can insert workflows" on public.workflows;
+drop policy if exists "Editors can update workflows" on public.workflows;
+drop policy if exists "Editors can delete workflows" on public.workflows;
 
 create policy "Company members can read workflows"
 on public.workflows
@@ -977,6 +984,9 @@ drop policy if exists "Company members can read workflow steps" on public.workfl
 drop policy if exists "Permissioned users can insert workflow steps" on public.workflow_steps;
 drop policy if exists "Permissioned users can update workflow steps" on public.workflow_steps;
 drop policy if exists "Managers can delete workflow steps" on public.workflow_steps;
+drop policy if exists "Editors can insert workflow steps" on public.workflow_steps;
+drop policy if exists "Editors can update workflow steps" on public.workflow_steps;
+drop policy if exists "Editors can delete workflow steps" on public.workflow_steps;
 
 create policy "Company members can read workflow steps"
 on public.workflow_steps
@@ -1041,6 +1051,9 @@ drop policy if exists "Company members can read task workflow instances" on publ
 drop policy if exists "Permissioned users can insert task workflow instances" on public.task_workflow_instances;
 drop policy if exists "Permissioned users can update task workflow instances" on public.task_workflow_instances;
 drop policy if exists "Managers can delete task workflow instances" on public.task_workflow_instances;
+drop policy if exists "Editors can insert task workflow instances" on public.task_workflow_instances;
+drop policy if exists "Assignees can update task workflow instances" on public.task_workflow_instances;
+drop policy if exists "Editors can delete task workflow instances" on public.task_workflow_instances;
 
 create policy "Company members can read task workflow instances"
 on public.task_workflow_instances
@@ -1106,6 +1119,8 @@ drop policy if exists "Company members can read workflow step instances" on publ
 drop policy if exists "Assignees can insert workflow step instances" on public.workflow_step_instances;
 drop policy if exists "Assignees can update workflow step instances" on public.workflow_step_instances;
 drop policy if exists "Managers can delete workflow step instances" on public.workflow_step_instances;
+drop policy if exists "Editors can insert workflow step instances" on public.workflow_step_instances;
+drop policy if exists "Editors can delete workflow step instances" on public.workflow_step_instances;
 
 create policy "Company members can read workflow step instances"
 on public.workflow_step_instances

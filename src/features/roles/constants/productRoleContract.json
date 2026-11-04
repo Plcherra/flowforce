@@ -249,8 +249,7 @@
           "tasks.checklist.create_others",
           "tasks.custom.create_self",
           "tasks.custom.create_others",
-          "tasks.list_issues.act",
-          "tasks.update"
+          "tasks.list_issues.act"
         ],
         "create_delete": ["createForms", "manageForms", "tasks.delete"]
       }

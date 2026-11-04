@@ -118,14 +118,6 @@ export function formatTaskWindow(
   return format(validStart ?? validEnd!, pattern);
 }
 
-export function taskPublishLabel(
-  state: TaskPublishState,
-): "Draft" | "Scheduled" | null {
-  if (state === "draft") return "Draft";
-  if (state === "scheduled") return "Scheduled";
-  return null;
-}
-
 export function readTaskPoints(links: unknown): number | null {
   if (!isLinkRecord(links)) return null;
   const value = links.points;

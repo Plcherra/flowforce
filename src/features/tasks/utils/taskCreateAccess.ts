@@ -6,6 +6,7 @@ import {
   type TaskCreateKind,
 } from "@/features/roles/constants/taskCreateKeys";
 import { taskCreateLevel, type TaskCreateLevel } from "./taskCreateLevel";
+import type { TaskCreateScope } from "@/features/roles/constants/taskCreateScope";
 
 export function taskCreateLevelFromDiffs(
   classPermissions: Record<string, boolean> | null | undefined,
@@ -56,6 +57,18 @@ export function retainTaskCreateDiffs(
     if (isTaskCreatePermissionKey(key)) next[key] = value;
   }
   return next;
+}
+
+export function taskCreateDialogProps(input: {
+  permissionsLoading: boolean;
+  level: TaskCreateLevel;
+  scope: TaskCreateScope | null;
+}): { createLevel: "self" | "others"; scope: TaskCreateScope | null } | null {
+  if (input.permissionsLoading || input.level === "none") return null;
+  return {
+    createLevel: input.level === "self" ? "self" : "others",
+    scope: input.scope,
+  };
 }
 
 export function taskCreateKeysAreSet(

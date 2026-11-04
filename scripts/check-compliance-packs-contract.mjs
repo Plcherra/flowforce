@@ -29,6 +29,7 @@ const migration = readText(
   "supabase/migrations/20260528001800_phase6_compliance_packs.sql",
 );
 const service = readText("src/services/operations/compliancePacks.ts");
+const englishLocale = readText("src/locales/en.json");
 const panel = readText(
   "src/features/operations/components/CompliancePacksPanel.tsx",
 );
@@ -71,9 +72,14 @@ requireIncludes(
     "operations_compliance_dashboard_v",
     "install_compliance_pack",
     "create_compliance_audit_export",
-    "Compliance Packs",
+    "operations.compliancePacks",
   ],
   "Compliance packs panel",
+);
+requireIncludes(
+  englishLocale,
+  ["Compliance Packs"],
+  "English compliance packs copy",
 );
 
 requireIncludes(hub, ["CompliancePacksPanel"], "Operations Hub");

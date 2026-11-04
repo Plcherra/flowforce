@@ -22,6 +22,7 @@ const requireIncludes = (text, needles, label) => {
 
 const service = readText("src/services/integrations/publicApiWebhooks.ts");
 const auditEvents = readText("src/services/audit/auditEvents.ts");
+const englishLocale = readText("src/locales/en.json");
 const ui = readText(
   "src/features/system/components/IntegrationSettingsPanel.tsx",
 );
@@ -84,16 +85,27 @@ requireIncludes(
 requireIncludes(
   ui,
   [
-    "Public API and webhooks",
+    "settings.publicApiAndWebhooks",
     "buildPublicApiWebhookReadiness",
     "getPublicApiEventCatalog",
     "getPublicApiRateLimits",
+    "settings.apiKeyModel",
+    "settings.webhookEvents",
+    "settings.rateLimits",
+    "settings.auditLogs",
+  ],
+  "integration settings UI",
+);
+requireIncludes(
+  englishLocale,
+  [
+    "Public API and webhooks",
     "API key model",
     "Webhook events",
     "Rate limits",
     "Audit logs",
   ],
-  "integration settings UI",
+  "English public API copy",
 );
 
 requireIncludes(

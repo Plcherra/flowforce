@@ -9,6 +9,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useEventLinks } from "@/hooks/useEventLinks";
@@ -26,6 +36,7 @@ interface EventDetailsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRefresh?: () => void;
+  onEdit?: () => void;
 }
 
 const UUID_PATTERN =
@@ -36,6 +47,7 @@ export function EventDetailsDrawer({
   open,
   onOpenChange,
   onRefresh,
+  onEdit,
 }: EventDetailsDrawerProps) {
   const { t } = useTranslation();
   const eventId = event?.id ?? null;
@@ -52,6 +64,7 @@ export function EventDetailsDrawer({
     "details" | "participants" | "shifts"
   >("details");
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [localShiftIds, setLocalShiftIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -82,13 +95,13 @@ export function EventDetailsDrawer({
       }
       onRefresh?.();
       toast({
-        title: "Saved",
-        description: "Linked shifts updated.",
+        title: t("calendar.saved"),
+        description: t("calendar.linkedShiftsUpdated"),
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       toast({
-        title: "Unable to link shifts",
+        title: t("calendar.unableToLinkShifts"),
         description: message,
         variant: "destructive",
       });
@@ -102,8 +115,11 @@ export function EventDetailsDrawer({
     setBusy(true);
     try {
       await deleteEvent(eventId);
+      setConfirmDelete(false);
       onOpenChange(false);
       onRefresh?.();
+    } catch {
+      setConfirmDelete(false);
     } finally {
       setBusy(false);
     }
@@ -112,6 +128,7 @@ export function EventDetailsDrawer({
   const participants = event?.participants ?? [];
 
   return (
+    <>
     <Drawer
       open={open}
       onOpenChange={onOpenChange}
@@ -121,12 +138,12 @@ export function EventDetailsDrawer({
         <div className="flex h-full flex-col">
           <DrawerHeader className="border-b px-6 py-4 text-left">
             <DrawerTitle className="text-xl">
-              {event?.title || "Event details"}
+              {event?.title || t("calendar.eventDetails")}
             </DrawerTitle>
             <DrawerDescription className="text-sm text-muted-foreground">
               {event
-                ? `${formatDateTime(event.start)} • ${event.type ?? "event"}`
-                : "Select an event to inspect details."}
+                ? `${formatDateTime(event.start)} • ${event.type ?? t("dashboard.event")}`
+                : t("calendar.selectEventPrompt")}
             </DrawerDescription>
           </DrawerHeader>
 
@@ -152,7 +169,7 @@ export function EventDetailsDrawer({
                       <section>
                         <h3 className="text-sm font-semibold text-foreground">{t("calendar.sessionSummary")}</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {event.description || "No description provided."}
+                          {event.description || t("calendar.noDescription")}
                         </p>
                       </section>
                       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -174,13 +191,13 @@ export function EventDetailsDrawer({
                         <div className="rounded-md border p-3 text-sm">
                           <p className="font-semibold text-foreground">{t("schedule.location")}</p>
                           <p className="text-muted-foreground">
-                            {event.location || "Not specified"}
+                            {event.location || t("calendar.notSpecified")}
                           </p>
                         </div>
                         <div className="rounded-md border p-3 text-sm">
                           <p className="font-semibold text-foreground">{t("calendar.eventType")}</p>
                           <p className="capitalize text-muted-foreground">
-                            {event.type ?? "event"}
+                            {event.type ?? t("dashboard.event")}
                           </p>
                         </div>
                       </section>
@@ -210,7 +227,7 @@ export function EventDetailsDrawer({
                           )}
                         </div>
                         <Badge variant="outline" className="text-[11px]">
-                          {participant.responseStatus ?? "Invited"}
+                          {participant.responseStatus ?? t("calendar.invited")}
                         </Badge>
                       </div>
                     ))
@@ -242,7 +259,7 @@ export function EventDetailsDrawer({
                           className="rounded-md border px-3 py-2"
                         >
                           <p className="font-semibold text-foreground">
-                            {link?.shift?.title || "Shift"}
+                            {link?.shift?.title || t("calendar.shiftFallback")}
                           </p>
                           <p>{timeRange(link?.shift)}</p>
                         </div>
@@ -251,9 +268,9 @@ export function EventDetailsDrawer({
                       <div className="rounded-md border px-3 py-2">
                         <p className="font-semibold text-foreground">{t("calendar.linkedShifts2")}</p>
                         <p className="text-xs text-muted-foreground">
-                          {fallbackShiftIds.length} shift
-                          {fallbackShiftIds.length === 1 ? "" : "s"} linked
-                          locally.
+                          {t("calendar.shiftsLinkedCount", {
+                            count: fallbackShiftIds.length,
+                          })}
                         </p>
                       </div>
                     )}
@@ -267,10 +284,15 @@ export function EventDetailsDrawer({
           <div className="flex items-center justify-between border-t px-6 py-4">
             <div className="text-xs text-muted-foreground">
               {busy
-                ? "Working…"
+                ? t("calendar.working")
                 : event
-                  ? `Created ${formatDateTime(event.raw.created_at ?? undefined, "EEE, MMM d · HH:mm")}`
-                  : "Idle"}
+                  ? t("calendar.createdOn", {
+                      when: formatDateTime(
+                        event.raw.created_at ?? undefined,
+                        "EEE, MMM d · HH:mm",
+                      ),
+                    })
+                  : t("calendar.eventDetails")}
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -279,10 +301,20 @@ export function EventDetailsDrawer({
                 onClick={() => onOpenChange(false)}
                 disabled={busy}
               >{t("common.close")}</Button>
+              {onEdit ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  data-testid="calendar-edit-event"
+                  onClick={onEdit}
+                  disabled={!eventId || busy}
+                >{t("common.edit")}</Button>
+              ) : null}
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={handleDelete}
+                data-testid="calendar-delete-event"
+                onClick={() => setConfirmDelete(true)}
                 disabled={!eventId || busy}
               >{t("common.delete")}</Button>
             </div>
@@ -290,16 +322,40 @@ export function EventDetailsDrawer({
         </div>
       </DrawerContent>
     </Drawer>
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("calendar.deleteThisEvent")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("calendar.deleteEventQuestion")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="calendar-confirm-delete"
+              disabled={busy}
+              onClick={(click) => {
+                click.preventDefault();
+                void handleDelete();
+              }}
+            >
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
 const timeRange = (
   shift?: { start_time?: string; end_time?: string } | null,
 ) => {
-  if (!shift?.start_time || !shift?.end_time) return "No time set";
+  if (!shift?.start_time || !shift?.end_time) return "";
   const start = parseISO(shift.start_time);
   const end = parseISO(shift.end_time);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
-    return "No time set";
+    return "";
   return `${format(start, "HH:mm")} – ${format(end, "HH:mm")}`;
 };

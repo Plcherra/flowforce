@@ -13,23 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { FormFieldType } from "@/types/forms";
+import { editorFieldTypeOptions } from "@/features/forms/utils/formFieldCatalog";
 import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
 import { cn } from "@/lib/utils";
-
-const fieldTypes: { value: FormFieldType; label: string }[] = [
-  { value: "text", label: "Text" },
-  { value: "textarea", label: "Paragraph" },
-  { value: "number", label: "Number" },
-  { value: "email", label: "Email" },
-  { value: "phone", label: "Phone" },
-  { value: "date", label: "Date" },
-  { value: "select", label: "Dropdown" },
-  { value: "radio", label: "Radio" },
-  { value: "checkbox", label: "Checkbox" },
-  { value: "file_upload", label: "File upload" },
-  { value: "signature", label: "Signature" },
-  { value: "formula", label: "Formula" },
-];
 
 const randomId = () => {
   if (
@@ -89,7 +75,7 @@ export function FormEditorPanel() {
     const targetId = activeField?.id ?? allFields[0]?.id ?? "";
     upsertFormula({
       id: randomId(),
-      name: "New formula",
+      name: t("forms.fieldFormula"),
       expression: "",
       targetFieldId: targetId,
     });
@@ -119,7 +105,7 @@ export function FormEditorPanel() {
     if (!sectionId) return;
     addField(sectionId, {
       type,
-      label: "New field",
+      label: t("forms.newField"),
     });
   };
 
@@ -157,7 +143,7 @@ export function FormEditorPanel() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => addSection("Untitled section")}
+              onClick={() => addSection(t("forms.untitledSection"))}
             >
               {t("forms.addSection")}</Button>
           </div>
@@ -233,7 +219,7 @@ export function FormEditorPanel() {
                     )}
                   >
                     <p className="text-sm font-medium">
-                      {field.label || "Untitled field"}
+                      {field.label || t("forms.untitledField")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {field.type}
@@ -246,7 +232,7 @@ export function FormEditorPanel() {
                   onClick={() =>
                     addField(section.id, {
                       type: "text",
-                      label: "New field",
+                      label: t("forms.newField"),
                     })
                   }
                 >
@@ -287,9 +273,9 @@ export function FormEditorPanel() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {fieldTypes.map((type) => (
+                    {editorFieldTypeOptions.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        {type.label}
+                        {t(type.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -323,6 +309,28 @@ export function FormEditorPanel() {
                 }
               />
             </div>
+            {activeField.type === "formula" && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  {t("forms.expression")}
+                </label>
+                <Textarea
+                  value={activeField.formula_expression ?? ""}
+                  onChange={(event) => {
+                    const expression = event.target.value;
+                    updateField(activeSection.id, activeField.id, {
+                      formula_expression: expression,
+                    });
+                    const existing = formulas.find(
+                      (formula) => formula.targetFieldId === activeField.id,
+                    );
+                    if (existing) upsertFormula({ ...existing, expression });
+                  }}
+                  placeholder={t("forms.eGFieldAFieldB")}
+                  rows={2}
+                />
+              </div>
+            )}
             {(activeField.type === "select" ||
               activeField.type === "radio" ||
               activeField.type === "checkbox") && (
@@ -403,7 +411,7 @@ export function FormEditorPanel() {
                     <SelectContent>
                       {allFields.map((field) => (
                         <SelectItem key={field.id} value={field.id}>
-                          {field.label || "Untitled field"}
+                          {field.label || t("forms.untitledField")}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -415,12 +423,18 @@ export function FormEditorPanel() {
                   {t("forms.expression")}</label>
                 <Textarea
                   value={formula.expression}
-                  onChange={(event) =>
-                    upsertFormula({
-                      ...formula,
-                      expression: event.target.value,
-                    })
-                  }
+                    onChange={(event) => {
+                      const expression = event.target.value;
+                      upsertFormula({ ...formula, expression });
+                      const section = schema?.sections.find((item) =>
+                        item.fields.some((field) => field.id === formula.targetFieldId),
+                      );
+                      if (section) {
+                        updateField(section.id, formula.targetFieldId, {
+                          formula_expression: expression,
+                        });
+                      }
+                    }}
                   placeholder={t("forms.eGFieldAFieldB")}
                   rows={2}
                 />
