@@ -176,7 +176,7 @@ export async function syncStripeBilling(
     normalizeBillingPlan(null);
   const planDefinition = getBillingPlanDefinition(plan);
 
-  let billingStatus = resolveEffectiveBillingStatus({
+  const billingStatus = resolveEffectiveBillingStatus({
     subscription,
     tenant,
     paymentFailedAt,
