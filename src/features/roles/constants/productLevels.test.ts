@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   canDeactivateClass,
   clampPermissionsToProductLevel,
+  fillMissingProductRoleDefaults,
   cloneClassFromProductLevel,
   inferProductLevel,
   isInviteableClass,
@@ -121,4 +122,25 @@ export function runProductLevelTests() {
   const staffDefault = cloneClassFromProductLevel("staff", "FOH");
   assert.equal(staffDefault.permissions.viewOwnSchedules, true);
   assert.equal(staffDefault.permissions.viewTeamSchedules, undefined);
+
+  const legacyStaff = clampPermissionsToProductLevel(
+    "staff",
+    fillMissingProductRoleDefaults("staff", {
+      viewOwnProfile: true,
+      "messages.send": false,
+    }),
+  );
+  assert.equal(legacyStaff["messages.send"], false, "explicit deny stays off");
+  assert.equal(legacyStaff["forms.submit"], true);
+  assert.equal(legacyStaff["timeoff.request"], true);
+  assert.equal(legacyStaff["goals.view"], true);
+  assert.equal(legacyStaff["tasks.view"], true);
+  assert.equal(legacyStaff["forms.submissions.read"], undefined);
+  assert.equal(legacyStaff["tasks.update"], undefined);
+
+  const legacyOwner = fillMissingProductRoleDefaults("owner", {
+    approveTimeOff: false,
+  });
+  assert.equal(legacyOwner["messages.send"], true);
+  assert.equal(legacyOwner.approveTimeOff, false);
 }

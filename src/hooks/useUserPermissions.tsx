@@ -8,6 +8,11 @@ import {
   type PermissionKey,
   type PermissionValue,
 } from "@/lib/permissions/registry";
+import {
+  clampPermissionsToProductLevel,
+  fillMissingProductRoleDefaults,
+  resolveProductLevel,
+} from "@/features/roles/constants/productLevels";
 import { createPermissionResolver } from "@/lib/permissions/resolver";
 import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
@@ -77,7 +82,7 @@ export function useUserEffectivePermissions(
       ] = await Promise.all([
         supabase
           .from("company_roles")
-          .select("permissions")
+          .select("permissions, product_level, name, hierarchy_level")
           .eq("id", roleId)
           .single(),
         supabase.from("user_permissions").select("*").eq("user_id", userId),
@@ -88,13 +93,22 @@ export function useUserEffectivePermissions(
 
       const overrides = (overrideData || []) as UserPermissionOverride[];
       const rawPermissions = role?.permissions ?? {};
-      const rolePermissions =
+      const parsedPermissions =
         typeof rawPermissions === "string"
           ? JSON.parse(rawPermissions)
           : rawPermissions;
+      const productLevel = resolveProductLevel({
+        product_level: role?.product_level,
+        name: role?.name,
+        hierarchy_level: role?.hierarchy_level,
+      });
+      const rolePermissions = clampPermissionsToProductLevel(
+        productLevel,
+        fillMissingProductRoleDefaults(productLevel, parsedPermissions || {}),
+      );
 
       const resolver = createPermissionResolver({
-        rolePermissions: rolePermissions || {},
+        rolePermissions,
         userOverrides: overrides,
         userId,
         roleId,

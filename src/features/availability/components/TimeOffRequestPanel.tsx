@@ -60,6 +60,7 @@ import type { AvailabilityGrid } from "@/features/availability/components/Availa
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { useCan } from "@/hooks/useCan";
 
 const BASE_TIME_OFF_ALLOWANCE = 25; // matches summary used in standalone Time Off page
 
@@ -124,6 +125,8 @@ export function TimeOffRequestPanel({
   availabilityGrid,
 }: TimeOffRequestPanelProps) {
   const { t } = useTranslation();
+  const { can } = useCan();
+  const canRequestTimeOff = can("timeoff.request");
   const { toast } = useToast();
   const { profile } = useProfile();
   const schedulingRole = useSchedulingRole();
@@ -391,6 +394,7 @@ export function TimeOffRequestPanel({
               {t("schedule.companyPolicies")}
             </Button>
           ) : null}
+          {canRequestTimeOff ? (
           <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" disabled={!employeeId || loading}>{t("schedule.requestTimeOff")}</Button>
@@ -482,6 +486,7 @@ export function TimeOffRequestPanel({
             </div>
           </DialogContent>
         </Dialog>
+          ) : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">

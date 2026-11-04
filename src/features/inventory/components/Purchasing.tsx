@@ -1075,6 +1075,7 @@ export default function InventoryPurchasingPage() {
                                 >
                                   <ExternalLink className="mr-2 h-4 w-4" />
                                   {t("inventory.review")} </Button>
+                                <IfCan permission="inventory.purchasing.manage">
                                 <Button
                                   type="button"
                                   size="sm"
@@ -1082,6 +1083,7 @@ export default function InventoryPurchasingPage() {
                                   disabled={updateOrder.isPending}
                                 >
                                   {t("inventory.approveSend")} </Button>
+                                </IfCan>
                                 <Button
                                   type="button"
                                   variant="ghost"

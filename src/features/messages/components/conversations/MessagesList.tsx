@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import type { Message, ThreadMessage } from "@/types/messages";
 import { Skeleton } from "@/components/ui/skeleton";
 import { logger } from "@/utils/logger";
+import { useCan } from "@/hooks/useCan";
 import {
   safeArrayLength,
   safeArrayMap,
@@ -55,6 +56,8 @@ export function MessagesList({
   channelMembers = [],
 }: MessagesListProps) {
   const { t } = useTranslation();
+  const { can } = useCan();
+  const canModerateMessages = can("messages.manage");
   const messageSources = useMemo(
     () =>
       messages.map((message) => ({
@@ -333,7 +336,8 @@ export function MessagesList({
                               <Edit2 className="h-4 w-4" />
                             </Button>
                           )}
-                        {message.senderid === currentUserId && (
+                        {(message.senderid === currentUserId ||
+                          canModerateMessages) && (
                           <Button
                             type="button"
                             variant="ghost"

@@ -248,7 +248,7 @@ select throws_ok(
 select col_type_is('public', 'payment_approvals', 'payment_id', 'uuid', 'Payment approval payment_id is a UUID relationship');
 select col_type_is('public', 'inv_count_lines', 'item_id', 'uuid', 'Inventory count line item_id is a UUID relationship');
 select is(
-  (select count(*) from pg_policies where schemaname = 'public' and tablename = 'inv_waste' and policyname = 'Company members can manage inv_waste'),
+  (select count(*) from pg_policies where schemaname = 'public' and tablename = 'inv_waste' and policyname = 'Permissioned users can insert inv_waste'),
   1::bigint,
   'Inventory waste has an explicit reviewed tenant policy'
 );

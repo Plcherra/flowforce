@@ -64,7 +64,7 @@ export function useMessageOperations() {
     deleteMessage: async (messageId: string) => {
       if (!user) return { error: new Error("User not authenticated") };
       try {
-        await messagesRepository.deleteMessage(messageId, user.id);
+        await messagesRepository.deleteMessage(messageId);
         return { error: null };
       } catch (error) {
         return { error };
