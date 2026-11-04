@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -12,6 +13,10 @@ import {
   sopChecklistTemplatePresets,
 } from "@/services/operations/sopChecklistBuilder";
 import { logger } from "@/utils/logger";
+import {
+  localizedSopTemplate,
+  sopCategoryLabel,
+} from "../utils/operationsHubLabels";
 
 type CreatedTemplate = {
   workflowid?: string;
@@ -24,6 +29,8 @@ export function SopChecklistBuilderPanel() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit = !permissionLoading && can("editTasks");
   const [selectedId, setSelectedId] = useState(
     sopChecklistTemplatePresets[0]?.id ?? "opening",
   );
@@ -31,12 +38,12 @@ export function SopChecklistBuilderPanel() {
   const [createdTemplate, setCreatedTemplate] =
     useState<CreatedTemplate | null>(null);
 
-  const selectedTemplate = useMemo(
-    () =>
-      sopChecklistTemplatePresets.find((template) => template.id === selectedId) ??
-      sopChecklistTemplatePresets[0],
-    [selectedId],
-  );
+  const selectedTemplate = useMemo(() => {
+    const template =
+      sopChecklistTemplatePresets.find((item) => item.id === selectedId) ??
+      sopChecklistTemplatePresets[0];
+    return template ? localizedSopTemplate(t, template) : template;
+  }, [selectedId, t]);
 
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
 
@@ -44,8 +51,8 @@ export function SopChecklistBuilderPanel() {
     if (!selectedTemplate || !companyId) {
       toast({
         variant: "destructive",
-        title: t("literals.companyContextMissing"),
-        description: t("literals.connectYourProfileToACompanyBeforePublishing"),
+        title: t("operations.companyContextMissing"),
+        description: t("operations.connectProfileBeforePublish"),
       });
       return;
     }
@@ -69,8 +76,8 @@ export function SopChecklistBuilderPanel() {
 
       setCreatedTemplate((data ?? {}) as CreatedTemplate);
       toast({
-        title: t("literals.checklistPublished"),
-        description: t("literals.isReadyForAssignment", { name: selectedTemplate.name }),
+        title: t("operations.checklistPublished"),
+        description: t("operations.checklistReady", { name: selectedTemplate.name }),
       });
     } catch (error) {
       logger.error("[SopChecklistBuilderPanel] publish failed", {
@@ -79,9 +86,9 @@ export function SopChecklistBuilderPanel() {
       });
       toast({
         variant: "destructive",
-        title: t("literals.unableToPublishChecklist"),
+        title: t("operations.unableToPublishChecklist"),
         description:
-          error instanceof Error ? error.message : t("literals.unexpectedBuilderError"),
+          error instanceof Error ? error.message : t("operations.unexpectedBuilderError"),
       });
     } finally {
       setSaving(false);
@@ -115,7 +122,7 @@ export function SopChecklistBuilderPanel() {
               value={template.id}
               className="justify-start text-xs"
             >
-              {template.templateCategory}
+              {sopCategoryLabel(t, template.id)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -147,7 +154,7 @@ export function SopChecklistBuilderPanel() {
                 <p className="font-medium">{step.label}</p>
                 <p className="text-xs text-muted-foreground">
                   {step.stepType} · {step.fieldType}
-                  {step.evidenceRequired ? t("literals.evidence") : ""}
+                  {step.evidenceRequired ? ` · ${t("operations.evidenceWord")}` : ""}
                 </p>
               </div>
               {step.required ? (
@@ -165,7 +172,7 @@ export function SopChecklistBuilderPanel() {
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button onClick={handlePublish} disabled={saving || !companyId}>
+        <Button onClick={handlePublish} disabled={saving || !companyId || !canEdit}>
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

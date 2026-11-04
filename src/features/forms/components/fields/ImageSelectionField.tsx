@@ -274,17 +274,11 @@ export function ImageSelectionField({
 // For form builder preview
 export function ImageSelectionFieldPreview({
   label: labelProp,
-  description = "Select one or more images from the options below",
+  description,
   className = "",
 }: Partial<ImageSelectionFieldProps>) {
   const { t } = useTranslation();
   const label = labelProp ?? t("forms.imageSelection");
-  const sampleImages = [
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop",
-    "https://images.unsplash.com/photo-1447433819943-74ca0d7a6ad8?w=150&h=150&fit=crop",
-    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=150&h=150&fit=crop",
-    "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=150&h=150&fit=crop",
-  ];
 
   return (
     <ImageSelectionField
@@ -292,7 +286,7 @@ export function ImageSelectionFieldPreview({
       description={description}
       value={undefined}
       onChange={() => {}}
-      predefinedImages={sampleImages}
+      predefinedImages={[]}
       allowCustomImages={true}
       maxSelection={3}
       className={className}

@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   runCopilotAutoSchedule,
   type AutoScheduleParams,
@@ -19,6 +20,7 @@ export function useAutoScheduler() {
   const { user } = useAuth();
   const { refetchAll } = useScheduling();
   const { profile } = useProfile();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [state, setState] = useState<AutoScheduleState>({
     loading: false,
@@ -29,7 +31,7 @@ export function useAutoScheduler() {
   const autoScheduleWeek = useCallback(
     async (params: AutoScheduleParams) => {
       if (!user) {
-        const error = new Error("Must be signed in to run the copilot");
+        const error = new Error(t("schedule.mustBeSignedIn"));
         setState((prev) => ({ ...prev, error: error.message }));
         throw error;
       }
@@ -37,7 +39,7 @@ export function useAutoScheduler() {
       const companyId = profile?.companyId ?? null;
       if (!companyId) {
         const error = new Error(
-          "A company must be selected before running the copilot",
+          t("schedule.companyRequiredForCopilot"),
         );
         setState((prev) => ({ ...prev, error: error.message }));
         throw error;
@@ -51,8 +53,11 @@ export function useAutoScheduler() {
         setState({ loading: false, error: null, lastResult: result });
 
         toast({
-          title: "Draft schedule ready",
-          description: `${result.schedulesCreated.length} shifts drafted for ${result.locationName}.`,
+          title: t("schedule.draftScheduleReady"),
+          description: t("schedule.shiftsDraftedFor", {
+            count: result.schedulesCreated.length,
+            location: result.locationName,
+          }),
         });
 
         return { data: result, error: null } as const;
@@ -60,17 +65,17 @@ export function useAutoScheduler() {
         const message =
           error instanceof Error
             ? error.message
-            : "Failed to auto-schedule week";
+            : t("schedule.failedToAutoSchedule");
         setState({ loading: false, error: message, lastResult: null });
         toast({
-          title: "Auto-schedule failed",
+          title: t("schedule.autoScheduleFailed"),
           description: message,
           variant: "destructive",
         });
         return { data: null, error: message } as const;
       }
     },
-    [profile?.companyId, refetchAll, toast, user],
+    [profile?.companyId, refetchAll, t, toast, user],
   );
 
   return {

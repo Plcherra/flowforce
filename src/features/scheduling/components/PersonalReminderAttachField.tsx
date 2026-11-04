@@ -78,7 +78,12 @@ export function PersonalReminderAttachField({
   });
 
   const records = recordsQuery.data ?? [];
-  const kindLabel = kind === "task" ? "task" : kind === "form" ? "form" : "shift";
+  const kindLabel =
+    kind === "task"
+      ? t("schedule.kindTask")
+      : kind === "form"
+        ? t("schedule.kindForm")
+        : t("schedule.kindShift");
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
@@ -104,25 +109,31 @@ export function PersonalReminderAttachField({
       </div>
       {kind ? (
         <div className="space-y-1">
-          <Label>Which {kindLabel}</Label>
+          <Label>{t("schedule.whichRecord", { kind: kindLabel })}</Label>
           <Select value={recordId || undefined} onValueChange={onRecordChange}>
             <SelectTrigger
-              aria-label={`Reminder ${kindLabel}`}
+              aria-label={t("schedule.reminderForKind", { kind: kindLabel })}
               data-testid="personal-reminder-record"
             >
-              <SelectValue placeholder={recordsQuery.isLoading ? "Loading..." : `Choose a ${kindLabel}`} />
+              <SelectValue
+                placeholder={
+                  recordsQuery.isLoading
+                    ? t("schedule.loading")
+                    : t("schedule.chooseAKind", { kind: kindLabel })
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {records.map((row) => (
                 <SelectItem key={row.id} value={row.id}>
-                  {recordLabel(row, `Untitled ${kindLabel}`)}
+                  {recordLabel(row, t("schedule.untitledKind", { kind: kindLabel }))}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {!recordsQuery.isLoading && records.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              No {kindLabel} you can open yet.
+              {t("schedule.noKindYet", { kind: kindLabel })}
             </p>
           ) : null}
         </div>

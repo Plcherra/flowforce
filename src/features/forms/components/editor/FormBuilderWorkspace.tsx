@@ -38,7 +38,14 @@ export function FormBuilderWorkspace({
   ];
 
   const paneView = (id: Pane) => {
-    if (id === "library") return <FormFieldLibrary onAddField={onAddField} />;
+    if (id === "library") {
+      return (
+        <FormFieldLibrary
+          onAddField={onAddField}
+          allowDrag={builderPaneMode(width) !== "stack"}
+        />
+      );
+    }
     if (id === "editor") return <FormEditorPanel />;
     return <FormLivePreview />;
   };
@@ -72,7 +79,7 @@ export function FormBuilderWorkspace({
       data-testid="form-builder-columns"
     >
       <ResizablePanel defaultSize={22} minSize={16} className="flex min-h-0 min-w-0 flex-col">
-        <FormFieldLibrary onAddField={onAddField} />
+        <FormFieldLibrary onAddField={onAddField} allowDrag />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={48} minSize={32} className="flex min-h-0 min-w-0 flex-col">

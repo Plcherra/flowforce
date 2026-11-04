@@ -10,8 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
-import { useProfile } from "@/hooks/useProfile";
-import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { submittedFormsHidden } from "@/features/roles/constants/permissionAccessTypes";
 import { useForms } from "@/features/forms/hooks/useForms";
 import { useFormListActions } from "@/features/forms/hooks/useFormListActions";
@@ -70,12 +68,14 @@ const matchesQuery = (
 export default function Forms() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { profile } = useProfile();
-  const leadership = isLeadershipLevel({ name: profile?.role });
   const { can: canUse, getSource } = useCan();
-  const hideOtherSubmissions = submittedFormsHidden(
-    getSource("forms.submissions.read"),
-  );
+  const canReadOtherForms =
+    canUse("forms.submissions.read") ||
+    canUse("approveFormSubmissions") ||
+    canUse("manageForms");
+  const hideOtherSubmissions =
+    !canReadOtherForms ||
+    submittedFormsHidden(getSource("forms.submissions.read"));
   const {
     forms,
     isInitialLoading,
@@ -99,6 +99,8 @@ export default function Forms() {
   const openedFormRef = useRef<string | null>(null);
 
   const canCreateForms = canUse("createForms");
+  const canManageForms = canUse("manageForms") || canCreateForms;
+  const canSubmitForms = canUse("forms.submit");
   const statusTabs: StatusFilter[] = ["all", "published", "draft", "archived"];
   const isRefreshing = isFetching && !isInitialLoading;
 
@@ -182,7 +184,7 @@ export default function Forms() {
     ? asArray(forms).find((form) => form.id === builderFormId)
     : null;
   const builderInitialTitle =
-    builderForm?.title ?? builderFallback?.title ?? "New Form";
+    builderForm?.title ?? builderFallback?.title ?? t("forms.newForm");
   const builderInitialDescription =
     builderForm?.description ?? builderFallback?.description ?? "";
 
@@ -192,12 +194,12 @@ export default function Forms() {
 
   const handleOpenBuilder = useCallback(
     (formId: string) => {
-      if (!canCreateForms) return;
+      if (!canManageForms) return;
       setDiscardEmptyId(null);
       setBuilderFallback(null);
       setBuilderFormId(formId);
     },
-    [canCreateForms],
+    [canManageForms],
   );
 
   const handleOpenFill = useCallback((formId: string) => {
@@ -230,11 +232,11 @@ export default function Forms() {
       isLoading={isInitialLoading}
       error={formsError}
       onRetry={handleRetry}
-      loadingTitle="Loading Forms"
-      loadingDescription="Preparing your workspace forms…"
+      loadingTitle={t("forms.loadingForms")}
+      loadingDescription={t("forms.preparingForms")}
     >
-      <div className="w-full space-y-3 px-1 py-3 sm:px-2">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="w-full min-w-0 space-y-3 px-1 py-3 sm:px-2">
+        <div className="sticky top-0 z-20 flex flex-col gap-2 bg-background/95 py-1 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-foreground">{t("common.forms")}</h1>
             <p className="text-sm text-muted-foreground">
@@ -272,7 +274,7 @@ export default function Forms() {
           </div>
         </div>
 
-        {leadership ? (
+        {canManageForms ? (
           <FormsReadinessPanel
             forms={forms}
             canCreateForms={canCreateForms}
@@ -310,14 +312,20 @@ export default function Forms() {
                       forms={section.forms}
                       loading={isInitialLoading}
                       refreshing={isRefreshing}
-                      canEdit={canCreateForms}
+                      canEdit={canManageForms}
                       emptyMessage={section.emptyMessage}
                       translations={translations}
-                      onFill={handleOpenFill}
+                      onFill={canSubmitForms ? handleOpenFill : undefined}
                       onEdit={handleOpenBuilder}
-                      onDelete={listActions.setDeleteId}
+                      onDelete={
+                        canUse("manageForms") ? listActions.setDeleteId : undefined
+                      }
                       onPublish={(formId) => void listActions.publishForm(formId)}
-                      onViewSubmissions={setSubmissionsFormId}
+                      onArchive={(formId) => void listActions.archiveForm(formId)}
+                      onRestore={(formId) => void listActions.restoreForm(formId)}
+                      onViewSubmissions={
+                        canReadOtherForms ? setSubmissionsFormId : undefined
+                      }
                     />
                   </ErrorBoundary>
                 ))}
@@ -338,7 +346,10 @@ export default function Forms() {
               onFormCreated={(formId, meta) => {
                 setCreateDialogOpen(false);
                 setDiscardEmptyId(meta?.discardIfEmpty ? formId : null);
-                setBuilderFallback({ title: "New Form", description: "" });
+                setBuilderFallback({
+                  title: meta?.title ?? t("forms.newForm"),
+                  description: meta?.description ?? "",
+                });
                 setBuilderFormId(formId);
                 void refetchForms();
               }}
@@ -367,6 +378,7 @@ export default function Forms() {
                 formId={builderFormId}
                 initialTitle={builderInitialTitle}
                 initialDescription={builderInitialDescription}
+                initialSettings={builderForm?.settings}
                 discardIfEmpty={discardEmptyId === builderFormId}
               />
             </ErrorBoundary>

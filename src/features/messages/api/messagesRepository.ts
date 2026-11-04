@@ -521,12 +521,10 @@ async function updateMessage(
   return normalized as Message;
 }
 
-async function deleteMessage(messageId: string, senderId: string) {
-  const { error } = await supabase
-    .from("messages")
-    .delete()
-    .eq("id", messageId)
-    .eq("sender_id", senderId);
+async function deleteMessage(messageId: string) {
+  // RLS allows the sender or messages.manage. Filtering on the current
+  // user's id made moderation delete nothing and still report success.
+  const { error } = await supabase.from("messages").delete().eq("id", messageId);
 
   if (error) throw error;
 }

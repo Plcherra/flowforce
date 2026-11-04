@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -17,10 +18,12 @@ import {
   type NewNotificationInput,
   type TaskNotification,
 } from "@/features/tasks/repositories/taskNotificationsRepository";
+import { translatedStatusLabel } from "@/features/tasks/utils/taskCopy";
 
 const NOTIFICATION_QUERY_KEY = "task-notifications";
 
 export function useTaskNotifications() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -87,31 +90,27 @@ export function useTaskNotifications() {
         }
       } catch (error) {
         // Handle various error types and extract meaningful messages
-        let errorMessage = "Unable to check due tasks.";
+        let errorMessage = t("tasks.unableCheckDue");
 
         if (error instanceof Error) {
           errorMessage = error.message || errorMessage;
         } else if (error && typeof error === "object") {
-          // Try to extract message from error object
           if ("message" in error && typeof error.message === "string") {
             errorMessage = error.message;
           } else if ("error" in error && typeof error.error === "string") {
             errorMessage = error.error;
           } else if ("code" in error) {
-            errorMessage = `Error code: ${String(error.code)}`;
+            errorMessage = t("tasks.errorCode", { code: String(error.code) });
           }
         } else if (typeof error === "string") {
           errorMessage = error;
         }
 
-        // Only log if there's a meaningful error message
-        if (errorMessage !== "Unable to check due tasks." || error) {
-          logger.error("Error checking due tasks:", {
-            error,
-            context: { errorMessage },
-            tags: ["error"],
-          });
-        }
+        logger.error("Error checking due tasks:", {
+          error,
+          context: { errorMessage },
+          tags: ["error"],
+        });
 
         if (isMounted) {
           setServiceError(errorMessage);
@@ -148,8 +147,8 @@ export function useTaskNotifications() {
           user_id: userId,
           task_id: task.id,
           type: "task_due_soon",
-          title: "Task Due Soon",
-          message: `"${task.title}" is due soon`,
+          title: t("tasks.notifyDueSoon"),
+          message: t("tasks.notifyDueSoonMessage", { title: task.title }),
           metadata: {
             task_title: task.title,
             priority: task.priority,
@@ -173,8 +172,8 @@ export function useTaskNotifications() {
           user_id: userId,
           task_id: task.id,
           type: "task_overdue",
-          title: "Task Overdue",
-          message: `"${task.title}" is overdue`,
+          title: t("tasks.notifyOverdue"),
+          message: t("tasks.notifyOverdueMessage", { title: task.title }),
           metadata: {
             task_title: task.title,
             priority: task.priority,
@@ -197,7 +196,7 @@ export function useTaskNotifications() {
         tags: ["error"],
       });
       setServiceError(
-        (error as Error)?.message ?? "Unable to update notification.",
+        (error as Error)?.message ?? t("tasks.unableUpdateNotification"),
       );
     }
   };
@@ -213,7 +212,7 @@ export function useTaskNotifications() {
         tags: ["error"],
       });
       setServiceError(
-        (error as Error)?.message ?? "Unable to update notifications.",
+        (error as Error)?.message ?? t("tasks.unableUpdateNotifications"),
       );
     }
   };
@@ -225,7 +224,7 @@ export function useTaskNotifications() {
     } catch (error) {
       logger.error("Error deleting notification:", { error, tags: ["error"] });
       setServiceError(
-        (error as Error)?.message ?? "Unable to delete notification.",
+        (error as Error)?.message ?? t("tasks.unableDeleteNotification"),
       );
     }
   };
@@ -237,7 +236,7 @@ export function useTaskNotifications() {
     } catch (error) {
       logger.error("Error creating notification:", { error, tags: ["error"] });
       setServiceError(
-        (error as Error)?.message ?? "Unable to create notification.",
+        (error as Error)?.message ?? t("tasks.unableCreateNotification"),
       );
     }
   };
@@ -252,8 +251,8 @@ export function useTaskNotifications() {
       user_id: assigneeId,
       task_id: taskId,
       type: "task_assigned",
-      title: "New Task Assignment",
-      message: `You have been assigned to "${taskTitle}"`,
+      title: t("tasks.notifyAssigned"),
+      message: t("tasks.notifyAssignedMessage", { title: taskTitle }),
       metadata: {
         task_title: taskTitle,
         assignee_name: assigneeName,
@@ -272,8 +271,11 @@ export function useTaskNotifications() {
       user_id: creatorId,
       task_id: taskId,
       type: "task_completed",
-      title: "Task Completed",
-      message: `"${taskTitle}" has been completed by ${completedBy}`,
+      title: t("tasks.notifyCompleted"),
+      message: t("tasks.notifyCompletedMessage", {
+        title: taskTitle,
+        name: completedBy,
+      }),
       metadata: {
         task_title: taskTitle,
       },
@@ -290,8 +292,11 @@ export function useTaskNotifications() {
       user_id: assigneeId,
       task_id: taskId,
       type: "task_status_changed",
-      title: "Task Status Updated",
-      message: `"${taskTitle}" status changed to ${newStatus.replace("_", " ")}`,
+      title: t("tasks.notifyStatusUpdated"),
+      message: t("tasks.notifyStatusMessage", {
+        title: taskTitle,
+        status: translatedStatusLabel(t, newStatus, newStatus.replaceAll("_", " ")),
+      }),
       metadata: {
         task_title: taskTitle,
         status: newStatus,
@@ -310,8 +315,11 @@ export function useTaskNotifications() {
       user_id: assigneeId,
       task_id: taskId,
       type: "task_comment",
-      title: "New Comment",
-      message: `${commenterName} commented on "${taskTitle}"`,
+      title: t("tasks.notifyComment"),
+      message: t("tasks.notifyCommentMessage", {
+        name: commenterName,
+        title: taskTitle,
+      }),
       metadata: {
         task_title: taskTitle,
         comment_author: commenterName,

@@ -58,6 +58,7 @@ export function OperatorAccessGrid({
             <p className="text-sm font-medium">{labelFor(row)}</p>
             <div className="flex flex-wrap gap-3">
               {switches.map((item) => {
+                const switchLabel = item.labelKey ? t(item.labelKey) : item.label;
                 const locked = level === "owner" && Boolean(item.ownerLocked);
                 const grantable = inviterCanGrantSwitch(
                   item,
@@ -83,7 +84,7 @@ export function OperatorAccessGrid({
                     {grantable ? (
                       <Switch
                         id={`${idPrefix}-${row.id}-${item.id}`}
-                        aria-label={t("literals.text17", { value0: labelFor(row), label: item.label })}
+                        aria-label={`${labelFor(row)} ${switchLabel}`}
                         checked={enabled}
                         disabled={disabled || locked || !grantable}
                         onCheckedChange={(checked) =>
@@ -93,7 +94,7 @@ export function OperatorAccessGrid({
                     ) : (
                       <span>—</span>
                     )}
-                    <span>{item.label}</span>
+                    <span>{switchLabel}</span>
                     {diffLabel ? (
                       <span className="uppercase tracking-wide">{diffLabel}</span>
                     ) : null}

@@ -37,6 +37,7 @@ const service = readText("src/services/integrations/integrationStrategy.ts");
 const settingsPanel = readText(
   "src/features/system/components/IntegrationSettingsPanel.tsx",
 );
+const englishLocale = readText("src/locales/en.json");
 const packageJson = readText("package.json");
 
 requireIncludes(
@@ -85,9 +86,14 @@ requireIncludes(
     'status: "pending"',
     'credentialMode: "server_vault_required"',
     "keyLast4",
-    "Raw API keys are never stored in browser-readable settings.",
+    "settings.rawApiKeysAreNeverStoredInBrowser",
   ],
   "integration settings placeholder safety",
+);
+requireIncludes(
+  englishLocale,
+  ["Raw API keys are never stored in browser-readable settings."],
+  "English integration settings copy",
 );
 
 requireExcludes(

@@ -4,6 +4,7 @@ import { CalendarClock, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -14,6 +15,11 @@ import {
   type OperationsDailyWorkloadRow,
 } from "@/services/operations/recurringOperationsCalendar";
 import { logger } from "@/utils/logger";
+import {
+  calendarPresetDescription,
+  calendarPresetLabel,
+  calendarPresetSignal,
+} from "../utils/operationsHubLabels";
 
 const generationWindow = buildGenerationWindow(6);
 
@@ -21,6 +27,8 @@ export function RecurringOperationsCalendarPanel() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { toast } = useToast();
+  const { can, isLoading: permissionLoading } = useCan();
+  const canEdit = !permissionLoading && can("editTasks");
   const [generating, setGenerating] = useState(false);
   const [loadingWorkload, setLoadingWorkload] = useState(false);
   const [lastRun, setLastRun] = useState<GenerateRecurringRunsResult | null>(
@@ -66,14 +74,14 @@ export function RecurringOperationsCalendarPanel() {
       });
       toast({
         variant: "destructive",
-        title: t("literals.unableToLoadWorkload"),
+        title: t("operations.unableToLoadWorkload"),
         description:
-          error instanceof Error ? error.message : t("literals.unexpectedWorkloadError"),
+          error instanceof Error ? error.message : t("operations.unexpectedWorkloadError"),
       });
     } finally {
       setLoadingWorkload(false);
     }
-  }, [companyId, toast]);
+  }, [companyId, t, toast]);
 
   useEffect(() => {
     void loadWorkload();
@@ -83,8 +91,8 @@ export function RecurringOperationsCalendarPanel() {
     if (!companyId) {
       toast({
         variant: "destructive",
-        title: t("literals.companyContextMissing"),
-        description: t("literals.connectYourProfileToACompanyBeforeScheduling"),
+        title: t("operations.companyContextMissing"),
+        description: t("operations.connectProfileBeforeSchedule"),
       });
       return;
     }
@@ -110,8 +118,10 @@ export function RecurringOperationsCalendarPanel() {
       await loadWorkload();
 
       toast({
-        title: t("literals.operationsCalendarGenerated"),
-        description: t("literals.newRunsCreatedForTheNextSevenDays", { value0: result.runs_created ?? 0 }),
+        title: t("operations.calendarGenerated"),
+        description: t("operations.calendarGeneratedDetail", {
+          count: result.runs_created ?? 0,
+        }),
       });
     } catch (error) {
       logger.error("[RecurringOperationsCalendarPanel] generation failed", {
@@ -120,9 +130,9 @@ export function RecurringOperationsCalendarPanel() {
       });
       toast({
         variant: "destructive",
-        title: t("literals.unableToGenerateCalendar"),
+        title: t("operations.unableToGenerateCalendar"),
         description:
-          error instanceof Error ? error.message : t("literals.unexpectedCalendarError"),
+          error instanceof Error ? error.message : t("operations.unexpectedCalendarError"),
       });
     } finally {
       setGenerating(false);
@@ -167,15 +177,15 @@ export function RecurringOperationsCalendarPanel() {
           <div key={preset.id} className="rounded-2xl border bg-muted/30 p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold">{preset.label}</p>
+                <p className="text-sm font-semibold">{calendarPresetLabel(t, preset.id)}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {preset.description}
+                  {calendarPresetDescription(t, preset.id)}
                 </p>
               </div>
               <ShieldCheck className="h-4 w-4 shrink-0 text-success" />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              {t("inventory.due")} {preset.dueTime} · {preset.managerWorkloadSignal}
+              {t("inventory.due")} {preset.dueTime} · {calendarPresetSignal(t, preset.id)}
             </p>
           </div>
         );
@@ -217,7 +227,7 @@ export function RecurringOperationsCalendarPanel() {
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button onClick={handleGenerate} disabled={generating || !companyId}>
+        <Button onClick={handleGenerate} disabled={generating || !companyId || !canEdit}>
           {generating ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

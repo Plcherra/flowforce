@@ -35,6 +35,14 @@ import {
 } from "@/features/tasks/utils/taskSchedule";
 import type { TaskCreateScope } from "@/features/roles/constants/taskCreateScope";
 import { peopleWithinTaskCreateScope } from "@/features/tasks/utils/taskAssigneeScope";
+import { TaskAudienceFields } from "@/features/tasks/components/TaskAudienceFields";
+import {
+  defaultTaskAudience,
+  taskAudienceJson,
+  taskAudienceReady,
+  type TaskAudience,
+} from "@/features/tasks/utils/taskAudience";
+import type { Json } from "@/integrations/supabase/public-types";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -55,6 +63,9 @@ export function CreateTaskDialog({
   const { toast } = useToast();
   const {
     assignees,
+    positions,
+    roles,
+    departments,
     loading: optionsLoading,
     error: optionsError,
   } = useTaskFormOptions(open);
@@ -73,6 +84,9 @@ export function CreateTaskDialog({
     assigned_to: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [audienceTouched, setAudienceTouched] = useState(false);
+  const [viewAudience, setViewAudience] = useState<TaskAudience>(defaultTaskAudience(null));
+  const [editAudience, setEditAudience] = useState<TaskAudience>(defaultTaskAudience(null));
   const allowedAssignees =
     scope && user
       ? peopleWithinTaskCreateScope({
@@ -85,20 +99,27 @@ export function CreateTaskDialog({
           })),
         })
       : [];
+  const scopePending = createLevel === "others" && !scope;
   const onlySelf =
     createLevel === "self" ||
-    !scope ||
-    allowedAssignees.every((person) => person.id === user?.id);
+    (scope != null &&
+      allowedAssignees.every((person) => person.id === user?.id));
+
+  useEffect(() => {
+    if (audienceTouched) return;
+    const next = defaultTaskAudience(onlySelf ? user?.id ?? "self" : formData.assigned_to || null);
+    setViewAudience(next);
+    setEditAudience(next);
+  }, [audienceTouched, onlySelf, user?.id, formData.assigned_to]);
 
   useEffect(() => {
     if (!optionsError) return;
     toast({
-      title: "Unable to load options",
-      description:
-        "Some fields may be unavailable right now. Please try again later.",
+      title: t("tasks.unableToLoadOptions"),
+      description: t("tasks.optionsUnavailable"),
       variant: "destructive",
     });
-  }, [optionsError, toast]);
+  }, [optionsError, t, toast]);
 
   const clearError = (field: string) => {
     setErrors((prev) => {
@@ -126,6 +147,9 @@ export function CreateTaskDialog({
       assigned_to: "",
     });
     setCreateReminder(false);
+    setAudienceTouched(false);
+    setViewAudience(defaultTaskAudience(null));
+    setEditAudience(defaultTaskAudience(null));
     setErrors({});
   };
 
@@ -136,6 +160,9 @@ export function CreateTaskDialog({
     }
     if (!onlySelf && scope && !formData.assigned_to) {
       nextErrors.assigned_to = t("tasks.chooseAssignee");
+    }
+    if (!taskAudienceReady(viewAudience) || !taskAudienceReady(editAudience)) {
+      nextErrors.audience = t("tasks.audienceNeedsAChoice");
     }
     if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
       nextErrors.points = t("tasks.pointsMustBeWholeNumber");
@@ -195,6 +222,8 @@ export function CreateTaskDialog({
           : formData.assigned_to
             ? formData.assigned_to
             : null,
+        view_audience: taskAudienceJson(viewAudience) as Json,
+        edit_audience: taskAudienceJson(editAudience) as Json,
         departmentid: null,
         tags: null,
         attachments: [],
@@ -208,14 +237,13 @@ export function CreateTaskDialog({
 
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to create task. Please try again.",
+          title: t("tasks.errorTitle"),
+          description: t("tasks.createFailed"),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Success",
-          description: "Task created successfully.",
+          title: t("tasks.taskCreated"),
         });
 
         // If user wants to create reminder, show reminder dialog
@@ -229,8 +257,8 @@ export function CreateTaskDialog({
     } catch (error) {
       logger.error("Error creating task:", { error, tags: ["error"] });
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.unexpectedError"),
         variant: "destructive",
       });
     } finally {
@@ -240,7 +268,7 @@ export function CreateTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] overflow-y-auto p-4 sm:max-w-[500px] sm:p-6">
         <DialogHeader>
           <DialogTitle>{t("tasks.createNewTask")}</DialogTitle>
           <DialogDescription>
@@ -283,7 +311,7 @@ export function CreateTaskDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="priority">{t("tasks.priority")}</Label>
               <Select
@@ -339,14 +367,14 @@ export function CreateTaskDialog({
                     value === "none" ? "" : value,
                   )
                 }
-                disabled={optionsLoading}
+                disabled={optionsLoading || scopePending}
               >
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      optionsLoading
-                        ? "Loading team members…"
-                        : "Select team member"
+                      optionsLoading || scopePending
+                        ? t("tasks.loadingTeam")
+                        : t("tasks.selectTeamMember")
                     }
                   />
                 </SelectTrigger>
@@ -405,6 +433,32 @@ export function CreateTaskDialog({
             {t("tasks.theWindowIsWhenTheTaskIsOpen")}
           </p>
 
+          <TaskAudienceFields
+            idPrefix="create-task"
+            viewAudience={viewAudience}
+            editAudience={editAudience}
+            people={assignees.map((person) => ({
+              id: person.id,
+              label: `${person.first_name} ${person.last_name}`.trim(),
+            }))}
+            positions={positions.map((item) => ({ id: item.id, label: item.name }))}
+            roles={roles.map((item) => ({ id: item.id, label: item.name }))}
+            departments={departments.map((item) => ({ id: item.id, label: item.name }))}
+            onViewChange={(audience) => {
+              setAudienceTouched(true);
+              setViewAudience(audience);
+              clearError("audience");
+            }}
+            onEditChange={(audience) => {
+              setAudienceTouched(true);
+              setEditAudience(audience);
+              clearError("audience");
+            }}
+          />
+          {errors.audience ? (
+            <p className="text-sm text-destructive">{errors.audience}</p>
+          ) : null}
+
           <div className="space-y-2">
             <Label htmlFor="points">{t("tasks.points")}</Label>
             <Input
@@ -451,8 +505,12 @@ export function CreateTaskDialog({
             >
               {t("tasks.cancel")}
             </Button>
-            <Button type="submit" disabled={loading || !formData.title.trim()}>
-              {loading ? "Creating..." : "Create Task"}
+            <Button
+              type="submit"
+              className="min-h-11"
+              disabled={loading || scopePending || !formData.title.trim()}
+            >
+              {loading ? t("tasks.creating") : t("tasks.createTask")}
             </Button>
           </DialogFooter>
         </form>

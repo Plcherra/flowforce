@@ -27,7 +27,6 @@ NEXT_PUBLIC_ENABLE_REMOTE_LOGS=false
 NEXT_PUBLIC_REMOTE_LOG_ENDPOINT=/api/logs
 NEXT_PUBLIC_ENABLE_AI_INSIGHTS=false
 NEXT_PUBLIC_DEFAULT_COMPANY_ID=
-NEXT_PUBLIC_FLOWFORCE_AUTOMATIONS_ENDPOINT=
 ```
 
 Server-only variables are runtime inputs through `.env.production.local` or the VPS secret file:

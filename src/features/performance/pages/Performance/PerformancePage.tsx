@@ -27,6 +27,8 @@ import {
 import { XPTrendsSection, type XpTrendEntry } from "./XPTrendsSection";
 import { performanceTaskPoints } from "@/features/performance/utils/taskPointsTotal";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
+import { useCan } from "@/hooks/useCan";
 
 function buildKpis({
   employees,
@@ -174,6 +176,10 @@ function LatestReviewsCard({
 
 export function PerformancePage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { can } = useCan();
+  const canManageReviews = can("reviews.manage");
+  const canViewGoals = can("goals.view") || can("goals.manage");
   const {
     employees,
     goals,
@@ -198,10 +204,17 @@ export function PerformancePage() {
   } = useLeaderboardData(leaderboardPeriod);
   const lastUpdated = useLeaderboardInsightsStore((state) => state.lastUpdated);
 
+  const visibleEmployees = canManageReviews
+    ? employees
+    : employees.filter((employee) => employee.id === user?.id);
+  const visibleReviews = canManageReviews
+    ? reviews
+    : reviews.filter((review) => review.employeeId === user?.id);
+  const visibleGoals = canViewGoals ? goals : [];
   const kpis = [
     ...buildKpis({
-      employees,
-      reviews,
+      employees: visibleEmployees,
+      reviews: visibleReviews,
       recognitionsCount: recognitions.length,
     }),
     {
@@ -213,7 +226,7 @@ export function PerformancePage() {
       description: "The same total as leaderboard task XP",
     },
   ];
-  const goalCards = buildGoalCards(goals);
+  const goalCards = buildGoalCards(visibleGoals);
   const xpSnapshot = buildLeaderboardSnapshot(entries);
   const xpBySource = analytics?.xpBySource ?? {
     tasks: 0,
@@ -265,7 +278,9 @@ export function PerformancePage() {
       <PerformanceKpiGrid metrics={kpis} loading={performanceLoading} />
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr,1fr]">
-        <GoalProgressSection goals={goalCards} loading={performanceLoading} />
+        {canViewGoals ? (
+          <GoalProgressSection goals={goalCards} loading={performanceLoading} />
+        ) : null}
         <XPTrendsSection
           xpBySource={xpBySource as unknown as Record<string, number>}
           leaderboard={xpSnapshot}
@@ -273,7 +288,7 @@ export function PerformancePage() {
         />
       </div>
 
-      <LatestReviewsCard reviews={reviews} loading={performanceLoading} />
+      <LatestReviewsCard reviews={visibleReviews} loading={performanceLoading} />
     </div>
   );
 }

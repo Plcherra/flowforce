@@ -14,6 +14,7 @@ import type { MessageChannel } from "@/types/messages";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useCan } from "@/hooks/useCan";
 
 interface MessagesSidebarProps {
   channels: MessageChannel[];
@@ -39,6 +40,8 @@ export function MessagesSidebar({
   onQueryChange,
 }: MessagesSidebarProps) {
   const { t } = useTranslation();
+  const { can } = useCan();
+  const canSend = can("messages.send");
   const people = channels.filter(isDirectChat);
   const groups = channels.filter((channel) => !isDirectChat(channel));
 
@@ -47,6 +50,7 @@ export function MessagesSidebar({
       <div className="space-y-3 border-b p-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">{t("messages.chats")}</h2>
+          {canSend ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" aria-label={t("messages.startAChat")}>
@@ -62,6 +66,7 @@ export function MessagesSidebar({
                 {t("messages.newGroup")} </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          ) : null}
         </div>
 
         {typeof onQueryChange === "function" && typeof query === "string" && (
@@ -83,11 +88,13 @@ export function MessagesSidebar({
           {channels.length === 0 ? (
             <div className="px-2 py-10 text-center">
               <p className="mb-4 text-sm text-muted-foreground">{t("messages.noChatsYet")}</p>
+              {canSend ? (
               <div className="flex flex-col gap-2">
                 <Button variant="outline" onClick={onShowDirectMessageDialog}>
                   {t("messages.messageSomeone")} </Button>
                 <Button onClick={onShowCreateDialog}>{t("messages.newGroup")}</Button>
               </div>
+              ) : null}
             </div>
           ) : (
             <>

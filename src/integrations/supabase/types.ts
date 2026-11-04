@@ -4692,19 +4692,25 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string | null
+          employee_id: string | null
           id: string
+          reviewerid: string | null
           updated_at: string | null
         }
         Insert: {
           company_id?: string | null
           created_at?: string | null
+          employee_id?: string | null
           id?: string
+          reviewerid?: string | null
           updated_at?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
+          employee_id?: string | null
           id?: string
+          reviewerid?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -6035,6 +6041,8 @@ export type Database = {
           tags: Json | null
           title: string | null
           updated_at: string | null
+          view_audience: Json | null
+          edit_audience: Json | null
           workflow_id: string | null
         }
         Insert: {
@@ -6061,6 +6069,8 @@ export type Database = {
           tags?: Json | null
           title?: string | null
           updated_at?: string | null
+          view_audience?: Json | null
+          edit_audience?: Json | null
           workflow_id?: string | null
         }
         Update: {
@@ -6087,6 +6097,8 @@ export type Database = {
           tags?: Json | null
           title?: string | null
           updated_at?: string | null
+          view_audience?: Json | null
+          edit_audience?: Json | null
           workflow_id?: string | null
         }
         Relationships: []

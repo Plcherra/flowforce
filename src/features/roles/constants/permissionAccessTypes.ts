@@ -15,6 +15,7 @@ export type AccessSwitchType = (typeof ACCESS_SWITCH_TYPES)[number];
 export type AccessSwitch = {
   id: AccessSwitchType;
   label: string;
+  labelKey?: string;
   keys: PermissionKey[];
   ownerLocked?: boolean;
 };
@@ -70,6 +71,11 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "read", label: "Read", keys: ["viewTeamTasks"] },
     { id: "edit", label: "Edit", keys: ["editTasks"] },
   ]},
+  { id: "task_record", label: "Task record", labelKey: "settings.accessTaskRecord", switches: [
+    { id: "read", label: "View", labelKey: "settings.accessView", keys: ["tasks.view"] },
+    { id: "edit", label: "Update", labelKey: "settings.accessUpdate", keys: ["tasks.update"] },
+    { id: "delete", label: "Delete", labelKey: "settings.accessDelete", keys: ["tasks.delete"] },
+  ]},
   { id: "submitted_forms", label: "Submitted forms", switches: [
     { id: "read", label: "Read", keys: ["forms.submissions.read"] },
   ]},
@@ -90,8 +96,43 @@ export const ACCESS_ROWS: AccessRow[] = [
   { id: "expense_approval", label: "Expenses", switches: [
     { id: "edit", label: "Edit", keys: ["approveExpenses"] },
   ]},
-  { id: "time_off", label: "Time off", switches: [
+  { id: "time_off", label: "Time off", labelKey: "settings.accessTimeOff", switches: [
+    { id: "create", label: "Create", keys: ["timeoff.request"] },
     { id: "edit", label: "Edit", keys: ["approveTimeOff"] },
+  ]},
+  { id: "form_submit", label: "Submit forms", labelKey: "settings.accessFormSubmit", switches: [
+    { id: "create", label: "Create", keys: ["forms.submit"] },
+  ]},
+  { id: "messages", label: "Messages", labelKey: "settings.accessMessages", switches: [
+    { id: "create", label: "Create", keys: ["messages.send"] },
+    { id: "edit", label: "Edit", keys: ["messages.manage"] },
+  ]},
+  { id: "goals", label: "Goals", labelKey: "settings.accessGoals", switches: [
+    { id: "read", label: "Read", keys: ["goals.view"] },
+    { id: "edit", label: "Edit", keys: ["goals.manage"] },
+  ]},
+  { id: "company_updates", label: "Company updates", labelKey: "settings.accessUpdates", switches: [
+    { id: "edit", label: "Edit", keys: ["updates.manage"] },
+  ]},
+  { id: "documents", label: "Documents", labelKey: "settings.accessDocuments", switches: [
+    { id: "read", label: "Read", keys: ["documents.view"] },
+    { id: "edit", label: "Edit", keys: ["documents.manage"] },
+  ]},
+  { id: "reviews", label: "Performance reviews", labelKey: "settings.accessReviews", switches: [
+    { id: "read", label: "Read", keys: ["reviews.view_own"] },
+    { id: "edit", label: "Edit", keys: ["reviews.manage"] },
+  ]},
+  { id: "workflow_evidence", label: "Workflow evidence", labelKey: "settings.accessWorkflowEvidence", switches: [
+    { id: "create", label: "Create", keys: ["workflow.evidence"] },
+  ]},
+  { id: "workflow_review", label: "Workflow reviews", labelKey: "settings.accessWorkflowReview", switches: [
+    { id: "edit", label: "Edit", keys: ["workflow.review"] },
+  ]},
+  { id: "workflow_exceptions", label: "Workflow exceptions", labelKey: "settings.accessWorkflowExceptions", switches: [
+    { id: "edit", label: "Edit", keys: ["workflow.exceptions"] },
+  ]},
+  { id: "workflow_assign", label: "Workflow assignments", labelKey: "settings.accessWorkflowAssign", switches: [
+    { id: "edit", label: "Edit", keys: ["workflow.assign"] },
   ]},
   { id: "inventory_items", label: "Inventory items", switches: [
     { id: "read", label: "Read", keys: ["inventory.view"] },

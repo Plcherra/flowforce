@@ -6,6 +6,7 @@ import { Send } from "lucide-react";
 import { MessageAttachments } from "./MessageAttachments";
 import type { MessageAttachment } from "@/types/messages";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
 import { logger } from "@/utils/logger";
 
 interface MessageInputProps {
@@ -23,6 +24,8 @@ export function MessageInput({
   onSendMessage,
 }: MessageInputProps) {
   const { t } = useTranslation();
+  const { can } = useCan();
+  const canSend = can("messages.send");
   const [messageInput, setMessageInput] = useState("");
   const [messageAttachments, setMessageAttachments] = useState<
     MessageAttachment[]
@@ -94,7 +97,9 @@ export function MessageInput({
   );
 
   const submitDisabled =
-    (!messageInput.trim() && messageAttachments.length === 0) || sending;
+    !canSend ||
+    (!messageInput.trim() && messageAttachments.length === 0) ||
+    sending;
 
   return (
     <div className="border-t border-border/70 p-4">
@@ -117,11 +122,16 @@ export function MessageInput({
             setMessageInput(event.target.value);
             resizeTextarea();
           }}
-          placeholder={t("messages.messageChannel", { name: channelName })}
+          placeholder={
+            canSend
+              ? t("messages.messageChannel", { name: channelName })
+              : t("messages.sendingTurnedOff")
+          }
           aria-label={t("messages.messageChannel", { name: channelName })}
           aria-invalid={Boolean(errorMessage)}
           className="flex-1 resize-none"
           rows={1}
+          disabled={!canSend}
           onKeyDown={handleKeyDown}
         />
         {errorMessage && (

@@ -14,7 +14,6 @@ import {
   Volume2,
   Repeat,
   Timer,
-  Play,
 } from "lucide-react";
 import {
   format,
@@ -38,7 +37,6 @@ export function RemindersPanel() {
     deleteReminder,
     markAsCompleted,
     snoozeReminder,
-    triggerReminder,
   } = useReminders();
   const reminderSources = useMemo(
     () =>
@@ -133,29 +131,13 @@ export function RemindersPanel() {
     try {
       await snoozeReminder(reminderId, 15); // Snooze for 15 minutes
       toast({
-        title: "Reminder Snoozed",
-        description: "Reminder will appear again in 15 minutes.",
+        title: t("tasks.reminderSnoozed"),
+        description: t("tasks.reminderSnoozedHelp"),
       });
     } catch (_error) {
       toast({
-        title: "Error",
-        description: "Failed to snooze reminder.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleTestReminder = async (reminderId: string) => {
-    try {
-      await triggerReminder(reminderId, translations.get(reminderId) ?? null);
-      toast({
-        title: "Test Notification",
-        description: "Test reminder notification sent!",
-      });
-    } catch (_error) {
-      toast({
-        title: "Error",
-        description: "Failed to send test notification.",
+        title: t("tasks.errorTitle"),
+        description: t("tasks.snoozeFailed"),
         variant: "destructive",
       });
     }
@@ -234,8 +216,9 @@ export function RemindersPanel() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 w-6 p-0"
+                                  className="min-h-11 min-w-11 p-0"
                                   onClick={() => handleSnooze(reminder.id)}
+                                  aria-label={t("tasks.snoozeFor15Minutes")}
                                   title={t("tasks.snoozeFor15Minutes")}
                                 >
                                   <Timer className="h-3 w-3" />
@@ -244,16 +227,8 @@ export function RemindersPanel() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => handleTestReminder(reminder.id)}
-                                title={t("tasks.testNotification")}
-                              >
-                                <Play className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
+                                className="min-h-11 min-w-11 p-0"
+                                aria-label={t("tasks.markDone")}
                                 onClick={() => markAsCompleted(reminder.id)}
                               >
                                 <CheckCircle className="h-3 w-3" />
@@ -261,7 +236,8 @@ export function RemindersPanel() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0"
+                                className="min-h-11 min-w-11 p-0"
+                                aria-label={t("tasks.delete")}
                                 onClick={() => deleteReminder(reminder.id)}
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -320,16 +296,8 @@ export function RemindersPanel() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0"
-                                onClick={() => handleTestReminder(reminder.id)}
-                                title={t("tasks.testNotification")}
-                              >
-                                <Play className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0"
+                                className="min-h-11 min-w-11 p-0"
+                                aria-label={t("tasks.markDone")}
                                 onClick={() => markAsCompleted(reminder.id)}
                               >
                                 <CheckCircle className="h-3 w-3" />
@@ -337,7 +305,8 @@ export function RemindersPanel() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 w-6 p-0"
+                                className="min-h-11 min-w-11 p-0"
+                                aria-label={t("tasks.delete")}
                                 onClick={() => deleteReminder(reminder.id)}
                               >
                                 <Trash2 className="h-3 w-3" />

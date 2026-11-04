@@ -20,6 +20,7 @@ interface TileDetailPanelProps {
   copilotMessages: Record<TileId, string>;
   onAutomation: (tile: TileId) => void;
   onCreateTask: () => void;
+  canCreateTask?: boolean;
   onNavigate: (path: string) => void;
   onClose: () => void;
 }
@@ -32,6 +33,7 @@ export function TileDetailPanel({
   copilotMessages,
   onAutomation,
   onCreateTask,
+  canCreateTask = true,
   onNavigate,
   onClose,
 }: TileDetailPanelProps) {
@@ -43,6 +45,7 @@ export function TileDetailPanel({
           copilotMessage={copilotMessages.tasks}
           onAutomation={() => onAutomation("tasks")}
           onCreateTask={onCreateTask}
+          canCreateTask={canCreateTask}
           onNavigateToTasks={() => {
             onNavigate("/app/tasks");
             onClose();

@@ -144,6 +144,24 @@ export const PERMISSION_DEFINITIONS = [
     category: "Tasks",
   },
   {
+    key: "tasks.view",
+    label: "Tasks: View",
+    description: "View tasks shared with you",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.update",
+    label: "Tasks: Update",
+    description: "Edit tasks shared with you for editing",
+    category: "Tasks",
+  },
+  {
+    key: "tasks.delete",
+    label: "Tasks: Delete",
+    description: "Delete tasks you are allowed to see",
+    category: "Tasks",
+  },
+  {
     key: "tasks.shift.create_self",
     label: "Shift tasks: Create for self",
     description: "Create a shift task assigned to yourself",
@@ -191,6 +209,30 @@ export const PERMISSION_DEFINITIONS = [
     description: "Act on the list issues gathered for the owner",
     category: "Tasks",
   },
+  {
+    key: "workflow.evidence",
+    label: "Workflow: Evidence",
+    description: "Submit evidence and report an open exception on your own work",
+    category: "Tasks",
+  },
+  {
+    key: "workflow.review",
+    label: "Workflow: Review",
+    description: "Review workflow runs and read the team's evidence",
+    category: "Tasks",
+  },
+  {
+    key: "workflow.exceptions",
+    label: "Workflow: Exceptions",
+    description: "Update, resolve, and delete workflow exceptions",
+    category: "Tasks",
+  },
+  {
+    key: "workflow.assign",
+    label: "Workflow: Assign",
+    description: "Assign workflows to people, roles, and places",
+    category: "Tasks",
+  },
 
   // Expenses & Time Off
   {
@@ -215,6 +257,12 @@ export const PERMISSION_DEFINITIONS = [
     key: "approveTimeOff",
     label: "Approve Time Off",
     description: "Approve time-off requests",
+    category: "Expenses",
+  },
+  {
+    key: "timeoff.request",
+    label: "Time off: Request",
+    description: "Request your own time off and keep a pending request",
     category: "Expenses",
   },
 
@@ -255,6 +303,12 @@ export const PERMISSION_DEFINITIONS = [
     key: "approveFormSubmissions",
     label: "Approve Form Submissions",
     description: "Approve or reject form submissions",
+    category: "Forms",
+  },
+  {
+    key: "forms.submit",
+    label: "Forms: Submit",
+    description: "Fill a published form as yourself",
     category: "Forms",
   },
 
@@ -311,6 +365,60 @@ export const PERMISSION_DEFINITIONS = [
     key: "managePayments",
     label: "Manage Payments",
     description: "Manage payment workflows",
+    category: "General",
+  },
+  {
+    key: "messages.send",
+    label: "Messages: Send",
+    description: "Start a conversation with coworkers and send messages in channels you belong to",
+    category: "General",
+  },
+  {
+    key: "messages.manage",
+    label: "Messages: Manage",
+    description: "Edit channels and delete other people's messages. Does not open a channel you are not in",
+    category: "General",
+  },
+  {
+    key: "goals.view",
+    label: "Goals: View",
+    description: "View company goals",
+    category: "General",
+  },
+  {
+    key: "goals.manage",
+    label: "Goals: Manage",
+    description: "Create, edit, and delete company goals and their rewards",
+    category: "General",
+  },
+  {
+    key: "updates.manage",
+    label: "Updates: Manage",
+    description: "Publish, edit, archive, and delete company updates",
+    category: "General",
+  },
+  {
+    key: "documents.view",
+    label: "Documents: View",
+    description: "View company documents",
+    category: "General",
+  },
+  {
+    key: "documents.manage",
+    label: "Documents: Manage",
+    description: "Upload, edit, and delete company documents",
+    category: "General",
+  },
+  {
+    key: "reviews.view_own",
+    label: "Reviews: View own",
+    description: "View your own performance reviews",
+    category: "General",
+  },
+  {
+    key: "reviews.manage",
+    label: "Reviews: Manage",
+    description: "View, write, and delete the team's performance reviews",
     category: "General",
   },
 

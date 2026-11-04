@@ -53,7 +53,7 @@ requireIncludes(
     "capacitor_is_v1_path",
     "deferred_until_pilot_evidence",
     "nativeFutureTriggers",
-    "offline_data_loss",
+    "offlinedata_loss",
     "platform_policy_blocker",
     "nativeCandidateScreens",
     "inventory_counts",
@@ -129,7 +129,7 @@ if (!nativeFuture.isMobileNativeFutureEvaluationReady()) {
   throw new Error("Mobile native future evaluation contract is not ready");
 }
 
-if (!nativeFuture.shouldStartNativeRewrite(["offline_data_loss"])) {
+if (!nativeFuture.shouldStartNativeRewrite(["offlinedata_loss"])) {
   throw new Error(
     "Offline data loss should trigger native rewrite consideration",
   );

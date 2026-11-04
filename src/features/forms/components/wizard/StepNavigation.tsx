@@ -2,6 +2,7 @@
  * Step navigation component for form wizard
  */
 
+import { useTranslation } from "react-i18next";
 import { CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WizardStepMeta } from "../../types/formFill";
@@ -17,6 +18,7 @@ export function StepNavigation({
   steps,
   onStepChange,
 }: StepNavigationProps) {
+  const { t } = useTranslation();
   return (
     <div className="shrink-0 border-b border-border/60 px-4 py-2 sm:px-6">
       <nav
@@ -60,7 +62,7 @@ export function StepNavigation({
               >
                 {isComplete ? <CheckCircle className="h-3 w-3" /> : index + 1}
               </span>
-              <span className="truncate font-medium">{step.name}</span>
+              <span className="truncate font-medium">{t(step.name)}</span>
             </button>
           );
         })}

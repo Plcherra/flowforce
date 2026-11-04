@@ -146,39 +146,41 @@ export function FormsReadinessPanel({
 
   const cards = [
     {
-      label: "Published",
+      label: t("forms.readinessPublished"),
       value: summary.publishedForms,
-      detail: `${summary.draftForms} drafts`,
+      detail: t("forms.readinessDrafts", { count: summary.draftForms }),
       icon: FileText,
     },
     {
-      label: "Submissions",
+      label: t("forms.readinessSubmissions"),
       value: summary.totalSubmissions,
-      detail: `${summary.pendingReviews} pending reviews`,
+      detail: t("forms.readinessPendingReviews", { count: summary.pendingReviews }),
       icon: ClipboardCheck,
     },
     {
-      label: "Fields",
-      value: readinessQuery.isLoading ? "..." : summary.requiredFields,
-      detail: `${summary.formsWithoutFields} forms empty`,
+      label: t("forms.readinessFields"),
+      value: readinessQuery.isLoading ? "…" : summary.requiredFields,
+      detail: t("forms.readinessFormsEmpty", { count: summary.formsWithoutFields }),
       icon: FilePenLine,
     },
     {
-      label: "Advanced",
+      label: t("forms.readinessAdvanced"),
       value: summary.advancedFieldCoverage,
-      detail: "Ratings, scans, files, signatures",
+      detail: t("forms.readinessAdvancedDetail"),
       icon: Layers,
     },
     {
-      label: "Files",
+      label: t("forms.readinessFiles"),
       value: summary.mediaFieldCoverage,
-      detail: "Private storage fields",
+      detail: t("forms.readinessFilesDetail"),
       icon: Paperclip,
     },
     {
-      label: "Review rules",
+      label: t("forms.readinessReviewRules"),
       value: summary.publishedForms - summary.formsWithoutReviewers,
-      detail: `${summary.formsWithoutReviewers} missing`,
+      detail: t("forms.readinessRulesCount", {
+        count: summary.publishedForms - summary.formsWithoutReviewers,
+      }),
       icon: ShieldCheck,
     },
   ];
@@ -243,9 +245,15 @@ export function FormsReadinessPanel({
                     className={`rounded-md border px-3 py-2 text-sm ${reviewTone[item.severity]}`}
                   >
                     <span className="flex items-center justify-between gap-2">
-                      <span className="font-medium">{item.label}</span>
+                      <span className="font-medium">{t(item.labelKey)}</span>
                       <Badge variant="outline" className="text-[10px]">
-                        {item.severity}
+                        {t(
+                          item.severity === "critical"
+                            ? "forms.severityCritical"
+                            : item.severity === "warning"
+                              ? "forms.severityWarning"
+                              : "forms.severityInfo",
+                        )}
                       </Badge>
                     </span>
                     <span className="mt-1 block truncate">{item.detail}</span>

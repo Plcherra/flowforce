@@ -81,9 +81,9 @@ export function useMessageActions() {
 
   const deleteMessage = useCallback(
     async (messageId: string) => {
-      const userId = ensureUser();
+      ensureUser();
       try {
-        await deleteMessageService(messageId, userId);
+        await deleteMessageService(messageId);
         toast({
           title: t("literals.messageDeleted"),
           description: t("literals.yourMessageWasRemoved"),

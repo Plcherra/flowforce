@@ -14,6 +14,7 @@ import {
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCan } from "@/hooks/useCan";
 import {
   Card,
   CardContent,
@@ -101,6 +102,8 @@ function summarizeText(text?: string | null) {
 
 export default function ReportsPage() {
   const { t } = useTranslation();
+  const { can: canUse } = useCan();
+  const canManageDocuments = canUse("documents.manage");
   const { user } = useAuth();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -171,6 +174,7 @@ export default function ReportsPage() {
   }, [selectedDocument]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canManageDocuments) return;
     const file = event.target.files?.[0];
     if (file) {
       uploadMutation.mutate({
@@ -303,7 +307,7 @@ export default function ReportsPage() {
           </Button>
           <Button
             onClick={() => uploadInputRef.current?.click()}
-            disabled={uploadMutation.isPending}
+            disabled={!canManageDocuments || uploadMutation.isPending}
             className="gap-2"
           >
             {uploadMutation.isPending ? (

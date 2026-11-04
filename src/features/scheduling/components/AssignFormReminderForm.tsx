@@ -35,7 +35,7 @@ function personName(person?: {
   last_name?: string | null;
 }) {
   const name = [person?.first_name, person?.last_name].filter(Boolean).join(" ").trim();
-  return name || "Team member";
+  return name || "";
 }
 
 export function AssignFormReminderForm({
@@ -75,7 +75,7 @@ export function AssignFormReminderForm({
       await createFormScheduleReminder({
         userId: targetId,
         formId,
-        title: selectedForm.title?.trim() || "Form reminder",
+        title: selectedForm.title?.trim() || t("schedule.formReminder"),
         time,
         repeat,
       });
@@ -88,13 +88,13 @@ export function AssignFormReminderForm({
         queryKey: ["linked-schedule-reminders"],
       });
       toast({
-        title: "Form reminder assigned",
-        description: "That person can see the time and how often it repeats.",
+        title: t("schedule.formReminderAssigned"),
+        description: t("schedule.formReminderAssignedHelp"),
       });
     } catch {
       toast({
-        title: "Could not assign the form reminder",
-        description: "Try again in a moment.",
+        title: t("schedule.couldNotAssignFormReminder"),
+        description: t("schedule.pleaseTryAgainInAFewMoments"),
         variant: "destructive",
       });
     } finally {
@@ -113,7 +113,7 @@ export function AssignFormReminderForm({
           <SelectContent>
             {(formsQuery.data ?? []).map((form) => (
               <SelectItem key={form.id} value={form.id}>
-                {form.title?.trim() || "Untitled form"}
+                {form.title?.trim() || t("schedule.untitledForm")}
               </SelectItem>
             ))}
           </SelectContent>
@@ -129,7 +129,7 @@ export function AssignFormReminderForm({
             <SelectContent>
               {others.map((person) => (
                 <SelectItem key={person.id} value={person.id}>
-                  {personName(person)}
+                  {personName(person) || t("schedule.teamMember")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -157,7 +157,11 @@ export function AssignFormReminderForm({
             <SelectContent>
               {REMINDER_REPEAT_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {option.value === "daily"
+                    ? t("schedule.repeatDaily")
+                    : option.value === "weekly"
+                      ? t("schedule.repeatWeekly")
+                      : t("schedule.repeatWeekdays")}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -171,7 +175,7 @@ export function AssignFormReminderForm({
         onClick={assign}
         disabled={saving || !formId || !targetId || !time}
       >
-        {saving ? "Assigning..." : "Assign form reminder"}
+        {saving ? t("schedule.assigning") : t("schedule.assignFormReminder")}
       </Button>
     </div>
   );
