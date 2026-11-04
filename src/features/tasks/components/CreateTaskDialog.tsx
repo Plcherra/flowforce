@@ -35,6 +35,14 @@ import {
 } from "@/features/tasks/utils/taskSchedule";
 import type { TaskCreateScope } from "@/features/roles/constants/taskCreateScope";
 import { peopleWithinTaskCreateScope } from "@/features/tasks/utils/taskAssigneeScope";
+import { TaskAudienceFields } from "@/features/tasks/components/TaskAudienceFields";
+import {
+  defaultTaskAudience,
+  taskAudienceJson,
+  taskAudienceReady,
+  type TaskAudience,
+} from "@/features/tasks/utils/taskAudience";
+import type { Json } from "@/integrations/supabase/public-types";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -55,6 +63,9 @@ export function CreateTaskDialog({
   const { toast } = useToast();
   const {
     assignees,
+    positions,
+    roles,
+    departments,
     loading: optionsLoading,
     error: optionsError,
   } = useTaskFormOptions(open);
@@ -73,6 +84,9 @@ export function CreateTaskDialog({
     assigned_to: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [audienceTouched, setAudienceTouched] = useState(false);
+  const [viewAudience, setViewAudience] = useState<TaskAudience>(defaultTaskAudience(null));
+  const [editAudience, setEditAudience] = useState<TaskAudience>(defaultTaskAudience(null));
   const allowedAssignees =
     scope && user
       ? peopleWithinTaskCreateScope({
@@ -90,6 +104,13 @@ export function CreateTaskDialog({
     createLevel === "self" ||
     (scope != null &&
       allowedAssignees.every((person) => person.id === user?.id));
+
+  useEffect(() => {
+    if (audienceTouched) return;
+    const next = defaultTaskAudience(onlySelf ? user?.id ?? "self" : formData.assigned_to || null);
+    setViewAudience(next);
+    setEditAudience(next);
+  }, [audienceTouched, onlySelf, user?.id, formData.assigned_to]);
 
   useEffect(() => {
     if (!optionsError) return;
@@ -126,6 +147,9 @@ export function CreateTaskDialog({
       assigned_to: "",
     });
     setCreateReminder(false);
+    setAudienceTouched(false);
+    setViewAudience(defaultTaskAudience(null));
+    setEditAudience(defaultTaskAudience(null));
     setErrors({});
   };
 
@@ -136,6 +160,9 @@ export function CreateTaskDialog({
     }
     if (!onlySelf && scope && !formData.assigned_to) {
       nextErrors.assigned_to = t("tasks.chooseAssignee");
+    }
+    if (!taskAudienceReady(viewAudience) || !taskAudienceReady(editAudience)) {
+      nextErrors.audience = t("tasks.audienceNeedsAChoice");
     }
     if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
       nextErrors.points = t("tasks.pointsMustBeWholeNumber");
@@ -195,6 +222,8 @@ export function CreateTaskDialog({
           : formData.assigned_to
             ? formData.assigned_to
             : null,
+        view_audience: taskAudienceJson(viewAudience) as Json,
+        edit_audience: taskAudienceJson(editAudience) as Json,
         departmentid: null,
         tags: null,
         attachments: [],
@@ -403,6 +432,32 @@ export function CreateTaskDialog({
           <p className="text-sm text-muted-foreground">
             {t("tasks.theWindowIsWhenTheTaskIsOpen")}
           </p>
+
+          <TaskAudienceFields
+            idPrefix="create-task"
+            viewAudience={viewAudience}
+            editAudience={editAudience}
+            people={assignees.map((person) => ({
+              id: person.id,
+              label: `${person.first_name} ${person.last_name}`.trim(),
+            }))}
+            positions={positions.map((item) => ({ id: item.id, label: item.name }))}
+            roles={roles.map((item) => ({ id: item.id, label: item.name }))}
+            departments={departments.map((item) => ({ id: item.id, label: item.name }))}
+            onViewChange={(audience) => {
+              setAudienceTouched(true);
+              setViewAudience(audience);
+              clearError("audience");
+            }}
+            onEditChange={(audience) => {
+              setAudienceTouched(true);
+              setEditAudience(audience);
+              clearError("audience");
+            }}
+          />
+          {errors.audience ? (
+            <p className="text-sm text-destructive">{errors.audience}</p>
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="points">{t("tasks.points")}</Label>

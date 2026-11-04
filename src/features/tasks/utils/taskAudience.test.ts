@@ -1,7 +1,29 @@
 import assert from "node:assert/strict";
-import { canSeeTask, taskInvolvesViewer } from "./taskAudience";
+import {
+  canSeeTask,
+  defaultTaskAudience,
+  parseTaskAudience,
+  taskAudienceJson,
+  taskAudienceReady,
+  taskInvolvesViewer,
+} from "./taskAudience";
 
 export function runTaskAudienceTests() {
+  assert.equal(defaultTaskAudience("cashier").kind, "private");
+  assert.equal(defaultTaskAudience(null).kind, "company");
+  assert.equal(defaultTaskAudience("").kind, "company");
+
+  const parsed = parseTaskAudience({
+    kind: "position",
+    position_ids: ["supervisor"],
+  });
+  assert.equal(parsed.kind, "position");
+  assert.deepEqual(parsed.positionIds, ["supervisor"]);
+  assert.equal(taskAudienceReady(parsed), true);
+  assert.equal(taskAudienceReady({ ...parsed, positionIds: [] }), false);
+  assert.deepEqual(taskAudienceJson(parsed).position_ids, ["supervisor"]);
+  assert.equal(parseTaskAudience(null).kind, "private");
+
   const now = new Date("2026-10-26T12:00:00.000Z");
   const mine = {
     created_by: "manager",

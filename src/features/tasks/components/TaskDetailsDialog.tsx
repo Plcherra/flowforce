@@ -39,12 +39,13 @@ import {
   type TaskWithRelations,
 } from "@/hooks/useTasks";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useCan } from "@/hooks/useCan";
 import { TaskTimeline } from "./TaskTimeline";
 import {
   getTaskStatusBadgeClass,
   TASK_STATUS_FLOW,
 } from "@/constants/taskStatus";
-import { useCan } from "@/hooks/useCan";
 import { readFormId } from "@/features/tasks/utils/shiftTaskWrite";
 import {
   translatedKindLabel,
@@ -52,6 +53,14 @@ import {
   workflowActionLabel,
 } from "@/features/tasks/utils/taskCopy";
 import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
+import { TaskAudienceFields } from "@/features/tasks/components/TaskAudienceFields";
+import {
+  parseTaskAudience,
+  taskAudienceJson,
+  taskAudienceReady,
+  type TaskAudience,
+} from "@/features/tasks/utils/taskAudience";
+import type { Json } from "@/integrations/supabase/public-types";
 import { useTaskComments } from "@/features/tasks/hooks";
 import {
   dueDateFromWindowEnd,
@@ -121,6 +130,7 @@ export function TaskDetailsDialog({
   onFillForm,
 }: TaskDetailsDialogProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { can } = useCan();
   const canEdit = can("editTasks");
   const { updateStatus, updateTask, deleteTask } = useTasks();
@@ -128,6 +138,9 @@ export function TaskDetailsDialog({
   const {
     assignees,
     loading: optionsLoading,
+    positions,
+    roles,
+    departments,
   } = useTaskFormOptions(open);
 
   const [currentTask, setCurrentTask] = useState<TaskWithRelations | null>(
@@ -138,6 +151,9 @@ export function TaskDetailsDialog({
     null,
   );
   const [assignmentValue, setAssignmentValue] = useState("none");
+  const [viewAudience, setViewAudience] = useState<TaskAudience>(parseTaskAudience(null));
+  const [editAudience, setEditAudience] = useState<TaskAudience>(parseTaskAudience(null));
+  const [savingAudience, setSavingAudience] = useState(false);
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
   const [executionForm, setExecutionForm] = useState({
     title: "",
@@ -172,6 +188,12 @@ export function TaskDetailsDialog({
     }
 
     setAssignmentValue(task.assigned_to ?? "none");
+    const record = task as TaskWithRelations & {
+      view_audience?: unknown;
+      edit_audience?: unknown;
+    };
+    setViewAudience(parseTaskAudience(record.view_audience));
+    setEditAudience(parseTaskAudience(record.edit_audience));
     const schedule = readTaskSchedule(task.links);
     setExecutionForm({
       title: task.title ?? "",
@@ -260,6 +282,38 @@ export function TaskDetailsDialog({
       });
     } finally {
       setSavingExecution(false);
+    }
+  };
+
+  const handleSaveAudience = async () => {
+    if (!currentTask) return;
+    if (!taskAudienceReady(viewAudience) || !taskAudienceReady(editAudience)) {
+      toast({
+        title: t("tasks.visibilitySaveFailed"),
+        description: t("tasks.audienceNeedsAChoice"),
+        variant: "destructive",
+      });
+      return;
+    }
+    setSavingAudience(true);
+    try {
+      const { data, error } = await updateTask(currentTask.id, {
+        view_audience: taskAudienceJson(viewAudience) as Json,
+        edit_audience: taskAudienceJson(editAudience) as Json,
+      });
+      if (error || !data) throw error ?? new Error("Unable to save visibility");
+      const updatedTask = { ...currentTask, ...data };
+      setCurrentTask(updatedTask);
+      onTaskUpdate?.(updatedTask);
+      toast({ title: t("tasks.visibilitySaved") });
+    } catch (error) {
+      logger.error("Error saving task visibility", { error, tags: ["error"] });
+      toast({
+        title: t("tasks.visibilitySaveFailed"),
+        variant: "destructive",
+      });
+    } finally {
+      setSavingAudience(false);
     }
   };
 
@@ -802,7 +856,32 @@ export function TaskDetailsDialog({
                   </p>
                 )}
               </div>
-
+              {currentTask.created_by === user?.id || can("editTasks") ? (
+              <>
+              <TaskAudienceFields
+                idPrefix="edit-task"
+                viewAudience={viewAudience}
+                editAudience={editAudience}
+                people={assignees.map((person) => ({
+                  id: person.id,
+                  label: `${person.first_name} ${person.last_name}`.trim(),
+                }))}
+                positions={positions.map((item) => ({ id: item.id, label: item.name }))}
+                roles={roles.map((item) => ({ id: item.id, label: item.name }))}
+                departments={departments.map((item) => ({ id: item.id, label: item.name }))}
+                onViewChange={setViewAudience}
+                onEditChange={setEditAudience}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSaveAudience}
+                disabled={savingAudience}
+              >
+                {savingAudience ? t("tasks.savingVisibility") : t("tasks.saveVisibility")}
+              </Button>
+              </>
+              ) : null}
             </div>
 
             <div className="space-y-3">

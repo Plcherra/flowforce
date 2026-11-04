@@ -18,10 +18,18 @@ export interface TaskFormGoal {
   target_completion_date: string | null;
 }
 
+export interface TaskFormChoice {
+  id: string;
+  name: string;
+}
+
 export const useTaskFormOptions = (shouldFetch: boolean) => {
   const { user } = useAuth();
   const [assignees, setAssignees] = useState<TaskFormAssignee[]>([]);
   const [goals, setGoals] = useState<TaskFormGoal[]>([]);
+  const [positions, setPositions] = useState<TaskFormChoice[]>([]);
+  const [roles, setRoles] = useState<TaskFormChoice[]>([]);
+  const [departments, setDepartments] = useState<TaskFormChoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,6 +53,9 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       if (!companyId) {
         setAssignees([]);
         setGoals([]);
+        setPositions([]);
+        setRoles([]);
+        setDepartments([]);
         setLoading(false);
         return;
       }
@@ -63,18 +74,32 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       assigneeQuery = assigneeQuery.eq("company_id", companyId);
       goalsQuery = goalsQuery.eq("company_id", companyId);
 
-      const [assigneesResult, goalsResult, rolesResult] = await Promise.all([
+      const [assigneesResult, goalsResult, rolesResult, positionsResult, departmentsResult] =
+        await Promise.all([
         assigneeQuery,
         goalsQuery,
         supabase
           .from("company_roles")
-          .select("id, hierarchy_level")
-          .eq("company_id", companyId),
+          .select("id, name, hierarchy_level")
+          .eq("company_id", companyId)
+          .order("hierarchy_level", { ascending: true }),
+        supabase
+          .from("positions")
+          .select("id, name")
+          .eq("company_id", companyId)
+          .order("name", { ascending: true }),
+        supabase
+          .from("departments")
+          .select("id, name")
+          .eq("company_id", companyId)
+          .order("name", { ascending: true }),
       ]);
 
       if (assigneesResult.error) throw assigneesResult.error;
       if (goalsResult.error) throw goalsResult.error;
       if (rolesResult.error) throw rolesResult.error;
+      if (positionsResult.error) throw positionsResult.error;
+      if (departmentsResult.error) throw departmentsResult.error;
 
       const levels = new Map(
         (rolesResult.data ?? []).map((role) => [role.id, role.hierarchy_level ?? 1]),
@@ -88,6 +113,24 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
         })),
       );
       setGoals((goalsResult.data ?? []) as TaskFormGoal[]);
+      setRoles(
+        (rolesResult.data ?? []).map((role) => ({
+          id: role.id,
+          name: role.name ?? "",
+        })),
+      );
+      setPositions(
+        (positionsResult.data ?? []).map((position) => ({
+          id: position.id,
+          name: position.name ?? "",
+        })),
+      );
+      setDepartments(
+        (departmentsResult.data ?? []).map((department) => ({
+          id: department.id,
+          name: department.name ?? "",
+        })),
+      );
     } catch (fetchError) {
       logger.error("Error loading task form options", {
         error: fetchError,
@@ -100,6 +143,9 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
       );
       setAssignees([]);
       setGoals([]);
+      setPositions([]);
+      setRoles([]);
+      setDepartments([]);
     } finally {
       setLoading(false);
     }
@@ -113,6 +159,9 @@ export const useTaskFormOptions = (shouldFetch: boolean) => {
   return {
     assignees,
     goals,
+    positions,
+    roles,
+    departments,
     loading,
     error,
     refetch: fetchOptions,

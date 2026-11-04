@@ -6035,6 +6035,8 @@ export type Database = {
           tags: Json | null
           title: string | null
           updated_at: string | null
+          view_audience: Json | null
+          edit_audience: Json | null
           workflow_id: string | null
         }
         Insert: {
@@ -6061,6 +6063,8 @@ export type Database = {
           tags?: Json | null
           title?: string | null
           updated_at?: string | null
+          view_audience?: Json | null
+          edit_audience?: Json | null
           workflow_id?: string | null
         }
         Update: {
@@ -6087,6 +6091,8 @@ export type Database = {
           tags?: Json | null
           title?: string | null
           updated_at?: string | null
+          view_audience?: Json | null
+          edit_audience?: Json | null
           workflow_id?: string | null
         }
         Relationships: []

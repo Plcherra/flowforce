@@ -3,6 +3,7 @@
  */
 
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { publishSchedulesWeekWithValidation } from "@/features/scheduling/repositories/schedulingRepository";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +28,7 @@ export function useWeekMutations({
   ensureCompanyContext,
 }: UseWeekMutationsProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const copyWeek = useCallback(
     async (params: { sourceWeekStart: string; targetWeekStart: string }) => {
@@ -88,13 +90,26 @@ export function useWeekMutations({
 
       try {
         ensureCompanyContext();
-        const { error: schedulesError } = await supabase
+        const visibleShifts = supabase
+          .from("schedules")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", companyId!)
+          .gte("start_time", params.weekStart)
+          .lt("start_time", params.weekEnd);
+        const { count: beforeCount, error: countError } = await visibleShifts;
+        if (countError) throw countError;
+
+        const { data: deleted, error: schedulesError } = await supabase
           .from("schedules")
           .delete()
           .eq("company_id", companyId!)
           .gte("start_time", params.weekStart)
-          .lt("start_time", params.weekEnd);
+          .lt("start_time", params.weekEnd)
+          .select("id");
         if (schedulesError) throw schedulesError;
+        if ((beforeCount ?? 0) > 0 && (deleted?.length ?? 0) === 0) {
+          throw new Error(t("schedule.clearWeekNeedsDelete"));
+        }
 
         const { error: vendorsError } = await supabase
           .from("vendor_visits")
@@ -127,6 +142,7 @@ export function useWeekMutations({
       isUsingFallbackData,
       refetchAll,
       showReadOnlyNotice,
+      t,
       toast,
     ],
   );
