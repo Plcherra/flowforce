@@ -9,6 +9,13 @@ export const formatDate = (value?: string | null) => {
   return date.toLocaleDateString();
 };
 
+export const formatDateTime = (value?: string | null) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+};
+
 export const getOwnerName = (form: FormWithMeta, missingLabel: string) => {
   const first = form.createdprofile?.first_name ?? "";
   const last = form.createdprofile?.last_name ?? "";

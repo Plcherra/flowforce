@@ -142,6 +142,9 @@ const { runFormTemplateCopyTests } = importTs(
 const { runFormsReadinessTests } = importTs(
   "../src/features/forms/utils/formsReadiness.test.ts",
 );
+const { runFormDistributionTests } = importTs(
+  "../src/features/forms/utils/formDistribution.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -187,4 +190,5 @@ runFormulaValueTests();
 runSubmissionValueTests();
 runFormTemplateCopyTests();
 runFormsReadinessTests();
+runFormDistributionTests();
 console.log("tasks page tests passed");

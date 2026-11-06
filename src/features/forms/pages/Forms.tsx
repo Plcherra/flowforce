@@ -11,6 +11,12 @@ import { useSearchParams } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
 import { submittedFormsHidden } from "@/features/roles/constants/permissionAccessTypes";
+import { useFormViewer } from "@/features/forms/hooks/useFormViewer";
+import {
+  canFillForm,
+  canSeeFormSubmissions,
+  formListedForViewer,
+} from "@/features/forms/utils/formDistribution";
 import { useForms } from "@/features/forms/hooks/useForms";
 import { useFormListActions } from "@/features/forms/hooks/useFormListActions";
 import { FormDeleteDialog } from "@/features/forms/components/FormDeleteDialog";
@@ -101,10 +107,12 @@ export default function Forms() {
   const canCreateForms = canUse("createForms");
   const canManageForms = canUse("manageForms") || canCreateForms;
   const canSubmitForms = canUse("forms.submit");
+  const viewer = useFormViewer();
   const statusTabs: StatusFilter[] = ["all", "published", "draft", "archived"];
   const isRefreshing = isFetching && !isInitialLoading;
 
   const sections = useMemo<FormSectionConfig[]>(() => {
+    const now = new Date();
     const trimmedQuery = query.trim();
     if (statusFilter === "archived") {
       const archivedForms = safeArrayFilter(
@@ -112,7 +120,9 @@ export default function Forms() {
         (form) =>
           form.status === "archived" &&
           matchesQuery(form, trimmedQuery, translations.get(form.id)) &&
-          (!hideOtherSubmissions || form.created_by === user?.id),
+          formListedForViewer(form, viewer, now, {
+            hideOthers: hideOtherSubmissions,
+          }),
       );
       return [
         {
@@ -138,10 +148,12 @@ export default function Forms() {
       activeForms,
       (form) => form.created_by === user?.id,
     );
-    const teamForms = safeArrayFilter(
-      activeForms,
-      (form) => form.created_by !== user?.id,
-    );
+    const otherForms = safeArrayFilter(activeForms, (form) => {
+      if (form.created_by === user?.id) return false;
+      if (!hideOtherSubmissions && viewer.canManage) return true;
+      if (hideOtherSubmissions) return canFillForm(form, viewer, now);
+      return formListedForViewer(form, viewer, now);
+    });
 
     const activeSections: FormSectionConfig[] = [
       {
@@ -153,12 +165,14 @@ export default function Forms() {
           : t("forms.noFormsAvailable"),
       },
     ];
-    if (!hideOtherSubmissions) {
+    if (!hideOtherSubmissions || canSubmitForms) {
       activeSections.push({
         key: "team",
-        title: t("forms.teamForms"),
-        forms: teamForms,
-        emptyMessage: t("forms.noSharedFormsYet"),
+        title: hideOtherSubmissions ? t("forms.toFill") : t("forms.teamForms"),
+        forms: otherForms,
+        emptyMessage: hideOtherSubmissions
+          ? t("forms.noFormsToFill")
+          : t("forms.noSharedFormsYet"),
       });
     }
 
@@ -167,7 +181,9 @@ export default function Forms() {
         (form) =>
           form.status === "archived" &&
           matchesQuery(form, trimmedQuery, translations.get(form.id)) &&
-          (!hideOtherSubmissions || form.created_by === user?.id),
+          formListedForViewer(form, viewer, now, {
+            hideOthers: hideOtherSubmissions,
+          }),
       );
       activeSections.push({
         key: "archived",
@@ -178,7 +194,18 @@ export default function Forms() {
     }
 
     return activeSections;
-  }, [forms, statusFilter, query, translations, user?.id, canCreateForms, hideOtherSubmissions, t]);
+  }, [
+    forms,
+    statusFilter,
+    query,
+    translations,
+    user?.id,
+    canCreateForms,
+    canSubmitForms,
+    hideOtherSubmissions,
+    viewer,
+    t,
+  ]);
 
   const builderForm = builderFormId
     ? asArray(forms).find((form) => form.id === builderFormId)
@@ -208,10 +235,11 @@ export default function Forms() {
 
   useEffect(() => {
     if (!requestedFormId || openedFormRef.current === requestedFormId) return;
-    if (!forms.some((form) => form.id === requestedFormId)) return;
+    const form = forms.find((item) => item.id === requestedFormId);
+    if (!form || !canFillForm(form, viewer, new Date())) return;
     openedFormRef.current = requestedFormId;
     setFillFormId(requestedFormId);
-  }, [forms, requestedFormId]);
+  }, [forms, requestedFormId, viewer]);
 
   const handleFillDialogChange = useCallback((open: boolean) => {
     if (!open) {
@@ -235,7 +263,7 @@ export default function Forms() {
       loadingTitle={t("forms.loadingForms")}
       loadingDescription={t("forms.preparingForms")}
     >
-      <div className="w-full min-w-0 space-y-3 px-1 py-3 sm:px-2">
+      <div className="w-full min-w-0 space-y-3 px-1 py-3 sm:px-2" data-testid="forms-page">
         <div className="sticky top-0 z-20 flex flex-col gap-2 bg-background/95 py-1 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-foreground">{t("common.forms")}</h1>
@@ -267,6 +295,7 @@ export default function Forms() {
               <Button
                 onClick={() => setCreateDialogOpen(true)}
                 className="gap-2"
+                data-testid="forms-new-button"
               >
                 <Plus className="h-4 w-4" />
                 {t("forms.newForm2")}</Button>
@@ -316,6 +345,12 @@ export default function Forms() {
                       emptyMessage={section.emptyMessage}
                       translations={translations}
                       onFill={canSubmitForms ? handleOpenFill : undefined}
+                      canFill={(form) => canFillForm(form, viewer, new Date())}
+                      canViewSubmissions={(form) =>
+                        canSeeFormSubmissions(form, viewer, {
+                          hideOthers: hideOtherSubmissions,
+                        })
+                      }
                       onEdit={handleOpenBuilder}
                       onDelete={
                         canUse("manageForms") ? listActions.setDeleteId : undefined
@@ -323,9 +358,7 @@ export default function Forms() {
                       onPublish={(formId) => void listActions.publishForm(formId)}
                       onArchive={(formId) => void listActions.archiveForm(formId)}
                       onRestore={(formId) => void listActions.restoreForm(formId)}
-                      onViewSubmissions={
-                        canReadOtherForms ? setSubmissionsFormId : undefined
-                      }
+                      onViewSubmissions={setSubmissionsFormId}
                     />
                   </ErrorBoundary>
                 ))}

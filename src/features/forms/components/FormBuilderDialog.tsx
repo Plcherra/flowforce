@@ -32,6 +32,14 @@ import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { FormsErrorFallback } from "@/components/ui/feature-error-fallbacks";
 import { FormShiftLinkEditor } from "@/features/forms/components/FormShiftLinkEditor";
+import { FormDistributionEditor } from "@/features/forms/components/FormDistributionEditor";
+import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
+import {
+  distributionProblem,
+  readFormDistribution,
+  withFormDistribution,
+  type FormDistribution,
+} from "@/features/forms/utils/formDistribution";
 
 interface FormBuilderDialogProps {
   open: boolean;
@@ -76,9 +84,14 @@ export default function FormBuilderDialog({
 
   const [formTitle, setFormTitle] = useState(initialTitle ?? "");
   const [formDescription, setFormDescription] = useState(initialDescription);
+  const [distribution, setDistribution] = useState<FormDistribution>(() =>
+    readFormDistribution(initialSettings),
+  );
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const savedFieldCountRef = useRef(0);
+  const distributionDirtyRef = useRef(false);
+  const audienceOptions = useTaskFormOptions(open);
 
   useEffect(() => {
     if (!open) {
@@ -90,6 +103,15 @@ export default function FormBuilderDialog({
     setFormTitle(initialTitle ?? "");
     setFormDescription(initialDescription);
   }, [initialTitle, initialDescription]);
+
+  useEffect(() => {
+    if (!open) {
+      distributionDirtyRef.current = false;
+      return;
+    }
+    if (distributionDirtyRef.current) return;
+    setDistribution(readFormDistribution(initialSettings));
+  }, [open, formId, initialSettings]);
 
   useEffect(() => {
     if (!open) return;
@@ -245,6 +267,20 @@ export default function FormBuilderDialog({
       return;
     }
 
+    const distributionIssue = distributionProblem(distribution);
+    if (distributionIssue) {
+      toast({
+        title: t("forms.saveFailed"),
+        description: t(
+          distributionIssue === "due"
+            ? "forms.dueBeforeShow"
+            : "forms.distributionIncomplete",
+        ),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const companyId = profile?.companyId ?? profile?.company_id ?? null;
@@ -270,15 +306,18 @@ export default function FormBuilderDialog({
         });
         return;
       }
-      const settings = mergeFormEditorLayout(currentRow?.settings, {
-        ownerOnly: Boolean(current.metadata?.ownerOnly),
-        sections: current.sections
-          .filter((section) => section.fields.length > 0)
-          .map((section) => ({
-            title: section.title,
-            fieldCount: section.fields.length,
-          })),
-      });
+      const settings = withFormDistribution(
+        mergeFormEditorLayout(currentRow?.settings, {
+          ownerOnly: Boolean(current.metadata?.ownerOnly),
+          sections: current.sections
+            .filter((section) => section.fields.length > 0)
+            .map((section) => ({
+              title: section.title,
+              fieldCount: section.fields.length,
+            })),
+        }),
+        distribution,
+      );
       const updated = await updateFormRow(
         companyId,
         formId,
@@ -405,6 +444,33 @@ export default function FormBuilderDialog({
           </div>
           <FormShiftLinkEditor formId={formId} />
         </DialogHeader>
+        <div className="max-h-56 shrink-0 overflow-y-auto border-b px-4 pb-3">
+          <FormDistributionEditor
+            distribution={distribution}
+            roles={audienceOptions.roles.map((role) => ({
+              id: role.id,
+              label: role.name,
+            }))}
+            people={audienceOptions.assignees.map((person) => ({
+              id: person.id,
+              label:
+                `${person.first_name ?? ""} ${person.last_name ?? ""}`.trim() ||
+                t("forms.unassigned"),
+            }))}
+            positions={audienceOptions.positions.map((item) => ({
+              id: item.id,
+              label: item.name,
+            }))}
+            departments={audienceOptions.departments.map((item) => ({
+              id: item.id,
+              label: item.name,
+            }))}
+            onChange={(next) => {
+              distributionDirtyRef.current = true;
+              setDistribution(next);
+            }}
+          />
+        </div>
 
         <ErrorBoundary fallbackRender={FormsErrorFallback}>
           <div className="relative flex min-h-0 flex-1 flex-col">
