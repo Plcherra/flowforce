@@ -23,6 +23,10 @@ import {
   getTypeLabel,
 } from "@/features/forms/components/form-utils";
 import { formShiftLinkKeys } from "@/features/forms/utils/formShiftLink";
+import {
+  readFormDistribution,
+} from "@/features/forms/utils/formDistribution";
+import { formatDateTime } from "@/features/forms/components/form-utils";
 
 interface FormsSectionProps {
   title: string;
@@ -33,6 +37,8 @@ interface FormsSectionProps {
   emptyMessage?: string;
   translations?: Map<string, FormContentTranslation | null>;
   onFill?: (formId: string) => void;
+  canFill?: (form: FormWithMeta) => boolean;
+  canViewSubmissions?: (form: FormWithMeta) => boolean;
   onEdit: (formId: string) => void;
   onDelete?: (formId: string) => void;
   onPublish?: (formId: string) => void;
@@ -50,6 +56,8 @@ export function FormsSection({
   emptyMessage,
   translations,
   onFill,
+  canFill,
+  canViewSubmissions,
   onEdit,
   onDelete,
   onPublish,
@@ -59,6 +67,7 @@ export function FormsSection({
 }: FormsSectionProps) {
   const { t } = useTranslation();
   const skeletonRows = Array.from({ length: 3 });
+  const showActions = Boolean(canEdit || onViewSubmissions || onFill);
 
   return (
     <section className="space-y-2">
@@ -75,7 +84,7 @@ export function FormsSection({
                   <TableHead>{t("forms.created")}</TableHead>
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
-                  {(canEdit || onViewSubmissions) && (
+                  {showActions && (
                     <TableHead className="text-right">{t("forms.formActions")}</TableHead>
                   )}
                 </TableRow>
@@ -101,7 +110,7 @@ export function FormsSection({
                     <TableCell>
                       <Skeleton className="h-5 w-24" />
                     </TableCell>
-                    {(canEdit || onViewSubmissions) && (
+                    {showActions && (
                       <TableCell>
                         <Skeleton className="ml-auto h-8 w-8 rounded-full" />
                       </TableCell>
@@ -135,32 +144,54 @@ export function FormsSection({
                   <TableHead>{t("forms.created")}</TableHead>
                   <TableHead>{t("forms.lastEdited")}</TableHead>
                   <TableHead>{t("forms.owner")}</TableHead>
-                  {(canEdit || onViewSubmissions) && (
+                  {showActions && (
                     <TableHead className="text-right">{t("forms.formActions")}</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {forms.map((form) => (
-                  <TableRow key={form.id}>
+                {forms.map((form) => {
+                  const distribution = readFormDistribution(form.settings);
+                  const dueText = formatDateTime(distribution.dueAt);
+                  const link = formShiftLinkKeys(form.settings);
+                  const allowFill = Boolean(onFill && (canFill ? canFill(form) : true));
+                  const allowSubmissions = Boolean(
+                    onViewSubmissions &&
+                      (canViewSubmissions ? canViewSubmissions(form) : true),
+                  );
+                  return (
+                  <TableRow key={form.id} data-testid={`form-row-${form.id}`}>
                     <TableCell>
                       <FormListTitle
                         formId={form.id}
                         title={form.title}
                         translation={translations?.get(form.id) ?? null}
                       />
-                      {(() => {
-                        const link = formShiftLinkKeys(form.settings);
-                        if (!link) return null;
-                        return (
-                          <p className="text-xs text-muted-foreground">
-                            {t("forms.linkedAs", {
-                              area: t(link.areaKey),
-                              slot: t(link.slotKey),
-                            })}
-                          </p>
-                        );
-                      })()}
+                      <p className="text-xs text-muted-foreground">
+                        {distribution.recordKind === "list"
+                          ? t("forms.recordKindList")
+                          : t("forms.recordKindForm")}
+                      </p>
+                      {distribution.roleIds.length > 0 ? (
+                        <p className="text-xs text-muted-foreground">
+                          {t("forms.attachedRoleCount", {
+                            count: distribution.roleIds.length,
+                          })}
+                        </p>
+                      ) : null}
+                      {dueText ? (
+                        <p className="text-xs text-muted-foreground">
+                          {t("forms.dueLabel", { time: dueText })}
+                        </p>
+                      ) : null}
+                      {link ? (
+                        <p className="text-xs text-muted-foreground">
+                          {t("forms.linkedAs", {
+                            area: t(link.areaKey),
+                            slot: t(link.slotKey),
+                          })}
+                        </p>
+                      ) : null}
                     </TableCell>
                     <TableCell>{getTypeLabel(form, t("forms.general"))}</TableCell>
                     <TableCell>
@@ -179,23 +210,25 @@ export function FormsSection({
                       {formatDate(form.updated_at || form.created_at)}
                     </TableCell>
                     <TableCell>{getOwnerName(form, t("forms.unassigned"))}</TableCell>
-                    <TableCell>
+                    {showActions ? <TableCell>
                       <div className="flex flex-wrap justify-end gap-1">
-                        {onFill ? (
+                        {allowFill && onFill ? (
                           <Button
                             variant="outline"
                             size="sm"
                             className="min-h-11"
+                            data-testid={`form-fill-${form.id}`}
                             onClick={() => onFill(form.id)}
                           >
                             {t("forms.fillForm")}
                           </Button>
                         ) : null}
-                        {onViewSubmissions ? (
+                        {allowSubmissions && onViewSubmissions ? (
                           <Button
                             variant="outline"
                             size="sm"
                             className="min-h-11"
+                            data-testid={`form-submissions-${form.id}`}
                             onClick={() => onViewSubmissions(form.id)}
                           >
                             {t("forms.viewSubmissions")}
@@ -253,9 +286,10 @@ export function FormsSection({
                           </Button>
                         ) : null}
                       </div>
-                    </TableCell>
+                    </TableCell> : null}
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
