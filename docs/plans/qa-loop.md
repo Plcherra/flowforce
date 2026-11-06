@@ -35,4 +35,10 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
    - `e2e/ops-invite-flow.spec.ts` pins English and Team off, signs in with the test user, walks the steps, and stops the invite request before it is stored.
 6. Employee directory stays in basic Ops (not gated) — done
    - Satisfied by item 1. The directory sits in Daily Operations, stays on the primary nav when Team is off, and `/app/employees` does not show the pack block.
-7. Café starter template: Barista role + opening/closing lists — todo
+7. Café starter template: Barista role + opening/closing lists — done
+   - Forms can add a Barista role plus an opening list and a closing list.
+   - Each list uses the existing per-form show-from and due time. There is no fixed open, mid, or close slot.
+   - The lists attach to the Barista role. A published Barista shift shows the lists that are still open on My Shift. A draft shift does not.
+   - `useCan("createForms")` shows the button. Adding the role also requires `useCan("systemSettings")`. An existing Barista role is reused.
+   - No sample people, schedules, inventory, or automations. No new table and no migration.
+   - `e2e/cafe-starter.spec.ts` pins English, signs in with the test user, checks both lists, and stops the role and form writes before they are stored.
