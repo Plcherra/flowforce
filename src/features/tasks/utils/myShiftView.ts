@@ -16,6 +16,12 @@ import {
 } from "./shiftWeekdayTask";
 import { readAssigneeIds, readFormId } from "./shiftTaskWrite";
 import { readTaskSchedule } from "./taskSchedule";
+import {
+  roleListsForShift,
+  scheduledRoleIds,
+  type ScheduledPosition,
+  type ScheduledRole,
+} from "./scheduledRoleLists";
 
 const WEEKDAY_BY_JS_DAY: Weekday[] = [
   "sun",
@@ -59,6 +65,12 @@ export type MyShiftListView = {
   items: MyShiftChecklistItem[];
 };
 
+export type MyShiftRoleList = {
+  formId: string;
+  title: string | null;
+  items: MyShiftChecklistItem[];
+};
+
 export type MyShiftWeekdayCard = {
   id: string;
   title: string;
@@ -79,6 +91,7 @@ export type MyShiftShiftCard = {
 export type MyShiftView = {
   area: ChecklistArea | null;
   lists: MyShiftListView[];
+  roleLists: MyShiftRoleList[];
   weekdayTasks: MyShiftWeekdayCard[];
   shiftTasks: MyShiftShiftCard[];
 };
@@ -92,12 +105,14 @@ export type MyShiftSchedule = {
   user_id: string | null;
   is_published: boolean | null;
   is_template: boolean | null;
+  position_id?: string | null;
 };
 
 export type MyShiftForm = {
   id: string;
   title?: string | null;
   settings?: unknown;
+  status?: string | null;
 };
 
 export type MyShiftField = {
@@ -310,6 +325,27 @@ function latestViewerSubmission(
   );
 }
 
+function checklistItems(
+  fields: readonly MyShiftField[],
+  submissions: readonly MyShiftSubmission[],
+  formId: string,
+  viewerId: string,
+  shiftStart: string | null,
+  shiftEnd: string | null,
+): MyShiftChecklistItem[] {
+  const submission = shiftStart
+    ? latestViewerSubmission(submissions, formId, viewerId, shiftStart, shiftEnd)
+    : null;
+  return fields
+    .filter((field) => field.form_id === formId)
+    .sort((left, right) => (left.field_order ?? 0) - (right.field_order ?? 0))
+    .map((field) => ({
+      id: field.id,
+      label: field.label?.trim() || field.id,
+      done: fieldIsDone(submission?.submission_data, field.id),
+    }));
+}
+
 export type AssembledShift =
   | { kind: "empty" }
   | { kind: "unmapped" }
@@ -329,6 +365,8 @@ export function assembleMyShift(input: {
   fields: readonly MyShiftField[];
   submissions: readonly MyShiftSubmission[];
   tasks: readonly MyShiftTaskRow[];
+  roles?: readonly ScheduledRole[];
+  positions?: readonly ScheduledPosition[];
 }): AssembledShift {
   const hasShift = input.schedules.some(
     (row) =>
@@ -340,18 +378,45 @@ export function assembleMyShift(input: {
   if (!shift) return hasShift ? { kind: "unmapped" } : { kind: "empty" };
   const area = checklistAreaFromShift(shift);
   const shiftTasks = shiftTasksForSchedule(input.tasks, shift.id);
+  const roleIds = scheduledRoleIds({
+    role: shift.role,
+    positionId: shift.position_id,
+    roles: input.roles ?? [],
+    positions: input.positions ?? [],
+  });
+  const slotForms = area ? listsForShift(input.forms, area) : null;
+  const shown = new Set(
+    slotForms
+      ? CHECKLIST_SLOTS.map((slot) => slotForms[slot]?.id).filter(
+          (id): id is string => Boolean(id),
+        )
+      : [],
+  );
+  const roleForms = roleListsForShift(input.forms, roleIds, input.now, shown);
+  const roleLists = roleForms.map((form) => ({
+    formId: form.id,
+    title: form.title ?? null,
+    items: checklistItems(
+      input.fields,
+      input.submissions,
+      form.id,
+      input.viewerId,
+      shift.start_time,
+      shift.end_time,
+    ),
+  }));
   if (!area || !shift.start_time) {
-    if (shiftTasks.length === 0) return { kind: "unmapped" };
+    if (shiftTasks.length === 0 && roleLists.length === 0) return { kind: "unmapped" };
     return {
       kind: "ready",
-      view: { area: null, lists: [], weekdayTasks: [], shiftTasks },
+      view: { area: null, lists: [], roleLists, weekdayTasks: [], shiftTasks },
       shiftTitle: shift.title?.trim() || shift.role?.trim() || "",
       shiftStartsAt: shift.start_time ?? "",
       shiftEndsAt: shift.end_time,
     };
   }
 
-  const lists = listsForShift(input.forms, area);
+  const lists = slotForms ?? listsForShift(input.forms, area);
   const notes = openingNotes({
     area,
     viewerId: input.viewerId,
@@ -363,8 +428,19 @@ export function assembleMyShift(input: {
   const weekday = weekdayFromDate(input.now);
   const view: MyShiftView = {
     area,
+    roleLists,
     lists: CHECKLIST_SLOTS.map((slot) => {
       const form = lists[slot];
+      const items = form
+        ? checklistItems(
+            input.fields,
+            input.submissions,
+            form.id,
+            input.viewerId,
+            shift.start_time,
+            shift.end_time,
+          )
+        : [];
       const submission = form
         ? latestViewerSubmission(
             input.submissions,
@@ -374,19 +450,6 @@ export function assembleMyShift(input: {
             shift.end_time,
           )
         : null;
-      const items = form
-        ? input.fields
-            .filter((field) => field.form_id === form.id)
-            .sort(
-              (left, right) =>
-                (left.field_order ?? 0) - (right.field_order ?? 0),
-            )
-            .map((field) => ({
-              id: field.id,
-              label: field.label?.trim() || field.id,
-              done: fieldIsDone(submission?.submission_data, field.id),
-            }))
-        : [];
       return {
         slot,
         formId: form?.id ?? null,

@@ -13,6 +13,7 @@ import {
   type MyShiftTaskRow,
 } from "@/features/tasks/utils/myShiftView";
 import { myShiftTasksKey } from "@/features/tasks/utils/myShiftReload";
+import type { ScheduledPosition, ScheduledRole } from "@/features/tasks/utils/scheduledRoleLists";
 
 export type MyShiftBoard = AssembledShift | { kind: "loading" } | { kind: "error" };
 
@@ -52,22 +53,33 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
     setBoard({ kind: "loading" });
 
     void (async () => {
-      const [schedulesResult, formsResult] = await Promise.all([
+      const [schedulesResult, formsResult, rolesResult, positionsResult] = await Promise.all([
         supabase
           .from("schedules")
           .select(
-            "id, role, title, start_time, end_time, user_id, is_published, is_template",
+            "id, role, title, start_time, end_time, user_id, is_published, is_template, position_id",
           )
           .eq("company_id", companyId)
           .gte("start_time", range.start)
           .lt("start_time", range.end),
-        supabase.from("forms").select("id, title, settings").eq("company_id", companyId),
+        supabase.from("forms").select("id, title, settings, status").eq("company_id", companyId), // pragma: allowlist secret
+        supabase.from("company_roles").select("id, name").eq("company_id", companyId), // pragma: allowlist secret
+        supabase.from("positions").select("id, name, role_id").eq("company_id", companyId), // pragma: allowlist secret
       ]);
       if (cancelled) return;
       if (schedulesResult.error || formsResult.error) {
         setBoard({ kind: "error" });
         return;
       }
+      const roles: ScheduledRole[] = (rolesResult.data ?? []).map((role) => ({
+        id: role.id,
+        name: role.name ?? "",
+      }));
+      const positions: ScheduledPosition[] = (positionsResult.data ?? []).map((position) => ({
+        id: position.id,
+        name: position.name ?? "",
+        roleId: position.role_id,
+      }));
       const forms = (formsResult.data ?? []) as MyShiftForm[];
       const formIds = forms.map((form) => form.id);
       let fields: MyShiftField[] = [];
@@ -102,6 +114,8 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
           fields,
           submissions,
           tasks: tasksRef.current,
+          roles,
+          positions,
         }),
       );
     })();

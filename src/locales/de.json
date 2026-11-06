@@ -2998,6 +2998,7 @@
     "shiftHasNoLists": "Diese Schicht hat keine Kassen- oder Aufsichtslisten.",
     "noListAttached": "Keine Liste angehängt.",
     "openList": "Liste öffnen",
+    "listsForThisRole": "Listen für diese Rolle",
     "weekdayTasks": "Wochentagsaufgaben",
     "frontOfHouse": "Gastraum",
     "backOfHouse": "Küche",
