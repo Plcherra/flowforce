@@ -12,7 +12,12 @@ Ops v1 block, Friday 6 Nov 2026, 4:00–6:00 AM America/New_York. Do not start a
    - `e2e/pack-flags.spec.ts` passed locally for flag-off and flag-on (English locale, test login).
    - Dev/Playwright override: sessionStorage `flowforce:pack-flags`. Production builds ignore it.
    - Smoke seed turns the three packs on so the visible-module smoke still opens those routes.
-2. Store (location) selection on invite, end to end — todo
+2. Store (location) selection on invite, end to end — done
+   - The invite form lists the company's active stores from `inv_locations` (`id`, `name`, `is_active`).
+   - The chosen store is saved on `company_invites.location_id` and copied onto `profiles.location_id` when access is applied. No new migration.
+   - Owners and admins can assign any active store. A manager with a home store can assign only that store. `manageUsers: false` cannot invite.
+   - A store is required when the company has an active store.
+   - `e2e/invite-location.spec.ts` signs in with the test user, pins English, picks a real store, and stops the invite request before it is stored.
 3. Forms and lists attached to roles, fill/see audiences and due windows (open, mid, close) — todo
 4. Publishing a schedule produces day-of "My Shift" lists by scheduled role — todo
 5. Ops-only invite flow: invite → company basics (welcome, docs, rules; non-blocking) → first shift — todo

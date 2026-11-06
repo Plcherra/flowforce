@@ -15,6 +15,7 @@ export type CompanyInvitePayload = {
 export type CompanyInviteResult = {
   ok: boolean;
   email: string | null;
+  code?: string;
   inviteId?: string;
   inviteToken?: string;
   inviteLink?: string;
@@ -44,12 +45,14 @@ export async function sendCompanyInvites(invites: CompanyInvitePayload[]) {
         roleId: invite.roleId,
         permissionOverrides: invite.permissionOverrides ?? {},
         departmentId: invite.departmentId || undefined,
+        locationId: invite.locationId || undefined,
       })),
     }),
   });
 
   const result = (await response.json().catch(() => ({}))) as {
     message?: string;
+    code?: string;
     details?: { message?: string } | string;
     inviteId?: string;
     inviteToken?: string;
@@ -62,10 +65,12 @@ export async function sendCompanyInvites(invites: CompanyInvitePayload[]) {
       typeof result.details === "string"
         ? result.details
         : result.details?.message;
-    throw new Error(
+    const error = new Error(
       [result.message, detailMessage].filter(Boolean).join(": ") ||
         "Failed to send invitation",
-    );
+    ) as Error & { code?: string };
+    if (result.code) error.code = result.code;
+    throw error;
   }
 
   return {

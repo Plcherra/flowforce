@@ -49,7 +49,9 @@ export function TeamActionsBar({
       {canInvite || canManageRoles || canManagePermissions ? (
         <div className="flex gap-2">
           {canInvite ? (
-            <Button onClick={onOpenInvite}>{t("employees.invite")}</Button>
+            <Button data-testid="employees-invite-button" onClick={onOpenInvite}>
+              {t("employees.invite")}
+            </Button>
           ) : null}
           {canManageRoles ? (
             <Button variant="secondary" onClick={onOpenRoles}>

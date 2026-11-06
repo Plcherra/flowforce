@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useInviteAccessOptions } from "../../hooks/useInviteAccessOptions";
 import { createInvitePersonCard, type InvitePersonCard } from "../../types/invites";
 import { sendCompanyInvites } from "../../utils/sendCompanyInvites";
+import { inviteErrorText } from "../../utils/inviteLocation";
 import { InvitePersonCardForm } from "./InvitePersonCard";
 
 export function InvitePersonStack({
@@ -36,13 +37,16 @@ export function InvitePersonStack({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!defaultClass) return;
+    if (!defaultClass && locations.length !== 1) return;
     setCards((current) =>
-      current.map((card) =>
-        card.roleId ? card : { ...card, roleId: defaultClass.id },
-      ),
+      current.map((card) => ({
+        ...card,
+        roleId: card.roleId || defaultClass?.id || "",
+        locationId:
+          card.locationId || (locations.length === 1 ? locations[0].id : ""),
+      })),
     );
-  }, [defaultClass]);
+  }, [defaultClass, locations]);
 
   const updateCard = (id: string, next: InvitePersonCard) => {
     setCards((current) => current.map((card) => (card.id === id ? next : card)));
@@ -60,6 +64,14 @@ export function InvitePersonStack({
       });
       return;
     }
+    if (showLocations && ready.some((card) => !card.locationId)) {
+      toast({
+        variant: "destructive",
+        title: t("literals.addAPerson"),
+        description: t("literals.eachCardNeedsAClassStoreAndContact"),
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -72,6 +84,7 @@ export function InvitePersonStack({
           roleId: card.roleId,
           permissionOverrides: card.permissionOverrides,
           departmentId: card.departmentId,
+          locationId: card.locationId,
         })),
       );
       const failed = result.results.filter((item) => !item.ok);
@@ -80,7 +93,9 @@ export function InvitePersonStack({
           variant: "destructive",
           title: t("literals.someInvitesDidNotSend"),
           description: failed
-            .map((item) => item.message)
+            .map((item) =>
+              inviteErrorText(t, item.code, item.message ?? ""),
+            )
             .filter(Boolean)
             .join(" "),
         });
@@ -98,8 +113,13 @@ export function InvitePersonStack({
       toast({
         variant: "destructive",
         title: t("literals.unableToSendInvite"),
-        description:
+        description: inviteErrorText(
+          t,
+          error instanceof Error && "code" in error
+            ? String((error as { code?: string }).code ?? "")
+            : null,
           error instanceof Error ? error.message : t("literals.pleaseTryAgain"),
+        ),
       });
     } finally {
       setIsSubmitting(false);
@@ -154,6 +174,7 @@ export function InvitePersonStack({
         </Button>
         <Button
           type="button"
+          data-testid="invite-send"
           onClick={handleSubmit}
           disabled={isSubmitting || isLoading}
         >

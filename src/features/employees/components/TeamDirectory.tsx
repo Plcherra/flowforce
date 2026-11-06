@@ -317,12 +317,15 @@ export function TeamDirectory() {
             title={t("employees.noTeamMembersYet")}
             description={t("employees.inviteFirstTeammate")}
             action={
-              <Button
-                onClick={() => handleInviteChange(true)}
-                className="self-center sm:self-auto"
-              >
-                {t("employees.inviteTeammates")}
-              </Button>
+              tools.invitations ? (
+                <Button
+                  data-testid="employees-invite-button"
+                  onClick={() => handleInviteChange(true)}
+                  className="self-center sm:self-auto"
+                >
+                  {t("employees.inviteTeammates")}
+                </Button>
+              ) : undefined
             }
           />
         )}
