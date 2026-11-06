@@ -940,7 +940,8 @@
       "selected": "{{count}} ausgewählt",
       "templateBadge": "Vorlage",
       "title": "Bereiche Ihres Arbeitsbereichs anpassen"
-    }
+    },
+    "startsOnOperations": "Sie starten mit Operationen. Team, Einblicke und Bestand bleiben aus, bis Sie sie unter Pakete hinzufügen."
   },
   "auth": {
     "businessPlatform": "Geschäftsabläufe-Plattform",
@@ -1258,7 +1259,7 @@
     "scheduleLaborTaskAndInventorySignalsAreSteadyForToday": "Die Signale zu Dienstplan, Personal, Aufgaben und Bestand sind heute stabil.",
     "settingUpYourWorkspace": "Dein Arbeitsbereich wird eingerichtet...",
     "steady": "Stabil",
-    "supabaseProfileError": "Supabase-Profilfehler",
+    "profileServiceError": "Profil konnte nicht geladen werden.",
     "taskExecution": "Aufgabenausführung",
     "title": "Titel",
     "todaySCommandCenter": "Heutige Einsatzzentrale",
@@ -3274,6 +3275,36 @@
         "title": "Bestand ist nicht aktiv",
         "description": "Inventar und Ausgaben sind für dieses Unternehmen ausgeschaltet."
       }
+    },
+    "pageTitle": "Pakete",
+    "pageDescription": "Operationen ist enthalten. Fügen Sie Team, Einblicke oder Bestand hinzu, wenn Sie diese Werkzeuge wollen.",
+    "opsNote": "Ein neues Unternehmen startet mit Operationen. Team, Einblicke und Bestand bleiben aus, bis Sie sie kaufen.",
+    "menuLabel": "Pakete",
+    "separateFromPlans": "Pakete sind von den Plänen Starter, Growth und Enterprise getrennt. Paketpreise sind noch nicht festgelegt.",
+    "priceTbd": "Preis folgt",
+    "pricePlaceholder": "Platzhalter — Preis ausstehend",
+    "statusOn": "An",
+    "statusOff": "Aus",
+    "buy": "Paket kaufen",
+    "buying": "Zahlung wird gestartet…",
+    "enabled": "Aktiviert",
+    "purchaseDenied": "Nur wer die Abrechnung verwalten kann, darf ein Paket kaufen.",
+    "pricePending": "Die Zahlung wartet auf einen Preis. Es wurde nichts berechnet.",
+    "checkoutCanceled": "Zahlung abgebrochen. Das Paket bleibt aus.",
+    "checkoutFailed": "Die Zahlung konnte nicht gestartet werden.",
+    "confirmFailed": "Das Paket konnte nach der Zahlung nicht eingeschaltet werden.",
+    "viewPacks": "Pakete ansehen",
+    "team": {
+      "title": "Team",
+      "description": "Schulung, Zertifizierungen, Leistung, Anerkennung, Rangliste und Ressourcen."
+    },
+    "insights": {
+      "title": "Einblicke",
+      "description": "Betriebsintelligenz, einschließlich Berichte, Analysen und der Betriebsbereich."
+    },
+    "stock": {
+      "title": "Bestand",
+      "description": "Inventar und Ausgaben."
     }
   },
   "forms": {
@@ -5634,7 +5665,8 @@
     "accessTaskRecord": "Aufgabe",
     "accessView": "Ansehen",
     "accessUpdate": "Aktualisieren",
-    "accessDelete": "Löschen"
+    "accessDelete": "Löschen",
+    "tabPacks": "Pakete"
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

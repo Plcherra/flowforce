@@ -40,6 +40,9 @@ export default function ReviewStep({
         <CardDescription>
           {t("onboarding.reviewYourWorkspaceConfigurationBeforeCompletingSetup")}
         </CardDescription>
+        <p className="pt-2 text-sm text-muted-foreground">
+          {t("onboarding.startsOnOperations")}
+        </p>
       </CardHeader>
 
       <div className="space-y-6">

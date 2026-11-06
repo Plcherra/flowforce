@@ -196,7 +196,7 @@
     "scheduleLaborTaskAndInventorySignalsAreSteadyForToday": "I segnali di turni, manodopera, attività e inventario sono stabili oggi.",
     "settingUpYourWorkspace": "Preparazione dello spazio di lavoro...",
     "steady": "Stabile",
-    "supabaseProfileError": "Errore del profilo Supabase",
+    "profileServiceError": "Impossibile caricare il profilo.",
     "taskExecution": "Esecuzione delle attività",
     "title": "Titolo",
     "todaySCommandCenter": "Centro di comando di oggi",
@@ -1091,7 +1091,8 @@
       "selected": "{{count}} selezionate",
       "templateBadge": "Modello",
       "title": "Personalizza le sezioni del tuo spazio di lavoro"
-    }
+    },
+    "startsOnOperations": "Inizi con Operazioni. Team, Approfondimenti e Scorte restano disattivati finché non li aggiungi da Pacchetti."
   },
   "auth": {
     "businessPlatform": "Piattaforma Operazioni Aziendali",
@@ -3274,6 +3275,36 @@
         "title": "Scorte non è attivo",
         "description": "Inventario e spese sono disattivati per questa azienda."
       }
+    },
+    "pageTitle": "Pacchetti",
+    "pageDescription": "Operazioni è incluso. Aggiungi Team, Approfondimenti o Scorte quando vuoi quegli strumenti.",
+    "opsNote": "Una nuova azienda inizia con Operazioni. Team, Approfondimenti e Scorte restano disattivati finché non li acquisti.",
+    "menuLabel": "Pacchetti",
+    "separateFromPlans": "I pacchetti sono separati dai piani Starter, Growth ed Enterprise. I prezzi dei pacchetti non sono ancora definiti.",
+    "priceTbd": "Prezzo da definire",
+    "pricePlaceholder": "Segnaposto — prezzo in attesa",
+    "statusOn": "Attivo",
+    "statusOff": "Disattivo",
+    "buy": "Acquista pacchetto",
+    "buying": "Avvio del pagamento…",
+    "enabled": "Attivo",
+    "purchaseDenied": "Solo chi può gestire la fatturazione può acquistare un pacchetto.",
+    "pricePending": "Il pagamento attende un prezzo. Non è stato addebitato nulla.",
+    "checkoutCanceled": "Pagamento annullato. Il pacchetto è ancora disattivo.",
+    "checkoutFailed": "Impossibile avviare il pagamento.",
+    "confirmFailed": "Impossibile attivare il pacchetto dopo il pagamento.",
+    "viewPacks": "Vedi pacchetti",
+    "team": {
+      "title": "Team",
+      "description": "Formazione, certificazioni, performance, riconoscimento, classifica e risorse."
+    },
+    "insights": {
+      "title": "Approfondimenti",
+      "description": "Intelligence operativa, inclusi report, analisi e lo spazio operazioni."
+    },
+    "stock": {
+      "title": "Scorte",
+      "description": "Inventario e spese."
     }
   },
   "forms": {
@@ -5634,7 +5665,8 @@
     "accessTaskRecord": "Scheda attività",
     "accessView": "Vedi",
     "accessUpdate": "Aggiorna",
-    "accessDelete": "Elimina"
+    "accessDelete": "Elimina",
+    "tabPacks": "Pacchetti"
   },
   "roles": {
     "aiSuggestions": "Suggerimenti IA",

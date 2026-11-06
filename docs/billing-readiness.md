@@ -44,6 +44,23 @@ Stripe price IDs are configured with:
 
 Server-side mapping lives in [stripePrices.ts](/src/server/billing/stripePrices.ts).
 
+## Packs
+
+Team, Insights, and Stock are company packs. They are not the Starter, Growth, or Enterprise plans. Prices are not decided yet, so the packs screen shows **Price TBD** and does not charge.
+
+When a recurring Stripe price exists, checkout uses that price with quantity 1 per company. The price's own interval is monthly or yearly. Expected server env vars:
+
+- `STRIPE_PRICE_PACK_TEAM`
+- `STRIPE_PRICE_PACK_INSIGHTS`
+- `STRIPE_PRICE_PACK_STOCK`
+
+Routes:
+
+- `POST /api/packs/checkout` with `{ pack: "team" | "insights" | "stock" }`
+- `POST /api/packs/confirm` with `{ pack, sessionId }` after Stripe marks the session paid
+
+Both routes use the same owner, admin, or company admin check as plan checkout. A missing price returns `409` with `code: "pack_price_pending"` and does not call Stripe. A paid pack checkout sets `system_settings.admin_config.packFlags` for that pack only. Pack webhook events do not change the workspace Starter, Growth, or Enterprise plan.
+
 ## Stripe Flows
 
 ### Checkout
@@ -168,7 +185,7 @@ STRIPE_PRICE_ENTERPRISE=price_...
 
 ## Local Testing
 
-1. Apply migrations locally: `supabase db reset` or run `20260702000200_phase2_stripe_billing_integration.sql`.
+1. Apply migrations locally: `supabase db reset` or run `20260702000200_phase2_stripe_billing_integration.sql`. // pragma: allowlist secret
 2. Create three recurring prices in Stripe test mode and copy their IDs into env.
 3. Start the app and Stripe CLI forwarding:
 
@@ -190,9 +207,9 @@ npm run typecheck:src
 
 ## Migrations
 
-1. `supabase/migrations/20260702000100_phase1_billing_status_simplification.sql`
-2. `supabase/migrations/20260702000200_phase2_stripe_billing_integration.sql`
+1. `supabase/migrations/20260702000100_phase1_billing_status_simplification.sql` // pragma: allowlist secret
+2. `supabase/migrations/20260702000200_phase2_stripe_billing_integration.sql` // pragma: allowlist secret
 
 Back up `system_settings` and `companies` before running in production.
 
-Verify Phase 1 with `supabase/scripts/verify-billing-status-migration.sql` in the SQL Editor.
+Verify Phase 1 with `supabase/scripts/verify-billing-status-migration.sql` in the SQL Editor. // pragma: allowlist secret

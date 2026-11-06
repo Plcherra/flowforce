@@ -1,6 +1,6 @@
 "use client";
 
-import { Profiler, ReactNode, useState } from "react";
+import { Profiler, ReactNode, useEffect, useRef, useState } from "react";
 import RoleGuard from "@/app-shell/guards/RoleGuard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +37,16 @@ export function SystemSettingsLayout({ tabs }: SystemSettingsLayoutProps) {
   } = system;
 
   const [activeTab, setActiveTab] = useState(() => tabs[0]?.key ?? "");
+  const didReadTab = useRef(false);
+
+  useEffect(() => {
+    if (didReadTab.current) return;
+    didReadTab.current = true;
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    if (requested && tabs.some((tab) => tab.key === requested)) {
+      setActiveTab(requested);
+    }
+  }, [tabs]);
 
   const hasTabs = tabs.length > 0;
 

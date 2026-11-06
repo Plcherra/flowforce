@@ -9,9 +9,10 @@ import {
   clampPermissionsToProductLevel,
   resolveProductLevel,
 } from "@/features/roles/constants/productLevels";
-import { supabaseAdmin } from "../../_server/supabaseAdmin";
+import { supabaseAdmin } from "../../_server/supabaseAdmin"; // pragma: allowlist secret
 import { createServerLogger } from "../../_server/utils/logger";
 import { buildOnboardingCompanyPayload } from "@/lib/theme/companySavePayload";
+import { withBasicOpsPackFlags } from "@/config/packCatalog";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -118,6 +119,40 @@ const publicErrorDetails = (error: unknown) => {
   };
 };
 
+async function ensureBasicOpsPackFlags(companyId: string) {
+  const { data, error } = await supabaseAdmin // pragma: allowlist secret
+    .from("system_settings")
+    .select("admin_config")
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  if (error || !data) {
+    logger.warn("Unable to read system settings for basic Ops packs", {
+      error,
+      context: { companyId },
+    });
+    return;
+  }
+
+  const next = withBasicOpsPackFlags(data.admin_config);
+  if (next === data.admin_config) return;
+
+  const { error: updateError } = await supabaseAdmin // pragma: allowlist secret
+    .from("system_settings")
+    .update({
+      admin_config: next,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("company_id", companyId);
+
+  if (updateError) {
+    logger.warn("Unable to store basic Ops pack flags", {
+      error: updateError,
+      context: { companyId },
+    });
+  }
+}
+
 const jsonError = (
   message: string,
   status = 400,
@@ -167,7 +202,7 @@ export async function POST(request: Request) {
     }
 
     const { data: userResult, error: userError } =
-      await supabaseAdmin.auth.admin.getUserById(userId);
+      await supabaseAdmin.auth.admin.getUserById(userId); // pragma: allowlist secret
 
     if (userError || !userResult?.user) {
       logger.warn("Unable to verify onboarding user", {
@@ -221,7 +256,7 @@ export async function POST(request: Request) {
       ownerPhone,
     });
 
-    const { data: companyId, error: setupError } = await supabaseAdmin.rpc(
+    const { data: companyId, error: setupError } = await supabaseAdmin.rpc( // pragma: allowlist secret
       "create_company_with_setup",
       {
         company_data: companyPayload,
@@ -248,18 +283,20 @@ export async function POST(request: Request) {
       );
     }
 
-    await applyOnboardingCompanyRoles(supabaseAdmin, {
+    await applyOnboardingCompanyRoles(supabaseAdmin, { // pragma: allowlist secret
       companyId,
       userId,
       roles: customRoles,
     });
 
-    await ensureProductCompanyRoles(supabaseAdmin, {
+    await ensureProductCompanyRoles(supabaseAdmin, { // pragma: allowlist secret
       companyId,
       userId,
     });
 
-    const setupStatus = await verifyOnboardingSetup(supabaseAdmin, {
+    await ensureBasicOpsPackFlags(companyId);
+
+    const setupStatus = await verifyOnboardingSetup(supabaseAdmin, { // pragma: allowlist secret
       companyId,
       userId,
     });
@@ -281,7 +318,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: company, error: companyError } = await supabaseAdmin
+    const { data: company, error: companyError } = await supabaseAdmin // pragma: allowlist secret
       .from("companies")
       .select("slug")
       .eq("id", companyId)
@@ -296,7 +333,7 @@ export async function POST(request: Request) {
     }
 
     const { error: metadataError } =
-      await supabaseAdmin.auth.admin.updateUserById(userId, {
+      await supabaseAdmin.auth.admin.updateUserById(userId, { // pragma: allowlist secret
         user_metadata: {
           ...userResult.user.user_metadata,
           first_name: firstName,

@@ -7,6 +7,7 @@ import type {
   TenantManagementSettings,
 } from "@/types/system-settings";
 import { DEFAULT_ADMIN_CONFIG } from "../systemSettingsDefaults";
+import { readPackFlagsFromAdminConfig } from "@/config/packFlags";
 import {
   getBillingPlanDefinition,
   normalizeBillingPlan,
@@ -162,5 +163,6 @@ export const normalizeAdminConfig = (
     apiMonitoring: normalizeApiMonitoring(source.apiMonitoring),
     aiCopilot: normalizeAiCopilot(source.aiCopilot),
     tenantManagement: normalizeTenantManagement(source.tenantManagement),
+    packFlags: readPackFlagsFromAdminConfig(source),
   };
 };

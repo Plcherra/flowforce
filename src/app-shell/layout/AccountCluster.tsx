@@ -98,6 +98,17 @@ export function AccountCluster() {
             {t("nav.signOut")}
           </Button>
         </div>
+        <div className="border-b px-2 py-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            data-testid="account-packs-link"
+            onClick={() => navigate("/app/packs")}
+          >
+            {t("packs.menuLabel")}
+          </Button>
+        </div>
         <NotificationsPanel embedded onUnreadCount={setUnreadCount} />
       </PopoverContent>
     </Popover>

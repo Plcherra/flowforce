@@ -5,6 +5,7 @@ import {
   Building2,
   CreditCard,
   Globe,
+  Package,
   Plug,
   Shield,
   Sparkles,
@@ -15,6 +16,7 @@ import { IfCan } from "@/components/permissions/IfCan";
 import { SystemSettingsLayout } from "../components/SystemSettingsLayout";
 import { PersonalLanguageSelect } from "../components/PersonalLanguageSelect";
 import { ErrorState } from "../components/ErrorState";
+import { PacksPanel } from "@/features/packs/components/PacksPanel";
 import {
   SETTINGS_CONTROL_GATES,
   SETTINGS_TAB_KEYS,
@@ -84,6 +86,8 @@ function tabLabel(key: SettingsTabKey, t: (key: string) => string) {
       return t("settings.tabAi");
     case "integrations":
       return t("footer.integrations");
+    case "packs":
+      return t("settings.tabPacks");
     case "billing":
       return t("settings.tabBilling");
   }
@@ -103,6 +107,8 @@ function tabIcon(key: SettingsTabKey) {
       return Sparkles;
     case "integrations":
       return Plug;
+    case "packs":
+      return Package;
     case "billing":
       return CreditCard;
   }
@@ -196,6 +202,18 @@ function SettingsTabContent({ tabKey }: { tabKey: SettingsTabKey }) {
       >
         <Suspense fallback={<PanelFallback />}>
           <IntegrationSettingsPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "packs") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <PacksPanel />
         </Suspense>
       </ErrorBoundary>
     );

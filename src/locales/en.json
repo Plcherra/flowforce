@@ -580,7 +580,7 @@
     "scheduleLaborTaskAndInventorySignalsAreSteadyForToday": "Schedule, labor, task, and inventory signals are steady for today.",
     "settingUpYourWorkspace": "Setting up your workspace...",
     "steady": "Steady",
-    "supabaseProfileError": "Supabase profile error",
+    "profileServiceError": "Could not load the profile.",
     "taskExecution": "Task execution",
     "title": "Title",
     "todaySCommandCenter": "Today's command center",
@@ -1992,7 +1992,8 @@
       "selectSections": "Select at least one section to continue",
       "selectedSections": "Selected Sections",
       "title": "Customize Workspace Sections"
-    }
+    },
+    "startsOnOperations": "You start on Operations. Team, Insights, and Stock stay off until you add them from Packs."
   },
   "auth": {
     "businessPlatform": "Business Operations Platform",
@@ -3274,6 +3275,36 @@
         "title": "Stock is not enabled",
         "description": "Inventory and expenses are turned off for this company."
       }
+    },
+    "pageTitle": "Packs",
+    "pageDescription": "Operations is included. Add Team, Insights, or Stock when you want those tools.",
+    "opsNote": "A new company starts on Operations. Team, Insights, and Stock stay off until you buy them.",
+    "menuLabel": "Packs",
+    "separateFromPlans": "Packs are separate from the Starter, Growth, and Enterprise plans. Pack prices are not set yet.",
+    "priceTbd": "Price TBD",
+    "pricePlaceholder": "Placeholder — awaiting pricing",
+    "statusOn": "On",
+    "statusOff": "Off",
+    "buy": "Buy pack",
+    "buying": "Starting checkout…",
+    "enabled": "Enabled",
+    "purchaseDenied": "Only someone who can manage billing can buy a pack.",
+    "pricePending": "Checkout is waiting for a price. Nothing was charged.",
+    "checkoutCanceled": "Checkout canceled. The pack is still off.",
+    "checkoutFailed": "Could not start checkout.",
+    "confirmFailed": "Could not turn the pack on after checkout.",
+    "viewPacks": "See packs",
+    "team": {
+      "title": "Team",
+      "description": "Training, certifications, performance, recognition, the leaderboard, and resources."
+    },
+    "insights": {
+      "title": "Insights",
+      "description": "Operations Intelligence, including reports, analytics, and the operations workspace."
+    },
+    "stock": {
+      "title": "Stock",
+      "description": "Inventory and expenses."
     }
   },
   "forms": {
@@ -5634,7 +5665,8 @@
     "accessTaskRecord": "Task record",
     "accessView": "View",
     "accessUpdate": "Update",
-    "accessDelete": "Delete"
+    "accessDelete": "Delete",
+    "tabPacks": "Packs"
   },
   "roles": {
     "aiSuggestions": "AI Suggestions",

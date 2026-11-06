@@ -167,6 +167,22 @@ export function BillingSettingsPanel() {
           <BillingStatusActions tenant={tenant} showHelperText />
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("packs.pageTitle")}</CardTitle>
+          <CardDescription>{t("packs.separateFromPlans")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <a
+            href="/app/packs"
+            className="text-sm font-medium text-primary underline"
+            data-testid="billing-packs-link"
+          >
+            {t("packs.viewPacks")}
+          </a>
+        </CardContent>
+      </Card>
     </div>
   );
 }

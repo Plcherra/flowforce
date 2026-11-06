@@ -181,6 +181,12 @@ export interface AdminConfigurationSettings {
   aiCopilot: AICopilotSettings;
   auditLogs?: AuditLogEntry[];
   tenantManagement?: TenantManagementSettings;
+  packFlags?: {
+    ops: boolean;
+    team: boolean;
+    insights: boolean;
+    stock: boolean;
+  };
 }
 
 export interface SystemSettings {
