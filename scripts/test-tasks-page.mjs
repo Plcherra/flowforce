@@ -198,5 +198,10 @@ runFormTemplateCopyTests();
 runFormsReadinessTests();
 runFormDistributionTests();
 runScheduledRoleListTests();
+const { runCafeStarterTests, runCafeStarterApplyTests } = importTs(
+  "../src/features/forms/utils/cafeStarter.test.ts",
+);
+runCafeStarterTests();
+await runCafeStarterApplyTests();
 runOpsInviteFlowTests();
 console.log("tasks page tests passed");
