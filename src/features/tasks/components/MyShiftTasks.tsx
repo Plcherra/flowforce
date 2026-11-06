@@ -104,6 +104,33 @@ export function MyShiftTasks({
           onSaveClosingNote={onSaveClosingNote}
         />
       ))}
+      {(board.view.roleLists ?? []).map((list) => (
+        <div
+          key={list.formId}
+          className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+          data-testid={`my-shift-role-list-${list.formId}`}
+        >
+          <h3 className="text-sm font-semibold">{list.title || t("tasks.listsForThisRole")}</h3>
+          {list.items.length > 0 ? (
+            <ul className="space-y-1">
+              {list.items.map((item) => (
+                <li key={item.id} className="text-sm">
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 w-full"
+            data-testid={`my-shift-role-open-${list.formId}`}
+            onClick={() => onOpenList(list.formId)}
+          >
+            {t("tasks.openList")}
+          </Button>
+        </div>
+      ))}
       {board.view.weekdayTasks.length > 0 ? (
         <div
           className="space-y-2 rounded-xl border border-border/70 bg-background p-3"

@@ -145,6 +145,9 @@ const { runFormsReadinessTests } = importTs(
 const { runFormDistributionTests } = importTs(
   "../src/features/forms/utils/formDistribution.test.ts",
 );
+const { runScheduledRoleListTests } = importTs(
+  "../src/features/tasks/utils/scheduledRoleLists.test.ts",
+);
 
 runStatusTabLayoutTests();
 runStatusHintTests();
@@ -191,4 +194,5 @@ runSubmissionValueTests();
 runFormTemplateCopyTests();
 runFormsReadinessTests();
 runFormDistributionTests();
+runScheduledRoleListTests();
 console.log("tasks page tests passed");
