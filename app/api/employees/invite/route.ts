@@ -10,6 +10,7 @@ import {
   type InviterGrantContext,
 } from "../../_server/inviteAccess";
 import { loadInviteLocationGate } from "../../_server/inviteLocation";
+import { saveOpsInviteShift } from "../../_server/opsInviteShift";
 import {
   actorCanInvite,
   inviteLocationRejected,
@@ -32,6 +33,7 @@ type InvitePersonBody = {
   permissionOverrides?: unknown;
   locationId?: unknown;
   departmentId?: unknown;
+  firstShift?: unknown;
 };
 
 type InviteRequestBody = InvitePersonBody & {
@@ -383,6 +385,20 @@ async function sendPersonInvite({
     }
   }
 
+  const personName = [firstName, lastName].filter(Boolean).join(" ");
+  const firstShift = await saveOpsInviteShift({
+    companyId,
+    actorId,
+    inviteId,
+    email: email || null,
+    title: personName,
+    roleName: role.name,
+    locationId: locationDecision.locationId,
+    userId: invitedUserId,
+    firstShift: person.firstShift,
+    inviter,
+  });
+
   await writeInviteAudit({
     actorId,
     companyId,
@@ -394,6 +410,7 @@ async function sendPersonInvite({
       role: roleKey,
       roleId: role.id,
       emailed,
+      firstShift,
     },
   });
 
@@ -404,6 +421,7 @@ async function sendPersonInvite({
     inviteToken,
     inviteLink,
     emailed,
+    firstShift,
   };
 }
 

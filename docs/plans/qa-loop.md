@@ -27,7 +27,12 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
    - A published shift shows the lists attached to that shift's role for the day of the shift. A draft shift does not.
    - The role match uses the shift role name, or the position's company role. Lists past their due time stay hidden.
    - `e2e/my-shift-role-lists.spec.ts` pins English, signs in with the test user, and checks the published shift in the browser response. Nothing is stored.
-5. Ops-only invite flow: invite → company basics (welcome, docs, rules; non-blocking) → first shift — todo
+5. Ops-only invite flow: invite → company basics (welcome, docs, rules; non-blocking) → first shift — done
+   - When Team is off, the invite dialog is three steps: invite, company basics, then first shift. When Team is on, the dialog stays the direct send form.
+   - Company basics reads the company description, uploaded documents, and scheduling-rule policies. Empty sections stay empty. Skip and Continue both move on. Nothing on this step is required.
+   - The first shift is optional. Skip sends the invite without one. Adding a shift sends `firstShift` on the invite. The server stores an unpublished schedule on `schedules.requirements.opsInvite` and assigns it when the invited user exists. No new table and no migration.
+   - Creating that shift requires `schedule.create`, `schedule.edit`, or `editSchedules`. `manageUsers: false` still cannot invite.
+   - `e2e/ops-invite-flow.spec.ts` pins English and Team off, signs in with the test user, walks the steps, and stops the invite request before it is stored.
 6. Employee directory stays in basic Ops (not gated) — done
    - Satisfied by item 1. The directory sits in Daily Operations, stays on the primary nav when Team is off, and `/app/employees` does not show the pack block.
 7. Café starter template: Barista role + opening/closing lists — todo

@@ -19,6 +19,7 @@ import {
   type PermissionDiffMap,
 } from "@/features/roles/constants/personAccessDiffs";
 import { getProductRolePermissions } from "@/features/roles/constants/productRoles";
+import { attachOpsInviteShift } from "./opsInviteShift";
 import { supabaseAdmin } from "./supabaseAdmin";
 
 export type InviteAccessClass = {
@@ -481,6 +482,17 @@ export async function applyInviteAccessByToken(params: {
       status: "accepted",
     })
     .eq("id", invite.id);
+
+  try {
+    await attachOpsInviteShift({
+      companyId: invite.company_id,
+      inviteId: invite.id,
+      userId: params.userId,
+      actorId: invite.invited_by ?? params.userId,
+    });
+  } catch {
+    // The invite is already accepted. A missed shift link can be repaired later.
+  }
 
   return invite.id as string;
 }

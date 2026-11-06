@@ -4,6 +4,10 @@ import { missingE2eEnv } from "./required-env";
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem("i18nextLng", "en");
+    window.sessionStorage.setItem(
+      "flowforce:pack-flags",
+      JSON.stringify({ team: true, insights: false, stock: false }),
+    );
   });
 });
 

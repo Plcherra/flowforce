@@ -6,16 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useInviteAccessOptions } from "../../hooks/useInviteAccessOptions";
 import { createInvitePersonCard, type InvitePersonCard } from "../../types/invites";
-import { sendCompanyInvites } from "../../utils/sendCompanyInvites";
+import {
+  sendCompanyInvites,
+  type CompanyInvitePayload,
+} from "../../utils/sendCompanyInvites";
 import { inviteErrorText } from "../../utils/inviteLocation";
 import { InvitePersonCardForm } from "./InvitePersonCard";
 
 export function InvitePersonStack({
   onSuccess,
   hideIntro = false,
+  onContinue,
 }: {
   onSuccess?: (inviteLink: string | null) => void;
   hideIntro?: boolean;
+  onContinue?: (people: CompanyInvitePayload[]) => void;
 }) {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -52,7 +57,7 @@ export function InvitePersonStack({
     setCards((current) => current.map((card) => (card.id === id ? next : card)));
   };
 
-  const handleSubmit = async () => {
+  const readyPeople = (): CompanyInvitePayload[] | null => {
     const ready = cards.filter(
       (card) => card.roleId && (card.email.trim() || card.phone.trim()),
     );
@@ -62,7 +67,7 @@ export function InvitePersonStack({
         title: t("literals.addAPerson"),
         description: t("literals.eachCardNeedsAClassAndAnEmail"),
       });
-      return;
+      return null;
     }
     if (showLocations && ready.some((card) => !card.locationId)) {
       toast({
@@ -70,23 +75,31 @@ export function InvitePersonStack({
         title: t("literals.addAPerson"),
         description: t("literals.eachCardNeedsAClassStoreAndContact"),
       });
+      return null;
+    }
+    return ready.map((card) => ({
+      firstName: card.firstName,
+      lastName: card.lastName,
+      email: card.email,
+      phone: card.phone,
+      roleId: card.roleId,
+      permissionOverrides: card.permissionOverrides,
+      departmentId: card.departmentId,
+      locationId: card.locationId,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const ready = readyPeople();
+    if (!ready) return;
+    if (onContinue) {
+      onContinue(ready);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const result = await sendCompanyInvites(
-        ready.map((card) => ({
-          firstName: card.firstName,
-          lastName: card.lastName,
-          email: card.email,
-          phone: card.phone,
-          roleId: card.roleId,
-          permissionOverrides: card.permissionOverrides,
-          departmentId: card.departmentId,
-          locationId: card.locationId,
-        })),
-      );
+      const result = await sendCompanyInvites(ready);
       const failed = result.results.filter((item) => !item.ok);
       if (failed.length > 0) {
         toast({
@@ -174,11 +187,15 @@ export function InvitePersonStack({
         </Button>
         <Button
           type="button"
-          data-testid="invite-send"
+          data-testid={onContinue ? "invite-continue" : "invite-send"}
           onClick={handleSubmit}
           disabled={isSubmitting || isLoading}
         >
-          {isSubmitting ? t("literals.sending") : t("literals.sendInvites")}
+          {isSubmitting
+            ? t("literals.sending")
+            : onContinue
+              ? t("employees.opsFlowContinue")
+              : t("literals.sendInvites")}
         </Button>
       </div>
     </div>

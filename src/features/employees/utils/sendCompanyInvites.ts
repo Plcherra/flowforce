@@ -10,6 +10,7 @@ export type CompanyInvitePayload = {
   permissionOverrides?: PermissionDiffMap;
   locationId?: string;
   departmentId?: string;
+  firstShift?: { start: string; end: string };
 };
 
 export type CompanyInviteResult = {
@@ -21,6 +22,7 @@ export type CompanyInviteResult = {
   inviteLink?: string;
   emailed?: boolean;
   message?: string;
+  firstShift?: "saved" | "forbidden" | "skipped" | "failed";
 };
 
 export async function sendCompanyInvites(invites: CompanyInvitePayload[]) {
@@ -46,6 +48,7 @@ export async function sendCompanyInvites(invites: CompanyInvitePayload[]) {
         permissionOverrides: invite.permissionOverrides ?? {},
         departmentId: invite.departmentId || undefined,
         locationId: invite.locationId || undefined,
+        firstShift: invite.firstShift,
       })),
     }),
   });
