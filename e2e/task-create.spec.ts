@@ -106,9 +106,21 @@ async function deleteTaskFromList(page: Page, title: string) {
     .catch(() => false);
   if (!visible) return;
 
-  await card.click();
+  // The details dialog is lazy-loaded. The first click in dev can spend the
+  // default expect timeout compiling that chunk, so retry the open.
   const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
+  let opened = false;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await card.click();
+    opened = await dialog
+      .waitFor({ state: 'visible', timeout: 20_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (opened) break;
+  }
+  if (!opened) {
+    throw new Error('Task details dialog did not open');
+  }
 
   const deleteButton = dialog.locator('button.text-destructive');
   if ((await deleteButton.count()) === 0) {
