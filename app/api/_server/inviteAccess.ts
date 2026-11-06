@@ -255,6 +255,9 @@ export async function applyInviteAccessToUser(params: {
       role: roleKey,
       role_id: params.role.id,
       department_id: params.departmentId,
+      ...(params.locationId !== undefined
+        ? { location_id: params.locationId }
+        : {}),
       employment_status: "active",
       updated_at: new Date().toISOString(),
     },

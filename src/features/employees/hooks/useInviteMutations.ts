@@ -14,6 +14,7 @@ import type {
 import type { CompanyRole } from "@/hooks/useCompanyRoles";
 import type { OrganizationLocation } from "@/hooks/useLocations";
 import type { Department } from "../types/directory";
+import { inviteErrorText } from "../utils/inviteLocation";
 
 const COMPANY_INVITES_QUERY_KEY = ["employees", "company-invites"];
 
@@ -58,6 +59,7 @@ export function useInviteMutations({
           roleId: payload.roleId,
           permissionOverrides: payload.permissionOverrides,
           departmentId: payload.departmentId,
+          locationId: payload.locationId,
         },
       ]);
       const first = result.results[0];
@@ -82,10 +84,15 @@ export function useInviteMutations({
     onError: (error: unknown) => {
       toast({
         title: t("literals.unableToCreateInvite"),
-        description:
+        description: inviteErrorText(
+          t,
+          error instanceof Error && "code" in error
+            ? String((error as { code?: string }).code ?? "")
+            : null,
           error instanceof Error
             ? error.message
             : t("literals.pleaseVerifyTheDetailsAndTryAgain"),
+        ),
         variant: "destructive",
       });
     },
@@ -111,11 +118,15 @@ export function useInviteMutations({
         phone: row.phone,
         roleId: matchClassId(classes, row.className) ?? "",
         departmentId: matchNamedId(departments, row.departmentName),
+        locationId: matchNamedId(locations, row.locationName),
       }));
 
       const missingClass = payloads.find((row) => !row.roleId);
       if (missingClass) {
         throw new Error("Every row needs a matching class.");
+      }
+      if (locations.length > 0 && payloads.some((row) => !row.locationId)) {
+        throw new Error(t("literals.eachRowNeedsAStoreYouCanAssign"));
       }
 
       const sent = await sendCompanyInvites(payloads);
@@ -123,7 +134,9 @@ export function useInviteMutations({
         results.push({
           email: rows[index]?.email || rows[index]?.phone || "unknown",
           status: result.ok ? "success" : "error",
-          message: result.message,
+          message: result.code
+            ? inviteErrorText(t, result.code, result.message ?? "")
+            : result.message,
           inviteLink: result.inviteLink,
           onboardingTriggered: result.ok,
         });

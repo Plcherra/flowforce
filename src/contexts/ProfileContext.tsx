@@ -26,6 +26,7 @@ type LegacyProfileFields = {
   hire_date: string | null;
   avatar_url: string | null;
   role_id: string | null;
+  locationId?: string | null;
 };
 
 type ProfileDetails = {
@@ -122,6 +123,7 @@ const buildProfilePlaceholder = (user: User | null): ProfileDetails => {
     hire_date: null,
     role_id: null,
     roleId: null,
+    locationId: null,
     locationIds: [],
     position: null,
     isPlaceholder: true,
@@ -137,7 +139,7 @@ async function fetchProfileFromSupabase(
     let query = supabase
       .from("profiles")
       .select(
-        "id, company_id, role, role_id, first_name, last_name, avatar_url, employee_id, phone",
+        "id, company_id, role, role_id, first_name, last_name, avatar_url, employee_id, phone, location_id",
       )
       .eq("id", userId);
 
@@ -174,6 +176,7 @@ async function fetchProfileFromSupabase(
       employee_id: data.employee_id ?? null,
       role_id: data.role_id ?? null,
       roleId: data.role_id ?? null,
+      locationId: data.location_id ?? null,
       locationIds: [],
       position: null,
       isPlaceholder: false,

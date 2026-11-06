@@ -172,7 +172,10 @@ export function InvitePersonCardForm({
                 });
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger
+                data-testid="invite-class"
+                data-selected={card.roleId ? "true" : "false"}
+              >
                 <SelectValue placeholder={t("employees.chooseAClass")} />
               </SelectTrigger>
               <SelectContent>
@@ -186,19 +189,28 @@ export function InvitePersonCardForm({
           </div>
           {showLocations ? (
             <div className="space-y-1.5">
-              <Label>{t("forms.location")}</Label>
+              <Label htmlFor={`${card.id}-location`}>{t("forms.location")}</Label>
               <Select
                 value={card.locationId}
                 onValueChange={(value) =>
                   onChange({ ...card, locationId: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  id={`${card.id}-location`}
+                  data-testid="invite-location"
+                  aria-label={t("forms.location")}
+                >
                   <SelectValue placeholder={t("employees.chooseALocation")} />
                 </SelectTrigger>
                 <SelectContent>
                   {locations.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
+                    <SelectItem
+                      key={location.id}
+                      value={location.id}
+                      data-testid="invite-location-option"
+                      data-location-id={location.id}
+                    >
                       {location.name}
                     </SelectItem>
                   ))}

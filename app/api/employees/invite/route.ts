@@ -9,6 +9,12 @@ import {
   loadInviterGrantContext,
   type InviterGrantContext,
 } from "../../_server/inviteAccess";
+import { loadInviteLocationGate } from "../../_server/inviteLocation";
+import {
+  actorCanInvite,
+  inviteLocationRejected,
+  resolveInviteLocationId,
+} from "@/features/employees/utils/inviteLocation";
 import { maxInvitableProductLevel } from "@/features/roles/constants/grantCeiling";
 import {
   AUDIT_ACTIONS,
@@ -86,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("id, company_id, role")
+      .select("id, company_id, role, location_id")
       .eq("id", actor.id)
       .maybeSingle();
 
@@ -115,9 +121,25 @@ export async function POST(request: NextRequest) {
       companyId,
       actorId: actor.id,
     });
-    if (!maxInvitableProductLevel(inviter.level, inviter.policy)) {
-      return jsonError("You do not have permission to invite teammates.", 403);
+    if (
+      !actorCanInvite({ role: actorRole, permissions: inviter.permissions }) ||
+      !maxInvitableProductLevel(inviter.level, inviter.policy)
+    ) {
+      return NextResponse.json(
+        {
+          message: "You do not have permission to invite teammates.",
+          code: "invite_forbidden",
+        },
+        { status: 403 },
+      );
     }
+
+    const locationGate = await loadInviteLocationGate({
+      companyId,
+      actorLevel: inviter.level,
+      actorLocationId:
+        typeof profile?.location_id === "string" ? profile.location_id : null,
+    });
 
     const origin = getRequestOrigin(request);
     const results = [];
@@ -130,6 +152,7 @@ export async function POST(request: NextRequest) {
         inviter,
         origin,
         requestId,
+        locationGate,
       });
       results.push(result);
     }
@@ -155,6 +178,7 @@ async function sendPersonInvite({
   inviter,
   origin,
   requestId,
+  locationGate,
 }: {
   person: InvitePersonBody;
   companyId: string;
@@ -162,6 +186,10 @@ async function sendPersonInvite({
   inviter: InviterGrantContext;
   origin: string;
   requestId: string;
+  locationGate: {
+    allowedIds: string[];
+    companyHasActiveLocations: boolean;
+  };
 }) {
   const email = readString(person.email).toLowerCase();
   const firstName = readString(person.firstName);
@@ -170,6 +198,20 @@ async function sendPersonInvite({
   const requestedRoleId = readString(person.roleId) || null;
   const requestedRoleKey = readString(person.role);
   const departmentId = readString(person.departmentId) || null;
+  const locationDecision = resolveInviteLocationId({
+    requestedId: readString(person.locationId) || null,
+    allowedIds: locationGate.allowedIds,
+    companyHasActiveLocations: locationGate.companyHasActiveLocations,
+  });
+
+  if (inviteLocationRejected(locationDecision)) {
+    return {
+      ok: false,
+      email: email || null,
+      code: locationDecision.code,
+      message: locationDecision.code,
+    };
+  }
 
   if (!email && !phone) {
     return {
@@ -232,6 +274,7 @@ async function sendPersonInvite({
     role_id: role.id,
     permission_overrides: permissionOverrides,
     department_id: departmentId,
+    location_id: locationDecision.locationId,
     invite_token: inviteToken,
     invited_by: actorId,
     status: "pending",
@@ -330,6 +373,7 @@ async function sendPersonInvite({
         role,
         permissionOverrides,
         departmentId,
+        locationId: locationDecision.locationId,
       });
     } catch (error) {
       logger.warn("Invite recorded, but access diffs were not applied yet", {
