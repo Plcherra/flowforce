@@ -7,11 +7,19 @@ const migrationAliases = {
   'react-router-dom': aliasPath,
 };
 
-// Phone/tablet LAN testing: set ALLOWED_DEV_ORIGINS=192.168.0.21 (comma-separated) in .env.local
-const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? '192.168.0.21')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+// Phone/tablet LAN testing: set ALLOWED_DEV_ORIGINS=192.168.0.21 (comma-separated) in .env.local.
+// `next dev -H 0.0.0.0` only auto-allows that bind host. Playwright opens
+// http://127.0.0.1:3000, so loopback must be listed or the dev websocket is
+// blocked and the client never hydrates.
+const allowedDevOrigins = Array.from(
+  new Set([
+    '127.0.0.1',
+    ...(process.env.ALLOWED_DEV_ORIGINS ?? '192.168.0.21')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+  ]),
+);
 
 const nextConfig = {
   reactStrictMode: true,
