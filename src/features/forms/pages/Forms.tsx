@@ -30,6 +30,9 @@ import { PageAsyncWrapper } from "@/components/ui/async-wrapper";
 const CreateFormDialog = lazy(
   () => import("@/features/forms/components/CreateFormDialog"),
 );
+const CafeStarterDialog = lazy(
+  () => import("@/features/forms/components/CafeStarterDialog"),
+);
 const FormBuilderDialog = lazy(
   () => import("@/features/forms/components/FormBuilderDialog"),
 );
@@ -94,6 +97,8 @@ export default function Forms() {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [cafeStarterOpen, setCafeStarterOpen] = useState(false);
+  const [cafeStarterKey, setCafeStarterKey] = useState(0);
   const [builderFormId, setBuilderFormId] = useState<string | null>(null);
   const [builderFallback, setBuilderFallback] = useState<BuilderFallback>(null);
   const [fillFormId, setFillFormId] = useState<string | null>(null);
@@ -293,6 +298,19 @@ export default function Forms() {
             </div>
             {canCreateForms && (
               <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCafeStarterKey((value) => value + 1);
+                  setCafeStarterOpen(true);
+                }}
+                data-testid="cafe-starter-button"
+              >
+                {t("forms.cafe.starter")}
+              </Button>
+            )}
+            {canCreateForms && (
+              <Button
                 onClick={() => setCreateDialogOpen(true)}
                 className="gap-2"
                 data-testid="forms-new-button"
@@ -389,6 +407,25 @@ export default function Forms() {
             />
           </ErrorBoundary>
         </Suspense>
+
+        {canCreateForms ? (
+          <Suspense fallback={null}>
+            <ErrorBoundary
+              fallback={
+                <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                  {t("forms.cafe.failed")}
+                </div>
+              }
+            >
+              <CafeStarterDialog
+                key={cafeStarterKey}
+                open={cafeStarterOpen}
+                onOpenChange={setCafeStarterOpen}
+                onApplied={() => void refetchForms()}
+              />
+            </ErrorBoundary>
+          </Suspense>
+        ) : null}
 
         {builderFormId && canCreateForms && (
           <Suspense fallback={null}>
