@@ -102,36 +102,65 @@ export function useTasks() {
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
   const queryClient = useQueryClient();
   const [tasksError, setTasksError] = useState<string | null>(null);
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const companyQueryKey = ["task-company", user?.id] as const;
 
-  const tasksQuery = useQuery({
-    queryKey: ["tasks", user?.id],
+  // Company id is cached with the query, not component state. Create and
+  // delete dialogs call useTasks() after the list has already loaded, so a
+  // setState inside the list query never reaches them.
+  const companyQuery = useQuery({
+    queryKey: companyQueryKey,
     enabled: Boolean(user?.id),
     staleTime: 60_000,
     throwOnError: false,
     retry: 1,
     queryFn: async () => {
-      if (!user) return [];
+      if (!user?.id) {
+        throw new Error("No company context found for the current profile.");
+      }
       const fetchedCompanyId = await fetchCompanyIdForUser(user.id);
       if (!fetchedCompanyId) {
         throw new Error("No company context found for the current profile.");
       }
-      setCompanyId(fetchedCompanyId);
-      return fetchTasksByCompany(fetchedCompanyId);
+      return fetchedCompanyId;
     },
   });
 
+  const companyId = companyQuery.data ?? null;
+
+  const tasksQuery = useQuery({
+    queryKey: ["tasks", user?.id],
+    enabled: Boolean(user?.id && companyId),
+    staleTime: 60_000,
+    throwOnError: false,
+    retry: 1,
+    queryFn: async () => {
+      if (!companyId) return [];
+      return fetchTasksByCompany(companyId);
+    },
+  });
+
+  const queryError = companyQuery.error ?? tasksQuery.error;
+
   useEffect(() => {
-    if (tasksQuery.error) {
-      setTasksError((tasksQuery.error as Error).message);
+    if (queryError) {
+      setTasksError(
+        queryError instanceof Error ? queryError.message : String(queryError),
+      );
     } else {
       setTasksError(null);
     }
-  }, [tasksQuery.error]);
+  }, [queryError]);
 
   const tasks = tasksQuery.data ?? [];
-  const loading = tasksQuery.isLoading && !tasksQuery.isError;
+  const loading =
+    Boolean(user?.id) &&
+    !companyQuery.isError &&
+    !tasksQuery.isError &&
+    (companyQuery.isPending || tasksQuery.isPending);
   const error = tasksError;
+
+  const requireCompanyId = () =>
+    queryClient.getQueryData<string>(companyQueryKey) ?? companyId;
 
   const invalidateTasks = () => {
     if (user?.id) {
@@ -142,14 +171,15 @@ export function useTasks() {
 
   const createTask = async (taskData: TaskInsert) => {
     try {
-      if (!companyId) {
+      const activeCompanyId = requireCompanyId();
+      if (!activeCompanyId) {
         throw new Error("Company context required to create tasks");
       }
 
       const normalizedTaskData: TaskInsert = {
         ...taskData,
         goal_id: taskData.goal_id ?? null,
-        company_id: taskData.company_id ?? companyId, // Ensure company_id is set
+        company_id: taskData.company_id ?? activeCompanyId, // Ensure company_id is set
       };
 
       const createdTask = await insertTask(normalizedTaskData, sourceLocale);
@@ -180,11 +210,12 @@ export function useTasks() {
     try {
       const previousTask = tasks.find((task) => task.id === id);
 
-      if (!companyId) {
+      const activeCompanyId = requireCompanyId();
+      if (!activeCompanyId) {
         throw new Error("Company context required to update tasks");
       }
 
-      const updatedTask = await updateTaskRow(id, updates, companyId, sourceLocale);
+      const updatedTask = await updateTaskRow(id, updates, activeCompanyId, sourceLocale);
 
       const previousGoalId = previousTask?.goal_id ?? null;
       const newGoalId = updatedTask.goal_id ?? null;
@@ -207,11 +238,12 @@ export function useTasks() {
 
   const deleteTask = async (id: string) => {
     try {
-      if (!companyId) {
+      const activeCompanyId = requireCompanyId();
+      if (!activeCompanyId) {
         throw new Error("Company context required to delete tasks");
       }
 
-      await deleteTaskRow(id, companyId);
+      await deleteTaskRow(id, activeCompanyId);
 
       await invalidateTasks();
       return { error: null };
