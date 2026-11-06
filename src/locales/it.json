@@ -3257,6 +3257,24 @@
     "search": "Cerca",
     "signOut": "Esci"
   },
+  "packs": {
+    "backToOps": "Torna a Operazioni",
+    "loading": "Controllo dei pacchetti attivi…",
+    "unavailable": {
+      "team": {
+        "title": "Team non è attivo",
+        "description": "Formazione, certificazioni, performance, riconoscimento e classifica sono disattivati per questa azienda. L'elenco dipendenti resta in Operazioni."
+      },
+      "insights": {
+        "title": "Approfondimenti non è attivo",
+        "description": "Report, analisi e intelligence operativa sono disattivati per questa azienda."
+      },
+      "stock": {
+        "title": "Scorte non è attivo",
+        "description": "Inventario e spese sono disattivati per questa azienda."
+      }
+    }
+  },
   "forms": {
     "tplEmailHint": "nome@azienda.com",
     "saved": "Salvato",

@@ -3257,6 +3257,24 @@
     "search": "Suchen",
     "signOut": "Abmelden"
   },
+  "packs": {
+    "backToOps": "Zurück zu Operationen",
+    "loading": "Prüfen, welche Pakete aktiv sind…",
+    "unavailable": {
+      "team": {
+        "title": "Team ist nicht aktiv",
+        "description": "Schulung, Zertifizierungen, Leistung, Anerkennung und die Rangliste sind für dieses Unternehmen ausgeschaltet. Das Mitarbeiterverzeichnis bleibt in Operationen."
+      },
+      "insights": {
+        "title": "Einblicke ist nicht aktiv",
+        "description": "Berichte, Analysen und Betriebsintelligenz sind für dieses Unternehmen ausgeschaltet."
+      },
+      "stock": {
+        "title": "Bestand ist nicht aktiv",
+        "description": "Inventar und Ausgaben sind für dieses Unternehmen ausgeschaltet."
+      }
+    }
+  },
   "forms": {
     "tplEmailHint": "name@firma.de",
     "saved": "Gespeichert",

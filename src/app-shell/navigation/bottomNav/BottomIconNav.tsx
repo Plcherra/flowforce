@@ -10,6 +10,7 @@ import {
   groupWideBottomNav,
   isMoreNavActive,
   navItemLabel,
+  bottomNavKey,
   partitionBottomNavigation,
   shouldShowMoreNav,
 } from "./bottomNavDestinations";
@@ -20,7 +21,8 @@ const BOTTOM_NAV_STACK = "calc(5.85rem + env(safe-area-inset-bottom))";
 export function BottomIconNav() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { processedSections, canManageSections, getIsActive } = useNavigationData();
+  const { processedSections, canManageSections, getIsActive, packFlags, packFlagsReady } =
+    useNavigationData();
   const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
@@ -51,7 +53,16 @@ export function BottomIconNav() {
 
   return (
     <>
-      <nav aria-label={t("nav.main")} data-bottom-icon-nav="true" className="bottom-icon-nav">
+      <nav
+        aria-label={t("nav.main")}
+        data-bottom-icon-nav="true"
+        data-testid="bottom-nav"
+        data-pack-ready={packFlagsReady ? "true" : "false"}
+        data-pack-team={packFlags.team ? "true" : "false"}
+        data-pack-insights={packFlags.insights ? "true" : "false"}
+        data-pack-stock={packFlags.stock ? "true" : "false"}
+        className="bottom-icon-nav"
+      >
         <div className="bottom-icon-nav-icons border-0 shadow-none">
           <div className="bottom-icon-nav-row">
           {groups.map((group) => {
@@ -77,6 +88,7 @@ export function BottomIconNav() {
                       <BottomIconButton
                         key={item.id}
                         label={label}
+                        testId={`nav-${bottomNavKey(item.href)}`}
                         active={item.isActive}
                         className={
                           primaryIds.has(item.id) ? undefined : "hidden lg:flex"

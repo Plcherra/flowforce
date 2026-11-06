@@ -8,7 +8,8 @@ export type {
 } from "./useActiveNavigation";
 
 export function useNavigationData() {
-  const { navigationStructure, canManageSections } = useNavigationStructure();
+  const { navigationStructure, canManageSections, packFlags, packFlagsReady } =
+    useNavigationStructure();
   const { processedSections, getIsActive } =
     useActiveNavigation(navigationStructure);
 
@@ -16,5 +17,7 @@ export function useNavigationData() {
     processedSections,
     canManageSections,
     getIsActive,
+    packFlags,
+    packFlagsReady,
   };
 }

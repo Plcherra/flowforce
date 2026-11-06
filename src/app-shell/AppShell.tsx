@@ -13,6 +13,7 @@ import { MobileOfflineQueueStatus } from "@/app-shell/mobile/MobileOfflineQueueS
 import { CompanyThemeSync } from "@/app-shell/theme/CompanyThemeSync";
 import { IdleSessionGuard } from "@/app-shell/auth/IdleSessionGuard";
 import { EmployeeAvailabilityOnboarding } from "@/features/onboarding/components/EmployeeAvailabilityOnboarding";
+import { PackRouteGuard } from "@/app-shell/guards/PackRouteGuard";
 
 interface AppShellProps {
   children?: ReactNode;
@@ -74,7 +75,7 @@ export default function AppShell({ children }: AppShellProps) {
               </div>
             }
           >
-            {children || <Outlet />}
+            <PackRouteGuard>{children || <Outlet />}</PackRouteGuard>
           </Suspense>
         </ErrorBoundary>
       </main>

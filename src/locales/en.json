@@ -3257,6 +3257,24 @@
     "search": "Search",
     "signOut": "Sign out"
   },
+  "packs": {
+    "backToOps": "Back to Operations",
+    "loading": "Checking which packs are enabled…",
+    "unavailable": {
+      "team": {
+        "title": "Team is not enabled",
+        "description": "Training, certifications, performance, recognition, and the leaderboard are turned off for this company. The employee directory stays in Operations."
+      },
+      "insights": {
+        "title": "Insights is not enabled",
+        "description": "Reports, analytics, and operations intelligence are turned off for this company."
+      },
+      "stock": {
+        "title": "Stock is not enabled",
+        "description": "Inventory and expenses are turned off for this company."
+      }
+    }
+  },
   "forms": {
     "tplEmailHint": "name@company.com",
     "saved": "Saved",

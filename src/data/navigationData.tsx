@@ -1,3 +1,4 @@
+import type { PackId } from "@/config/packFlags";
 import i18n from "@/i18n/config";
 import {
   BarChart3,
@@ -29,6 +30,7 @@ interface NavigationItem {
   permission?: string;
   translationKey: string;
   featureFlag?: string;
+  pack?: PackId;
 }
 
 interface NavigationSection {
@@ -61,12 +63,21 @@ export const navigationSections: NavigationSection[] = [
         href: "/messages",
         icon: MessageSquare,
         translationKey: "messages",
+        pack: "ops",
+      },
+      {
+        name: "Team Directory",
+        href: "/employees",
+        icon: Users,
+        translationKey: "employees",
+        pack: "ops",
       },
       {
         name: "Company Updates",
         href: "/company-updates",
         icon: Megaphone,
         translationKey: "companyUpdates",
+        pack: "ops",
       },
       {
         name: "Forms",
@@ -79,6 +90,7 @@ export const navigationSections: NavigationSection[] = [
         href: "/operations",
         icon: Wrench,
         translationKey: "operationsIntelligence",
+        pack: "insights",
       },
       {
         name: "Calendar",
@@ -97,12 +109,14 @@ export const navigationSections: NavigationSection[] = [
         href: "/inventory",
         icon: Calculator,
         translationKey: "inventory",
+        pack: "stock",
       },
       {
         name: "Expenses",
         href: "/expenses",
         icon: DollarSign,
         translationKey: "expenses",
+        pack: "stock",
       },
     ],
   },
@@ -115,18 +129,21 @@ export const navigationSections: NavigationSection[] = [
         href: "/reports",
         icon: FileText,
         translationKey: "reports",
+        pack: "insights",
       },
       {
         name: "Analytics",
         href: "/analytics",
         icon: BarChart3,
         translationKey: "analytics",
+        pack: "insights",
       },
       {
         name: "AI Insights",
         href: "/ai-insights",
         icon: Sparkles,
         translationKey: "aiInsights",
+        pack: "insights",
       },
     ],
   },
@@ -135,46 +152,46 @@ export const navigationSections: NavigationSection[] = [
     translationKey: "team",
     items: [
       {
-        name: "Team Directory",
-        href: "/employees",
-        icon: Users,
-        translationKey: "employees",
-      },
-      {
         name: "Performance",
         href: "/performance",
         icon: Target,
         translationKey: "performance",
+        pack: "team",
       },
       {
         name: "Recognition",
         href: "/recognition",
         icon: Trophy,
         translationKey: "recognition",
+        pack: "team",
       },
       {
         name: "Leaderboard",
         href: "/leaderboard",
         icon: Trophy,
         translationKey: "leaderboard",
+        pack: "team",
       },
       {
         name: "Learning Center",
         href: "/learning-center",
         icon: GraduationCap,
         translationKey: "learning",
+        pack: "team",
       },
       {
         name: "Certifications",
         href: "/certifications",
         icon: GraduationCap,
         translationKey: "certifications",
+        pack: "team",
       },
       {
         name: "Resources",
         href: "/resources",
         icon: FileText,
         translationKey: "resources",
+        pack: "team",
       },
     ],
   },

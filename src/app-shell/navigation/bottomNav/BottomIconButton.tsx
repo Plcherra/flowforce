@@ -8,6 +8,7 @@ interface BottomIconButtonProps {
   children: ReactNode;
   expanded?: boolean;
   className?: string;
+  testId?: string;
 }
 
 export function BottomIconButton({
@@ -17,10 +18,12 @@ export function BottomIconButton({
   children,
   expanded,
   className,
+  testId,
 }: BottomIconButtonProps) {
   return (
     <button
       type="button"
+      data-testid={testId}
       aria-label={label}
       title={label}
       aria-current={active ? "page" : undefined}

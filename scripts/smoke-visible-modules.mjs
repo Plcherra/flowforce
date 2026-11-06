@@ -320,7 +320,15 @@ async function seedSmokeTenant(admin) {
     },
   ]);
 
-  await insertRows(admin, "system_settings", [{ company_id: companyId }]);
+  await insertRows(admin, "system_settings", [
+    {
+      company_id: companyId,
+      // Smoke still walks every module. Pack gates default off for real companies.
+      admin_config: {
+        packFlags: { team: true, insights: true, stock: true },
+      },
+    },
+  ]);
 
   await insertRows(admin, "departments", [
     {

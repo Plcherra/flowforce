@@ -3,6 +3,8 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
+import { isPackEnabled, packForNavSection, packRequiredForPath, type PackId } from "@/config/packFlags";
+import { usePackFlags } from "@/hooks/usePackFlags";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useCustomSections } from "@/hooks/useCustomSections";
 import { navigationSections } from "@/data/navigationData";
@@ -47,6 +49,7 @@ export function useNavigationStructure() {
   const { profile } = useProfile();
   const leadership = isLeadershipLevel({ name: profile?.role });
   const featureFlags = useFeatureFlags();
+  const packFlags = usePackFlags();
   const { sections: customSections } = useCustomSections();
 
   const isDirectoryItem = (item: { name?: string; href?: string }) => {
@@ -65,9 +68,19 @@ export function useNavigationStructure() {
     return href === "ai-insights" || name === "ai insights";
   };
 
+  const blockedByPack = (item: { href?: string; name?: string; pack?: PackId }) => {
+    if (isDirectoryItem(item)) return false;
+    if (item.pack && item.pack !== "ops" && !isPackEnabled(packFlags.flags, item.pack)) {
+      return true;
+    }
+    const required = packRequiredForPath(item.href || "");
+    return Boolean(required && !isPackEnabled(packFlags.flags, required));
+  };
+
   const isItemVisible = (item: any) => {
-    if (isDirectoryItem(item) && !can("directory.view")) return false;
+    if (isDirectoryItem(item)) return can("directory.view");
     if (!leadership && isLeadershipItem(item)) return false;
+    if (blockedByPack(item)) return false;
     if (item.roles && !hasRole(item.roles)) return false;
     if (item.permission && !can(item.permission as any)) return false;
     if (item.featureFlag && !featureFlags.isEnabled(item.featureFlag))
@@ -78,7 +91,11 @@ export function useNavigationStructure() {
   const isSectionVisible = (section: any) => {
     if (section.roles && !hasRole(section.roles)) return false;
     if (section.permission && !can(section.permission as any)) return false;
-    return section.items.some((item: unknown) => isItemVisible(item));
+    if (section.items.some((item: unknown) => isItemVisible(item))) return true;
+    return (
+      section.translationKey === "team" ||
+      section.translationKey === "dailyOperations"
+    );
   };
 
   // Filter and deduplicate custom sections
@@ -142,6 +159,9 @@ export function useNavigationStructure() {
     return navigationSections
       .filter((section) => isSectionVisible(section))
       .map((section) => {
+        const sectionPack = packForNavSection(section.translationKey);
+        const sectionOpen =
+          !sectionPack || isPackEnabled(packFlags.flags, sectionPack);
         // Process static navigation items
         const staticItems: NavigationItem[] = section.items
           .filter((item) => isItemVisible(item))
@@ -178,6 +198,13 @@ export function useNavigationStructure() {
               rawPath.startsWith("/") || rawPath.startsWith("http")
                 ? rawPath
                 : `/${rawPath}`;
+
+            if (
+              !sectionOpen &&
+              !isDirectoryItem({ name: customSection.name, href: resolvedPath })
+            ) {
+              return null;
+            }
 
             const canonical = canonicalizePath(resolvedPath);
             const canonicalTail = canonical.split("/").pop() || "";
@@ -238,6 +265,12 @@ export function useNavigationStructure() {
         )
           .map((fileSection) => {
             const canonical = canonicalizePath(fileSection.href || "");
+            if (
+              !sectionOpen &&
+              !isDirectoryItem({ name: fileSection.name, href: fileSection.href })
+            ) {
+              return null;
+            }
             const canonicalTail = canonical.split("/").pop() || "";
             const normalizedName = (fileSection.name || "")
               .trim()
@@ -275,6 +308,7 @@ export function useNavigationStructure() {
           ...fileItems,
         ].filter((item) => {
           if (isDirectoryItem(item) && !can("directory.view")) return false;
+          if (blockedByPack(item)) return false;
           if (!leadership && isLeadershipItem(item)) return false;
           const canonical = canonicalizePath(item.href);
           if (!canonical) {
@@ -296,7 +330,7 @@ export function useNavigationStructure() {
       })
       .filter((section) => section.items.length > 0); // Only include sections with visible items
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [customSections, hasRole, can, featureFlags, leadership]);
+  }, [customSections, hasRole, can, featureFlags, leadership, packFlags.flags]);
 
   const canManageSections =
     can("systemSettings") || hasRole(["company_admin", "owner", "admin"]);
@@ -304,5 +338,7 @@ export function useNavigationStructure() {
   return {
     navigationStructure,
     canManageSections,
+    packFlags: packFlags.flags,
+    packFlagsReady: packFlags.isReady,
   };
 }
