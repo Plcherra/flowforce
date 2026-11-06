@@ -3257,6 +3257,24 @@
     "search": "Buscar",
     "signOut": "Cerrar sesión"
   },
+  "packs": {
+    "backToOps": "Volver a Operaciones",
+    "loading": "Comprobando qué paquetes están activados…",
+    "unavailable": {
+      "team": {
+        "title": "Equipo no está activado",
+        "description": "Formación, certificaciones, desempeño, reconocimiento y la clasificación están desactivados para esta empresa. El directorio de empleados sigue en Operaciones."
+      },
+      "insights": {
+        "title": "Perspectivas no está activado",
+        "description": "Informes, analítica e inteligencia de operaciones están desactivados para esta empresa."
+      },
+      "stock": {
+        "title": "Stock no está activado",
+        "description": "Inventario y gastos están desactivados para esta empresa."
+      }
+    }
+  },
   "forms": {
     "tplEmailHint": "nombre@empresa.com",
     "saved": "Guardado",

@@ -3,5 +3,9 @@
 import EmployeesPage from "@/features/employees/pages/Employees";
 
 export default function Employees() {
-  return <EmployeesPage />;
+  return (
+    <div data-testid="employees-page">
+      <EmployeesPage />
+    </div>
+  );
 }

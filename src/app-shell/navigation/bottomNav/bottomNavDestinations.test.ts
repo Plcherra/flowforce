@@ -105,7 +105,7 @@ export function runBottomNavDestinationTests() {
   const limited = partitionBottomNavigation(dailyOnly, true);
   assert.deepEqual(
     limited.primary.map((item) => item.name),
-    ["Dashboard", "Scheduling", "Tasks", "Messages"],
+    ["Dashboard", "Scheduling", "Tasks", "Messages", "Team Directory"],
   );
   assert.equal(limited.primary[0]?.isActive, true);
   assert.equal(
@@ -178,14 +178,13 @@ export function runBottomNavDestinationTests() {
   assert.equal(groups[0]?.items[0]?.name, "Dashboard");
   assert.equal(
     groups[0]?.items.some((item) => item.name === "Team Directory"),
-    false,
+    true,
   );
   const teamGroup = groups.find((group) => group.translationKey === "team");
-  assert.equal(teamGroup?.items[0]?.name, "Team Directory");
+  assert.equal(teamGroup?.items[0]?.name, "Performance");
   assert.deepEqual(
     teamGroup?.items.map((item) => item.name),
     [
-      "Team Directory",
       "Performance",
       "Recognition",
       "Leaderboard",

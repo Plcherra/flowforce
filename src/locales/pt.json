@@ -3257,6 +3257,24 @@
     "search": "Buscar",
     "signOut": "Sair"
   },
+  "packs": {
+    "backToOps": "Voltar para Operações",
+    "loading": "Verificando quais pacotes estão ativados…",
+    "unavailable": {
+      "team": {
+        "title": "Equipe não está ativada",
+        "description": "Treinamento, certificações, desempenho, reconhecimento e a classificação estão desativados para esta empresa. O diretório de funcionários continua em Operações."
+      },
+      "insights": {
+        "title": "Percepções não está ativado",
+        "description": "Relatórios, análises e inteligência de operações estão desativados para esta empresa."
+      },
+      "stock": {
+        "title": "Stock não está ativado",
+        "description": "Inventário e despesas estão desativados para esta empresa."
+      }
+    }
+  },
   "forms": {
     "tplEmailHint": "nome@empresa.com",
     "saved": "Salvo",
