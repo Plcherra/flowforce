@@ -11,10 +11,10 @@ Pedro removed the Operations Hub automations feature from this branch. Task crea
 
 ## Still in this branch
 
-`supabase/migrations/20261103011747_ops_action_permissions.sql` is not applied to production.
+`migrations/20261104020901_ops_action_permissions.sql` is applied to production.
 
 - Issue create and update, workflow templates, calendar generation, review, compliance packs, and workflow hooks require `editTasks`.
 - An assigned person with `viewOwnTasks` can still update their own workflow run, steps, evidence, and exceptions.
 - The checks call `current_user_has_permission`. If that function is already installed, this migration keeps it. Otherwise it installs a compatible check for the operations keys.
 
-Apply that file with `supabase db push` when the locks should go live. Do not apply it from this agent, and do not merge this pull request from here.
+Production already has this migration, so do not push it again. Do not apply it from this agent, and do not merge this pull request from here.
