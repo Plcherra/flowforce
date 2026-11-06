@@ -10,6 +10,8 @@ const importTs = jiti(import.meta.url, {
 });
 
 const { runPackFlagTests } = importTs("../src/config/packFlags.test.ts");
+const { runPackCatalogTests } = importTs("../src/config/packCatalog.test.ts");
 
 runPackFlagTests();
+runPackCatalogTests();
 console.log("pack flag tests passed");

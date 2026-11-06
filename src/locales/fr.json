@@ -196,7 +196,7 @@
     "scheduleLaborTaskAndInventorySignalsAreSteadyForToday": "Les signaux de planning, de main-d'œuvre, de tâches et de stock sont stables aujourd'hui.",
     "settingUpYourWorkspace": "Préparation de votre espace de travail...",
     "steady": "Stable",
-    "supabaseProfileError": "Erreur de profil Supabase",
+    "profileServiceError": "Impossible de charger le profil.",
     "taskExecution": "Exécution des tâches",
     "title": "Titre",
     "todaySCommandCenter": "Centre de commande du jour",
@@ -1091,7 +1091,8 @@
       "selected": "{{count}} sélectionnées",
       "templateBadge": "Modèle",
       "title": "Personnalisez les sections de votre espace de travail"
-    }
+    },
+    "startsOnOperations": "Vous commencez sur Opérations. Équipe, Aperçus et Stock restent désactivés jusqu'à ce que vous les ajoutiez dans Packs."
   },
   "auth": {
     "businessPlatform": "Plateforme d'Opérations Commerciales",
@@ -3274,6 +3275,36 @@
         "title": "Le stock n'est pas activé",
         "description": "L'inventaire et les dépenses sont désactivés pour cette entreprise."
       }
+    },
+    "pageTitle": "Packs",
+    "pageDescription": "Les opérations sont incluses. Ajoutez Équipe, Aperçus ou Stock lorsque vous voulez ces outils.",
+    "opsNote": "Une nouvelle entreprise commence sur Opérations. Équipe, Aperçus et Stock restent désactivés jusqu'à l'achat.",
+    "menuLabel": "Packs",
+    "separateFromPlans": "Les packs sont distincts des plans Starter, Growth et Enterprise. Les prix des packs ne sont pas encore fixés.",
+    "priceTbd": "Prix à définir",
+    "pricePlaceholder": "Espace réservé — prix en attente",
+    "statusOn": "Activé",
+    "statusOff": "Désactivé",
+    "buy": "Acheter le pack",
+    "buying": "Ouverture du paiement…",
+    "enabled": "Activé",
+    "purchaseDenied": "Seule une personne autorisée à gérer la facturation peut acheter un pack.",
+    "pricePending": "Le paiement attend un prix. Aucun montant n'a été débité.",
+    "checkoutCanceled": "Paiement annulé. Le pack reste désactivé.",
+    "checkoutFailed": "Impossible de démarrer le paiement.",
+    "confirmFailed": "Impossible d'activer le pack après le paiement.",
+    "viewPacks": "Voir les packs",
+    "team": {
+      "title": "Équipe",
+      "description": "Formation, certifications, performance, reconnaissance, classement et ressources."
+    },
+    "insights": {
+      "title": "Aperçus",
+      "description": "Intelligence opérationnelle, y compris les rapports, l'analytique et l'espace opérations."
+    },
+    "stock": {
+      "title": "Stock",
+      "description": "Inventaire et dépenses."
     }
   },
   "forms": {
@@ -5634,7 +5665,8 @@
     "accessTaskRecord": "Fiche de tâche",
     "accessView": "Voir",
     "accessUpdate": "Modifier",
-    "accessDelete": "Supprimer"
+    "accessDelete": "Supprimer",
+    "tabPacks": "Packs"
   },
   "roles": {
     "aiSuggestions": "Suggestions d'IA",

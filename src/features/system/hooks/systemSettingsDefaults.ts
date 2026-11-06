@@ -13,6 +13,7 @@ import type {
   TenantManagementSettings,
 } from "@/types/system-settings";
 import type { Company } from "@/hooks/useCompany";
+import { DEFAULT_PACK_FLAGS } from "@/config/packFlags";
 
 export const DEFAULT_GENERAL: GeneralSettings = {
   companyName: "",
@@ -143,6 +144,7 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfigurationSettings = {
   aiCopilot: DEFAULT_AI_COPILOT,
   auditLogs: [],
   tenantManagement: DEFAULT_TENANT_MANAGEMENT,
+  packFlags: DEFAULT_PACK_FLAGS,
 };
 
 export function seedSystemSettings(company: Company | null) {

@@ -1,10 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { supabaseAdmin } from "../../_server/supabaseAdmin";
+import { supabaseAdmin } from "../../_server/supabaseAdmin"; // pragma: allowlist secret
 import { createServerLogger } from "../../_server/utils/logger";
 import { getStripeClient } from "@/server/billing/stripeClient";
-import { planKeyFromStripePriceId } from "@/server/billing/stripePrices";
+import {
+  isPackBillingMetadata,
+  readPackCheckoutMetadata,
+} from "@/config/packCatalog";
+import { enablePurchasedPack } from "@/server/billing/enablePurchasedPack";
 import {
   BILLING_AUDIT,
   findCompanyIdByStripeCustomer,
@@ -42,17 +46,36 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
   const session = event.data.object as Stripe.Checkout.Session;
   const companyId =
     session.metadata?.company_id ?? session.client_reference_id ?? null;
+
+  if (!companyId) {
+    throw new Error("checkout.session.completed missing company_id metadata");
+  }
+
+  if (isPackBillingMetadata(session.metadata)) {
+    const pack = readPackCheckoutMetadata(session.metadata);
+    if (!pack) {
+      throw new Error("pack checkout is missing a pack id");
+    }
+    const packResult = await enablePurchasedPack(supabaseAdmin, { // pragma: allowlist secret
+      companyId,
+      pack,
+      actorId: session.metadata?.initiated_by ?? null,
+      checkoutSessionId: session.id,
+      source: "stripe.webhook",
+    });
+    if (packResult.ok === false) {
+      throw new Error(packResult.message);
+    }
+    return companyId;
+  }
+
   const customerId = readCustomerId(session.customer);
   const subscription = await loadSubscription(session.subscription);
   const plan =
     normalizeBillingPlan(session.metadata?.plan) ??
     normalizeBillingPlan(subscription?.metadata?.plan);
 
-  if (!companyId) {
-    throw new Error("checkout.session.completed missing company_id metadata");
-  }
-
-  const syncResult = await syncStripeBilling(supabaseAdmin, {
+  const syncResult = await syncStripeBilling(supabaseAdmin, { // pragma: allowlist secret
     companyId,
     customerId,
     subscription,
@@ -77,7 +100,7 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
   const subscription = event.data.object as Stripe.Subscription;
   const customerId = readCustomerId(subscription.customer);
   const companyId = await findCompanyIdByStripeCustomer(
-    supabaseAdmin,
+    supabaseAdmin, // pragma: allowlist secret
     customerId ?? "",
     subscription.metadata?.company_id,
   );
@@ -86,12 +109,31 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
     throw new Error(`${event.type} could not resolve company for customer`);
   }
 
+  if (isPackBillingMetadata(subscription.metadata)) {
+    const pack = readPackCheckoutMetadata(subscription.metadata);
+    if (
+      pack &&
+      (subscription.status === "active" || subscription.status === "trialing")
+    ) {
+      const packResult = await enablePurchasedPack(supabaseAdmin, { // pragma: allowlist secret
+        companyId,
+        pack,
+        actorId: null,
+        source: "stripe.webhook",
+      });
+      if (packResult.ok === false) {
+        throw new Error(packResult.message);
+      }
+    }
+    return companyId;
+  }
+
   const auditAction =
     event.type === "customer.subscription.deleted"
       ? BILLING_AUDIT.subscriptionCanceled
       : BILLING_AUDIT.subscriptionUpdated;
 
-  const syncResult = await syncStripeBilling(supabaseAdmin, {
+  const syncResult = await syncStripeBilling(supabaseAdmin, { // pragma: allowlist secret
     companyId,
     customerId,
     subscription,
@@ -120,7 +162,7 @@ async function handlePaymentFailed(event: Stripe.Event) {
       : invoice.parent?.subscription_details?.subscription?.id ?? null;
   const subscription = await loadSubscription(subscriptionId);
   const companyId = await findCompanyIdByStripeCustomer(
-    supabaseAdmin,
+    supabaseAdmin, // pragma: allowlist secret
     customerId ?? "",
     subscription?.metadata?.company_id ?? invoice.metadata?.company_id,
   );
@@ -129,9 +171,13 @@ async function handlePaymentFailed(event: Stripe.Event) {
     throw new Error("invoice.payment_failed could not resolve company");
   }
 
+  if (isPackBillingMetadata(subscription?.metadata)) {
+    return companyId;
+  }
+
   const subscriptionStatus = subscription?.status;
 
-  const syncResult = await syncStripeBilling(supabaseAdmin, {
+  const syncResult = await syncStripeBilling(supabaseAdmin, { // pragma: allowlist secret
     companyId,
     customerId,
     subscription,
@@ -178,7 +224,7 @@ export async function POST(request: NextRequest) {
     }
 
     const idempotency = await recordStripeWebhookEvent(
-      supabaseAdmin,
+      supabaseAdmin, // pragma: allowlist secret
       event.id,
       event.type,
       null,
@@ -203,7 +249,7 @@ export async function POST(request: NextRequest) {
         companyId = await handlePaymentFailed(event);
         break;
       default:
-        await supabaseAdmin
+        await supabaseAdmin // pragma: allowlist secret
           .from("stripe_webhook_events")
           .delete()
           .eq("id", event.id);
@@ -211,7 +257,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (companyId) {
-      await supabaseAdmin
+      await supabaseAdmin // pragma: allowlist secret
         .from("stripe_webhook_events")
         .update({ company_id: companyId })
         .eq("id", event.id);

@@ -5,6 +5,7 @@ export const SETTINGS_TAB_KEYS = [
   "notifications",
   "copilot",
   "integrations",
+  "packs",
   "billing",
 ] as const;
 

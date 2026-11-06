@@ -580,7 +580,7 @@
     "scheduleLaborTaskAndInventorySignalsAreSteadyForToday": "Os sinais de escala, mão de obra, tarefas e estoque estão estáveis hoje.",
     "settingUpYourWorkspace": "Preparando seu espaço de trabalho...",
     "steady": "Estável",
-    "supabaseProfileError": "Erro de perfil do Supabase",
+    "profileServiceError": "Não foi possível carregar o perfil.",
     "taskExecution": "Execução de tarefas",
     "title": "Título",
     "todaySCommandCenter": "Centro de comando de hoje",
@@ -1070,7 +1070,8 @@
       "selected": "{{count}} selecionadas",
       "templateBadge": "Modelo",
       "title": "Personalize as seções do seu espaço de trabalho"
-    }
+    },
+    "startsOnOperations": "Você começa em Operações. Equipe, Percepções e Stock ficam desativados até você adicioná-los em Pacotes."
   },
   "footer": {
     "about": "Sobre",
@@ -3274,6 +3275,36 @@
         "title": "Stock não está ativado",
         "description": "Inventário e despesas estão desativados para esta empresa."
       }
+    },
+    "pageTitle": "Pacotes",
+    "pageDescription": "Operações está incluído. Adicione Equipe, Percepções ou Stock quando quiser essas ferramentas.",
+    "opsNote": "Uma empresa nova começa em Operações. Equipe, Percepções e Stock ficam desativados até você comprá-los.",
+    "menuLabel": "Pacotes",
+    "separateFromPlans": "Os pacotes são separados dos planos Starter, Growth e Enterprise. Os preços dos pacotes ainda não foram definidos.",
+    "priceTbd": "Preço a definir",
+    "pricePlaceholder": "Espaço reservado — preço pendente",
+    "statusOn": "Ativado",
+    "statusOff": "Desativado",
+    "buy": "Comprar pacote",
+    "buying": "Iniciando o pagamento…",
+    "enabled": "Ativado",
+    "purchaseDenied": "Só quem pode gerir a faturação pode comprar um pacote.",
+    "pricePending": "O pagamento espera um preço. Nada foi cobrado.",
+    "checkoutCanceled": "Pagamento cancelado. O pacote continua desativado.",
+    "checkoutFailed": "Não foi possível iniciar o pagamento.",
+    "confirmFailed": "Não foi possível ativar o pacote depois do pagamento.",
+    "viewPacks": "Ver pacotes",
+    "team": {
+      "title": "Equipe",
+      "description": "Treinamento, certificações, desempenho, reconhecimento, a classificação e recursos."
+    },
+    "insights": {
+      "title": "Percepções",
+      "description": "Inteligência de operações, incluindo relatórios, análises e o espaço de operações."
+    },
+    "stock": {
+      "title": "Stock",
+      "description": "Inventário e despesas."
     }
   },
   "forms": {
@@ -5634,7 +5665,8 @@
     "accessTaskRecord": "Registo da tarefa",
     "accessView": "Ver",
     "accessUpdate": "Atualizar",
-    "accessDelete": "Eliminar"
+    "accessDelete": "Eliminar",
+    "tabPacks": "Pacotes"
   },
   "roles": {
     "aiSuggestions": "Sugestões de IA",

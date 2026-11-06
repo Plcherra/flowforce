@@ -580,7 +580,7 @@
     "scheduleLaborTaskAndInventorySignalsAreSteadyForToday": "Las señales de horario, mano de obra, tareas e inventario están estables hoy.",
     "settingUpYourWorkspace": "Preparando tu espacio de trabajo...",
     "steady": "Estable",
-    "supabaseProfileError": "Error de perfil de Supabase",
+    "profileServiceError": "No se pudo cargar el perfil.",
     "taskExecution": "Ejecución de tareas",
     "title": "Título",
     "todaySCommandCenter": "Centro de mando de hoy",
@@ -1070,7 +1070,8 @@
         "description": "Elige la plantilla de tu negocio",
         "title": "Plantilla"
       }
-    }
+    },
+    "startsOnOperations": "Empiezas en Operaciones. Equipo, Perspectivas y Stock siguen apagados hasta que los añadas desde Paquetes."
   },
   "footer": {
     "about": "Acerca de",
@@ -3274,6 +3275,36 @@
         "title": "Stock no está activado",
         "description": "Inventario y gastos están desactivados para esta empresa."
       }
+    },
+    "pageTitle": "Paquetes",
+    "pageDescription": "Operaciones está incluido. Añade Equipo, Perspectivas o Stock cuando quieras esas herramientas.",
+    "opsNote": "Una empresa nueva empieza en Operaciones. Equipo, Perspectivas y Stock siguen apagados hasta que los compres.",
+    "menuLabel": "Paquetes",
+    "separateFromPlans": "Los paquetes son distintos de los planes Starter, Growth y Enterprise. Los precios de los paquetes aún no están definidos.",
+    "priceTbd": "Precio por definir",
+    "pricePlaceholder": "Marcador de posición — precio pendiente",
+    "statusOn": "Activado",
+    "statusOff": "Desactivado",
+    "buy": "Comprar paquete",
+    "buying": "Iniciando el pago…",
+    "enabled": "Activado",
+    "purchaseDenied": "Solo quien puede gestionar la facturación puede comprar un paquete.",
+    "pricePending": "El pago espera un precio. No se ha cobrado nada.",
+    "checkoutCanceled": "Pago cancelado. El paquete sigue desactivado.",
+    "checkoutFailed": "No se pudo iniciar el pago.",
+    "confirmFailed": "No se pudo activar el paquete después del pago.",
+    "viewPacks": "Ver paquetes",
+    "team": {
+      "title": "Equipo",
+      "description": "Formación, certificaciones, desempeño, reconocimiento, la clasificación y recursos."
+    },
+    "insights": {
+      "title": "Perspectivas",
+      "description": "Inteligencia de operaciones, incluidos informes, analítica y el espacio de operaciones."
+    },
+    "stock": {
+      "title": "Stock",
+      "description": "Inventario y gastos."
     }
   },
   "forms": {
@@ -5634,7 +5665,8 @@
     "accessTaskRecord": "Registro de la tarea",
     "accessView": "Ver",
     "accessUpdate": "Actualizar",
-    "accessDelete": "Eliminar"
+    "accessDelete": "Eliminar",
+    "tabPacks": "Paquetes"
   },
   "roles": {
     "aiSuggestions": "Sugerencias de IA",

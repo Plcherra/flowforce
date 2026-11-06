@@ -30,9 +30,17 @@ export function PackUnavailable({ pack }: { pack: OptionalPackId }) {
             {t(`packs.unavailable.${pack}.description`)}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-wrap gap-2">
           <Button
             type="button"
+            data-testid="pack-view-packs"
+            onClick={() => navigate("/app/packs")}
+          >
+            {t("packs.viewPacks")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
             data-testid="pack-back-to-ops"
             onClick={() => navigate("/app/dashboard")}
           >
