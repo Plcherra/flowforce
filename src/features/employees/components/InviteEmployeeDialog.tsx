@@ -8,9 +8,12 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { usePackFlags } from "@/hooks/usePackFlags";
+import { isOpsOnlyInvite } from "../utils/opsInviteFlow";
 import { useInviteAccessOptions } from "../hooks/useInviteAccessOptions";
 import { useInviteMutations } from "../hooks/useInviteMutations";
 import { InvitePersonStack } from "./invites/InvitePersonStack";
+import { OpsInviteWizard } from "./invites/OpsInviteWizard";
 import { BulkInviteForm } from "./invites/BulkInviteForm";
 import type { BulkInviteRow } from "../types/invites";
 
@@ -27,6 +30,8 @@ export function InviteEmployeeDialog({
 }: InviteEmployeeDialogProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { flags, isReady: packFlagsReady } = usePackFlags();
+  const opsOnly = packFlagsReady && isOpsOnlyInvite(flags);
   const { classes, locations, departments } = useInviteAccessOptions();
   const { bulkInviteMutation } = useInviteMutations({
     onInvitesCreated: onSuccess,
@@ -76,6 +81,18 @@ export function InviteEmployeeDialog({
         <DialogHeader>
           <DialogTitle>{t("employees.inviteTeammates")}</DialogTitle>
         </DialogHeader>
+        {!packFlagsReady ? (
+          <p className="text-sm text-muted-foreground">{t("employees.opsFlowLoading")}</p>
+        ) : null}
+        {opsOnly ? (
+          <OpsInviteWizard
+            onSuccess={() => {
+              onSuccess?.();
+              onOpenChange(false);
+            }}
+          />
+        ) : null}
+        {packFlagsReady && !opsOnly ? (
         <Tabs defaultValue="cards">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="cards">{t("schedule.people")}</TabsTrigger>
@@ -118,6 +135,7 @@ export function InviteEmployeeDialog({
             />
           </TabsContent>
         </Tabs>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
