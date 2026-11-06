@@ -1,27 +1,23 @@
-import {
-  CHECKLIST_SLOTS,
-  type ChecklistArea,
-  type ChecklistSlot,
-} from "@/features/forms/utils/checklistForms";
-import { listsForShift } from "@/features/forms/utils/shiftChecklistLists";
+import type { ChecklistArea } from "@/features/forms/utils/checklistForms";
 import {
   checklistAreaFromShift,
   fieldIsDone,
   isWorkShift,
-  readAdditionalInformation,
   type MyShiftField,
   type MyShiftForm,
   type MyShiftSchedule,
   type MyShiftSubmission,
 } from "./myShiftView";
+import {
+  formsForScheduledRole,
+  type CompanyRoleRef,
+} from "./roleShiftLists";
 
 export type TodayListProgress = {
-  slot: ChecklistSlot;
-  formId: string | null;
-  title: string | null;
+  formId: string;
+  title: string;
   done: number;
   total: number;
-  note: string;
 };
 
 export type TodayShiftRow = {
@@ -75,6 +71,7 @@ export function todayShiftProgress(input: {
   forms: readonly MyShiftForm[];
   fields: readonly MyShiftField[];
   submissions: readonly MyShiftSubmission[];
+  roles?: readonly CompanyRoleRef[];
 }): TodayShiftRow[] {
   return input.schedules
     .filter(
@@ -86,43 +83,37 @@ export function todayShiftProgress(input: {
     )
     .map((shift) => {
       const area = checklistAreaFromShift(shift);
-      const lists = area ? listsForShift(input.forms, area) : null;
+      const openForms = formsForScheduledRole({
+        forms: input.forms,
+        scheduledRole: shift.role,
+        roles: input.roles ?? [],
+        now: input.now,
+      });
       return {
         shiftId: shift.id,
         personId: shift.user_id,
         shiftTitle: shift.title?.trim() || shift.role?.trim() || shift.id,
         area,
-        lists: area
-          ? CHECKLIST_SLOTS.map((slot) => {
-              const form = lists?.[slot] ?? null;
-              const submission =
-                form && shift.start_time
-                  ? latestInShift(
-                      input.submissions,
-                      form.id,
-                      shift.user_id,
-                      shift.start_time,
-                      shift.end_time,
-                    )
-                  : null;
-              const fields = form
-                ? input.fields.filter((field) => field.form_id === form.id)
-                : [];
-              return {
-                slot,
-                formId: form?.id ?? null,
-                title: form?.title ?? null,
-                done: fields.filter((field) =>
-                  fieldIsDone(submission?.submission_data, field.id),
-                ).length,
-                total: fields.length,
-                note:
-                  slot === "closing"
-                    ? readAdditionalInformation(submission?.submission_data)
-                    : "",
-              };
-            })
-          : [],
+        lists: openForms.map((form) => {
+          const submission = shift.start_time
+            ? latestInShift(
+                input.submissions,
+                form.id,
+                shift.user_id,
+                shift.start_time,
+                shift.end_time,
+              )
+            : null;
+          const fields = input.fields.filter((field) => field.form_id === form.id);
+          return {
+            formId: form.id,
+            title: form.title?.trim() || form.id,
+            done: fields.filter((field) =>
+              fieldIsDone(submission?.submission_data, field.id),
+            ).length,
+            total: fields.length,
+          };
+        }),
       };
     });
 }

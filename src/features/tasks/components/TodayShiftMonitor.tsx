@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
-import type { ChecklistSlot } from "@/features/forms/utils/checklistForms";
 import {
   todayShiftProgress,
   type TodayShiftRow,
@@ -13,12 +12,7 @@ import type {
   MyShiftSchedule,
   MyShiftSubmission,
 } from "@/features/tasks/utils/myShiftView";
-
-const SLOT_KEYS: Record<ChecklistSlot, string> = {
-  opening: "tasks.openingList",
-  daily: "tasks.daily",
-  closing: "tasks.closingList",
-};
+import type { CompanyRoleRef } from "@/features/tasks/utils/roleShiftLists";
 
 export function TodayShiftMonitor() {
   const { t } = useTranslation();
@@ -43,21 +37,33 @@ export function TodayShiftMonitor() {
     end.setHours(0, 0, 0, 0);
     end.setDate(end.getDate() + 2);
     void (async () => {
-      const [schedulesResult, formsResult, peopleResult] = await Promise.all([
+      const [schedulesResult, formsResult, peopleResult, rolesResult] = await Promise.all([
         supabase
           .from("schedules")
           .select("id, role, title, start_time, end_time, user_id, is_published, is_template")
           .eq("company_id", companyId)
           .gte("start_time", start.toISOString())
           .lt("start_time", end.toISOString()),
-        supabase.from("forms").select("id, title, settings").eq("company_id", companyId),
+        supabase // pragma: allowlist secret
+          .from("forms")
+          .select("id, title, settings, status")
+          .eq("company_id", companyId),
         supabase
           .from("profiles")
           .select("id, first_name, last_name")
           .eq("company_id", companyId),
+        supabase // pragma: allowlist secret
+          .from("company_roles")
+          .select("id, name")
+          .eq("company_id", companyId),
       ]);
       if (cancelled) return;
-      if (schedulesResult.error || formsResult.error || peopleResult.error) {
+      if (
+        schedulesResult.error ||
+        formsResult.error ||
+        peopleResult.error ||
+        rolesResult.error
+      ) {
         setFailed(true);
         return;
       }
@@ -98,6 +104,7 @@ export function TodayShiftMonitor() {
           forms,
           fields,
           submissions,
+          roles: (rolesResult.data ?? []) as CompanyRoleRef[],
         }),
       );
       setFailed(false);
@@ -133,16 +140,19 @@ export function TodayShiftMonitor() {
             </p>
             <p className="text-sm text-muted-foreground">{row.shiftTitle}</p>
           </div>
-          {row.area === null ? (
+          {row.lists.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("tasks.shiftHasNoLists")}</p>
           ) : (
             <ul className="space-y-1">
               {row.lists.map((list) => (
-                <li key={list.slot} className="text-sm">
-                  <span className="font-medium">{t(SLOT_KEYS[list.slot])}</span>
-                  {list.title ? t("literals.text23", { title: list.title }) : ""}
-                  {list.formId ? t("literals.text20", { value0: t("tasks.listProgress", { done: list.done, total: list.total }) }) : ""}
-                  {list.note ? <span className="block text-muted-foreground">{list.note}</span> : null}
+                <li key={list.formId} className="text-sm" data-testid={`today-shift-list-${list.formId}`}>
+                  <span className="font-medium">
+                    {t("tasks.listProgress", {
+                      done: list.done,
+                      total: list.total,
+                    })}
+                  </span>
+                  <span>{list.title}</span>
                 </li>
               ))}
             </ul>

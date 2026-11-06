@@ -229,9 +229,16 @@ export default function Tasks() {
       {boardMode === "shift" ? (
         <MyShiftTasks
           board={shift.board}
+          scheduleAccess={
+            permissionsLoading
+              ? "loading"
+              : can("viewOwnSchedules")
+                ? "allowed"
+                : "denied"
+          }
+          canFill={!permissionsLoading && can("forms.submit")}
           onOpenList={setOpenFormId}
           onToggleItem={shift.toggleItem}
-          onSaveClosingNote={shift.saveClosingNote}
           onFillForm={setOpenFormId}
           onCompleteTask={(taskId) => {
             void updateStatus(taskId, "completed").then(async (result) => {

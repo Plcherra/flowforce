@@ -1,39 +1,41 @@
+import { readFormDistribution } from "@/features/forms/utils/formDistribution";
 import {
-  CHECKLIST_SLOTS,
-  type ChecklistArea,
-  type ChecklistSlot,
-} from "@/features/forms/utils/checklistForms";
-import { listsForShift } from "@/features/forms/utils/shiftChecklistLists";
-import { checklistAreaFromShift } from "@/features/tasks/utils/myShiftView";
+  scheduledRoleMatches,
+  type CompanyRoleRef,
+} from "@/features/tasks/utils/roleShiftLists";
 
 export type ShiftLinkedForm = {
-  slot: ChecklistSlot;
   formId: string;
   title: string;
   href: string;
+  showFrom: string | null;
+  dueAt: string | null;
 };
 
 export function formsLinkedToShift(input: {
   role?: string | null;
-  title?: string | null;
-  forms: readonly { id: string; title?: string | null; settings?: unknown }[];
-}): { area: ChecklistArea | null; forms: ShiftLinkedForm[] } {
-  const area = checklistAreaFromShift({ role: input.role, title: input.title });
-  if (!area) return { area: null, forms: [] };
-  const lists = listsForShift(input.forms, area);
-  return {
-    area,
-    forms: CHECKLIST_SLOTS.flatMap((slot) => {
-      const form = lists[slot];
-      if (!form?.id) return [];
-      return [
-        {
-          slot,
-          formId: form.id,
-          title: form.title?.trim() || form.id,
-          href: `/app/forms?form=${form.id}`,
-        },
-      ];
-    }),
-  };
+  forms: readonly {
+    id: string;
+    title?: string | null;
+    settings?: unknown;
+    status?: string | null;
+  }[];
+  roles?: readonly CompanyRoleRef[];
+}): ShiftLinkedForm[] {
+  return input.forms.flatMap((form) => {
+    if (form.status !== "published") return [];
+    const distribution = readFormDistribution(form.settings);
+    if (!scheduledRoleMatches(input.role, distribution.roleIds, input.roles ?? [])) {
+      return [];
+    }
+    return [
+      {
+        formId: form.id,
+        title: form.title?.trim() || form.id,
+        href: `/app/forms?form=${form.id}`,
+        showFrom: distribution.showFrom,
+        dueAt: distribution.dueAt,
+      },
+    ];
+  });
 }

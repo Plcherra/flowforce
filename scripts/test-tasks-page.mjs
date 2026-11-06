@@ -70,6 +70,9 @@ const { runClosingNoteDraftTests } = importTs(
 const { runMyShiftViewTests } = importTs(
   "../src/features/tasks/utils/myShiftView.test.ts",
 );
+const { runRoleShiftListTests } = importTs(
+  "../src/features/tasks/utils/roleShiftLists.test.ts",
+);
 const { runChecklistProgressTests } = importTs(
   "../src/features/tasks/utils/checklistProgress.test.ts",
 );
@@ -166,6 +169,7 @@ runShiftWeekdayTaskTests();
 runClosingNoteTests();
 await runClosingNoteDraftTests();
 runMyShiftViewTests();
+runRoleShiftListTests();
 runChecklistProgressTests();
 runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();

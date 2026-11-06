@@ -59,14 +59,10 @@ export function runWeekdayTaskDraftTests() {
     schedules: [{ ...SHIFT, id: "c", role: "cashier", title: "Cashier", user_id: "ada" }],
   });
   assert.equal(supervisor.kind, "ready");
-  assert.equal(cashier.kind, "ready");
-  if (supervisor.kind !== "ready" || cashier.kind !== "ready") return;
+  assert.equal(cashier.kind, "unmapped");
+  if (supervisor.kind !== "ready") return;
   assert.equal(supervisor.view.weekdayTasks[0]?.title, "Organize the US Foods delivery");
-  assert.equal(cashier.view.weekdayTasks.length, 0);
-  assert.equal(
-    supervisor.view.lists.every((list) => list.items.length === 0),
-    true,
-  );
+  assert.equal(supervisor.view.lists.length, 0);
 
   const html = renderToStaticMarkup(
     createElement(WeekdayTaskForm, {

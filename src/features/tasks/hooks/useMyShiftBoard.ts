@@ -13,6 +13,7 @@ import {
   type MyShiftTaskRow,
 } from "@/features/tasks/utils/myShiftView";
 import { myShiftTasksKey } from "@/features/tasks/utils/myShiftReload";
+import type { CompanyRoleRef } from "@/features/tasks/utils/roleShiftLists";
 
 export type MyShiftBoard = AssembledShift | { kind: "loading" } | { kind: "error" };
 
@@ -52,7 +53,7 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
     setBoard({ kind: "loading" });
 
     void (async () => {
-      const [schedulesResult, formsResult] = await Promise.all([
+      const [schedulesResult, formsResult, rolesResult] = await Promise.all([
         supabase
           .from("schedules")
           .select(
@@ -61,10 +62,17 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
           .eq("company_id", companyId)
           .gte("start_time", range.start)
           .lt("start_time", range.end),
-        supabase.from("forms").select("id, title, settings").eq("company_id", companyId),
+        supabase // pragma: allowlist secret
+          .from("forms")
+          .select("id, title, settings, status")
+          .eq("company_id", companyId),
+        supabase // pragma: allowlist secret
+          .from("company_roles")
+          .select("id, name")
+          .eq("company_id", companyId),
       ]);
       if (cancelled) return;
-      if (schedulesResult.error || formsResult.error) {
+      if (schedulesResult.error || formsResult.error || rolesResult.error) {
         setBoard({ kind: "error" });
         return;
       }
@@ -102,6 +110,7 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
           fields,
           submissions,
           tasks: tasksRef.current,
+          roles: (rolesResult.data ?? []) as CompanyRoleRef[],
         }),
       );
     })();
@@ -119,7 +128,6 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
       const items = list.items.map((item) =>
         item.id === itemId && done !== null ? { ...item, done } : item,
       );
-      const includeNote = note !== undefined;
       const { error } = await supabase.from("form_submissions").insert({
         company_id: companyId,
         form_id: formId,
@@ -127,8 +135,8 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
         submitted_at: new Date().toISOString(),
         submission_data: checklistSubmissionData({
           items,
-          note: includeNote ? note : list.savedNote,
-          includeNote: includeNote || list.savedNote.trim().length > 0,
+          note,
+          includeNote: note !== undefined && note.trim().length > 0,
         }),
       });
       if (!error) refresh();
@@ -143,12 +151,5 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
     [saveList],
   );
 
-  const saveClosingNote = useCallback(
-    (formId: string, note: string) => {
-      void saveList(formId, null, null, note);
-    },
-    [saveList],
-  );
-
-  return { board, refresh, toggleItem, saveClosingNote };
+  return { board, refresh, toggleItem };
 }

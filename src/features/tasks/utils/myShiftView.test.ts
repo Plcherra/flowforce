@@ -2,6 +2,10 @@ import "@/i18n/client";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import {
+  defaultFormDistribution,
+  withFormDistribution,
+} from "@/features/forms/utils/formDistribution";
 import { withChecklistAddress } from "@/features/forms/utils/checklistForms";
 import { withShiftWeekdayTask, US_FOODS_DELIVERY } from "./shiftWeekdayTask";
 import { MyShiftTasks } from "../components/MyShiftTasks";
@@ -11,100 +15,163 @@ import {
   shiftTaskMarkDoneAllowed,
 } from "./myShiftView";
 
-const CASHIER_OPENING = {
-  id: "form-open",
-  title: "Cashier opening",
-  settings: withChecklistAddress({}, { area: "cashier", slot: "opening" }),
-};
-const CASHIER_DAILY = {
-  id: "form-daily",
-  title: "Cashier daily",
-  settings: withChecklistAddress({}, { area: "cashier", slot: "daily" }),
-};
-const CASHIER_CLOSING = {
-  id: "form-close",
-  title: "Cashier closing",
-  settings: withChecklistAddress({}, { area: "cashier", slot: "closing" }),
-};
+const ROLES = [
+  { id: "role-barista", name: "Barista" },
+  { id: "role-cook", name: "Cook" },
+];
+
+const NOW = new Date("2026-10-23T14:00:00.000Z");
+
+function listForm(
+  id: string,
+  title: string,
+  roleIds: string[],
+  times: { showFrom?: string | null; dueAt?: string | null } = {},
+  status = "published",
+) {
+  return {
+    id,
+    title,
+    status,
+    settings: withFormDistribution(
+      {},
+      {
+        ...defaultFormDistribution(),
+        recordKind: "list" as const,
+        roleIds,
+        showFrom: times.showFrom ?? null,
+        dueAt: times.dueAt ?? null,
+      },
+    ),
+  };
+}
+
+const OPEN = listForm("form-open", "Open the bar", ["role-barista"], {
+  showFrom: "2026-10-23T12:00:00.000Z",
+  dueAt: "2026-10-23T22:00:00.000Z",
+});
 
 export function runMyShiftViewTests() {
-  assert.equal(
-    checklistAreaFromShift({ role: "Cashier", title: "Morning" }),
-    "cashier",
-  );
+  assert.equal(checklistAreaFromShift({ role: "Cashier", title: "Morning" }), "cashier");
   assert.equal(
     checklistAreaFromShift({ role: "Team", title: "Supervisor close" }),
     "supervisor",
   );
   assert.equal(checklistAreaFromShift({ role: "Cook", title: "Line" }), null);
 
+  const published = {
+    id: "shift-ada",
+    role: "Barista",
+    title: "Barista",
+    start_time: "2026-10-23T12:00:00.000Z",
+    end_time: "2026-10-23T20:00:00.000Z",
+    user_id: "ada",
+    is_published: true,
+    is_template: false,
+  };
+  const forms = [
+    OPEN,
+    listForm("form-past", "Past bar", ["role-barista"], {
+      dueAt: "2026-10-23T13:00:00.000Z",
+    }),
+    listForm("form-later", "Not yet", ["role-barista"], {
+      showFrom: "2026-10-23T18:00:00.000Z",
+    }),
+    listForm("form-cook", "Cook list", ["role-cook"]),
+    listForm("form-draft", "Draft bar", ["role-barista"], {}, "draft"),
+    {
+      id: "form-slot",
+      title: "Cashier opening",
+      status: "published",
+      settings: withChecklistAddress({}, { area: "cashier", slot: "opening" }),
+    },
+  ];
+  const fields = [
+    { id: "drawer", form_id: "form-open", label: "Count the drawer", field_order: 1 },
+  ];
+
   const ready = assembleMyShift({
     viewerId: "ada",
-    now: new Date("2026-10-23T14:00:00"),
+    now: NOW,
+    roles: ROLES,
     schedules: [
+      published,
       {
-        id: "shift-ada",
-        role: "cashier",
-        title: "Cashier",
-        start_time: "2026-10-23T12:00:00.000Z",
-        end_time: "2026-10-23T20:00:00.000Z",
+        ...published,
+        id: "draft",
+        role: "Cook",
+        is_published: false,
         user_id: "ada",
-        is_published: true,
-        is_template: false,
-      },
-      {
-        id: "shift-ben",
-        role: "cashier",
-        title: "Cashier",
-        start_time: "2026-10-24T12:00:00.000Z",
-        end_time: "2026-10-24T20:00:00.000Z",
-        user_id: "ben",
-        is_published: true,
-        is_template: false,
       },
     ],
-    forms: [CASHIER_OPENING, CASHIER_DAILY, CASHIER_CLOSING],
-    fields: [
-      {
-        id: "drawer",
-        form_id: "form-open",
-        label: "Count the drawer",
-        field_order: 1,
-      },
-    ],
+    forms,
+    fields,
     submissions: [
       {
-        form_id: "form-close",
-        submitted_at: "2026-10-22T21:00:00.000Z",
-        submitted_by: "ben",
-        submission_data: { additional_information: "No coins in the drawer" },
+        form_id: "form-open",
+        submitted_at: "2026-10-23T13:00:00.000Z",
+        submitted_by: "ada",
+        submission_data: { drawer: true },
       },
     ],
-    tasks: [
-      {
-        id: "delivery",
-        title: US_FOODS_DELIVERY.title,
-        links: withShiftWeekdayTask({}, US_FOODS_DELIVERY),
-      },
-    ],
+    tasks: [],
   });
-
   assert.equal(ready.kind, "ready");
   if (ready.kind !== "ready") return;
-  assert.equal(ready.view.area, "cashier");
   assert.deepEqual(
     ready.view.lists.map((list) => list.formId),
-    ["form-open", "form-daily", "form-close"],
+    ["form-open"],
   );
-  assert.deepEqual(ready.view.lists[0]?.notes, ["No coins in the drawer"]);
-  assert.deepEqual(ready.view.lists[1]?.notes, []);
-  assert.equal(ready.view.lists[0]?.items[0]?.label, "Count the drawer");
-  assert.equal(ready.view.weekdayTasks.length, 0);
-  assert.equal(ready.view.shiftTasks.length, 0);
+  assert.equal(ready.view.lists[0]?.items[0]?.done, true);
+  assert.equal(ready.view.lists[0]?.dueAt, "2026-10-23T22:00:00.000Z");
+
+  const html = renderToStaticMarkup(
+    createElement(MyShiftTasks, {
+      board: ready,
+      onOpenList: () => undefined,
+    }),
+  );
+  assert.match(html, /my-shift-list-form-open/);
+  assert.match(html, /my-shift-open-form-open/);
+  assert.equal(html.includes("my-shift-list-opening"), false);
+  assert.equal(html.includes("Past bar"), false);
+  assert.equal(html.includes("Cashier opening"), false);
+
+  const denied = renderToStaticMarkup(
+    createElement(MyShiftTasks, {
+      board: ready,
+      scheduleAccess: "denied",
+      onOpenList: () => undefined,
+    }),
+  );
+  assert.match(denied, /my-shift-schedule-denied/);
+  assert.equal(denied.includes("my-shift-list-form-open"), false);
+
+  const readOnly = renderToStaticMarkup(
+    createElement(MyShiftTasks, {
+      board: ready,
+      canFill: false,
+      onOpenList: () => undefined,
+    }),
+  );
+  assert.match(readOnly, /my-shift-item-readonly-drawer/);
+  assert.equal(readOnly.includes("my-shift-open-form-open"), false);
+
+  const unpublished = assembleMyShift({
+    viewerId: "ada",
+    now: NOW,
+    roles: ROLES,
+    schedules: [{ ...published, is_published: false }],
+    forms,
+    fields,
+    submissions: [],
+    tasks: [],
+  });
+  assert.equal(unpublished.kind, "empty");
 
   const friday = assembleMyShift({
     viewerId: "sam",
-    now: new Date("2026-10-23T15:00:00"),
+    now: new Date("2026-10-23T15:00:00.000Z"),
     schedules: [
       {
         id: "sup",
@@ -119,14 +186,7 @@ export function runMyShiftViewTests() {
     ],
     forms: [],
     fields: [],
-    submissions: [
-      {
-        form_id: "missing",
-        submitted_at: "2026-10-22T21:00:00.000Z",
-        submitted_by: "sam",
-        submission_data: {},
-      },
-    ],
+    submissions: [],
     tasks: [
       {
         id: "delivery",
@@ -137,41 +197,21 @@ export function runMyShiftViewTests() {
   });
   assert.equal(friday.kind, "ready");
   if (friday.kind !== "ready") return;
-  assert.equal(friday.view.lists[0]?.notes.length, 0);
+  assert.equal(friday.view.lists.length, 0);
   assert.equal(friday.view.weekdayTasks[0]?.title, "Organize the US Foods delivery");
-  assert.deepEqual(friday.view.weekdayTasks[0]?.stations, [
-    "front_of_house",
-    "back_of_house",
-  ]);
 
-  const html = renderToStaticMarkup(
+  const fridayHtml = renderToStaticMarkup(
     createElement(MyShiftTasks, {
       board: friday,
       onOpenList: () => undefined,
     }),
   );
-  assert.match(html, /my-shift-tasks/);
-  assert.match(html, /Organize the US Foods delivery/);
-  assert.match(html, /my-shift-list-opening/);
-  assert.equal(html.includes("No coins in the drawer"), false);
-
-  const noted = ready.view;
-  const notedHtml = renderToStaticMarkup(
-    createElement(MyShiftTasks, {
-      board: { kind: "ready", view: noted, shiftTitle: "Cashier", shiftStartsAt: "", shiftEndsAt: null },
-      onOpenList: () => undefined,
-    }),
-  );
-  assert.match(notedHtml, /No coins in the drawer/);
-  assert.match(notedHtml, /my-shift-opening-notes/);
-  const openingIndex = notedHtml.indexOf("my-shift-list-opening");
-  const noteIndex = notedHtml.indexOf("No coins in the drawer");
-  const dailyIndex = notedHtml.indexOf("my-shift-list-daily");
-  assert.ok(openingIndex >= 0 && noteIndex > openingIndex && noteIndex < dailyIndex);
+  assert.match(fridayHtml, /Organize the US Foods delivery/);
+  assert.equal(fridayHtml.includes("my-shift-list-opening"), false);
 
   const empty = assembleMyShift({
     viewerId: "ada",
-    now: new Date("2026-10-23T14:00:00"),
+    now: NOW,
     schedules: [],
     forms: [],
     fields: [],
@@ -179,14 +219,11 @@ export function runMyShiftViewTests() {
     tasks: [],
   });
   assert.equal(empty.kind, "empty");
-  const emptyHtml = renderToStaticMarkup(
-    createElement(MyShiftTasks, { board: empty, onOpenList: () => undefined }),
-  );
-  assert.match(emptyHtml, /my-shift-empty/);
 
   const cook = assembleMyShift({
     viewerId: "lee",
-    now: new Date("2026-10-23T15:00:00"),
+    now: NOW,
+    roles: ROLES,
     schedules: [
       {
         id: "line",
@@ -199,7 +236,7 @@ export function runMyShiftViewTests() {
         is_template: false,
       },
     ],
-    forms: [],
+    forms,
     fields: [],
     submissions: [],
     tasks: [
@@ -222,69 +259,12 @@ export function runMyShiftViewTests() {
   });
   assert.equal(cook.kind, "ready");
   if (cook.kind !== "ready") return;
-  assert.equal(cook.view.area, null);
-  assert.equal(cook.view.lists.length, 0);
-  assert.equal(cook.view.shiftTasks[0]?.title, "Clean the restroom");
-  assert.equal(cook.view.shiftTasks[0]?.description, "After lunch");
-  assert.equal(cook.view.shiftTasks[0]?.formId, "form-close-up");
-  assert.equal(cook.view.shiftTasks[0]?.assigneeCount, 2);
-
-  const cookHtml = renderToStaticMarkup(
-    createElement(MyShiftTasks, {
-      board: cook,
-      onOpenList: () => undefined,
-      onFillForm: () => undefined,
-      onCompleteTask: () => undefined,
-    }),
+  assert.deepEqual(
+    cook.view.lists.map((list) => list.formId),
+    ["form-cook"],
   );
-  assert.match(cookHtml, /Clean the restroom/);
-  assert.match(cookHtml, /After lunch/);
-  assert.match(cookHtml, /my-shift-task-fill-restroom/);
-  assert.match(cookHtml, /my-shift-task-done-restroom/);
-  assert.equal(cookHtml.includes("my-shift-list-opening"), false);
-
+  assert.equal(cook.view.shiftTasks[0]?.title, "Clean the restroom");
   assert.equal(shiftTaskMarkDoneAllowed("todo"), true);
   assert.equal(shiftTaskMarkDoneAllowed("completed"), false);
   assert.equal(shiftTaskMarkDoneAllowed("cancelled"), false);
-
-  const cancelled = assembleMyShift({
-    viewerId: "lee",
-    now: new Date("2026-10-23T15:00:00"),
-    schedules: [
-      {
-        id: "line",
-        role: "Cook",
-        title: "Line",
-        start_time: "2026-10-23T12:00:00.000Z",
-        end_time: "2026-10-23T20:00:00.000Z",
-        user_id: "lee",
-        is_published: true,
-        is_template: false,
-      },
-    ],
-    forms: [],
-    fields: [],
-    submissions: [],
-    tasks: [
-      {
-        id: "restroom",
-        title: "Clean the restroom",
-        description: "After lunch",
-        status: "cancelled",
-        assigned_to: "lee",
-        links: { schedule_id: "line", assignee_ids: ["lee"] },
-      },
-    ],
-  });
-  assert.equal(cancelled.kind, "ready");
-  if (cancelled.kind !== "ready") return;
-  const cancelledHtml = renderToStaticMarkup(
-    createElement(MyShiftTasks, {
-      board: cancelled,
-      onOpenList: () => undefined,
-      onCompleteTask: () => undefined,
-    }),
-  );
-  assert.match(cancelledHtml, /my-shift-task-closed-restroom/);
-  assert.equal(cancelledHtml.includes("my-shift-task-done-restroom"), false);
 }

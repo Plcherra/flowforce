@@ -23,7 +23,13 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
    - After the due time passes, it stops showing to fillers. Creators and people who can manage forms still see the row.
    - Stored on the existing `forms.settings.distribution` object (attached company roles, fill audience, see audience, show-from, due). No new table and no migration.
    - `e2e/form-distribution.spec.ts` pins English, signs in with the test user, checks due-time and audience hiding, and stops the save before it is stored.
-4. Publishing a schedule produces day-of "My Shift" lists by scheduled role — todo
+4. Publishing a schedule produces day-of "My Shift" lists by scheduled role — done
+   - A published shift that overlaps today shows the forms and lists attached to that shift's role. A draft shift does not.
+   - The attachment is `forms.settings.distribution.role_ids`, matched to the shift's role by company role id or name. There is no fixed open, mid, or close slot.
+   - A list is on My Shift only while now is at or after its show-from time and before its due time.
+   - Seeing the shift uses `viewOwnSchedules`. Checking items and opening a list use `forms.submit`. Both go through `useCan`.
+   - No new table and no migration.
+   - `e2e/my-shift-role-lists.spec.ts` pins English, signs in with the test user, overlays a published shift and role-attached lists on the read responses, and blocks schedule, form, and submission writes.
 5. Ops-only invite flow: invite → company basics (welcome, docs, rules; non-blocking) → first shift — todo
 6. Employee directory stays in basic Ops (not gated) — done
    - Satisfied by item 1. The directory sits in Daily Operations, stays on the primary nav when Team is off, and `/app/employees` does not show the pack block.

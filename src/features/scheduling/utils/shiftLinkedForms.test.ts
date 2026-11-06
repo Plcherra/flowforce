@@ -1,27 +1,49 @@
 import assert from "node:assert/strict";
-import { withChecklistAddress } from "@/features/forms/utils/checklistForms";
+import {
+  defaultFormDistribution,
+  withFormDistribution,
+} from "@/features/forms/utils/formDistribution";
 import { formsLinkedToShift } from "./shiftLinkedForms";
+
+const ROLES = [{ id: "role-barista", name: "Barista" }];
 
 const forms = [
   {
-    id: "open-form",
-    title: "Open drawer",
-    settings: withChecklistAddress(null, { area: "cashier", slot: "opening" }),
+    id: "bar-list",
+    title: "Open the bar",
+    status: "published",
+    settings: withFormDistribution(
+      {},
+      {
+        ...defaultFormDistribution(),
+        recordKind: "list" as const,
+        roleIds: ["role-barista"],
+        dueAt: "2026-11-06T22:00:00.000Z",
+      },
+    ),
+  },
+  {
+    id: "draft-list",
+    title: "Draft bar",
+    status: "draft",
+    settings: withFormDistribution(
+      {},
+      {
+        ...defaultFormDistribution(),
+        recordKind: "list" as const,
+        roleIds: ["role-barista"],
+      },
+    ),
   },
 ];
 
 export function runShiftLinkedFormsTests() {
-  const cashier = formsLinkedToShift({
-    role: "Cashier",
-    title: "Cashier - Opening",
-    forms,
-  });
-  assert.equal(cashier.area, "cashier");
-  assert.equal(cashier.forms.length, 1);
-  assert.equal(cashier.forms[0]?.formId, "open-form");
-  assert.equal(cashier.forms[0]?.href, "/app/forms?form=open-form");
+  const barista = formsLinkedToShift({ role: "Barista", forms, roles: ROLES });
+  assert.equal(barista.length, 1);
+  assert.equal(barista[0]?.formId, "bar-list");
+  assert.equal(barista[0]?.href, "/app/forms?form=bar-list");
+  assert.equal(barista[0]?.dueAt, "2026-11-06T22:00:00.000Z");
 
-  const cook = formsLinkedToShift({ role: "Cook", title: "Cook", forms });
-  assert.equal(cook.area, null);
-  assert.deepEqual(cook.forms, []);
+  const cook = formsLinkedToShift({ role: "Cook", forms, roles: ROLES });
+  assert.deepEqual(cook, []);
 }

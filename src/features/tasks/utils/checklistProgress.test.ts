@@ -44,28 +44,12 @@ export function runChecklistProgressTests() {
       shiftTasks: [],
       lists: [
         {
-          slot: "opening",
           formId: "open",
           title: "Cashier opening",
-          notes: [],
-          savedNote: "",
+          recordKind: "list",
+          showFrom: null,
+          dueAt: null,
           items: [{ id: "drawer", label: "Count the drawer", done: false }],
-        },
-        {
-          slot: "daily",
-          formId: "daily",
-          title: "Cashier daily",
-          notes: [],
-          savedNote: "",
-          items: [],
-        },
-        {
-          slot: "closing",
-          formId: "close",
-          title: "Cashier closing",
-          notes: [],
-          savedNote: "",
-          items: [],
         },
       ],
     },
@@ -75,10 +59,9 @@ export function runChecklistProgressTests() {
       board,
       onOpenList: () => undefined,
       onToggleItem: () => undefined,
-      onSaveClosingNote: () => undefined,
     }),
   );
   assert.match(html, /my-shift-item-drawer/);
-  assert.match(html, /my-shift-closing-note/);
-  assert.match(html, /my-shift-save-note/);
+  assert.match(html, /my-shift-open-open/);
+  assert.equal(html.includes("my-shift-closing-note"), false);
 }

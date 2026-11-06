@@ -1,13 +1,8 @@
+import type { ChecklistArea } from "@/features/forms/utils/checklistForms";
 import {
-  CHECKLIST_SLOTS,
-  type ChecklistArea,
-  type ChecklistSlot,
-} from "@/features/forms/utils/checklistForms";
-import { listsForShift } from "@/features/forms/utils/shiftChecklistLists";
-import {
-  carryClosingNotes,
-  type AreaShift,
-} from "@/features/forms/utils/closingNotes";
+  readFormDistribution,
+  type FormRecordKind,
+} from "@/features/forms/utils/formDistribution";
 import {
   matchesWeekday,
   readShiftWeekdayTask,
@@ -16,6 +11,10 @@ import {
 } from "./shiftWeekdayTask";
 import { readAssigneeIds, readFormId } from "./shiftTaskWrite";
 import { readTaskSchedule } from "./taskSchedule";
+import {
+  formsForScheduledRole,
+  type CompanyRoleRef,
+} from "./roleShiftLists";
 
 const WEEKDAY_BY_JS_DAY: Weekday[] = [
   "sun",
@@ -51,11 +50,11 @@ export type MyShiftChecklistItem = {
 };
 
 export type MyShiftListView = {
-  slot: ChecklistSlot;
-  formId: string | null;
-  title: string | null;
-  notes: string[];
-  savedNote: string;
+  formId: string;
+  title: string;
+  recordKind: FormRecordKind;
+  showFrom: string | null;
+  dueAt: string | null;
   items: MyShiftChecklistItem[];
 };
 
@@ -98,6 +97,7 @@ export type MyShiftForm = {
   id: string;
   title?: string | null;
   settings?: unknown;
+  status?: string | null;
 };
 
 export type MyShiftField = {
@@ -200,8 +200,7 @@ function pickViewerShift(
       isWorkShift(row) &&
       overlapsToday(row.start_time, row.end_time, now),
   );
-  const mapped = mine.filter((row) => checklistAreaFromShift(row) !== null);
-  return chooseCoveringShift(mapped.length > 0 ? mapped : mine, now);
+  return chooseCoveringShift(mine, now);
 }
 
 export function shiftTaskMarkDoneAllowed(
@@ -237,52 +236,6 @@ export function shiftTasksForSchedule(
       },
     ];
   });
-}
-
-function openingNotes(input: {
-  area: ChecklistArea;
-  viewerId: string;
-  viewerStartsAt: string;
-  schedules: readonly MyShiftSchedule[];
-  submissions: readonly MyShiftSubmission[];
-  closingFormId: string | null;
-}): string[] {
-  if (!input.closingFormId) return [];
-  const latest = input.submissions
-    .filter(
-      (row) =>
-        row.form_id === input.closingFormId &&
-        row.submitted_at &&
-        row.submitted_at < input.viewerStartsAt &&
-        readAdditionalInformation(row.submission_data).length > 0,
-    )
-    .sort((left, right) =>
-      `${right.submitted_at ?? ""}`.localeCompare(`${left.submitted_at ?? ""}`),
-    )[0];
-  if (!latest?.submitted_at) return [];
-  const note = readAdditionalInformation(latest.submission_data);
-  const shifts: AreaShift[] = input.schedules
-    .filter(
-      (row) =>
-        isWorkShift(row) &&
-        checklistAreaFromShift(row) === input.area &&
-        Boolean(row.user_id) &&
-        Boolean(row.start_time),
-    )
-    .map((row) => ({
-      area: input.area,
-      slot: "opening" as const,
-      personId: row.user_id ?? "",
-      startsAt: row.start_time ?? "",
-    }));
-  const carried = carryClosingNotes({
-    area: input.area,
-    notes: [note],
-    shifts,
-    closingEndsAt: latest.submitted_at,
-  });
-  if (carried.personId !== input.viewerId) return [];
-  return carried.notes;
 }
 
 function latestViewerSubmission(
@@ -329,96 +282,70 @@ export function assembleMyShift(input: {
   fields: readonly MyShiftField[];
   submissions: readonly MyShiftSubmission[];
   tasks: readonly MyShiftTaskRow[];
+  roles?: readonly CompanyRoleRef[];
 }): AssembledShift {
-  const hasShift = input.schedules.some(
-    (row) =>
-      row.user_id === input.viewerId &&
-      isWorkShift(row) &&
-      overlapsToday(row.start_time, row.end_time, input.now),
-  );
   const shift = pickViewerShift(input.schedules, input.viewerId, input.now);
-  if (!shift) return hasShift ? { kind: "unmapped" } : { kind: "empty" };
+  if (!shift) return { kind: "empty" };
   const area = checklistAreaFromShift(shift);
   const shiftTasks = shiftTasksForSchedule(input.tasks, shift.id);
-  if (!area || !shift.start_time) {
-    if (shiftTasks.length === 0) return { kind: "unmapped" };
-    return {
-      kind: "ready",
-      view: { area: null, lists: [], weekdayTasks: [], shiftTasks },
-      shiftTitle: shift.title?.trim() || shift.role?.trim() || "",
-      shiftStartsAt: shift.start_time ?? "",
-      shiftEndsAt: shift.end_time,
-    };
-  }
-
-  const lists = listsForShift(input.forms, area);
-  const notes = openingNotes({
-    area,
-    viewerId: input.viewerId,
-    viewerStartsAt: shift.start_time,
-    schedules: input.schedules,
-    submissions: input.submissions,
-    closingFormId: lists.closing?.id ?? null,
-  });
   const weekday = weekdayFromDate(input.now);
-  const view: MyShiftView = {
-    area,
-    lists: CHECKLIST_SLOTS.map((slot) => {
-      const form = lists[slot];
-      const submission = form
-        ? latestViewerSubmission(
-            input.submissions,
-            form.id,
-            input.viewerId,
-            shift.start_time ?? "",
-            shift.end_time,
-          )
-        : null;
-      const items = form
-        ? input.fields
-            .filter((field) => field.form_id === form.id)
-            .sort(
-              (left, right) =>
-                (left.field_order ?? 0) - (right.field_order ?? 0),
-            )
-            .map((field) => ({
-              id: field.id,
-              label: field.label?.trim() || field.id,
-              done: fieldIsDone(submission?.submission_data, field.id),
-            }))
-        : [];
-      return {
-        slot,
-        formId: form?.id ?? null,
-        title: form?.title ?? null,
-        notes: slot === "opening" ? notes : [],
-        savedNote:
-          slot === "closing"
-            ? readAdditionalInformation(submission?.submission_data)
-            : "",
-        items,
-      };
-    }),
-    shiftTasks,
-    weekdayTasks: input.tasks.flatMap((task) => {
-      const weekdayTask = readShiftWeekdayTask(task.links);
-      if (!weekdayTask || weekdayTask.area !== area) return [];
-      if (!matchesWeekday(weekdayTask, weekday)) return [];
-      return [
-        {
-          id: task.id,
-          title: weekdayTask.title,
-          stations: weekdayTask.stations,
-        },
-      ];
-    }),
-  };
+  const weekdayTasks = input.tasks.flatMap((task) => {
+    const weekdayTask = readShiftWeekdayTask(task.links);
+    if (!weekdayTask || !area || weekdayTask.area !== area) return [];
+    if (!matchesWeekday(weekdayTask, weekday)) return [];
+    return [
+      {
+        id: task.id,
+        title: weekdayTask.title,
+        stations: weekdayTask.stations,
+      },
+    ];
+  });
+  const openForms = formsForScheduledRole({
+    forms: input.forms,
+    scheduledRole: shift.role,
+    roles: input.roles ?? [],
+    now: input.now,
+  });
+  const lists: MyShiftListView[] = openForms.map((form) => {
+    const distribution = readFormDistribution(form.settings);
+    const submission = shift.start_time
+      ? latestViewerSubmission(
+          input.submissions,
+          form.id,
+          input.viewerId,
+          shift.start_time,
+          shift.end_time,
+        )
+      : null;
+    const items = input.fields
+      .filter((field) => field.form_id === form.id)
+      .sort(
+        (left, right) => (left.field_order ?? 0) - (right.field_order ?? 0),
+      )
+      .map((field) => ({
+        id: field.id,
+        label: field.label?.trim() || field.id,
+        done: fieldIsDone(submission?.submission_data, field.id),
+      }));
+    return {
+      formId: form.id,
+      title: form.title?.trim() || form.id,
+      recordKind: distribution.recordKind,
+      showFrom: distribution.showFrom,
+      dueAt: distribution.dueAt,
+      items,
+    };
+  });
+  if (lists.length === 0 && shiftTasks.length === 0 && weekdayTasks.length === 0) {
+    return { kind: "unmapped" };
+  }
 
   return {
     kind: "ready",
-    view,
-    shiftTitle: shift.title?.trim() || shift.role?.trim() || area,
-    shiftStartsAt: shift.start_time,
+    view: { area, lists, weekdayTasks, shiftTasks },
+    shiftTitle: shift.title?.trim() || shift.role?.trim() || area || "",
+    shiftStartsAt: shift.start_time ?? "",
     shiftEndsAt: shift.end_time,
   };
 }
