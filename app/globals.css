@@ -205,7 +205,9 @@
     z-index: 40;
     display: flex;
     flex-shrink: 0;
+    min-width: 0;
     width: 100%;
+    max-width: 100%;
     border: 0;
     background: hsl(var(--background));
     box-shadow: none;
@@ -216,6 +218,7 @@
   .bottom-icon-nav-icons {
     pointer-events: auto;
     display: flex;
+    min-width: 0;
     width: 100%;
     max-width: 100%;
     overflow-x: auto;

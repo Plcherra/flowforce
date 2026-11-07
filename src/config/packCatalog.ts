@@ -81,13 +81,29 @@ export function withPackEnabled(
   adminConfig: unknown,
   pack: OptionalPackId,
 ): Record<string, unknown> {
+  return withPackFlag(adminConfig, pack, true);
+}
+
+/** Turn one optional pack off without dropping the rest of admin_config. */
+export function withPackDisabled(
+  adminConfig: unknown,
+  pack: OptionalPackId,
+): Record<string, unknown> {
+  return withPackFlag(adminConfig, pack, false);
+}
+
+function withPackFlag(
+  adminConfig: unknown,
+  pack: OptionalPackId,
+  enabled: boolean,
+): Record<string, unknown> {
   const root = isRecord(adminConfig) ? { ...adminConfig } : {};
   const current = readPackFlagsFromAdminConfig(root);
   const previousFlags = isRecord(root.packFlags) ? root.packFlags : {};
   const flags: PackFlags = {
     ...current,
     ops: true,
-    [pack]: true,
+    [pack]: enabled,
   };
 
   return {
@@ -97,6 +113,27 @@ export function withPackEnabled(
       ...flags,
     },
   };
+}
+
+/** Active or trialing pack subscriptions keep the flag on. */
+export function packSubscriptionGrantsAccess(status: string | null | undefined): boolean {
+  return status === "active" || status === "trialing";
+}
+
+/**
+ * A canceled, deleted, unpaid, or expired pack subscription turns that flag off.
+ * cancel_at_period_end while the subscription is still active does not.
+ */
+export function packSubscriptionRevokesAccess(
+  status: string | null | undefined,
+  eventType: string,
+): boolean {
+  return (
+    eventType === "customer.subscription.deleted" ||
+    status === "canceled" ||
+    status === "unpaid" ||
+    status === "incomplete_expired"
+  );
 }
 
 /**

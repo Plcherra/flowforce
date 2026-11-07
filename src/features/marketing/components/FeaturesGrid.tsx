@@ -5,130 +5,81 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Users,
-  Calendar,
-  CheckSquare,
-  MessageSquare,
-  FileText,
-  BarChart3,
-  ArrowRight,
-} from "lucide-react";
-import { useNavigate } from "@/lib/router-adapter";
-import { EmployeeManagement } from "@/features/marketing/components/illustrations/EmployeeManagement";
-import { ShiftScheduling } from "@/features/marketing/components/illustrations/ShiftScheduling";
-import { TaskManagement } from "@/features/marketing/components/illustrations/TaskManagement";
-import { InternalCommunication } from "@/features/marketing/components/illustrations/InternalCommunication";
-import { DigitalForms } from "@/features/marketing/components/illustrations/DigitalForms";
-import { AnalyticsReporting } from "@/features/marketing/components/illustrations/AnalyticsReporting";
+import { Badge } from "@/components/ui/badge";
+import { BarChart3, ClipboardList, Package, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-const features = [
+const packs = [
   {
+    id: "ops",
+    icon: ClipboardList,
+    titleKey: "landing.model.ops.title",
+    badgeKey: "landing.model.ops.badge",
+    descriptionKey: "landing.model.ops.description",
+  },
+  {
+    id: "team",
     icon: Users,
-    titleKey: "features.employeeManagement.title",
-    descriptionKey: "features.employeeManagement.description",
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-    anchor: "employee-management",
-    illustration: EmployeeManagement,
+    titleKey: "landing.model.team.title",
+    badgeKey: "landing.model.team.badge",
+    descriptionKey: "landing.model.team.description",
   },
   {
-    icon: Calendar,
-    titleKey: "features.shiftScheduling.title",
-    descriptionKey: "features.shiftScheduling.description",
-    color: "text-success",
-    bgColor: "bg-success-muted",
-    anchor: "shift-scheduling",
-    illustration: ShiftScheduling,
-  },
-  {
-    icon: CheckSquare,
-    titleKey: "features.taskManagement.title",
-    descriptionKey: "features.taskManagement.description",
-    color: "text-secondary",
-    bgColor: "bg-secondary/10",
-    anchor: "task-management",
-    illustration: TaskManagement,
-  },
-  {
-    icon: MessageSquare,
-    titleKey: "features.internalCommunication.title",
-    descriptionKey: "features.internalCommunication.description",
-    color: "text-accent",
-    bgColor: "bg-accent/60",
-    anchor: "internal-communication",
-    illustration: InternalCommunication,
-  },
-  {
-    icon: FileText,
-    titleKey: "features.digitalForms.title",
-    descriptionKey: "features.digitalForms.description",
-    color: "text-warning",
-    bgColor: "bg-warning-muted",
-    anchor: "digital-forms",
-    illustration: DigitalForms,
-  },
-  {
+    id: "insights",
     icon: BarChart3,
-    titleKey: "features.analyticsReporting.title",
-    descriptionKey: "features.analyticsReporting.description",
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-    anchor: "analytics-reporting",
-    illustration: AnalyticsReporting,
+    titleKey: "landing.model.insights.title",
+    badgeKey: "landing.model.insights.badge",
+    descriptionKey: "landing.model.insights.description",
   },
-];
+  {
+    id: "stock",
+    icon: Package,
+    titleKey: "landing.model.stock.title",
+    badgeKey: "landing.model.stock.badge",
+    descriptionKey: "landing.model.stock.description",
+  },
+] as const;
 
 export function FeaturesGrid() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            {t("landing.everythingNeeds")}
+    <section className="bg-background py-24" id="packs" data-testid="landing-pack-model">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-16 text-center">
+          <h2 className="mb-6 text-4xl font-bold text-foreground lg:text-5xl">
+            {t("landing.model.title")}
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t("landing.sixModules")}
+          <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
+            {t("landing.model.subtitle")}
           </p>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <Card
-              key={index}
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 shadow-lg overflow-hidden"
-            >
-              <CardHeader className="pb-4">
-                <div className="h-48 mb-4">
-                  <feature.illustration />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {packs.map((pack) => (
+            <Card key={pack.id} data-testid={`landing-pack-${pack.id}`}>
+              <CardHeader>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="grid h-11 w-11 place-items-center rounded-md bg-primary/10 text-primary">
+                    <pack.icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <Badge variant={pack.id === "ops" ? "default" : "outline"}>
+                    {t(pack.badgeKey)}
+                  </Badge>
                 </div>
-                <CardTitle className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                  {t(feature.titleKey)}
-                </CardTitle>
+                <CardTitle>{t(pack.titleKey)}</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <CardDescription className="text-muted-foreground mb-6 leading-relaxed">
-                  {t(feature.descriptionKey)}
+              <CardContent>
+                <CardDescription className="text-base leading-relaxed">
+                  {t(pack.descriptionKey)}
                 </CardDescription>
-                <Button
-                  variant="ghost"
-                  className="text-primary hover:text-primary hover:bg-primary/5 p-0 h-auto font-semibold group/btn"
-                  onClick={() => navigate(`/features#${feature.anchor}`)}
-                >
-                  {t("landing.learnMore")}
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          {t("landing.model.priceNote")}
+        </p>
       </div>
     </section>
   );

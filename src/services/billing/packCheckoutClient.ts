@@ -66,6 +66,14 @@ export async function startPackCheckout(pack: OptionalPackId) {
   window.location.assign(payload.url);
 }
 
+export async function startPackPortal(pack: OptionalPackId) {
+  const payload = await postPackRoute("/api/packs/portal", { pack });
+  if (!payload.url) {
+    throw new PackCheckoutError("Billing portal did not return a page.");
+  }
+  window.location.assign(payload.url);
+}
+
 export async function confirmPackCheckout(params: {
   pack: OptionalPackId;
   sessionId: string;

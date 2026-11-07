@@ -305,7 +305,7 @@
     "configureSyncSettingsAndGoLive": "Configurez la synchronisation et mettez en ligne",
     "connectFlowforceWithYourExistingTools": "Connectez FlowForce aux outils que vous utilisez déjà",
     "createYourFirstSchedule": "- Créez votre premier planning",
-    "customFormBuilderAndDigitalSignatures": "Créateur de formulaires et signatures numériques",
+    "customFormBuilderAndDigitalSignatures": "Listes de quart et signatures numériques",
     "customIntegrations": "Intégrations personnalisées",
     "dashboardOverview": "Aperçu du tableau de bord",
     "download": "Télécharger",
@@ -433,8 +433,8 @@
     },
     "digitalForms": {
       "title": "Formulaires Numériques",
-      "description": "Constructeur de formulaires personnalisé avec logique conditionnelle, signatures numériques et génération automatique de PDF.",
-      "details": "Créez des formulaires personnalisés avec une logique conditionnelle, collectez des signatures numériques et générez automatiquement des PDFs. Rationalisez la paperasserie et éliminez la saisie manuelle de données."
+      "description": "Listes d'ouverture, listes de fermeture et les formulaires qu'un quart utilise déjà.",
+      "details": "Attachez une liste à un rôle et à une heure limite. Un quart publié affiche les listes encore ouvertes."
     },
     "analyticsReporting": {
       "title": "Analyses et Rapports",
@@ -481,7 +481,33 @@
     "usedBy": "Utilisé par plus de 1 200 sites dans le monde",
     "operationsMade": "Opérations Rendues",
     "simple": "Simples.",
-    "subtitle": "FlowForce unifie la gestion des employés, la planification et les flux de travail en une plateforme puissante. Organisez et rendez votre équipe productive en minutes, pas en mois.",
+    "subtitle": "Operations est inclus pour chaque entreprise. Ajoutez Équipe, Aperçus ou Stock lorsque vous avez besoin de ces outils.",
+    "model": {
+      "eyebrow": "Operations d'abord",
+      "title": "OPS est la base. Les packs ajoutent le reste.",
+      "subtitle": "Chaque entreprise commence sur Operations. Équipe, Aperçus et Stock sont des packs complémentaires pour une seule entreprise.",
+      "priceNote": "Les prix des packs sont encore en cours de décision. Rien n'est facturé tant qu'un prix n'est pas fixé.",
+      "ops": {
+        "title": "Operations",
+        "badge": "Inclus",
+        "description": "Quarts, tâches, formulaires et l'annuaire des employés."
+      },
+      "team": {
+        "title": "Équipe",
+        "badge": "Pack complémentaire",
+        "description": "Formation, certifications, performance, reconnaissance et le classement."
+      },
+      "insights": {
+        "title": "Aperçus",
+        "badge": "Pack complémentaire",
+        "description": "Rapports, analytique et intelligence opérationnelle."
+      },
+      "stock": {
+        "title": "Stock",
+        "badge": "Pack complémentaire",
+        "description": "Inventaire et dépenses."
+      }
+    },
     "registerCompany": "Enregistrer Votre Entreprise",
     "watchDemo": "Regarder la Démo",
     "fasterScheduling": "Planification plus rapide",
@@ -499,7 +525,7 @@
       "template": "Modèle",
       "retail": {
         "title": "Commerce de Détail",
-        "description": "Intégration point de vente, suivi d'inventaire et gestion multi-sites.",
+        "description": "Couverture des quarts, notes de vente et inventaire lorsque vous ajoutez le pack Stock.",
         "features": {
           "alerts": "Alertes de couverture d'équipe",
           "tracking": "Suivi des performances de vente",
@@ -554,10 +580,10 @@
         "amandaFoster": "Le meilleur investissement que nous ayons fait pour nos cliniques. Le flux de patients s'est considérablement amélioré et notre personnel a enfin une clarté sur ses responsabilités quotidiennes.",
         "jamesPark": "La mise en œuvre a été transparente et le ROI a été immédiat. Nous constatons une efficacité 25% meilleure dans tous nos points de vente.",
         "lisaThompson": "FlowForce s'adapte parfaitement à nous. De 50 à 200 employés, il gère tout sans rater une occasion. Un véritable changement pour la croissance.",
-        "pierreMartin": "L'implémentation a été transparente et le ROI immédiat. Nous constatons 25% d'efficacité en plus dans tous nos cafés parisiens.",
-        "sophieDubois": "FlowForce a révolutionné notre gestion des équipes. Coordonner nos 15 restaurants lyonnais n'a jamais été aussi simple.",
+        "pierreMartin": "L'implémentation a été transparente et le ROI immédiat. Nous constatons 25% d'efficacité en plus dans notre café parisien.",
+        "sophieDubois": "FlowForce a révolutionné la gestion de notre équipe. Organiser les quarts de notre restaurant n'a jamais été aussi simple.",
         "julienBernard": "En tant que directeur médical, j'avais besoin d'une solution conforme aux réglementations françaises de santé. FlowForce a dépassé toutes nos attentes.",
-        "camilleLefebvre": "Le gain de temps est spectaculaire. Ce qui nous prenait des heures pour gérer nos magasins, nous le faisons maintenant en minutes.",
+        "camilleLefebvre": "Le gain de temps est spectaculaire. Ce qui nous prenait des heures, nous le faisons maintenant en minutes.",
         "lucMoreau": "FlowForce nous a aidés à croître durablement. C'est l'outil parfait pour les entreprises françaises en forte croissance.",
         "alejandroMartinez": "En tant que directeur médical, j'avais besoin d'une solution conforme aux réglementations sanitaires espagnoles. FlowForce a dépassé toutes nos attentes en matière de sécurité.",
         "anaRuiz": "Le gain de temps est incroyable. Ce qui nous prenait des heures de coordination des magasins se fait maintenant en minutes.",
@@ -594,8 +620,8 @@
         "description": "Flux de travail rationalisés et automatisation éliminent les tâches administratives répétitives"
       },
       "locationsManaged": {
-        "title": "Emplacements Gérés",
-        "description": "Les entreprises multi-sites font confiance à FlowForce pour des opérations centralisées"
+        "title": "Une entreprise",
+        "description": "Les packs ajoutent des outils pour l'entreprise que vous enregistrez. Ils n'ajoutent pas une autre entreprise."
       },
       "costReduction": {
         "title": "Réduction des Coûts",
@@ -3294,6 +3320,17 @@
     "checkoutFailed": "Impossible de démarrer le paiement.",
     "confirmFailed": "Impossible d'activer le pack après le paiement.",
     "viewPacks": "Voir les packs",
+    "viewPack": "Ouvrir le pack",
+    "pricingComingSoon": "Tarifs bientôt disponibles",
+    "buyEnable": "Acheter et activer",
+    "manage": "Gérer ou annuler",
+    "managing": "Ouverture de la facturation…",
+    "addMenuTitle": "Ajouter un pack",
+    "addMenuDescription": "Operations reste inclus. Choisissez Équipe, Aperçus ou Stock.",
+    "alreadySubscribed": "Ce pack a déjà un abonnement. Gérez-le dans la facturation.",
+    "backToPacks": "Tous les packs",
+    "notFound": "Ce pack n'existe pas.",
+    "testModeOnly": "L'achat de packs est disponible uniquement en mode test Stripe.",
     "team": {
       "title": "Équipe",
       "description": "Formation, certifications, performance, reconnaissance, classement et ressources."

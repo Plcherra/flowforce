@@ -142,7 +142,33 @@
     "usedBy": "Usado por más de 1,200 ubicaciones en todo el mundo",
     "operationsMade": "Operaciones Realizadas",
     "simple": "Simple.",
-    "subtitle": "FlowForce unifica la gestión de empleados, programación y flujos de trabajo en una plataforma poderosa. Organiza y hace productivo a tu equipo en minutos, no meses.",
+    "subtitle": "Operaciones está incluido en cada empresa. Añade Equipo, Perspectivas o Stock cuando necesites esas herramientas.",
+    "model": {
+      "eyebrow": "Operaciones primero",
+      "title": "OPS es la base. Los paquetes añaden el resto.",
+      "subtitle": "Cada empresa empieza en Operaciones. Equipo, Perspectivas y Stock son paquetes adicionales para una sola empresa.",
+      "priceNote": "Los precios de los paquetes aún se están decidiendo. No se cobra nada hasta que haya un precio.",
+      "ops": {
+        "title": "Operaciones",
+        "badge": "Incluido",
+        "description": "Turnos, tareas, formularios y el directorio de empleados."
+      },
+      "team": {
+        "title": "Equipo",
+        "badge": "Paquete adicional",
+        "description": "Formación, certificaciones, desempeño, reconocimiento y la clasificación."
+      },
+      "insights": {
+        "title": "Perspectivas",
+        "badge": "Paquete adicional",
+        "description": "Informes, analítica e inteligencia de operaciones."
+      },
+      "stock": {
+        "title": "Stock",
+        "badge": "Paquete adicional",
+        "description": "Inventario y gastos."
+      }
+    },
     "registerCompany": "Registra tu Empresa",
     "watchDemo": "Ver Demo",
     "fasterScheduling": "Programación más rápida",
@@ -160,7 +186,7 @@
       "template": "Plantilla",
       "retail": {
         "title": "Comercio",
-        "description": "Integración de punto de venta, seguimiento de inventario y gestión de múltiples ubicaciones.",
+        "description": "Cobertura de turnos, notas de ventas e inventario cuando añades el paquete Stock.",
         "features": {
           "alerts": "Alertas de cobertura de turnos",
           "tracking": "Seguimiento de rendimiento de ventas",
@@ -215,10 +241,10 @@
         "amandaFoster": "La mejor inversión que hemos hecho para nuestras clínicas. El flujo de pacientes mejoró dramáticamente y nuestro personal finalmente tiene claridad sobre sus responsabilidades diarias.",
         "jamesPark": "La implementación fue perfecta y el ROI fue inmediato. Estamos viendo una eficiencia 25% mejor en todas nuestras ubicaciones de venta.",
         "lisaThompson": "FlowForce se escala perfectamente con nosotros. De 50 a 200 empleados, maneja todo sin perder el ritmo. Un cambio de juego para el crecimiento.",
-        "carlosGarcia": "La implementación fue perfecta y el retorno de la inversión inmediato. Estamos viendo un 25% más de eficiencia en todas nuestras ubicaciones de café.",
-        "mariaLopez": "FlowForce transformó completamente nuestra gestión de turnos. Ahora coordinamos 15 restaurantes sin esfuerzo y nuestros empleados están más satisfechos.",
+        "carlosGarcia": "La implementación fue perfecta y el retorno de la inversión inmediato. Estamos viendo un 25% más de eficiencia en nuestro café.",
+        "mariaLopez": "FlowForce transformó la gestión de turnos de nuestro restaurante. El equipo tiene claros los turnos y está más satisfecho.",
         "alejandroMartinez": "Como director médico, necesitaba una solución que cumpliera con las normativas sanitarias españolas. FlowForce superó todas nuestras expectativas de seguridad.",
-        "anaRuiz": "El ahorro de tiempo es increíble. Lo que antes nos tomaba horas en coordinación de tiendas, ahora lo hacemos en minutos.",
+        "anaRuiz": "El ahorro de tiempo es increíble. Lo que antes nos tomaba horas de coordinación, ahora lo hacemos en minutos.",
         "pedroSanchez": "FlowForce nos ayudó a crecer de manera sostenible. Es la herramienta perfecta para empresas españolas en expansión rápida.",
         "anaSantos": "FlowForce transformó cómo gestionamos los turnos. Coordinar nuestros 15 restaurantes en Oporto nunca ha sido tan fácil.",
         "andreaWagner": "La implementación fue fluida y el retorno fue inmediato. Vemos un 25% más de eficiencia en todas nuestras tiendas.",
@@ -255,8 +281,8 @@
         "description": "Flujos de trabajo optimizados y automatización eliminan tareas administrativas repetitivas"
       },
       "locationsManaged": {
-        "title": "Ubicaciones Gestionadas",
-        "description": "Empresas multi-ubicación confían en FlowForce para operaciones centralizadas"
+        "title": "Una empresa",
+        "description": "Los paquetes añaden herramientas para la empresa que registras. No añaden otro negocio."
       },
       "costReduction": {
         "title": "Reducción de Costos",
@@ -329,7 +355,7 @@
     "configureSyncSettingsAndGoLive": "Configura la sincronización y pasa a producción",
     "connectFlowforceWithYourExistingTools": "Conecta FlowForce con las herramientas que ya usas",
     "createYourFirstSchedule": "- Crea tu primer horario",
-    "customFormBuilderAndDigitalSignatures": "Creador de formularios y firmas digitales",
+    "customFormBuilderAndDigitalSignatures": "Listas de turno y firmas digitales",
     "customIntegrations": "Integraciones personalizadas",
     "dashboardOverview": "Resumen del panel",
     "download": "Descargar",
@@ -457,8 +483,8 @@
     },
     "digitalForms": {
       "title": "Formularios Digitales",
-      "description": "Constructor de formularios personalizado con lógica condicional, firmas digitales y generación automática de PDF.",
-      "details": "Crea formularios personalizados con lógica condicional, recopila firmas digitales y genera automáticamente PDFs. Optimiza el papeleo y elimina la entrada manual de datos."
+      "description": "Listas de apertura, listas de cierre y los formularios que un turno ya usa.",
+      "details": "Adjunta una lista a un rol y una hora límite. Un turno publicado muestra las listas que siguen abiertas."
     },
     "analyticsReporting": {
       "title": "Análisis e Informes",
@@ -3294,6 +3320,17 @@
     "checkoutFailed": "No se pudo iniciar el pago.",
     "confirmFailed": "No se pudo activar el paquete después del pago.",
     "viewPacks": "Ver paquetes",
+    "viewPack": "Abrir paquete",
+    "pricingComingSoon": "Precios próximamente",
+    "buyEnable": "Comprar y activar",
+    "manage": "Gestionar o cancelar",
+    "managing": "Abriendo la facturación…",
+    "addMenuTitle": "Añadir un paquete",
+    "addMenuDescription": "Operaciones sigue activo. Elige Equipo, Perspectivas o Stock.",
+    "alreadySubscribed": "Este paquete ya tiene una suscripción. Gestiónala en facturación.",
+    "backToPacks": "Todos los paquetes",
+    "notFound": "Ese paquete no existe.",
+    "testModeOnly": "La compra de paquetes solo está disponible en el modo de prueba de Stripe.",
     "team": {
       "title": "Equipo",
       "description": "Formación, certificaciones, desempeño, reconocimiento, la clasificación y recursos."

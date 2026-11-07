@@ -46,9 +46,13 @@ Server-side mapping lives in [stripePrices.ts](/src/server/billing/stripePrices.
 
 ## Packs
 
-Team, Insights, and Stock are company packs. They are not the Starter, Growth, or Enterprise plans. Prices are not decided yet, so the packs screen shows **Price TBD** and does not charge.
+Team, Insights, and Stock are add-on packs. Operations is the base and stays on. Packs are not the Starter, Growth, or Enterprise plans. Commercial terms are not decided yet, so the pack page keeps the placeholders **Price TBD** and **Placeholder — awaiting pricing**.
 
-When a recurring Stripe price exists, checkout uses that price with quantity 1 per company. The price's own interval is monthly or yearly. Expected server env vars:
+Open packs from the **+** button next to OPS in the bottom nav (desktop and mobile). That menu lists what each pack unlocks. Opening one pack shows a page with a buy button only when its price env var is set. A missing price shows **Pricing coming soon** and does not call Stripe.
+
+When a recurring Stripe **test** price exists, `POST /api/packs/checkout` creates a Checkout Session in `subscription` mode with quantity 1. The price's own interval is monthly or yearly. Pack checkout refuses live secret keys (`sk_live_` / `rk_live_`). Use a test key (`sk_test_` or `rk_test_`) only.
+
+Expected server env vars (test price ids):
 
 - `STRIPE_PRICE_PACK_TEAM`
 - `STRIPE_PRICE_PACK_INSIGHTS`
@@ -56,10 +60,27 @@ When a recurring Stripe price exists, checkout uses that price with quantity 1 p
 
 Routes:
 
+- `GET /api/packs/offers` — booleans only, no price ids
 - `POST /api/packs/checkout` with `{ pack: "team" | "insights" | "stock" }`
 - `POST /api/packs/confirm` with `{ pack, sessionId }` after Stripe marks the session paid
+- `POST /api/packs/portal` with `{ pack }` — Stripe Customer Portal to manage or cancel that company's pack subscription
 
-Both routes use the same owner, admin, or company admin check as plan checkout. A missing price returns `409` with `code: "pack_price_pending"` and does not call Stripe. A paid pack checkout sets `system_settings.admin_config.packFlags` for that pack only. Pack webhook events do not change the workspace Starter, Growth, or Enterprise plan.
+Checkout and portal use the same owner, admin, or company admin check as plan checkout, and they honor a `billing.manage` deny override. A missing price returns `409` with `code: "pack_price_pending"`.
+
+Webhook `POST /api/stripe/webhooks` (signature `STRIPE_WEBHOOK_SECRET`):
+
+- `checkout.session.completed` and `checkout.session.async_payment_succeeded` turn that pack's flag on in `system_settings.admin_config.packFlags` only when `payment_status` is `paid` or `no_payment_required`.
+- `customer.subscription.deleted`, and a subscription whose status is `canceled`, `unpaid`, or `incomplete_expired`, turn that pack's flag off.
+- A subscription that is still `active` or `trialing`, including one set to cancel at period end, leaves the flag on.
+- Pack events do not change the workspace Starter, Growth, or Enterprise plan.
+
+Still waiting on Pedro:
+
+1. Price for Team, Insights, and Stock?
+2. Monthly or yearly?
+3. Per seat or per company?
+4. À la carte or only as bundles?
+5. Add-on to Starter, Growth, and Enterprise, or a replacement of that model?
 
 ## Stripe Flows
 
@@ -82,6 +103,7 @@ Both routes use the same owner, admin, or company admin check as plan checkout. 
 - Auth: Stripe signature (`STRIPE_WEBHOOK_SECRET`)
 - Handled events:
   - `checkout.session.completed`
+  - `checkout.session.async_payment_succeeded`
   - `customer.subscription.created`
   - `customer.subscription.updated`
   - `customer.subscription.deleted`

@@ -142,7 +142,33 @@
     "usedBy": "Verwendet von 1.200+ Standorten weltweit",
     "operationsMade": "Durchgeführte Operationen",
     "simple": "Einfach.",
-    "subtitle": "FlowForce vereint Mitarbeiterverwaltung, Planung und Arbeitsabläufe in einer mächtigen Plattform. Organisieren Sie Ihr Team produktiv in Minuten, nicht Monaten.",
+    "subtitle": "Operationen ist in jedem Unternehmen enthalten. Fügen Sie Team, Einblicke oder Bestand hinzu, wenn Sie diese Werkzeuge brauchen.",
+    "model": {
+      "eyebrow": "Zuerst Operationen",
+      "title": "OPS ist die Basis. Pakete ergänzen den Rest.",
+      "subtitle": "Jedes Unternehmen startet mit Operationen. Team, Einblicke und Bestand sind Zusatzpakete für ein Unternehmen.",
+      "priceNote": "Die Paketpreise werden noch festgelegt. Es wird nichts berechnet, solange kein Preis steht.",
+      "ops": {
+        "title": "Operationen",
+        "badge": "Enthalten",
+        "description": "Schichten, Aufgaben, Formulare und das Mitarbeiterverzeichnis."
+      },
+      "team": {
+        "title": "Team",
+        "badge": "Zusatzpaket",
+        "description": "Schulung, Zertifizierungen, Leistung, Anerkennung und die Rangliste."
+      },
+      "insights": {
+        "title": "Einblicke",
+        "badge": "Zusatzpaket",
+        "description": "Berichte, Analysen und Betriebsintelligenz."
+      },
+      "stock": {
+        "title": "Bestand",
+        "badge": "Zusatzpaket",
+        "description": "Inventar und Ausgaben."
+      }
+    },
     "registerCompany": "Ihr Unternehmen Registrieren",
     "watchDemo": "Demo Ansehen",
     "fasterScheduling": "Schnellere Planung",
@@ -160,7 +186,7 @@
       "template": "Vorlage",
       "retail": {
         "title": "Einzelhandel",
-        "description": "Kassensystem-Integration, Bestandsverfolgung und Multi-Standort-Management.",
+        "description": "Schichtabdeckung, Verkaufsnotizen und Inventar, wenn Sie das Paket Bestand hinzufügen.",
         "features": {
           "alerts": "Schichtabdeckungs-Benachrichtigungen",
           "tracking": "Verkaufsleistungs-Verfolgung",
@@ -212,8 +238,8 @@
       "quotes": {
         "klausWeber": "FlowForce hat unsere Abläufe komplett transformiert. Wir gingen vom Chaos zur organisierten Effizienz in nur zwei Wochen. Unsere Planungskonflikte sind um 90% gesunken.",
         "sabineSchneider": "Allein das Aufgabenverwaltungssystem sparte uns 15 Stunden pro Woche. Die Automatisierungsfunktionen sind unglaublich und das Team hat es sofort übernommen.",
-        "thomasMuller": "Die beste Investition, die wir für unsere Kliniken gemacht haben. Der Patientenfluss verbesserte sich dramatisch und unser Personal hat endlich Klarheit über ihre täglichen Verantwortlichkeiten.",
-        "andreaWagner": "Die Implementierung war nahtlos und der ROI war sofort da. Wir sehen 25% bessere Effizienz in allen unseren Einzelhandelsstandorten.",
+        "thomasMuller": "Die beste Investition, die wir für unsere Klinik gemacht haben. Der Patientenfluss verbesserte sich dramatisch und unser Personal hat endlich Klarheit über ihre täglichen Verantwortlichkeiten.",
+        "andreaWagner": "Die Implementierung war nahtlos und der ROI war sofort da. Wir sehen 25% bessere Effizienz im Laden.",
         "michaelBauer": "FlowForce skaliert perfekt mit uns. Von 50 auf 200 Mitarbeiter, es bewältigt alles ohne einen Takt zu verpassen. Ein Spielveränderer für Wachstum.",
         "alejandroMartinez": "Als ärztlicher Leiter brauchte ich eine Lösung, die die spanischen Gesundheitsvorschriften erfüllt. FlowForce hat alle unsere Sicherheitserwartungen übertroffen.",
         "amandaFoster": "Die beste Investition, die wir für unsere Kliniken gemacht haben. Der Patientenfluss verbesserte sich dramatisch und unser Personal hat endlich Klarheit über die täglichen Verantwortlichkeiten.",
@@ -255,8 +281,8 @@
         "description": "Optimierte Arbeitsabläufe und Automatisierung eliminieren repetitive administrative Aufgaben"
       },
       "locationsManaged": {
-        "title": "Verwaltete Standorte",
-        "description": "Multi-Standort-Unternehmen vertrauen FlowForce für zentralisierte Abläufe"
+        "title": "Ein Unternehmen",
+        "description": "Pakete ergänzen Werkzeuge für das Unternehmen, das Sie registrieren. Sie fügen kein weiteres Unternehmen hinzu."
       },
       "costReduction": {
         "title": "Kostenreduzierung",
@@ -329,7 +355,7 @@
     "configureSyncSettingsAndGoLive": "Synchronisierung einrichten und live schalten",
     "connectFlowforceWithYourExistingTools": "Verbinden Sie FlowForce mit den Werkzeugen, die Sie bereits nutzen",
     "createYourFirstSchedule": "- Erstellen Sie Ihren ersten Dienstplan",
-    "customFormBuilderAndDigitalSignatures": "Formularbuilder und digitale Signaturen",
+    "customFormBuilderAndDigitalSignatures": "Schichtlisten und digitale Signaturen",
     "customIntegrations": "Individuelle Integrationen",
     "dashboardOverview": "Dashboard-Überblick",
     "download": "Herunterladen",
@@ -457,8 +483,8 @@
     },
     "digitalForms": {
       "title": "Digitale Formulare",
-      "description": "Benutzerdefinierter Formular-Builder mit bedingter Logik, digitalen Signaturen und automatischer PDF-Generierung.",
-      "details": "Erstellen Sie benutzerdefinierte Formulare mit bedingter Logik, sammeln Sie digitale Signaturen und generieren Sie automatisch PDFs. Optimieren Sie Papierkram und eliminieren Sie manuelle Dateneingabe."
+      "description": "Öffnungslisten, Schließlisten und die Formulare, die eine Schicht schon nutzt.",
+      "details": "Hängen Sie eine Liste an eine Rolle und eine Fälligkeitszeit. Eine veröffentlichte Schicht zeigt die Listen, die noch offen sind."
     },
     "analyticsReporting": {
       "description": "Echtzeit-Dashboards, eigene Berichte und konkrete Hinweise, um den Betrieb zu verbessern.",
@@ -3294,6 +3320,17 @@
     "checkoutFailed": "Die Zahlung konnte nicht gestartet werden.",
     "confirmFailed": "Das Paket konnte nach der Zahlung nicht eingeschaltet werden.",
     "viewPacks": "Pakete ansehen",
+    "viewPack": "Paket öffnen",
+    "pricingComingSoon": "Preise folgen in Kürze",
+    "buyEnable": "Kaufen und aktivieren",
+    "manage": "Verwalten oder kündigen",
+    "managing": "Abrechnung wird geöffnet…",
+    "addMenuTitle": "Paket hinzufügen",
+    "addMenuDescription": "Operationen bleibt an. Wählen Sie Team, Einblicke oder Bestand.",
+    "alreadySubscribed": "Dieses Paket hat bereits ein Abonnement. Verwalten Sie es in der Abrechnung.",
+    "backToPacks": "Alle Pakete",
+    "notFound": "Dieses Paket gibt es nicht.",
+    "testModeOnly": "Paketkauf ist nur im Stripe-Testmodus verfügbar.",
     "team": {
       "title": "Team",
       "description": "Schulung, Zertifizierungen, Leistung, Anerkennung, Rangliste und Ressourcen."

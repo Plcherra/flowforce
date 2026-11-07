@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { supabaseAdmin } from "../../../app/api/_server/supabaseAdmin";
+import { supabaseAdmin } from "../../../app/api/_server/supabaseAdmin"; // pragma: allowlist secret
 
 const BILLING_ADMIN_ROLES = new Set(["owner", "admin", "company_admin"]);
 
@@ -27,14 +27,14 @@ export async function requireBillingAuth(
   }
 
   const { data: userResult, error: userError } =
-    await supabaseAdmin.auth.getUser(token);
+    await supabaseAdmin.auth.getUser(token); // pragma: allowlist secret
 
   if (userError || !userResult?.user) {
     return { ok: false, status: 401, message: "Unable to verify session." };
   }
 
   const actor = userResult.user;
-  const { data: profile, error: profileError } = await supabaseAdmin
+  const { data: profile, error: profileError } = await supabaseAdmin // pragma: allowlist secret
     .from("profiles")
     .select("id, company_id, role")
     .eq("id", actor.id)
@@ -62,6 +62,29 @@ export async function requireBillingAuth(
   }
 
   if (!BILLING_ADMIN_ROLES.has(role)) {
+    return {
+      ok: false,
+      status: 403,
+      message: "You do not have permission to manage billing.",
+    };
+  }
+
+  const { data: overrides, error: overrideError } = await supabaseAdmin // pragma: allowlist secret
+    .from("user_permissions")
+    .select("permission_value")
+    .eq("user_id", actor.id)
+    .eq("permission_key", "billing.manage")
+    .limit(5);
+
+  if (overrideError) {
+    return {
+      ok: false,
+      status: 500,
+      message: "Unable to verify billing permissions.",
+    };
+  }
+
+  if (overrides?.some((row) => row.permission_value === "deny")) {
     return {
       ok: false,
       status: 403,

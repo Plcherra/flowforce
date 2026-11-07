@@ -29,7 +29,7 @@ const useCases = [
   },
   {
     icon: Users,
-    metric: "1,200+",
+    metric: "1",
     titleKey: "landing.useCases.locationsManaged.title",
     descriptionKey: "landing.useCases.locationsManaged.description",
     color: "text-secondary",
@@ -87,7 +87,7 @@ export function UseCasesSection() {
           {useCases.map((useCase, index) => (
             <Card
               key={index}
-              className="group border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+              className="border bg-card"
             >
               <CardContent className="p-8">
                 {/* Icon */}
@@ -117,29 +117,29 @@ export function UseCasesSection() {
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="mt-16 p-8 bg-gradient-to-r from-primary to-primary rounded-2xl text-primary-foreground">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+        <div className="mt-16 rounded-xl border bg-card p-8 text-foreground">
+          <div className="grid grid-cols-1 gap-8 text-center md:grid-cols-4">
             <div>
-              <div className="text-3xl font-bold mb-2">50,000+</div>
-              <div className="text-primary-foreground">
+              <div className="mb-2 text-3xl font-bold">50,000+</div>
+              <div className="text-muted-foreground">
                 {t("landing.useCases.stats.employeesManaged")}
               </div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">{t("landing.n12m")}</div>
-              <div className="text-primary-foreground">
+              <div className="mb-2 text-3xl font-bold">{t("landing.n12m")}</div>
+              <div className="text-muted-foreground">
                 {t("landing.useCases.stats.tasksCompleted")}
               </div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">98%</div>
-              <div className="text-primary-foreground">
+              <div className="mb-2 text-3xl font-bold">98%</div>
+              <div className="text-muted-foreground">
                 {t("landing.useCases.stats.customerSatisfaction")}
               </div>
             </div>
             <div>
-              <div className="text-3xl font-bold mb-2">24/7</div>
-              <div className="text-primary-foreground">
+              <div className="mb-2 text-3xl font-bold">24/7</div>
+              <div className="text-muted-foreground">
                 {t("landing.useCases.stats.supportAvailable")}
               </div>
             </div>

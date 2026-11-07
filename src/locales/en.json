@@ -142,7 +142,33 @@
     "usedBy": "Used by 1,200+ locations worldwide",
     "operationsMade": "Operations Made",
     "simple": "Simple.",
-    "subtitle": "FlowForce unifies employee management, scheduling, and workflows into one powerful platform. Get your team organized and productive in minutes, not months.",
+    "subtitle": "Operations is included with every company. Add Team, Insights, or Stock when you need those tools.",
+    "model": {
+      "eyebrow": "Operations first",
+      "title": "OPS is the base. Packs add the rest.",
+      "subtitle": "Every company starts on Operations. Team, Insights, and Stock are add-on packs for one company.",
+      "priceNote": "Pack prices are still being decided. Nothing is charged until a price is set.",
+      "ops": {
+        "title": "Operations",
+        "badge": "Included",
+        "description": "Shifts, tasks, forms, and the employee directory."
+      },
+      "team": {
+        "title": "Team",
+        "badge": "Add-on pack",
+        "description": "Training, certifications, performance, recognition, and the leaderboard."
+      },
+      "insights": {
+        "title": "Insights",
+        "badge": "Add-on pack",
+        "description": "Reports, analytics, and operations intelligence."
+      },
+      "stock": {
+        "title": "Stock",
+        "badge": "Add-on pack",
+        "description": "Inventory and expenses."
+      }
+    },
     "registerCompany": "Register Your Company",
     "watchDemo": "Watch Demo",
     "fasterScheduling": "Faster scheduling",
@@ -160,7 +186,7 @@
       "template": "Template",
       "retail": {
         "title": "Retail",
-        "description": "Point-of-sale integration, inventory tracking, and multi-location management.",
+        "description": "Shift coverage, sales notes, and inventory when you add the Stock pack.",
         "features": {
           "alerts": "Shift coverage alerts",
           "tracking": "Sales performance tracking",
@@ -212,8 +238,8 @@
       "quotes": {
         "sarahChen": "FlowForce transformed our operations completely. We went from chaos to organized efficiency in just two weeks. Our scheduling conflicts dropped by 90%.",
         "michaelRodriguez": "The task management system alone saved us 15 hours per week. The automation features are incredible and the team adopted it instantly.",
-        "amandaFoster": "Best investment we've made for our clinics. Patient flow improved dramatically and our staff finally has clarity on their daily responsibilities.",
-        "jamesPark": "Implementation was seamless and the ROI was immediate. We're seeing 25% better efficiency across all our retail locations.",
+        "amandaFoster": "Best investment we've made for our clinic. Patient flow improved dramatically and our staff finally has clarity on their daily responsibilities.",
+        "jamesPark": "Implementation was seamless and the ROI was immediate. We're seeing 25% better efficiency on the floor.",
         "lisaThompson": "FlowForce scales with us perfectly. From 50 to 200 employees, it handles everything without missing a beat. Game-changer for growth.",
         "alejandroMartinez": "As a medical director, I needed a solution that met Spanish healthcare regulations. FlowForce exceeded all of our security expectations.",
         "anaRuiz": "The time savings are incredible. What used to take us hours of store coordination now takes minutes.",
@@ -255,8 +281,8 @@
         "description": "Streamlined workflows and automation eliminate repetitive administrative tasks"
       },
       "locationsManaged": {
-        "title": "Locations Managed",
-        "description": "Multi-location businesses trust FlowForce for centralized operations"
+        "title": "One company",
+        "description": "Packs add tools for the company you register. They do not add another business."
       },
       "costReduction": {
         "title": "Cost Reduction",
@@ -329,7 +355,7 @@
     "configureSyncSettingsAndGoLive": "Configure sync settings and go live",
     "connectFlowforceWithYourExistingTools": "Connect FlowForce with your existing tools",
     "createYourFirstSchedule": "- Create your first schedule",
-    "customFormBuilderAndDigitalSignatures": "Custom form builder and digital signatures",
+    "customFormBuilderAndDigitalSignatures": "Shift lists and digital signatures",
     "customIntegrations": "Custom Integrations",
     "dashboardOverview": "Dashboard Overview",
     "download": "Download",
@@ -457,8 +483,8 @@
     },
     "digitalForms": {
       "title": "Digital Forms",
-      "description": "Custom form builder with conditional logic, digital signatures, and automated PDF generation.",
-      "details": "Create custom forms with conditional logic, collect digital signatures, and automatically generate PDFs. Streamline paperwork and eliminate manual data entry."
+      "description": "Opening lists, closing lists, and the forms a shift already uses.",
+      "details": "Attach a list to a role and a due time. A published shift shows the lists that are still open."
     },
     "analyticsReporting": {
       "title": "Analytics & Reporting",
@@ -3294,6 +3320,17 @@
     "checkoutFailed": "Could not start checkout.",
     "confirmFailed": "Could not turn the pack on after checkout.",
     "viewPacks": "See packs",
+    "viewPack": "Open pack",
+    "pricingComingSoon": "Pricing coming soon",
+    "buyEnable": "Buy and enable",
+    "manage": "Manage or cancel",
+    "managing": "Opening billing…",
+    "addMenuTitle": "Add a pack",
+    "addMenuDescription": "Operations stays on. Choose Team, Insights, or Stock.",
+    "alreadySubscribed": "This pack already has a subscription. Manage it in billing.",
+    "backToPacks": "All packs",
+    "notFound": "That pack does not exist.",
+    "testModeOnly": "Pack checkout is available in Stripe test mode only.",
     "team": {
       "title": "Team",
       "description": "Training, certifications, performance, recognition, the leaderboard, and resources."

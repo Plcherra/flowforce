@@ -3,16 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { supabaseAdmin } from "../../_server/supabaseAdmin"; // pragma: allowlist secret
 import { createServerLogger } from "../../_server/utils/logger";
-import {
-  isOptionalPackId,
-  packPriceCanCheckout,
-  readPackPriceId,
-} from "@/config/packCatalog";
+import { isOptionalPackId } from "@/config/packCatalog";
 import type { OptionalPackId } from "@/config/packFlags";
 import { requireBillingAuth } from "@/server/billing/requireBillingAuth";
 import { checkBillingRouteRateLimit } from "@/server/billing/rateLimitBillingRoute";
 import { mapStripeRouteError } from "@/server/billing/stripeRouteErrors";
-import { getStripeClient } from "@/server/billing/stripeClient";
+import { createPackCheckoutSession } from "@/server/billing/createPackCheckout";
 
 const logger = createServerLogger("pack-checkout");
 
@@ -60,31 +56,21 @@ export async function POST(request: NextRequest) {
     }
 
     const pack: OptionalPackId = parsed.data.pack;
-    const priceId = readPackPriceId(pack);
-    if (!priceId) {
-      return jsonError(
-        "This pack does not have a price yet.",
-        409,
-        { code: "pack_price_pending" },
-      );
-    }
-
-    const stripe = getStripeClient();
-    const price = await stripe.prices.retrieve(priceId);
-    if (!packPriceCanCheckout(price)) {
-      return jsonError(
-        "This pack price is not ready for checkout.",
-        409,
-        { code: "pack_price_pending" },
-      );
-    }
-
     const origin = getRequestOrigin(request);
-    const { data: company, error: companyError } = await supabaseAdmin // pragma: allowlist secret
-      .from("companies")
-      .select("id, name, stripe_customer_id")
-      .eq("id", companyId)
-      .maybeSingle();
+    const [companyResult, settingsResult] = await Promise.all([
+      supabaseAdmin // pragma: allowlist secret
+        .from("companies")
+        .select("id, name, stripe_customer_id")
+        .eq("id", companyId)
+        .maybeSingle(),
+      supabaseAdmin // pragma: allowlist secret
+        .from("system_settings")
+        .select("admin_config")
+        .eq("company_id", companyId)
+        .maybeSingle(),
+    ]);
+    const { data: company, error: companyError } = companyResult;
+    const settingsRow = settingsResult.data;
 
     if (companyError || !company) {
       scopedLogger.error("Unable to load company for pack checkout", {
@@ -94,12 +80,6 @@ export async function POST(request: NextRequest) {
       return jsonError("Unable to start checkout.", 500);
     }
 
-    const { data: settingsRow } = await supabaseAdmin // pragma: allowlist secret
-      .from("system_settings")
-      .select("admin_config")
-      .eq("company_id", companyId)
-      .maybeSingle();
-
     const tenant = (settingsRow?.admin_config as Record<string, unknown> | null)
       ?.tenantManagement as Record<string, unknown> | undefined;
     const billingEmail =
@@ -108,53 +88,30 @@ export async function POST(request: NextRequest) {
         tenant.primaryOwnerEmail) ||
       email;
 
-    let customerId = company.stripe_customer_id;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: billingEmail ?? undefined,
-        name: company.name,
-        metadata: { company_id: companyId },
-      });
-      customerId = customer.id;
-      await supabaseAdmin // pragma: allowlist secret
-        .from("companies")
-        .update({
-          stripe_customer_id: customerId,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", companyId);
-    }
-
-    const metadata = {
-      kind: "pack",
+    const result = await createPackCheckoutSession({
       pack,
-      company_id: companyId,
-      initiated_by: userId,
-    };
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/app/packs?checkout=success&pack=${pack}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/app/packs?checkout=canceled&pack=${pack}`,
-      client_reference_id: companyId,
-      metadata,
-      subscription_data: {
-        metadata: {
-          kind: "pack",
-          pack,
-          company_id: companyId,
-        },
+      companyId,
+      userId,
+      companyName: company.name,
+      billingEmail,
+      existingCustomerId: company.stripe_customer_id,
+      origin,
+      persistCustomerId: async (customerId) => {
+        await supabaseAdmin // pragma: allowlist secret
+          .from("companies")
+          .update({
+            stripe_customer_id: customerId,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", companyId);
       },
-      allow_promotion_codes: true,
     });
 
-    if (!session.url) {
-      return jsonError("Stripe did not return a checkout URL.", 502);
+    if (result.ok === false) {
+      return jsonError(result.message, result.status, { code: result.code });
     }
 
-    return NextResponse.json({ url: session.url, sessionId: session.id });
+    return NextResponse.json({ url: result.url, sessionId: result.sessionId });
   } catch (error) {
     scopedLogger.error("Unexpected pack checkout error", { error });
     const mapped = mapStripeRouteError(error);

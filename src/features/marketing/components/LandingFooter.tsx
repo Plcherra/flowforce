@@ -23,7 +23,7 @@ export function LandingFooter() {
   };
 
   return (
-    <footer className="bg-foreground text-primary-foreground">
+    <footer className="border-t border-border bg-background text-foreground">
       {/* Newsletter Section */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -42,7 +42,7 @@ export function LandingFooter() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-foreground border-border text-primary-foreground placeholder-muted-foreground focus:border-primary"
+                className="border-border bg-background text-foreground"
               />
               <Button
                 type="submit"
@@ -75,27 +75,27 @@ export function LandingFooter() {
             <h4 className="font-semibold mb-4">{t("footer.product")}</h4>
             <ul className="space-y-3 text-muted-foreground">
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("landing.features")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("landing.pricing")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("landing.templatesNav")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.integrations")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("profile.security")}
                 </Link>
               </li>
@@ -107,27 +107,27 @@ export function LandingFooter() {
             <h4 className="font-semibold mb-4">{t("footer.company")}</h4>
             <ul className="space-y-3 text-muted-foreground">
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.about")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.careers")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.blog")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.press")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.partners")}
                 </Link>
               </li>
@@ -139,27 +139,27 @@ export function LandingFooter() {
             <h4 className="font-semibold mb-4">{t("footer.support")}</h4>
             <ul className="space-y-3 text-muted-foreground">
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.helpCenter")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("resources.documentation.title")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("footer.apiReference")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("employees.contact")}
                 </Link>
               </li>
               <li>
-                <Link to="#" className="hover:text-primary-foreground transition-colors">
+                <Link to="#" className="hover:text-foreground transition-colors">
                   {t("schedule.status")}
                 </Link>
               </li>
@@ -175,13 +175,13 @@ export function LandingFooter() {
             {/* Legal Links */}
             <div className="flex items-center space-x-6 text-muted-foreground text-sm">
               <span>{t("footer.allRightsReserved")}</span>
-              <Link to="#" className="hover:text-primary-foreground transition-colors">
+              <Link to="#" className="hover:text-foreground transition-colors">
                 {t("footer.privacyPolicy")}
               </Link>
-              <Link to="#" className="hover:text-primary-foreground transition-colors">
+              <Link to="#" className="hover:text-foreground transition-colors">
                 {t("footer.termsOfService")}
               </Link>
-              <Link to="#" className="hover:text-primary-foreground transition-colors">
+              <Link to="#" className="hover:text-foreground transition-colors">
                 {t("footer.cookiePolicy")}
               </Link>
             </div>
@@ -192,7 +192,7 @@ export function LandingFooter() {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Twitter className="h-5 w-5" />
               </a>
@@ -200,7 +200,7 @@ export function LandingFooter() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
@@ -208,7 +208,7 @@ export function LandingFooter() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Youtube className="h-5 w-5" />
               </a>
@@ -216,7 +216,7 @@ export function LandingFooter() {
                 href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Github className="h-5 w-5" />
               </a>
