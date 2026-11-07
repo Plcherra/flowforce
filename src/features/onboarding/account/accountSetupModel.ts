@@ -296,6 +296,10 @@ export function starterListSettings(roleId: string, showFrom: string, dueAt: str
     seeAudience: emptyTaskAudience("company"),
     showFrom,
     dueAt,
+    showAt: null,
+    dueTime: null,
+    completeBy: null,
+    timeMode: "legacy",
   });
 }
 

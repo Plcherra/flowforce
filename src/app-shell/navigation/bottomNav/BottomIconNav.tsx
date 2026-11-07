@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@/lib/router-adapter";
 import { useNavigationData } from "@/hooks/useNavigationData";

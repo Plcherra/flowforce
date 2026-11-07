@@ -61,7 +61,7 @@
   },
   {
     "path": "src/features/forms/components/builder/FieldEditor.tsx",
-    "lines": 908,
+    "lines": 910,
     "ticket": "FF-SPLIT-13"
   },
   {
@@ -73,6 +73,11 @@
     "path": "src/features/scheduling/services/autoScheduler.ts",
     "lines": 877,
     "ticket": "FF-SPLIT-15"
+  },
+  {
+    "path": "src/features/scheduling/components/ShiftDetailsPanel.tsx",
+    "lines": 867,
+    "ticket": "FF-SPLIT-21"
   },
   {
     "path": "src/services/integrations/marketmanMigrationPath.ts",
@@ -98,11 +103,6 @@
     "path": "src/services/integrations/csvImportFramework.ts",
     "lines": 809,
     "ticket": "FF-SPLIT-20"
-  },
-  {
-    "path": "src/features/scheduling/components/ShiftDetailsPanel.tsx",
-    "lines": 807,
-    "ticket": "FF-SPLIT-21"
   },
   {
     "path": "src/services/performance/performanceService.ts",
@@ -135,6 +135,11 @@
     "ticket": "FF-SPLIT-27"
   },
   {
+    "path": "src/features/scheduling/components/ShiftWizardDialog.tsx",
+    "lines": 710,
+    "ticket": "FF-SPLIT-31"
+  },
+  {
     "path": "src/features/analytics/components/FormAnalytics.tsx",
     "lines": 706,
     "ticket": "FF-SPLIT-28"
@@ -148,11 +153,6 @@
     "path": "src/features/analytics/pages/Reports.tsx",
     "lines": 704,
     "ticket": "FF-SPLIT-30"
-  },
-  {
-    "path": "src/features/scheduling/components/ShiftWizardDialog.tsx",
-    "lines": 704,
-    "ticket": "FF-SPLIT-31"
   },
   {
     "path": "src/features/scheduling/repositories/schedulingRepository.ts",
@@ -206,7 +206,7 @@
   },
   {
     "path": "src/features/scheduling/components/DragDropScheduleCalendar.tsx",
-    "lines": 648,
+    "lines": 651,
     "ticket": "FF-SPLIT-42"
   },
   {
@@ -225,6 +225,11 @@
     "ticket": "FF-SPLIT-45"
   },
   {
+    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
+    "lines": 631,
+    "ticket": "FF-SPLIT-49"
+  },
+  {
     "path": "src/hooks/useAIActionsFeed.ts",
     "lines": 631,
     "ticket": "FF-SPLIT-46"
@@ -238,11 +243,6 @@
     "path": "src/features/operations/hooks/useCopilotChecklist.ts",
     "lines": 613,
     "ticket": "FF-SPLIT-48"
-  },
-  {
-    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
-    "lines": 611,
-    "ticket": "FF-SPLIT-49"
   },
   {
     "path": "src/features/sections/components/DynamicSection.tsx",
@@ -270,6 +270,11 @@
     "ticket": "FF-SPLIT-54"
   },
   {
+    "path": "src/features/forms/components/FormBuilderDialog.tsx",
+    "lines": 563,
+    "ticket": "FF-SPLIT-69"
+  },
+  {
     "path": "src/services/integrations/checklistMigrationPath.ts",
     "lines": 560,
     "ticket": "FF-SPLIT-55"
@@ -295,6 +300,11 @@
     "ticket": "FF-SPLIT-59"
   },
   {
+    "path": "src/features/scheduling/components/shift-wizard/DetailsTab.tsx",
+    "lines": 548,
+    "ticket": "FF-SPLIT-63"
+  },
+  {
     "path": "src/features/company-updates/wizard/steps/DesignContentStep.tsx",
     "lines": 547,
     "ticket": "FF-SPLIT-60"
@@ -310,14 +320,14 @@
     "ticket": "FF-SPLIT-62"
   },
   {
-    "path": "src/features/scheduling/components/shift-wizard/DetailsTab.tsx",
-    "lines": 538,
-    "ticket": "FF-SPLIT-63"
-  },
-  {
     "path": "src/features/availability/manage/useAvailabilityManagement.ts",
     "lines": 534,
     "ticket": "FF-SPLIT-64"
+  },
+  {
+    "path": "src/features/tasks/utils/myShiftView.ts",
+    "lines": 533,
+    "ticket": "FF-SPLIT-73"
   },
   {
     "path": "src/features/gamification/leaderboard/syncLeaderboard.ts",
@@ -338,11 +348,6 @@
     "path": "src/features/scheduling/components/ScheduleRemindersPanel.tsx",
     "lines": 523,
     "ticket": "FF-SPLIT-68"
-  },
-  {
-    "path": "src/features/forms/components/FormBuilderDialog.tsx",
-    "lines": 518,
-    "ticket": "FF-SPLIT-69"
   },
   {
     "path": "src/features/inventory/hooks/useInventoryCounts.tsx",
