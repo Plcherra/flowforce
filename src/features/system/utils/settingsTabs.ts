@@ -6,6 +6,7 @@ export const SETTINGS_TAB_KEYS = [
   "copilot",
   "integrations",
   "packs",
+  "onboarding",
   "billing",
 ] as const;
 

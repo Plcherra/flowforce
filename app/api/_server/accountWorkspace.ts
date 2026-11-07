@@ -163,12 +163,25 @@ export async function applyAccountWorkspace(
             },
           },
         ];
+  const existingStores = await client
+    .from("stores")
+    .select("id, name, archived_at")
+    .eq("company_id", input.companyId);
+  const keptStores = rowsOf(existingStores.data).filter((row) => !row.archived_at);
   for (const draft of toSave) {
+    const name = draft.name.trim();
+    const existing = keptStores.find(
+      (row) => String(row.name ?? "").trim().toLowerCase() === name.toLowerCase(),
+    );
+    if (name && existing?.id) {
+      savedStores.push({ id: String(existing.id), key: draft.key, name });
+      continue;
+    }
     const locationInsert = await client
       .from("stores")
       .insert({
         company_id: input.companyId,
-        name: draft.name.trim(),
+        name,
         address: draft.address.trim() || null,
         hours: draft.hours,
       })
@@ -185,8 +198,9 @@ export async function applyAccountWorkspace(
     savedStores.push({
       id: String(locationInsert.data.id),
       key: draft.key,
-      name: draft.name.trim(),
+      name,
     });
+    keptStores.push({ id: locationInsert.data.id, name });
   }
   const starter =
     savedStores.find((store) => store.key === input.workspace.starterStoreKey) ??

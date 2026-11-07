@@ -25,6 +25,7 @@
     "test:scheduling-grid": "node scripts/test-week-template-serializer.mjs && node scripts/test-move-shift.mjs",
     "test:operations-hub": "node scripts/test-operations-hub.mjs",
     "test:product-roles": "node scripts/test-product-roles-setup.mjs",
+    "test:employee-onboarding": "node scripts/test-employee-onboarding.mjs",
     "test:grok-provider": "node scripts/test-grok-provider.mjs",
     "test:service-role-auth": "node scripts/test-service-role-auth.mjs",
     "test:security-headers": "node scripts/test-security-headers.mjs",

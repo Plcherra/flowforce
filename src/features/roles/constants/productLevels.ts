@@ -193,6 +193,13 @@ export function profileRoleFromClass(role: {
   return resolveProductLevel(role);
 }
 
+/** profiles.role still allows the older names, not the product keys. */
+export function storedProfileRole(level: ProductLevel) {
+  if (level === "admin") return "administrator";
+  if (level === "staff") return "employee";
+  return level;
+}
+
 export function cloneClassFromProductLevel(
   level: CloneableProductLevel,
   name = "",

@@ -13,6 +13,16 @@
       "notes": "Default command-center entry."
     },
     {
+      "label": "Onboarding",
+      "path": "/app/onboarding",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/employee-onboarding",
+      "dataDependency": "employee onboarding tables",
+      "notes": "Shown after an invite is accepted and from Overview until the required steps are done."
+    },
+    {
       "label": "Scheduling",
       "path": "/app/enhanced-scheduling",
       "status": "production",

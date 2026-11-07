@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "../../../_server/supabaseAdmin";
 import { createServerLogger } from "../../../_server/utils/logger";
+import { enrollEmployeeOnboarding } from "../../../_server/enrollEmployeeOnboarding";
 import { applyInviteAccessByToken } from "../../../_server/inviteAccess";
 
 const logger = createServerLogger("employees-invite-activate");
@@ -106,6 +107,8 @@ export async function POST(request: NextRequest) {
     if (!inviteId) {
       return jsonError("This invitation could not be applied.", 404);
     }
+
+    await enrollEmployeeOnboarding({ inviteId, userId });
 
     return NextResponse.json({ ok: true, email, inviteId });
   } catch (error) {

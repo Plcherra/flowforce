@@ -16,6 +16,7 @@ import {
   isInviteableClass,
   resolveProductLevel,
 } from "@/features/roles/constants/productLevels";
+import { shouldAskForStore } from "@/features/stores/storeDraft";
 import type { OrganizationLocation } from "@/hooks/useLocations";
 import {
   actorCanInvite,
@@ -133,7 +134,7 @@ export function useInviteAccessOptions() {
     inviterLevel,
     inviterPermissions,
     invitePolicy,
-    showLocations: assignableLocations.length > 1,
+    showLocations: shouldAskForStore(assignableLocations.length),
     showDepartments: departments.length > 1,
     isLoading:
       rolesLoading ||

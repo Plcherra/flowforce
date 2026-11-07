@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   Bell,
   Building2,
+  Coffee,
   CreditCard,
   Globe,
   Package,
@@ -53,6 +54,11 @@ const IntegrationSettingsPanel = lazy(async () => {
   return { default: mod.IntegrationSettingsPanel };
 });
 
+const OnboardingSettingsPanel = lazy(async () => {
+  const mod = await import("@/features/employee-onboarding/components/OnboardingSettingsPanel");
+  return { default: mod.default };
+});
+
 const BillingSettingsPanel = lazy(async () => {
   const mod = await import("../components/BillingSettingsPanel");
   return { default: mod.BillingSettingsPanel };
@@ -88,6 +94,8 @@ function tabLabel(key: SettingsTabKey, t: (key: string) => string) {
       return t("footer.integrations");
     case "packs":
       return t("settings.tabPacks");
+    case "onboarding":
+      return t("settings.tabOnboarding");
     case "billing":
       return t("settings.tabBilling");
   }
@@ -109,6 +117,8 @@ function tabIcon(key: SettingsTabKey) {
       return Plug;
     case "packs":
       return Package;
+    case "onboarding":
+      return Coffee;
     case "billing":
       return CreditCard;
   }
@@ -214,6 +224,18 @@ function SettingsTabContent({ tabKey }: { tabKey: SettingsTabKey }) {
       >
         <Suspense fallback={<PanelFallback />}>
           <PacksPanel />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  if (tabKey === "onboarding") {
+    return (
+      <ErrorBoundary
+        FallbackComponent={({ error }) => <ErrorState message={error.message} />}
+      >
+        <Suspense fallback={<PanelFallback />}>
+          <OnboardingSettingsPanel />
         </Suspense>
       </ErrorBoundary>
     );

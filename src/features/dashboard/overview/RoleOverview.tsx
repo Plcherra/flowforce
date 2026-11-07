@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { usePackFlags } from "@/hooks/usePackFlags";
 import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { TodayRoleLists } from "@/features/dashboard/components/TodayRoleLists";
+import { EmployeeOnboardingOverview } from "@/features/employee-onboarding/components/EmployeeOnboardingOverview";
 import { overviewWidgets, type OverviewWidgetId } from "./overviewModel";
 import { useListStatus, useTodayCoverage } from "./useRoleOverviewData";
 
@@ -35,6 +36,7 @@ export function RoleOverview() {
       data-testid="role-overview"
       data-leadership={leadership ? "true" : "false"}
     >
+      <EmployeeOnboardingOverview />
       {widgets.map((widget) => (
         <OverviewWidget
           key={widget}
