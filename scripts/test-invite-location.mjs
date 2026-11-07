@@ -12,6 +12,10 @@ const importTs = jiti(import.meta.url, {
 const { runInviteLocationTests } = importTs(
   "../src/features/employees/utils/inviteLocation.test.ts",
 );
+const { runInviteDepartmentTests } = importTs(
+  "../src/features/employees/utils/inviteDepartment.test.ts",
+);
 
 runInviteLocationTests();
+runInviteDepartmentTests();
 console.log("invite location tests passed");

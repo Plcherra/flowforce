@@ -2,7 +2,7 @@ export const DEMO_COMPANY_ID = "demo-company";
 
 const MAX_SHIFT_MS = 18 * 60 * 60 * 1000;
 
-export type OpsInviteStep = "invite" | "basics" | "shift";
+export type OpsInviteStep = "invite" | "basics";
 
 export type OpsBasicsDocument = {
   id: string;

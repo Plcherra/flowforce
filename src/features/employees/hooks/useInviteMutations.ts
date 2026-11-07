@@ -60,6 +60,7 @@ export function useInviteMutations({
           permissionOverrides: payload.permissionOverrides,
           departmentId: payload.departmentId,
           locationId: payload.locationId,
+          startDate: payload.startDate,
         },
       ]);
       const first = result.results[0];
@@ -119,6 +120,7 @@ export function useInviteMutations({
         roleId: matchClassId(classes, row.className) ?? "",
         departmentId: matchNamedId(departments, row.departmentName),
         locationId: matchNamedId(locations, row.locationName),
+        startDate: row.startDate,
       }));
 
       const missingClass = payloads.find((row) => !row.roleId);

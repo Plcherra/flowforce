@@ -5,16 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { inviteErrorText } from "../../utils/inviteLocation";
-import { type OpsFirstShift, type OpsInviteStep } from "../../utils/opsInviteFlow";
+import { type OpsInviteStep } from "../../utils/opsInviteFlow";
 import {
   sendCompanyInvites,
   type CompanyInvitePayload,
 } from "../../utils/sendCompanyInvites";
 import { InvitePersonStack } from "./InvitePersonStack";
 import { OpsInviteBasics } from "./OpsInviteBasics";
-import { OpsInviteShift } from "./OpsInviteShift";
 
-const STEPS: OpsInviteStep[] = ["invite", "basics", "shift"];
+const STEPS: OpsInviteStep[] = ["invite", "basics"];
 
 export function OpsInviteWizard({
   onSuccess,
@@ -31,26 +30,16 @@ export function OpsInviteWizard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const canInvite = isLoading || can("manageUsers");
-  const canShift =
-    isLoading ||
-    can("schedule.create") ||
-    can("schedule.edit") ||
-    can("editSchedules");
   const stepLabel: Record<OpsInviteStep, string> = {
     invite: t("employees.opsFlowInvite"),
     basics: t("employees.opsFlowBasics"),
-    shift: t("employees.opsFlowShift"),
   };
 
-  const send = async (shift: OpsFirstShift | null) => {
+  const send = async () => {
     if (!canInvite || people.length === 0) return;
     setIsSubmitting(true);
     try {
-      const payload = people.map((person) => ({
-        ...person,
-        firstShift: shift ?? undefined,
-      }));
-      const result = await sendCompanyInvites(payload);
+      const result = await sendCompanyInvites(people);
       const failed = result.results.filter((item) => !item.ok);
       if (failed.length > 0) {
         toast({
@@ -64,15 +53,9 @@ export function OpsInviteWizard({
         return;
       }
 
-      const shiftStatus = result.results.find((item) => item.firstShift)?.firstShift;
       toast({
         title: people.length === 1 ? t("literals.inviteSent") : t("literals.invitesSent"),
-        description:
-          shift && shiftStatus === "saved"
-            ? t("employees.opsFlowShiftSaved")
-            : shift && (shiftStatus === "failed" || shiftStatus === "forbidden")
-              ? t("employees.opsFlowShiftNotSaved")
-              : t("literals.theClassIsPaintedGiveOrTakeOn"),
+        description: t("employees.opsFlowSent"),
       });
       void queryClient.invalidateQueries({ queryKey: ["invites"] });
       onSuccess?.(result.inviteLink);
@@ -127,18 +110,10 @@ export function OpsInviteWizard({
       {step === "basics" ? (
         <OpsInviteBasics
           companyId={companyId}
-          onBack={() => setStep("invite")}
-          onContinue={() => setStep("shift")}
-        />
-      ) : null}
-
-      {step === "shift" ? (
-        <OpsInviteShift
-          canAddShift={canShift}
           isSubmitting={isSubmitting}
-          onBack={() => setStep("basics")}
-          onSend={(shift) => {
-            void send(shift);
+          onBack={() => setStep("invite")}
+          onSend={() => {
+            void send();
           }}
         />
       ) : null}

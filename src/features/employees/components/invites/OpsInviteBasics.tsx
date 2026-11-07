@@ -6,12 +6,14 @@ import { opsInviteBasics } from "../../utils/opsInviteFlow";
 
 export function OpsInviteBasics({
   companyId,
+  isSubmitting = false,
   onBack,
-  onContinue,
+  onSend,
 }: {
   companyId: string | null;
+  isSubmitting?: boolean;
   onBack: () => void;
-  onContinue: () => void;
+  onSend: () => void;
 }) {
   const { t } = useTranslation();
   const basicsQuery = useQuery({
@@ -144,7 +146,7 @@ export function OpsInviteBasics({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button type="button" variant="outline" onClick={onBack}>
+        <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
           {t("employees.opsFlowBack")}
         </Button>
         <div className="flex gap-2">
@@ -152,12 +154,18 @@ export function OpsInviteBasics({
             type="button"
             variant="outline"
             data-testid="ops-basics-skip"
-            onClick={onContinue}
+            onClick={onSend}
+            disabled={isSubmitting}
           >
             {t("employees.opsFlowSkip")}
           </Button>
-          <Button type="button" data-testid="ops-basics-continue" onClick={onContinue}>
-            {t("employees.opsFlowContinue")}
+          <Button
+            type="button"
+            data-testid="ops-basics-continue"
+            onClick={onSend}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? t("literals.sending") : t("employees.opsFlowSend")}
           </Button>
         </div>
       </div>

@@ -1460,5 +1460,7 @@
   "yourTrialEndedOnChooseAPlanTo": "Sua avaliação terminou em {{value0}}. Escolha um plano para restaurar o acesso total para gerentes e funcionários.",
   "yourTrialEndsOnUpgradeBeforeThenTo": "Sua avaliação termina em {{value0}}. Atualize antes disso para evitar interrupções.",
   "yourTrialPeriodHasEndedPickAPlan": "Seu período de avaliação terminou. Escolha um plano para manter seu espaço de trabalho ativo.",
-  "youVeBeenAssignedTheRole": "Você recebeu a função {{name}}."
+  "youVeBeenAssignedTheRole": "Você recebeu a função {{name}}.",
+  "eachCardNeedsARoleStartAndContact": "Cada pessoa precisa de uma função, uma data de início e um e-mail ou telefone.",
+  "eachCardNeedsARoleDepartmentStoreAndContact": "Cada pessoa precisa de uma função, uma data de início, uma loja e um e-mail ou telefone."
 }

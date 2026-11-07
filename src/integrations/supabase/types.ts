@@ -687,6 +687,7 @@ export type Database = {
           email: string | null
           expires_at: string | null
           first_name: string | null
+          hire_date: string | null
           id: string
           invite_token: string | null
           invited_by: string | null
@@ -707,6 +708,7 @@ export type Database = {
           email?: string | null
           expires_at?: string | null
           first_name?: string | null
+          hire_date?: string | null
           id?: string
           invite_token?: string | null
           invited_by?: string | null
@@ -727,6 +729,7 @@ export type Database = {
           email?: string | null
           expires_at?: string | null
           first_name?: string | null
+          hire_date?: string | null
           id?: string
           invite_token?: string | null
           invited_by?: string | null

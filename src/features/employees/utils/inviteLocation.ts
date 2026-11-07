@@ -7,6 +7,9 @@ export const INVITE_LOCATION_ERROR_KEYS = {
   location_forbidden: "literals.thatStoreIsNotOneYouCanAssign",
   invite_forbidden: "literals.youDoNotHavePermissionToInvite",
   location_row: "literals.eachRowNeedsAStoreYouCanAssign",
+  department_required: "employees.departmentRequired",
+  department_forbidden: "employees.departmentNotAssignable",
+  start_date_required: "employees.startDateRequired",
 } as const;
 
 export type InviteLocationErrorCode = keyof typeof INVITE_LOCATION_ERROR_KEYS;

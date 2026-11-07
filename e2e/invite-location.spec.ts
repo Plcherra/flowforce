@@ -35,11 +35,23 @@ test("invites a teammate to a real store the signed-in user can assign", async (
 
   const dialog = page.getByTestId("invite-dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByTestId("invite-class")).toHaveAttribute(
+  await expect(dialog.getByTestId("invite-role")).toHaveAttribute(
     "data-selected",
     "true",
     { timeout: 20_000 },
   );
+  await dialog.getByTestId("invite-start-date").fill("2026-11-16");
+
+  const department = dialog.getByTestId("invite-department");
+  let departmentId: string | null = null;
+  if (await department.isVisible().catch(() => false)) {
+    await department.click();
+    const option = page.getByTestId("invite-department-option").first();
+    await expect(option).toBeVisible();
+    departmentId = await option.getAttribute("data-department-id");
+    expect(departmentId).toBeTruthy();
+    await option.click();
+  }
 
   const location = dialog.getByTestId("invite-location");
   const asksForStore = await location.isVisible().catch(() => false);
@@ -62,12 +74,22 @@ test("invites a teammate to a real store the signed-in user can assign", async (
   const email = `e2e-invite-${Date.now()}@example.com`;
   await dialog.locator('input[type="email"]').fill(email);
 
-  let captured: { locationId?: string; email?: string } | null = null;
+  let captured: {
+    locationId?: string;
+    email?: string;
+    startDate?: string;
+    departmentId?: string;
+  } | null = null;
   // The test login uses the production project. Fulfill the invite
   // request here so the run does not write a row or send an email.
   await page.route("**/api/employees/invite", async (route) => {
     const body = route.request().postDataJSON() as {
-      invites?: Array<{ locationId?: string; email?: string }>;
+      invites?: Array<{
+        locationId?: string;
+        email?: string;
+        startDate?: string;
+        departmentId?: string;
+      }>;
     };
     captured = body.invites?.[0] ?? null;
     await route.fulfill({
@@ -89,6 +111,10 @@ test("invites a teammate to a real store the signed-in user can assign", async (
 
   await dialog.getByTestId("invite-send").click();
   await expect.poll(() => captured?.email).toBe(email);
+  expect(captured?.startDate).toBe("2026-11-16");
+  if (departmentId) {
+    expect(captured?.departmentId).toBe(departmentId);
+  }
   if (asksForStore) {
     expect(captured?.locationId).toBe(storeId);
   } else {

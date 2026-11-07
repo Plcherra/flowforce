@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "../../../_server/supabaseAdmin";
 import { createServerLogger } from "../../../_server/utils/logger";
 import { applyInviteAccessByToken } from "../../../_server/inviteAccess";
+import { copyInviteHireDate } from "../../../_server/inviteHireDate";
 
 const logger = createServerLogger("employees-invite-accept");
 
@@ -53,6 +54,11 @@ export async function POST(request: NextRequest) {
     if (!inviteId) {
       return jsonError("This invitation is invalid or has expired.", 404);
     }
+
+    await copyInviteHireDate({
+      inviteId,
+      userId: userResult.user.id,
+    });
 
     return NextResponse.json({ ok: true, inviteId });
   } catch (error) {
