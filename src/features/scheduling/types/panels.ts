@@ -16,47 +16,47 @@ export type SchedulingPanelId =
 
 export interface SchedulingPanel {
   id: SchedulingPanelId;
-  label: string;
+  labelKey: string;
   icon: LucideIcon;
-  description: string;
+  descriptionKey: string;
 }
 
 export const SCHEDULING_PANELS: SchedulingPanel[] = [
   {
     id: "staff",
-    label: "Team requests",
+    labelKey: "schedule.panelTeamRequests",
     icon: Users,
-    description: "Shift swaps and time off waiting on a decision",
+    descriptionKey: "schedule.panelTeamRequestsDescription",
   },
   {
     id: "availability",
-    label: "Availability",
+    labelKey: "schedule.panelAvailability",
     icon: Clock,
-    description: "Personal and team availability",
+    descriptionKey: "schedule.panelAvailabilityDescription",
   },
   {
     id: "timeoff",
-    label: "Time Off",
+    labelKey: "schedule.panelTimeOff",
     icon: Calendar,
-    description: "Request time off or review team requests",
+    descriptionKey: "schedule.panelTimeOffDescription",
   },
   {
     id: "swaps",
-    label: "Shift Swaps",
+    labelKey: "schedule.panelShiftSwaps",
     icon: ArrowRightLeft,
-    description: "Shift swap requests and approvals",
+    descriptionKey: "schedule.panelShiftSwapsDescription",
   },
   {
     id: "workflow",
-    label: "Reminders",
+    labelKey: "schedule.panelReminders",
     icon: Settings,
-    description: "Personal reminders and reminders assigned to the team",
+    descriptionKey: "schedule.panelRemindersDescription",
   },
   {
     id: "company-policies",
-    label: "Company policies",
+    labelKey: "schedule.companyPolicies",
     icon: ScrollText,
-    description: "Time off, availability, and scheduling rules",
+    descriptionKey: "schedule.companyPoliciesDescription",
   },
 ];
 

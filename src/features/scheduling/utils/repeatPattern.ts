@@ -17,14 +17,14 @@ export type RepeatChoice =
   | "every-15-days"
   | "custom";
 
-export const REPEAT_CHOICES: Array<{ id: RepeatChoice; label: string }> = [
-  { id: "none", label: "Does not repeat" },
-  { id: "daily", label: "Daily" },
-  { id: "weekly", label: "Weekly" },
-  { id: "monthly", label: "Monthly" },
-  { id: "every-2-weeks", label: "Every 2 weeks (14 days)" },
-  { id: "every-15-days", label: "Every 15 days" },
-  { id: "custom", label: "Custom" },
+export const REPEAT_CHOICES: Array<{ id: RepeatChoice; labelKey: string }> = [
+  { id: "none", labelKey: "schedule.repeatNone" },
+  { id: "daily", labelKey: "schedule.repeatDaily" },
+  { id: "weekly", labelKey: "schedule.repeatWeekly" },
+  { id: "monthly", labelKey: "schedule.repeatMonthly" },
+  { id: "every-2-weeks", labelKey: "schedule.repeatEveryTwoWeeks" },
+  { id: "every-15-days", labelKey: "schedule.repeatEvery15Days" },
+  { id: "custom", labelKey: "schedule.repeatCustom" },
 ];
 
 const DAY_MS = 86_400_000;

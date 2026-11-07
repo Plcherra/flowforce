@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigation } from "@/lib/router-adapter";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 
 export function ContentLoader({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const [showLoader, setShowLoader] = useState(false);
 
@@ -24,7 +26,7 @@ export function ContentLoader({ children }: { children: React.ReactNode }) {
   if (showLoader) {
     return (
       <div className="p-6">
-        <LoadingSpinner text="Loading..." />
+        <LoadingSpinner text={t("common.loading")} />
       </div>
     );
   }

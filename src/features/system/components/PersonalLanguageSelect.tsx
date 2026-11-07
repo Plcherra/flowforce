@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isAppLanguage } from "@/i18n/resolveLanguage";
+import { saveProfileLanguage } from "@/i18n/saveProfileLanguage";
+import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -17,8 +19,9 @@ import {
 
 export function PersonalLanguageSelect() {
   const { user } = useAuth();
-  const { changeLanguage, availableLanguages } = useLanguage();
+  const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [value, setValue] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -46,12 +49,15 @@ export function PersonalLanguageSelect() {
   const onChange = async (next: string) => {
     if (!user || !isAppLanguage(next)) return;
     setValue(next);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ language: next })
-      .eq("id", user.id);
-    if (error) return;
     await changeLanguage(next);
+    const error = await saveProfileLanguage(user.id, next);
+    if (error) {
+      toast({
+        title: t("personalLanguage.saveFailed"),
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -64,7 +70,7 @@ export function PersonalLanguageSelect() {
         }}
         disabled={!user || !ready}
       >
-        <SelectTrigger>
+        <SelectTrigger data-testid="personal-language">
           <SelectValue placeholder={t("personalLanguage.placeholder")} />
         </SelectTrigger>
         <SelectContent>

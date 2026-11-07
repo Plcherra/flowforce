@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock, Bell, Share2, CheckCircle2 } from "lucide-react";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
+import { dateLocale } from "@/features/scheduling/utils/dateLocale";
 import { useToast } from "@/hooks/use-toast";
 
 interface WorkflowStep {
@@ -25,7 +26,7 @@ interface WorkflowStep {
 }
 
 export function SchedulingWorkflow() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const today = new Date();
   const weekStart = startOfWeek(today);
@@ -36,52 +37,53 @@ export function SchedulingWorkflow() {
     const saturday = addDays(weekStart, 6);
     const sunday = addDays(weekStart, 7);
 
+    const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
     return [
       {
-        day: format(thursday, "MMM d"),
-        dayName: "Thursday",
+        day: format(thursday, "MMM d", { locale }),
+        dayName: format(thursday, "EEEE", { locale }),
         icon: <Bell className="h-4 w-4" />,
-        title: "Send Availability Reminder",
-        description: "Notify staff to update their availability",
-        actions: ["Send reminder to all staff", "Set deadline for tonight"],
+        title: t("schedule.workflowSendReminder"),
+        description: t("schedule.workflowSendReminderDescription"),
+        actions: [t("schedule.workflowSendReminderAction"), t("schedule.workflowSetDeadline")],
         color: "bg-primary",
         isToday: isSameDay(today, thursday),
       },
       {
-        day: format(friday, "MMM d"),
-        dayName: "Friday",
+        day: format(friday, "MMM d", { locale }),
+        dayName: format(friday, "EEEE", { locale }),
         icon: <CalendarDays className="h-4 w-4" />,
-        title: "Collect Updates & Build Draft",
-        description: "Gather availability updates and create draft schedule",
+        title: t("schedule.workflowCollectUpdates"),
+        description: t("schedule.workflowCollectUpdatesDescription"),
         actions: [
-          "Collect availability updates",
-          "Build draft schedule",
-          "Review conflicts",
+          t("schedule.workflowCollectAvailability"),
+          t("schedule.workflowBuildDraft"),
+          t("schedule.workflowReviewConflicts"),
         ],
         color: "bg-warning",
         isToday: isSameDay(today, friday),
       },
       {
-        day: format(saturday, "MMM d"),
-        dayName: "Saturday",
+        day: format(saturday, "MMM d", { locale }),
+        dayName: format(saturday, "EEEE", { locale }),
         icon: <CheckCircle2 className="h-4 w-4" />,
-        title: "Review & Finalize",
-        description: "Morning review and afternoon publication",
+        title: t("schedule.workflowReview"),
+        description: t("schedule.workflowReviewDescription"),
         actions: [
-          "Review draft (morning)",
-          "Finalize schedule",
-          "Post to channels (afternoon)",
+          t("schedule.workflowReviewMorning"),
+          t("schedule.workflowFinalize"),
+          t("schedule.workflowPostChannels"),
         ],
         color: "bg-success",
         isToday: isSameDay(today, saturday),
       },
       {
-        day: format(sunday, "MMM d"),
-        dayName: "Sunday",
+        day: format(sunday, "MMM d", { locale }),
+        dayName: format(sunday, "EEEE", { locale }),
         icon: <Share2 className="h-4 w-4" />,
-        title: "Schedule Reminder",
-        description: "Final reminder before week starts",
-        actions: ["Send schedule reminder", "Confirm all shifts covered"],
+        title: t("schedule.workflowReminder"),
+        description: t("schedule.workflowReminderDescription"),
+        actions: [t("schedule.workflowSendScheduleReminder"), t("schedule.workflowConfirmCovered")],
         color: "bg-secondary",
         isToday: isSameDay(today, sunday),
       },

@@ -574,7 +574,7 @@ function evaluateCompliance(
         severity: "soft",
         code: "max_hours_exceeded",
         message: `${employee.name} scheduled for ${totalHours}h (max ${allowance}h).`,
-        fixes: [{ label: "Reduce hours", payload: { employeeId } }],
+        fixes: [{ label: "schedule.fixReduceHours", payload: { employeeId } }],
       });
     }
 
@@ -593,7 +593,7 @@ function evaluateCompliance(
           message: `${employee.name} has ${rest.toFixed(1)}h rest before next shift (needs ${compliance.minRestHours}h).`,
           fixes: [
             {
-              label: "Move next shift",
+              label: "schedule.fixMoveNextShift",
               payload: { employeeId, slotId: next.slotId },
             },
           ],

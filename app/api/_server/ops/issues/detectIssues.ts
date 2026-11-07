@@ -3,6 +3,7 @@ import { computeInventoryHealth } from "../kpi/computeInventoryHealth";
 import { computeLaborVsSales } from "../kpi/computeLaborVsSales";
 import { createIssue } from "./createIssue";
 import { createServerLogger } from "../../utils/logger";
+import i18n from "@/i18n/config";
 
 export interface DetectIssuesOptions {
   orgId: string;
@@ -31,8 +32,10 @@ export async function detectIssues({ orgId }: DetectIssuesOptions) {
           kpiKey: tasks.kpiKey,
           issueType: "tasks",
           severity: "critical",
-          title: "Task compliance slipping",
-          description: `Completion rate is ${tasks.value}% which is below the 85% target`,
+          title: i18n.t("operations.issueTaskComplianceTitle"),
+          description: i18n.t("operations.issueTaskComplianceDescription", {
+            value: tasks.value,
+          }),
         }),
       );
     }
@@ -44,9 +47,8 @@ export async function detectIssues({ orgId }: DetectIssuesOptions) {
           kpiKey: inventory.kpiKey,
           issueType: "inventory",
           severity: inventory.severity,
-          title: "Inventory health warning",
-          description:
-            "Low stock or shrinkage risks detected across key categories.",
+          title: i18n.t("operations.issueInventoryTitle"),
+          description: i18n.t("operations.issueInventoryDescription"),
         }),
       );
     }
@@ -58,9 +60,8 @@ export async function detectIssues({ orgId }: DetectIssuesOptions) {
           kpiKey: labor.kpiKey,
           issueType: "labor",
           severity: "critical",
-          title: "Labor cost pressure",
-          description:
-            "Labor to sales ratio is above 33%. Consider schedule optimization.",
+          title: i18n.t("operations.issueLaborTitle"),
+          description: i18n.t("operations.issueLaborDescription"),
         }),
       );
     }

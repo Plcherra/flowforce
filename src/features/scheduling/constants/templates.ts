@@ -84,28 +84,28 @@ export const ROLE_TEMPLATES: ShiftTemplate[] = [
 export const VENDOR_PALETTE: VendorPaletteItem[] = [
   {
     id: "vendor-ecolab",
-    label: "Ecolab Service",
+    label: "schedule.vendorEcolab",
     vendorType: "ecolab",
     color: "#0ea5e9",
     defaultDurationHours: 2,
   },
   {
     id: "vendor-electric",
-    label: "Electrician",
+    label: "schedule.vendorElectrician",
     vendorType: "electrician",
     color: "#f97316",
     defaultDurationHours: 3,
   },
   {
     id: "vendor-cleaning",
-    label: "Cleaning Crew",
+    label: "schedule.vendorCleaning",
     vendorType: "cleaning",
     color: "#22c55e",
     defaultDurationHours: 4,
   },
   {
     id: "vendor-inspection",
-    label: "Health Inspection",
+    label: "schedule.vendorInspection",
     vendorType: "inspection",
     color: "#a855f7",
     defaultDurationHours: 2,
@@ -122,7 +122,9 @@ const VENDOR_PALETTE_MAP = new Map(
 export function getVendorLabel(vendorType: string | null | undefined): string {
   if (!vendorType) return i18n.t("literals.vendor");
   return (
-    VENDOR_PALETTE_MAP.get(vendorType)?.label ?? vendorType.replace(/_/g, " ")
+    (VENDOR_PALETTE_MAP.get(vendorType)?.label
+      ? i18n.t(VENDOR_PALETTE_MAP.get(vendorType)!.label)
+      : vendorType.replace(/_/g, " "))
   );
 }
 

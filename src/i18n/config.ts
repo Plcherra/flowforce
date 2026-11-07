@@ -14,6 +14,7 @@ import frLiterals from "../locales/literals/fr.json" with { type: "json" };
 import deLiterals from "../locales/literals/de.json" with { type: "json" };
 import itLiterals from "../locales/literals/it.json" with { type: "json" };
 import ptLiterals from "../locales/literals/pt.json" with { type: "json" };
+import { bootLanguage } from "./languagePreference";
 
 const resources = {
   en: { translation: { ...en, literals: enLiterals } },
@@ -27,19 +28,31 @@ const resources = {
 // Do not import react-i18next here. Route handlers import this module, and
 // react-i18next calls createContext at load time. The client binding lives
 // in ./client and is loaded from the browser provider.
+const initialLanguage = bootLanguage();
+
 i18n.use(LanguageDetector).init({
     resources,
+    lng: initialLanguage,
     fallbackLng: "en",
     supportedLngs: ["en", "es", "pt", "fr", "it", "de"],
+    nonExplicitSupportedLngs: true,
+    initImmediate: false,
+    initAsync: false,
     debug: false,
+    react: {
+      useSuspense: false,
+    },
 
     interpolation: {
       escapeValue: false,
     },
 
     detection: {
-      order: ["localStorage", "navigator", "htmlTag"],
+      order: ["cookie", "localStorage", "navigator", "htmlTag"],
       caches: ["localStorage"],
+      lookupCookie: "i18nextLng",
+      lookupLocalStorage: "i18nextLng",
+      cookieMinutes: 60 * 24 * 365,
     },
   });
 

@@ -1,8 +1,23 @@
-import { extractHardcodedLiterals as extractUserFacingLiterals } from "./userFacingLiterals";
+import {
+  extractHardcodedLiterals as extractUserFacingLiterals,
+  extractStrictLiterals,
+  extractTranslationKeys,
+} from "./userFacingLiterals";
 
 const LOCALES = ["en", "es", "pt", "fr", "it", "de"] as const;
 
 export { extractUserFacingLiterals as extractHardcodedLiterals };
+export { extractStrictLiterals, extractTranslationKeys };
+
+export const STRICT_LITERAL_PREFIXES = [
+  "src/features/scheduling/",
+  "src/features/system/",
+  "src/features/forms/",
+  "src/features/packs/",
+  "src/app-shell/",
+  "src/components/",
+  "app/",
+] as const;
 
 export function compareLocaleKeySets(
   sets: Record<string, readonly string[]>,
@@ -47,4 +62,16 @@ export function compareHardcodedLiterals(
   }
 
   return problems;
+}
+
+export function compareUsedTranslationKeys(
+  used: readonly string[],
+  catalog: readonly string[],
+): string[] {
+  const known = new Set(catalog);
+  const problems: string[] = [];
+  for (const key of new Set(used)) {
+    if (!known.has(key)) problems.push(`missing translation key ${key}`);
+  }
+  return problems.sort();
 }

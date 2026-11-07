@@ -8,12 +8,12 @@ import { useCan } from "@/hooks/useCan";
 import type { PermissionKey } from "@/lib/permissions/registry";
 
 const SCHEDULE_KEYS = [
-  { key: "viewOwnSchedules", label: "Own schedule" },
-  { key: "viewTeamSchedules", label: "Team schedule" },
-  { key: "schedule.view", label: "Published grid" },
-  { key: "editSchedules", label: "Draft weeks" },
-  { key: "schedule.edit", label: "Create and assign shifts" },
-] as const satisfies ReadonlyArray<{ key: PermissionKey; label: string }>;
+  { key: "viewOwnSchedules", labelKey: "schedule.permissionOwn" },
+  { key: "viewTeamSchedules", labelKey: "schedule.permissionTeam" },
+  { key: "schedule.view", labelKey: "schedule.permissionPublished" },
+  { key: "editSchedules", labelKey: "schedule.permissionDrafts" },
+  { key: "schedule.edit", labelKey: "schedule.permissionAssign" },
+] as const satisfies ReadonlyArray<{ key: PermissionKey; labelKey: string }>;
 
 type ScheduleKey = (typeof SCHEDULE_KEYS)[number]["key"];
 
@@ -199,7 +199,7 @@ export function TeamHoursPermissionMatrix({
                             })
                           }
                         />
-                        {entry.label}
+                        {t(entry.labelKey)}
                       </label>
                     );
                   })}

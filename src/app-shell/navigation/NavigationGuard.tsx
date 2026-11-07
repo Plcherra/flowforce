@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "@/lib/router-adapter";
 import { useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/ui/loading-states";
@@ -13,6 +14,7 @@ const protectedRoutes = ["/app"];
 const authRoutes = ["/auth", "/register"];
 
 export function NavigationGuard({ children }: NavigationGuardProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -81,7 +83,7 @@ export function NavigationGuard({ children }: NavigationGuardProps) {
     return (
       <div className="flex flex-col h-screen overflow-hidden bg-background">
         <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center">
-          <LoadingSpinner text="Preparing your workspace..." />
+          <LoadingSpinner text={t("shell.preparingWorkspace")} />
         </div>
       </div>
     );

@@ -7,11 +7,22 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const jiti = createJiti(import.meta.url, {
   alias: { "@": path.join(root, "src") },
 });
-const { compareHardcodedLiterals, compareLocaleKeySets, extractHardcodedLiterals } =
-  jiti("../src/i18n/i18nCheck.ts");
+const {
+  STRICT_LITERAL_PREFIXES,
+  compareHardcodedLiterals,
+  compareLocaleKeySets,
+  compareUsedTranslationKeys,
+  extractHardcodedLiterals,
+  extractStrictLiterals,
+  extractTranslationKeys,
+} = jiti("../src/i18n/i18nCheck.ts");
 const { runI18nCheckTests } = jiti("../src/i18n/i18nCheck.test.ts");
+const { runLanguagePreferenceTests } = jiti("../src/i18n/languagePreference.test.ts");
+const { runFormTemplateCopyTests } = jiti("../src/features/forms/utils/formTemplateCopy.test.ts");
 
 runI18nCheckTests();
+runLanguagePreferenceTests();
+runFormTemplateCopyTests();
 
 const codes = ["en", "es", "pt", "fr", "it", "de"];
 
@@ -69,11 +80,20 @@ const files = [];
 for (const dir of ["src", "app"]) walk(path.join(root, dir), files);
 
 const found = [];
+const strictFound = [];
+const usedKeys = [];
 for (const file of files) {
   const relative = path.relative(root, file).split(path.sep).join("/");
   if (relative.startsWith("src/i18n/") || relative.startsWith("src/locales/")) continue;
   const source = readFileSync(file, "utf8");
   found.push(...extractHardcodedLiterals(source, relative));
+  usedKeys.push(...extractTranslationKeys(source, relative));
+  if (
+    STRICT_LITERAL_PREFIXES.some((prefix) => relative.startsWith(prefix)) &&
+    relative !== "src/features/forms/utils/formTemplates.ts"
+  ) {
+    strictFound.push(...extractStrictLiterals(source, relative));
+  }
 }
 found.sort();
 
@@ -81,7 +101,9 @@ const baseline = JSON.parse(
   readFileSync(path.join(root, "scripts/i18n-hardcoded-baseline.json"), "utf8"),
 );
 const literalProblems = compareHardcodedLiterals(found, baseline);
-const problems = [...keyProblems, ...literalProblems];
+const strictProblems = strictFound.map((literal) => `hard-coded string: ${literal}`);
+const keyUseProblems = compareUsedTranslationKeys(usedKeys, localeSets.en);
+const problems = [...keyProblems, ...literalProblems, ...strictProblems, ...keyUseProblems];
 
 if (problems.length > 0) {
   for (const problem of problems.slice(0, 40)) {

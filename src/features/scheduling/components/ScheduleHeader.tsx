@@ -34,7 +34,7 @@ export function ScheduleHeader({
   const { t } = useTranslation();
   const { can } = useCan();
   const isScheduling = mode === "scheduling";
-  const heading = isScheduling ? "Schedule" : "Events Calendar";
+  const heading = isScheduling ? t("schedule.heading") : t("schedule.eventsCalendar");
   const filtersEnabled = isScheduling && Boolean(onToggleFilters);
   const filtersActive = filtersEnabled && showFilters;
   const shouldShowToolbar =

@@ -334,3 +334,112 @@ export function extractHardcodedLiterals(source: string, filePath: string): stri
   const literals = collectUserFacingLiterals(source, filePath);
   return [...new Set(literals.map((literal) => `${filePath}: ${literal.text}`))].sort();
 }
+
+const STRICT_PROPERTIES = new Set([
+  "label",
+  "description",
+  "placeholder",
+  "heading",
+  "helperText",
+  "tooltip",
+  "subtitle",
+  "actionLabel",
+  "emptyTitle",
+  "emptyDescription",
+]);
+
+const STRICT_VARIABLES = /^(title|label|description|placeholder|heading|panelTitle|panelDescription|actionLabel|emptyTitle|emptyDescription|helperText|tooltip|subtitle)$/;
+
+const STRICT_ATTRIBUTES = new Set(["text", "actionLabel"]);
+
+const LANGUAGE_ENDONYMS = new Set([
+  "English",
+  "Español",
+  "Français",
+  "Deutsch",
+  "Italiano",
+  "Português",
+]);
+
+function isStrictLiteralNode(node: ts.Node): boolean {
+  if (hasSkippedAncestor(node) || isTranslationKeyArgument(node)) return false;
+  const attribute = findJsxAttribute(node);
+  if (attribute) {
+    const name = jsxAttributeName(attribute);
+    return Boolean(name && STRICT_ATTRIBUTES.has(name));
+  }
+  let current: ts.Node | undefined = node.parent;
+  while (current && isWrapper(current)) current = current.parent;
+  if (!current) return false;
+  if (ts.isVariableDeclaration(current) && ts.isIdentifier(current.name)) {
+    return STRICT_VARIABLES.test(current.name.text);
+  }
+  if (ts.isPropertyAssignment(current)) {
+    const name = propertyName(current);
+    return Boolean(name && STRICT_PROPERTIES.has(name));
+  }
+  return false;
+}
+
+export function extractStrictLiterals(source: string, filePath: string): string[] {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    filePath.endsWith(".tsx") || filePath.endsWith(".jsx")
+      ? ts.ScriptKind.TSX
+      : ts.ScriptKind.TS,
+  );
+  const found: string[] = [];
+  const visit = (node: ts.Node) => {
+    if (
+      (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) &&
+      isStrictLiteralNode(node)
+    ) {
+      const text = node.text.replace(/\s+/g, " ").trim();
+      if (
+        isHumanText(text) &&
+        !isUserFacingNode(node, text) &&
+        !/^[a-z][a-zA-Z0-9]*(\.[a-zA-Z0-9_-]+)+$/.test(text) &&
+        !LANGUAGE_ENDONYMS.has(text)
+      ) {
+        found.push(`${filePath}: ${text}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return [...new Set(found)].sort();
+}
+
+export function extractTranslationKeys(source: string, filePath: string): string[] {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    filePath.endsWith(".tsx") || filePath.endsWith(".jsx")
+      ? ts.ScriptKind.TSX
+      : ts.ScriptKind.TS,
+  );
+  const keys: string[] = [];
+  const visit = (node: ts.Node) => {
+    if (ts.isCallExpression(node) && !hasSkippedAncestor(node)) {
+      const expression = node.expression;
+      const isT = ts.isIdentifier(expression) && expression.text === "t";
+      const isI18nT =
+        ts.isPropertyAccessExpression(expression) &&
+        expression.name.text === "t" &&
+        ts.isIdentifier(expression.expression) &&
+        expression.expression.text === "i18n";
+      const first = node.arguments[0];
+      if ((isT || isI18nT) && first && ts.isStringLiteral(first) && first.text.includes(".")) {
+        keys.push(first.text);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return keys;
+}

@@ -20,43 +20,43 @@ import { useTranslation } from "react-i18next";
 
 const NOTIFICATION_CHANNELS: Array<{
   key: "email" | "in_app" | "sms" | "push";
-  label: string;
+  labelKey: string;
 }> = [
-  { key: "email", label: "Email" },
-  { key: "in_app", label: "In-app" },
-  { key: "sms", label: "SMS" },
-  { key: "push", label: "Push" },
+  { key: "email", labelKey: "settings.channelEmail" },
+  { key: "in_app", labelKey: "settings.channelInApp" },
+  { key: "sms", labelKey: "settings.channelSms" },
+  { key: "push", labelKey: "settings.channelPush" },
 ];
 
 const MODULE_OPTIONS: Array<{
   key: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
 }> = [
   {
     key: "scheduling",
-    label: "Scheduling",
-    description: "Shift updates and confirmations",
+    labelKey: "settings.moduleScheduling",
+    descriptionKey: "settings.moduleSchedulingDescription",
   },
   {
     key: "tasks",
-    label: "Tasks",
-    description: "Assignments and due reminders",
+    labelKey: "settings.moduleTasks",
+    descriptionKey: "settings.moduleTasksDescription",
   },
   {
     key: "payments",
-    label: "Payments",
-    description: "Expense approvals and payouts",
+    labelKey: "settings.modulePayments",
+    descriptionKey: "settings.modulePaymentsDescription",
   },
   {
     key: "inventory",
-    label: "Inventory",
-    description: "Counts, orders, and transfers",
+    labelKey: "settings.moduleInventory",
+    descriptionKey: "settings.moduleInventoryDescription",
   },
   {
     key: "announcements",
-    label: "Announcements",
-    description: "Company-wide updates",
+    labelKey: "settings.moduleAnnouncements",
+    descriptionKey: "settings.moduleAnnouncementsDescription",
   },
 ];
 
@@ -116,7 +116,7 @@ export function NotificationSettingsPanel() {
                     (!canEdit || loading) && "cursor-not-allowed opacity-60",
                   )}
                 >
-                  {channel.label}
+                  {t(channel.labelKey)}
                 </button>
               );
             })}
@@ -171,10 +171,10 @@ export function NotificationSettingsPanel() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        {module.label}
+                        {t(module.labelKey)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {module.description}
+                        {t(module.descriptionKey)}
                       </p>
                     </div>
                     <Badge variant="outline">{t("settings.module")}</Badge>
@@ -201,7 +201,7 @@ export function NotificationSettingsPanel() {
                             "cursor-not-allowed opacity-60",
                         )}
                       >
-                        {channel.label}
+                        {t(channel.labelKey)}
                       </button>
                     ))}
                   </div>

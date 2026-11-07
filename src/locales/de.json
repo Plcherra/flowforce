@@ -80,7 +80,8 @@
     "noDataFound": "Keine Daten gefunden",
     "noDataToDisplay": "Zurzeit gibt es keine Daten zum Anzeigen.",
     "loadingData": "Daten werden geladen...",
-    "formsBuilder": "Formular-Builder"
+    "formsBuilder": "Formular-Builder",
+    "notAvailable": "Nicht verfügbar"
   },
   "navigation": {
     "communication": "Kommunikation",
@@ -101,7 +102,11 @@
     "inventory": "Inventar",
     "leaderboard": "Rangliste",
     "operationsIntelligence": "Betriebsintelligenz",
-    "team": "Team"
+    "team": "Team",
+    "addNew": "Neu",
+    "custom": "Benutzerdefiniert",
+    "more": "Mehr",
+    "moreDescription": "Zu einem anderen Bereich von FlowForce wechseln"
   },
   "landing": {
     "checkoutCanceled": "Zahlung abgebrochen",
@@ -455,7 +460,8 @@
       "comingSoon": "Demnächst",
       "videoInProduction": "Dieses Video wird derzeit produziert.",
       "notFound": "nicht gefunden",
-      "requestedNotFound": "Der angeforderte {{type}} konnte nicht gefunden werden."
+      "requestedNotFound": "Der angeforderte {{type}} konnte nicht gefunden werden.",
+      "lastUpdated": "Aktualisiert"
     }
   },
   "features": {
@@ -1198,7 +1204,13 @@
       "shiftsToday": "Schichten heute",
       "title": "Betriebsüberblick",
       "viewSchedule": "Dienstplan öffnen",
-      "viewScheduleDesc": "Zur Planung wechseln und die Besetzung anpassen"
+      "viewScheduleDesc": "Zur Planung wechseln und die Besetzung anpassen",
+      "coverageCompleteness": "Vollständige Abdeckung",
+      "coverageCompletenessHint": "Geplante Abdeckung gegenüber den benötigten Schichten dieser Woche.",
+      "hoursUtilisation": "Stundenauslastung",
+      "hoursUtilisationHint": "Geplante Stunden im Vergleich zur Kapazität.",
+      "taskCompletion": "Erledigte Aufgaben",
+      "taskCompletionHint": "Diese Woche erledigte operative Aufgaben."
     },
     "profile": {
       "assigned": "Zugewiesen",
@@ -2130,7 +2142,8 @@
   },
   "personalLanguage": {
     "label": "Ihre Sprache",
-    "placeholder": "Unternehmenssprache"
+    "placeholder": "Unternehmenssprache",
+    "saveFailed": "Sprache konnte nicht gespeichert werden"
   },
   "schedule": {
     "aForm": "Ein Formular",
@@ -2849,7 +2862,75 @@
     "couldNotTurnReminderOff": "Erinnerung konnte nicht ausgeschaltet werden",
     "allowDeactivateNamed": "Ausschalten erlauben {{title}}",
     "reminderWord": "Erinnerung",
-    "noUsersFound": "Keine Person gefunden"
+    "noUsersFound": "Keine Person gefunden",
+    "heading": "Dienstplan",
+    "eventsCalendar": "Veranstaltungskalender",
+    "panelTeamAvailability": "Teamverfügbarkeit",
+    "panelMyAvailability": "Meine Verfügbarkeit",
+    "panelTeamRequests": "Teamanfragen",
+    "panelMyTimeOff": "Meine Abwesenheit",
+    "panelMySwaps": "Meine Tausche",
+    "panelReminders": "Erinnerungen",
+    "panelTeamAvailabilityDescription": "Verfügbarkeitswahl und Änderungswünsche anderer Personen. Deine eigenen Stunden bleiben unter Meine Verfügbarkeit.",
+    "panelMyAvailabilityDescription": "Die Stunden, zu denen du arbeiten kannst. Speichern ändert hier nicht die Verfügbarkeit anderer.",
+    "panelTeamRequestsDescription": "Entscheide Schichttausche und Abwesenheiten des Teams. Das ändert nicht deine eigenen Stunden.",
+    "panelMyTimeOffDescription": "Beantrage Abwesenheit für dich. Andere Personen genehmigst du unter Teamanfragen.",
+    "panelMySwapsDescription": "Tausche, die du angefragt hast oder die dir angeboten wurden.",
+    "panelRemindersManagerDescription": "Behalte deine eigenen Erinnerungen und weise welche zu, die das Team sehen, aber nicht ändern kann.",
+    "panelRemindersStaffDescription": "Erinnerungen, die du für dich steuerst. Zugewiesene Erinnerungen bleiben, wie eine Führungskraft sie gesetzt hat.",
+    "retryDataSync": "Synchronisierung erneut versuchen",
+    "untilTime": "Bis {{time}}",
+    "unavailable": "Nicht verfügbar",
+    "dayMonShort": "Mo",
+    "dayTueShort": "Di",
+    "dayWedShort": "Mi",
+    "dayThuShort": "Do",
+    "dayFriShort": "Fr",
+    "daySatShort": "Sa",
+    "daySunShort": "So",
+    "openShift": "Offene Schicht",
+    "panelAvailability": "Verfügbarkeit",
+    "panelAvailabilityDescription": "Persönliche und Teamverfügbarkeit",
+    "panelTimeOff": "Abwesenheit",
+    "panelTimeOffDescription": "Abwesenheit beantragen oder Teamanfragen prüfen",
+    "panelShiftSwaps": "Schichttausch",
+    "panelShiftSwapsDescription": "Anfragen und Genehmigungen zum Schichttausch",
+    "panelRemindersDescription": "Persönliche Erinnerungen und Erinnerungen für das Team",
+    "repeatNone": "Wiederholt sich nicht",
+    "repeatMonthly": "Monatlich",
+    "repeatEveryTwoWeeks": "Alle 2 Wochen (14 Tage)",
+    "repeatEvery15Days": "Alle 15 Tage",
+    "repeatCustom": "Benutzerdefiniert",
+    "fixReduceHours": "Stunden reduzieren",
+    "fixMoveNextShift": "Nächste Schicht verschieben",
+    "vendorEcolab": "Ecolab-Service",
+    "vendorElectrician": "Elektriker",
+    "vendorCleaning": "Reinigungsteam",
+    "vendorInspection": "Gesundheitskontrolle",
+    "permissionOwn": "Eigener Dienstplan",
+    "permissionTeam": "Teamdienstplan",
+    "permissionPublished": "Veröffentlichtes Raster",
+    "permissionDrafts": "Entwurfswochen",
+    "permissionAssign": "Schichten erstellen und zuweisen",
+    "workflowSendReminder": "Verfügbarkeitserinnerung senden",
+    "workflowSendReminderDescription": "Das Team bitten, die Verfügbarkeit zu aktualisieren",
+    "workflowSendReminderAction": "Erinnerung an das ganze Team senden",
+    "workflowSetDeadline": "Frist für heute Abend setzen",
+    "workflowCollectUpdates": "Änderungen sammeln und Entwurf bauen",
+    "workflowCollectUpdatesDescription": "Verfügbarkeit sammeln und den Dienstplanentwurf erstellen",
+    "workflowCollectAvailability": "Verfügbarkeitsänderungen sammeln",
+    "workflowBuildDraft": "Dienstplanentwurf erstellen",
+    "workflowReviewConflicts": "Konflikte prüfen",
+    "workflowReview": "Prüfen und abschließen",
+    "workflowReviewDescription": "Prüfung am Morgen und Veröffentlichung am Nachmittag",
+    "workflowReviewMorning": "Entwurf prüfen (Morgen)",
+    "workflowFinalize": "Dienstplan abschließen",
+    "workflowPostChannels": "In den Kanälen veröffentlichen (Nachmittag)",
+    "workflowReminder": "Dienstplanerinnerung",
+    "workflowReminderDescription": "Letzte Erinnerung bevor die Woche beginnt",
+    "workflowSendScheduleReminder": "Dienstplanerinnerung senden",
+    "workflowConfirmCovered": "Bestätigen, dass alle Schichten besetzt sind",
+    "shiftEndsHint": "Die Schicht endet um {{time}}, {{hint}}."
   },
   "tasks": {
     "aTitleIsRequired": "Ein Titel ist erforderlich.",
@@ -3273,7 +3354,12 @@
     "oopsPageNotFound": "Hoppla! Seite nicht gefunden",
     "returnToHome": "Zurück zur Startseite",
     "unableToLoadModule": "Modul konnte nicht geladen werden",
-    "loadingModule": "Modul wird geladen..."
+    "loadingModule": "Modul wird geladen...",
+    "loadingWorkspace": "Arbeitsbereich wird geladen...",
+    "preparingWorkspace": "Arbeitsbereich wird vorbereitet...",
+    "loadingProfile": "Profil wird geladen...",
+    "loadingPage": "Seite wird geladen...",
+    "metaDescription": "Plattform für Geschäftsabläufe von FlowForce."
   },
   "nav": {
     "addNew": "Neu hinzufügen",
@@ -3905,7 +3991,35 @@
     "importFileTypes": "CSV, PDF, DOC, DOCX oder TXT. Die erste CSV-Zeile wird zu den Feldern.",
     "formImported": "Formular importiert",
     "fileReadyToEdit": "{{name}} kann jetzt bearbeitet werden.",
-    "publishedForm": "Veröffentlichtes Formular"
+    "publishedForm": "Veröffentlichtes Formular",
+    "ratingVeryPoor": "Sehr schlecht",
+    "ratingPoor": "Schlecht",
+    "ratingAverage": "Mittel",
+    "ratingGood": "Gut",
+    "ratingExcellent": "Ausgezeichnet",
+    "ratingFair": "Ausreichend",
+    "ratingVeryGood": "Sehr gut",
+    "fieldKind": {
+      "description": "Beschreibung",
+      "formula": "Formel",
+      "dropdown": "Auswahlliste",
+      "number": "Zahl",
+      "openEnded": "Offene Antwort",
+      "yesNo": "Ja/Nein",
+      "date": "Datum",
+      "numbersSlider": "Zahlenregler",
+      "numberSlider": "Zahlenregler",
+      "location": "Ort",
+      "imageUpload": "Bild hochladen",
+      "audioRecording": "Audioaufnahme",
+      "videoUpload": "Video hochladen",
+      "fileUpload": "Datei hochladen",
+      "task": "Aufgabe",
+      "scanner": "Scanner",
+      "imageSelection": "Bildauswahl",
+      "signature": "Unterschrift",
+      "rating": "Bewertung"
+    }
   },
   "updates": {
     "1Week": "1 Woche",
@@ -4883,7 +4997,13 @@
     "withExceptions": "mit Ausnahmen",
     "workflowAutomation": "Ablaufautomatisierung",
     "workflowQueue": "Ablauf-Queue",
-    "yearRetention": "Jahr Aufbewahrung"
+    "yearRetention": "Jahr Aufbewahrung",
+    "issueTaskComplianceTitle": "Die Aufgabenerfüllung sinkt",
+    "issueTaskComplianceDescription": "Die Abschlussquote liegt bei {{value}} % und damit unter dem Ziel von 85 %",
+    "issueInventoryTitle": "Hinweis zur Bestandsgesundheit",
+    "issueInventoryDescription": "Risiko von Fehlbestand oder Schwund in wichtigen Kategorien.",
+    "issueLaborTitle": "Druck bei den Personalkosten",
+    "issueLaborDescription": "Das Verhältnis von Personal zu Umsatz liegt über 33 %. Prüfe den Dienstplan."
   },
   "sections": {
     "accessPermissions": "Zugriffsberechtigungen",
@@ -5042,7 +5162,10 @@
     "urlPath": "URL-Pfad",
     "useTemplate": "Vorlage verwenden",
     "viewPage": "Seite ansehen",
-    "views": "Ansichten"
+    "views": "Ansichten",
+    "fallback": {
+      "description": "Bereich {{section}}"
+    }
   },
   "employees": {
     "activeCount": "{{count}} aktiv",
@@ -5703,7 +5826,35 @@
     "accessView": "Ansehen",
     "accessUpdate": "Aktualisieren",
     "accessDelete": "Löschen",
-    "tabPacks": "Pakete"
+    "tabPacks": "Pakete",
+    "channelEmail": "E-Mail",
+    "channelInApp": "In der App",
+    "channelSms": "SMS",
+    "channelPush": "Push",
+    "moduleScheduling": "Dienstplan",
+    "moduleSchedulingDescription": "Schichtänderungen und Bestätigungen",
+    "moduleTasks": "Aufgaben",
+    "moduleTasksDescription": "Zuweisungen und Fälligkeitserinnerungen",
+    "modulePayments": "Zahlungen",
+    "modulePaymentsDescription": "Ausgabengenehmigungen und Auszahlungen",
+    "moduleInventory": "Bestand",
+    "moduleInventoryDescription": "Zählungen, Bestellungen und Umbuchungen",
+    "moduleAnnouncements": "Ankündigungen",
+    "moduleAnnouncementsDescription": "Neuigkeiten für das ganze Unternehmen",
+    "timezoneUtc": "UTC",
+    "timezoneEastern": "Ost (USA und Kanada)",
+    "timezoneCentral": "Mitte (USA und Kanada)",
+    "timezoneMountain": "Berge (USA und Kanada)",
+    "timezonePacific": "Pazifik (USA und Kanada)",
+    "timezoneLondon": "London (Vereinigtes Königreich)",
+    "timezoneParis": "Paris (Frankreich)",
+    "timezoneTokyo": "Tokio (Japan)",
+    "providerToastDescription": "Abgleich von Lohn, Dienstplan und Umsatz",
+    "providerMarketmanDescription": "Abgleich von Bestand und Rezeptkosten",
+    "providerQuickbooksDescription": "Abgleich von Buchhaltung und Lohn",
+    "providerXeroDescription": "Buchhaltungsexporte und Abstimmung",
+    "providerAdpDescription": "Import von Lohn und tatsächlichen Stunden",
+    "generatedWorkspace": "Automatisch erstellter Arbeitsbereich"
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

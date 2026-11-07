@@ -2,6 +2,7 @@
 
 import { Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 interface AuthHeaderProps {
   inviteCode?: string | null;
@@ -12,6 +13,9 @@ export default function AuthHeader({ inviteCode }: AuthHeaderProps) {
 
   return (
     <div className="text-center space-y-2">
+      <div className="flex justify-end">
+        <LanguageSwitcher />
+      </div>
       <div className="flex items-center justify-center space-x-2">
         <Building2 className="h-8 w-8 text-primary" />
         <h1 className="text-3xl font-bold text-foreground">{t("auth.productName")}</h1>

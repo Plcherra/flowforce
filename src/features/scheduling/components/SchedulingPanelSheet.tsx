@@ -99,37 +99,39 @@ export function SchedulingPanelSheet({
   const panelTitle =
     panel === "availability"
       ? availabilityIsTeam
-        ? "Team availability"
-        : "My availability"
+        ? t("schedule.panelTeamAvailability")
+        : t("schedule.panelMyAvailability")
       : panel === "staff"
-        ? "Team requests"
+        ? t("schedule.panelTeamRequests")
         : panel === "timeoff"
-          ? "My time off"
+          ? t("schedule.panelMyTimeOff")
           : panel === "swaps"
-            ? "My swaps"
+            ? t("schedule.panelMySwaps")
             : panel === "workflow"
-              ? "Reminders"
+              ? t("schedule.panelReminders")
               : panel === "company-policies"
                 ? t("schedule.companyPolicies")
-                : (panelMeta?.label ?? "Scheduling");
+                : t("schedule.heading");
   const panelDescription =
     panel === "availability"
       ? availabilityIsTeam
-        ? "Availability choice and change requests for other people. Your own hours stay under My availability."
-        : "The hours you can work. Saving here does not change anyone else's availability."
+        ? t("schedule.panelTeamAvailabilityDescription")
+        : t("schedule.panelMyAvailabilityDescription")
       : panel === "staff"
-        ? "Decide the team's shift swaps and time off. This does not edit your own hours."
+        ? t("schedule.panelTeamRequestsDescription")
         : panel === "timeoff"
-          ? "Request time away for yourself. Approving other people is under Team requests."
+          ? t("schedule.panelMyTimeOffDescription")
           : panel === "swaps"
-            ? "Swaps you asked for or that were offered to you."
-              : panel === "workflow"
+            ? t("schedule.panelMySwapsDescription")
+            : panel === "workflow"
               ? role.canManageSchedule
-                ? "Keep your own reminders, and assign ones that staff can see but cannot change."
-                : "Reminders you control for yourself. Assigned reminders stay as a manager set them."
+                ? t("schedule.panelRemindersManagerDescription")
+                : t("schedule.panelRemindersStaffDescription")
               : panel === "company-policies"
                 ? t("schedule.companyPoliciesDescription")
-                : panelMeta?.description;
+                : panelMeta
+                  ? t(panelMeta.descriptionKey)
+                  : undefined;
 
   return (
     <Sheet open={panel !== null} onOpenChange={(open) => !open && onClose()}>
@@ -157,7 +159,7 @@ export function SchedulingPanelSheet({
               icon={Users}
               title={t("schedule.teamRequestsNeedALiveConnection")}
               description={t("literals.weNeedLiveStaffDataToProcessSwaps")}
-              actionLabel="Retry data sync"
+              actionLabel={t("schedule.retryDataSync")}
               onAction={onRetry}
               disabled={retryDisabled}
             />
@@ -180,7 +182,7 @@ export function SchedulingPanelSheet({
               icon={Clock}
               title={t("schedule.availabilityPreviewMode")}
               description={t("literals.employeeAvailabilityUpdatesAreReadOnlyUntilThe")}
-              actionLabel="Retry data sync"
+              actionLabel={t("schedule.retryDataSync")}
               onAction={onRetry}
               disabled={retryDisabled}
             />
@@ -218,7 +220,7 @@ export function SchedulingPanelSheet({
               icon={Calendar}
               title={t("schedule.timeOffUnavailable")}
               description={t("literals.timeOffRequestsResumeOnceSchedulingDataIs")}
-              actionLabel="Retry data sync"
+              actionLabel={t("schedule.retryDataSync")}
               onAction={onRetry}
               disabled={retryDisabled}
             />
@@ -235,7 +237,7 @@ export function SchedulingPanelSheet({
               icon={ArrowRightLeft}
               title={t("schedule.shiftSwapsUnavailable")}
               description={t("literals.shiftSwapRequestsResumeOnceSchedulingDataIs")}
-              actionLabel="Retry data sync"
+              actionLabel={t("schedule.retryDataSync")}
               onAction={onRetry}
               disabled={retryDisabled}
             />

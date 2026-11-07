@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import {
   compareHardcodedLiterals,
   compareLocaleKeySets,
+  compareUsedTranslationKeys,
   extractHardcodedLiterals,
+  extractStrictLiterals,
+  extractTranslationKeys,
 } from "./i18nCheck";
 
 export function runI18nCheckTests() {
@@ -66,4 +69,28 @@ export function runI18nCheckTests() {
   assert.ok(found.some((line) => line.endsWith("Could not save")), found.join("\n"));
   assert.equal(found.some((line) => line.includes("pending")), false);
   assert.equal(found.some((line) => line.includes("console")), false);
+
+  const missingUsed = compareUsedTranslationKeys(
+    ["settings.language", "settings.missing"],
+    ["settings.language"],
+  );
+  assert.deepEqual(missingUsed, ["missing translation key settings.missing"]);
+
+  const strictSource = `
+    const panelTitle = ready ? "Team availability" : "My availability";
+    const row = { label: "Eastern (US & Canada)", code: "utc" };
+    export function View() {
+      return <Spinner text="Loading workspace..." />;
+    }
+  `;
+  const strict = extractStrictLiterals(strictSource, "src/features/scheduling/View.tsx");
+  assert.ok(strict.some((line) => line.endsWith("Team availability")), strict.join("\n"));
+  assert.ok(strict.some((line) => line.endsWith("Eastern (US & Canada)")), strict.join("\n"));
+  assert.ok(strict.some((line) => line.endsWith("Loading workspace...")), strict.join("\n"));
+
+  const keys = extractTranslationKeys(
+    `export function View(){ const t = (key) => key; return t("schedule.heading"); }`,
+    "src/View.tsx",
+  );
+  assert.deepEqual(keys, ["schedule.heading"]);
 }

@@ -1,4 +1,6 @@
 import type { StaffAvailabilityRow } from "@/features/availability/utils/availabilityUtils";
+import i18n from "@/i18n/config";
+import { translateAvailabilityHint } from "@/i18n/translateAvailabilityHint";
 import type {
   TimeOffWithUser,
   UnavailabilityWithUser,
@@ -120,7 +122,7 @@ export function resolveEmployeeDayWindows(
   if (windows.length === 0) {
     blockers.push({
       kind: "outside_preference",
-      label: "Off",
+      label: "schedule.off",
       severity: "blocking",
     });
     return { windows: [], blockers };
@@ -148,7 +150,7 @@ export function resolveEmployeeDayWindows(
 
     blockers.push({
       kind: "pto",
-      label: "PTO pending",
+      label: "schedule.ptoPending",
       severity: "warning",
     });
   }
@@ -186,7 +188,7 @@ export function resolveEmployeeDayWindows(
     windows = subtractInterval(windows, blockStartMinutes, blockEndMinutes);
     blockers.push({
       kind: "unavailability",
-      label: "Unavailable",
+      label: "schedule.unavailable",
       severity: "blocking",
     });
   }
@@ -208,10 +210,10 @@ export function buildGridCellPresentation(
 
   if (hasBlockingPto || hasOffPreference || windows.length === 0) {
     const label = hasBlockingPto
-      ? "PTO"
+      ? "schedule.pto"
       : hasOffPreference
-        ? "Off"
-        : "Unavailable";
+        ? "schedule.off"
+        : "schedule.unavailable";
     return {
       status: "blocked",
       windows: [],
@@ -281,9 +283,16 @@ export function evaluateAssignment(params: {
               ),
             ),
           )
-        : "Unavailable");
+        : "schedule.unavailable");
+    const hintText =
+      translateAvailabilityHint(availabilityHint, (key, options) =>
+        i18n.t(key, options),
+      ) ?? availabilityHint;
     reasons.push(
-      `Shift ends ${minutesToHHmm(shiftEndMinutes)}, ${availabilityHint.toLowerCase()}.`,
+      i18n.t("schedule.shiftEndsHint", {
+        time: minutesToHHmm(shiftEndMinutes),
+        hint: hintText,
+      }),
     );
     return { allowed: false, severity: "blocking", reasons };
   }

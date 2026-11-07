@@ -8,13 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const WEEKDAYS = [
-  { value: "0", label: "Sunday" },
-  { value: "1", label: "Monday" },
-  { value: "2", label: "Tuesday" },
-  { value: "3", label: "Wednesday" },
-  { value: "4", label: "Thursday" },
-  { value: "5", label: "Friday" },
-  { value: "6", label: "Saturday" },
+  { value: "0", labelKey: "schedule.daySunday" },
+  { value: "1", labelKey: "schedule.dayMonday" },
+  { value: "2", labelKey: "schedule.dayTuesday" },
+  { value: "3", labelKey: "schedule.dayWednesday" },
+  { value: "4", labelKey: "schedule.dayThursday" },
+  { value: "5", labelKey: "schedule.dayFriday" },
+  { value: "6", labelKey: "schedule.daySaturday" },
 ] as const;
 
 type AvailabilityChoice = "open" | "fixed";
@@ -202,7 +202,7 @@ function WeekdaySelect({
         <option value="">{t("schedule.notSet")}</option>
         {WEEKDAYS.map((day) => (
           <option key={day.value} value={day.value}>
-            {day.label}
+            {t(day.labelKey)}
           </option>
         ))}
       </select>

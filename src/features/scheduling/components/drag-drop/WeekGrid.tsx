@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { dateLocale } from "@/features/scheduling/utils/dateLocale";
+import { translateAvailabilityHint } from "@/i18n/translateAvailabilityHint";
 import { shiftIsOpen } from "@/features/scheduling/utils/shiftChipPaint";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDroppable } from "@dnd-kit/core";
@@ -124,7 +125,9 @@ function AvailabilityCellOverlay({
           }}
         />
         <div className="relative p-1 text-[10px] font-medium text-destructive">
-          {approvedPto ? t("schedule.pto") : (cell.hint ?? t("schedule.off"))}
+          {approvedPto
+            ? t("schedule.pto")
+            : (translateAvailabilityHint(cell.hint, t) ?? t("schedule.off"))}
         </div>
       </div>
     );
@@ -148,7 +151,7 @@ function AvailabilityCellOverlay({
           )}
           data-testid="schedule-cell-availability-hint"
         >
-          {cell.hint ?? t("schedule.ptoPending")}
+          {translateAvailabilityHint(cell.hint, t) ?? t("schedule.ptoPending")}
         </div>
       )}
     </>
@@ -332,6 +335,15 @@ function EmployeeRowComponent({
 const GridCell = memo(GridCellComponent);
 const EmployeeRow = memo(EmployeeRowComponent);
 
+function scrollParent(start: HTMLElement | null): HTMLElement | null {
+  let node = start;
+  while (node) {
+    if (node.scrollWidth > node.clientWidth + 1) return node;
+    node = node.parentElement;
+  }
+  return start;
+}
+
 export function WeekGrid({
   weekDays,
   employees,
@@ -360,9 +372,10 @@ export function WeekGrid({
   const weekKey = weekDays[0]?.toISOString() ?? "";
 
   useLayoutEffect(() => {
-    const scroller = scrollContainerRef?.current ?? horizontalScrollRef.current;
-    if (!scroller) return;
     const alignToday = () => {
+      const start = scrollContainerRef?.current ?? horizontalScrollRef.current;
+      const scroller = scrollParent(start);
+      if (!scroller) return;
       const todayIndex = weekDays.findIndex((day) => isSameDay(day, new Date()));
       if (todayIndex < 0) return;
       if (scroller.scrollWidth <= scroller.clientWidth + 1) return;
@@ -372,7 +385,14 @@ export function WeekGrid({
     };
     alignToday();
     const frame = requestAnimationFrame(alignToday);
-    return () => cancelAnimationFrame(frame);
+    const observed = scrollContainerRef?.current ?? horizontalScrollRef.current;
+    const observer = new ResizeObserver(() => alignToday());
+    if (observed) observer.observe(observed);
+    if (observed?.parentElement) observer.observe(observed.parentElement);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [scrollContainerRef, weekDays, weekKey]);
 
   const unassignedLookup = useMemo(() => {
