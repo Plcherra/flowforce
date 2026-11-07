@@ -310,7 +310,7 @@
     },
     "coffee": {
       "title": "Café-Vorlage",
-      "description": "Starte mit Service und Küche, Kasse, Schichtleitung und Koch. Ändere die Namen oder fang neu an.",
+      "description": "Starte mit Service (Kasse, Barista, Schichtleitung), Küche (Bäcker/Vorbereitung) und einer Leitung. Ändere die Namen oder fang neu an.",
       "featureOpen": "Öffnungsliste",
       "featureShift": "Die Schicht und wer da ist",
       "featureClose": "Schließliste",
@@ -1146,20 +1146,43 @@
       }
     },
     "org": {
-      "useTemplate": "Die Café-Vorlage verwenden",
-      "startScratch": "Neu anfangen",
+      "useTemplate": "Café-Vorlage verwenden",
+      "startScratch": "Neu beginnen",
       "sourceLabel": "Wie möchtest du anfangen?",
       "addDepartment": "Abteilung hinzufügen",
       "teamTitle": "Abteilungen und Rollen",
       "departmentName": "Abteilung",
       "roleName": "Rolle",
       "addRole": "Rolle hinzufügen",
-      "permissionsHelp": "Jede Abteilung hat Vorgaben. Eine Rolle kann sie überschreiben.",
-      "permSchedule": "Den Plan sehen",
-      "permScheduleEdit": "Den Plan bearbeiten",
+      "permissionsHelp": "Die Vorschläge passen zu einem Café. Eine Rolle kann die Abteilung ändern.",
+      "permSchedule": "Dienstplan sehen",
+      "permScheduleEdit": "Dienstplan bearbeiten",
       "permForms": "Formulare und Listen ausfüllen",
       "permTasks": "Aufgaben sehen",
-      "permTasksUpdate": "Aufgaben aktualisieren"
+      "permTasksUpdate": "Aufgaben aktualisieren",
+      "teamHelp": "Beginnen Sie mit der Café-Vorlage oder legen Sie eigene an. Sie können das später in den Einstellungen ändern.",
+      "coffeeShop": "Café",
+      "emptyDepartments": "Fügen Sie Ihre erste Abteilung hinzu",
+      "emptyRoles": "Fügen Sie Ihre erste Rolle hinzu",
+      "removeDepartment": "Abteilung entfernen",
+      "removeRole": "Rolle entfernen",
+      "permissionsTitle": "Berechtigungen",
+      "permissionsEmpty": "Fügen Sie zuerst eine Abteilung und eine Rolle hinzu.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Kassierer",
+        "barista": "Barista",
+        "shiftLead": "Schichtleitung",
+        "bakerPrep": "Bäcker/Vorbereitung",
+        "manager": "Leitung"
+      },
+      "accountTitle": "Ihr Konto",
+      "next": "Weiter",
+      "back": "Zurück",
+      "finish": "Unternehmen erstellen",
+      "savePermissions": "Berechtigungen speichern",
+      "permissionsSaved": "Berechtigungen gespeichert"
     }
   },
   "auth": {
@@ -2348,7 +2371,8 @@
     "yield3": "Ausbeute",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Ausbeuteschätzungen und Kosten aktualisieren sich automatisch, wenn Sie die Mengen ändern.",
     "yieldQuantity": "Ausbeutemenge",
-    "yieldUnit": "Ausbeuteeinheit"
+    "yieldUnit": "Ausbeuteeinheit",
+    "onHold": "Pausiert"
   },
   "personalLanguage": {
     "label": "Ihre Sprache",

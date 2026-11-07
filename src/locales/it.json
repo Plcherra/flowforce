@@ -645,7 +645,7 @@
     },
     "coffee": {
       "title": "Modello caffetteria",
-      "description": "Parti da sala e cucina, cassa, responsabile turno e cuoco. Cambia i nomi oppure parti da zero.",
+      "description": "Parti da sala (cassiere, barista, capoturno), cucina (panettiere/preparazione) e un responsabile. Cambia i nomi oppure parti da zero.",
       "featureOpen": "Lista di apertura",
       "featureShift": "Il turno e chi c'è",
       "featureClose": "Lista di chiusura",
@@ -1326,20 +1326,43 @@
       }
     },
     "org": {
-      "useTemplate": "Usa il modello caffetteria",
-      "startScratch": "Parti da zero",
+      "useTemplate": "Usa il modello caffè",
+      "startScratch": "Inizia da zero",
       "sourceLabel": "Come vuoi iniziare?",
       "addDepartment": "Aggiungi reparto",
       "teamTitle": "Reparti e ruoli",
       "departmentName": "Reparto",
       "roleName": "Ruolo",
       "addRole": "Aggiungi ruolo",
-      "permissionsHelp": "Ogni reparto ha dei valori. Un ruolo può sostituirli.",
-      "permSchedule": "Vedi il piano",
-      "permScheduleEdit": "Modifica il piano",
-      "permForms": "Compila moduli e liste",
-      "permTasks": "Vedi le attività",
-      "permTasksUpdate": "Aggiorna le attività"
+      "permissionsHelp": "I permessi suggeriti vanno bene per un caffè. Un ruolo può cambiare quelli del reparto.",
+      "permSchedule": "Vedere i turni",
+      "permScheduleEdit": "Modificare i turni",
+      "permForms": "Compilare moduli e liste",
+      "permTasks": "Vedere le attività",
+      "permTasksUpdate": "Aggiornare le attività",
+      "teamHelp": "Parti dal modello caffè oppure aggiungi i tuoi. Puoi cambiarli dopo in Impostazioni.",
+      "coffeeShop": "Caffè",
+      "emptyDepartments": "Aggiungi il primo reparto",
+      "emptyRoles": "Aggiungi il primo ruolo",
+      "removeDepartment": "Rimuovi reparto",
+      "removeRole": "Rimuovi ruolo",
+      "permissionsTitle": "Permessi",
+      "permissionsEmpty": "Aggiungi prima un reparto e un ruolo.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Cassiere",
+        "barista": "Barista",
+        "shiftLead": "Capoturno",
+        "bakerPrep": "Panettiere/Preparazione",
+        "manager": "Responsabile"
+      },
+      "accountTitle": "Il tuo account",
+      "next": "Avanti",
+      "back": "Indietro",
+      "finish": "Crea azienda",
+      "savePermissions": "Salva permessi",
+      "permissionsSaved": "Permessi salvati"
     }
   },
   "auth": {
@@ -2348,7 +2371,8 @@
     "yield3": "resa",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Le stime di resa e i costi si aggiornano automaticamente quando cambi le quantità.",
     "yieldQuantity": "Quantità di resa",
-    "yieldUnit": "Unità di resa"
+    "yieldUnit": "Unità di resa",
+    "onHold": "In pausa"
   },
   "personalLanguage": {
     "label": "La tua lingua",

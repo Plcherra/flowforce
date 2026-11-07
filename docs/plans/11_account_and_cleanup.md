@@ -23,7 +23,7 @@ Order:
 
 1. Sign up (name, email, password).
 2. Company basics: name, time zone, language, optional logo. FlowForce is for coffee shops only. There is no business-type step.
-3. Departments and roles. The default is "Use the coffee shop template" (FOH: Cashier and Shift lead, BOH: Cook). The owner can edit names or choose "Start from scratch". This uses the department, role, and permission model from the departments work (role overrides department).
+3. Departments and roles. The default is "Use the coffee shop template" from `coffeeShopStarter` in `src/features/onboarding/utils/orgTemplates.ts`, the same source as pull request #35: FOH Cashier, Barista, and Shift lead; BOH Baker/Prep; plus Manager. The owner can edit names or choose "Start from scratch". A role override wins over the department.
 4. Permissions for that same setup. The template is still the default when they arrive here.
 5. First store and open/close hours.
 6. Invite team, optional.
@@ -65,7 +65,7 @@ Files already over 500 are in `scripts/file-length-allowlist.json`, largest firs
 
 ## Docs to realign later
 
-Do not delete these in this pull request. Release-gate contracts still read them (`check:vps-deploy-scripts`, `check:reverse-proxy-tls`, `check:monitoring-logging`, `check:production-runtime`):
+Not in this pull request. A follow-up pull request will archive them after the release contracts stop reading the files (`check:vps-deploy-scripts`, `check:reverse-proxy-tls`, `check:monitoring-logging`, `check:production-runtime`). Deleting them here fails Release gates:
 
 - `docs/production-vps-deploy.md` and the other VPS, Caddy, and Docker-on-a-VM docs.
 - `infrastructure/caddy/Caddyfile`.

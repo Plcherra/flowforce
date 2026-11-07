@@ -310,7 +310,7 @@
     },
     "coffee": {
       "title": "Plantilla de cafetería",
-      "description": "Empieza con sala y cocina, caja, encargado de turno y cocina. Cambia los nombres o empieza desde cero.",
+      "description": "Empieza con sala (cajero, barista, jefe de turno), cocina (panadero/preparación) y un gerente. Cambia los nombres o empieza desde cero.",
       "featureOpen": "Lista de apertura",
       "featureShift": "El turno y quién está",
       "featureClose": "Lista de cierre",
@@ -1313,12 +1313,35 @@
       "departmentName": "Departamento",
       "roleName": "Rol",
       "addRole": "Añadir rol",
-      "permissionsHelp": "Cada departamento tiene valores. Un rol puede sustituirlos.",
+      "permissionsHelp": "Los permisos sugeridos encajan en una cafetería. Un rol puede cambiar los de su departamento.",
       "permSchedule": "Ver el horario",
       "permScheduleEdit": "Editar el horario",
       "permForms": "Rellenar formularios y listas",
       "permTasks": "Ver tareas",
-      "permTasksUpdate": "Actualizar tareas"
+      "permTasksUpdate": "Actualizar tareas",
+      "teamHelp": "Empieza con la plantilla de cafetería o añade los tuyos. Puedes cambiarlo después en Ajustes.",
+      "coffeeShop": "Cafetería",
+      "emptyDepartments": "Añade tu primer departamento",
+      "emptyRoles": "Añade tu primer rol",
+      "removeDepartment": "Quitar departamento",
+      "removeRole": "Quitar rol",
+      "permissionsTitle": "Permisos",
+      "permissionsEmpty": "Añade primero un departamento y un rol.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Cajero",
+        "barista": "Barista",
+        "shiftLead": "Jefe de turno",
+        "bakerPrep": "Panadero/Preparación",
+        "manager": "Gerente"
+      },
+      "accountTitle": "Tu cuenta",
+      "next": "Siguiente",
+      "back": "Atrás",
+      "finish": "Crear empresa",
+      "savePermissions": "Guardar permisos",
+      "permissionsSaved": "Permisos guardados"
     }
   },
   "footer": {
@@ -2348,7 +2371,8 @@
     "yield3": "rendimiento",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Las estimaciones de rendimiento y los costos se actualizan solos cuando cambias las cantidades.",
     "yieldQuantity": "Cantidad de rendimiento",
-    "yieldUnit": "Unidad de rendimiento"
+    "yieldUnit": "Unidad de rendimiento",
+    "onHold": "En pausa"
   },
   "personalLanguage": {
     "label": "Tu idioma",

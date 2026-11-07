@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFormDistribution } from "@/features/forms/utils/formDistribution";
 import {
-  blankOrg,
-  orgTemplate,
+  coffeeShopStarter,
+  emptyOrgSetup,
   permissionValue,
   withRoleOverride,
 } from "@/features/onboarding/utils/orgTemplates";
@@ -15,11 +15,24 @@ import {
   type AccountWorkspaceInput,
 } from "./accountSetupModel";
 
+function shopNames(key: string) {
+  const names: Record<string, string> = {
+    "onboarding.org.names.foh": "FOH",
+    "onboarding.org.names.boh": "BOH",
+    "onboarding.org.names.cashier": "Cashier",
+    "onboarding.org.names.barista": "Barista",
+    "onboarding.org.names.shiftLead": "Shift lead",
+    "onboarding.org.names.bakerPrep": "Baker/Prep",
+    "onboarding.org.names.manager": "Manager",
+  };
+  return names[key] ?? key;
+}
+
 function workspace(): AccountWorkspaceInput {
   return {
     timezone: "Europe/Lisbon",
     locale: "en",
-    org: orgTemplate(),
+    org: coffeeShopStarter(shopNames),
     store: { name: "Rua", opens: "08:00", closes: "22:00" },
     starter: "lists",
     starterCopy: {
@@ -30,22 +43,17 @@ function workspace(): AccountWorkspaceInput {
 }
 
 export function runAccountSetupModelTests() {
-  const shop = orgTemplate();
+  const shop = coffeeShopStarter(shopNames);
   assert.equal(shop.businessType, "cafe");
   assert.deepEqual(
-    shop.departments.map((department) => department.id),
-    ["foh", "boh"],
+    shop.departments.map((department) => department.roles.map((role) => role.name)),
+    [["Cashier", "Barista", "Shift lead"], ["Baker/Prep"], ["Manager"]],
   );
-  assert.deepEqual(
-    shop.departments[0]?.roles.map((role) => role.name),
-    ["Cashier", "Shift lead"],
-  );
-  assert.equal(shop.departments[1]?.roles[0]?.name, "Cook");
-  assert.equal(blankOrg().departments[0]?.name, "");
-  assert.equal(blankOrg().departments[0]?.roles[0]?.name, "");
+  assert.equal(emptyOrgSetup().departments.length, 0);
+  assert.equal(shop.departments.some((department) => department.roles.some((role) => role.name === "Cook")), false);
 
   const floor = shop.departments[0];
-  const lead = floor?.roles[1];
+  const lead = floor?.roles[2];
   assert.ok(floor);
   assert.ok(lead);
   assert.equal(
@@ -63,12 +71,15 @@ export function runAccountSetupModelTests() {
   const names = records.customRoles.map((role) => role.name);
   assert.ok(names.includes("Owner"));
   assert.ok(names.includes("Cashier"));
-  assert.ok(names.includes("Cook"));
+  assert.ok(names.includes("Barista"));
+  assert.ok(names.includes("Baker/Prep"));
+  assert.ok(names.includes("Manager"));
+  assert.equal(names.includes("Cook"), false);
   assert.equal(
     records.customRoles.find((role) => role.name === "Cashier")?.is_system_role,
     false,
   );
-  assert.equal(enabledJobRoles(workspace()).length, 3);
+  assert.equal(enabledJobRoles(workspace()).length, 5);
   assert.equal(
     signupProblem({ firstName: "A", lastName: "B", email: "a@b.com", password: "short" }),
     "password",

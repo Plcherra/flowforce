@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next";
-import type { OrgSource } from "@/features/onboarding/utils/orgTemplates";
+type ListSource = "template" | "scratch";
 
 export function SourceChoice({
   source,
   onSource,
   name = "org-source",
 }: {
-  source: OrgSource;
-  onSource: (source: OrgSource) => void;
+  source: ListSource;
+  onSource: (source: ListSource) => void;
   name?: string;
 }) {
   const { t } = useTranslation();

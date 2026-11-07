@@ -41,12 +41,15 @@ test("walks signup through starter lists and does not create a company", async (
   await page.getByTestId("account-next").click();
 
   await expect(page.getByTestId("account-step-departments")).toBeVisible();
-  await expect(page.getByTestId("org-source-template")).toBeChecked();
+  await expect(page.getByTestId("org-start-template")).toHaveAttribute("data-active", "true");
   await expect(page.getByTestId("org-role-cashier")).toHaveValue("Cashier");
-  await expect(page.getByTestId("org-role-cook")).toHaveValue("Cook");
-  await page.getByTestId("org-source-scratch").check();
-  await expect(page.getByTestId("org-role-cashier")).toHaveCount(0);
-  await page.getByTestId("org-source-template").check();
+  await expect(page.getByTestId("org-role-barista")).toHaveValue("Barista");
+  await expect(page.getByTestId("org-role-baker")).toHaveValue("Baker/Prep");
+  await expect(page.getByTestId("org-role-manager")).toHaveValue("Manager");
+  await expect(page.getByTestId("org-role-cook")).toHaveCount(0);
+  await page.getByTestId("org-start-scratch").click();
+  await expect(page.getByTestId("org-empty-departments")).toBeVisible();
+  await page.getByTestId("org-start-template").click();
   await page.screenshot({
     path: "/opt/cursor/artifacts/onboarding-departments.png",
     fullPage: true,

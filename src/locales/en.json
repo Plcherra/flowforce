@@ -310,7 +310,7 @@
     },
     "coffee": {
       "title": "Coffee shop template",
-      "description": "Start with front of house and back of house, a cashier, a shift lead, and a cook. Edit the names, or start from scratch.",
+      "description": "Start with front of house (Cashier, Barista, Shift lead), back of house (Baker/Prep), and a Manager. Edit the names, or start from scratch.",
       "featureOpen": "Opening list",
       "featureShift": "The shift and who is on it",
       "featureClose": "Closing list",
@@ -1535,7 +1535,8 @@
     "yield3": "yield",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Yield estimates and costs update automatically as you change quantities.",
     "yieldQuantity": "Yield Quantity",
-    "yieldUnit": "Yield Unit"
+    "yieldUnit": "Yield Unit",
+    "onHold": "On hold"
   },
   "admin": {
     "title": "Admin Console",
@@ -2235,12 +2236,35 @@
       "departmentName": "Department",
       "roleName": "Role",
       "addRole": "Add role",
-      "permissionsHelp": "Each department has defaults. A role can override them.",
+      "permissionsHelp": "Suggested permissions fit a coffee shop. A role can override its department.",
       "permSchedule": "See the schedule",
       "permScheduleEdit": "Edit the schedule",
       "permForms": "Fill forms and lists",
       "permTasks": "See tasks",
-      "permTasksUpdate": "Update tasks"
+      "permTasksUpdate": "Update tasks",
+      "teamHelp": "Start from the coffee shop template, or add your own. You can change this later in Settings.",
+      "coffeeShop": "Coffee shop",
+      "emptyDepartments": "Add your first department",
+      "emptyRoles": "Add your first role",
+      "removeDepartment": "Remove department",
+      "removeRole": "Remove role",
+      "permissionsTitle": "Permissions",
+      "permissionsEmpty": "Add a department and a role first.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Cashier",
+        "barista": "Barista",
+        "shiftLead": "Shift lead",
+        "bakerPrep": "Baker/Prep",
+        "manager": "Manager"
+      },
+      "accountTitle": "Your account",
+      "next": "Next",
+      "back": "Back",
+      "finish": "Create company",
+      "savePermissions": "Save permissions",
+      "permissionsSaved": "Permissions saved"
     }
   },
   "auth": {

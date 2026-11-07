@@ -679,7 +679,7 @@
     },
     "coffee": {
       "title": "Modèle café",
-      "description": "Commencez avec la salle et la cuisine, un caissier, un responsable de service et un cuisinier. Modifiez les noms ou partez de zéro.",
+      "description": "Commencez avec la salle (caissier, barista, chef d'équipe), la cuisine (boulanger/préparation) et un gérant. Modifiez les noms ou partez de zéro.",
       "featureOpen": "Liste d'ouverture",
       "featureShift": "Le service et qui est là",
       "featureClose": "Liste de fermeture",
@@ -1327,19 +1327,42 @@
     },
     "org": {
       "useTemplate": "Utiliser le modèle café",
-      "startScratch": "Partir de zéro",
+      "startScratch": "Commencer de zéro",
       "sourceLabel": "Comment voulez-vous commencer ?",
       "addDepartment": "Ajouter un département",
       "teamTitle": "Départements et rôles",
       "departmentName": "Département",
       "roleName": "Rôle",
       "addRole": "Ajouter un rôle",
-      "permissionsHelp": "Chaque département a des valeurs. Un rôle peut les remplacer.",
+      "permissionsHelp": "Les autorisations suggérées conviennent à un café. Un rôle peut modifier celles de son département.",
       "permSchedule": "Voir le planning",
       "permScheduleEdit": "Modifier le planning",
-      "permForms": "Remplir les formulaires et les listes",
+      "permForms": "Remplir les formulaires et listes",
       "permTasks": "Voir les tâches",
-      "permTasksUpdate": "Mettre à jour les tâches"
+      "permTasksUpdate": "Mettre à jour les tâches",
+      "teamHelp": "Commencez par le modèle café, ou ajoutez les vôtres. Vous pourrez les modifier plus tard dans les réglages.",
+      "coffeeShop": "Café",
+      "emptyDepartments": "Ajoutez votre premier département",
+      "emptyRoles": "Ajoutez votre premier rôle",
+      "removeDepartment": "Retirer le département",
+      "removeRole": "Retirer le rôle",
+      "permissionsTitle": "Autorisations",
+      "permissionsEmpty": "Ajoutez d'abord un département et un rôle.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Caissier",
+        "barista": "Barista",
+        "shiftLead": "Chef d'équipe",
+        "bakerPrep": "Boulanger/Préparation",
+        "manager": "Gérant"
+      },
+      "accountTitle": "Votre compte",
+      "next": "Suivant",
+      "back": "Retour",
+      "finish": "Créer l'entreprise",
+      "savePermissions": "Enregistrer les autorisations",
+      "permissionsSaved": "Autorisations enregistrées"
     }
   },
   "auth": {
@@ -2348,7 +2371,8 @@
     "yield3": "rendement",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Les estimations de rendement et les coûts se mettent à jour automatiquement lorsque vous modifiez les quantités.",
     "yieldQuantity": "Quantité de rendement",
-    "yieldUnit": "Unité de rendement"
+    "yieldUnit": "Unité de rendement",
+    "onHold": "En attente"
   },
   "personalLanguage": {
     "label": "Votre langue",

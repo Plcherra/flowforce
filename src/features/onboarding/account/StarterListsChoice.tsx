@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SourceChoice } from "@/features/onboarding/components/SourceChoice";
-import type { OrgSource } from "@/features/onboarding/utils/orgTemplates";
+type ListSource = "template" | "scratch";
 
 export type StarterListDraft = {
   id: string;
@@ -16,9 +16,9 @@ export function StarterListsChoice({
   onSource,
   onChange,
 }: {
-  source: OrgSource;
+  source: ListSource;
   lists: StarterListDraft[];
-  onSource: (source: OrgSource) => void;
+  onSource: (source: ListSource) => void;
   onChange: (lists: StarterListDraft[]) => void;
 }) {
   const { t } = useTranslation();

@@ -4,13 +4,11 @@ import { Button } from "@/components/ui/button";
 import type { RegistrationData } from "@/hooks/useCompanyRegistration";
 import { OrgPermissionsStep } from "@/features/onboarding/components/OrgPermissionsStep";
 import { OrgSetupStep } from "@/features/onboarding/components/OrgSetupStep";
-import { SourceChoice } from "@/features/onboarding/components/SourceChoice";
 import {
-  blankOrg,
+  coffeeShopStarter,
+  emptyOrgSetup,
   orgReady,
-  orgTemplate,
   type OrgSetup,
-  type OrgSource,
 } from "@/features/onboarding/utils/orgTemplates";
 import {
   CompanyStep,
@@ -117,8 +115,7 @@ export default function AccountSetupWizard({
   const [timezone, setTimezone] = useState(browserTimezone);
   const [locale, setLocale] = useState<SetupLocale>(browserLocale);
   const [logo, setLogo] = useState<File | null>(null);
-  const [orgSource, setOrgSource] = useState<OrgSource>("template");
-  const [org, setOrg] = useState<OrgSetup>(() => orgTemplate());
+  const [org, setOrg] = useState<OrgSetup>(() => coffeeShopStarter(t));
   const [storeName, setStoreName] = useState("");
   const [opens, setOpens] = useState("08:00");
   const [closes, setCloses] = useState("22:00");
@@ -126,7 +123,7 @@ export default function AccountSetupWizard({
     { email: "", roleKey: "cashier" },
   ]);
   const [starter, setStarter] = useState<AccountStarter>("lists");
-  const [listSource, setListSource] = useState<OrgSource>("template");
+  const [listSource, setListSource] = useState<"template" | "scratch">("template");
   const [starterLists, setStarterLists] = useState<StarterListDraft[]>(() =>
     coffeeLists(t),
   );
@@ -232,12 +229,7 @@ export default function AccountSetupWizard({
     setStep((value) => value + 1);
   };
 
-  const chooseOrgSource = (source: OrgSource) => {
-    setOrgSource(source);
-    setOrg(source === "template" ? orgTemplate() : blankOrg());
-  };
-
-  const chooseListSource = (source: OrgSource) => {
+  const chooseListSource = (source: "template" | "scratch") => {
     setListSource(source);
     setStarter("lists");
     setStarterLists(source === "template" ? coffeeLists(t) : blankLists());
@@ -287,10 +279,7 @@ export default function AccountSetupWizard({
           />
         ) : null}
         {stepId === "departments" ? (
-          <div className="space-y-4">
-            <SourceChoice source={orgSource} onSource={chooseOrgSource} />
-            <OrgSetupStep setup={org} onChange={setOrg} />
-          </div>
+          <OrgSetupStep setup={org} onChange={setOrg} showStartChoice embedded />
         ) : null}
         {stepId === "permissions" ? (
           <OrgPermissionsStep setup={org} onChange={setOrg} />
