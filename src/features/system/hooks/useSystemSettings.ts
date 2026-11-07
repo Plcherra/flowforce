@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import i18n from "@/i18n/config";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany, type Company } from "@/hooks/useCompany";
@@ -298,7 +299,7 @@ export function useSystemSettings(
               name: "Demo Workspace",
               industry: null,
               size: null,
-              description: "Automatically generated workspace",
+              description: i18n.t("settings.generatedWorkspace"),
               website: null,
               phone: null,
               templateId: null,

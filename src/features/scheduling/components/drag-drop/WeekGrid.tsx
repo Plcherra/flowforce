@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { format, isSameDay } from "date-fns";
 import { dateLocale } from "@/features/scheduling/utils/dateLocale";
+import { translateAvailabilityHint } from "@/i18n/translateAvailabilityHint";
 import { shiftIsOpen } from "@/features/scheduling/utils/shiftChipPaint";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDroppable } from "@dnd-kit/core";
@@ -124,7 +125,9 @@ function AvailabilityCellOverlay({
           }}
         />
         <div className="relative p-1 text-[10px] font-medium text-destructive">
-          {approvedPto ? t("schedule.pto") : (cell.hint ?? t("schedule.off"))}
+          {approvedPto
+            ? t("schedule.pto")
+            : (translateAvailabilityHint(cell.hint, t) ?? t("schedule.off"))}
         </div>
       </div>
     );
@@ -148,7 +151,7 @@ function AvailabilityCellOverlay({
           )}
           data-testid="schedule-cell-availability-hint"
         >
-          {cell.hint ?? t("schedule.ptoPending")}
+          {translateAvailabilityHint(cell.hint, t) ?? t("schedule.ptoPending")}
         </div>
       )}
     </>

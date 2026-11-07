@@ -22,7 +22,7 @@ export function RouteLoadingBoundary({
   const defaultFallback = (
     <div className="flex flex-col h-screen overflow-hidden">
       <div className="flex-1 overflow-y-auto min-h-0 flex items-center justify-center p-6">
-        <LoadingSpinner text="Loading page..." />
+        <LoadingSpinner text={t("shell.loadingPage")} />
       </div>
     </div>
   );

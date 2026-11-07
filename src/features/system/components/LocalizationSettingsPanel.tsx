@@ -20,16 +20,18 @@ import { ErrorState } from "./ErrorState";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useLocalizationSettings } from "../hooks/useLocalizationSettings";
 import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { isAppLanguage } from "@/i18n/resolveLanguage";
 
 const TIMEZONE_OPTIONS = [
-  { value: "UTC", label: "UTC" },
-  { value: "America/New_York", label: "Eastern (US & Canada)" },
-  { value: "America/Chicago", label: "Central (US & Canada)" },
-  { value: "America/Denver", label: "Mountain (US & Canada)" },
-  { value: "America/Los_Angeles", label: "Pacific (US & Canada)" },
-  { value: "Europe/London", label: "London (UK)" },
-  { value: "Europe/Paris", label: "Paris (France)" },
-  { value: "Asia/Tokyo", label: "Tokyo (Japan)" },
+  { value: "UTC", labelKey: "settings.timezoneUtc" },
+  { value: "America/New_York", labelKey: "settings.timezoneEastern" },
+  { value: "America/Chicago", labelKey: "settings.timezoneCentral" },
+  { value: "America/Denver", labelKey: "settings.timezoneMountain" },
+  { value: "America/Los_Angeles", labelKey: "settings.timezonePacific" },
+  { value: "Europe/London", labelKey: "settings.timezoneLondon" },
+  { value: "Europe/Paris", labelKey: "settings.timezoneParis" },
+  { value: "Asia/Tokyo", labelKey: "settings.timezoneTokyo" },
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -51,6 +53,7 @@ const CURRENCY_OPTIONS = [
 
 export function LocalizationSettingsPanel() {
   const { t } = useTranslation();
+  const { changeLanguage, profileLanguage, profileLanguageReady } = useLanguage();
   const system = useSystemSettingsContext();
   const {
     loading,
@@ -93,7 +96,7 @@ export function LocalizationSettingsPanel() {
               <SelectContent>
                 {TIMEZONE_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.labelKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -103,9 +106,16 @@ export function LocalizationSettingsPanel() {
             <Label>{t("settings.language")}</Label>
             <Select
               value={state.language}
-              onValueChange={(value) =>
-                setState((prev) => ({ ...prev, language: value }))
-              }
+              onValueChange={(value) => {
+                setState((prev) => ({ ...prev, language: value }));
+                if (
+                  profileLanguageReady &&
+                  !profileLanguage &&
+                  isAppLanguage(value)
+                ) {
+                  void changeLanguage(value, "resolved");
+                }
+              }}
               disabled={!canEdit || loading}
             >
               <SelectTrigger>

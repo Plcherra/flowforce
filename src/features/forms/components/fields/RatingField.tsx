@@ -140,11 +140,11 @@ export function RatingField({
 
   const renderEmojiRating = () => {
     const emojis = [
-      { icon: Frown, label: "Very Poor", color: "text-destructive" },
-      { icon: Meh, label: "Poor", color: "text-warning" },
-      { icon: Smile, label: "Average", color: "text-warning" },
-      { icon: Smile, label: "Good", color: "text-success" },
-      { icon: Smile, label: "Excellent", color: "text-success" },
+      { icon: Frown, labelKey: "forms.ratingVeryPoor", color: "text-destructive" },
+      { icon: Meh, labelKey: "forms.ratingPoor", color: "text-warning" },
+      { icon: Smile, labelKey: "forms.ratingAverage", color: "text-warning" },
+      { icon: Smile, labelKey: "forms.ratingGood", color: "text-success" },
+      { icon: Smile, labelKey: "forms.ratingExcellent", color: "text-success" },
     ];
 
     const visibleEmojis = emojis.slice(0, maxRating);
@@ -170,7 +170,7 @@ export function RatingField({
               onClick={() => handleRatingClick(rating)}
               onMouseEnter={() => setHoverValue(rating)}
               onMouseLeave={() => setHoverValue(null)}
-              title={emoji.label}
+              title={t(emoji.labelKey)}
             >
               <IconComponent className="h-6 w-6" />
             </button>
@@ -271,7 +271,13 @@ export function RatingFieldPreview({
       config={{
         max_rating: 5,
         rating_type: "stars",
-        labels: ["Poor", "Fair", "Good", "Very Good", "Excellent"],
+        labels: [
+          t("forms.ratingPoor"),
+          t("forms.ratingFair"),
+          t("forms.ratingGood"),
+          t("forms.ratingVeryGood"),
+          t("forms.ratingExcellent"),
+        ],
       }}
       className={className}
     />

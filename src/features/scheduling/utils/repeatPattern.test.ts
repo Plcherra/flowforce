@@ -38,15 +38,15 @@ export function runRepeatPatternTests() {
 
   assert.equal(occursOn(everyTwoWeeks, "2026-10-11", "2026-10-26"), false);
   assert.deepEqual(
-    REPEAT_CHOICES.map((choice) => choice.label),
+    REPEAT_CHOICES.map((choice) => choice.labelKey),
     [
-      "Does not repeat",
-      "Daily",
-      "Weekly",
-      "Monthly",
-      "Every 2 weeks (14 days)",
-      "Every 15 days",
-      "Custom",
+      "schedule.repeatNone",
+      "schedule.repeatDaily",
+      "schedule.repeatWeekly",
+      "schedule.repeatMonthly",
+      "schedule.repeatEveryTwoWeeks",
+      "schedule.repeatEvery15Days",
+      "schedule.repeatCustom",
     ],
   );
 

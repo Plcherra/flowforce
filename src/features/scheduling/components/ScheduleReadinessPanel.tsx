@@ -14,27 +14,18 @@ import { ScheduleMoreMenu } from "./ScheduleMoreMenu";
 type Tone = "steady" | "watch" | "urgent";
 type ReadinessAction = SchedulingPanelId | "schedule" | "reports";
 
-const toneStyles: Record<
-  Tone,
-  { pill: string; badge: string; label: string }
-> = {
+const toneStyles: Record<Tone, { pill: string; badge: string }> = {
   steady: {
     pill: "border-success/80 bg-success/40",
-    badge:
-      "border-success/40 bg-success-muted text-success",
-    label: "Ready",
+    badge: "border-success/40 bg-success-muted text-success",
   },
   watch: {
     pill: "border-warning/80 bg-warning/50",
-    badge:
-      "border-warning/40 bg-warning-muted text-warning-foreground",
-    label: "Watch",
+    badge: "border-warning/40 bg-warning-muted text-warning-foreground",
   },
   urgent: {
     pill: "border-destructive/80 bg-destructive/50",
-    badge:
-      "border-destructive/40 bg-destructive/10 text-destructive",
-    label: "Fix",
+    badge: "border-destructive/40 bg-destructive/10 text-destructive",
   },
 };
 

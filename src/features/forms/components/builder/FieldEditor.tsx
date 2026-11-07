@@ -84,76 +84,76 @@ interface FieldEditorProps {
 }
 
 const fieldTypes = [
-  { value: "text", label: "Description", icon: "FileText", category: "basic" },
-  { value: "formula", label: "Formula", icon: "Calculator", category: "basic" },
+  { value: "text", labelKey: "forms.fieldKind.description", icon: "FileText", category: "basic" },
+  { value: "formula", labelKey: "forms.fieldKind.formula", icon: "Calculator", category: "basic" },
   {
     value: "select",
-    label: "Dropdown",
+    labelKey: "forms.fieldKind.dropdown",
     icon: "ChevronDown",
     category: "basic",
   },
-  { value: "number", label: "Number", icon: "Hash", category: "basic" },
+  { value: "number", labelKey: "forms.fieldKind.number", icon: "Hash", category: "basic" },
   {
     value: "textarea",
-    label: "Open ended",
+    labelKey: "forms.fieldKind.openEnded",
     icon: "AlignLeft",
     category: "basic",
   },
-  { value: "yes_no", label: "Yes/No", icon: "CheckCircle", category: "basic" },
-  { value: "date", label: "Date", icon: "Calendar", category: "basic" },
+  { value: "yes_no", labelKey: "forms.fieldKind.yesNo", icon: "CheckCircle", category: "basic" },
+  { value: "date", labelKey: "forms.fieldKind.date", icon: "Calendar", category: "basic" },
   {
     value: "number_slider",
-    label: "Number Slider",
+    labelKey: "forms.fieldKind.numberSlider",
     icon: "Sliders",
     category: "basic",
   },
   {
     value: "location",
-    label: "Location",
+    labelKey: "forms.fieldKind.location",
     icon: "MapPin",
     category: "location",
   },
   {
     value: "image_upload",
-    label: "Image Upload",
+    labelKey: "forms.fieldKind.imageUpload",
     icon: "ImageUp",
     category: "media",
   },
   {
     value: "audio_recording",
-    label: "Audio Recording",
+    labelKey: "forms.fieldKind.audioRecording",
     icon: "Mic",
     category: "media",
   },
   {
     value: "video_upload",
-    label: "Video Upload",
+    labelKey: "forms.fieldKind.videoUpload",
     icon: "Video",
     category: "media",
   },
-  { value: "file", label: "File upload", icon: "Upload", category: "media" },
+  { value: "file", labelKey: "forms.fieldKind.fileUpload", icon: "Upload", category: "media" },
   {
     value: "scanner",
-    label: "Scanner",
+    labelKey: "forms.fieldKind.scanner",
     icon: "ScanLine",
     category: "interactive",
   },
   {
     value: "image_selection",
-    label: "Image selection",
+    labelKey: "forms.fieldKind.imageSelection",
     icon: "Image",
     category: "interactive",
   },
   {
     value: "signature",
-    label: "Signature",
+    labelKey: "forms.fieldKind.signature",
     icon: "PenTool",
     category: "interactive",
   },
-  { value: "rating", label: "Rating", icon: "Star", category: "interactive" },
+  { value: "rating", labelKey: "forms.fieldKind.rating", icon: "Star", category: "interactive" },
   {
     value: "task",
-    label: "Task",
+    labelKey: "forms.fieldKind.task",
     icon: "CheckSquare",
     category: "interactive",
   },
@@ -399,8 +399,10 @@ export default function FieldEditor({
 
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded capitalize">
-                    {fieldTypes.find((t) => t.value === field.field_type)
-                      ?.label || field.field_type}
+                    {(() => {
+                      const match = fieldTypes.find((entry) => entry.value === field.field_type);
+                      return match ? t(match.labelKey) : field.field_type;
+                    })()}
                   </span>
                   <Button
                     variant="ghost"
@@ -511,7 +513,7 @@ export default function FieldEditor({
                                 <SelectItem key={type.value} value={type.value}>
                                   <div className="flex items-center gap-2">
                                     {getFieldIcon(type.value)}
-                                    {type.label}
+                                    {t(type.labelKey)}
                                   </div>
                                 </SelectItem>
                               ))}
@@ -815,7 +817,7 @@ export default function FieldEditor({
                               <SelectItem key={type.value} value={type.value}>
                                 <div className="flex items-center gap-2">
                                   {getFieldIcon(type.value)}
-                                  {type.label}
+                                  {t(type.labelKey)}
                                 </div>
                               </SelectItem>
                             ))}

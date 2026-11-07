@@ -5,13 +5,13 @@ import { policyIsOpen } from "@/features/scheduling/utils/policyDraft";
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const WEEKDAY_LABEL: Record<number, string> = {
-  1: "Mon",
-  2: "Tue",
-  3: "Wed",
-  4: "Thu",
-  5: "Fri",
-  6: "Sat",
-  0: "Sun",
+  1: "schedule.dayMonShort",
+  2: "schedule.dayTueShort",
+  3: "schedule.dayWedShort",
+  4: "schedule.dayThuShort",
+  5: "schedule.dayFriShort",
+  6: "schedule.daySatShort",
+  0: "schedule.daySunShort",
 };
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -33,9 +33,12 @@ function capText(value: number | null): string {
   return value == null ? "—" : String(value);
 }
 
-function weekdayText(days: number[]): string {
+function weekdayText(
+  days: number[],
+  t: (key: string) => string,
+): string {
   return WEEKDAY_ORDER.filter((day) => days.includes(day))
-    .map((day) => WEEKDAY_LABEL[day])
+    .map((day) => t(WEEKDAY_LABEL[day]))
     .join(", ");
 }
 
@@ -118,7 +121,7 @@ export function CompanyPolicyList({
             {t("schedule.maxPerYear")}: {capText(policy.capYear)}
           </p>
           <p className="text-muted-foreground">
-            {weekdayText(policy.eligibleWeekdays)}
+            {weekdayText(policy.eligibleWeekdays, t)}
             {" · "}
             {t("schedule.noticeInDays")}: {policy.noticeDays}
           </p>

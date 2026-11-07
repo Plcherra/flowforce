@@ -63,7 +63,7 @@ import { useTranslation } from "react-i18next";
 type ProviderMeta = {
   key: string;
   name: string;
-  description: string;
+  descriptionKey: string;
   authType: "api_key" | "oauth";
   documentation: string;
 };
@@ -72,35 +72,35 @@ const PROVIDERS: ProviderMeta[] = [
   {
     key: "toast",
     name: "Toast",
-    description: "Payroll, scheduling, and sales data sync",
+    descriptionKey: "settings.providerToastDescription",
     authType: "api_key",
     documentation: "https://pos.toasttab.com/",
   },
   {
     key: "marketman",
     name: "MarketMan",
-    description: "Inventory and recipe cost synchronization",
+    descriptionKey: "settings.providerMarketmanDescription",
     authType: "api_key",
     documentation: "https://www.marketman.com/",
   },
   {
     key: "quickbooks",
     name: "QuickBooks Online",
-    description: "Accounting and payroll sync",
+    descriptionKey: "settings.providerQuickbooksDescription",
     authType: "oauth",
     documentation: "https://quickbooks.intuit.com/",
   },
   {
     key: "xero",
     name: "Xero",
-    description: "Accounting exports and reconciliation",
+    descriptionKey: "settings.providerXeroDescription",
     authType: "oauth",
     documentation: "https://www.xero.com/",
   },
   {
     key: "gusto",
     name: "Gusto",
-    description: "Payroll and labor actual imports",
+    descriptionKey: "settings.providerAdpDescription",
     authType: "oauth",
     documentation: "https://gusto.com/",
   },
@@ -244,7 +244,7 @@ export function IntegrationSettingsPanel() {
                     </Badge>
                   </div>
                   <CardDescription className="text-xs">
-                    {provider.description}
+                    {t(provider.descriptionKey)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm">

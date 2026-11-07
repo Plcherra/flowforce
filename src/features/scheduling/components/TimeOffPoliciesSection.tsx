@@ -32,13 +32,13 @@ import {
 } from "@/features/scheduling/utils/policyTemplates";
 
 const WEEKDAYS = [
-  { value: 1, label: "Mon" },
-  { value: 2, label: "Tue" },
-  { value: 3, label: "Wed" },
-  { value: 4, label: "Thu" },
-  { value: 5, label: "Fri" },
-  { value: 6, label: "Sat" },
-  { value: 0, label: "Sun" },
+  { value: 1, labelKey: "schedule.dayMonShort" },
+  { value: 2, labelKey: "schedule.dayTueShort" },
+  { value: 3, labelKey: "schedule.dayWedShort" },
+  { value: 4, labelKey: "schedule.dayThuShort" },
+  { value: 5, labelKey: "schedule.dayFriShort" },
+  { value: 6, labelKey: "schedule.daySatShort" },
+  { value: 0, labelKey: "schedule.daySunShort" },
 ];
 
 const LEVEL_LABELS: Record<(typeof PRODUCT_LEVELS)[number], string> = {
@@ -357,7 +357,7 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
                     variant={weekdays.includes(day.value) ? "default" : "outline"}
                     onClick={() => toggleWeekday(day.value)}
                   >
-                    {day.label}
+                    {t(day.labelKey)}
                   </Button>
                 ))}
               </div>

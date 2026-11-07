@@ -1,4 +1,5 @@
 import { ReactNode, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet } from "@/lib/router-adapter";
 import { BottomIconNav } from "@/app-shell/navigation/bottomNav/BottomIconNav";
 import { TopNavbar } from "@/app-shell/layout/TopNavbar";
@@ -30,6 +31,7 @@ function WorkspaceLoadingState({ text }: { text: string }) {
 }
 
 export default function AppShell({ children }: AppShellProps) {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const profileState = useProfile();
   const resolvedProfile = profileState.profile;
@@ -42,11 +44,11 @@ export default function AppShell({ children }: AppShellProps) {
   });
 
   if (authLoading || !user) {
-    return <WorkspaceLoadingState text="Preparing your workspace..." />;
+    return <WorkspaceLoadingState text={t("shell.preparingWorkspace")} />;
   }
 
   if (!profileState.isReady || profileState.loading) {
-    return <WorkspaceLoadingState text="Loading your profile..." />;
+    return <WorkspaceLoadingState text={t("shell.loadingProfile")} />;
   }
 
   if (!companyId || resolvedProfile?.isPlaceholder) {
@@ -71,7 +73,7 @@ export default function AppShell({ children }: AppShellProps) {
           <Suspense
             fallback={
               <div className="p-6">
-                <LoadingSpinner text="Loading page..." />
+                <LoadingSpinner text={t("shell.loadingPage")} />
               </div>
             }
           >

@@ -13,8 +13,15 @@ import { logger } from "@/utils/logger";
 import { supabase } from "@/integrations/supabase/client";
 // Initialize i18next, including the React binding, before using it.
 import "@/i18n/client";
+import type { AppLanguage } from "@/i18n/resolveLanguage";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  initialLanguage,
+}: {
+  children: React.ReactNode;
+  initialLanguage?: AppLanguage;
+}) {
   // Debug logging for dev
   useEffect(() => {
     if (appEnv.DEV) {
@@ -83,7 +90,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AuthStateCacheInvalidator />
         <AuthProvider>
           <ProfileProvider>
-            <LanguageProvider>
+            <LanguageProvider initialLanguage={initialLanguage}>
               <TooltipProvider>
                 {children}
                 <Toaster />

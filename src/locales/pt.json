@@ -80,7 +80,8 @@
     "noDataFound": "Nenhum dado encontrado",
     "noDataToDisplay": "Não há dados para exibir no momento.",
     "loadingData": "Carregando dados...",
-    "formsBuilder": "Criador de formulários"
+    "formsBuilder": "Criador de formulários",
+    "notAvailable": "Indisponível"
   },
   "navigation": {
     "communication": "Comunicação",
@@ -101,7 +102,11 @@
     "financial": "Financeiro",
     "leaderboard": "Classificação",
     "operationsIntelligence": "Inteligência de operações",
-    "team": "Equipe"
+    "team": "Equipe",
+    "addNew": "Adicionar",
+    "custom": "Personalizado",
+    "more": "Mais",
+    "moreDescription": "Ir para outra parte do FlowForce"
   },
   "landing": {
     "checkoutCanceled": "Checkout cancelado",
@@ -455,7 +460,8 @@
       "comingSoon": "Em Breve",
       "videoInProduction": "Este vídeo está sendo produzido atualmente.",
       "notFound": "não encontrado",
-      "requestedNotFound": "O {{type}} solicitado não pôde ser encontrado."
+      "requestedNotFound": "O {{type}} solicitado não pôde ser encontrado.",
+      "lastUpdated": "Atualizado"
     }
   },
   "features": {
@@ -534,7 +540,13 @@
       "managePeople": "Gerenciar equipe",
       "managePeopleDesc": "Atualize funções e departamentos",
       "openTasks": "Abrir tarefas",
-      "openTasksDesc": "Veja as atividades prioritárias"
+      "openTasksDesc": "Veja as atividades prioritárias",
+      "coverageCompleteness": "Cobertura completa",
+      "coverageCompletenessHint": "Cobertura planeada face aos turnos necessários esta semana.",
+      "hoursUtilisation": "Utilização de horas",
+      "hoursUtilisationHint": "Horas planeadas comparadas com a capacidade.",
+      "taskCompletion": "Tarefas concluídas",
+      "taskCompletionHint": "Tarefas operacionais concluídas esta semana."
     },
     "profile": {
       "assigned": "Atribuído",
@@ -2130,7 +2142,8 @@
   },
   "personalLanguage": {
     "label": "Seu idioma",
-    "placeholder": "Idioma da empresa"
+    "placeholder": "Idioma da empresa",
+    "saveFailed": "Não foi possível guardar o seu idioma"
   },
   "schedule": {
     "aForm": "Um formulário",
@@ -2849,7 +2862,75 @@
     "couldNotTurnReminderOff": "Não foi possível desligar o lembrete",
     "allowDeactivateNamed": "Permitir desativar {{title}}",
     "reminderWord": "lembrete",
-    "noUsersFound": "Nenhuma pessoa encontrada"
+    "noUsersFound": "Nenhuma pessoa encontrada",
+    "heading": "Escala",
+    "eventsCalendar": "Calendário de eventos",
+    "panelTeamAvailability": "Disponibilidade da equipa",
+    "panelMyAvailability": "A minha disponibilidade",
+    "panelTeamRequests": "Pedidos da equipa",
+    "panelMyTimeOff": "O meu tempo livre",
+    "panelMySwaps": "As minhas trocas",
+    "panelReminders": "Lembretes",
+    "panelTeamAvailabilityDescription": "A escolha de disponibilidade e os pedidos de alteração de outras pessoas. As suas horas ficam em A minha disponibilidade.",
+    "panelMyAvailabilityDescription": "As horas em que pode trabalhar. Guardar aqui não altera a disponibilidade de mais ninguém.",
+    "panelTeamRequestsDescription": "Decida as trocas de turno e o tempo livre da equipa. Isto não edita as suas horas.",
+    "panelMyTimeOffDescription": "Peça tempo livre para si. Aprovar outras pessoas fica em Pedidos da equipa.",
+    "panelMySwapsDescription": "Trocas que pediu ou que lhe foram oferecidas.",
+    "panelRemindersManagerDescription": "Guarde os seus lembretes e atribua outros que a equipa pode ver mas não alterar.",
+    "panelRemindersStaffDescription": "Lembretes que controla para si. Os lembretes atribuídos ficam como um responsável os definiu.",
+    "retryDataSync": "Tentar sincronizar de novo",
+    "untilTime": "Até {{time}}",
+    "unavailable": "Indisponível",
+    "dayMonShort": "Seg",
+    "dayTueShort": "Ter",
+    "dayWedShort": "Qua",
+    "dayThuShort": "Qui",
+    "dayFriShort": "Sex",
+    "daySatShort": "Sáb",
+    "daySunShort": "Dom",
+    "openShift": "Turno aberto",
+    "panelAvailability": "Disponibilidade",
+    "panelAvailabilityDescription": "Disponibilidade pessoal e da equipa",
+    "panelTimeOff": "Tempo livre",
+    "panelTimeOffDescription": "Peça tempo livre ou reveja os pedidos da equipa",
+    "panelShiftSwaps": "Trocas de turno",
+    "panelShiftSwapsDescription": "Pedidos e aprovações de trocas de turno",
+    "panelRemindersDescription": "Lembretes pessoais e os atribuídos à equipa",
+    "repeatNone": "Não se repete",
+    "repeatMonthly": "Mensal",
+    "repeatEveryTwoWeeks": "A cada 2 semanas (14 dias)",
+    "repeatEvery15Days": "A cada 15 dias",
+    "repeatCustom": "Personalizado",
+    "fixReduceHours": "Reduzir horas",
+    "fixMoveNextShift": "Mover o turno seguinte",
+    "vendorEcolab": "Serviço Ecolab",
+    "vendorElectrician": "Eletricista",
+    "vendorCleaning": "Equipa de limpeza",
+    "vendorInspection": "Inspeção sanitária",
+    "permissionOwn": "A minha escala",
+    "permissionTeam": "Escala da equipa",
+    "permissionPublished": "Grelha publicada",
+    "permissionDrafts": "Semanas em rascunho",
+    "permissionAssign": "Criar e atribuir turnos",
+    "workflowSendReminder": "Enviar lembrete de disponibilidade",
+    "workflowSendReminderDescription": "Avisar a equipa para atualizar a disponibilidade",
+    "workflowSendReminderAction": "Enviar lembrete a toda a equipa",
+    "workflowSetDeadline": "Definir o prazo para hoje à noite",
+    "workflowCollectUpdates": "Recolher alterações e criar o rascunho",
+    "workflowCollectUpdatesDescription": "Reunir a disponibilidade e criar a escala em rascunho",
+    "workflowCollectAvailability": "Recolher atualizações de disponibilidade",
+    "workflowBuildDraft": "Criar a escala em rascunho",
+    "workflowReviewConflicts": "Rever conflitos",
+    "workflowReview": "Rever e fechar",
+    "workflowReviewDescription": "Revisão de manhã e publicação à tarde",
+    "workflowReviewMorning": "Rever o rascunho (manhã)",
+    "workflowFinalize": "Fechar a escala",
+    "workflowPostChannels": "Publicar nos canais (tarde)",
+    "workflowReminder": "Lembrete da escala",
+    "workflowReminderDescription": "Último lembrete antes de a semana começar",
+    "workflowSendScheduleReminder": "Enviar lembrete da escala",
+    "workflowConfirmCovered": "Confirmar que todos os turnos estão cobertos",
+    "shiftEndsHint": "O turno termina às {{time}}, {{hint}}."
   },
   "tasks": {
     "aTitleIsRequired": "O título é obrigatório.",
@@ -3273,7 +3354,12 @@
     "oopsPageNotFound": "Ops! Página não encontrada",
     "returnToHome": "Voltar ao início",
     "unableToLoadModule": "Não foi possível carregar o módulo",
-    "loadingModule": "Carregando módulo..."
+    "loadingModule": "Carregando módulo...",
+    "loadingWorkspace": "Carregando o espaço de trabalho...",
+    "preparingWorkspace": "A preparar o seu espaço de trabalho...",
+    "loadingProfile": "A carregar o seu perfil...",
+    "loadingPage": "A carregar a página...",
+    "metaDescription": "Plataforma de operações empresariais da FlowForce."
   },
   "nav": {
     "addNew": "Adicionar",
@@ -3905,7 +3991,35 @@
     "importFileTypes": "CSV, PDF, DOC, DOCX ou TXT. A primeira linha de um CSV vira os campos.",
     "formImported": "Formulário importado",
     "fileReadyToEdit": "{{name}} está pronto para editar.",
-    "publishedForm": "Formulário publicado"
+    "publishedForm": "Formulário publicado",
+    "ratingVeryPoor": "Muito fraca",
+    "ratingPoor": "Fraca",
+    "ratingAverage": "Média",
+    "ratingGood": "Boa",
+    "ratingExcellent": "Excelente",
+    "ratingFair": "Razoável",
+    "ratingVeryGood": "Muito boa",
+    "fieldKind": {
+      "description": "Descrição",
+      "formula": "Fórmula",
+      "dropdown": "Lista pendente",
+      "number": "Número",
+      "openEnded": "Resposta aberta",
+      "yesNo": "Sim/Não",
+      "date": "Data",
+      "numbersSlider": "Controlo deslizante",
+      "numberSlider": "Controlo numérico",
+      "location": "Localização",
+      "imageUpload": "Carregar imagem",
+      "audioRecording": "Gravação de áudio",
+      "videoUpload": "Carregar vídeo",
+      "fileUpload": "Carregar ficheiro",
+      "task": "Tarefa",
+      "scanner": "Leitor",
+      "imageSelection": "Seleção de imagem",
+      "signature": "Assinatura",
+      "rating": "Avaliação"
+    }
   },
   "updates": {
     "1Week": "1 semana",
@@ -4883,7 +4997,13 @@
     "withExceptions": "com exceções",
     "workflowAutomation": "Automatização de fluxos",
     "workflowQueue": "Fila de fluxos",
-    "yearRetention": "ano de retenção"
+    "yearRetention": "ano de retenção",
+    "issueTaskComplianceTitle": "O cumprimento das tarefas está a descer",
+    "issueTaskComplianceDescription": "A taxa de conclusão é {{value}}%, abaixo da meta de 85%",
+    "issueInventoryTitle": "Aviso de saúde do inventário",
+    "issueInventoryDescription": "Há risco de rutura ou quebra em categorias importantes.",
+    "issueLaborTitle": "Pressão do custo de mão de obra",
+    "issueLaborDescription": "A relação entre mão de obra e vendas ultrapassa 33%. Reveja a escala."
   },
   "sections": {
     "accessPermissions": "Permissões de acesso",
@@ -5042,7 +5162,10 @@
     "urlPath": "Caminho do URL",
     "useTemplate": "Usar modelo",
     "viewPage": "Ver página",
-    "views": "vistas"
+    "views": "vistas",
+    "fallback": {
+      "description": "Secção {{section}}"
+    }
   },
   "employees": {
     "activeCount": "{{count}} ativos",
@@ -5703,7 +5826,35 @@
     "accessView": "Ver",
     "accessUpdate": "Atualizar",
     "accessDelete": "Eliminar",
-    "tabPacks": "Pacotes"
+    "tabPacks": "Pacotes",
+    "channelEmail": "E-mail",
+    "channelInApp": "Na app",
+    "channelSms": "SMS",
+    "channelPush": "Push",
+    "moduleScheduling": "Escala",
+    "moduleSchedulingDescription": "Atualizações e confirmações de turnos",
+    "moduleTasks": "Tarefas",
+    "moduleTasksDescription": "Atribuições e lembretes de prazo",
+    "modulePayments": "Pagamentos",
+    "modulePaymentsDescription": "Aprovações de despesas e pagamentos",
+    "moduleInventory": "Inventário",
+    "moduleInventoryDescription": "Contagens, encomendas e transferências",
+    "moduleAnnouncements": "Anúncios",
+    "moduleAnnouncementsDescription": "Novidades de toda a empresa",
+    "timezoneUtc": "UTC",
+    "timezoneEastern": "Leste (EUA e Canadá)",
+    "timezoneCentral": "Centro (EUA e Canadá)",
+    "timezoneMountain": "Montanha (EUA e Canadá)",
+    "timezonePacific": "Pacífico (EUA e Canadá)",
+    "timezoneLondon": "Londres (Reino Unido)",
+    "timezoneParis": "Paris (França)",
+    "timezoneTokyo": "Tóquio (Japão)",
+    "providerToastDescription": "Sincronização de folha, escala e vendas",
+    "providerMarketmanDescription": "Sincronização de inventário e custo de receitas",
+    "providerQuickbooksDescription": "Sincronização de contabilidade e folha",
+    "providerXeroDescription": "Exportações contabilísticas e reconciliação",
+    "providerAdpDescription": "Importação de folha e horas reais",
+    "generatedWorkspace": "Espaço de trabalho gerado automaticamente"
   },
   "roles": {
     "aiSuggestions": "Sugestões de IA",

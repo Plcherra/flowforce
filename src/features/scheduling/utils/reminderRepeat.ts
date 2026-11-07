@@ -1,8 +1,8 @@
 import i18n from "@/i18n/config";
 export const REMINDER_REPEAT_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "weekdays", label: "Weekdays" },
+  { value: "daily", labelKey: "schedule.repeatDaily" },
+  { value: "weekly", labelKey: "schedule.repeatWeekly" },
+  { value: "weekdays", labelKey: "schedule.repeatWeekdays" },
 ] as const;
 
 export type ReminderRepeat = (typeof REMINDER_REPEAT_OPTIONS)[number]["value"];
@@ -16,7 +16,7 @@ export function repeatLabel(
   labels?: Partial<Record<ReminderRepeat | "once", string>>,
 ): string {
   const match = REMINDER_REPEAT_OPTIONS.find((option) => option.value === interval);
-  if (match) return labels?.[match.value] ?? match.label;
+  if (match) return labels?.[match.value] ?? i18n.t(match.labelKey);
   if (!interval) return labels?.once ?? i18n.t("literals.once");
   return interval.charAt(0).toUpperCase() + interval.slice(1);
 }

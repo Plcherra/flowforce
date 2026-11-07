@@ -80,7 +80,8 @@
     "noDataFound": "Aucune donnée trouvée",
     "noDataToDisplay": "Il n'y a aucune donnée à afficher pour le moment.",
     "loadingData": "Chargement des données...",
-    "formsBuilder": "Créateur de formulaires"
+    "formsBuilder": "Créateur de formulaires",
+    "notAvailable": "Indisponible"
   },
   "dashboard": {
     "greeting": {
@@ -124,7 +125,13 @@
       "managePeople": "Gérer le personnel",
       "managePeopleDesc": "Mettre à jour les rôles et affectations",
       "openTasks": "Ouvrir les tâches",
-      "openTasksDesc": "Consulter les actions prioritaires"
+      "openTasksDesc": "Consulter les actions prioritaires",
+      "coverageCompleteness": "Couverture complète",
+      "coverageCompletenessHint": "Couverture planifiée par rapport aux postes requis cette semaine.",
+      "hoursUtilisation": "Utilisation des heures",
+      "hoursUtilisationHint": "Heures planifiées comparées à la capacité.",
+      "taskCompletion": "Tâches terminées",
+      "taskCompletionHint": "Tâches opérationnelles terminées cette semaine."
     },
     "profile": {
       "assigned": "Attribué",
@@ -252,7 +259,11 @@
     "dailyOperations": "Opérations quotidiennes",
     "leaderboard": "Classement",
     "operationsIntelligence": "Intelligence opérationnelle",
-    "team": "Équipe"
+    "team": "Équipe",
+    "addNew": "Ajouter",
+    "custom": "Personnalisé",
+    "more": "Plus",
+    "moreDescription": "Aller vers une autre partie de FlowForce"
   },
   "resources": {
     "addYourTeam": "Ajoutez votre équipe",
@@ -405,7 +416,8 @@
       "comingSoon": "Bientôt Disponible",
       "videoInProduction": "Cette vidéo est actuellement en production.",
       "notFound": "non trouvé",
-      "requestedNotFound": "Le {{type}} demandé n'a pas pu être trouvé."
+      "requestedNotFound": "Le {{type}} demandé n'a pas pu être trouvé.",
+      "lastUpdated": "Mis à jour"
     }
   },
   "features": {
@@ -2130,7 +2142,8 @@
   },
   "personalLanguage": {
     "label": "Votre langue",
-    "placeholder": "Langue de l'entreprise"
+    "placeholder": "Langue de l'entreprise",
+    "saveFailed": "Impossible d'enregistrer votre langue"
   },
   "schedule": {
     "aForm": "Un formulaire",
@@ -2849,7 +2862,75 @@
     "couldNotTurnReminderOff": "Impossible d'éteindre le rappel",
     "allowDeactivateNamed": "Autoriser la désactivation {{title}}",
     "reminderWord": "rappel",
-    "noUsersFound": "Aucune personne trouvée"
+    "noUsersFound": "Aucune personne trouvée",
+    "heading": "Planning",
+    "eventsCalendar": "Calendrier des événements",
+    "panelTeamAvailability": "Disponibilités de l'équipe",
+    "panelMyAvailability": "Mes disponibilités",
+    "panelTeamRequests": "Demandes de l'équipe",
+    "panelMyTimeOff": "Mes congés",
+    "panelMySwaps": "Mes échanges",
+    "panelReminders": "Rappels",
+    "panelTeamAvailabilityDescription": "Le choix de disponibilité et les demandes de modification des autres personnes. Vos heures restent dans Mes disponibilités.",
+    "panelMyAvailabilityDescription": "Les heures où vous pouvez travailler. Enregistrer ici ne change la disponibilité de personne d'autre.",
+    "panelTeamRequestsDescription": "Décidez des échanges de poste et des congés de l'équipe. Cela ne modifie pas vos propres heures.",
+    "panelMyTimeOffDescription": "Demandez un congé pour vous. Approuver d'autres personnes se fait dans Demandes de l'équipe.",
+    "panelMySwapsDescription": "Échanges que vous avez demandés ou qui vous ont été proposés.",
+    "panelRemindersManagerDescription": "Gardez vos rappels et assignez-en que l'équipe peut voir mais pas modifier.",
+    "panelRemindersStaffDescription": "Rappels que vous contrôlez pour vous. Les rappels assignés restent tels qu'un responsable les a définis.",
+    "retryDataSync": "Réessayer la synchronisation",
+    "untilTime": "Jusqu'à {{time}}",
+    "unavailable": "Indisponible",
+    "dayMonShort": "Lun",
+    "dayTueShort": "Mar",
+    "dayWedShort": "Mer",
+    "dayThuShort": "Jeu",
+    "dayFriShort": "Ven",
+    "daySatShort": "Sam",
+    "daySunShort": "Dim",
+    "openShift": "Poste ouvert",
+    "panelAvailability": "Disponibilités",
+    "panelAvailabilityDescription": "Disponibilités personnelles et de l'équipe",
+    "panelTimeOff": "Congés",
+    "panelTimeOffDescription": "Demandez un congé ou examinez les demandes de l'équipe",
+    "panelShiftSwaps": "Échanges de poste",
+    "panelShiftSwapsDescription": "Demandes et approbations d'échanges de poste",
+    "panelRemindersDescription": "Rappels personnels et rappels assignés à l'équipe",
+    "repeatNone": "Ne se répète pas",
+    "repeatMonthly": "Mensuel",
+    "repeatEveryTwoWeeks": "Toutes les 2 semaines (14 jours)",
+    "repeatEvery15Days": "Tous les 15 jours",
+    "repeatCustom": "Personnalisé",
+    "fixReduceHours": "Réduire les heures",
+    "fixMoveNextShift": "Déplacer le poste suivant",
+    "vendorEcolab": "Service Ecolab",
+    "vendorElectrician": "Électricien",
+    "vendorCleaning": "Équipe de nettoyage",
+    "vendorInspection": "Inspection sanitaire",
+    "permissionOwn": "Mon planning",
+    "permissionTeam": "Planning de l'équipe",
+    "permissionPublished": "Grille publiée",
+    "permissionDrafts": "Semaines en brouillon",
+    "permissionAssign": "Créer et assigner des postes",
+    "workflowSendReminder": "Envoyer un rappel de disponibilité",
+    "workflowSendReminderDescription": "Prévenir l'équipe de mettre à jour sa disponibilité",
+    "workflowSendReminderAction": "Envoyer un rappel à toute l'équipe",
+    "workflowSetDeadline": "Fixer l'échéance pour ce soir",
+    "workflowCollectUpdates": "Collecter les mises à jour et créer le brouillon",
+    "workflowCollectUpdatesDescription": "Rassembler les disponibilités et créer le planning brouillon",
+    "workflowCollectAvailability": "Collecter les mises à jour de disponibilité",
+    "workflowBuildDraft": "Créer le planning brouillon",
+    "workflowReviewConflicts": "Examiner les conflits",
+    "workflowReview": "Relire et finaliser",
+    "workflowReviewDescription": "Relecture le matin et publication l'après-midi",
+    "workflowReviewMorning": "Relire le brouillon (matin)",
+    "workflowFinalize": "Finaliser le planning",
+    "workflowPostChannels": "Publier sur les canaux (après-midi)",
+    "workflowReminder": "Rappel du planning",
+    "workflowReminderDescription": "Dernier rappel avant le début de la semaine",
+    "workflowSendScheduleReminder": "Envoyer le rappel du planning",
+    "workflowConfirmCovered": "Confirmer que tous les postes sont couverts",
+    "shiftEndsHint": "Le poste se termine à {{time}}, {{hint}}."
   },
   "tasks": {
     "aTitleIsRequired": "Un titre est obligatoire.",
@@ -3273,7 +3354,12 @@
     "oopsPageNotFound": "Oups ! Page introuvable",
     "returnToHome": "Retour à l'accueil",
     "unableToLoadModule": "Impossible de charger le module",
-    "loadingModule": "Chargement du module…"
+    "loadingModule": "Chargement du module…",
+    "loadingWorkspace": "Chargement de l'espace de travail...",
+    "preparingWorkspace": "Préparation de votre espace de travail...",
+    "loadingProfile": "Chargement de votre profil...",
+    "loadingPage": "Chargement de la page...",
+    "metaDescription": "Plateforme d'opérations d'entreprise propulsée par FlowForce."
   },
   "nav": {
     "addNew": "Ajouter",
@@ -3905,7 +3991,35 @@
     "importFileTypes": "CSV, PDF, DOC, DOCX ou TXT. La première ligne d'un CSV devient les champs.",
     "formImported": "Formulaire importé",
     "fileReadyToEdit": "{{name}} est prêt à modifier.",
-    "publishedForm": "Formulaire publié"
+    "publishedForm": "Formulaire publié",
+    "ratingVeryPoor": "Très mauvais",
+    "ratingPoor": "Mauvais",
+    "ratingAverage": "Moyen",
+    "ratingGood": "Bon",
+    "ratingExcellent": "Excellent",
+    "ratingFair": "Passable",
+    "ratingVeryGood": "Très bon",
+    "fieldKind": {
+      "description": "Description",
+      "formula": "Formule",
+      "dropdown": "Liste déroulante",
+      "number": "Nombre",
+      "openEnded": "Réponse ouverte",
+      "yesNo": "Oui/Non",
+      "date": "Date",
+      "numbersSlider": "Curseur de nombres",
+      "numberSlider": "Curseur numérique",
+      "location": "Lieu",
+      "imageUpload": "Importer une image",
+      "audioRecording": "Enregistrement audio",
+      "videoUpload": "Importer une vidéo",
+      "fileUpload": "Importer un fichier",
+      "task": "Tâche",
+      "scanner": "Scanner",
+      "imageSelection": "Sélection d'image",
+      "signature": "Signature",
+      "rating": "Note"
+    }
   },
   "updates": {
     "1Week": "1 semaine",
@@ -4883,7 +4997,13 @@
     "withExceptions": "avec exceptions",
     "workflowAutomation": "Automatisation des flux",
     "workflowQueue": "File des flux",
-    "yearRetention": "an de conservation"
+    "yearRetention": "an de conservation",
+    "issueTaskComplianceTitle": "Le respect des tâches baisse",
+    "issueTaskComplianceDescription": "Le taux d'achèvement est de {{value}} %, sous l'objectif de 85 %",
+    "issueInventoryTitle": "Alerte sur la santé des stocks",
+    "issueInventoryDescription": "Risque de rupture ou de démarque sur des catégories clés.",
+    "issueLaborTitle": "Pression du coût du travail",
+    "issueLaborDescription": "Le ratio travail/ventes dépasse 33 %. Revoyez le planning."
   },
   "sections": {
     "accessPermissions": "Autorisations d'accès",
@@ -5042,7 +5162,10 @@
     "urlPath": "Chemin d'URL",
     "useTemplate": "Utiliser le modèle",
     "viewPage": "Voir la page",
-    "views": "vues"
+    "views": "vues",
+    "fallback": {
+      "description": "Section {{section}}"
+    }
   },
   "employees": {
     "activeCount": "{{count}} actifs",
@@ -5703,7 +5826,35 @@
     "accessView": "Voir",
     "accessUpdate": "Modifier",
     "accessDelete": "Supprimer",
-    "tabPacks": "Packs"
+    "tabPacks": "Packs",
+    "channelEmail": "E-mail",
+    "channelInApp": "Dans l'app",
+    "channelSms": "SMS",
+    "channelPush": "Push",
+    "moduleScheduling": "Planning",
+    "moduleSchedulingDescription": "Mises à jour et confirmations des postes",
+    "moduleTasks": "Tâches",
+    "moduleTasksDescription": "Affectations et rappels d'échéance",
+    "modulePayments": "Paiements",
+    "modulePaymentsDescription": "Approbations de notes de frais et versements",
+    "moduleInventory": "Inventaire",
+    "moduleInventoryDescription": "Comptages, commandes et transferts",
+    "moduleAnnouncements": "Annonces",
+    "moduleAnnouncementsDescription": "Nouvelles pour toute l'entreprise",
+    "timezoneUtc": "UTC",
+    "timezoneEastern": "Est (États-Unis et Canada)",
+    "timezoneCentral": "Centre (États-Unis et Canada)",
+    "timezoneMountain": "Rocheuses (États-Unis et Canada)",
+    "timezonePacific": "Pacifique (États-Unis et Canada)",
+    "timezoneLondon": "Londres (Royaume-Uni)",
+    "timezoneParis": "Paris (France)",
+    "timezoneTokyo": "Tokyo (Japon)",
+    "providerToastDescription": "Synchronisation de la paie, du planning et des ventes",
+    "providerMarketmanDescription": "Synchronisation de l'inventaire et du coût des recettes",
+    "providerQuickbooksDescription": "Synchronisation de la comptabilité et de la paie",
+    "providerXeroDescription": "Exports comptables et rapprochement",
+    "providerAdpDescription": "Import de la paie et des heures réelles",
+    "generatedWorkspace": "Espace de travail généré automatiquement"
   },
   "roles": {
     "aiSuggestions": "Suggestions d'IA",

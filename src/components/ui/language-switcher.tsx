@@ -22,6 +22,7 @@ export function LanguageSwitcher() {
           variant="ghost"
           size="sm"
           className="text-foreground"
+          data-testid="language-switcher"
         >
           <Languages className="mr-2 h-4 w-4" />
           {currentLang?.flag} {currentLang?.name}
