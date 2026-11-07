@@ -135,11 +135,6 @@
     "ticket": "FF-SPLIT-27"
   },
   {
-    "path": "src/features/scheduling/components/ShiftWizardDialog.tsx",
-    "lines": 710,
-    "ticket": "FF-SPLIT-31"
-  },
-  {
     "path": "src/features/analytics/components/FormAnalytics.tsx",
     "lines": 706,
     "ticket": "FF-SPLIT-28"
@@ -158,6 +153,11 @@
     "path": "src/features/scheduling/repositories/schedulingRepository.ts",
     "lines": 702,
     "ticket": "FF-SPLIT-32"
+  },
+  {
+    "path": "src/features/scheduling/components/ShiftWizardDialog.tsx",
+    "lines": 698,
+    "ticket": "FF-SPLIT-31"
   },
   {
     "path": "src/features/forms/components/wizard/FormFieldRenderer.tsx",
@@ -298,11 +298,6 @@
     "path": "src/features/ai/components/ScenarioSimulator.tsx",
     "lines": 550,
     "ticket": "FF-SPLIT-59"
-  },
-  {
-    "path": "src/features/scheduling/components/shift-wizard/DetailsTab.tsx",
-    "lines": 548,
-    "ticket": "FF-SPLIT-63"
   },
   {
     "path": "src/features/company-updates/wizard/steps/DesignContentStep.tsx",

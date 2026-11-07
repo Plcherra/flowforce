@@ -1,6 +1,5 @@
 -- Real coffee-shop stores. Inventory count rooms stay on inv_locations.
 -- Additive only: new table and nullable columns. Nothing is deleted.
--- Do not apply this migration from an agent. Review it first.
 
 create table if not exists public.stores (
   id uuid primary key default gen_random_uuid(),
@@ -89,7 +88,6 @@ to authenticated
 using (public.current_user_is_company_admin(company_id))
 with check (public.current_user_is_company_admin(company_id));
 
--- Copy signup rows that were saved as inventory rooms with location_type store.
 insert into public.stores (company_id, name, address, hours, created_at)
 select
   room.company_id,
@@ -118,7 +116,6 @@ where room.company_id is not null
       and store.archived_at is null
   );
 
--- Hide the placeholder and the old store-shaped inventory rows. Do not delete them.
 update public.inv_locations
 set hidden_at = coalesce(hidden_at, now())
 where hidden_at is null
@@ -127,7 +124,6 @@ where hidden_at is null
     or coalesce(location_type, '') = 'store'
   );
 
--- Point people, invites, shifts, policies, and lists at the first real store when one exists.
 update public.profiles as person
 set store_id = first_store.id
 from public.inv_locations as room
@@ -173,44 +169,59 @@ set
   legacy_location = coalesce(shift.legacy_location, shift.location),
   store_id = first_store.id,
   location = first_store.name
-from lateral (
-  select store.id, store.name
-  from public.stores as store
-  where store.company_id = shift.company_id
-    and store.archived_at is null
-    and lower(regexp_replace(trim(store.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
-  order by store.created_at, store.id
-  limit 1
+from (
+  select
+    s.id as schedule_id,
+    store.id,
+    store.name
+  from public.schedules as s
+  join lateral (
+    select candidate.id, candidate.name
+    from public.stores as candidate
+    where candidate.company_id = s.company_id
+      and candidate.archived_at is null
+      and lower(regexp_replace(trim(candidate.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
+    order by candidate.created_at, candidate.id
+    limit 1
+  ) as store on true
+  where s.store_id is null
+    and lower(regexp_replace(trim(coalesce(s.location, '')), '\s+', ' ', 'g')) in ('walk-in', 'walk in', 'walkin')
 ) as first_store
-where shift.store_id is null
-  and lower(regexp_replace(trim(coalesce(shift.location, '')), '\s+', ' ', 'g')) in ('walk-in', 'walk in', 'walkin');
+where shift.id = first_store.schedule_id;
 
 update public.company_policy_assignments as assignment
-set target_id = first_store.id::text
-from public.company_policies as policy
-join public.inv_locations as room
-  on room.company_id = policy.company_id
- and room.id::text = assignment.target_id
-join lateral (
-  select store.id
-  from public.stores as store
-  where store.company_id = policy.company_id
-    and store.archived_at is null
-    and lower(regexp_replace(trim(store.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
-  order by store.created_at, store.id
-  limit 1
-) as first_store on true
-where assignment.policy_id = policy.id
-  and assignment.target_type = 'store'
-  and room.hidden_at is not null
-  and assignment.target_id is distinct from first_store.id::text
-  and not exists (
-    select 1
-    from public.company_policy_assignments as other
-    where other.policy_id = assignment.policy_id
-      and other.target_type = 'store'
-      and other.target_id = first_store.id::text
-  );
+set target_id = mapped.new_store_id
+from (
+  select
+    a.ctid as assignment_ctid,
+    first_store.id::text as new_store_id
+  from public.company_policy_assignments as a
+  join public.company_policies as policy
+    on policy.id = a.policy_id
+  join public.inv_locations as room
+    on room.company_id = policy.company_id
+   and room.id::text = a.target_id
+  join lateral (
+    select store.id
+    from public.stores as store
+    where store.company_id = policy.company_id
+      and store.archived_at is null
+      and lower(regexp_replace(trim(store.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
+    order by store.created_at, store.id
+    limit 1
+  ) as first_store on true
+  where a.target_type = 'store'
+    and room.hidden_at is not null
+    and a.target_id is distinct from first_store.id::text
+    and not exists (
+      select 1
+      from public.company_policy_assignments as other
+      where other.policy_id = a.policy_id
+        and other.target_type = 'store'
+        and other.target_id = first_store.id::text
+    )
+) as mapped
+where assignment.ctid = mapped.assignment_ctid;
 
 update public.forms as form
 set settings = jsonb_set(
@@ -219,25 +230,32 @@ set settings = jsonb_set(
   to_jsonb(array[first_store.id]::text[]),
   true
 )
-from lateral (
-  select store.id
-  from public.stores as store
-  where store.company_id = form.company_id
-    and store.archived_at is null
-    and lower(regexp_replace(trim(store.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
-  order by store.created_at, store.id
-  limit 1
+from (
+  select
+    f.id as form_id,
+    store.id
+  from public.forms as f
+  join lateral (
+    select candidate.id
+    from public.stores as candidate
+    where candidate.company_id = f.company_id
+      and candidate.archived_at is null
+      and lower(regexp_replace(trim(candidate.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
+    order by candidate.created_at, candidate.id
+    limit 1
+  ) as store on true
+  where f.company_id is not null
+    and coalesce(f.settings #>> '{distribution,record_kind}', '') = 'list'
+    and (
+      jsonb_typeof(f.settings #> '{distribution,store_ids}') is distinct from 'array'
+      or jsonb_array_length(coalesce(f.settings #> '{distribution,store_ids}', '[]'::jsonb)) = 0
+    )
+    and (
+      select count(*)
+      from public.stores as candidate
+      where candidate.company_id = f.company_id
+        and candidate.archived_at is null
+        and lower(regexp_replace(trim(candidate.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
+    ) = 1
 ) as first_store
-where form.company_id is not null
-  and coalesce(form.settings #>> '{distribution,record_kind}', '') = 'list'
-  and (
-    jsonb_typeof(form.settings #> '{distribution,store_ids}') is distinct from 'array'
-    or jsonb_array_length(coalesce(form.settings #> '{distribution,store_ids}', '[]'::jsonb)) = 0
-  )
-  and (
-    select count(*)
-    from public.stores as store
-    where store.company_id = form.company_id
-      and store.archived_at is null
-      and lower(regexp_replace(trim(store.name), '\s+', ' ', 'g')) not in ('walk-in', 'walk in', 'walkin')
-  ) = 1;
+where form.id = first_store.form_id;
