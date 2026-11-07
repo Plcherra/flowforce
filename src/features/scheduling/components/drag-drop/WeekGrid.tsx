@@ -471,7 +471,7 @@ export function WeekGrid({
   return (
     <div
       ref={horizontalScrollRef}
-      className="min-w-[800px]"
+      className="w-full min-w-0 lg:min-w-[800px]"
       data-testid="schedule-week-grid"
       data-minimized={minimizedView ? "true" : "false"}
     >
