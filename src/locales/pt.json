@@ -132,7 +132,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "O vídeo de demonstração do produto está em produção",
     "pendingTask": "Tarefa pendente",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Escolha um plano abaixo para restaurar escalas, estoque, tarefas e relatórios da sua equipe.",
-    "plansForRestaurantOperations": "Planos para operações de restaurante",
+    "plansForRestaurantOperations": "Planos para cafés",
     "reactivateYourWorkspace": "Reative seu espaço",
     "realWorldUseCaseExamples": "Exemplos de uso reais",
     "retailStore": "LOJA",
@@ -144,10 +144,10 @@
     "signInToManageAnExistingWorkspace": "Entre para gerenciar um espaço existente",
     "taskCompleted": "Tarefa concluída",
     "trend": "Tendência",
-    "usedBy": "Usado por mais de 1.200 locais em todo o mundo",
+    "usedBy": "Feito para cafés",
     "operationsMade": "Operações Realizadas",
     "simple": "Simples.",
-    "subtitle": "Operações está incluído em cada empresa. Adicione Equipe, Percepções ou Stock quando precisar dessas ferramentas.",
+    "subtitle": "O FlowForce é a app diária para cafés. O turno, as listas e a equipa num só lugar.",
     "model": {
       "eyebrow": "Operações primeiro",
       "title": "OPS é a base. Os pacotes acrescentam o resto.",
@@ -179,14 +179,14 @@
     "fasterScheduling": "Agendamento mais rápido",
     "averageSetup": "Tempo médio de configuração",
     "uptimeGuarantee": "Garantia de tempo de atividade",
-    "everythingNeeds": "Tudo que seu Negócio Precisa",
-    "sixModules": "Seis módulos poderosos que trabalham juntos perfeitamente para otimizar todos os aspectos das operações do seu negócio.",
+    "everythingNeeds": "Tudo o que o seu café precisa",
+    "sixModules": "Escala, listas, mensagens e o resto do turno, numa app.",
     "learnMore": "Saiba Mais",
     "features": "Recursos",
     "templatesNav": "Modelos",
     "industries": {
-      "title": "Construído para Sua Indústria",
-      "subtitle": "Comece mais rápido com templates pré-configurados projetados especificamente para seu setor empresarial.",
+      "title": "Feito para cafés",
+      "subtitle": "Abrir, gerir o turno e fechar. Um modelo para começar.",
       "explore": "Explorar",
       "template": "Template",
       "retail": {
@@ -237,9 +237,9 @@
       }
     },
     "testimonials": {
-      "title": "Amado por Empresas em Crescimento",
-      "subtitle": "Junte-se a milhares de empresas que transformaram suas operações com FlowForce.",
-      "trustedBy": "Confiado por líderes da indústria",
+      "title": "Usado por cafés",
+      "subtitle": "Os cafés usam o FlowForce para ter o turno, as listas e a equipa claros.",
+      "trustedBy": "Da confiança de cafés",
       "quotes": {
         "sarahChen": "FlowForce transformou completamente nossas operações. Passamos do caos para a eficiência organizada em apenas duas semanas. Nossos conflitos de agendamento caíram 90%.",
         "michaelRodriguez": "Apenas o sistema de gestão de tarefas nos economizou 15 horas por semana. Os recursos de automação são incríveis e a equipe adotou instantaneamente.",
@@ -307,6 +307,14 @@
         "customerSatisfaction": "Satisfação do Cliente",
         "supportAvailable": "Suporte Disponível"
       }
+    },
+    "coffee": {
+      "title": "Modelo de café",
+      "description": "Comece com sala e cozinha, caixa, chefe de turno e cozinheiro. Mude os nomes ou comece do zero.",
+      "featureOpen": "Lista de abertura",
+      "featureShift": "O turno e quem está",
+      "featureClose": "Lista de fecho",
+      "start": "Comece o seu café"
     }
   },
   "resources": {
@@ -1189,7 +1197,7 @@
       },
       "company": {
         "title": "Dados da empresa",
-        "description": "Adicione o nome, o tipo de negócio, o fuso horário e o idioma. O logótipo é opcional.",
+        "description": "Adicione o nome, o fuso horário e o idioma. O logótipo é opcional.",
         "name": "Nome da empresa",
         "businessType": "Tipo de negócio",
         "choose": "Escolha um tipo de negócio",
@@ -1214,7 +1222,7 @@
       },
       "departments": {
         "title": "Departamentos e funções",
-        "description": "Comece pelo modelo do seu tipo de negócio. Desligue as funções de que não precisa."
+        "description": "Use o modelo de café e edite-o, ou comece do zero."
       },
       "department": {
         "foh": "Sala",
@@ -1279,18 +1287,38 @@
         "closingItem1": "Limpar as estações",
         "closingItem2": "Fechar a caixa",
         "closingItem3": "Trancar e anotar as sobras",
-        "shiftTitle": "Primeiro turno"
+        "shiftTitle": "Primeiro turno",
+        "listTitle": "Nome da lista",
+        "listItem": "Item da lista",
+        "addItem": "Adicionar item",
+        "addList": "Adicionar lista"
       },
       "error": {
         "name": "Adicione o nome e o apelido.",
         "email": "Introduza um e-mail válido.",
         "password": "Use pelo menos 8 caracteres.",
-        "company": "Adicione o nome, o tipo de negócio, o fuso horário e o idioma.",
+        "company": "Adicione o nome, o fuso horário e o idioma.",
         "role": "Ative pelo menos uma função.",
         "store": "Adicione o nome da loja e o horário.",
         "invite": "Verifique o e-mail do convite ou deixe-o em branco para ignorar.",
         "failed": "Não foi possível concluir a configuração. Tente novamente."
       }
+    },
+    "org": {
+      "useTemplate": "Usar o modelo de café",
+      "startScratch": "Começar do zero",
+      "sourceLabel": "Como quer começar?",
+      "addDepartment": "Adicionar departamento",
+      "teamTitle": "Departamentos e funções",
+      "departmentName": "Departamento",
+      "roleName": "Função",
+      "addRole": "Adicionar função",
+      "permissionsHelp": "Cada departamento tem sugestões. Uma função pode substituí-las.",
+      "permSchedule": "Ver o horário",
+      "permScheduleEdit": "Editar o horário",
+      "permForms": "Preencher formulários e listas",
+      "permTasks": "Ver tarefas",
+      "permTasksUpdate": "Atualizar tarefas"
     }
   },
   "footer": {

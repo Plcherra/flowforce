@@ -2,35 +2,40 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import type { RegistrationData } from "@/hooks/useCompanyRegistration";
+import { OrgPermissionsStep } from "@/features/onboarding/components/OrgPermissionsStep";
+import { OrgSetupStep } from "@/features/onboarding/components/OrgSetupStep";
+import { SourceChoice } from "@/features/onboarding/components/SourceChoice";
+import {
+  blankOrg,
+  orgReady,
+  orgTemplate,
+  type OrgSetup,
+  type OrgSource,
+} from "@/features/onboarding/utils/orgTemplates";
 import {
   CompanyStep,
-  DepartmentsStep,
   InviteStep,
-  PermissionsStep,
   SignupStep,
   StarterStep,
   StoreStep,
 } from "./AccountSetupSteps";
 import {
+  StarterListsChoice,
+  type StarterListDraft,
+} from "./StarterListsChoice";
+import {
+  COFFEE_INDUSTRY,
   DEFAULT_COMPANY_SIZE,
   FIXED_OPS_SECTIONS,
   LOCALES,
   companyProblem,
-  departmentsProblem,
   fixedOpsTemplate,
-  industryForBusinessType,
   inviteEmailProblem,
   onboardingRecordsFromWorkspace,
-  setDepartmentPermission,
-  setRolePermission,
   signupProblem,
   storeProblem,
-  templateFor,
   type AccountStarter,
   type AccountWorkspaceInput,
-  type BusinessType,
-  type PlainPermission,
-  type SetupDepartment,
   type SetupLocale,
 } from "./accountSetupModel";
 
@@ -69,6 +74,29 @@ function browserLocale(): SetupLocale {
   return LOCALES.includes(code as SetupLocale) ? (code as SetupLocale) : "en";
 }
 
+function coffeeLists(translate: (key: string) => string): StarterListDraft[] {
+  return [
+    {
+      id: "opening",
+      title: translate("onboarding.account.starter.openingTitle"),
+      items: [1, 2, 3].map((index) =>
+        translate(`onboarding.account.starter.openingItem${index}`),
+      ),
+    },
+    {
+      id: "closing",
+      title: translate("onboarding.account.starter.closingTitle"),
+      items: [1, 2, 3].map((index) =>
+        translate(`onboarding.account.starter.closingItem${index}`),
+      ),
+    },
+  ];
+}
+
+function blankLists(): StarterListDraft[] {
+  return [{ id: "list-1", title: "", items: [""] }];
+}
+
 export default function AccountSetupWizard({
   onComplete,
   onCancel,
@@ -86,64 +114,51 @@ export default function AccountSetupWizard({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [businessType, setBusinessType] = useState<BusinessType | "">("");
-  const [templateType, setTemplateType] = useState<BusinessType | "">("");
   const [timezone, setTimezone] = useState(browserTimezone);
   const [locale, setLocale] = useState<SetupLocale>(browserLocale);
   const [logo, setLogo] = useState<File | null>(null);
-  const [departments, setDepartments] = useState<SetupDepartment[]>(templateFor("restaurant"));
+  const [orgSource, setOrgSource] = useState<OrgSource>("template");
+  const [org, setOrg] = useState<OrgSetup>(() => orgTemplate());
   const [storeName, setStoreName] = useState("");
   const [opens, setOpens] = useState("08:00");
   const [closes, setCloses] = useState("22:00");
   const [invites, setInvites] = useState<{ email: string; roleKey: string }[]>([
     { email: "", roleKey: "cashier" },
   ]);
-  const [starter, setStarter] = useState<AccountStarter>("skip");
+  const [starter, setStarter] = useState<AccountStarter>("lists");
+  const [listSource, setListSource] = useState<OrgSource>("template");
+  const [starterLists, setStarterLists] = useState<StarterListDraft[]>(() =>
+    coffeeLists(t),
+  );
 
   const stepId = STEPS[step] ?? "signup";
-  const listsAvailable = businessType === "restaurant" || businessType === "cafe";
   const enabledRoles = useMemo(
     () =>
-      departments.flatMap((department) =>
+      org.departments.flatMap((department) =>
         department.roles
-          .filter((role) => role.enabled)
-          .map((role) => ({
-            key: role.key,
-            label: t(`onboarding.account.role.${role.key}`),
-          })),
+          .filter((role) => role.name.trim())
+          .map((role) => ({ key: role.id, label: role.name })),
       ),
-    [departments, t],
+    [org],
   );
 
   const workspace = (): AccountWorkspaceInput => ({
-    businessType: businessType || "other",
     timezone,
     locale,
-    departments: departments.map((department) => ({
-      ...department,
-      name: t(`onboarding.account.department.${department.key}`),
-      roles: department.roles.map((role) => ({
-        ...role,
-        name: t(`onboarding.account.role.${role.key}`),
-      })),
-    })),
+    org,
     store: { name: storeName, opens, closes },
     starter,
     starterCopy: {
-      openingTitle: t("onboarding.account.starter.openingTitle"),
-      closingTitle: t("onboarding.account.starter.closingTitle"),
-      openingItems: [1, 2, 3].map((index) =>
-        t(`onboarding.account.starter.openingItem${index}`),
-      ),
-      closingItems: [1, 2, 3].map((index) =>
-        t(`onboarding.account.starter.closingItem${index}`),
-      ),
       shiftTitle: t("onboarding.account.starter.shiftTitle"),
+      lists: starterLists.map((list) => ({
+        key: list.id,
+        title: list.title.trim(),
+        items: list.items.map((item) => item.trim()).filter(Boolean),
+      })),
     },
   });
 
   const finish = async (nextStarter: AccountStarter) => {
-    if (!businessType) return;
     const chosen = { ...workspace(), starter: nextStarter };
     const records = onboardingRecordsFromWorkspace(chosen);
     const payload: RegistrationData = {
@@ -156,7 +171,7 @@ export default function AccountSetupWizard({
       },
       companyInfo: {
         name: companyName.trim(),
-        industry: industryForBusinessType(businessType),
+        industry: COFFEE_INDUSTRY,
         size: DEFAULT_COMPANY_SIZE,
         description: "",
         website: "",
@@ -167,7 +182,7 @@ export default function AccountSetupWizard({
         primaryColor: "hsl(var(--primary))",
         secondaryColor: "hsl(var(--secondary))",
       },
-      template: fixedOpsTemplate(businessType),
+      template: fixedOpsTemplate(),
       enabledSections: FIXED_OPS_SECTIONS,
       customRoles: records.customRoles,
       positions: records.positions,
@@ -191,19 +206,12 @@ export default function AccountSetupWizard({
       }
     }
     if (stepId === "company") {
-      if (companyProblem({ name: companyName, businessType, timezone, locale })) {
+      if (companyProblem({ name: companyName, timezone, locale })) {
         setError("onboarding.account.error.company");
         return;
       }
-      if (businessType && businessType !== templateType) {
-        const nextDepartments = templateFor(businessType);
-        setDepartments(nextDepartments);
-        setTemplateType(businessType);
-        const first = nextDepartments[0]?.roles[0]?.key ?? "";
-        setInvites([{ email: "", roleKey: first }]);
-      }
     }
-    if (stepId === "departments" && departmentsProblem(departments)) {
+    if (stepId === "departments" && !orgReady(org)) {
       setError("onboarding.account.error.role");
       return;
     }
@@ -224,48 +232,15 @@ export default function AccountSetupWizard({
     setStep((value) => value + 1);
   };
 
-  const toggleRole = (departmentKey: string, roleKey: string, enabled: boolean) => {
-    setDepartments((current) =>
-      current.map((department) =>
-        department.key === departmentKey
-          ? {
-              ...department,
-              roles: department.roles.map((role) =>
-                role.key === roleKey ? { ...role, enabled } : role,
-              ),
-            }
-          : department,
-      ),
-    );
+  const chooseOrgSource = (source: OrgSource) => {
+    setOrgSource(source);
+    setOrg(source === "template" ? orgTemplate() : blankOrg());
   };
 
-  const changeDepartment = (
-    departmentKey: string,
-    key: PlainPermission,
-    value: boolean,
-  ) => {
-    setDepartments((current) =>
-      current.map((department) =>
-        department.key === departmentKey
-          ? setDepartmentPermission(department, key, value)
-          : department,
-      ),
-    );
-  };
-
-  const changeRole = (
-    departmentKey: string,
-    roleKey: string,
-    key: PlainPermission,
-    value: boolean,
-  ) => {
-    setDepartments((current) =>
-      current.map((department) =>
-        department.key === departmentKey
-          ? setRolePermission(department, roleKey, key, value)
-          : department,
-      ),
-    );
+  const chooseListSource = (source: OrgSource) => {
+    setListSource(source);
+    setStarter("lists");
+    setStarterLists(source === "template" ? coffeeLists(t) : blankLists());
   };
 
   return (
@@ -302,26 +277,23 @@ export default function AccountSetupWizard({
         {stepId === "company" ? (
           <CompanyStep
             name={companyName}
-            businessType={businessType}
             timezone={timezone}
             timezones={TIMEZONES}
             locale={locale}
             onName={setCompanyName}
-            onBusinessType={setBusinessType}
             onTimezone={setTimezone}
             onLocale={setLocale}
             onLogo={setLogo}
           />
         ) : null}
         {stepId === "departments" ? (
-          <DepartmentsStep departments={departments} onToggle={toggleRole} />
+          <div className="space-y-4">
+            <SourceChoice source={orgSource} onSource={chooseOrgSource} />
+            <OrgSetupStep setup={org} onChange={setOrg} />
+          </div>
         ) : null}
         {stepId === "permissions" ? (
-          <PermissionsStep
-            departments={departments}
-            onDepartment={changeDepartment}
-            onRole={changeRole}
-          />
+          <OrgPermissionsStep setup={org} onChange={setOrg} />
         ) : null}
         {stepId === "store" ? (
           <StoreStep
@@ -358,11 +330,17 @@ export default function AccountSetupWizard({
           />
         ) : null}
         {stepId === "starter" ? (
-          <StarterStep
-            starter={listsAvailable || starter !== "lists" ? starter : "skip"}
-            listsAvailable={listsAvailable}
-            onChange={setStarter}
-          />
+          <div className="space-y-4">
+            <StarterStep starter={starter} onChange={setStarter} />
+            {starter === "lists" ? (
+              <StarterListsChoice
+                source={listSource}
+                lists={starterLists}
+                onSource={chooseListSource}
+                onChange={setStarterLists}
+              />
+            ) : null}
+          </div>
         ) : null}
       </div>
       {error ? (

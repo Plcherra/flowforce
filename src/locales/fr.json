@@ -501,7 +501,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "La vidéo de démonstration du produit est en cours de production",
     "pendingTask": "Tâche en attente",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Choisissez un forfait ci-dessous pour rétablir la planification, l'inventaire, les tâches et les rapports de votre équipe.",
-    "plansForRestaurantOperations": "Forfaits pour les opérations de restaurant",
+    "plansForRestaurantOperations": "Formules pour les cafés",
     "reactivateYourWorkspace": "Réactivez votre espace",
     "realWorldUseCaseExamples": "Exemples d'usage réels",
     "retailStore": "MAGASIN",
@@ -513,10 +513,10 @@
     "signInToManageAnExistingWorkspace": "Connectez-vous pour gérer un espace existant",
     "taskCompleted": "Tâche terminée",
     "trend": "Tendance",
-    "usedBy": "Utilisé par plus de 1 200 sites dans le monde",
+    "usedBy": "Conçu pour les cafés",
     "operationsMade": "Opérations Rendues",
     "simple": "Simples.",
-    "subtitle": "Operations est inclus pour chaque entreprise. Ajoutez Équipe, Aperçus ou Stock lorsque vous avez besoin de ces outils.",
+    "subtitle": "FlowForce est l'application du quotidien pour les cafés. Le service, les listes et l'équipe au même endroit.",
     "model": {
       "eyebrow": "Operations d'abord",
       "title": "OPS est la base. Les packs ajoutent le reste.",
@@ -548,14 +548,14 @@
     "fasterScheduling": "Planification plus rapide",
     "averageSetup": "Temps de configuration moyen",
     "uptimeGuarantee": "Garantie de disponibilité",
-    "everythingNeeds": "Tout ce dont Votre Entreprise a Besoin",
-    "sixModules": "Six modules puissants qui fonctionnent ensemble de manière transparente pour rationaliser tous les aspects de vos opérations commerciales.",
+    "everythingNeeds": "Tout ce dont votre café a besoin",
+    "sixModules": "Planning, listes, messages et le reste du service, dans une application.",
     "learnMore": "En Savoir Plus",
     "features": "Fonctionnalités",
     "templatesNav": "Modèles",
     "industries": {
-      "title": "Conçu pour Votre Secteur",
-      "subtitle": "Démarrez plus rapidement avec des modèles préconfigurés conçus spécifiquement pour votre secteur d'activité.",
+      "title": "Conçu pour les cafés",
+      "subtitle": "Ouvrir, tenir le service et fermer. Un modèle pour commencer.",
       "explore": "Explorer",
       "template": "Modèle",
       "retail": {
@@ -606,9 +606,9 @@
       }
     },
     "testimonials": {
-      "title": "Aimé par les Entreprises en Croissance",
-      "subtitle": "Rejoignez des milliers d'entreprises qui ont transformé leurs opérations avec FlowForce.",
-      "trustedBy": "Approuvé par les leaders de l'industrie",
+      "title": "Adopté par les cafés",
+      "subtitle": "Les cafés utilisent FlowForce pour clarifier le service, les listes et l'équipe.",
+      "trustedBy": "La confiance des cafés",
       "quotes": {
         "sarahChen": "FlowForce a complètement transformé nos opérations. Nous sommes passés du chaos à l'efficacité organisée en seulement deux semaines. Nos conflits de planification ont chuté de 90%.",
         "michaelRodriguez": "Le système de gestion des tâches seul nous a fait économiser 15 heures par semaine. Les fonctionnalités d'automatisation sont incroyables et l'équipe l'a adopté instantanément.",
@@ -676,6 +676,14 @@
         "customerSatisfaction": "Satisfaction Client",
         "supportAvailable": "Support Disponible"
       }
+    },
+    "coffee": {
+      "title": "Modèle café",
+      "description": "Commencez avec la salle et la cuisine, un caissier, un responsable de service et un cuisinier. Modifiez les noms ou partez de zéro.",
+      "featureOpen": "Liste d'ouverture",
+      "featureShift": "Le service et qui est là",
+      "featureClose": "Liste de fermeture",
+      "start": "Ouvrir votre café"
     }
   },
   "footer": {
@@ -1210,7 +1218,7 @@
       },
       "company": {
         "title": "Informations de l'entreprise",
-        "description": "Ajoutez le nom, le type d'activité, le fuseau horaire et la langue. Le logo est facultatif.",
+        "description": "Ajoutez le nom, le fuseau horaire et la langue. Le logo est facultatif.",
         "name": "Nom de l'entreprise",
         "businessType": "Type d'activité",
         "choose": "Choisissez un type d'activité",
@@ -1235,7 +1243,7 @@
       },
       "departments": {
         "title": "Départements et rôles",
-        "description": "Partez du modèle de votre type d'activité. Désactivez les rôles dont vous n'avez pas besoin."
+        "description": "Utilisez le modèle café, puis modifiez-le, ou partez de zéro."
       },
       "department": {
         "foh": "Salle",
@@ -1300,18 +1308,38 @@
         "closingItem1": "Nettoyer les postes",
         "closingItem2": "Fermer la caisse",
         "closingItem3": "Fermer et noter les restes",
-        "shiftTitle": "Premier service"
+        "shiftTitle": "Premier service",
+        "listTitle": "Nom de la liste",
+        "listItem": "Élément de la liste",
+        "addItem": "Ajouter un élément",
+        "addList": "Ajouter une liste"
       },
       "error": {
         "name": "Ajoutez votre prénom et votre nom.",
         "email": "Saisissez un e-mail valide.",
         "password": "Utilisez au moins 8 caractères.",
-        "company": "Ajoutez le nom, le type d'activité, le fuseau horaire et la langue.",
+        "company": "Ajoutez le nom, le fuseau horaire et la langue.",
         "role": "Activez au moins un rôle.",
         "store": "Ajoutez le nom du magasin et les heures.",
         "invite": "Vérifiez l'e-mail d'invitation ou laissez-le vide pour passer.",
         "failed": "La configuration n'a pas abouti. Réessayez."
       }
+    },
+    "org": {
+      "useTemplate": "Utiliser le modèle café",
+      "startScratch": "Partir de zéro",
+      "sourceLabel": "Comment voulez-vous commencer ?",
+      "addDepartment": "Ajouter un département",
+      "teamTitle": "Départements et rôles",
+      "departmentName": "Département",
+      "roleName": "Rôle",
+      "addRole": "Ajouter un rôle",
+      "permissionsHelp": "Chaque département a des valeurs. Un rôle peut les remplacer.",
+      "permSchedule": "Voir le planning",
+      "permScheduleEdit": "Modifier le planning",
+      "permForms": "Remplir les formulaires et les listes",
+      "permTasks": "Voir les tâches",
+      "permTasksUpdate": "Mettre à jour les tâches"
     }
   },
   "auth": {

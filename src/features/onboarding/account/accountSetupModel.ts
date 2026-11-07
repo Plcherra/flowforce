@@ -8,10 +8,9 @@ import {
   getPlantedSystemRoles,
   getProductRoleDefinition,
 } from "@/features/roles/constants/productRoles";
+import { rolesFromOrg, type OrgSetup } from "@/features/onboarding/utils/orgTemplates";
 
-export const BUSINESS_TYPES = ["restaurant", "cafe", "retail", "other"] as const;
-
-export type BusinessType = (typeof BUSINESS_TYPES)[number];
+export const COFFEE_INDUSTRY = "Coffee shop";
 
 export const LOCALES = ["en", "es", "pt", "fr", "it", "de"] as const;
 
@@ -61,28 +60,14 @@ export type SetupDepartment = {
 export type AccountStarter = "skip" | "shift" | "lists";
 
 export type AccountWorkspaceInput = {
-  businessType: BusinessType;
   timezone: string;
   locale: SetupLocale;
-  departments: Array<{
-    key: string;
-    name: string;
-    defaults: PermissionChecks;
-    roles: Array<{
-      key: string;
-      name: string;
-      enabled: boolean;
-      permissions: PermissionChecks;
-    }>;
-  }>;
+  org: OrgSetup;
   store: { name: string; opens: string; closes: string };
   starter: AccountStarter;
   starterCopy: {
-    openingTitle: string;
-    closingTitle: string;
-    openingItems: string[];
-    closingItems: string[];
     shiftTitle: string;
+    lists: Array<{ key: string; title: string; items: string[] }>;
   };
 };
 
@@ -116,30 +101,18 @@ export function cloneChecks(checks: PermissionChecks): PermissionChecks {
   return { ...checks };
 }
 
-function role(key: string, permissions: PermissionChecks): SetupRole {
-  return { key, enabled: true, permissions: cloneChecks(permissions) };
-}
-
-function department(key: string, roleKeys: string[]): SetupDepartment {
-  const defaults = staffChecks();
-  return {
-    key,
-    defaults,
-    roles: roleKeys.map((key) => role(key, defaults)),
-  };
-}
-
-export function templateFor(type: BusinessType): SetupDepartment[] {
-  if (type === "cafe") {
-    return [department("foh", ["barista", "cashier"]), department("boh", ["cook"])];
-  }
-  if (type === "retail") {
-    return [department("floor", ["cashier", "stocker"]), department("back", ["receiver"])];
-  }
-  if (type === "other") {
-    return [department("team", ["teammate"])];
-  }
-  return [department("foh", ["cashier", "server"]), department("boh", ["cook", "prep"])];
+export function jobsFromOrg(setup: OrgSetup) {
+  return setup.departments.flatMap((departmentRow) =>
+    departmentRow.roles
+      .filter((item) => item.name.trim() && departmentRow.name.trim())
+      .map((item) => ({
+        key: item.id,
+        name: item.name.trim(),
+        departmentKey: departmentRow.id,
+        departmentName: departmentRow.name.trim(),
+        level: item.level,
+      })),
+  );
 }
 
 export function accessLevelFor(checks: PermissionChecks): "staff" | "manager" {
@@ -211,62 +184,29 @@ export function permissionsForRole(
 }
 
 export function enabledJobRoles(workspace: AccountWorkspaceInput) {
-  return workspace.departments.flatMap((departmentRow) =>
-    departmentRow.roles
-      .filter((item) => item.enabled && item.name.trim())
-      .map((item) => ({
-        key: item.key,
-        name: item.name.trim(),
-        departmentKey: departmentRow.key,
-        departmentName: departmentRow.name.trim(),
-        level: accessLevelFor(item.permissions),
-        permissions: item.permissions,
-      })),
-  );
+  return jobsFromOrg(workspace.org);
 }
 
 export function onboardingRecordsFromWorkspace(workspace: AccountWorkspaceInput) {
   const jobs = enabledJobRoles(workspace);
-  const customRoles = [
-    ...getPlantedSystemRoles(),
-    ...jobs.map((job) => {
-      const definition = getProductRoleDefinition(job.level);
-      return {
-        id: job.key,
-        name: job.name,
-        description: job.departmentName,
-        color: definition.color,
-        icon: definition.icon,
-        hierarchy_level: definition.hierarchy_level,
-        product_level: job.level,
-        permissions: permissionsForRole(job.level, job.permissions),
-        is_system_role: false,
-        is_active: true,
-      };
-    }),
-  ];
-  const positions = jobs.map((job) => ({
-    id: job.key,
-    name: job.name,
-    description: job.departmentName,
+  const orgRoles = rolesFromOrg(workspace.org);
+  const customRoles = [...getPlantedSystemRoles(), ...orgRoles];
+  const positions = orgRoles.map((role) => ({
+    id: role.id,
+    name: role.name,
+    description: role.description,
     roleId: "",
-    permissions: permissionsForRole(job.level, job.permissions),
+    permissions: role.permissions,
   }));
   return { customRoles, positions, jobs };
 }
 
-export function industryForBusinessType(type: BusinessType): string {
-  if (type === "retail") return "Retail";
-  if (type === "other") return "Other";
-  return "Food & Beverage";
-}
-
-export function fixedOpsTemplate(type: BusinessType) {
+export function fixedOpsTemplate() {
   return {
     id: "ops",
     name: "FlowForce",
     description: "",
-    industry: type,
+    industry: "cafe",
     icon: "LayoutDashboard",
     sections: FIXED_OPS_SECTIONS,
     defaultRoles: [] as string[],
@@ -291,14 +231,10 @@ export function signupProblem(input: {
 
 export function companyProblem(input: {
   name: string;
-  businessType: string;
   timezone: string;
   locale: string;
 }): "company" | null {
-  if (!input.name.trim() || !input.businessType || !input.timezone || !input.locale) {
-    return "company";
-  }
-  if (!BUSINESS_TYPES.includes(input.businessType as BusinessType)) return "company";
+  if (!input.name.trim() || !input.timezone || !input.locale) return "company";
   if (!LOCALES.includes(input.locale as SetupLocale)) return "company";
   return null;
 }
@@ -366,9 +302,9 @@ export function starterListSettings(roleId: string, showFrom: string, dueAt: str
 export function readWorkspace(value: unknown): AccountWorkspaceInput | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const source = value as Partial<AccountWorkspaceInput>;
-  if (!BUSINESS_TYPES.includes(source.businessType as BusinessType)) return null;
   if (!LOCALES.includes(source.locale as SetupLocale)) return null;
+  if (!source.org || !Array.isArray(source.org.departments)) return null;
   if (!source.store || typeof source.store.name !== "string") return null;
-  if (!Array.isArray(source.departments)) return null;
+  if (!source.starterCopy || !Array.isArray(source.starterCopy.lists)) return null;
   return source as AccountWorkspaceInput;
 }

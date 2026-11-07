@@ -1,109 +1,85 @@
 import assert from "node:assert/strict";
 import { readFormDistribution } from "@/features/forms/utils/formDistribution";
 import {
-  accessLevelFor,
-  departmentsProblem,
+  blankOrg,
+  orgTemplate,
+  permissionValue,
+  withRoleOverride,
+} from "@/features/onboarding/utils/orgTemplates";
+import {
   enabledJobRoles,
-  industryForBusinessType,
   onboardingRecordsFromWorkspace,
-  permissionsForRole,
-  roleOverridesDepartment,
-  setDepartmentPermission,
-  setRolePermission,
   signupProblem,
-  staffChecks,
   starterListSettings,
   storeProblem,
-  templateFor,
   type AccountWorkspaceInput,
 } from "./accountSetupModel";
 
 function workspace(): AccountWorkspaceInput {
-  const departments = templateFor("restaurant").map((department) => ({
-    ...department,
-    name: department.key === "foh" ? "FOH" : "BOH",
-    roles: department.roles.map((role) => ({
-      ...role,
-      name: role.key,
-    })),
-  }));
   return {
-    businessType: "restaurant",
     timezone: "Europe/Lisbon",
     locale: "en",
-    departments,
+    org: orgTemplate(),
     store: { name: "Rua", opens: "08:00", closes: "22:00" },
-    starter: "skip",
+    starter: "lists",
     starterCopy: {
-      openingTitle: "Opening list",
-      closingTitle: "Closing list",
-      openingItems: ["Unlock"],
-      closingItems: ["Lock"],
       shiftTitle: "First shift",
+      lists: [{ key: "opening", title: "Opening list", items: ["Unlock"] }],
     },
   };
 }
 
 export function runAccountSetupModelTests() {
-  const restaurant = templateFor("restaurant");
+  const shop = orgTemplate();
+  assert.equal(shop.businessType, "cafe");
   assert.deepEqual(
-    restaurant.map((department) => department.key),
+    shop.departments.map((department) => department.id),
     ["foh", "boh"],
   );
   assert.deepEqual(
-    restaurant[0]?.roles.map((role) => role.key),
-    ["cashier", "server"],
+    shop.departments[0]?.roles.map((role) => role.name),
+    ["Cashier", "Shift lead"],
   );
-  assert.deepEqual(templateFor("cafe")[0]?.roles.map((role) => role.key), [
-    "barista",
-    "cashier",
-  ]);
-  assert.equal(industryForBusinessType("cafe"), "Food & Beverage");
-  assert.equal(industryForBusinessType("retail"), "Retail");
+  assert.equal(shop.departments[1]?.roles[0]?.name, "Cook");
+  assert.equal(blankOrg().departments[0]?.name, "");
+  assert.equal(blankOrg().departments[0]?.roles[0]?.name, "");
 
-  const foh = restaurant[0];
-  assert.ok(foh);
-  const cashier = foh.roles[0];
-  assert.ok(cashier);
-  assert.equal(roleOverridesDepartment(foh, cashier), false);
-  const raised = setRolePermission(foh, "cashier", "scheduleEdit", true);
-  const raisedCashier = raised.roles.find((role) => role.key === "cashier");
-  const server = raised.roles.find((role) => role.key === "server");
-  assert.ok(raisedCashier);
-  assert.ok(server);
-  assert.equal(roleOverridesDepartment(raised, raisedCashier), true);
-  assert.equal(server.permissions.scheduleEdit, false);
-  assert.equal(accessLevelFor(raisedCashier.permissions), "manager");
-  assert.equal(accessLevelFor(server.permissions), "staff");
-
-  const nextDefault = setDepartmentPermission(raised, "formsSubmit", false);
-  const stillRaised = nextDefault.roles.find((role) => role.key === "cashier");
-  const followed = nextDefault.roles.find((role) => role.key === "server");
-  assert.equal(stillRaised?.permissions.scheduleEdit, true);
-  assert.equal(followed?.permissions.formsSubmit, false);
-  assert.equal(stillRaised?.permissions.formsSubmit, false);
+  const floor = shop.departments[0];
+  const lead = floor?.roles[1];
+  assert.ok(floor);
+  assert.ok(lead);
+  assert.equal(
+    permissionValue(floor.permissions, {}, "schedule.edit"),
+    false,
+  );
+  assert.equal(
+    permissionValue(floor.permissions, lead.overrides, "schedule.edit"),
+    true,
+  );
+  const cleared = withRoleOverride(lead.overrides, floor.permissions, "schedule.edit", false);
+  assert.equal(cleared["schedule.edit"], undefined);
 
   const records = onboardingRecordsFromWorkspace(workspace());
   const names = records.customRoles.map((role) => role.name);
   assert.ok(names.includes("Owner"));
-  assert.ok(names.includes("cashier"));
+  assert.ok(names.includes("Cashier"));
+  assert.ok(names.includes("Cook"));
   assert.equal(
-    records.customRoles.find((role) => role.name === "cashier")?.is_system_role,
+    records.customRoles.find((role) => role.name === "Cashier")?.is_system_role,
     false,
   );
-  const cashierPermissions = permissionsForRole("staff", staffChecks());
-  assert.equal(cashierPermissions["forms.submit"], true);
-  assert.equal(cashierPermissions["schedule.edit"], false);
-  assert.equal(enabledJobRoles(workspace()).length, 4);
-
+  assert.equal(enabledJobRoles(workspace()).length, 3);
   assert.equal(
     signupProblem({ firstName: "A", lastName: "B", email: "a@b.com", password: "short" }),
     "password",
   );
-  assert.equal(departmentsProblem([{ key: "foh", defaults: staffChecks(), roles: [] }]), "role");
   assert.equal(storeProblem({ name: "Rua", opens: "08:00", closes: "08:00" }), "store");
 
-  const settings = starterListSettings("role-1", "2026-11-07T08:00:00.000Z", "2026-11-07T10:00:00.000Z");
+  const settings = starterListSettings(
+    "role-1",
+    "2026-11-07T08:00:00.000Z",
+    "2026-11-07T10:00:00.000Z",
+  );
   const distribution = readFormDistribution(settings);
   assert.equal(distribution.recordKind, "list");
   assert.deepEqual(distribution.roleIds, ["role-1"]);

@@ -2,12 +2,10 @@ import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  BUSINESS_TYPES,
   LOCALES,
   PLAIN_PERMISSIONS,
   roleOverridesDepartment,
   type AccountStarter,
-  type BusinessType,
   type PlainPermission,
   type SetupDepartment,
   type SetupLocale,
@@ -68,12 +66,10 @@ export function SignupStep(props: {
 
 export function CompanyStep(props: {
   name: string;
-  businessType: BusinessType | "";
   timezone: string;
   timezones: string[];
   locale: SetupLocale | "";
   onName: (value: string) => void;
-  onBusinessType: (value: BusinessType) => void;
   onTimezone: (value: string) => void;
   onLocale: (value: SetupLocale) => void;
   onLogo: (file: File | null) => void;
@@ -87,22 +83,6 @@ export function CompanyStep(props: {
         value={props.name}
         onChange={props.onName}
       />
-      <label className="space-y-2 text-sm" htmlFor="business-type">
-        <span className="font-medium">{t("onboarding.account.company.businessType")}</span>
-        <select
-          id="business-type"
-          className={fieldClass}
-          value={props.businessType}
-          onChange={(event) => props.onBusinessType(event.target.value as BusinessType)}
-        >
-          <option value="">{t("onboarding.account.company.choose")}</option>
-          {BUSINESS_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {t(`onboarding.account.business.${type}`)}
-            </option>
-          ))}
-        </select>
-      </label>
       <label className="space-y-2 text-sm" htmlFor="company-timezone">
         <span className="font-medium">{t("onboarding.account.company.timezone")}</span>
         <select
@@ -323,14 +303,13 @@ export function InviteStep(props: {
 
 export function StarterStep(props: {
   starter: AccountStarter;
-  listsAvailable: boolean;
   onChange: (starter: AccountStarter) => void;
 }) {
   const { t } = useTranslation();
   const choices: { id: AccountStarter; show: boolean }[] = [
-    { id: "skip", show: true },
+    { id: "lists", show: true },
     { id: "shift", show: true },
-    { id: "lists", show: props.listsAvailable },
+    { id: "skip", show: true },
   ];
   return (
     <div className="space-y-3">

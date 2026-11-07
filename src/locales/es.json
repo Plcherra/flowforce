@@ -132,7 +132,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "El vídeo de demostración del producto está en producción",
     "pendingTask": "Tarea pendiente",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Elige un plan abajo para recuperar horarios, inventario, tareas e informes de tu equipo.",
-    "plansForRestaurantOperations": "Planes para operaciones de restaurante",
+    "plansForRestaurantOperations": "Planes para cafeterías",
     "reactivateYourWorkspace": "Reactiva tu espacio",
     "realWorldUseCaseExamples": "Ejemplos de uso reales",
     "retailStore": "TIENDA",
@@ -144,10 +144,10 @@
     "signInToManageAnExistingWorkspace": "Inicia sesión para gestionar un espacio existente",
     "taskCompleted": "Tarea completada",
     "trend": "Tendencia",
-    "usedBy": "Usado por más de 1,200 ubicaciones en todo el mundo",
+    "usedBy": "Hecho para cafeterías",
     "operationsMade": "Operaciones Realizadas",
     "simple": "Simple.",
-    "subtitle": "Operaciones está incluido en cada empresa. Añade Equipo, Perspectivas o Stock cuando necesites esas herramientas.",
+    "subtitle": "FlowForce es la app diaria para cafeterías. El turno, las listas y el equipo en un solo lugar.",
     "model": {
       "eyebrow": "Operaciones primero",
       "title": "OPS es la base. Los paquetes añaden el resto.",
@@ -179,14 +179,14 @@
     "fasterScheduling": "Programación más rápida",
     "averageSetup": "Tiempo promedio de configuración",
     "uptimeGuarantee": "Garantía de tiempo de actividad",
-    "everythingNeeds": "Todo lo que tu Negocio Necesita",
-    "sixModules": "Seis módulos poderosos que trabajan juntos sin problemas para optimizar todos los aspectos de las operaciones de tu negocio.",
+    "everythingNeeds": "Todo lo que necesita tu cafetería",
+    "sixModules": "Horario, listas, mensajes y el resto del turno, en una app.",
     "learnMore": "Aprender Más",
     "features": "Características",
     "templatesNav": "Plantillas",
     "industries": {
-      "title": "Construido para Tu Industria",
-      "subtitle": "Comienza más rápido con plantillas preconfiguradas diseñadas específicamente para tu sector empresarial.",
+      "title": "Hecho para cafeterías",
+      "subtitle": "Abre, lleva el turno y cierra. Una plantilla para empezar.",
       "explore": "Explorar",
       "template": "Plantilla",
       "retail": {
@@ -237,9 +237,9 @@
       }
     },
     "testimonials": {
-      "title": "Amado por Empresas en Crecimiento",
-      "subtitle": "Únete a miles de empresas que han transformado sus operaciones con FlowForce.",
-      "trustedBy": "Confiado por líderes de la industria",
+      "title": "Lo usan las cafeterías",
+      "subtitle": "Las cafeterías usan FlowForce para tener claro el turno, las listas y el equipo.",
+      "trustedBy": "De confianza para cafeterías",
       "quotes": {
         "sarahChen": "FlowForce transformó completamente nuestras operaciones. Pasamos del caos a la eficiencia organizada en solo dos semanas. Nuestros conflictos de programación se redujeron en un 90%.",
         "michaelRodriguez": "Solo el sistema de gestión de tareas nos ahorró 15 horas por semana. Las características de automatización son increíbles y el equipo lo adoptó instantáneamente.",
@@ -307,6 +307,14 @@
         "customerSatisfaction": "Satisfacción del Cliente",
         "supportAvailable": "Soporte Disponible"
       }
+    },
+    "coffee": {
+      "title": "Plantilla de cafetería",
+      "description": "Empieza con sala y cocina, caja, encargado de turno y cocina. Cambia los nombres o empieza desde cero.",
+      "featureOpen": "Lista de apertura",
+      "featureShift": "El turno y quién está",
+      "featureClose": "Lista de cierre",
+      "start": "Empieza tu cafetería"
     }
   },
   "resources": {
@@ -1189,7 +1197,7 @@
       },
       "company": {
         "title": "Datos de la empresa",
-        "description": "Añade el nombre, el tipo de negocio, la zona horaria y el idioma. El logo es opcional.",
+        "description": "Añade el nombre, la zona horaria y el idioma. El logo es opcional.",
         "name": "Nombre de la empresa",
         "businessType": "Tipo de negocio",
         "choose": "Elige un tipo de negocio",
@@ -1214,7 +1222,7 @@
       },
       "departments": {
         "title": "Departamentos y roles",
-        "description": "Empieza con la plantilla de tu tipo de negocio. Desactiva los roles que no necesites."
+        "description": "Usa la plantilla de cafetería y edítala, o empieza desde cero."
       },
       "department": {
         "foh": "Sala",
@@ -1279,18 +1287,38 @@
         "closingItem1": "Limpiar las estaciones",
         "closingItem2": "Cerrar la caja",
         "closingItem3": "Cerrar y anotar las sobras",
-        "shiftTitle": "Primer turno"
+        "shiftTitle": "Primer turno",
+        "listTitle": "Nombre de la lista",
+        "listItem": "Elemento de la lista",
+        "addItem": "Añadir elemento",
+        "addList": "Añadir lista"
       },
       "error": {
         "name": "Añade tu nombre y apellido.",
         "email": "Introduce un correo válido.",
         "password": "Usa al menos 8 caracteres.",
-        "company": "Añade el nombre, el tipo de negocio, la zona horaria y el idioma.",
+        "company": "Añade el nombre, la zona horaria y el idioma.",
         "role": "Activa al menos un rol.",
         "store": "Añade el nombre del local y el horario.",
         "invite": "Revisa el correo de la invitación o déjalo en blanco para omitir.",
         "failed": "No pudimos terminar la configuración. Inténtalo de nuevo."
       }
+    },
+    "org": {
+      "useTemplate": "Usar la plantilla de cafetería",
+      "startScratch": "Empezar desde cero",
+      "sourceLabel": "¿Cómo quieres empezar?",
+      "addDepartment": "Añadir departamento",
+      "teamTitle": "Departamentos y roles",
+      "departmentName": "Departamento",
+      "roleName": "Rol",
+      "addRole": "Añadir rol",
+      "permissionsHelp": "Cada departamento tiene valores. Un rol puede sustituirlos.",
+      "permSchedule": "Ver el horario",
+      "permScheduleEdit": "Editar el horario",
+      "permForms": "Rellenar formularios y listas",
+      "permTasks": "Ver tareas",
+      "permTasksUpdate": "Actualizar tareas"
     }
   },
   "footer": {

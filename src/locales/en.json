@@ -132,7 +132,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "Our product demo video is currently in production",
     "pendingTask": "Pending task",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Pick a plan below to restore scheduling, inventory, tasks, and reporting for your team.",
-    "plansForRestaurantOperations": "Plans for restaurant operations",
+    "plansForRestaurantOperations": "Plans for coffee shops",
     "reactivateYourWorkspace": "Reactivate your workspace",
     "realWorldUseCaseExamples": "Real-world use case examples",
     "retailStore": "RETAIL STORE",
@@ -144,10 +144,10 @@
     "signInToManageAnExistingWorkspace": "Sign in to manage an existing workspace",
     "taskCompleted": "Task completed",
     "trend": "Trend",
-    "usedBy": "Used by 1,200+ locations worldwide",
+    "usedBy": "Made for coffee shops",
     "operationsMade": "Operations Made",
     "simple": "Simple.",
-    "subtitle": "Operations is included with every company. Add Team, Insights, or Stock when you need those tools.",
+    "subtitle": "FlowForce is the daily app for coffee shops. Run the shift, the lists, and the team in one place.",
     "model": {
       "eyebrow": "Operations first",
       "title": "OPS is the base. Packs add the rest.",
@@ -179,14 +179,14 @@
     "fasterScheduling": "Faster scheduling",
     "averageSetup": "Average setup time",
     "uptimeGuarantee": "Uptime guarantee",
-    "everythingNeeds": "Everything Your Business Needs",
-    "sixModules": "Six powerful modules that work together seamlessly to streamline every aspect of your business operations.",
+    "everythingNeeds": "Everything your coffee shop needs",
+    "sixModules": "Scheduling, lists, messages, and the rest of the shift, in one app.",
     "learnMore": "Learn More",
     "features": "Features",
     "templatesNav": "Templates",
     "industries": {
-      "title": "Built for Your Industry",
-      "subtitle": "Get started faster with pre-configured templates designed specifically for your business vertical.",
+      "title": "Built for coffee shops",
+      "subtitle": "Open the shop, run the shift, and close. One template to start from.",
       "explore": "Explore",
       "template": "Template",
       "retail": {
@@ -237,9 +237,9 @@
       }
     },
     "testimonials": {
-      "title": "Loved by Growing Businesses",
-      "subtitle": "Join thousands of companies that have transformed their operations with FlowForce.",
-      "trustedBy": "Trusted by industry leaders",
+      "title": "Loved by coffee shops",
+      "subtitle": "Shops use FlowForce to keep the shift, the lists, and the team clear.",
+      "trustedBy": "Trusted by coffee shops",
       "quotes": {
         "sarahChen": "FlowForce transformed our operations completely. We went from chaos to organized efficiency in just two weeks. Our scheduling conflicts dropped by 90%.",
         "michaelRodriguez": "The task management system alone saved us 15 hours per week. The automation features are incredible and the team adopted it instantly.",
@@ -307,6 +307,14 @@
         "customerSatisfaction": "Customer Satisfaction",
         "supportAvailable": "Support Available"
       }
+    },
+    "coffee": {
+      "title": "Coffee shop template",
+      "description": "Start with front of house and back of house, a cashier, a shift lead, and a cook. Edit the names, or start from scratch.",
+      "featureOpen": "Opening list",
+      "featureShift": "The shift and who is on it",
+      "featureClose": "Closing list",
+      "start": "Start your shop"
     }
   },
   "resources": {
@@ -2111,7 +2119,7 @@
       },
       "company": {
         "title": "Company basics",
-        "description": "Add the company name, business type, time zone, and language. A logo is optional.",
+        "description": "Add the company name, time zone, and language. A logo is optional.",
         "name": "Company name",
         "businessType": "Business type",
         "choose": "Choose a business type",
@@ -2136,7 +2144,7 @@
       },
       "departments": {
         "title": "Departments and roles",
-        "description": "Start from the template for your business type. Turn off any role you do not need."
+        "description": "Use the coffee shop template, then edit it, or start from scratch."
       },
       "department": {
         "foh": "FOH",
@@ -2201,18 +2209,38 @@
         "closingItem1": "Clean the stations",
         "closingItem2": "Close the register",
         "closingItem3": "Lock up and note leftovers",
-        "shiftTitle": "First shift"
+        "shiftTitle": "First shift",
+        "listTitle": "List name",
+        "listItem": "List item",
+        "addItem": "Add item",
+        "addList": "Add list"
       },
       "error": {
         "name": "Add your first and last name.",
         "email": "Enter a valid email.",
         "password": "Use at least 8 characters.",
-        "company": "Add the company name, business type, time zone, and language.",
+        "company": "Add the company name, time zone, and language.",
         "role": "Turn on at least one role.",
         "store": "Add the store name and hours.",
         "invite": "Check the invite email or leave it blank to skip.",
         "failed": "We could not finish setup. Try again."
       }
+    },
+    "org": {
+      "useTemplate": "Use the coffee shop template",
+      "startScratch": "Start from scratch",
+      "sourceLabel": "How do you want to start?",
+      "addDepartment": "Add department",
+      "teamTitle": "Departments and roles",
+      "departmentName": "Department",
+      "roleName": "Role",
+      "addRole": "Add role",
+      "permissionsHelp": "Each department has defaults. A role can override them.",
+      "permSchedule": "See the schedule",
+      "permScheduleEdit": "Edit the schedule",
+      "permForms": "Fill forms and lists",
+      "permTasks": "See tasks",
+      "permTasksUpdate": "Update tasks"
     }
   },
   "auth": {

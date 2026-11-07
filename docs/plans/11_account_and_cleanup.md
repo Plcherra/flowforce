@@ -22,12 +22,12 @@ Live route: `/company-registration`.
 Order:
 
 1. Sign up (name, email, password).
-2. Company basics: name, business type, time zone, language, optional logo.
-3. Departments and roles from a template. Restaurant: FOH (Cashier, Server) and BOH (Cook, Prep). Café: FOH (Barista, Cashier) and BOH (Cook). Retail: Floor and Back room. Other: Team.
-4. Permissions. Each department has a suggested default. Each role starts as a copy. Changing a role does not change the department, and the role wins. A role that turns on a manager permission is stored as the manager access class. The four system classes (Owner, Admin, Manager, Staff) stay planted.
+2. Company basics: name, time zone, language, optional logo. FlowForce is for coffee shops only. There is no business-type step.
+3. Departments and roles. The default is "Use the coffee shop template" (FOH: Cashier and Shift lead, BOH: Cook). The owner can edit names or choose "Start from scratch". This uses the department, role, and permission model from the departments work (role overrides department).
+4. Permissions for that same setup. The template is still the default when they arrive here.
 5. First store and open/close hours.
 6. Invite team, optional.
-7. Optional unpublished shift for tomorrow, or opening and closing lists for café and restaurant.
+7. Optional starter lists. The default is "Use the coffee shop template" (opening and closing lists, which they can edit). They can choose "Start from scratch", add an unpublished shift, or skip. Restaurant and retail templates are leftovers and are not offered.
 8. Overview at `/app/dashboard`.
 
 Writes go through the existing `POST /api/onboarding/complete` after the current auth check. Departments, the store, hours, the optional shift, and the optional lists are applied in `applyAccountWorkspace`. No new table. No migration is applied. Custom section rows are left in place and ignored.

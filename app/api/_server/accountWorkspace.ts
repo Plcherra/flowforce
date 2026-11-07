@@ -253,22 +253,16 @@ export async function applyAccountWorkspace(
     const closingStart = addHours(input.workspace.store.closes, -2);
     const opening = clockOnNextDay(input.workspace.store.opens, openingDue);
     const closing = clockOnNextDay(closingStart, input.workspace.store.closes);
-    const lists = [
-      {
-        key: "opening",
-        title: input.workspace.starterCopy.openingTitle,
-        items: input.workspace.starterCopy.openingItems,
-        showFrom: opening.start,
-        dueAt: opening.end,
-      },
-      {
-        key: "closing",
-        title: input.workspace.starterCopy.closingTitle,
-        items: input.workspace.starterCopy.closingItems,
-        showFrom: closing.start,
-        dueAt: closing.end,
-      },
-    ];
+    const lists = input.workspace.starterCopy.lists.map((list, index) => {
+      const window = index === 0 ? opening : closing;
+      return {
+        key: list.key,
+        title: list.title,
+        items: list.items,
+        showFrom: window.start,
+        dueAt: window.end,
+      };
+    });
     for (const list of lists) {
       const settings = starterListSettings(firstRole.id, list.showFrom, list.dueAt);
       settings.starter = { pack: "account-setup", list: list.key };

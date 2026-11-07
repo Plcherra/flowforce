@@ -132,7 +132,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "Das Produkt-Demovideo ist noch in Produktion",
     "pendingTask": "Offene Aufgabe",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Wählen Sie unten einen Tarif, um Planung, Bestand, Aufgaben und Berichte für Ihr Team wiederherzustellen.",
-    "plansForRestaurantOperations": "Tarife für den Restaurantbetrieb",
+    "plansForRestaurantOperations": "Pläne für Cafés",
     "reactivateYourWorkspace": "Arbeitsbereich reaktivieren",
     "realWorldUseCaseExamples": "Beispiele aus der Praxis",
     "retailStore": "GESCHÄFT",
@@ -144,10 +144,10 @@
     "signInToManageAnExistingWorkspace": "Melden Sie sich an, um einen bestehenden Arbeitsbereich zu verwalten",
     "taskCompleted": "Aufgabe erledigt",
     "trend": "Trend",
-    "usedBy": "Verwendet von 1.200+ Standorten weltweit",
+    "usedBy": "Gemacht für Cafés",
     "operationsMade": "Durchgeführte Operationen",
     "simple": "Einfach.",
-    "subtitle": "Operationen ist in jedem Unternehmen enthalten. Fügen Sie Team, Einblicke oder Bestand hinzu, wenn Sie diese Werkzeuge brauchen.",
+    "subtitle": "FlowForce ist die tägliche App für Cafés. Schicht, Listen und Team an einem Ort.",
     "model": {
       "eyebrow": "Zuerst Operationen",
       "title": "OPS ist die Basis. Pakete ergänzen den Rest.",
@@ -179,14 +179,14 @@
     "fasterScheduling": "Schnellere Planung",
     "averageSetup": "Durchschnittliche Einrichtungszeit",
     "uptimeGuarantee": "Verfügbarkeitsgarantie",
-    "everythingNeeds": "Alles Was Ihr Unternehmen Braucht",
-    "sixModules": "Sechs mächtige Module, die nahtlos zusammenarbeiten, um jeden Aspekt Ihrer Geschäftsabläufe zu optimieren.",
+    "everythingNeeds": "Alles, was dein Café braucht",
+    "sixModules": "Plan, Listen, Nachrichten und der Rest der Schicht in einer App.",
     "learnMore": "Mehr Erfahren",
     "features": "Funktionen",
     "templatesNav": "Vorlagen",
     "industries": {
-      "title": "Für Ihre Branche Gebaut",
-      "subtitle": "Starten Sie schneller mit vorkonfigurierten Vorlagen, die speziell für Ihren Geschäftsbereich entwickelt wurden.",
+      "title": "Gemacht für Cafés",
+      "subtitle": "Öffnen, die Schicht führen und schließen. Eine Vorlage zum Start.",
       "explore": "Erkunden",
       "template": "Vorlage",
       "retail": {
@@ -237,9 +237,9 @@
       }
     },
     "testimonials": {
-      "title": "Geliebt von Wachsenden Unternehmen",
-      "subtitle": "Schließen Sie sich Tausenden von Unternehmen an, die ihre Abläufe mit FlowForce transformiert haben.",
-      "trustedBy": "Vertraut von Branchenführern",
+      "title": "Bei Cafés beliebt",
+      "subtitle": "Cafés nutzen FlowForce, damit Schicht, Listen und Team klar sind.",
+      "trustedBy": "Cafés vertrauen darauf",
       "quotes": {
         "klausWeber": "FlowForce hat unsere Abläufe komplett transformiert. Wir gingen vom Chaos zur organisierten Effizienz in nur zwei Wochen. Unsere Planungskonflikte sind um 90% gesunken.",
         "sabineSchneider": "Allein das Aufgabenverwaltungssystem sparte uns 15 Stunden pro Woche. Die Automatisierungsfunktionen sind unglaublich und das Team hat es sofort übernommen.",
@@ -307,6 +307,14 @@
         "customerSatisfaction": "Kundenzufriedenheit",
         "supportAvailable": "Support Verfügbar"
       }
+    },
+    "coffee": {
+      "title": "Café-Vorlage",
+      "description": "Starte mit Service und Küche, Kasse, Schichtleitung und Koch. Ändere die Namen oder fang neu an.",
+      "featureOpen": "Öffnungsliste",
+      "featureShift": "Die Schicht und wer da ist",
+      "featureClose": "Schließliste",
+      "start": "Dein Café starten"
     }
   },
   "resources": {
@@ -1030,7 +1038,7 @@
       },
       "company": {
         "title": "Unternehmensdaten",
-        "description": "Name, Betriebsart, Zeitzone und Sprache. Ein Logo ist optional.",
+        "description": "Name, Zeitzone und Sprache. Ein Logo ist optional.",
         "name": "Unternehmensname",
         "businessType": "Betriebsart",
         "choose": "Betriebsart wählen",
@@ -1055,7 +1063,7 @@
       },
       "departments": {
         "title": "Abteilungen und Rollen",
-        "description": "Starte mit der Vorlage für deine Betriebsart. Schalte Rollen aus, die du nicht brauchst."
+        "description": "Nutze die Café-Vorlage und bearbeite sie, oder fang neu an."
       },
       "department": {
         "foh": "Service",
@@ -1120,18 +1128,38 @@
         "closingItem1": "Stationen reinigen",
         "closingItem2": "Kasse schließen",
         "closingItem3": "Abschließen und Reste notieren",
-        "shiftTitle": "Erste Schicht"
+        "shiftTitle": "Erste Schicht",
+        "listTitle": "Listenname",
+        "listItem": "Listeneintrag",
+        "addItem": "Eintrag hinzufügen",
+        "addList": "Liste hinzufügen"
       },
       "error": {
         "name": "Gib Vor- und Nachname ein.",
         "email": "Gib eine gültige E-Mail ein.",
         "password": "Mindestens 8 Zeichen.",
-        "company": "Gib Name, Betriebsart, Zeitzone und Sprache ein.",
+        "company": "Gib Name, Zeitzone und Sprache ein.",
         "role": "Schalte mindestens eine Rolle ein.",
         "store": "Gib Standortname und Öffnungszeiten ein.",
         "invite": "Prüfe die Einladungs-E-Mail oder lass sie leer, um zu überspringen.",
         "failed": "Die Einrichtung ist nicht fertig geworden. Versuch es noch einmal."
       }
+    },
+    "org": {
+      "useTemplate": "Die Café-Vorlage verwenden",
+      "startScratch": "Neu anfangen",
+      "sourceLabel": "Wie möchtest du anfangen?",
+      "addDepartment": "Abteilung hinzufügen",
+      "teamTitle": "Abteilungen und Rollen",
+      "departmentName": "Abteilung",
+      "roleName": "Rolle",
+      "addRole": "Rolle hinzufügen",
+      "permissionsHelp": "Jede Abteilung hat Vorgaben. Eine Rolle kann sie überschreiben.",
+      "permSchedule": "Den Plan sehen",
+      "permScheduleEdit": "Den Plan bearbeiten",
+      "permForms": "Formulare und Listen ausfüllen",
+      "permTasks": "Aufgaben sehen",
+      "permTasksUpdate": "Aufgaben aktualisieren"
     }
   },
   "auth": {

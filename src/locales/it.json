@@ -467,7 +467,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "Il video dimostrativo del prodotto è in produzione",
     "pendingTask": "Attività in sospeso",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Scegli un piano qui sotto per ripristinare turni, inventario, attività e report del tuo team.",
-    "plansForRestaurantOperations": "Piani per le operazioni di ristorante",
+    "plansForRestaurantOperations": "Piani per caffetterie",
     "reactivateYourWorkspace": "Riattiva il tuo spazio",
     "realWorldUseCaseExamples": "Esempi di utilizzo reali",
     "retailStore": "NEGOZIO",
@@ -479,10 +479,10 @@
     "signInToManageAnExistingWorkspace": "Accedi per gestire uno spazio esistente",
     "taskCompleted": "Attività completata",
     "trend": "Tendenza",
-    "usedBy": "Utilizzato da oltre 1.200 sedi in tutto il mondo",
+    "usedBy": "Pensato per le caffetterie",
     "operationsMade": "Operazioni Rese",
     "simple": "Semplici.",
-    "subtitle": "Operations è incluso in ogni azienda. Aggiungi Team, Approfondimenti o Scorte quando ti servono quegli strumenti.",
+    "subtitle": "FlowForce è l'app quotidiana per le caffetterie. Turno, liste e team in un solo posto.",
     "model": {
       "eyebrow": "Prima Operations",
       "title": "OPS è la base. I pacchetti aggiungono il resto.",
@@ -514,14 +514,14 @@
     "fasterScheduling": "Pianificazione più veloce",
     "averageSetup": "Tempo medio di configurazione",
     "uptimeGuarantee": "Garanzia di uptime",
-    "everythingNeeds": "Tutto ciò di cui la Tua Azienda ha Bisogno",
-    "sixModules": "Sei moduli potenti che lavorano insieme senza soluzione di continuità per ottimizzare tutti gli aspetti delle operazioni aziendali.",
+    "everythingNeeds": "Tutto ciò che serve alla tua caffetteria",
+    "sixModules": "Piano, liste, messaggi e il resto del turno, in un'app.",
     "learnMore": "Scopri di Più",
     "features": "Funzionalità",
     "templatesNav": "Modelli",
     "industries": {
-      "title": "Costruito per la Tua Industria",
-      "subtitle": "Inizia più velocemente con template preconfigurati progettati specificamente per il tuo settore aziendale.",
+      "title": "Pensato per le caffetterie",
+      "subtitle": "Apri, gestisci il turno e chiudi. Un modello da cui partire.",
       "explore": "Esplora",
       "template": "Template",
       "retail": {
@@ -572,9 +572,9 @@
       }
     },
     "testimonials": {
-      "title": "Amato dalle Aziende in Crescita",
-      "subtitle": "Unisciti a migliaia di aziende che hanno trasformato le loro operazioni con FlowForce.",
-      "trustedBy": "Apprezzato dai leader del settore",
+      "title": "Scelto dalle caffetterie",
+      "subtitle": "Le caffetterie usano FlowForce per tenere chiari turno, liste e team.",
+      "trustedBy": "Scelto dalle caffetterie",
       "quotes": {
         "sarahChen": "FlowForce ha trasformato completamente le nostre operazioni. Siamo passati dal caos all'efficienza organizzata in sole due settimane. I nostri conflitti di pianificazione sono diminuiti del 90%.",
         "michaelRodriguez": "Solo il sistema di gestione delle attività ci ha fatto risparmiare 15 ore a settimana. Le funzionalità di automazione sono incredibili e il team l'ha adottato istantaneamente.",
@@ -642,6 +642,14 @@
         "customerSatisfaction": "Soddisfazione Cliente",
         "supportAvailable": "Supporto Disponibile"
       }
+    },
+    "coffee": {
+      "title": "Modello caffetteria",
+      "description": "Parti da sala e cucina, cassa, responsabile turno e cuoco. Cambia i nomi oppure parti da zero.",
+      "featureOpen": "Lista di apertura",
+      "featureShift": "Il turno e chi c'è",
+      "featureClose": "Lista di chiusura",
+      "start": "Apri la tua caffetteria"
     }
   },
   "features": {
@@ -1210,7 +1218,7 @@
       },
       "company": {
         "title": "Dati dell'azienda",
-        "description": "Aggiungi nome, tipo di attività, fuso orario e lingua. Il logo è facoltativo.",
+        "description": "Aggiungi nome, fuso orario e lingua. Il logo è facoltativo.",
         "name": "Nome azienda",
         "businessType": "Tipo di attività",
         "choose": "Scegli un tipo di attività",
@@ -1235,7 +1243,7 @@
       },
       "departments": {
         "title": "Reparti e ruoli",
-        "description": "Parti dal modello del tuo tipo di attività. Disattiva i ruoli che non ti servono."
+        "description": "Usa il modello caffetteria e modificalo, oppure parti da zero."
       },
       "department": {
         "foh": "Sala",
@@ -1300,18 +1308,38 @@
         "closingItem1": "Pulisci le postazioni",
         "closingItem2": "Chiudi la cassa",
         "closingItem3": "Chiudi e annota gli avanzi",
-        "shiftTitle": "Primo turno"
+        "shiftTitle": "Primo turno",
+        "listTitle": "Nome della lista",
+        "listItem": "Voce della lista",
+        "addItem": "Aggiungi voce",
+        "addList": "Aggiungi lista"
       },
       "error": {
         "name": "Aggiungi nome e cognome.",
         "email": "Inserisci un'e-mail valida.",
         "password": "Usa almeno 8 caratteri.",
-        "company": "Aggiungi nome, tipo di attività, fuso orario e lingua.",
+        "company": "Aggiungi nome, fuso orario e lingua.",
         "role": "Attiva almeno un ruolo.",
         "store": "Aggiungi il nome del negozio e l'orario.",
         "invite": "Controlla l'e-mail dell'invito o lasciala vuota per saltare.",
         "failed": "Non siamo riusciti a completare la configurazione. Riprova."
       }
+    },
+    "org": {
+      "useTemplate": "Usa il modello caffetteria",
+      "startScratch": "Parti da zero",
+      "sourceLabel": "Come vuoi iniziare?",
+      "addDepartment": "Aggiungi reparto",
+      "teamTitle": "Reparti e ruoli",
+      "departmentName": "Reparto",
+      "roleName": "Ruolo",
+      "addRole": "Aggiungi ruolo",
+      "permissionsHelp": "Ogni reparto ha dei valori. Un ruolo può sostituirli.",
+      "permSchedule": "Vedi il piano",
+      "permScheduleEdit": "Modifica il piano",
+      "permForms": "Compila moduli e liste",
+      "permTasks": "Vedi le attività",
+      "permTasksUpdate": "Aggiorna le attività"
     }
   },
   "auth": {
