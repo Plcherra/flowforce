@@ -385,9 +385,9 @@ async function insertMessage(
   const contentValidation = MessageContentSchema.safeParse(content);
   if (!contentValidation.success) {
     const error =
-      contentValidation.error.errors[0]?.message ?? "Invalid message content";
+      contentValidation.error.issues[0]?.message ?? "Invalid message content";
     logger.error("[messagesRepository] Invalid message content", {
-      errors: contentValidation.error.errors,
+      errors: contentValidation.error.issues,
       tags: ["validation", "error"],
     });
     throw new Error(error);
@@ -395,11 +395,11 @@ async function insertMessage(
 
   const optionsValidation = InsertMessageOptionsSchema.safeParse(options);
   if (!optionsValidation.success) {
-    const errors = optionsValidation.error.errors
+    const errors = optionsValidation.error.issues
       .map((e) => `${e.path.join(".")}: ${e.message}`)
       .join(", ");
     logger.error("[messagesRepository] Invalid message options", {
-      errors: optionsValidation.error.errors,
+      errors: optionsValidation.error.issues,
       tags: ["validation", "error"],
     });
     throw new Error(`Invalid message options: ${errors}`);

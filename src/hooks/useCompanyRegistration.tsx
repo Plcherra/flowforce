@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useNavigate } from "@/lib/router-adapter";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import {
   UserInfo,
   CompanyInfo,
@@ -107,11 +107,17 @@ export function useCompanyRegistration() {
   const completeOnboardingOnServer = async (
     data: RegistrationData,
     userId: string,
+    accessToken: string,
   ) => {
+    const { password, ...userInfo } = data.userInfo;
+    void password;
     const response = await fetch("/api/onboarding/complete", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, userId }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ ...data, userInfo, userId }),
     });
 
     const result = (await response.json().catch(() => ({}))) as {
@@ -142,7 +148,7 @@ export function useCompanyRegistration() {
     data: RegistrationData,
     companyId: string | null,
   ) => {
-    const { error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({ // pragma: allowlist secret
       data: {
         first_name: data.userInfo.firstName.trim(),
         last_name: data.userInfo.lastName.trim(),
@@ -172,7 +178,7 @@ export function useCompanyRegistration() {
     const companyPhone = normalizeText(data.companyInfo.phone);
     const companyWebsite = normalizeWebsite(data.companyInfo.website);
 
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({ // pragma: allowlist secret
       email,
       password: data.userInfo.password,
       options: {
@@ -212,13 +218,13 @@ export function useCompanyRegistration() {
 
     const userId = authData.user?.id;
     if (!userId) {
-      throw new Error("Supabase did not return a user id after signup.");
+      throw new Error("Supabase did not return a user id after signup."); // pragma: allowlist secret
     }
 
     let session = authData.session;
     if (!session) {
       const { data: signInData, error: signInError } =
-        await supabase.auth.signInWithPassword({
+        await supabase.auth.signInWithPassword({ // pragma: allowlist secret
           email,
           password: data.userInfo.password,
         });
@@ -236,10 +242,16 @@ export function useCompanyRegistration() {
       }
     }
 
-    const companyId = await completeOnboardingOnServer(data, userId);
-    if (session) {
-      await updateUserMetadata(data, companyId);
+    if (!session?.access_token) {
+      return { userId, companyId: null, sessionActive: false };
     }
+
+    const companyId = await completeOnboardingOnServer(
+      data,
+      session.user.id,
+      session.access_token,
+    );
+    await updateUserMetadata(data, companyId);
 
     return { userId, companyId, sessionActive: Boolean(session) };
   };
@@ -296,7 +308,7 @@ export function useCompanyRegistration() {
       return {
         type: "database",
         message:
-          "FlowForce could not finish workspace setup because Supabase permissions are blocking the write. Check the onboarding API service role key and RLS policies.",
+          "FlowForce could not finish workspace setup because Supabase permissions are blocking the write. Check the onboarding API service role key and RLS policies.", // pragma: allowlist secret
         details,
       };
     }
@@ -362,7 +374,7 @@ export function useCompanyRegistration() {
         return;
       }
 
-      const { error: sessionError } = await supabase.auth.refreshSession();
+      const { error: sessionError } = await supabase.auth.refreshSession(); // pragma: allowlist secret
       if (sessionError) {
         logger.warn("Session refresh after onboarding failed", {
           error: sessionError,

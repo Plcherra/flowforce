@@ -1,3 +1,5 @@
+import { productionSecurityHeaders } from './src/server/securityHeaders.mjs';
+
 const aliasPath = './src/lib/router-adapter';
 const migrationAliases = {
   '@app-shell': './src/app-shell',
@@ -58,6 +60,14 @@ const nextConfig = {
       'lucide-react',
       'date-fns',
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: productionSecurityHeaders(),
+      },
+    ];
   },
   async redirects() {
     return [

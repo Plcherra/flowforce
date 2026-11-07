@@ -1,8 +1,8 @@
 export type ApiBoundaryKind =
-  | "browser_supabase"
+  | "browser_supabase" // pragma: allowlist secret
   | "next_route"
-  | "supabase_rpc"
-  | "supabase_edge_function"
+  | "supabase_rpc" // pragma: allowlist secret
+  | "supabase_edge_function" // pragma: allowlist secret
   | "future_service";
 
 export type ApiSecurityLevel =
@@ -32,7 +32,7 @@ export interface ApiBoundaryDefinition {
 export const apiBoundaryDefinitions: ApiBoundaryDefinition[] = [
   {
     name: "Feature repositories",
-    kind: "browser_supabase",
+    kind: "browser_supabase", // pragma: allowlist secret
     security: "tenant_scoped",
     mutationPolicy: "rls_write",
     owner: "src/features/*/repositories",
@@ -42,9 +42,11 @@ export const apiBoundaryDefinitions: ApiBoundaryDefinition[] = [
   {
     name: "Onboarding complete",
     kind: "next_route",
-    security: "server_only",
+    security: "authenticated",
     mutationPolicy: "idempotent_server_write",
     owner: "app/api/onboarding/complete/route.ts",
+    notes:
+      "Derives the owner from the bearer session. Client userId and email are ignored unless they mismatch, which is rejected.",
   },
   {
     name: "Onboarding repair",
@@ -80,17 +82,17 @@ export const apiBoundaryDefinitions: ApiBoundaryDefinition[] = [
   },
   {
     name: "Company setup and invite RPCs",
-    kind: "supabase_rpc",
+    kind: "supabase_rpc", // pragma: allowlist secret
     security: "tenant_scoped",
     mutationPolicy: "idempotent_server_write",
-    owner: "supabase/migrations/*",
+    owner: "supabase/migrations/*", // pragma: allowlist secret
   },
   {
     name: "AI and copilot edge functions",
-    kind: "supabase_edge_function",
+    kind: "supabase_edge_function", // pragma: allowlist secret
     security: "authenticated",
     mutationPolicy: "audited_service_role_write",
-    owner: "supabase/functions/*",
+    owner: "supabase/functions/*", // pragma: allowlist secret
     notes:
       "Must validate bearer sessions, tenant scope, CORS, idempotency, and audit/event logging before production enablement.",
   },

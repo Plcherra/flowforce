@@ -113,6 +113,16 @@
       "notes": "Opened from the header profile card. Not a team-directory or bottom-nav entry."
     },
     {
+      "label": "Packs",
+      "path": "/app/packs",
+      "status": "production",
+      "sidebar": false,
+      "smoke": true,
+      "owner": "src/features/packs",
+      "dataDependency": "tenant billing settings",
+      "notes": "Pack discovery. Opened from the account menu and settings, not the sidebar."
+    },
+    {
       "label": "Messages Filter",
       "path": "/app/messages/[filter]",
       "status": "hidden",
