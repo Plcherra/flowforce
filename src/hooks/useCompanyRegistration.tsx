@@ -201,7 +201,18 @@ export function useCompanyRegistration() {
     const companyPhone = normalizeText(data.companyInfo.phone);
     const companyWebsite = normalizeWebsite(data.companyInfo.website);
 
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({ // pragma: allowlist secret
+    const { data: existingSession } = await supabase.auth.getSession(); // pragma: allowlist secret
+    const signedInEmail = existingSession.session?.user?.email?.toLowerCase();
+    const alreadySignedIn = signedInEmail === email && Boolean(existingSession.session);
+    const signedUp = alreadySignedIn
+      ? {
+          data: {
+            user: existingSession.session?.user ?? null,
+            session: existingSession.session,
+          },
+          error: null,
+        }
+      : await supabase.auth.signUp({ // pragma: allowlist secret
       email,
       password: data.userInfo.password,
       options: {
@@ -234,9 +245,23 @@ export function useCompanyRegistration() {
         },
       },
     });
+    const signedUpResult = signedUp;
+    let authData = signedUpResult.data;
+    const signUpError = signedUpResult.error;
+    if (signUpError && !/already registered/i.test(signUpError.message)) {
+      throw signUpError;
+    }
 
     if (signUpError) {
-      throw signUpError;
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInWithPassword({ // pragma: allowlist secret
+          email,
+          password: data.userInfo.password,
+        });
+      if (signInError || !signInData.session) {
+        throw signUpError;
+      }
+      authData = { user: signInData.user, session: signInData.session };
     }
 
     const userId = authData.user?.id;

@@ -20,6 +20,20 @@ const staff = {
 test.describe.configure({ mode: "serial" });
 
 async function fillOwnerSignup(page: Page) {
+  if (process.env.PLAYWRIGHT_RESUME_SIGNUP === "1") {
+    await page.goto("/auth");
+    await page.getByLabel("Email").fill(owner.email);
+    await page.getByLabel("Password").fill(PASSWORD);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await expect(page.getByRole("button", { name: "Sign In" })).toBeHidden({ timeout: 20_000 });
+    await page.goto("/app/settings?tab=onboarding");
+    const settings = page.getByTestId("onboarding-settings");
+    const ready = await settings
+      .waitFor({ state: "visible", timeout: 20_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (ready) return;
+  }
   await page.goto("/company-registration");
   await expect(page.getByRole("heading", { level: 1, name: "Sign up" })).toBeVisible();
   await page.getByLabel("First name").fill(owner.firstName);
@@ -103,7 +117,7 @@ test.describe("Employee onboarding with separate users", () => {
       mimeType: "application/pdf",
       buffer: Buffer.from("%PDF-1.4 handbook"),
     });
-    await page.getByRole("button", { name: "Upload document" }).click();
+    await page.locator('button[type="submit"]').filter({ hasText: "Upload document" }).click();
     await expect(page.getByText("Shop handbook").first()).toBeVisible();
 
     await page.getByLabel("Step title").fill("Read the shop handbook");
@@ -128,12 +142,25 @@ test.describe("Employee onboarding with separate users", () => {
     const department = inviteDialog.getByTestId("invite-department");
     if (await department.isVisible().catch(() => false)) {
       await department.click();
-      await page.getByRole("option", { name: "FOH", exact: true }).click();
+      await page.getByRole("option", { name: "FOH", exact: true }).first().click();
     }
     const location = inviteDialog.getByTestId("invite-location");
     if (await location.isVisible().catch(() => false)) {
       await location.click();
-      await page.getByRole("option", { name: "High Street" }).click();
+      const storeOption = page
+        .getByTestId("invite-location-option")
+        .filter({ hasText: "High Street" })
+        .first();
+      await expect(storeOption).toBeVisible();
+      await storeOption.click();
+      await expect(location).toHaveText("High Street");
+    }
+    await inviteDialog.getByTestId("invite-continue").click();
+    try {
+      await expect(page.getByTestId("ops-basics")).toBeVisible({ timeout: 5_000 });
+    } catch (error) {
+      const notes = await page.locator("[role='status']").allTextContents();
+      throw new Error(notes.join(" | ") || "Invite did not continue.", { cause: error });
     }
     const inviteResponse = page.waitForResponse(
       (response) =>
@@ -142,7 +169,7 @@ test.describe("Employee onboarding with separate users", () => {
         !response.url().includes("/activate") &&
         !response.url().includes("/accept"),
     );
-    await inviteDialog.getByRole("button", { name: "Send invites" }).click();
+    await page.getByTestId("ops-basics-continue").click();
     const invitePayload = (await (await inviteResponse).json()) as {
       inviteLink?: string;
       results?: Array<{ inviteLink?: string }>;
