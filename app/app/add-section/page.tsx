@@ -1,7 +1,5 @@
-"use client";
-
-import AddSectionPage from "@/features/sections/pages/AddSection";
+import { redirect } from "next/navigation";
 
 export default function AddSection() {
-  return <AddSectionPage />;
+  redirect("/app/dashboard");
 }

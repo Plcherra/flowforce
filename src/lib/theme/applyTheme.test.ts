@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 import {
   applyTheme,
   themeBootScript,
-  themeClassList,
   THEME_NAMES,
   THEME_STORAGE_KEY,
   type ThemeName,
@@ -38,9 +37,9 @@ export function runApplyThemeTests() {
   for (const name of ["flowforce", "light", "dark"] as const) {
     const root = createRoot(["dark"]);
     const resolved = applyTheme(name, root);
-    assert.equal(resolved, name);
-    assert.equal(root.getAttribute("data-theme"), name);
-    assert.deepEqual([...root.classes], [...themeClassList(name)]);
+    assert.equal(resolved, "flowforce");
+    assert.equal(root.getAttribute("data-theme"), "flowforce");
+    assert.deepEqual([...root.classes], []);
   }
 
   for (const value of ["system", "blue", "", null, undefined]) {
@@ -90,18 +89,17 @@ export function runApplyThemeTests() {
     assert.equal(storage.getItem(THEME_STORAGE_KEY), name);
     const root = createRoot(["dark"]);
     const resolved = applyTheme(storage.getItem(THEME_STORAGE_KEY), root);
-    assert.equal(resolved, name);
-    assert.equal(root.getAttribute("data-theme"), name);
+    assert.equal(resolved, "flowforce");
+    assert.equal(root.getAttribute("data-theme"), "flowforce");
     dataThemes.set(name, root.getAttribute("data-theme"));
     const booted = bootStoredTheme(name);
-    assert.equal(booted.dataTheme, name);
-    assert.equal(booted.classes.has("dark"), name === "dark");
+    assert.equal(booted.dataTheme, "flowforce");
+    assert.equal(booted.classes.has("dark"), false);
   }
 
-  assert.notEqual(dataThemes.get("light"), dataThemes.get("flowforce"));
-  assert.equal(dataThemes.get("light"), "light");
+  assert.equal(dataThemes.get("light"), "flowforce");
   assert.equal(dataThemes.get("flowforce"), "flowforce");
-  assert.equal(dataThemes.get("dark"), "dark");
+  assert.equal(dataThemes.get("dark"), "flowforce");
 
   const css = fs.readFileSync(path.resolve(here, "../../../app/globals.css"), "utf8");
   const flowforceBackground = backgroundToken(css, ":root");

@@ -9,8 +9,6 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { templates } from "@/data/templateData";
-import { TemplateCard } from "./TemplateCard";
 
 export function TemplatesOverview() {
   const { t } = useTranslation();
@@ -52,14 +50,8 @@ export function TemplatesOverview() {
         </div>
 
         {/* Templates Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {Object.entries(templates).map(([key, template]) => (
-            <TemplateCard
-              key={key}
-              templateKey={key as keyof typeof templates}
-              template={template}
-            />
-          ))}
+        <div className="mx-auto max-w-xl text-center">
+          <p className="text-lg text-muted-foreground">{t("landing.coffee.description")}</p>
         </div>
       </div>
     </div>

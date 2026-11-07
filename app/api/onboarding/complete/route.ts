@@ -17,6 +17,11 @@ import {
   authorizeOnboardingCaller,
   type OnboardingGetUser,
 } from "./authorizeOnboarding";
+import { applyAccountWorkspace } from "../../_server/accountWorkspace";
+import {
+  onboardingRecordsFromWorkspace,
+  readWorkspace,
+} from "@/features/onboarding/account/accountSetupModel";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -95,13 +100,22 @@ const transformRolesForDatabase = (roles: unknown) => {
 const transformPositionsForDatabase = (positions: unknown) => {
   if (!Array.isArray(positions)) return [];
 
-  return positions.map((position: OnboardingPositionPayload) => ({
-    id: position.id,
-    name: position.name,
-    description: position.description || "",
-    roleId: position.roleId,
-    permissions: position.permissions || {},
-  }));
+  return positions.map((position: OnboardingPositionPayload) => {
+    const roleId =
+      typeof position.roleId === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        position.roleId,
+      )
+        ? position.roleId
+        : undefined;
+    return {
+      id: position.id,
+      name: position.name,
+      description: position.description || "",
+      ...(roleId ? { roleId } : {}),
+      permissions: position.permissions || {},
+    };
+  });
 };
 
 const publicErrorDetails = (error: unknown) => {
@@ -267,8 +281,16 @@ export async function handleOnboardingComplete(
     const enabledSections = Array.isArray(body.enabledSections)
       ? body.enabledSections
       : [];
-    const customRoles = transformRolesForDatabase(body.customRoles);
-    const positions = transformPositionsForDatabase(body.positions);
+    const workspace = readWorkspace(body.workspace);
+    const builtWorkspace = workspace
+      ? onboardingRecordsFromWorkspace(workspace)
+      : null;
+    const customRoles = transformRolesForDatabase(
+      builtWorkspace ? builtWorkspace.customRoles : body.customRoles,
+    );
+    const positions = transformPositionsForDatabase(
+      builtWorkspace ? builtWorkspace.positions : body.positions,
+    );
 
     const firstName = readString(userInfo, "firstName").trim();
     const lastName = readString(userInfo, "lastName").trim();
@@ -369,6 +391,16 @@ export async function handleOnboardingComplete(
     await ensureBasicOpsPackFlags(companyId);
     await storeOrgSetup(companyId, body.orgSetup);
 
+    let workspaceResult: Awaited<ReturnType<typeof applyAccountWorkspace>> | null =
+      null;
+    if (workspace) {
+      workspaceResult = await applyAccountWorkspace(supabaseAdmin, { // pragma: allowlist secret
+        companyId,
+        userId,
+        workspace,
+      });
+    }
+
     const setupStatus = await verifyOnboardingSetup(supabaseAdmin, { // pragma: allowlist secret
       companyId,
       userId,
@@ -428,7 +460,12 @@ export async function handleOnboardingComplete(
       });
     }
 
-    return NextResponse.json({ companyId, requestId, setup: setupStatus });
+    return NextResponse.json({
+      companyId,
+      requestId,
+      setup: setupStatus,
+      workspace: workspaceResult,
+    });
   } catch (error) {
     logger.error("Unexpected onboarding completion error", {
       error,

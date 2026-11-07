@@ -39,6 +39,7 @@ const navItems = [
     href: "/app/inventory/prep",
     icon: Calculator,
     permission: "inventory.prep.view" as const,
+    onHold: true,
   },
   {
     name: "Purchasing",
@@ -58,12 +59,14 @@ const navItems = [
     icon: ChefHat,
     permission: "inventory.view" as const,
     featureFlag: "inventory.cookbook",
+    onHold: true,
   },
   {
     name: "Reports",
     href: "/app/inventory/reports",
     icon: FileText,
     permission: "reports.view" as const,
+    onHold: true,
   },
 ];
 
@@ -103,6 +106,9 @@ export function InventoryNav() {
             >
               <item.icon className="h-4 w-4" />
               {item.name}
+              {item.onHold ? (
+                <span className="text-xs font-normal">{t("inventory.onHold")}</span>
+              ) : null}
             </NavLink>
           </IfCan>
         );

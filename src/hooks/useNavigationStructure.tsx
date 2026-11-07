@@ -3,12 +3,10 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
-import { isPackEnabled, packForNavSection, packRequiredForPath, type PackId } from "@/config/packFlags";
+import { isPackEnabled, packRequiredForPath, type PackId } from "@/config/packFlags";
 import { usePackFlags } from "@/hooks/usePackFlags";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
-import { useCustomSections } from "@/hooks/useCustomSections";
 import { navigationSections } from "@/data/navigationData";
-import { getNavByCategory } from "@/sections/registry";
 
 export interface NavigationItem {
   id: string;
@@ -50,7 +48,6 @@ export function useNavigationStructure() {
   const leadership = isLeadershipLevel({ name: profile?.role });
   const featureFlags = useFeatureFlags();
   const packFlags = usePackFlags();
-  const { sections: customSections } = useCustomSections();
 
   const isDirectoryItem = (item: { name?: string; href?: string }) => {
     const name = (item.name || "").trim().toLowerCase();
@@ -98,71 +95,12 @@ export function useNavigationStructure() {
     );
   };
 
-  // Filter and deduplicate custom sections
-  const getFilteredCustomSections = (categoryKey: string) => {
-    return (
-      customSections
-        .filter(
-          (customSection) =>
-            customSection.category === categoryKey && customSection.is_active,
-        )
-        // Remove unwanted sections
-        .filter((cs) => {
-          const name = (cs.name || "").toLowerCase();
-          return (
-            !name.includes("simple inventory") &&
-            !name.includes("events") &&
-            !name.includes("calendar")
-          );
-        })
-        // Deduplicate by path
-        .reduce((unique: any[], curr) => {
-          const exists = unique.some(
-            (u) =>
-              (u.path || "").toLowerCase() === (curr.path || "").toLowerCase(),
-          );
-          return exists ? unique : [...unique, curr];
-        }, [])
-    );
-  };
-
-  // Filter file-based sections to avoid duplicates
-  const getFilteredFileSections = (
-    categoryKey: string,
-    existingPaths: Set<string>,
-  ) => {
-    const dynamic = getNavByCategory()[categoryKey] || [];
-    const customSlugs = new Set(
-      customSections.map(
-        (cs) => (cs.path || "").replace(/^\//, "").split("/")[0],
-      ),
-    );
-
-    return dynamic.filter((it) => {
-      const slug = (it.href || "").split("/")[2] || "";
-      const path = canonicalizePath(it.href || "");
-      const itemName = (it.name || "").toLowerCase();
-
-      return (
-        !customSlugs.has(slug) &&
-        !existingPaths.has(path) &&
-        !itemName.includes("simple inventory") &&
-        !itemName.includes("events") &&
-        !itemName.includes("calendar")
-      );
-    });
-  };
-
   const navigationStructure: NavigationSection[] = useMemo(() => {
     const includedPaths = new Set<string>();
 
     return navigationSections
       .filter((section) => isSectionVisible(section))
       .map((section) => {
-        const sectionPack = packForNavSection(section.translationKey);
-        const sectionOpen =
-          !sectionPack || isPackEnabled(packFlags.flags, sectionPack);
-        // Process static navigation items
         const staticItems: NavigationItem[] = section.items
           .filter((item) => isItemVisible(item))
           .map((item) => ({
@@ -173,150 +111,12 @@ export function useNavigationStructure() {
             translationKey: item.translationKey,
           }));
 
-        const staticNames = new Set(
-          staticItems
-            .map((item) => (item.name || "").trim().toLowerCase())
-            .filter(Boolean),
-        );
-
-        // Get canonical paths to avoid duplicates
-        const canonicalPaths = new Set(
-          section.items.map((item) => canonicalizePath(item.href)),
-        );
-
-        // Process custom sections
-        const customItems: NavigationItem[] = getFilteredCustomSections(
-          section.translationKey,
-        )
-          .map((customSection) => {
-            const rawPath = (customSection.path || "").trim();
-            if (!rawPath) {
-              return null;
-            }
-
-            const resolvedPath =
-              rawPath.startsWith("/") || rawPath.startsWith("http")
-                ? rawPath
-                : `/${rawPath}`;
-
-            if (
-              !sectionOpen &&
-              !isDirectoryItem({ name: customSection.name, href: resolvedPath })
-            ) {
-              return null;
-            }
-
-            const canonical = canonicalizePath(resolvedPath);
-            const canonicalTail = canonical.split("/").pop() || "";
-            const normalizedName = (customSection.name || "")
-              .trim()
-              .toLowerCase();
-            const templateKey = (customSection.template_id || "")
-              .toString()
-              .toLowerCase();
-
-            if (
-              !canonical ||
-              canonicalPaths.has(canonical) ||
-              staticNames.has(normalizedName)
-            ) {
-              return null;
-            }
-
-            if (
-              canonicalTail === "company-updates" ||
-              normalizedName === "company updates"
-            ) {
-              return null;
-            }
-
-            if (
-              templateKey === "help-desk" ||
-              canonical.includes("help-desk") ||
-              normalizedName.includes("help desk")
-            ) {
-              return null;
-            }
-
-            let href = resolvedPath;
-            if (
-              canonicalTail === "employee-directory" ||
-              normalizedName === "employee directory"
-            ) {
-              if (!can("directory.view")) return null;
-              href = "/employees";
-            }
-
-            canonicalPaths.add(canonical);
-
-            return {
-              id: `custom-${customSection.id}`,
-              name: customSection.name || "Unnamed Section",
-              href,
-              icon: customSection.icon,
-            };
-          })
-          .filter((item): item is NavigationItem => item !== null);
-
-        // Process file-based sections
-        const fileItems: NavigationItem[] = getFilteredFileSections(
-          section.translationKey,
-          canonicalPaths,
-        )
-          .map((fileSection) => {
-            const canonical = canonicalizePath(fileSection.href || "");
-            if (
-              !sectionOpen &&
-              !isDirectoryItem({ name: fileSection.name, href: fileSection.href })
-            ) {
-              return null;
-            }
-            const canonicalTail = canonical.split("/").pop() || "";
-            const normalizedName = (fileSection.name || "")
-              .trim()
-              .toLowerCase();
-
-            if (
-              !canonical ||
-              canonicalPaths.has(canonical) ||
-              staticNames.has(normalizedName)
-            ) {
-              return null;
-            }
-
-            if (
-              canonicalTail === "company-updates" ||
-              normalizedName === "company updates"
-            ) {
-              return null;
-            }
-
-            canonicalPaths.add(canonical);
-
-            return {
-              id: `file-${fileSection.href}`,
-              name: fileSection.name,
-              href: fileSection.href,
-              icon: fileSection.icon,
-            } as NavigationItem;
-          })
-          .filter((item): item is NavigationItem => item !== null);
-
-        const combinedItems = [
-          ...staticItems,
-          ...customItems,
-          ...fileItems,
-        ].filter((item) => {
+        const items = staticItems.filter((item) => {
           if (isDirectoryItem(item) && !can("directory.view")) return false;
           if (blockedByPack(item)) return false;
           if (!leadership && isLeadershipItem(item)) return false;
           const canonical = canonicalizePath(item.href);
-          if (!canonical) {
-            return false;
-          }
-          if (includedPaths.has(canonical)) {
-            return false;
-          }
+          if (!canonical || includedPaths.has(canonical)) return false;
           includedPaths.add(canonical);
           return true;
         });
@@ -325,19 +125,17 @@ export function useNavigationStructure() {
           id: section.translationKey,
           title: section.title,
           translationKey: section.translationKey,
-          items: combinedItems,
+          items,
         };
       })
-      .filter((section) => section.items.length > 0); // Only include sections with visible items
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [customSections, hasRole, can, featureFlags, leadership, packFlags.flags]);
-
-  const canManageSections =
-    can("systemSettings") || hasRole(["company_admin", "owner", "admin"]);
+      .filter((section) => section.items.length > 0);
+    // Built-in sections only. Custom sections stay in the database and are ignored.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
+  }, [hasRole, can, featureFlags, leadership, packFlags.flags]);
 
   return {
     navigationStructure,
-    canManageSections,
+    canManageSections: false,
     packFlags: packFlags.flags,
     packFlagsReady: packFlags.isReady,
   };

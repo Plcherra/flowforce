@@ -132,7 +132,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "Our product demo video is currently in production",
     "pendingTask": "Pending task",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Pick a plan below to restore scheduling, inventory, tasks, and reporting for your team.",
-    "plansForRestaurantOperations": "Plans for restaurant operations",
+    "plansForRestaurantOperations": "Plans for coffee shops",
     "reactivateYourWorkspace": "Reactivate your workspace",
     "realWorldUseCaseExamples": "Real-world use case examples",
     "retailStore": "RETAIL STORE",
@@ -144,10 +144,10 @@
     "signInToManageAnExistingWorkspace": "Sign in to manage an existing workspace",
     "taskCompleted": "Task completed",
     "trend": "Trend",
-    "usedBy": "Used by 1,200+ locations worldwide",
+    "usedBy": "Made for coffee shops",
     "operationsMade": "Operations Made",
     "simple": "Simple.",
-    "subtitle": "Operations is included with every company. Add Team, Insights, or Stock when you need those tools.",
+    "subtitle": "FlowForce is the daily app for coffee shops. Run the shift, the lists, and the team in one place.",
     "model": {
       "eyebrow": "Operations first",
       "title": "OPS is the base. Packs add the rest.",
@@ -179,14 +179,14 @@
     "fasterScheduling": "Faster scheduling",
     "averageSetup": "Average setup time",
     "uptimeGuarantee": "Uptime guarantee",
-    "everythingNeeds": "Everything Your Business Needs",
-    "sixModules": "Six powerful modules that work together seamlessly to streamline every aspect of your business operations.",
+    "everythingNeeds": "Everything your coffee shop needs",
+    "sixModules": "Scheduling, lists, messages, and the rest of the shift, in one app.",
     "learnMore": "Learn More",
     "features": "Features",
     "templatesNav": "Templates",
     "industries": {
-      "title": "Built for Your Industry",
-      "subtitle": "Get started faster with pre-configured templates designed specifically for your business vertical.",
+      "title": "Built for coffee shops",
+      "subtitle": "Open the shop, run the shift, and close. One template to start from.",
       "explore": "Explore",
       "template": "Template",
       "retail": {
@@ -237,9 +237,9 @@
       }
     },
     "testimonials": {
-      "title": "Loved by Growing Businesses",
-      "subtitle": "Join thousands of companies that have transformed their operations with FlowForce.",
-      "trustedBy": "Trusted by industry leaders",
+      "title": "Loved by coffee shops",
+      "subtitle": "Shops use FlowForce to keep the shift, the lists, and the team clear.",
+      "trustedBy": "Trusted by coffee shops",
       "quotes": {
         "sarahChen": "FlowForce transformed our operations completely. We went from chaos to organized efficiency in just two weeks. Our scheduling conflicts dropped by 90%.",
         "michaelRodriguez": "The task management system alone saved us 15 hours per week. The automation features are incredible and the team adopted it instantly.",
@@ -307,6 +307,14 @@
         "customerSatisfaction": "Customer Satisfaction",
         "supportAvailable": "Support Available"
       }
+    },
+    "coffee": {
+      "title": "Coffee shop template",
+      "description": "Start with front of house (Cashier, Barista, Shift lead), back of house (Baker/Prep), and a Manager. Edit the names, or start from scratch.",
+      "featureOpen": "Opening list",
+      "featureShift": "The shift and who is on it",
+      "featureClose": "Closing list",
+      "start": "Start your shop"
     }
   },
   "resources": {
@@ -653,7 +661,30 @@
     "lowStockDetail": "{{count}} inventory items are at or below par.",
     "openPurchasesDetail": "{{count}} open purchases total {{value}}.",
     "overstaffedDetail": "{{count}} shifts are above planned headcount in the cost engine.",
-    "viewAllUpdates": "View All Updates ({{count}})"
+    "viewAllUpdates": "View All Updates ({{count}})",
+    "overview": {
+      "myShiftTitle": "My shift today",
+      "myShiftEmpty": "You do not have a shift today.",
+      "myShiftLoading": "Looking up your shift.",
+      "myShiftError": "We could not load your shift.",
+      "myShiftOpen": "Open the schedule",
+      "myListsTitle": "My lists due",
+      "myListsEmpty": "No lists are due for your role today.",
+      "myListsLoading": "Looking up your lists.",
+      "myListsError": "We could not load your lists.",
+      "openList": "Open list",
+      "coverageTitle": "Today's coverage",
+      "coverageEmpty": "No shifts are published for today.",
+      "coverageFilled": "Filled shifts: {{count}}",
+      "coverageOpen": "Open shifts: {{count}}",
+      "coverageLoading": "Looking up today's shifts.",
+      "coverageError": "We could not load today's shifts.",
+      "listStatusTitle": "Lists overdue or completed",
+      "listStatusBody": "Overdue lists: {{overdue}}. Completed lists: {{completed}}.",
+      "listStatusLoading": "Looking up lists.",
+      "listStatusError": "We could not load list status.",
+      "myShiftWhen": "{{title}} · {{when}}"
+    }
   },
   "certifications": {
     "title": "Certifications & Badges",
@@ -1504,7 +1535,8 @@
     "yield3": "yield",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Yield estimates and costs update automatically as you change quantities.",
     "yieldQuantity": "Yield Quantity",
-    "yieldUnit": "Yield Unit"
+    "yieldUnit": "Yield Unit",
+    "onHold": "On hold"
   },
   "admin": {
     "title": "Admin Console",
@@ -2069,7 +2101,171 @@
       "selectedSections": "Selected Sections",
       "title": "Customize Workspace Sections"
     },
-    "startsOnOperations": "You start on Operations. Team, Insights, and Stock stay off until you add them from Packs."
+    "startsOnOperations": "You start on Operations. Team, Insights, and Stock stay off until you add them from Packs.",
+    "account": {
+      "progress": "Step {{step}} of {{total}}",
+      "next": "Continue",
+      "back": "Back",
+      "skip": "Skip for now",
+      "finish": "Go to Overview",
+      "cancel": "Cancel",
+      "signup": {
+        "title": "Sign up",
+        "description": "Create the account you will use to run FlowForce.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "password": "Password",
+        "passwordHint": "Use at least 8 characters."
+      },
+      "company": {
+        "title": "Company basics",
+        "description": "Add the company name, time zone, and language. A logo is optional.",
+        "name": "Company name",
+        "businessType": "Business type",
+        "choose": "Choose a business type",
+        "timezone": "Time zone",
+        "locale": "Language",
+        "logo": "Logo",
+        "logoHint": "Optional. PNG, JPEG, or SVG up to 2MB."
+      },
+      "business": {
+        "restaurant": "Restaurant",
+        "cafe": "Café",
+        "retail": "Retail",
+        "other": "Other"
+      },
+      "locale": {
+        "en": "English",
+        "es": "Spanish",
+        "pt": "Portuguese",
+        "fr": "French",
+        "it": "Italian",
+        "de": "German"
+      },
+      "departments": {
+        "title": "Departments and roles",
+        "description": "Use the coffee shop template, then edit it, or start from scratch."
+      },
+      "department": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "floor": "Floor",
+        "back": "Back room",
+        "team": "Team"
+      },
+      "role": {
+        "barista": "Barista",
+        "cashier": "Cashier",
+        "server": "Server",
+        "cook": "Cook",
+        "prep": "Prep",
+        "stocker": "Stocker",
+        "receiver": "Receiver",
+        "teammate": "Teammate"
+      },
+      "permissions": {
+        "title": "Permissions",
+        "description": "Each department has a suggested default. A role starts from that default. If you change a role, the role wins.",
+        "departmentDefault": "Department default",
+        "overrides": "Overrides the department",
+        "classNote": "A role that can edit the schedule, see finished lists, invite people, or see reports uses the manager access class. Other roles use the staff access class."
+      },
+      "permission": {
+        "viewOwnSchedules": "See my schedule",
+        "formsSubmit": "Complete lists",
+        "scheduleEdit": "Edit the schedule",
+        "formsRead": "See lists that are finished",
+        "manageUsers": "Invite people",
+        "reportsView": "See reports"
+      },
+      "store": {
+        "title": "First store",
+        "description": "Add the first location and the hours you are open.",
+        "name": "Store name",
+        "opens": "Opens",
+        "closes": "Closes"
+      },
+      "invite": {
+        "title": "Invite your team",
+        "description": "Optional. You can invite people later from the directory.",
+        "email": "Email",
+        "role": "Role",
+        "add": "Add another person",
+        "remove": "Remove"
+      },
+      "starter": {
+        "title": "First shift or starter lists",
+        "description": "Optional. You can add a shift or lists later.",
+        "skip": "Skip this step",
+        "shift": "Add an unpublished shift for tomorrow",
+        "shiftHint": "The shift uses your first role and your store hours. It stays unpublished until you publish it on the schedule.",
+        "lists": "Add opening and closing lists",
+        "listsHint": "Two lists for your first role. People scheduled in that role see them on Overview.",
+        "openingTitle": "Opening list",
+        "closingTitle": "Closing list",
+        "openingItem1": "Unlock and walk the floor",
+        "openingItem2": "Check the stations are ready",
+        "openingItem3": "Note anything that needs a manager",
+        "closingItem1": "Clean the stations",
+        "closingItem2": "Close the register",
+        "closingItem3": "Lock up and note leftovers",
+        "shiftTitle": "First shift",
+        "listTitle": "List name",
+        "listItem": "List item",
+        "addItem": "Add item",
+        "addList": "Add list"
+      },
+      "error": {
+        "name": "Add your first and last name.",
+        "email": "Enter a valid email.",
+        "password": "Use at least 8 characters.",
+        "company": "Add the company name, time zone, and language.",
+        "role": "Turn on at least one role.",
+        "store": "Add the store name and hours.",
+        "invite": "Check the invite email or leave it blank to skip.",
+        "failed": "We could not finish setup. Try again."
+      }
+    },
+    "org": {
+      "useTemplate": "Use the coffee shop template",
+      "startScratch": "Start from scratch",
+      "sourceLabel": "How do you want to start?",
+      "addDepartment": "Add department",
+      "teamTitle": "Departments and roles",
+      "departmentName": "Department",
+      "roleName": "Role",
+      "addRole": "Add role",
+      "permissionsHelp": "Suggested permissions fit a coffee shop. A role can override its department.",
+      "permSchedule": "See the schedule",
+      "permScheduleEdit": "Edit the schedule",
+      "permForms": "Fill forms and lists",
+      "permTasks": "See tasks",
+      "permTasksUpdate": "Update tasks",
+      "teamHelp": "Start from the coffee shop template, or add your own. You can change this later in Settings.",
+      "coffeeShop": "Coffee shop",
+      "emptyDepartments": "Add your first department",
+      "emptyRoles": "Add your first role",
+      "removeDepartment": "Remove department",
+      "removeRole": "Remove role",
+      "permissionsTitle": "Permissions",
+      "permissionsEmpty": "Add a department and a role first.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Cashier",
+        "barista": "Barista",
+        "shiftLead": "Shift lead",
+        "bakerPrep": "Baker/Prep",
+        "manager": "Manager"
+      },
+      "accountTitle": "Your account",
+      "next": "Next",
+      "back": "Back",
+      "finish": "Create company",
+      "savePermissions": "Save permissions",
+      "permissionsSaved": "Permissions saved"
+    }
   },
   "auth": {
     "businessPlatform": "Business Operations Platform",
@@ -3401,7 +3597,8 @@
     "preparingWorkspace": "Preparing your workspace...",
     "loadingProfile": "Loading your profile...",
     "loadingPage": "Loading page...",
-    "metaDescription": "Business operations platform powered by FlowForce."
+    "metaDescription": "Business operations platform powered by FlowForce.",
+    "companyLogo": "Company logo"
   },
   "nav": {
     "addNew": "Add new",
@@ -5930,7 +6127,8 @@
     "providerQuickbooksDescription": "Accounting and payroll sync",
     "providerXeroDescription": "Accounting exports and reconciliation",
     "providerAdpDescription": "Payroll and labor actual imports",
-    "generatedWorkspace": "Automatically generated workspace"
+    "generatedWorkspace": "Automatically generated workspace",
+    "standardTheme": "FlowForce uses one standard theme."
   },
   "roles": {
     "aiSuggestions": "AI Suggestions",

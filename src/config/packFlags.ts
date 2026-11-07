@@ -34,6 +34,8 @@ const GATED_PREFIXES: { pack: OptionalPackId; prefix: string }[] = [
   { pack: "stock", prefix: "/app/inventory" },
   { pack: "stock", prefix: "/app/expenses" },
   { pack: "stock", prefix: "/app/purchasing" },
+  // Prep, Cookbook, and Inventory Reports stay available with Stock.
+  // They are on hold until next week and are not part of the builder cleanup.
   { pack: "stock", prefix: "/app/cookbook" },
   { pack: "stock", prefix: "/app/items-setup" },
   { pack: "stock", prefix: "/app/inventory-actions" },

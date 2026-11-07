@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -6,9 +6,23 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("coffee shop template is the signup default and stays editable", async ({ page }) => {
+async function reachDepartments(page: Page) {
   await page.goto("/company-registration");
-  await expect(page.getByTestId("org-setup")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("account-step-signup")).toBeVisible({ timeout: 30_000 });
+  await page.getByLabel("First name").fill("Ada");
+  await page.getByLabel("Last name").fill("Owner");
+  await page.getByLabel("Email").fill("ada.owner@example.com");
+  await page.getByLabel("Password").fill("correct-horse");
+  await page.getByTestId("account-next").click();
+  await expect(page.getByTestId("account-step-company")).toBeVisible();
+  await page.getByLabel("Company name").fill("North Cafe");
+  await page.getByTestId("account-next").click();
+  await expect(page.getByTestId("account-step-departments")).toBeVisible();
+  await expect(page.getByTestId("org-setup")).toBeVisible();
+}
+
+test("coffee shop template is the signup default and stays editable", async ({ page }) => {
+  await reachDepartments(page);
   await expect(page.getByTestId("org-start-template")).toHaveAttribute("data-active", "true");
   await expect(page.getByTestId("org-business-restaurant")).toHaveCount(0);
   await expect(page.getByTestId("org-role-cashier")).toHaveValue("Cashier");
@@ -26,7 +40,7 @@ test("coffee shop template is the signup default and stays editable", async ({ p
     path: "/opt/cursor/artifacts/signup-departments-roles.png",
   });
 
-  await page.getByTestId("signup-next").click();
+  await page.getByTestId("account-next").click();
   await expect(page.getByTestId("org-permissions")).toBeVisible();
   await expect(page.getByTestId("role-lead-schedule.edit")).toBeChecked();
   await expect(page.getByTestId("role-barista-schedule.edit")).not.toBeChecked();
@@ -39,32 +53,34 @@ test("coffee shop template is the signup default and stays editable", async ({ p
 });
 
 test("signup can start from an empty coffee shop team", async ({ page }) => {
-  await page.goto("/company-registration");
-  await expect(page.getByTestId("org-setup")).toBeVisible({ timeout: 30_000 });
+  await reachDepartments(page);
   await page.getByTestId("org-start-scratch").click();
   await expect(page.getByTestId("org-start-scratch")).toHaveAttribute("data-active", "true");
   await expect(page.getByTestId("org-empty-departments")).toBeVisible();
   await expect(page.getByTestId("org-role-cashier")).toHaveCount(0);
-  await expect(page.getByTestId("signup-next")).toBeDisabled();
+  await page.getByTestId("account-next").click();
+  await expect(page.getByTestId("account-step-departments")).toBeVisible();
+  await expect(page.getByText("Turn on at least one role.")).toBeVisible();
   await page.getByTestId("org-empty-departments").screenshot({
     path: "/opt/cursor/artifacts/signup-scratch-empty.png",
   });
 
   await page.getByTestId("org-add-department").click();
   await expect(page.getByTestId("org-empty-roles")).toBeVisible();
-  await expect(page.getByTestId("signup-next")).toBeDisabled();
+  await page.getByTestId("account-next").click();
+  await expect(page.getByTestId("account-step-departments")).toBeVisible();
   await page.getByTestId("org-add-role").click();
   await page.getByLabel("Department").fill("Bar");
   await page.getByLabel("Role").fill("Closer");
-  await expect(page.getByTestId("signup-next")).toBeEnabled();
 
-  await page.getByTestId("signup-next").click();
+  await page.getByTestId("account-next").click();
   await expect(page.getByTestId("org-permissions")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Bar" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Closer" })).toBeVisible();
   await expect(page.locator("[data-testid$='-schedule.view']").first()).not.toBeChecked();
 
-  await page.getByTestId("signup-steps").getByRole("button", { name: "Departments and roles" }).click();
+  await page.getByTestId("account-back").click();
+  await expect(page.getByTestId("account-step-departments")).toBeVisible();
   await page.getByTestId("org-start-template").click();
   await expect(page.getByTestId("org-role-cashier")).toHaveValue("Cashier");
   await expect(page.getByTestId("org-role-manager")).toHaveValue("Manager");

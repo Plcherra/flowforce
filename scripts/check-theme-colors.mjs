@@ -124,6 +124,7 @@ const allowedFiles = new Set([
   "src/features/forms/components/fields/SignatureField.tsx",
   "src/data/updateTemplates.ts",
   "src/features/roles/constants/productRoleContract.json",
+  "src/features/onboarding/utils/orgTemplates.ts",
   "src/features/system/hooks/useAdminSettings.ts",
   "src/hooks/useCompany.tsx",
   "src/hooks/useCompanyRoles.tsx",

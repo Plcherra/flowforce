@@ -17,14 +17,10 @@ import { SectionsReadinessPanel } from "@/features/sections/components/SectionsR
 import RoleConfigurationTab from "@/features/roles/components/RoleConfigurationTab";
 import SectionPermissionsTab from "@/features/roles/components/SectionPermissionsTab";
 import { AVAILABLE_SECTIONS } from "@/data/availableSections";
-import { useNavigate } from "@/lib/router-adapter";
-
 import {
   Layers,
   Shield,
-  Plus,
   Settings,
-  LayoutTemplate,
   Users,
 } from "lucide-react";
 
@@ -32,7 +28,6 @@ export default function SectionsPermissions() {
   const { t } = useTranslation();
   const { can } = useCan();
   const { hasRole } = usePermissions();
-  const navigate = useNavigate();
   const [enabledSections, setEnabledSections] = useState<string[]>(
     AVAILABLE_SECTIONS.filter((s) => s.enabled).map((s) => s.id),
   );
@@ -78,21 +73,9 @@ export default function SectionsPermissions() {
               {t("sections.manageBusinessTemplatesNavigationSectionsAndRoleBasedAccessControl")}
             </p>
           </div>
-          <div className="flex space-x-3">
-            <Button variant="outline">
-              <LayoutTemplate className="mr-2 h-4 w-4" />
-              {t("sections.importTemplate")}
-            </Button>
-            <Button onClick={() => navigate("/app/add-section")}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("sections.createCustomSection")}
-            </Button>
-          </div>
         </div>
 
-        <SectionsReadinessPanel
-          onAddSection={() => navigate("/app/add-section")}
-        />
+        <SectionsReadinessPanel />
 
         <Tabs defaultValue="sections" className="space-y-6">
           <TabsList>

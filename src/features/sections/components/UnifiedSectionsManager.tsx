@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "@/lib/router-adapter";
 
 type Props = {
   selectedSections: string[];
@@ -84,7 +82,6 @@ export function UnifiedSectionsManager({
   const { sections: customSections } = useCustomSections();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
-  const navigate = useNavigate();
 
   const items = useMemo<UnifiedItem[]>(() => {
     const defaults: UnifiedItem[] = AVAILABLE_SECTIONS.map((s) => ({
@@ -155,9 +152,6 @@ export function UnifiedSectionsManager({
                 <SelectItem value="custom">{t("common.custom")}</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={() => navigate("/app/add-section")}>
-              {t("sections.addNewSection")}
-            </Button>
           </div>
         </CardTitle>
       </CardHeader>

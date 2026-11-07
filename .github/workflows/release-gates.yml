@@ -76,6 +76,9 @@ jobs:
       - name: Architecture contract
         run: npm run check:architecture
 
+      - name: Source file length
+        run: npm run check:file-length
+
       - name: Install Supabase CLI
         run: npm install --global supabase@${{ env.SUPABASE_CLI_VERSION }}
 

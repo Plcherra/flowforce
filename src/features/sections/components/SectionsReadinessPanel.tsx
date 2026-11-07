@@ -17,7 +17,7 @@ import { useCustomSections } from "@/hooks/useCustomSections";
 import { buildSectionsReadinessSummary } from "@/features/sections/utils/sectionsReadiness";
 
 interface SectionsReadinessPanelProps {
-  onAddSection: () => void;
+  onAddSection?: () => void;
 }
 
 const reviewTone: Record<string, string> = {
@@ -84,9 +84,11 @@ export function SectionsReadinessPanel({
               {t("sections.customPagesPermissionsTemplatesAndEnabledModulesAreCheckedHere")}
             </p>
           </div>
-          <Button type="button" onClick={onAddSection}>
-            {t("sections.addSection")}
-          </Button>
+          {onAddSection ? (
+            <Button type="button" onClick={onAddSection}>
+              {t("sections.addSection")}
+            </Button>
+          ) : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -132,7 +132,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "Das Produkt-Demovideo ist noch in Produktion",
     "pendingTask": "Offene Aufgabe",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Wählen Sie unten einen Tarif, um Planung, Bestand, Aufgaben und Berichte für Ihr Team wiederherzustellen.",
-    "plansForRestaurantOperations": "Tarife für den Restaurantbetrieb",
+    "plansForRestaurantOperations": "Pläne für Cafés",
     "reactivateYourWorkspace": "Arbeitsbereich reaktivieren",
     "realWorldUseCaseExamples": "Beispiele aus der Praxis",
     "retailStore": "GESCHÄFT",
@@ -144,10 +144,10 @@
     "signInToManageAnExistingWorkspace": "Melden Sie sich an, um einen bestehenden Arbeitsbereich zu verwalten",
     "taskCompleted": "Aufgabe erledigt",
     "trend": "Trend",
-    "usedBy": "Verwendet von 1.200+ Standorten weltweit",
+    "usedBy": "Gemacht für Cafés",
     "operationsMade": "Durchgeführte Operationen",
     "simple": "Einfach.",
-    "subtitle": "Operationen ist in jedem Unternehmen enthalten. Fügen Sie Team, Einblicke oder Bestand hinzu, wenn Sie diese Werkzeuge brauchen.",
+    "subtitle": "FlowForce ist die tägliche App für Cafés. Schicht, Listen und Team an einem Ort.",
     "model": {
       "eyebrow": "Zuerst Operationen",
       "title": "OPS ist die Basis. Pakete ergänzen den Rest.",
@@ -179,14 +179,14 @@
     "fasterScheduling": "Schnellere Planung",
     "averageSetup": "Durchschnittliche Einrichtungszeit",
     "uptimeGuarantee": "Verfügbarkeitsgarantie",
-    "everythingNeeds": "Alles Was Ihr Unternehmen Braucht",
-    "sixModules": "Sechs mächtige Module, die nahtlos zusammenarbeiten, um jeden Aspekt Ihrer Geschäftsabläufe zu optimieren.",
+    "everythingNeeds": "Alles, was dein Café braucht",
+    "sixModules": "Plan, Listen, Nachrichten und der Rest der Schicht in einer App.",
     "learnMore": "Mehr Erfahren",
     "features": "Funktionen",
     "templatesNav": "Vorlagen",
     "industries": {
-      "title": "Für Ihre Branche Gebaut",
-      "subtitle": "Starten Sie schneller mit vorkonfigurierten Vorlagen, die speziell für Ihren Geschäftsbereich entwickelt wurden.",
+      "title": "Gemacht für Cafés",
+      "subtitle": "Öffnen, die Schicht führen und schließen. Eine Vorlage zum Start.",
       "explore": "Erkunden",
       "template": "Vorlage",
       "retail": {
@@ -237,9 +237,9 @@
       }
     },
     "testimonials": {
-      "title": "Geliebt von Wachsenden Unternehmen",
-      "subtitle": "Schließen Sie sich Tausenden von Unternehmen an, die ihre Abläufe mit FlowForce transformiert haben.",
-      "trustedBy": "Vertraut von Branchenführern",
+      "title": "Bei Cafés beliebt",
+      "subtitle": "Cafés nutzen FlowForce, damit Schicht, Listen und Team klar sind.",
+      "trustedBy": "Cafés vertrauen darauf",
       "quotes": {
         "klausWeber": "FlowForce hat unsere Abläufe komplett transformiert. Wir gingen vom Chaos zur organisierten Effizienz in nur zwei Wochen. Unsere Planungskonflikte sind um 90% gesunken.",
         "sabineSchneider": "Allein das Aufgabenverwaltungssystem sparte uns 15 Stunden pro Woche. Die Automatisierungsfunktionen sind unglaublich und das Team hat es sofort übernommen.",
@@ -307,6 +307,14 @@
         "customerSatisfaction": "Kundenzufriedenheit",
         "supportAvailable": "Support Verfügbar"
       }
+    },
+    "coffee": {
+      "title": "Café-Vorlage",
+      "description": "Starte mit Service (Kasse, Barista, Schichtleitung), Küche (Bäcker/Vorbereitung) und einer Leitung. Ändere die Namen oder fang neu an.",
+      "featureOpen": "Öffnungsliste",
+      "featureShift": "Die Schicht und wer da ist",
+      "featureClose": "Schließliste",
+      "start": "Dein Café starten"
     }
   },
   "resources": {
@@ -1011,7 +1019,171 @@
       "templateBadge": "Vorlage",
       "title": "Bereiche Ihres Arbeitsbereichs anpassen"
     },
-    "startsOnOperations": "Sie starten mit Operationen. Team, Einblicke und Bestand bleiben aus, bis Sie sie unter Pakete hinzufügen."
+    "startsOnOperations": "Sie starten mit Operationen. Team, Einblicke und Bestand bleiben aus, bis Sie sie unter Pakete hinzufügen.",
+    "account": {
+      "progress": "Schritt {{step}} von {{total}}",
+      "next": "Weiter",
+      "back": "Zurück",
+      "skip": "Vorerst überspringen",
+      "finish": "Zur Übersicht",
+      "cancel": "Abbrechen",
+      "signup": {
+        "title": "Konto erstellen",
+        "description": "Erstelle das Konto, mit dem du FlowForce nutzt.",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail",
+        "password": "Passwort",
+        "passwordHint": "Mindestens 8 Zeichen."
+      },
+      "company": {
+        "title": "Unternehmensdaten",
+        "description": "Name, Zeitzone und Sprache. Ein Logo ist optional.",
+        "name": "Unternehmensname",
+        "businessType": "Betriebsart",
+        "choose": "Betriebsart wählen",
+        "timezone": "Zeitzone",
+        "locale": "Sprache",
+        "logo": "Logo",
+        "logoHint": "Optional. PNG, JPEG oder SVG bis 2 MB."
+      },
+      "business": {
+        "restaurant": "Restaurant",
+        "cafe": "Café",
+        "retail": "Einzelhandel",
+        "other": "Sonstiges"
+      },
+      "locale": {
+        "en": "Englisch",
+        "es": "Spanisch",
+        "pt": "Portugiesisch",
+        "fr": "Französisch",
+        "it": "Italienisch",
+        "de": "Deutsch"
+      },
+      "departments": {
+        "title": "Abteilungen und Rollen",
+        "description": "Nutze die Café-Vorlage und bearbeite sie, oder fang neu an."
+      },
+      "department": {
+        "foh": "Service",
+        "boh": "Küche",
+        "floor": "Fläche",
+        "back": "Lager",
+        "team": "Team"
+      },
+      "role": {
+        "barista": "Barista",
+        "cashier": "Kasse",
+        "server": "Servicekraft",
+        "cook": "Koch",
+        "prep": "Vorbereitung",
+        "stocker": "Warenpflege",
+        "receiver": "Wareneingang",
+        "teammate": "Teammitglied"
+      },
+      "permissions": {
+        "title": "Berechtigungen",
+        "description": "Jede Abteilung hat einen Vorschlag. Die Rolle startet damit. Wenn du die Rolle änderst, gilt die Rolle.",
+        "departmentDefault": "Vorschlag der Abteilung",
+        "overrides": "Überschreibt die Abteilung",
+        "classNote": "Eine Rolle, die den Plan bearbeiten, erledigte Listen sehen, Leute einladen oder Berichte sehen kann, nutzt die Leitungsstufe. Die anderen nutzen die Mitarbeiterstufe."
+      },
+      "permission": {
+        "viewOwnSchedules": "Meinen Plan sehen",
+        "formsSubmit": "Listen erledigen",
+        "scheduleEdit": "Den Plan bearbeiten",
+        "formsRead": "Erledigte Listen sehen",
+        "manageUsers": "Leute einladen",
+        "reportsView": "Berichte sehen"
+      },
+      "store": {
+        "title": "Erster Standort",
+        "description": "Füge den ersten Standort und die Öffnungszeiten hinzu.",
+        "name": "Name des Standorts",
+        "opens": "Öffnet",
+        "closes": "Schließt"
+      },
+      "invite": {
+        "title": "Team einladen",
+        "description": "Optional. Du kannst später über das Verzeichnis einladen.",
+        "email": "E-Mail",
+        "role": "Rolle",
+        "add": "Weitere Person hinzufügen",
+        "remove": "Entfernen"
+      },
+      "starter": {
+        "title": "Erste Schicht oder Startlisten",
+        "description": "Optional. Eine Schicht oder Listen kannst du später anlegen.",
+        "skip": "Diesen Schritt überspringen",
+        "shift": "Eine unveröffentlichte Schicht für morgen anlegen",
+        "shiftHint": "Die Schicht nutzt deine erste Rolle und die Öffnungszeiten. Sie bleibt unveröffentlicht, bis du sie im Plan veröffentlichst.",
+        "lists": "Öffnungs- und Schließlisten anlegen",
+        "listsHint": "Zwei Listen für deine erste Rolle. Wer in dieser Rolle eingeplant ist, sieht sie in der Übersicht.",
+        "openingTitle": "Öffnungsliste",
+        "closingTitle": "Schließliste",
+        "openingItem1": "Aufschließen und durchgehen",
+        "openingItem2": "Prüfen, ob die Stationen bereit sind",
+        "openingItem3": "Notieren, was eine Leitung braucht",
+        "closingItem1": "Stationen reinigen",
+        "closingItem2": "Kasse schließen",
+        "closingItem3": "Abschließen und Reste notieren",
+        "shiftTitle": "Erste Schicht",
+        "listTitle": "Listenname",
+        "listItem": "Listeneintrag",
+        "addItem": "Eintrag hinzufügen",
+        "addList": "Liste hinzufügen"
+      },
+      "error": {
+        "name": "Gib Vor- und Nachname ein.",
+        "email": "Gib eine gültige E-Mail ein.",
+        "password": "Mindestens 8 Zeichen.",
+        "company": "Gib Name, Zeitzone und Sprache ein.",
+        "role": "Schalte mindestens eine Rolle ein.",
+        "store": "Gib Standortname und Öffnungszeiten ein.",
+        "invite": "Prüfe die Einladungs-E-Mail oder lass sie leer, um zu überspringen.",
+        "failed": "Die Einrichtung ist nicht fertig geworden. Versuch es noch einmal."
+      }
+    },
+    "org": {
+      "useTemplate": "Café-Vorlage verwenden",
+      "startScratch": "Neu beginnen",
+      "sourceLabel": "Wie möchtest du anfangen?",
+      "addDepartment": "Abteilung hinzufügen",
+      "teamTitle": "Abteilungen und Rollen",
+      "departmentName": "Abteilung",
+      "roleName": "Rolle",
+      "addRole": "Rolle hinzufügen",
+      "permissionsHelp": "Die Vorschläge passen zu einem Café. Eine Rolle kann die Abteilung ändern.",
+      "permSchedule": "Dienstplan sehen",
+      "permScheduleEdit": "Dienstplan bearbeiten",
+      "permForms": "Formulare und Listen ausfüllen",
+      "permTasks": "Aufgaben sehen",
+      "permTasksUpdate": "Aufgaben aktualisieren",
+      "teamHelp": "Beginnen Sie mit der Café-Vorlage oder legen Sie eigene an. Sie können das später in den Einstellungen ändern.",
+      "coffeeShop": "Café",
+      "emptyDepartments": "Fügen Sie Ihre erste Abteilung hinzu",
+      "emptyRoles": "Fügen Sie Ihre erste Rolle hinzu",
+      "removeDepartment": "Abteilung entfernen",
+      "removeRole": "Rolle entfernen",
+      "permissionsTitle": "Berechtigungen",
+      "permissionsEmpty": "Fügen Sie zuerst eine Abteilung und eine Rolle hinzu.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Kassierer",
+        "barista": "Barista",
+        "shiftLead": "Schichtleitung",
+        "bakerPrep": "Bäcker/Vorbereitung",
+        "manager": "Leitung"
+      },
+      "accountTitle": "Ihr Konto",
+      "next": "Weiter",
+      "back": "Zurück",
+      "finish": "Unternehmen erstellen",
+      "savePermissions": "Berechtigungen speichern",
+      "permissionsSaved": "Berechtigungen gespeichert"
+    }
   },
   "auth": {
     "businessPlatform": "Geschäftsabläufe-Plattform",
@@ -1370,7 +1542,30 @@
     "lowStockDetail": "{{count}} Artikel sind am oder unter dem Sollbestand.",
     "openPurchasesDetail": "{{count}} offene Einkäufe ergeben {{value}}.",
     "overstaffedDetail": "{{count}} Schichten liegen über der geplanten Besetzung in der Kostenrechnung.",
-    "viewAllUpdates": "Alle Updates anzeigen ({{count}})"
+    "viewAllUpdates": "Alle Updates anzeigen ({{count}})",
+    "overview": {
+      "myShiftTitle": "Meine Schicht heute",
+      "myShiftEmpty": "Du hast heute keine Schicht.",
+      "myShiftLoading": "Deine Schicht wird gesucht.",
+      "myShiftError": "Deine Schicht konnte nicht geladen werden.",
+      "myShiftOpen": "Plan öffnen",
+      "myListsTitle": "Meine fälligen Listen",
+      "myListsEmpty": "Für deine Rolle sind heute keine Listen fällig.",
+      "myListsLoading": "Deine Listen werden gesucht.",
+      "myListsError": "Deine Listen konnten nicht geladen werden.",
+      "openList": "Liste öffnen",
+      "coverageTitle": "Heutige Besetzung",
+      "coverageEmpty": "Für heute sind keine Schichten veröffentlicht.",
+      "coverageFilled": "Besetzte Schichten: {{count}}",
+      "coverageOpen": "Offene Schichten: {{count}}",
+      "coverageLoading": "Heutige Schichten werden gesucht.",
+      "coverageError": "Die heutigen Schichten konnten nicht geladen werden.",
+      "listStatusTitle": "Überfällige oder erledigte Listen",
+      "listStatusBody": "Überfällige Listen: {{overdue}}. Erledigte Listen: {{completed}}.",
+      "listStatusLoading": "Listen werden gesucht.",
+      "listStatusError": "Der Listenstatus konnte nicht geladen werden.",
+      "myShiftWhen": "{{title}} · {{when}}"
+    }
   },
   "inventory": {
     "7DayTrend": "7-Tage-Trend",
@@ -2176,7 +2371,8 @@
     "yield3": "Ausbeute",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Ausbeuteschätzungen und Kosten aktualisieren sich automatisch, wenn Sie die Mengen ändern.",
     "yieldQuantity": "Ausbeutemenge",
-    "yieldUnit": "Ausbeuteeinheit"
+    "yieldUnit": "Ausbeuteeinheit",
+    "onHold": "Pausiert"
   },
   "personalLanguage": {
     "label": "Ihre Sprache",
@@ -3401,7 +3597,8 @@
     "preparingWorkspace": "Arbeitsbereich wird vorbereitet...",
     "loadingProfile": "Profil wird geladen...",
     "loadingPage": "Seite wird geladen...",
-    "metaDescription": "Plattform für Geschäftsabläufe von FlowForce."
+    "metaDescription": "Plattform für Geschäftsabläufe von FlowForce.",
+    "companyLogo": "Unternehmenslogo"
   },
   "nav": {
     "addNew": "Neu hinzufügen",
@@ -5930,7 +6127,8 @@
     "providerQuickbooksDescription": "Abgleich von Buchhaltung und Lohn",
     "providerXeroDescription": "Buchhaltungsexporte und Abstimmung",
     "providerAdpDescription": "Import von Lohn und tatsächlichen Stunden",
-    "generatedWorkspace": "Automatisch erstellter Arbeitsbereich"
+    "generatedWorkspace": "Automatisch erstellter Arbeitsbereich",
+    "standardTheme": "FlowForce verwendet ein Standarddesign."
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

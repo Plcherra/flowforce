@@ -238,7 +238,30 @@
     "lowStockDetail": "{{count}} articoli sono alla soglia o sotto.",
     "openPurchasesDetail": "{{count}} acquisti aperti per un totale di {{value}}.",
     "overstaffedDetail": "{{count}} turni superano l'organico previsto nel motore dei costi.",
-    "viewAllUpdates": "Vedi tutti gli aggiornamenti ({{count}})"
+    "viewAllUpdates": "Vedi tutti gli aggiornamenti ({{count}})",
+    "overview": {
+      "myShiftTitle": "Il mio turno oggi",
+      "myShiftEmpty": "Oggi non hai un turno.",
+      "myShiftLoading": "Cerco il tuo turno.",
+      "myShiftError": "Non siamo riusciti a caricare il tuo turno.",
+      "myShiftOpen": "Apri il piano",
+      "myListsTitle": "Le mie liste in scadenza",
+      "myListsEmpty": "Nessuna lista è in scadenza per il tuo ruolo oggi.",
+      "myListsLoading": "Cerco le tue liste.",
+      "myListsError": "Non siamo riusciti a caricare le tue liste.",
+      "openList": "Apri lista",
+      "coverageTitle": "Copertura di oggi",
+      "coverageEmpty": "Nessun turno è pubblicato per oggi.",
+      "coverageFilled": "Turni coperti: {{count}}",
+      "coverageOpen": "Turni aperti: {{count}}",
+      "coverageLoading": "Cerco i turni di oggi.",
+      "coverageError": "Non siamo riusciti a caricare i turni di oggi.",
+      "listStatusTitle": "Liste in ritardo o completate",
+      "listStatusBody": "Liste in ritardo: {{overdue}}. Liste completate: {{completed}}.",
+      "listStatusLoading": "Cerco le liste.",
+      "listStatusError": "Non siamo riusciti a caricare lo stato delle liste.",
+      "myShiftWhen": "{{title}} · {{when}}"
+    }
   },
   "navigation": {
     "communication": "Comunicazione",
@@ -444,7 +467,7 @@
     "ourProductDemoVideoIsCurrentlyInProduction": "Il video dimostrativo del prodotto è in produzione",
     "pendingTask": "Attività in sospeso",
     "pickAPlanBelowToRestoreSchedulingInventoryTasksAndReportingForYourTeam": "Scegli un piano qui sotto per ripristinare turni, inventario, attività e report del tuo team.",
-    "plansForRestaurantOperations": "Piani per le operazioni di ristorante",
+    "plansForRestaurantOperations": "Piani per caffetterie",
     "reactivateYourWorkspace": "Riattiva il tuo spazio",
     "realWorldUseCaseExamples": "Esempi di utilizzo reali",
     "retailStore": "NEGOZIO",
@@ -456,10 +479,10 @@
     "signInToManageAnExistingWorkspace": "Accedi per gestire uno spazio esistente",
     "taskCompleted": "Attività completata",
     "trend": "Tendenza",
-    "usedBy": "Utilizzato da oltre 1.200 sedi in tutto il mondo",
+    "usedBy": "Pensato per le caffetterie",
     "operationsMade": "Operazioni Rese",
     "simple": "Semplici.",
-    "subtitle": "Operations è incluso in ogni azienda. Aggiungi Team, Approfondimenti o Scorte quando ti servono quegli strumenti.",
+    "subtitle": "FlowForce è l'app quotidiana per le caffetterie. Turno, liste e team in un solo posto.",
     "model": {
       "eyebrow": "Prima Operations",
       "title": "OPS è la base. I pacchetti aggiungono il resto.",
@@ -491,14 +514,14 @@
     "fasterScheduling": "Pianificazione più veloce",
     "averageSetup": "Tempo medio di configurazione",
     "uptimeGuarantee": "Garanzia di uptime",
-    "everythingNeeds": "Tutto ciò di cui la Tua Azienda ha Bisogno",
-    "sixModules": "Sei moduli potenti che lavorano insieme senza soluzione di continuità per ottimizzare tutti gli aspetti delle operazioni aziendali.",
+    "everythingNeeds": "Tutto ciò che serve alla tua caffetteria",
+    "sixModules": "Piano, liste, messaggi e il resto del turno, in un'app.",
     "learnMore": "Scopri di Più",
     "features": "Funzionalità",
     "templatesNav": "Modelli",
     "industries": {
-      "title": "Costruito per la Tua Industria",
-      "subtitle": "Inizia più velocemente con template preconfigurati progettati specificamente per il tuo settore aziendale.",
+      "title": "Pensato per le caffetterie",
+      "subtitle": "Apri, gestisci il turno e chiudi. Un modello da cui partire.",
       "explore": "Esplora",
       "template": "Template",
       "retail": {
@@ -549,9 +572,9 @@
       }
     },
     "testimonials": {
-      "title": "Amato dalle Aziende in Crescita",
-      "subtitle": "Unisciti a migliaia di aziende che hanno trasformato le loro operazioni con FlowForce.",
-      "trustedBy": "Apprezzato dai leader del settore",
+      "title": "Scelto dalle caffetterie",
+      "subtitle": "Le caffetterie usano FlowForce per tenere chiari turno, liste e team.",
+      "trustedBy": "Scelto dalle caffetterie",
       "quotes": {
         "sarahChen": "FlowForce ha trasformato completamente le nostre operazioni. Siamo passati dal caos all'efficienza organizzata in sole due settimane. I nostri conflitti di pianificazione sono diminuiti del 90%.",
         "michaelRodriguez": "Solo il sistema di gestione delle attività ci ha fatto risparmiare 15 ore a settimana. Le funzionalità di automazione sono incredibili e il team l'ha adottato istantaneamente.",
@@ -619,6 +642,14 @@
         "customerSatisfaction": "Soddisfazione Cliente",
         "supportAvailable": "Supporto Disponibile"
       }
+    },
+    "coffee": {
+      "title": "Modello caffetteria",
+      "description": "Parti da sala (cassiere, barista, capoturno), cucina (panettiere/preparazione) e un responsabile. Cambia i nomi oppure parti da zero.",
+      "featureOpen": "Lista di apertura",
+      "featureShift": "Il turno e chi c'è",
+      "featureClose": "Lista di chiusura",
+      "start": "Apri la tua caffetteria"
     }
   },
   "features": {
@@ -1168,7 +1199,171 @@
       "templateBadge": "Modello",
       "title": "Personalizza le sezioni del tuo spazio di lavoro"
     },
-    "startsOnOperations": "Inizi con Operazioni. Team, Approfondimenti e Scorte restano disattivati finché non li aggiungi da Pacchetti."
+    "startsOnOperations": "Inizi con Operazioni. Team, Approfondimenti e Scorte restano disattivati finché non li aggiungi da Pacchetti.",
+    "account": {
+      "progress": "Passo {{step}} di {{total}}",
+      "next": "Continua",
+      "back": "Indietro",
+      "skip": "Salta per ora",
+      "finish": "Vai alla panoramica",
+      "cancel": "Annulla",
+      "signup": {
+        "title": "Crea account",
+        "description": "Crea l'account che userai per FlowForce.",
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "E-mail",
+        "password": "Password",
+        "passwordHint": "Usa almeno 8 caratteri."
+      },
+      "company": {
+        "title": "Dati dell'azienda",
+        "description": "Aggiungi nome, fuso orario e lingua. Il logo è facoltativo.",
+        "name": "Nome azienda",
+        "businessType": "Tipo di attività",
+        "choose": "Scegli un tipo di attività",
+        "timezone": "Fuso orario",
+        "locale": "Lingua",
+        "logo": "Logo",
+        "logoHint": "Facoltativo. PNG, JPEG o SVG fino a 2 MB."
+      },
+      "business": {
+        "restaurant": "Ristorante",
+        "cafe": "Caffè",
+        "retail": "Negozio",
+        "other": "Altro"
+      },
+      "locale": {
+        "en": "Inglese",
+        "es": "Spagnolo",
+        "pt": "Portoghese",
+        "fr": "Francese",
+        "it": "Italiano",
+        "de": "Tedesco"
+      },
+      "departments": {
+        "title": "Reparti e ruoli",
+        "description": "Usa il modello caffetteria e modificalo, oppure parti da zero."
+      },
+      "department": {
+        "foh": "Sala",
+        "boh": "Cucina",
+        "floor": "Negozio",
+        "back": "Magazzino",
+        "team": "Team"
+      },
+      "role": {
+        "barista": "Barista",
+        "cashier": "Cassiere",
+        "server": "Cameriere",
+        "cook": "Cuoco",
+        "prep": "Preparazione",
+        "stocker": "Rifornitore",
+        "receiver": "Ricevimento merci",
+        "teammate": "Collega"
+      },
+      "permissions": {
+        "title": "Permessi",
+        "description": "Ogni reparto ha un valore suggerito. Il ruolo parte da quel valore. Se modifichi il ruolo, vale il ruolo.",
+        "departmentDefault": "Valore del reparto",
+        "overrides": "Sostituisce il reparto",
+        "classNote": "Un ruolo che può modificare il piano, vedere le liste concluse, invitare persone o vedere i report usa la classe responsabile. Gli altri usano la classe staff."
+      },
+      "permission": {
+        "viewOwnSchedules": "Vedi il mio piano",
+        "formsSubmit": "Completa le liste",
+        "scheduleEdit": "Modifica il piano",
+        "formsRead": "Vedi le liste concluse",
+        "manageUsers": "Invita persone",
+        "reportsView": "Vedi i report"
+      },
+      "store": {
+        "title": "Primo negozio",
+        "description": "Aggiungi la prima sede e l'orario di apertura.",
+        "name": "Nome del negozio",
+        "opens": "Apre",
+        "closes": "Chiude"
+      },
+      "invite": {
+        "title": "Invita il team",
+        "description": "Facoltativo. Puoi invitare persone più tardi dalla rubrica.",
+        "email": "E-mail",
+        "role": "Ruolo",
+        "add": "Aggiungi un'altra persona",
+        "remove": "Rimuovi"
+      },
+      "starter": {
+        "title": "Primo turno o liste iniziali",
+        "description": "Facoltativo. Puoi aggiungere un turno o delle liste più tardi.",
+        "skip": "Salta questo passo",
+        "shift": "Aggiungi un turno non pubblicato per domani",
+        "shiftHint": "Il turno usa il primo ruolo e l'orario del negozio. Resta non pubblicato finché non lo pubblichi nel piano.",
+        "lists": "Aggiungi le liste di apertura e chiusura",
+        "listsHint": "Due liste per il primo ruolo. Chi è in turno con quel ruolo le vede nella panoramica.",
+        "openingTitle": "Lista di apertura",
+        "closingTitle": "Lista di chiusura",
+        "openingItem1": "Apri e fai il giro",
+        "openingItem2": "Controlla che le postazioni siano pronte",
+        "openingItem3": "Annota ciò che serve a un responsabile",
+        "closingItem1": "Pulisci le postazioni",
+        "closingItem2": "Chiudi la cassa",
+        "closingItem3": "Chiudi e annota gli avanzi",
+        "shiftTitle": "Primo turno",
+        "listTitle": "Nome della lista",
+        "listItem": "Voce della lista",
+        "addItem": "Aggiungi voce",
+        "addList": "Aggiungi lista"
+      },
+      "error": {
+        "name": "Aggiungi nome e cognome.",
+        "email": "Inserisci un'e-mail valida.",
+        "password": "Usa almeno 8 caratteri.",
+        "company": "Aggiungi nome, fuso orario e lingua.",
+        "role": "Attiva almeno un ruolo.",
+        "store": "Aggiungi il nome del negozio e l'orario.",
+        "invite": "Controlla l'e-mail dell'invito o lasciala vuota per saltare.",
+        "failed": "Non siamo riusciti a completare la configurazione. Riprova."
+      }
+    },
+    "org": {
+      "useTemplate": "Usa il modello caffè",
+      "startScratch": "Inizia da zero",
+      "sourceLabel": "Come vuoi iniziare?",
+      "addDepartment": "Aggiungi reparto",
+      "teamTitle": "Reparti e ruoli",
+      "departmentName": "Reparto",
+      "roleName": "Ruolo",
+      "addRole": "Aggiungi ruolo",
+      "permissionsHelp": "I permessi suggeriti vanno bene per un caffè. Un ruolo può cambiare quelli del reparto.",
+      "permSchedule": "Vedere i turni",
+      "permScheduleEdit": "Modificare i turni",
+      "permForms": "Compilare moduli e liste",
+      "permTasks": "Vedere le attività",
+      "permTasksUpdate": "Aggiornare le attività",
+      "teamHelp": "Parti dal modello caffè oppure aggiungi i tuoi. Puoi cambiarli dopo in Impostazioni.",
+      "coffeeShop": "Caffè",
+      "emptyDepartments": "Aggiungi il primo reparto",
+      "emptyRoles": "Aggiungi il primo ruolo",
+      "removeDepartment": "Rimuovi reparto",
+      "removeRole": "Rimuovi ruolo",
+      "permissionsTitle": "Permessi",
+      "permissionsEmpty": "Aggiungi prima un reparto e un ruolo.",
+      "names": {
+        "foh": "FOH",
+        "boh": "BOH",
+        "cashier": "Cassiere",
+        "barista": "Barista",
+        "shiftLead": "Capoturno",
+        "bakerPrep": "Panettiere/Preparazione",
+        "manager": "Responsabile"
+      },
+      "accountTitle": "Il tuo account",
+      "next": "Avanti",
+      "back": "Indietro",
+      "finish": "Crea azienda",
+      "savePermissions": "Salva permessi",
+      "permissionsSaved": "Permessi salvati"
+    }
   },
   "auth": {
     "businessPlatform": "Piattaforma Operazioni Aziendali",
@@ -2176,7 +2371,8 @@
     "yield3": "resa",
     "yieldEstimatesAndCostsUpdateAutomaticallyAsYouChangeQuantities": "Le stime di resa e i costi si aggiornano automaticamente quando cambi le quantità.",
     "yieldQuantity": "Quantità di resa",
-    "yieldUnit": "Unità di resa"
+    "yieldUnit": "Unità di resa",
+    "onHold": "In pausa"
   },
   "personalLanguage": {
     "label": "La tua lingua",
@@ -3401,7 +3597,8 @@
     "preparingWorkspace": "Preparazione dell'area di lavoro...",
     "loadingProfile": "Caricamento del profilo...",
     "loadingPage": "Caricamento della pagina...",
-    "metaDescription": "Piattaforma di operazioni aziendali di FlowForce."
+    "metaDescription": "Piattaforma di operazioni aziendali di FlowForce.",
+    "companyLogo": "Logo aziendale"
   },
   "nav": {
     "addNew": "Aggiungi",
@@ -5930,7 +6127,8 @@
     "providerQuickbooksDescription": "Sincronizzazione di contabilità e buste paga",
     "providerXeroDescription": "Esportazioni contabili e riconciliazione",
     "providerAdpDescription": "Importazione di buste paga e ore effettive",
-    "generatedWorkspace": "Area di lavoro generata automaticamente"
+    "generatedWorkspace": "Area di lavoro generata automaticamente",
+    "standardTheme": "FlowForce usa un solo tema standard."
   },
   "roles": {
     "aiSuggestions": "Suggerimenti IA",

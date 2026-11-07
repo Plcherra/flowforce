@@ -1,7 +1,5 @@
-"use client";
-
-import DynamicSectionPage from "@/features/sections/components/DynamicSection";
+import { redirect } from "next/navigation";
 
 export default function DynamicSection() {
-  return <DynamicSectionPage />;
+  redirect("/app/dashboard");
 }
