@@ -12,6 +12,7 @@ import {
 import { OPTIONAL_PACK_IDS } from "@/config/packCatalog";
 import type { OptionalPackId } from "@/config/packFlags";
 import { usePackFlags } from "@/hooks/usePackFlags";
+import { PackMonthlyPrice } from "@/features/packs/components/PackMonthlyPrice";
 
 export function PacksAddSheet({
   open,
@@ -34,6 +35,9 @@ export function PacksAddSheet({
         <SheetHeader className="text-left">
           <SheetTitle>{t("packs.addMenuTitle")}</SheetTitle>
           <SheetDescription>{t("packs.addMenuDescription")}</SheetDescription>
+          <p className="text-sm text-muted-foreground" data-testid="packs-add-price-note">
+            {t("packs.pricePlaceholderNote")}
+          </p>
         </SheetHeader>
         <ul className="mx-auto mt-4 max-w-3xl space-y-3" data-testid="packs-add-sheet">
           {OPTIONAL_PACK_IDS.map((pack) => {
@@ -55,6 +59,7 @@ export function PacksAddSheet({
                   <span className="text-sm text-muted-foreground">
                     {t(`packs.${pack}.description`)}
                   </span>
+                  <PackMonthlyPrice pack={pack} priceTestId={`pack-add-price-${pack}`} />
                 </button>
               </li>
             );

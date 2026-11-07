@@ -13,6 +13,7 @@ import {
 import { isOptionalPackId } from "@/config/packCatalog";
 import type { OptionalPackId } from "@/config/packFlags";
 import { usePackFlags } from "@/hooks/usePackFlags";
+import { PackMonthlyPrice } from "@/features/packs/components/PackMonthlyPrice";
 import { PackCheckoutNoticeText, PackPurchaseActions } from "@/features/packs/components/PackPurchaseActions";
 import { useConfirmPackCheckout } from "@/features/packs/useConfirmPackCheckout";
 import { usePackOffers } from "@/features/packs/usePackOffers";
@@ -53,12 +54,7 @@ export function PackDetail({ pack }: { pack: string }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">{t("packs.opsNote")}</p>
-          <p className="text-base font-medium" data-testid={`pack-price-${pack}`}>
-            {t("packs.priceTbd")}
-          </p>
-          <p className="text-xs text-muted-foreground" data-testid={`pack-price-note-${pack}`}>
-            {t("packs.pricePlaceholder")}
-          </p>
+          <PackMonthlyPrice pack={pack} showNote />
           {notice && notice !== "price_pending" ? <PackCheckoutNoticeText notice={notice} /> : null}
           <PackPurchaseActions
             pack={pack as OptionalPackId}

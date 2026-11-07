@@ -1,8 +1,11 @@
 /**
  * Pack discovery catalog.
  *
- * Team, Insights, and Stock prices are not decided yet. The UI shows a
- * placeholder. Checkout stays off until a recurring Stripe price id is set
+ * Placeholder prices (USD, monthly, per company, changeable later):
+ * Team $49, Insights $39, Stock $49. Sold à la carte. They are additive
+ * add-ons on Operations and do not replace starter, growth, or enterprise.
+ *
+ * Checkout stays off until a recurring monthly Stripe test price id is set
  * in the matching server env var:
  *
  * - STRIPE_PRICE_PACK_TEAM
@@ -10,8 +13,8 @@
  * - STRIPE_PRICE_PACK_STOCK
  *
  * Those prices are not STRIPE_PRICE_STARTER, STRIPE_PRICE_GROWTH, or
- * STRIPE_PRICE_ENTERPRISE. Quantity is 1 per company until seat pricing
- * is decided. The Stripe price's own interval answers monthly vs yearly.
+ * STRIPE_PRICE_ENTERPRISE. Checkout quantity is 1 (one company, not per seat).
+ * A yearly price is not accepted.
  */
 
 import {
@@ -26,6 +29,13 @@ export const PACK_PRICE_ENV: Record<OptionalPackId, string> = {
   team: "STRIPE_PRICE_PACK_TEAM",
   insights: "STRIPE_PRICE_PACK_INSIGHTS",
   stock: "STRIPE_PRICE_PACK_STOCK",
+};
+
+/** Placeholder monthly USD amount per company. Display only; Stripe uses the env price id. */
+export const PACK_PLACEHOLDER_MONTHLY_USD: Record<OptionalPackId, number> = {
+  team: 49,
+  insights: 39,
+  stock: 49,
 };
 
 export const OPTIONAL_PACK_IDS: OptionalPackId[] = ["team", "insights", "stock"];
@@ -43,11 +53,11 @@ export function readPackPriceId(
   return trimmed.length > 0 ? trimmed : null;
 }
 
-/** A pack can be sent to Stripe only when the price is recurring. */
+/** A pack can be sent to Stripe only when the price recurs monthly. */
 export function packPriceCanCheckout(price: {
-  recurring?: unknown;
+  recurring?: { interval?: string | null } | null;
 } | null): boolean {
-  return Boolean(price?.recurring);
+  return price?.recurring?.interval === "month";
 }
 
 export function isPackBillingMetadata(
