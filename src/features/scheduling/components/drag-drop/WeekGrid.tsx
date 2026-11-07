@@ -335,6 +335,15 @@ function EmployeeRowComponent({
 const GridCell = memo(GridCellComponent);
 const EmployeeRow = memo(EmployeeRowComponent);
 
+function scrollParent(start: HTMLElement | null): HTMLElement | null {
+  let node = start;
+  while (node) {
+    if (node.scrollWidth > node.clientWidth + 1) return node;
+    node = node.parentElement;
+  }
+  return start;
+}
+
 export function WeekGrid({
   weekDays,
   employees,
@@ -363,9 +372,10 @@ export function WeekGrid({
   const weekKey = weekDays[0]?.toISOString() ?? "";
 
   useLayoutEffect(() => {
-    const scroller = scrollContainerRef?.current ?? horizontalScrollRef.current;
-    if (!scroller) return;
     const alignToday = () => {
+      const start = scrollContainerRef?.current ?? horizontalScrollRef.current;
+      const scroller = scrollParent(start);
+      if (!scroller) return;
       const todayIndex = weekDays.findIndex((day) => isSameDay(day, new Date()));
       if (todayIndex < 0) return;
       if (scroller.scrollWidth <= scroller.clientWidth + 1) return;
@@ -375,7 +385,14 @@ export function WeekGrid({
     };
     alignToday();
     const frame = requestAnimationFrame(alignToday);
-    return () => cancelAnimationFrame(frame);
+    const observed = scrollContainerRef?.current ?? horizontalScrollRef.current;
+    const observer = new ResizeObserver(() => alignToday());
+    if (observed) observer.observe(observed);
+    if (observed?.parentElement) observer.observe(observed.parentElement);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [scrollContainerRef, weekDays, weekKey]);
 
   const unassignedLookup = useMemo(() => {
