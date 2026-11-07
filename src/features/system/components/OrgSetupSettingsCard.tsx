@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { OrgPermissionsStep } from "@/features/onboarding/components/OrgPermissionsStep";
+import { OrgSetupStep } from "@/features/onboarding/components/OrgSetupStep";
 import {
   effectivePermissions,
   orgReady,
@@ -16,12 +17,7 @@ import {
 function isOrgSetup(value: unknown): value is OrgSetup {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const record = value as { businessType?: unknown; departments?: unknown };
-  return (
-    (record.businessType === "cafe" ||
-      record.businessType === "restaurant" ||
-      record.businessType === "retail") &&
-    Array.isArray(record.departments)
-  );
+  return record.businessType === "cafe" && Array.isArray(record.departments);
 }
 
 export function OrgSetupSettingsCard() {
@@ -96,10 +92,12 @@ export function OrgSetupSettingsCard() {
   return (
     <Card data-testid="org-permissions-settings">
       <CardHeader>
-        <CardTitle>{t("onboarding.org.permissionsTitle")}</CardTitle>
+        <CardTitle>{t("onboarding.org.teamTitle")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <OrgPermissionsStep setup={setup} onChange={setSetup} />
+        <p className="text-sm text-muted-foreground">{t("onboarding.org.teamHelp")}</p>
+        <OrgSetupStep setup={setup} embedded onChange={setSetup} />
+        <OrgPermissionsStep setup={setup} embedded onChange={setSetup} />
         <Button type="button" className="min-h-11" disabled={busy} onClick={() => void save()}>
           {t("onboarding.org.savePermissions")}
         </Button>

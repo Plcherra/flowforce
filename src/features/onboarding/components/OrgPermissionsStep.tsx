@@ -5,6 +5,7 @@ import {
   permissionValue,
   withRoleOverride,
   type OrgPermissionKey,
+  type OrgPermissionMap,
   type OrgSetup,
 } from "@/features/onboarding/utils/orgTemplates";
 
@@ -19,73 +20,99 @@ const LABEL_KEYS: Record<OrgPermissionKey, string> = {
 export function OrgPermissionsStep({
   setup,
   onChange,
+  embedded = false,
 }: {
   setup: OrgSetup;
   onChange: (setup: OrgSetup) => void;
+  embedded?: boolean;
 }) {
   const { t } = useTranslation();
 
+  const setDepartmentPermission = (departmentId: string, key: OrgPermissionKey, value: boolean) => {
+    onChange({
+      ...setup,
+      departments: setup.departments.map((item) =>
+        item.id === departmentId
+          ? { ...item, permissions: { ...item.permissions, [key]: value } }
+          : item,
+      ),
+    });
+  };
+
   return (
     <section className="mx-auto w-full max-w-xl space-y-6" data-testid="org-permissions">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-semibold">{t("onboarding.org.permissionsTitle")}</h2>
-        <p className="text-sm text-muted-foreground">{t("onboarding.org.permissionsHelp")}</p>
-      </div>
-      {setup.departments.map((department) => (
-        <div key={department.id} className="space-y-3 rounded-xl border p-3">
-          <h3 className="font-medium">{department.name}</h3>
-          <PermissionToggles
-            prefix={`dept-${department.id}`}
-            permissions={department.permissions}
-            overrides={{}}
-            onToggle={(key, value) =>
-              onChange({
-                ...setup,
-                departments: setup.departments.map((item) =>
-                  item.id === department.id
-                    ? { ...item, permissions: { ...item.permissions, [key]: value } }
-                    : item,
-                ),
-              })
-            }
-          />
-          {department.roles.map((role) => (
-            <div key={role.id} className="space-y-2 rounded-lg bg-muted/40 p-3">
-              <h4 className="text-sm font-medium">{role.name}</h4>
-              <PermissionToggles
-                prefix={`role-${role.id}`}
-                permissions={department.permissions}
-                overrides={role.overrides}
-                onToggle={(key, value) =>
-                  onChange({
-                    ...setup,
-                    departments: setup.departments.map((item) =>
-                      item.id === department.id
-                        ? {
-                            ...item,
-                            roles: item.roles.map((entry) =>
-                              entry.id === role.id
-                                ? {
-                                    ...entry,
-                                    overrides: withRoleOverride(
-                                      entry.overrides,
-                                      item.permissions,
-                                      key,
-                                      value,
-                                    ),
-                                  }
-                                : entry,
-                            ),
-                          }
-                        : item,
-                    ),
-                  })
-                }
-              />
-            </div>
-          ))}
+      {embedded ? null : (
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold">{t("onboarding.org.permissionsTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{t("onboarding.org.permissionsHelp")}</p>
         </div>
-      ))}
+      )}
+      {setup.departments.length === 0 ? (
+        <p className="text-sm text-muted-foreground" data-testid="org-permissions-empty">
+          {t("onboarding.org.permissionsEmpty")}
+        </p>
+      ) : null}
+      {setup.departments.map((department) => {
+        const solo = department.solo && department.roles.length === 1;
+        const primary = department.roles[0];
+        return (
+          <div key={department.id} className="space-y-3 rounded-xl border p-3">
+            <h3 className="font-medium">{solo && primary ? primary.name : department.name}</h3>
+            {solo && primary ? (
+              <PermissionToggles
+                prefix={`role-${primary.id}`}
+                permissions={department.permissions}
+                overrides={{}}
+                onToggle={(key, value) => setDepartmentPermission(department.id, key, value)}
+              />
+            ) : (
+              <>
+                <PermissionToggles
+                  prefix={`dept-${department.id}`}
+                  permissions={department.permissions}
+                  overrides={{}}
+                  onToggle={(key, value) => setDepartmentPermission(department.id, key, value)}
+                />
+                {department.roles.map((entry) => (
+                  <div key={entry.id} className="space-y-2 rounded-lg bg-muted/40 p-3">
+                    <h4 className="text-sm font-medium">{entry.name}</h4>
+                    <PermissionToggles
+                      prefix={`role-${entry.id}`}
+                      permissions={department.permissions}
+                      overrides={entry.overrides}
+                      onToggle={(key, value) =>
+                        onChange({
+                          ...setup,
+                          departments: setup.departments.map((item) =>
+                            item.id === department.id
+                              ? {
+                                  ...item,
+                                  roles: item.roles.map((role) =>
+                                    role.id === entry.id
+                                      ? {
+                                          ...role,
+                                          overrides: withRoleOverride(
+                                            role.overrides,
+                                            item.permissions,
+                                            key,
+                                            value,
+                                          ),
+                                        }
+                                      : role,
+                                  ),
+                                }
+                              : item,
+                          ),
+                        })
+                      }
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+      })}
     </section>
   );
 }
@@ -97,8 +124,8 @@ function PermissionToggles({
   onToggle,
 }: {
   prefix: string;
-  permissions: OrgSetup["departments"][number]["permissions"];
-  overrides: OrgSetup["departments"][number]["roles"][number]["overrides"];
+  permissions: OrgPermissionMap;
+  overrides: OrgPermissionMap;
   onToggle: (key: OrgPermissionKey, value: boolean) => void;
 }) {
   const { t } = useTranslation();

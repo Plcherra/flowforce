@@ -7,20 +7,13 @@ import { OrgPermissionsStep } from "@/features/onboarding/components/OrgPermissi
 import { OrgSetupStep } from "@/features/onboarding/components/OrgSetupStep";
 import { ValidationManager } from "@/features/onboarding/components/ValidationManager";
 import {
+  coffeeShopStarter,
   orgReady,
-  orgTemplate,
   rolesFromOrg,
-  type OrgBusinessType,
   type OrgSetup,
 } from "@/features/onboarding/utils/orgTemplates";
 import type { CompanyInfo, UserInfo } from "@/types/onboarding";
 import type { BusinessTemplate } from "@/types/templates";
-
-const INDUSTRY: Record<OrgBusinessType, string> = {
-  cafe: "Food & Beverage",
-  restaurant: "Food & Beverage",
-  retail: "Retail",
-};
 
 export function CompanySignupGuide({
   onComplete,
@@ -40,7 +33,7 @@ export function CompanySignupGuide({
 }) {
   const { t } = useTranslation();
   const [step, setStep] = useState(0);
-  const [setup, setSetup] = useState<OrgSetup>(() => orgTemplate("cafe"));
+  const [setup, setSetup] = useState<OrgSetup>(() => coffeeShopStarter(t));
   const [userInfo, setUserInfo] = useState<UserInfo>({
     firstName: "",
     lastName: "",
@@ -50,29 +43,18 @@ export function CompanySignupGuide({
   });
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
     name: "",
-    industry: INDUSTRY.cafe,
+    industry: "Food & Beverage",
     size: "1-10 employees",
     description: "",
     website: "",
     phone: "",
   });
 
-  const chooseType = (type: OrgBusinessType) => {
-    setSetup(orgTemplate(type));
-    setCompanyInfo((current) => ({ ...current, industry: INDUSTRY[type] }));
-  };
-
   const finish = () => {
     if (!ValidationManager.validateUserInfo(userInfo, companyInfo)) return;
     const template: BusinessTemplate = {
-      id: setup.businessType,
-      name: t(
-        setup.businessType === "cafe"
-          ? "onboarding.org.cafe"
-          : setup.businessType === "restaurant"
-            ? "onboarding.org.restaurant"
-            : "onboarding.org.retail",
-      ),
+      id: "cafe",
+      name: t("onboarding.org.coffeeShop"),
       description: "",
       industry: companyInfo.industry,
       icon: "store",
@@ -109,7 +91,10 @@ export function CompanySignupGuide({
                 className={`min-h-11 w-full rounded-md px-2 text-sm font-medium ${
                   step === index ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                 }`}
-                onClick={() => setStep(index)}
+                onClick={() => {
+                  if (index > 0 && !orgReady(setup)) return;
+                  setStep(index);
+                }}
               >
                 {label}
               </button>
@@ -119,7 +104,7 @@ export function CompanySignupGuide({
         <Card>
           <CardContent className="p-6">
             {step === 0 ? (
-              <OrgSetupStep setup={setup} onType={chooseType} onChange={setSetup} />
+              <OrgSetupStep setup={setup} showStartChoice onChange={setSetup} />
             ) : null}
             {step === 1 ? <OrgPermissionsStep setup={setup} onChange={setSetup} /> : null}
             {step === 2 ? (
@@ -148,7 +133,7 @@ export function CompanySignupGuide({
               type="button"
               className="min-h-11"
               data-testid="signup-next"
-              disabled={step === 0 && !orgReady(setup)}
+              disabled={!orgReady(setup)}
               onClick={() => setStep((value) => value + 1)}
             >
               {t("onboarding.org.next")}

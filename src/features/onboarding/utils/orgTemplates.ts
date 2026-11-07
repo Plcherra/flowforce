@@ -1,7 +1,3 @@
-export const ORG_BUSINESS_TYPES = ["cafe", "restaurant", "retail"] as const;
-
-export type OrgBusinessType = (typeof ORG_BUSINESS_TYPES)[number];
-
 export const ORG_PERMISSION_KEYS = [
   "schedule.view",
   "schedule.edit",
@@ -26,14 +22,16 @@ export type OrgDepartmentDraft = {
   name: string;
   permissions: OrgPermissionMap;
   roles: OrgRoleDraft[];
+  solo?: boolean;
 };
 
 export type OrgSetup = {
-  businessType: OrgBusinessType;
+  businessType: "cafe";
+  start?: "template" | "scratch";
   departments: OrgDepartmentDraft[];
 };
 
-const FLOOR: OrgPermissionMap = {
+const FOH: OrgPermissionMap = {
   "schedule.view": true,
   "schedule.edit": false,
   "forms.submit": true,
@@ -41,15 +39,39 @@ const FLOOR: OrgPermissionMap = {
   "tasks.update": true,
 };
 
-const KITCHEN: OrgPermissionMap = {
+const PREP: OrgPermissionMap = {
   "schedule.view": true,
   "schedule.edit": false,
-  "forms.submit": false,
+  "forms.submit": true,
+  "tasks.view": true,
+  "tasks.update": true,
+};
+
+const MANAGER: OrgPermissionMap = {
+  "schedule.view": true,
+  "schedule.edit": true,
+  "forms.submit": true,
   "tasks.view": true,
   "tasks.update": true,
 };
 
 const LEAD: OrgPermissionMap = { "schedule.edit": true };
+
+const NAME_FALLBACKS: Record<string, string> = {
+  "onboarding.org.names.foh": "FOH",
+  "onboarding.org.names.boh": "BOH",
+  "onboarding.org.names.cashier": "Cashier",
+  "onboarding.org.names.barista": "Barista",
+  "onboarding.org.names.shiftLead": "Shift lead",
+  "onboarding.org.names.bakerPrep": "Baker/Prep",
+  "onboarding.org.names.manager": "Manager",
+};
+
+function label(name: (key: string) => string, key: string) {
+  const value = name(key).trim();
+  if (!value || value === key) return NAME_FALLBACKS[key] ?? "";
+  return value;
+}
 
 function role(
   id: string,
@@ -65,48 +87,60 @@ function department(
   name: string,
   permissions: OrgPermissionMap,
   roles: OrgRoleDraft[],
+  solo = false,
 ): OrgDepartmentDraft {
-  return { id, name, permissions, roles };
+  return { id, name, permissions, roles, ...(solo ? { solo: true } : {}) };
 }
 
-export function orgTemplate(type: OrgBusinessType): OrgSetup {
-  if (type === "restaurant") {
-    return {
-      businessType: type,
-      departments: [
-        department("foh", "FOH", FLOOR, [
-          role("cashier", "Cashier"),
-          role("server", "Server"),
-          role("host", "Host"),
-        ]),
-        department("boh", "BOH", KITCHEN, [
-          role("cook", "Cook"),
-          role("dish", "Dish"),
-        ]),
-      ],
-    };
-  }
-  if (type === "retail") {
-    return {
-      businessType: type,
-      departments: [
-        department("floor", "Floor", FLOOR, [
-          role("sales", "Sales"),
-          role("cashier", "Cashier"),
-        ]),
-        department("stock", "Stock", KITCHEN, [role("stocker", "Stocker")]),
-      ],
-    };
-  }
+function randomId() {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  if (uuid) return uuid;
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+export function coffeeShopStarter(name: (key: string) => string): OrgSetup {
   return {
     businessType: "cafe",
+    start: "template",
     departments: [
-      department("foh", "FOH", FLOOR, [
-        role("cashier", "Cashier"),
-        role("lead", "Shift lead", "manager", LEAD),
+      department("foh", label(name, "onboarding.org.names.foh"), FOH, [
+        role("cashier", label(name, "onboarding.org.names.cashier")),
+        role("barista", label(name, "onboarding.org.names.barista")),
+        role("lead", label(name, "onboarding.org.names.shiftLead"), "manager", LEAD),
       ]),
-      department("boh", "BOH", KITCHEN, [role("cook", "Cook")]),
+      department("boh", label(name, "onboarding.org.names.boh"), PREP, [
+        role("baker", label(name, "onboarding.org.names.bakerPrep")),
+      ]),
+      department(
+        "manager",
+        label(name, "onboarding.org.names.manager"),
+        MANAGER,
+        [role("manager", label(name, "onboarding.org.names.manager"), "manager")],
+        true,
+      ),
     ],
+  };
+}
+
+export function emptyOrgSetup(): OrgSetup {
+  return { businessType: "cafe", start: "scratch", departments: [] };
+}
+
+export function newDepartment(): OrgDepartmentDraft {
+  return {
+    id: `department-${randomId()}`,
+    name: "",
+    permissions: {},
+    roles: [],
+  };
+}
+
+export function newRole(departmentId: string): OrgRoleDraft {
+  return {
+    id: `${departmentId}-role-${randomId()}`,
+    name: "",
+    level: "staff",
+    overrides: {},
   };
 }
 
@@ -158,15 +192,15 @@ export function rolesFromOrg(setup: OrgSetup): Array<{
   is_active: boolean;
 }> {
   return setup.departments.flatMap((department) =>
-    department.roles.map((role) => ({
-      id: role.id,
-      name: role.name.trim(),
-      description: department.name.trim(),
-      color: role.level === "manager" ? "#0f766e" : "#2563eb",
+    department.roles.map((entry) => ({
+      id: entry.id,
+      name: entry.name.trim(),
+      description: department.solo ? entry.name.trim() : department.name.trim(),
+      color: entry.level === "manager" ? "#0f766e" : "#2563eb",
       icon: "Users",
-      hierarchy_level: role.level === "manager" ? 2 : 1,
-      product_level: role.level,
-      permissions: effectivePermissions(department.permissions, role.overrides) as Record<
+      hierarchy_level: entry.level === "manager" ? 2 : 1,
+      product_level: entry.level,
+      permissions: effectivePermissions(department.permissions, entry.overrides) as Record<
         string,
         boolean
       >,
@@ -182,6 +216,6 @@ export function orgReady(setup: OrgSetup | null): boolean {
     (department) =>
       department.name.trim().length > 0 &&
       department.roles.length > 0 &&
-      department.roles.every((role) => role.name.trim().length > 0),
+      department.roles.every((entry) => entry.name.trim().length > 0),
   );
 }
