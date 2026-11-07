@@ -465,6 +465,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
 
       const shiftChip = page.getByTestId(`schedule-shift-${seedHandles.shiftId}`);
       await expect(shiftChip).toBeVisible({ timeout: 15_000 });
+      await shiftChip.scrollIntoViewIfNeeded();
       const chipBox = await shiftChip.boundingBox();
       expect(chipBox, `${viewport.name} shift chip`).toBeTruthy();
       expect(chipBox!.x).toBeGreaterThanOrEqual(-1);
