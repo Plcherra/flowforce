@@ -10,6 +10,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { CalendarGrid } from "./CalendarGrid";
+import { ShiftCardLabelProvider } from "./drag-drop/ShiftCardLabels";
 import { ScheduleHeader } from "./ScheduleHeader";
 import { ShiftDetailsPanel } from "./ShiftDetailsPanel";
 import { ViewSelector } from "./ViewSelector";
@@ -303,6 +304,7 @@ export function SchedulingCalendar({
       {!setupMissing && (
         <div className={isMobile ? "" : "flex gap-6"}>
           <div className="flex-1">
+            <ShiftCardLabelProvider>
             <CalendarGrid
               currentView={currentView}
               schedules={filteredShifts}
@@ -316,6 +318,7 @@ export function SchedulingCalendar({
               hideShiftActions={effectiveHideShiftActions}
               selectedEventId={selectedEventId}
             />
+            </ShiftCardLabelProvider>
           </div>
 
           {selectedShift &&

@@ -57,7 +57,7 @@ export function useMyShiftBoard(tasks: readonly MyShiftTaskRow[]) {
         supabase
           .from("schedules")
           .select(
-            "id, role, title, start_time, end_time, user_id, is_published, is_template, position_id",
+            "id, role, title, start_time, end_time, user_id, is_published, is_template, position_id, requirements",
           )
           .eq("company_id", companyId)
           .gte("start_time", range.start)

@@ -18,6 +18,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Position } from "@/hooks/usePositions";
 import type { ShiftTemplate } from "@/features/scheduling/hooks/useShiftTemplates";
 import type { ShiftWizardFormData, BreakItem } from "./types";
+import { ShiftRoleDepartmentFields } from "./ShiftRoleDepartmentFields";
 
 type DetailsTabProps = {
   formData: ShiftWizardFormData;
@@ -131,6 +132,15 @@ export function DetailsTab({
           required
         />
       </div>
+
+      <ShiftRoleDepartmentFields
+        roleId={formData.role_id}
+        departmentId={formData.department_id}
+        onRoleId={(roleId) => setFormData((prev) => ({ ...prev, role_id: roleId }))}
+        onDepartmentId={(departmentId) =>
+          setFormData((prev) => ({ ...prev, department_id: departmentId }))
+        }
+      />
 
       <div className="space-y-1">
         <Label htmlFor="job_position">{t("schedule.jobPosition")}</Label>

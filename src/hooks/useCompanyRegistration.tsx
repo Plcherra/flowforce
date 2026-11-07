@@ -21,6 +21,7 @@ interface RegistrationData {
   enabledSections: string[];
   customRoles: OnboardingRole[];
   positions: OnboardingPosition[];
+  orgSetup?: unknown;
 }
 
 interface RegistrationError {

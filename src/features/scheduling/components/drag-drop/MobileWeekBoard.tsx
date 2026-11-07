@@ -10,6 +10,7 @@ import {
   formatShiftWindow,
 } from "@/features/scheduling/components/drag-drop/ShiftChip";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
+import { useShiftCardText } from "@/features/scheduling/components/drag-drop/ShiftCardLabels";
 
 export function usePhoneScheduleLayout() {
   const [isPhone, setIsPhone] = useState(false);
@@ -95,51 +96,84 @@ export function MobileWeekBoard({
               const open = shiftIsOpen(shift);
               const paint = shiftChipPaint(shift.color, open ? "unassigned" : "assigned");
               const names = assignedNames(shift);
-              const hasConflict = conflictByShiftId?.get(shift.id) ?? false;
               return (
-                <button
+                <MobileShiftCard
                   key={shift.id}
-                  type="button"
-                  data-testid={`schedule-shift-${shift.id}`}
-                  className="w-full rounded-lg border border-black/10 p-3 text-left shadow-sm"
-                  style={{
-                    backgroundColor: paint.backgroundColor,
-                    color: paint.color,
-                    borderLeft: paint.borderLeft,
-                  }}
-                  onClick={() => onShiftClick(shift.id)}
-                >
-                  <div className="flex items-center gap-1 text-sm font-medium">
-                    {hasConflict ? (
-                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning" />
-                    ) : null}
-                    <span className="truncate">
-                      {shift.title || shift.job_position?.name || t("schedule.shiftSingular")}
-                    </span>
-                  </div>
-                  {shift.job_position?.name || shift.role ? (
-                    <div className="truncate text-xs font-medium opacity-90">
-                      {shift.job_position?.name || shift.role}
-                    </div>
-                  ) : null}
-                  <div className="text-xs opacity-80">
-                    {formatShiftWindow(shift, t("schedule.invalidTime"))}
-                    {" · "}
-                    {formatShiftDuration(shift, t("schedule.hoursAbbrev"))}
-                  </div>
-                  <div className="mt-1 text-xs opacity-80">
-                    {names.length > 0
-                      ? names.join(", ")
-                      : open
-                        ? t("schedule.openShift")
-                        : t("schedule.unassignedShifts")}
-                  </div>
-                </button>
+                  shift={shift}
+                  open={open}
+                  paint={paint}
+                  names={names}
+                  hasConflict={conflictByShiftId?.get(shift.id) ?? false}
+                  onShiftClick={onShiftClick}
+                />
               );
             })
           )}
         </section>
       ))}
     </div>
+  );
+}
+
+function MobileShiftCard({
+  shift,
+  open,
+  paint,
+  names,
+  hasConflict,
+  onShiftClick,
+}: {
+  shift: ShiftWithAssignments;
+  open: boolean;
+  paint: { backgroundColor: string; color: string; borderLeft: string };
+  names: string[];
+  hasConflict: boolean;
+  onShiftClick: (shiftId: string) => void;
+}) {
+  const { t } = useTranslation();
+  const cardText = useShiftCardText(shift);
+  return (
+    <button
+      type="button"
+      data-testid={`schedule-shift-${shift.id}`}
+      className="w-full rounded-lg border border-black/10 p-3 text-left shadow-sm"
+      style={{
+        backgroundColor: paint.backgroundColor,
+        color: paint.color,
+        borderLeft: paint.borderLeft,
+      }}
+      onClick={() => onShiftClick(shift.id)}
+    >
+      <div className="flex items-center gap-1 text-sm font-medium">
+        {hasConflict ? (
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning" />
+        ) : null}
+        <span className="truncate">
+          {shift.title || t("schedule.shiftSingular")}
+        </span>
+      </div>
+      {cardText.role ? (
+        <div data-testid="shift-chip-role" className="truncate text-xs font-medium opacity-90">
+          {cardText.role}
+        </div>
+      ) : null}
+      {cardText.department ? (
+        <div data-testid="shift-chip-department" className="truncate text-xs opacity-90">
+          {cardText.department}
+        </div>
+      ) : null}
+      <div className="text-xs opacity-80">
+        {formatShiftWindow(shift, t("schedule.invalidTime"))}
+        {" · "}
+        {formatShiftDuration(shift, t("schedule.hoursAbbrev"))}
+      </div>
+      <div className="mt-1 text-xs opacity-80">
+        {names.length > 0
+          ? names.join(", ")
+          : open
+            ? t("schedule.openShift")
+            : t("schedule.unassignedShifts")}
+      </div>
+    </button>
   );
 }

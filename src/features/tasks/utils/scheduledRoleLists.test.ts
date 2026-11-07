@@ -72,6 +72,15 @@ export function runScheduledRoleListTests() {
     }),
     ["role-barista"],
   );
+  assert.deepEqual(
+    scheduledRoleIds({
+      role: "Staff",
+      roleId: "role-cashier",
+      roles: [...ROLES, { id: "role-cashier", name: "Cashier" }],
+      positions: [],
+    }),
+    ["role-cashier"],
+  );
 
   const open = list("open", ["role-barista"], "2099-01-01T00:00:00.000Z");
   const late = list("late", ["role-barista"], "2020-01-01T00:00:00.000Z");

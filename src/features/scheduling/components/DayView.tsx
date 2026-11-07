@@ -15,6 +15,22 @@ import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor } from "@/utils/schedulingUtils";
 import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
+import { useShiftCardText } from "@/features/scheduling/components/drag-drop/ShiftCardLabels";
+
+function DayShiftBadge({
+  shift,
+  color,
+}: {
+  shift: ShiftWithAssignments;
+  color: string;
+}) {
+  const card = useShiftCardText(shift);
+  const label = card.department || card.role;
+  if (!label) return null;
+  return (
+    <Badge style={{ backgroundColor: color, color: "white" }}>{label}</Badge>
+  );
+}
 
 interface DayViewProps {
   schedules: ShiftWithAssignments[];
@@ -188,14 +204,7 @@ export function DayView({
                     <h4 className="font-medium">
                       {shift.title || shift.job_position?.name || t("literals.shift")}
                     </h4>
-                    <Badge
-                      style={{
-                        backgroundColor: getShiftColor(shift),
-                        color: "white",
-                      }}
-                    >
-                      {shift.job_position?.role || t("literals.staff")}
-                    </Badge>
+                    <DayShiftBadge shift={shift} color={getShiftColor(shift)} />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-3">

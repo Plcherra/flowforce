@@ -66,7 +66,7 @@ export function useFormViewer(): FormAccessViewer {
         companyId
           ? browserClient
               .from("schedules")
-              .select("role, position_id, start_time, end_time, user_id, is_published, is_template")
+              .select("role, position_id, start_time, end_time, user_id, is_published, is_template, requirements")
               .eq("company_id", companyId)
               .eq("user_id", userId)
               .gte("start_time", dayStart.toISOString())

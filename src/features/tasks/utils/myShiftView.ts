@@ -18,6 +18,7 @@ import { readAssigneeIds, readFormId } from "./shiftTaskWrite";
 import { readTaskSchedule } from "./taskSchedule";
 import { readFormDistribution } from "@/features/forms/utils/formDistribution";
 import { shiftDayPhase } from "@/features/forms/utils/formDayWindow";
+import { readShiftAssignment } from "@/features/scheduling/utils/shiftRoleDepartment";
 import {
   roleListsForShift,
   scheduledRoleIds,
@@ -110,6 +111,7 @@ export type MyShiftSchedule = {
   is_published: boolean | null;
   is_template: boolean | null;
   position_id?: string | null;
+  requirements?: unknown;
 };
 
 export type MyShiftForm = {
@@ -393,6 +395,7 @@ export function assembleMyShift(input: {
       todaysShifts.flatMap((row) =>
         scheduledRoleIds({
           role: row.role,
+          roleId: readShiftAssignment(row.requirements).roleId,
           positionId: row.position_id,
           roles: input.roles ?? [],
           positions: input.positions ?? [],

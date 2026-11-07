@@ -48,6 +48,8 @@ import { shiftTaskRow } from "@/features/tasks/utils/shiftTaskWrite";
 import type { Json } from "@/integrations/supabase/public-types";
 import { logger } from "@/utils/logger";
 import { shiftDraftRole } from "@/features/scheduling/utils/shiftDraftRole";
+import { mergeShiftAssignment } from "@/features/scheduling/utils/shiftRoleDepartment";
+import { useCompanyRoles } from "@/hooks/useCompanyRoles";
 
 export interface ShiftWizardTemplateSeed {
   title: string;
@@ -91,6 +93,8 @@ const createDefaultFormState = (date: Date): ShiftWizardFormData => ({
   location: "",
   job_position_id: "",
   job_position_input: "",
+  role_id: "",
+  department_id: "",
   required_headcount: 1,
   hourly_rate: "",
   assignedusers: [],
@@ -131,6 +135,7 @@ export function ShiftWizardDialog({
   const companyId = profile?.companyId ?? metadataCompanyId ?? null;
 
   const { positions } = usePositions();
+  const { roles } = useCompanyRoles();
   const { templates: shiftTemplates } = useShiftTemplates();
   const {
     employees,
@@ -420,13 +425,14 @@ export function ShiftWizardDialog({
         is_template: false,
         template_id: null,
         position_id: formData.job_position_id || null,
-        role: shiftDraftRole(
-          formData.job_position_input,
-          t("schedule.unassignedPosition"),
-        ),
+        role: roles.find((role) => role.id === formData.role_id)?.name ?? null,
         status: "scheduled",
         user_id: null,
-        requirements: [],
+        requirements: mergeShiftAssignment(null, {
+          roleId: formData.role_id || null,
+          roleName: roles.find((role) => role.id === formData.role_id)?.name ?? null,
+          departmentId: formData.department_id || null,
+        }),
       } satisfies Parameters<typeof createSchedule>[0];
 
       const created = await createSchedule(payload, { silent: true });
