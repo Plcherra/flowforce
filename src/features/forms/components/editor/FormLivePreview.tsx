@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useFormSchemaStore } from "@/stores/useFormSchemaStore";
 import { evaluateArithmeticFormula, formulaAnswerMap } from "@/features/forms/utils/formulaValue";
 
-export function FormLivePreview() {
+export function FormLivePreview({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation();
   const schema = useFormSchemaStore((state) => state.schema);
   const [formState, setFormState] = useState<Record<string, unknown>>({});
@@ -41,6 +41,7 @@ export function FormLivePreview() {
 
   return (
     <div className="flex h-full flex-col bg-muted/40">
+      {compact ? null : (
       <div className="sticky top-0 z-10 border-b bg-background/90 p-4 backdrop-blur">
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -49,6 +50,7 @@ export function FormLivePreview() {
             {t("forms.formIsInteractiveButChangesAreNotSavedUseThisPreviewToValidateConfiguration")}</p>
         </div>
       </div>
+      )}
       <div className={paneScroller}>
         <div className="space-y-6 p-4">
           <div className="space-y-1">
@@ -64,9 +66,11 @@ export function FormLivePreview() {
               key={section.id}
               className="space-y-4 rounded-xl border bg-background p-4 shadow-sm"
             >
+              {section.title ? (
               <h3 className="text-base font-semibold text-foreground">
                 {section.title}
               </h3>
+              ) : null}
               <div className="space-y-4">
                 {section.fields.map((field) => {
                   const value = formState[field.id];

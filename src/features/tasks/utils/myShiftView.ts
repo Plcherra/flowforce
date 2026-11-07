@@ -16,6 +16,8 @@ import {
 } from "./shiftWeekdayTask";
 import { readAssigneeIds, readFormId } from "./shiftTaskWrite";
 import { readTaskSchedule } from "./taskSchedule";
+import { readFormDistribution } from "@/features/forms/utils/formDistribution";
+import { shiftDayPhase } from "@/features/forms/utils/formDayWindow";
 import {
   roleListsForShift,
   scheduledRoleIds,
@@ -69,6 +71,8 @@ export type MyShiftRoleList = {
   formId: string;
   title: string | null;
   items: MyShiftChecklistItem[];
+  phase: "open" | "due";
+  dueTime: string | null;
 };
 
 export type MyShiftWeekdayCard = {
@@ -378,12 +382,24 @@ export function assembleMyShift(input: {
   if (!shift) return hasShift ? { kind: "unmapped" } : { kind: "empty" };
   const area = checklistAreaFromShift(shift);
   const shiftTasks = shiftTasksForSchedule(input.tasks, shift.id);
-  const roleIds = scheduledRoleIds({
-    role: shift.role,
-    positionId: shift.position_id,
-    roles: input.roles ?? [],
-    positions: input.positions ?? [],
-  });
+  const todaysShifts = input.schedules.filter(
+    (row) =>
+      row.user_id === input.viewerId &&
+      isWorkShift(row) &&
+      overlapsToday(row.start_time, row.end_time, input.now),
+  );
+  const roleIds = [
+    ...new Set(
+      todaysShifts.flatMap((row) =>
+        scheduledRoleIds({
+          role: row.role,
+          positionId: row.position_id,
+          roles: input.roles ?? [],
+          positions: input.positions ?? [],
+        }),
+      ),
+    ),
+  ];
   const slotForms = area ? listsForShift(input.forms, area) : null;
   const shown = new Set(
     slotForms
@@ -393,18 +409,45 @@ export function assembleMyShift(input: {
       : [],
   );
   const roleForms = roleListsForShift(input.forms, roleIds, input.now, shown);
-  const roleLists = roleForms.map((form) => ({
-    formId: form.id,
-    title: form.title ?? null,
-    items: checklistItems(
+  const { start: dayStart, end: dayEnd } = dayBounds(input.now);
+  const roleLists = roleForms.flatMap((form) => {
+    const distribution = readFormDistribution(form.settings);
+    const items = checklistItems(
       input.fields,
       input.submissions,
       form.id,
       input.viewerId,
-      shift.start_time,
-      shift.end_time,
-    ),
-  }));
+      dayStart.toISOString(),
+      dayEnd.toISOString(),
+    );
+    const finished =
+      items.length > 0
+        ? items.every((item) => item.done)
+        : latestViewerSubmission(
+            input.submissions,
+            form.id,
+            input.viewerId,
+            dayStart.toISOString(),
+            dayEnd.toISOString(),
+          ) != null;
+    if (
+      distribution.timeMode === "shift_day" &&
+      !distribution.completeBy &&
+      finished
+    ) {
+      return [];
+    }
+    const phase = shiftDayPhase(distribution, input.now);
+    return [
+      {
+        formId: form.id,
+        title: form.title ?? null,
+        items,
+        phase: phase === "due" ? ("due" as const) : ("open" as const),
+        dueTime: distribution.dueTime,
+      },
+    ];
+  });
   if (!area || !shift.start_time) {
     if (shiftTasks.length === 0 && roleLists.length === 0) return { kind: "unmapped" };
     return {

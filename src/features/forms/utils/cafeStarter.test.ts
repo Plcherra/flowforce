@@ -12,24 +12,23 @@ import {
   cafeWindowProblem,
   CAFE_BARISTA_ROLE_NAME,
   CAFE_LIST_SPECS,
-  clockOnDay,
   findBaristaRole,
   pendingCafeLists,
   readCafeStarterList,
 } from "./cafeStarter";
 
-const DAY = new Date(2026, 10, 6, 12, 0, 0);
-
 export function runCafeStarterTests() {
-  const opening = cafeDefaultWindow(DAY, "opening");
-  const closing = cafeDefaultWindow(DAY, "closing");
-  assert.equal(opening.showFrom, clockOnDay(DAY, "05:30"));
-  assert.equal(opening.dueAt, clockOnDay(DAY, "09:00"));
-  assert.equal(closing.showFrom, clockOnDay(DAY, "16:00"));
-  assert.equal(closing.dueAt, clockOnDay(DAY, "21:30"));
-  assert.notEqual(opening.showFrom, closing.showFrom);
-  assert.equal(cafeWindowProblem(opening.showFrom, opening.dueAt), null);
-  assert.equal(cafeWindowProblem(opening.dueAt, opening.showFrom), "due");
+  const opening = cafeDefaultWindow("opening");
+  const closing = cafeDefaultWindow("closing");
+  assert.equal(opening.showAt, "05:30");
+  assert.equal(opening.dueTime, "09:00");
+  assert.equal(opening.completeBy, "09:00");
+  assert.equal(closing.showAt, "16:00");
+  assert.equal(closing.dueTime, "21:30");
+  assert.equal(closing.completeBy, "21:30");
+  assert.notEqual(opening.showAt, closing.showAt);
+  assert.equal(cafeWindowProblem(opening.showAt, opening.dueTime, opening.completeBy), null);
+  assert.equal(cafeWindowProblem(opening.dueTime, opening.showAt, opening.completeBy), "due");
 
   const role = baristaRoleInsert("Makes drinks");
   assert.equal(role.name, CAFE_BARISTA_ROLE_NAME);
@@ -45,8 +44,9 @@ export function runCafeStarterTests() {
   const settings = cafeListSettings({
     key: "opening",
     roleId: "role-barista",
-    showFrom: opening.showFrom,
-    dueAt: opening.dueAt,
+    showAt: opening.showAt,
+    dueTime: opening.dueTime,
+    completeBy: opening.completeBy,
   });
   assert.equal(readChecklistAddress(settings), null);
   assert.equal("checklist" in settings, false);
@@ -55,8 +55,10 @@ export function runCafeStarterTests() {
   const distribution = readFormDistribution(settings);
   assert.equal(distribution.recordKind, "list");
   assert.deepEqual(distribution.roleIds, ["role-barista"]);
-  assert.equal(distribution.showFrom, opening.showFrom);
-  assert.equal(distribution.dueAt, opening.dueAt);
+  assert.equal(distribution.timeMode, "shift_day");
+  assert.equal(distribution.showAt, "05:30");
+  assert.equal(distribution.dueTime, "09:00");
+  assert.equal(distribution.completeBy, "09:00");
   assert.equal(readCafeStarterList(settings), "opening");
   const fields = cafeListFields(["Turn on the espresso machine", "Count the till"]);
   assert.equal(fields.length, 2);
@@ -74,14 +76,16 @@ export function runCafeStarterTests() {
   const openSettings = cafeListSettings({
     key: "opening",
     roleId: "role-barista",
-    showFrom: clockOnDay(morning, "05:30"),
-    dueAt: clockOnDay(morning, "09:00"),
+    showAt: "05:30",
+    dueTime: "09:00",
+    completeBy: "09:00",
   });
   const closeSettings = cafeListSettings({
     key: "closing",
     roleId: "role-barista",
-    showFrom: clockOnDay(morning, "16:00"),
-    dueAt: clockOnDay(morning, "21:30"),
+    showAt: "16:00",
+    dueTime: "21:30",
+    completeBy: "21:30",
   });
   const forms = [
     { id: "open-id", title: "Opening list", settings: openSettings, status: "published" },
@@ -164,16 +168,18 @@ export async function runCafeStarterApplyTests() {
         key: "opening",
         title: "Opening list",
         description: "Set up the bar",
-        showFrom: clockOnDay(DAY, "05:30"),
-        dueAt: clockOnDay(DAY, "09:00"),
+        showAt: "05:30",
+        dueTime: "09:00",
+        completeBy: "09:00",
         itemLabels: ["Turn on the espresso machine"],
       },
       {
         key: "closing",
         title: "Closing list",
         description: "Close the bar",
-        showFrom: clockOnDay(DAY, "16:00"),
-        dueAt: clockOnDay(DAY, "21:30"),
+        showAt: "16:00",
+        dueTime: "21:30",
+        completeBy: "21:30",
         itemLabels: ["Lock up"],
       },
     ],
@@ -206,8 +212,9 @@ export async function runCafeStarterApplyTests() {
         settings: cafeListSettings({
           key: "opening",
           roleId: "role-barista",
-          showFrom: null,
-          dueAt: null,
+          showAt: null,
+          dueTime: null,
+          completeBy: null,
         }),
       },
       {
@@ -215,8 +222,9 @@ export async function runCafeStarterApplyTests() {
         settings: cafeListSettings({
           key: "closing",
           roleId: "role-barista",
-          showFrom: null,
-          dueAt: null,
+          showAt: null,
+          dueTime: null,
+          completeBy: null,
         }),
       },
     ],

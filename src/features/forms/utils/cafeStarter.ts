@@ -1,7 +1,6 @@
 import { readChecklistAddress } from "@/features/forms/utils/checklistForms";
+import { clockWindowProblem } from "@/features/forms/utils/formDayWindow";
 import {
-  distributionProblem,
-  readFormDistribution,
   withFormDistribution,
   type FormDistribution,
 } from "@/features/forms/utils/formDistribution";
@@ -18,14 +17,15 @@ export type CafeListKey = (typeof CAFE_LIST_KEYS)[number];
 
 export type CafeListSpec = {
   key: CafeListKey;
-  showFromTime: string;
+  showAt: string;
   dueTime: string;
+  completeBy: string;
   itemCount: number;
 };
 
 export const CAFE_LIST_SPECS: readonly CafeListSpec[] = [
-  { key: "opening", showFromTime: "05:30", dueTime: "09:00", itemCount: 5 },
-  { key: "closing", showFromTime: "16:00", dueTime: "21:30", itemCount: 5 },
+  { key: "opening", showAt: "05:30", dueTime: "09:00", completeBy: "09:00", itemCount: 5 },
+  { key: "closing", showAt: "16:00", dueTime: "21:30", completeBy: "21:30", itemCount: 5 },
 ];
 
 export type CafeRoleInsert = {
@@ -42,8 +42,9 @@ export type CafeListWrite = {
   key: CafeListKey;
   title: string;
   description: string;
-  showFrom: string | null;
-  dueAt: string | null;
+  showAt: string | null;
+  dueTime: string | null;
+  completeBy: string | null;
   itemLabels: string[];
 };
 
@@ -81,13 +82,13 @@ export function clockOnDay(day: Date, hhmm: string): string {
 }
 
 export function cafeDefaultWindow(
-  day: Date,
   key: CafeListKey,
-): { showFrom: string; dueAt: string } {
+): { showAt: string; dueTime: string; completeBy: string } {
   const spec = CAFE_LIST_SPECS.find((item) => item.key === key);
   return {
-    showFrom: clockOnDay(day, spec?.showFromTime ?? "00:00"),
-    dueAt: clockOnDay(day, spec?.dueTime ?? "00:00"),
+    showAt: spec?.showAt ?? "00:00",
+    dueTime: spec?.dueTime ?? "00:00",
+    completeBy: spec?.completeBy ?? spec?.dueTime ?? "00:00",
   };
 }
 
@@ -123,16 +124,21 @@ export function baristaRoleInsert(description: string): CafeRoleInsert {
 export function cafeListSettings(input: {
   key: CafeListKey;
   roleId: string;
-  showFrom: string | null;
-  dueAt: string | null;
+  showAt: string | null;
+  dueTime: string | null;
+  completeBy: string | null;
 }): Record<string, unknown> {
   const distribution: FormDistribution = {
     recordKind: "list",
     roleIds: input.roleId ? [input.roleId] : [],
     fillAudience: emptyTaskAudience("company"),
     seeAudience: emptyTaskAudience("company"),
-    showFrom: input.showFrom,
-    dueAt: input.dueAt,
+    showFrom: null,
+    dueAt: null,
+    showAt: input.showAt,
+    dueTime: input.dueTime,
+    completeBy: input.completeBy,
+    timeMode: "shift_day",
   };
   const settings = withFormDistribution(null, distribution);
   settings.starter = { pack: CAFE_STARTER_PACK, list: input.key };
@@ -196,20 +202,11 @@ export function cafeStarterGate(input: {
 }
 
 export function cafeWindowProblem(
-  showFrom: string | null,
-  dueAt: string | null,
-): "due" | null {
-  const problem = distributionProblem(
-    readFormDistribution(
-      cafeListSettings({
-        key: "opening",
-        roleId: "pending",
-        showFrom,
-        dueAt,
-      }),
-    ),
-  );
-  return problem === "due" ? "due" : null;
+  showAt: string | null,
+  dueTime: string | null,
+  completeBy: string | null,
+): "due" | "complete" | null {
+  return clockWindowProblem(showAt, dueTime, completeBy);
 }
 
 export async function applyCafeStarter(input: {
@@ -247,8 +244,9 @@ export async function applyCafeStarter(input: {
     return list ? [list] : [];
   });
   for (const list of writes) {
-    if (cafeWindowProblem(list.showFrom, list.dueAt)) {
-      throw new Error("due");
+    const problem = cafeWindowProblem(list.showAt, list.dueTime, list.completeBy);
+    if (problem) {
+      throw new Error(problem);
     }
   }
 
@@ -265,8 +263,9 @@ export async function applyCafeStarter(input: {
     const settings = cafeListSettings({
       key: list.key,
       roleId,
-      showFrom: list.showFrom,
-      dueAt: list.dueAt,
+      showAt: list.showAt,
+      dueTime: list.dueTime,
+      completeBy: list.completeBy,
     });
     if (readChecklistAddress(settings)) {
       throw new Error("slot");

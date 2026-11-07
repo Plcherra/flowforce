@@ -5,18 +5,32 @@ import {
   taskAudienceReady,
   type TaskAudience,
 } from "@/features/tasks/utils/taskAudience";
+import {
+  clockFromDate,
+  clockWindowProblem,
+  parseClock,
+  shiftDayPhase,
+} from "@/features/forms/utils/formDayWindow";
 
 export const FORM_RECORD_KINDS = ["form", "list"] as const;
 
 export type FormRecordKind = (typeof FORM_RECORD_KINDS)[number];
+
+export type FormTimeMode = "legacy" | "shift_day";
 
 export type FormDistribution = {
   recordKind: FormRecordKind;
   roleIds: string[];
   fillAudience: TaskAudience;
   seeAudience: TaskAudience;
+  /** Legacy absolute instants. Unused when timeMode is shift_day. */
   showFrom: string | null;
   dueAt: string | null;
+  /** Clock on the scheduled shift day. Null means that bound is off. */
+  showAt: string | null;
+  dueTime: string | null;
+  completeBy: string | null;
+  timeMode: FormTimeMode;
 };
 
 export type FormAccessViewer = {
@@ -29,6 +43,8 @@ export type FormAccessViewer = {
   canSubmit: boolean;
   canReadSubmissions: boolean;
   roles?: ReadonlyArray<{ id: string; name: string }>;
+  /** Roles from today's published shifts. When set, shift-day lists use this instead of the profile role. */
+  scheduledRoleIds?: readonly string[];
 };
 
 export type FormAccessRow = {
@@ -47,6 +63,10 @@ export function defaultFormDistribution(): FormDistribution {
     seeAudience: emptyTaskAudience("company"),
     showFrom: null,
     dueAt: null,
+    showAt: null,
+    dueTime: null,
+    completeBy: null,
+    timeMode: "legacy",
   };
 }
 
@@ -85,6 +105,15 @@ export function readFormDistribution(settings: unknown): FormDistribution {
   }
   const record = raw as Record<string, unknown>;
   const recordKind = record.record_kind === "list" || record.recordKind === "list" ? "list" : "form";
+  const shiftDay =
+    record.time_mode === "shift_day" ||
+    record.timeMode === "shift_day" ||
+    "show_at" in record ||
+    "showAt" in record ||
+    "due_time" in record ||
+    "dueTime" in record ||
+    "complete_by" in record ||
+    "completeBy" in record;
   return {
     recordKind,
     roleIds: stringList(record.role_ids ?? record.roleIds),
@@ -92,6 +121,27 @@ export function readFormDistribution(settings: unknown): FormDistribution {
     seeAudience: readAudience(record.see_audience ?? record.seeAudience),
     showFrom: readIso(record.show_from ?? record.showFrom),
     dueAt: readIso(record.due_at ?? record.dueAt),
+    showAt: parseClock(record.show_at ?? record.showAt),
+    dueTime: parseClock(record.due_time ?? record.dueTime),
+    completeBy: parseClock(record.complete_by ?? record.completeBy),
+    timeMode: shiftDay ? "shift_day" : "legacy",
+  };
+}
+
+/** Builder state: shift-day clocks. A saved absolute window becomes the same clocks. */
+export function distributionForEditor(settings: unknown): FormDistribution {
+  const read = readFormDistribution(settings);
+  if (read.timeMode === "shift_day") return read;
+  const showAt = read.showFrom ? clockFromDate(new Date(read.showFrom)) : null;
+  const dueTime = read.dueAt ? clockFromDate(new Date(read.dueAt)) : null;
+  return {
+    ...read,
+    timeMode: "shift_day",
+    showAt,
+    dueTime,
+    completeBy: dueTime,
+    showFrom: null,
+    dueAt: null,
   };
 }
 
@@ -100,22 +150,44 @@ export function withFormDistribution(
   distribution: FormDistribution,
 ): Record<string, unknown> {
   const base = settingsRecord(settings);
-  base[DISTRIBUTION_KEY] = {
-    record_kind: distribution.recordKind,
-    role_ids: distribution.roleIds,
-    fill_audience: taskAudienceJson(distribution.fillAudience),
-    see_audience: taskAudienceJson(distribution.seeAudience),
-    show_from: distribution.showFrom,
-    due_at: distribution.dueAt,
-  };
+  if (distribution.timeMode === "shift_day") {
+    base[DISTRIBUTION_KEY] = {
+      record_kind: distribution.recordKind,
+      role_ids: distribution.roleIds,
+      fill_audience: taskAudienceJson(distribution.fillAudience),
+      see_audience: taskAudienceJson(distribution.seeAudience),
+      time_mode: "shift_day",
+      show_at: distribution.showAt,
+      due_time: distribution.dueTime,
+      complete_by: distribution.completeBy,
+      show_from: null,
+      due_at: null,
+    };
+  } else {
+    base[DISTRIBUTION_KEY] = {
+      record_kind: distribution.recordKind,
+      role_ids: distribution.roleIds,
+      fill_audience: taskAudienceJson(distribution.fillAudience),
+      see_audience: taskAudienceJson(distribution.seeAudience),
+      show_from: distribution.showFrom,
+      due_at: distribution.dueAt,
+    };
+  }
   return base;
 }
 
 export function distributionProblem(
   distribution: FormDistribution,
-): "due" | "fill" | "see" | null {
+): "due" | "complete" | "fill" | "see" | null {
   if (!taskAudienceReady(distribution.fillAudience)) return "fill";
   if (!taskAudienceReady(distribution.seeAudience)) return "see";
+  if (distribution.timeMode === "shift_day") {
+    return clockWindowProblem(
+      distribution.showAt,
+      distribution.dueTime,
+      distribution.completeBy,
+    );
+  }
   if (distribution.showFrom && distribution.dueAt) {
     const start = new Date(distribution.showFrom).getTime();
     const due = new Date(distribution.dueAt).getTime();
@@ -158,6 +230,10 @@ export function formIsOpenForFill(
   distribution: FormDistribution,
   now: Date,
 ): boolean {
+  if (distribution.timeMode === "shift_day") {
+    const phase = shiftDayPhase(distribution, now);
+    return phase === "open" || phase === "due";
+  }
   if (distribution.showFrom) {
     const start = new Date(distribution.showFrom);
     if (!Number.isNaN(start.getTime()) && now < start) return false;
@@ -171,6 +247,9 @@ export function formIsOpenForFill(
 
 function roleAttached(distribution: FormDistribution, viewer: FormAccessViewer): boolean {
   if (distribution.roleIds.length === 0) return true;
+  if (distribution.timeMode === "shift_day" && viewer.scheduledRoleIds) {
+    return distribution.roleIds.some((id) => viewer.scheduledRoleIds?.includes(id));
+  }
   return distribution.roleIds.some((id) => viewerMatchesRole(id, viewer));
 }
 

@@ -32,6 +32,8 @@ interface FormSchemaState {
   setActiveField: (fieldId: string | null) => void;
   reset: () => void;
   addSection: (title?: string) => void;
+  renameSection: (sectionId: string, title: string) => void;
+  setTitle: (title: string) => void;
   addField: (sectionId: string, field: Partial<FormField>) => void;
   updateField: (
     sectionId: string,
@@ -71,6 +73,23 @@ export const useFormSchemaStore = create<FormSchemaState>()(
         set({ schema: null, activeSectionId: null, activeFieldId: null }),
       setActiveSection: (sectionId) => set({ activeSectionId: sectionId }),
       setActiveField: (fieldId) => set({ activeFieldId: fieldId }),
+      setTitle: (title) => {
+        const current = get().schema;
+        if (!current || current.title === title) return;
+        set({ schema: { ...current, title } });
+      },
+      renameSection: (sectionId, title) => {
+        const current = get().schema;
+        if (!current) return;
+        set({
+          schema: {
+            ...current,
+            sections: current.sections.map((section) =>
+              section.id === sectionId ? { ...section, title } : section,
+            ),
+          },
+        });
+      },
       addSection: (title?: string) => {
         const current = get().schema;
         if (!current) return;

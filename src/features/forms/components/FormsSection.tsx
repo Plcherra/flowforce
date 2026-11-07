@@ -22,6 +22,7 @@ import {
   getStatusColor,
   getTypeLabel,
 } from "@/features/forms/components/form-utils";
+import { formatClock } from "@/features/forms/utils/formDayWindow";
 import { formShiftLinkKeys } from "@/features/forms/utils/formShiftLink";
 import {
   readFormDistribution,
@@ -65,7 +66,7 @@ export function FormsSection({
   onRestore,
   onViewSubmissions,
 }: FormsSectionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const skeletonRows = Array.from({ length: 3 });
   const showActions = Boolean(canEdit || onViewSubmissions || onFill);
 
@@ -152,7 +153,12 @@ export function FormsSection({
               <TableBody>
                 {forms.map((form) => {
                   const distribution = readFormDistribution(form.settings);
-                  const dueText = formatDateTime(distribution.dueAt);
+                  const dueText =
+                    distribution.timeMode === "shift_day"
+                      ? distribution.dueTime
+                        ? formatClock(distribution.dueTime, i18n.language)
+                        : ""
+                      : formatDateTime(distribution.dueAt);
                   const link = formShiftLinkKeys(form.settings);
                   const allowFill = Boolean(onFill && (canFill ? canFill(form) : true));
                   const allowSubmissions = Boolean(

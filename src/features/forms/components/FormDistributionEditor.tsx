@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
   type TaskAudience,
   type TaskAudienceKind,
 } from "@/features/tasks/utils/taskAudience";
-import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/features/tasks/utils/taskSchedule";
+import { parseClock } from "@/features/forms/utils/formDayWindow";
 import { type FormDistribution } from "@/features/forms/utils/formDistribution";
 
 type Choice = { id: string; label: string };
@@ -26,6 +27,10 @@ const AUDIENCE_KINDS = [
   "role",
   "department",
 ] as const;
+
+const SHOW_DEFAULT = "06:00";
+const DUE_DEFAULT = "08:00";
+const COMPLETE_DEFAULT = "09:00";
 
 export function FormDistributionEditor({
   distribution,
@@ -58,80 +63,46 @@ export function FormDistributionEditor({
     onChange({ ...distribution, roleIds: [...next] });
   };
 
+  const setClock = (
+    key: "showAt" | "dueTime" | "completeBy",
+    value: string | null,
+  ) => {
+    onChange({ ...distribution, timeMode: "shift_day", [key]: value });
+  };
+
   return (
-    <section className="space-y-3 pt-3" data-testid="form-distribution">
-      <div className="space-y-1">
-        <h3 className="text-sm font-semibold text-foreground">
-          {t("forms.distributionTitle")}
-        </h3>
-        <p className="text-xs text-muted-foreground">{t("forms.distributionHelp")}</p>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="form-record-kind">{t("forms.recordKind")}</Label>
-          <Select
-            value={distribution.recordKind}
-            onValueChange={(value) =>
-              onChange({
-                ...distribution,
-                recordKind: value === "list" ? "list" : "form",
-              })
-            }
-          >
-            <SelectTrigger id="form-record-kind" data-testid="form-record-kind">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="form">{t("forms.recordKindForm")}</SelectItem>
-              <SelectItem value="list">{t("forms.recordKindList")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="form-show-from">{t("forms.showFrom")}</Label>
-          <Input
-            id="form-show-from"
-            type="datetime-local"
-            data-testid="form-show-from"
-            value={toDatetimeLocalValue(distribution.showFrom)}
-            onChange={(event) =>
-              onChange({
-                ...distribution,
-                showFrom: fromDatetimeLocalValue(event.target.value),
-              })
-            }
-          />
-          <p className="text-xs text-muted-foreground">{t("forms.showFromHelp")}</p>
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="form-due-at">{t("forms.dueAt")}</Label>
-          <Input
-            id="form-due-at"
-            type="datetime-local"
-            data-testid="form-due-at"
-            value={toDatetimeLocalValue(distribution.dueAt)}
-            onChange={(event) =>
-              onChange({
-                ...distribution,
-                dueAt: fromDatetimeLocalValue(event.target.value),
-              })
-            }
-          />
-          <p className="text-xs text-muted-foreground">{t("forms.dueAtHelp")}</p>
-        </div>
+    <section className="space-y-5" data-testid="form-distribution">
+      <div className="space-y-1.5">
+        <Label htmlFor="form-record-kind">{t("forms.recordKind")}</Label>
+        <Select
+          value={distribution.recordKind}
+          onValueChange={(value) =>
+            onChange({
+              ...distribution,
+              recordKind: value === "list" ? "list" : "form",
+            })
+          }
+        >
+          <SelectTrigger id="form-record-kind" className="min-h-11" data-testid="form-record-kind">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="form">{t("forms.recordKindForm")}</SelectItem>
+            <SelectItem value="list">{t("forms.recordKindList")}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-1.5">
         <Label>{t("forms.attachedRoles")}</Label>
-        <p className="text-xs text-muted-foreground">{t("forms.attachedRolesHelp")}</p>
         {roles.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("forms.noCompanyRoles")}</p>
         ) : (
           <div
-            className="max-h-36 space-y-2 overflow-y-auto rounded-md border p-2"
+            className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-2"
             data-testid="form-attached-roles"
           >
             {roles.map((role) => (
-              <label key={role.id} className="flex items-center gap-2 text-sm">
+              <label key={role.id} className="flex min-h-11 items-center gap-2 text-sm">
                 <Checkbox
                   data-testid={`form-attached-role-${role.id}`}
                   checked={distribution.roleIds.includes(role.id)}
@@ -163,7 +134,70 @@ export function FormDistributionEditor({
         departments={departments}
         onChange={(audience) => setAudience("seeAudience", audience)}
       />
+      <div className="space-y-2">
+        <TimeToggle
+          id="form-show-time"
+          label={t("forms.showTime")}
+          value={distribution.showAt}
+          fallback={SHOW_DEFAULT}
+          onChange={(value) => setClock("showAt", value)}
+        />
+        <TimeToggle
+          id="form-due-time"
+          label={t("forms.dueTime")}
+          value={distribution.dueTime}
+          fallback={DUE_DEFAULT}
+          onChange={(value) => setClock("dueTime", value)}
+        />
+        <TimeToggle
+          id="form-complete-time"
+          label={t("forms.completeByTime")}
+          value={distribution.completeBy}
+          fallback={COMPLETE_DEFAULT}
+          onChange={(value) => setClock("completeBy", value)}
+        />
+      </div>
     </section>
+  );
+}
+
+function TimeToggle({
+  id,
+  label,
+  value,
+  fallback,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string | null;
+  fallback: string;
+  onChange: (value: string | null) => void;
+}) {
+  const on = value != null;
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between gap-3">
+        <Label htmlFor={`${id}-toggle`}>{label}</Label>
+        <Switch
+          id={`${id}-toggle`}
+          checked={on}
+          data-testid={`${id}-toggle`}
+          onCheckedChange={(checked) => onChange(checked ? (value ?? fallback) : null)}
+          aria-label={label}
+        />
+      </div>
+      {on ? (
+        <Input
+          type="time"
+          className="min-h-11 sm:max-w-[10rem]"
+          data-testid={id}
+          value={value ?? ""}
+          aria-label={label}
+          onChange={(event) => onChange(parseClock(event.target.value) ?? fallback)}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -231,7 +265,7 @@ function AudienceControl({
         value={audience.kind}
         onValueChange={(value) => onChange(emptyTaskAudience(value as TaskAudienceKind))}
       >
-        <SelectTrigger id={id} data-testid={id}>
+        <SelectTrigger id={id} className="min-h-11" data-testid={id}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -245,7 +279,7 @@ function AudienceControl({
       {options.length > 0 ? (
         <div className="max-h-36 space-y-2 overflow-y-auto rounded-md border p-2">
           {options.map((option) => (
-            <label key={option.id} className="flex items-center gap-2 text-sm">
+            <label key={option.id} className="flex min-h-11 items-center gap-2 text-sm">
               <Checkbox
                 data-testid={`${id}-${option.id}`}
                 checked={selected.includes(option.id)}
