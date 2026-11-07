@@ -15,10 +15,20 @@ export type GridRow<T> =
   | { kind: "section"; id: string; store: string; role: string; count: number }
   | { kind: "employee"; employee: T };
 
+function visibleStore(value: string | null | undefined): string {
+  const store = value?.trim() || "";
+  if (!store) return "No store";
+  const normalized = store.toLowerCase().replace(/\s+/g, " ");
+  if (normalized === "walk-in" || normalized === "walk in" || normalized === "walkin") {
+    return "No store";
+  }
+  return store;
+}
+
 export function personStoreAndRole(shifts: GridShiftLabel[]): StoreRole {
   const counts = new Map<string, StoreRole & { count: number }>();
   for (const shift of shifts) {
-    const store = shift.location?.trim() || "No store";
+    const store = visibleStore(shift.location);
     const role = shift.role?.trim() || shift.job_position?.name?.trim() || "No role";
     const key = `${store}\0${role}`;
     const current = counts.get(key) ?? { store, role, count: 0 };

@@ -31,6 +31,7 @@ export type FormDistribution = {
   dueTime: string | null;
   completeBy: string | null;
   timeMode: FormTimeMode;
+  storeIds?: string[];
 };
 
 export type FormAccessViewer = {
@@ -45,6 +46,7 @@ export type FormAccessViewer = {
   roles?: ReadonlyArray<{ id: string; name: string }>;
   /** Roles from today's published shifts. When set, shift-day lists use this instead of the profile role. */
   scheduledRoleIds?: readonly string[];
+  storeId?: string | null;
 };
 
 export type FormAccessRow = {
@@ -67,6 +69,7 @@ export function defaultFormDistribution(): FormDistribution {
     dueTime: null,
     completeBy: null,
     timeMode: "legacy",
+    storeIds: [],
   };
 }
 
@@ -125,6 +128,7 @@ export function readFormDistribution(settings: unknown): FormDistribution {
     dueTime: parseClock(record.due_time ?? record.dueTime),
     completeBy: parseClock(record.complete_by ?? record.completeBy),
     timeMode: shiftDay ? "shift_day" : "legacy",
+    storeIds: stringList(record.store_ids ?? record.storeIds),
   };
 }
 
@@ -142,6 +146,7 @@ export function distributionForEditor(settings: unknown): FormDistribution {
     completeBy: dueTime,
     showFrom: null,
     dueAt: null,
+    storeIds: read.storeIds ?? [],
   };
 }
 
@@ -162,6 +167,7 @@ export function withFormDistribution(
       complete_by: distribution.completeBy,
       show_from: null,
       due_at: null,
+      store_ids: distribution.storeIds ?? [],
     };
   } else {
     base[DISTRIBUTION_KEY] = {
@@ -171,6 +177,7 @@ export function withFormDistribution(
       see_audience: taskAudienceJson(distribution.seeAudience),
       show_from: distribution.showFrom,
       due_at: distribution.dueAt,
+      store_ids: distribution.storeIds ?? [],
     };
   }
   return base;
@@ -245,6 +252,12 @@ export function formIsOpenForFill(
   return true;
 }
 
+function storeAttached(distribution: FormDistribution, viewer: FormAccessViewer): boolean {
+  const storeIds = distribution.storeIds ?? [];
+  if (storeIds.length === 0 || !viewer.storeId) return true;
+  return storeIds.includes(viewer.storeId);
+}
+
 function roleAttached(distribution: FormDistribution, viewer: FormAccessViewer): boolean {
   if (distribution.roleIds.length === 0) return true;
   if (distribution.timeMode === "shift_day" && viewer.scheduledRoleIds) {
@@ -263,7 +276,11 @@ export function canFillForm(
   const distribution = readFormDistribution(form.settings);
   if (!formIsOpenForFill(distribution, now)) return false;
   if (form.created_by === viewer.userId) return true;
-  return audienceIncludes(distribution.fillAudience, viewer) && roleAttached(distribution, viewer);
+  return (
+    audienceIncludes(distribution.fillAudience, viewer) &&
+    roleAttached(distribution, viewer) &&
+    storeAttached(distribution, viewer)
+  );
 }
 
 export function canSeeFormSubmissions(
@@ -276,6 +293,7 @@ export function canSeeFormSubmissions(
   if (options?.hideOthers) return false;
   if (viewer.canManage) return true;
   const distribution = readFormDistribution(form.settings);
+  if (!storeAttached(distribution, viewer)) return false;
   if (!audienceIncludes(distribution.seeAudience, viewer)) return false;
   if (distribution.seeAudience.kind === "company") return viewer.canReadSubmissions;
   return true;

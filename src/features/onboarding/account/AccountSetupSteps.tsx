@@ -214,41 +214,6 @@ export function PermissionsStep(props: {
   );
 }
 
-export function StoreStep(props: {
-  name: string;
-  opens: string;
-  closes: string;
-  onChange: (patch: { name?: string; opens?: string; closes?: string }) => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <div className="sm:col-span-2">
-        <Field
-          id="store-name"
-          label={t("onboarding.account.store.name")}
-          value={props.name}
-          onChange={(name) => props.onChange({ name })}
-        />
-      </div>
-      <Field
-        id="store-opens"
-        label={t("onboarding.account.store.opens")}
-        type="time"
-        value={props.opens}
-        onChange={(opens) => props.onChange({ opens })}
-      />
-      <Field
-        id="store-closes"
-        label={t("onboarding.account.store.closes")}
-        type="time"
-        value={props.closes}
-        onChange={(closes) => props.onChange({ closes })}
-      />
-    </div>
-  );
-}
-
 export function InviteStep(props: {
   invites: { email: string; roleKey: string }[];
   roles: { key: string; label: string }[];

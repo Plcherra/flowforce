@@ -21,6 +21,7 @@ import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useTranslation } from "react-i18next";
 import { DepartmentSettingsCard } from "./DepartmentSettingsCard";
 import { OrgSetupSettingsCard } from "./OrgSetupSettingsCard";
+import { StoresSettingsCard } from "@/features/stores/StoresSettingsCard";
 
 export function GeneralSettingsPanel() {
   const { t } = useTranslation();
@@ -69,6 +70,7 @@ export function GeneralSettingsPanel() {
   };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>{t("settings.companyProfile")}</CardTitle>
@@ -250,5 +252,7 @@ export function GeneralSettingsPanel() {
         </div>
       </CardContent>
     </Card>
+    <StoresSettingsCard />
+    </>
   );
 }

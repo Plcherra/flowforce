@@ -29,10 +29,9 @@ export function useLocations() {
 
       try {
         const { data, error } = await supabase
-          .from("inv_locations")
-          .select(
-            "id, name, address, city, state, country, timezone, is_active, capacity",
-          )
+          .from("stores")
+          .select("id, name, address, archived_at")
+          .is("archived_at", null)
           .eq("company_id", companyId)
           .order("name", { ascending: true });
 
@@ -41,17 +40,22 @@ export function useLocations() {
           return [];
         }
 
-        return (data ?? []).map((location) => ({
-          id: location.id,
-          name: location.name ?? "Untitled Location",
-          address: location.address ?? null,
-          city: location.city ?? null,
-          state: location.state ?? null,
-          country: location.country ?? null,
-          timezone: location.timezone ?? "UTC",
-          is_active: location.is_active ?? true,
-          capacity: location.capacity ?? null,
-        }));
+        return (data ?? [])
+          .filter((location) => {
+            const normalized = (location.name ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+            return normalized !== "walk-in" && normalized !== "walk in" && normalized !== "walkin";
+          })
+          .map((location) => ({
+            id: location.id,
+            name: location.name ?? "Untitled Location",
+            address: location.address ?? null,
+            city: null,
+            state: null,
+            country: null,
+            timezone: "UTC",
+            is_active: true,
+            capacity: null,
+          }));
       } catch (error) {
         logger.error("Unexpected locations query error", {
           error,

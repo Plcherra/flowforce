@@ -26,6 +26,7 @@ export interface ShiftWizardFormData {
   end_time: string;
   timezone: string;
   location: string;
+  storeId?: string;
   job_position_id: string;
   job_position_input: string;
   role_id: string;

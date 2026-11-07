@@ -34,6 +34,7 @@ function workspace(): AccountWorkspaceInput {
     locale: "en",
     org: coffeeShopStarter(shopNames),
     store: { name: "Rua", opens: "08:00", closes: "22:00" },
+    stores: [],
     starter: "lists",
     starterCopy: {
       shiftTitle: "First shift",

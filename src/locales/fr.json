@@ -1278,11 +1278,16 @@
         "reportsView": "Voir les rapports"
       },
       "store": {
-        "title": "Premier magasin",
-        "description": "Ajoutez le premier lieu et les heures d'ouverture.",
+        "title": "Magasin et horaires",
+        "description": "Ajoutez chaque café avec son adresse et ses horaires. Au moins un magasin est requis.",
         "name": "Nom du magasin",
         "opens": "Ouvre",
-        "closes": "Ferme"
+        "closes": "Ferme",
+        "address": "Adresse",
+        "add": "Ajouter un autre magasin",
+        "remove": "Retirer le magasin",
+        "hours": "Horaires d'ouverture",
+        "closed": "Fermé"
       },
       "invite": {
         "title": "Invitez votre équipe",
@@ -1290,7 +1295,10 @@
         "email": "E-mail",
         "role": "Rôle",
         "add": "Ajouter une autre personne",
-        "remove": "Retirer"
+        "remove": "Retirer",
+        "open": "Inviter un collègue",
+        "store": "Magasin",
+        "dialogTitle": "Inviter un collègue"
       },
       "starter": {
         "title": "Premier service ou listes de départ",
@@ -4036,6 +4044,8 @@
     "recordKind": "Type",
     "recordKindForm": "Formulaire",
     "recordKindList": "Liste",
+    "listStore": "Magasin",
+    "listStoreHelp": "Cette liste appartient à un magasin.",
     "attachedRoles": "Rôles associés",
     "attachedRolesHelp": "Les personnes de ces rôles peuvent remplir ceci tant que c’est ouvert. Laissez vide pour n’utiliser que le public qui remplit.",
     "noCompanyRoles": "Cette entreprise n’a pas encore de rôles.",
@@ -6065,6 +6075,11 @@
     "noSettingsForCompany": "Nous n'avons pas trouvé les paramètres système de cette entreprise.",
     "profileNotLinkedToCompany": "Votre profil n'est pas encore lié à une entreprise. Créez une entreprise ou demandez à un administrateur de vous donner l'accès.",
     "profileNotLinkedToWorkspace": "Votre profil n'est pas encore lié à un espace. Vous pouvez créer un espace de démo maintenant ou demander à un administrateur de vous donner l'accès.",
+    "storesTitle": "Magasins",
+    "storesHelp": "Ajoutez un magasin, renommez-le, modifiez ses horaires ou retirez-le. Un magasin retiré reste dans les archives et disparaît des listes.",
+    "storeNameRequired": "Chaque magasin a besoin d'un nom et d'horaires.",
+    "saveStore": "Enregistrer les magasins",
+    "storeSaved": "Magasins enregistrés",
     "tabGeneral": "Général",
     "departmentsTitle": "Départements",
     "departmentName": "Nom du département",

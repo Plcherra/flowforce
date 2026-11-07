@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
-      .select("id, company_id, role, location_id")
+      .select("id, company_id, role, location_id, store_id")
       .eq("id", actor.id)
       .maybeSingle();
 
@@ -140,7 +140,11 @@ export async function POST(request: NextRequest) {
       companyId,
       actorLevel: inviter.level,
       actorLocationId:
-        typeof profile?.location_id === "string" ? profile.location_id : null,
+        typeof profile?.store_id === "string"
+          ? profile.store_id
+          : typeof profile?.location_id === "string"
+            ? profile.location_id
+            : null,
     });
 
     const origin = getRequestOrigin(request);
@@ -276,7 +280,8 @@ async function sendPersonInvite({
     role_id: role.id,
     permission_overrides: permissionOverrides,
     department_id: departmentId,
-    location_id: locationDecision.locationId,
+    store_id: locationDecision.locationId,
+    location_id: null,
     invite_token: inviteToken,
     invited_by: actorId,
     status: "pending",
@@ -375,7 +380,7 @@ async function sendPersonInvite({
         role,
         permissionOverrides,
         departmentId,
-        locationId: locationDecision.locationId,
+        storeId: locationDecision.locationId,
       });
     } catch (error) {
       logger.warn("Invite recorded, but access diffs were not applied yet", {

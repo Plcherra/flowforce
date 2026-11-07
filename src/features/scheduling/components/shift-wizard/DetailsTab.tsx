@@ -19,12 +19,12 @@ import type { Position } from "@/hooks/usePositions";
 import type { ShiftTemplate } from "@/features/scheduling/hooks/useShiftTemplates";
 import type { ShiftWizardFormData, BreakItem } from "./types";
 import { ShiftRoleDepartmentFields } from "./ShiftRoleDepartmentFields";
+import { ShiftStoreField } from "./ShiftStoreField";
 
 type DetailsTabProps = {
   formData: ShiftWizardFormData;
   setFormData: Dispatch<SetStateAction<ShiftWizardFormData>>;
   positions: Position[];
-  distinctLocations: string[];
   hours: { total: number; net: number };
   laborCost: number;
   shiftTemplates: ShiftTemplate[];
@@ -67,7 +67,6 @@ export function DetailsTab({
   formData,
   setFormData,
   positions,
-  distinctLocations,
   hours,
   laborCost,
   shiftTemplates,
@@ -75,9 +74,6 @@ export function DetailsTab({
   const { t } = useTranslation();
   const [showPositionSuggestions, setShowPositionSuggestions] = useState(false);
   const [positionActiveIndex, setPositionActiveIndex] = useState<number>(-1);
-  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
-  const [locationActiveIndex, setLocationActiveIndex] = useState<number>(-1);
-
   const filteredPositions = useMemo(
     () =>
       positions.filter((position) =>
@@ -481,68 +477,13 @@ export function DetailsTab({
         </select>
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="location">{t("schedule.location")}</Label>
-        <div className="relative">
-          <Input
-            id="location"
-            value={formData.location}
-            onChange={(event) => {
-              const value = event.target.value;
-              setFormData((prev) => ({ ...prev, location: value }));
-              setShowLocationSuggestions(Boolean(value));
-              setLocationActiveIndex(-1);
-            }}
-            onFocus={() =>
-              setShowLocationSuggestions(Boolean(formData.location))
-            }
-            onBlur={() =>
-              setTimeout(() => setShowLocationSuggestions(false), 120)
-            }
-            placeholder={t("schedule.selectOrTypeALocationStore")}
-          />
-          {showLocationSuggestions && (
-            <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
-              <div className="max-h-56 overflow-y-auto py-1">
-                {distinctLocations
-                  .filter((location) =>
-                    location
-                      .toLowerCase()
-                      .includes((formData.location || "").toLowerCase()),
-                  )
-                  .slice(0, 8)
-                  .map((location, index) => (
-                    <button
-                      type="button"
-                      key={location}
-                      className={cn(
-                        "w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                        index === locationActiveIndex &&
-                          "bg-accent text-accent-foreground",
-                      )}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        setFormData((prev) => ({ ...prev, location }));
-                        setShowLocationSuggestions(false);
-                      }}
-                    >
-                      {location}
-                    </button>
-                  ))}
-                {distinctLocations.filter((location) =>
-                  location
-                    .toLowerCase()
-                    .includes((formData.location || "").toLowerCase()),
-                ).length === 0 && (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    {t("schedule.noSavedLocationsTypeToAddANew")}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <ShiftStoreField
+        location={formData.location}
+        storeId={formData.storeId}
+        onChange={(next) =>
+          setFormData((prev) => ({ ...prev, location: next.location, storeId: next.storeId }))
+        }
+      />
     </div>
   );
 }

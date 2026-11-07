@@ -13,7 +13,7 @@ export type OpsInviteShiftStatus = "saved" | "forbidden" | "skipped" | "failed";
 async function locationName(companyId: string, locationId: string | null) {
   if (!locationId) return null;
   const { data, error } = await admin
-    .from("inv_locations")
+    .from("stores")
     .select("name")
     .eq("company_id", companyId)
     .eq("id", locationId)

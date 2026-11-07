@@ -7,6 +7,8 @@ import {
   workingHoursFor,
   type AccountWorkspaceInput,
 } from "@/features/onboarding/account/accountSetupModel";
+import { namedStores } from "@/features/stores/storeDraft";
+import { remapPlaceholderReferences } from "./storeReferences";
 
 const logger = createServerLogger("account-workspace");
 
@@ -26,6 +28,7 @@ export type WorkspaceRoleRef = {
 
 export type WorkspaceApplyResult = {
   locationId: string | null;
+  stores: { id: string; key: string; name: string }[];
   roles: WorkspaceRoleRef[];
   warnings: string[];
 };
@@ -139,26 +142,67 @@ export async function applyAccountWorkspace(
     });
   }
 
-  let locationId: string | null = null;
-  const locationInsert = await client
-    .from("inv_locations")
-    .insert({
-      company_id: input.companyId,
-      name: input.workspace.store.name.trim(),
-      location_type: "store",
-      is_active: true,
-    })
-    .select("id")
-    .maybeSingle();
-  if (locationInsert.error) {
-    warnings.push("location");
-    logger.warn("Unable to store the first store", {
-      error: locationInsert.error,
-      context: { companyId: input.companyId },
+  const savedStores: { id: string; key: string; name: string }[] = [];
+  const drafts = namedStores(input.workspace.stores ?? []);
+  const toSave =
+    drafts.length > 0
+      ? drafts
+      : [
+          {
+            key: "store",
+            name: input.workspace.store.name,
+            address: "",
+            hours: {
+              monday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+              tuesday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+              wednesday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+              thursday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+              friday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+              saturday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+              sunday: { closed: false, open: input.workspace.store.opens, close: input.workspace.store.closes },
+            },
+          },
+        ];
+  for (const draft of toSave) {
+    const locationInsert = await client
+      .from("stores")
+      .insert({
+        company_id: input.companyId,
+        name: draft.name.trim(),
+        address: draft.address.trim() || null,
+        hours: draft.hours,
+      })
+      .select("id")
+      .maybeSingle();
+    if (locationInsert.error || !locationInsert.data?.id) {
+      warnings.push("location");
+      logger.warn("Unable to store a shop", {
+        error: locationInsert.error,
+        context: { companyId: input.companyId, name: draft.name },
+      });
+      continue;
+    }
+    savedStores.push({
+      id: String(locationInsert.data.id),
+      key: draft.key,
+      name: draft.name.trim(),
     });
-  } else {
-    const row = locationInsert.data as { id?: string } | null;
-    locationId = row?.id ?? null;
+  }
+  const starter =
+    savedStores.find((store) => store.key === input.workspace.starterStoreKey) ??
+    savedStores[0] ??
+    null;
+  const locationId = starter?.id ?? null;
+  if (locationId) {
+    try {
+      await remapPlaceholderReferences(client, input.companyId);
+    } catch (error) {
+      warnings.push("remap");
+      logger.warn("Unable to move placeholder store references", {
+        error,
+        context: { companyId: input.companyId },
+      });
+    }
   }
 
   const companyUpdate = await client
@@ -203,16 +247,11 @@ export async function applyAccountWorkspace(
         name: department.name,
         type: department.id,
       })),
-      locations: locationId
-        ? [
-            {
-              id: locationId,
-              name: input.workspace.store.name.trim(),
-              location_type: "store",
-              is_active: true,
-            },
-          ]
-        : [],
+      locations: savedStores.map((store) => ({
+        id: store.id,
+        name: store.name,
+        is_active: true,
+      })),
     };
     const settingsUpdate = await client
       .from("system_settings")
@@ -244,8 +283,9 @@ export async function applyAccountWorkspace(
       is_template: false,
       status: "draft",
       timezone: input.workspace.timezone,
-      location: input.workspace.store.name.trim(),
-      requirements: { accountSetup: true },
+      location: starter?.name ?? input.workspace.store.name.trim(),
+      store_id: locationId,
+      requirements: { accountSetup: true, store_id: locationId },
     });
     if (shiftInsert.error) warnings.push("shift");
   }
@@ -266,7 +306,7 @@ export async function applyAccountWorkspace(
       };
     });
     for (const list of lists) {
-      const settings = starterListSettings(firstRole.id, list.showFrom, list.dueAt);
+      const settings = starterListSettings(firstRole.id, list.showFrom, list.dueAt, locationId);
       settings.starter = { pack: "account-setup", list: list.key };
       const formInsert = await client
         .from("forms")
@@ -297,7 +337,7 @@ export async function applyAccountWorkspace(
     }
   }
 
-  return { locationId, roles, warnings };
+  return { locationId, stores: savedStores, roles, warnings };
 }
 
 export function workspaceWarning(error: DbError): string {
