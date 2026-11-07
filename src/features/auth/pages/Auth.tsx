@@ -102,7 +102,10 @@ export default function Auth() {
         "@/features/employees/utils/acceptCompanyInvite"
       );
       await acceptCompanyInvite(inviteCode);
-      navigate(authSuccessPath);
+      const joinedShop = searchParams.get(mobileAuthRedirectParam)
+        ? authSuccessPath
+        : "/app/onboarding";
+      navigate(joinedShop);
       setIsLoading(false);
       return;
     }
