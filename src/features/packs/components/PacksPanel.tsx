@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import type { OptionalPackId } from "@/config/packFlags";
 import { usePackFlags } from "@/hooks/usePackFlags";
+import { PackMonthlyPrice } from "@/features/packs/components/PackMonthlyPrice";
 import { PackCheckoutNoticeText } from "@/features/packs/components/PackPurchaseActions";
 import { useCanPurchasePacks } from "@/features/packs/useCanPurchasePacks";
 import { useConfirmPackCheckout } from "@/features/packs/useConfirmPackCheckout";
@@ -82,12 +83,7 @@ function PackSummaryCard({
         <CardDescription>{t(`packs.${pack}.description`)}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-base font-medium" data-testid={`pack-price-${pack}`}>
-          {t("packs.priceTbd")}
-        </p>
-        <p className="text-xs text-muted-foreground" data-testid={`pack-price-note-${pack}`}>
-          {t("packs.pricePlaceholder")}
-        </p>
+        <PackMonthlyPrice pack={pack} showNote />
         {purchasable === false ? (
           <p className="text-sm font-medium" data-testid={`pack-pricing-soon-${pack}`}>
             {t("packs.pricingComingSoon")}

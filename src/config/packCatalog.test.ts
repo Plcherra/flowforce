@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { isStripeTestSecret } from "@/server/billing/stripeTestMode";
 import {
   OPTIONAL_PACK_IDS,
+  PACK_PLACEHOLDER_MONTHLY_USD,
   PACK_PRICE_ENV,
   isPackBillingMetadata,
   packCheckoutIsPaid,
@@ -25,7 +26,13 @@ export function runPackCatalogTests() {
     "price_team",
   );
   assert.equal(readPackPriceId("stock", {}), null);
+  assert.deepEqual(PACK_PLACEHOLDER_MONTHLY_USD, {
+    team: 49,
+    insights: 39,
+    stock: 49,
+  });
   assert.equal(packPriceCanCheckout({ recurring: { interval: "month" } }), true);
+  assert.equal(packPriceCanCheckout({ recurring: { interval: "year" } }), false);
   assert.equal(packPriceCanCheckout({ recurring: null }), false);
   assert.equal(packPriceCanCheckout(null), false);
 

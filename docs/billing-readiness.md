@@ -46,17 +46,50 @@ Server-side mapping lives in [stripePrices.ts](/src/server/billing/stripePrices.
 
 ## Packs
 
-Team, Insights, and Stock are add-on packs. Operations is the base and stays on. Packs are not the Starter, Growth, or Enterprise plans. Commercial terms are not decided yet, so the pack page keeps the placeholders **Price TBD** and **Placeholder — awaiting pricing**.
+Team, Insights, and Stock are à la carte add-on packs on top of Operations. Operations stays on. Packs do not replace Starter, Growth, or Enterprise.
 
-Open packs from the **+** button next to OPS in the bottom nav (desktop and mobile). That menu lists what each pack unlocks. Opening one pack shows a page with a buy button only when its price env var is set. A missing price shows **Pricing coming soon** and does not call Stripe.
+Pedro decided these placeholder terms on 7 Nov 2026. They can change later:
 
-When a recurring Stripe **test** price exists, `POST /api/packs/checkout` creates a Checkout Session in `subscription` mode with quantity 1. The price's own interval is monthly or yearly. Pack checkout refuses live secret keys (`sk_live_` / `rk_live_`). Use a test key (`sk_test_` or `rk_test_`) only.
+1. Prices, monthly, USD, per company: Team $49, Insights $39, Stock $49.
+2. Billing interval: monthly.
+3. Metering: per company. Checkout quantity is 1, not per seat.
+4. Packs are sold à la carte. There are no bundles.
+5. Packs are additive add-ons on Operations. They do not replace starter, growth, or enterprise.
 
-Expected server env vars (test price ids):
+The discovery page, the **+** menu next to OPS, and the landing and pricing copy show those amounts and say they are placeholders. Checkout stays off, and that pack shows **Pricing coming soon**, until the matching test price env var is set. A missing price does not call Stripe.
+
+When a recurring **monthly** Stripe **test** price exists, `POST /api/packs/checkout` creates a Checkout Session in `subscription` mode with quantity 1. A yearly price is refused. Pack checkout refuses live secret keys (`sk_live_` / `rk_live_`). Use a test key (`sk_test_` or `rk_test_`) only.
+
+Expected server env vars (test price ids). Leave them unset in the repo until the prices exist in the project's Stripe test account:
 
 - `STRIPE_PRICE_PACK_TEAM`
 - `STRIPE_PRICE_PACK_INSIGHTS`
 - `STRIPE_PRICE_PACK_STOCK`
+
+### Creating the Stripe test prices
+
+This environment had no `STRIPE_SECRET_KEY`, so the test Products and Prices were not created. Create them in the Stripe Dashboard in **test mode** (the same account whose test secret is `STRIPE_SECRET_KEY` on Vercel). Do not use live mode. Do not commit secret keys.
+
+1. Open the Stripe Dashboard and switch the mode toggle to **Test mode**.
+2. Go to **Product catalog** → **Add product**.
+3. Create three products. Each product gets one recurring price:
+
+| Product name | Amount | Currency | Billing period |
+| --- | --- | --- | --- |
+| FlowForce Team pack | 49.00 | USD | Monthly |
+| FlowForce Insights pack | 39.00 | USD | Monthly |
+| FlowForce Stock pack | 49.00 | USD | Monthly |
+
+4. Open each price and copy its id (`price_...`).
+5. Set these on Vercel (and in local secrets), not in git:
+
+```bash
+STRIPE_PRICE_PACK_TEAM=price_...
+STRIPE_PRICE_PACK_INSIGHTS=price_...
+STRIPE_PRICE_PACK_STOCK=price_...
+```
+
+Use the test secret (`sk_test_` or `rk_test_`) that belongs to that same account. A live key is refused at checkout.
 
 Routes:
 
@@ -73,14 +106,6 @@ Webhook `POST /api/stripe/webhooks` (signature `STRIPE_WEBHOOK_SECRET`):
 - `customer.subscription.deleted`, and a subscription whose status is `canceled`, `unpaid`, or `incomplete_expired`, turn that pack's flag off.
 - A subscription that is still `active` or `trialing`, including one set to cancel at period end, leaves the flag on.
 - Pack events do not change the workspace Starter, Growth, or Enterprise plan.
-
-Still waiting on Pedro:
-
-1. Price for Team, Insights, and Stock?
-2. Monthly or yearly?
-3. Per seat or per company?
-4. À la carte or only as bundles?
-5. Add-on to Starter, Growth, and Enterprise, or a replacement of that model?
 
 ## Stripe Flows
 

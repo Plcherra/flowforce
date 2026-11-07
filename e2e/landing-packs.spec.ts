@@ -15,10 +15,28 @@ test("landing presents Operations plus add-on packs", async ({ page }) => {
   await expect(page.getByTestId("landing-pack-team")).toContainText("Team");
   await expect(page.getByTestId("landing-pack-insights")).toContainText("Insights");
   await expect(page.getByTestId("landing-pack-stock")).toContainText("Stock");
+  await expect(page.getByTestId("landing-pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("landing-pack-price-insights")).toHaveText("$39/mo");
+  await expect(page.getByTestId("landing-pack-price-stock")).toHaveText("$49/mo");
+  await expect(model).toContainText(
+    "Placeholder prices, billed monthly per company. These amounts can change.",
+  );
 
   const body = await page.locator("body").innerText();
+  expect(body).not.toContain("Price TBD");
+  expect(body).not.toContain("awaiting pricing");
+  expect(body.toLowerCase()).not.toContain("still being decided");
   expect(body.toLowerCase()).not.toContain("multi-location");
   expect(body.toLowerCase()).not.toContain("multi-business");
   expect(body.toLowerCase()).not.toContain("custom form builder");
   expect(body.toLowerCase()).not.toContain("custom builder");
+
+  await page.goto("/pricing");
+  const pricing = page.getByTestId("pricing-pack-note");
+  await expect(pricing).toBeVisible();
+  await expect(page.getByTestId("pricing-pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pricing-pack-price-insights")).toHaveText("$39/mo");
+  await expect(page.getByTestId("pricing-pack-price-stock")).toHaveText("$49/mo");
+  await expect(pricing).toContainText("can change");
+  await expect(pricing).not.toContainText("Pricing coming soon");
 });

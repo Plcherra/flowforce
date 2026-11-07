@@ -41,6 +41,15 @@ test("opens packs from the OPS plus button and shows pricing coming soon", async
   page,
 }) => {
   const writes = trackWrites(page);
+  const checkoutHits: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      request.url().includes("/api/packs/checkout")
+    ) {
+      checkoutHits.push(request.url());
+    }
+  });
   await pinPackFlags(page, { team: false, insights: false, stock: false });
   await mockOffers(page, { team: false, insights: false, stock: false });
   await signIn(page);
@@ -63,19 +72,38 @@ test("opens packs from the OPS plus button and shows pricing coming soon", async
     "Inventory and expenses",
   );
 
+  await expect(sheet.getByTestId("pack-add-price-team")).toHaveText("$49/mo");
+  await expect(sheet.getByTestId("pack-add-price-insights")).toHaveText("$39/mo");
+  await expect(sheet.getByTestId("pack-add-price-stock")).toHaveText("$49/mo");
+  await expect(page.getByTestId("packs-add-price-note")).toHaveText(
+    "Placeholder price, billed monthly per company. This amount can change.",
+  );
+
   await sheet.getByTestId("pack-add-team").click();
   await page.waitForURL(/\/app\/packs\/team/, { timeout: 20_000 });
   await expect(page.getByTestId("pack-detail")).toHaveAttribute("data-pack", "team");
   await expect(page.getByTestId("pack-card-team")).toContainText("leaderboard");
-  await expect(page.getByTestId("pack-price-team")).toHaveText("Price TBD");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
   await expect(page.getByTestId("pack-price-note-team")).toHaveText(
-    "Placeholder — awaiting pricing",
+    "Placeholder price, billed monthly per company. This amount can change.",
   );
   await expect(page.getByTestId("pack-pricing-soon-team")).toHaveText(
     "Pricing coming soon",
   );
   await expect(page.getByTestId("pack-buy-team")).toHaveCount(0);
+
+  await page.goto("/app/packs");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-price-insights")).toHaveText("$39/mo");
+  await expect(page.getByTestId("pack-price-stock")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-buy-team")).toHaveCount(0);
+  await expect(page.getByTestId("pack-buy-insights")).toHaveCount(0);
+  await expect(page.getByTestId("pack-buy-stock")).toHaveCount(0);
+  const body = await page.locator("body").innerText();
+  expect(body).not.toContain("Price TBD");
+  expect(body).not.toContain("awaiting pricing");
   expect(writes).toEqual([]);
+  expect(checkoutHits).toEqual([]);
 });
 
 test("mocked Stripe test checkout and customer portal do not write settings", async ({
@@ -112,6 +140,8 @@ test("mocked Stripe test checkout and customer portal do not write settings", as
 
   await signIn(page);
   await page.goto("/app/packs/team");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-pricing-soon-team")).toHaveCount(0);
   await expect(page.getByTestId("pack-buy-team")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("pack-buy-team")).toHaveAttribute(
     "data-permission",
@@ -175,7 +205,8 @@ test("hides pack purchase when billing management is denied", async ({ page }) =
   await expect(detail).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("packs-purchase-denied")).toBeVisible();
   await expect(page.getByTestId("pack-buy-team")).toHaveCount(0);
-  await expect(page.getByTestId("pack-price-team")).toHaveText("Price TBD");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-price-note-team")).toContainText("can change");
 });
 
 test("turns a pack on after a mocked checkout confirmation and does not charge", async ({

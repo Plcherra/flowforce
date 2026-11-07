@@ -15,6 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { OPTIONAL_PACK_IDS } from "@/config/packCatalog";
+import { PackMonthlyPrice } from "@/features/packs/components/PackMonthlyPrice";
 import {
   BILLING_PLANS,
   type BillingPlanKey,
@@ -155,7 +157,18 @@ export default function Pricing() {
         <div className="mx-auto mt-16 max-w-3xl space-y-3 text-center" data-testid="pricing-pack-note">
           <h2 className="text-2xl font-semibold">{t("landing.model.title")}</h2>
           <p className="text-muted-foreground">{t("landing.model.subtitle")}</p>
-          <p className="text-sm font-medium">{t("packs.pricingComingSoon")}</p>
+          <ul className="space-y-3 text-left">
+            {OPTIONAL_PACK_IDS.map((pack) => (
+              <li key={pack} data-testid={`pricing-pack-${pack}`} className="flex items-baseline justify-between gap-4">
+                <span className="font-medium">{t(`packs.${pack}.title`)}</span>
+                <PackMonthlyPrice
+                  pack={pack}
+                  priceTestId={`pricing-pack-price-${pack}`}
+                />
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm text-muted-foreground">{t("packs.pricePlaceholderNote")}</p>
           <p className="text-sm text-muted-foreground">{t("packs.separateFromPlans")}</p>
         </div>
 

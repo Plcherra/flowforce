@@ -66,7 +66,7 @@ export async function createPackCheckoutSession(input: {
       ok: false,
       status: 409,
       code: "pack_price_pending",
-      message: "This pack does not have a price yet.",
+      message: "This pack's Stripe price is not set yet.",
     };
   }
 
@@ -88,7 +88,7 @@ export async function createPackCheckoutSession(input: {
       ok: false,
       status: 409,
       code: "pack_price_pending",
-      message: "This pack price is not ready for checkout.",
+      message: "This pack price must be a monthly recurring test price.",
     };
   }
 

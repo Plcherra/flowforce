@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, ClipboardList, Package, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { isOptionalPackId, PACK_PLACEHOLDER_MONTHLY_USD } from "@/config/packCatalog";
 
 const packs = [
   {
@@ -69,10 +70,20 @@ export function FeaturesGrid() {
                 </div>
                 <CardTitle>{t(pack.titleKey)}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <CardDescription className="text-base leading-relaxed">
                   {t(pack.descriptionKey)}
                 </CardDescription>
+                {isOptionalPackId(pack.id) ? (
+                  <p
+                    className="text-base font-medium text-foreground"
+                    data-testid={`landing-pack-price-${pack.id}`}
+                  >
+                    {t("packs.priceMonthly", {
+                      amount: PACK_PLACEHOLDER_MONTHLY_USD[pack.id],
+                    })}
+                  </p>
+                ) : null}
               </CardContent>
             </Card>
           ))}
