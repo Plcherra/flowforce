@@ -32,7 +32,7 @@ export default function RootLayout({
           {themeBootScript}
         </Script>
         <Providers>{children}</Providers>
-        <Analytics />
+        {process.env.VERCEL ? <Analytics /> : null}
       </body>
     </html>
   );

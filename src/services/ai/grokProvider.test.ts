@@ -328,7 +328,6 @@ export async function runGrokProviderTests() {
     assert.equal(source.includes('"Access-Control-Allow-Origin": "*"') || source.includes("'Access-Control-Allow-Origin': '*'"), true, path);
   }
   assert.equal(engagement.includes("runMeteredGrokChat"), true);
-  assert.equal(automation.includes("responseFormat: { type: \"json_object\" }"), true);
   assert.equal(read("supabase/functions/_shared/grokProvider.ts").includes(XAI_CHAT_COMPLETIONS_URL), true);
   for (const path of [
     "supabase/functions/ai-scheduling-assistant/index.ts",

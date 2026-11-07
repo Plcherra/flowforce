@@ -6,7 +6,9 @@
  * `system_settings.admin_config.packFlags` — no extra table.
  *
  * Dev and Playwright can override the three optional packs with
- * sessionStorage key `flowforce:pack-flags`. Production builds ignore it.
+ * sessionStorage key `flowforce:pack-flags`. Production builds ignore it
+ * unless NEXT_PUBLIC_E2E_PACK_OVERRIDES=1, which release gates set for the
+ * local server only.
  */
 
 export const PACK_IDS = ["ops", "team", "insights", "stock"] as const;

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createJiti } from "jiti";
@@ -56,6 +57,16 @@ requireIncludes(
     "npm run mobile:android:debug",
     "npm run test:e2e:onboarding",
     "npm run test:smoke",
+    "npm run lint",
+    "npm run check:visible-modules",
+    "npm run test:operations-hub",
+    "npm run test:grok-provider",
+    "npm run test:service-role-auth",
+    "npm run test:security-headers",
+    "npm run test:pages",
+    "npm run test:e2e",
+    "npm run test:playwright",
+    "npm run test:db:ai-copilot",
   ],
   "release gates workflow",
 );
@@ -201,6 +212,16 @@ if (
   !readiness.hasMainBranchProtectionShape
 ) {
   throw new Error("Production release gate readiness flags are incomplete");
+}
+
+for (const script of [
+  "scripts/test-operations-hub.mjs",
+  "scripts/test-grok-provider.mjs",
+  "scripts/test-service-role-auth.mjs",
+  "scripts/test-security-headers.mjs",
+  "scripts/check-visible-module-inventory-contract.mjs",
+]) {
+  execFileSync(process.execPath, [script], { cwd: root, stdio: "inherit" });
 }
 
 console.log("OK production release gates contract");

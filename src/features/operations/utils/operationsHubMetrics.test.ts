@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { summarizeItemStock } from "@/features/inventory/utils/stockPosition";
+import "@/i18n/client";
 import i18n from "@/i18n/config";
 import { KpiCard } from "../components/KpiCard";
 import { OperationsSignalsCard } from "../components/OperationsSignalsCard";

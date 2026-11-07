@@ -74,7 +74,7 @@ const recognitionDetailsSchema = z.object({
   training_assignmentid: z.string().nullable().optional(),
   onboarding_step: z.string().nullable().optional(),
   xp_awarded: z.number().nullable().optional(),
-  metadata: z.record(z.any()).nullable().optional(),
+  metadata: z.record(z.string(), z.any()).nullable().optional(),
 });
 
 const recognitionRowSchema = z.object({
@@ -146,7 +146,7 @@ const awardRuleSchema = z.object({
   threshold: z.number(),
   badge_code: z.string().nullable().optional(),
   xp_award: z.number().nullable().optional(),
-  metadata: z.record(z.any()).nullable().optional(),
+  metadata: z.record(z.string(), z.any()).nullable().optional(),
 });
 
 const DEFAULT_LOOKBACK_DAYS = 365;

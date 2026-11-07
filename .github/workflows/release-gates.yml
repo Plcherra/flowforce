@@ -34,7 +34,7 @@ jobs:
   release-gates:
     name: Release gates
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -56,11 +56,25 @@ jobs:
         # Pin npm 10.x locally: npx npm@10.9.8 ci — prevents lockfile drift (e.g. yaml@2.9.0)
         run: npm ci
 
-      - name: Architecture contract
-        run: npm run check:architecture
+      - name: Lint
+        run: npm run lint
 
       - name: Locale keys and hard-coded strings
         run: npm run check:i18n
+
+      - name: Visible module route inventory
+        run: npm run check:visible-modules
+
+      - name: Unit tests
+        run: |
+          npm run test:operations-hub
+          npm run test:product-roles
+          npm run test:grok-provider
+          npm run test:service-role-auth
+          npm run test:security-headers
+
+      - name: Architecture contract
+        run: npm run check:architecture
 
       - name: Install Supabase CLI
         run: npm install --global supabase@${{ env.SUPABASE_CLI_VERSION }}
@@ -117,7 +131,9 @@ jobs:
         run: npm run check:ai-copilot
 
       - name: Database tenant-isolation and storage tests
-        run: npm run test:db:security
+        run: |
+          npm run test:db:security
+          npm run test:db:ai-copilot
 
       - name: Scheduling availability and grid unit tests
         run: |
@@ -131,6 +147,8 @@ jobs:
         run: npm run typecheck
 
       - name: Build production app
+        env:
+          NEXT_PUBLIC_E2E_PACK_OVERRIDES: "1"
         run: npm run build
 
       - name: Docker image build gate
@@ -169,6 +187,12 @@ jobs:
           cat /tmp/flowforce-next.log
           exit 1
 
+      - name: Page reachability
+        run: npm run test:pages:simple
+
+      - name: Page runtime sweep
+        run: npm run test:pages
+
       - name: Onboarding E2E
         run: npm run test:e2e:onboarding
 
@@ -178,7 +202,17 @@ jobs:
       - name: Scheduling workflow contract
         run: npm run check:scheduling-workflow
 
-      - name: Scheduling Playwright smoke
+      - name: Seed local Playwright user
+        shell: bash
+        run: |
+          node scripts/seed-local-playwright-user.mjs >> "$GITHUB_ENV"
+
+      - name: Playwright end-to-end
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.TEST_URL }}
+        run: npm run test:e2e
+
+      - name: Playwright product suite
         env:
           PLAYWRIGHT_SMOKE: "1"
           PLAYWRIGHT_BASE_URL: ${{ env.TEST_URL }}

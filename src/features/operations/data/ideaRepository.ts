@@ -20,7 +20,7 @@ const ideaActionSchema = z.object({
   cycleid: z.string().nullable(),
   action_name: z.string(),
   status: z.enum(["pending", "executed", "failed"]),
-  result: z.record(z.any()).nullable(),
+  result: z.record(z.string(), z.any()).nullable(),
   created_at: z.string(),
 });
 
@@ -30,7 +30,7 @@ const copilotInsightSchema = z.object({
   summary: z.string().optional(),
   metric: z.string().optional(),
   severity: z.enum(["info", "warning", "critical"]).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 const copilotRecommendationSchema = z.object({
@@ -38,8 +38,8 @@ const copilotRecommendationSchema = z.object({
   id: z.string().optional(),
   actionType: z.string().optional(),
   action: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
-  evaluation: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
+  evaluation: z.record(z.string(), z.any()).optional(),
   confidence: z.number().optional(),
   notes: z.array(z.string()).optional(),
   impacts: z

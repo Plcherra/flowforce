@@ -9,6 +9,7 @@ type EnvGroup = Record<string, EnvValue>;
 export const appEnv = {
   MODE: process.env.NODE_ENV,
   DEV: process.env.NODE_ENV !== "production",
+  E2E_PACK_OVERRIDES: process.env.NEXT_PUBLIC_E2E_PACK_OVERRIDES === "1",
   VITE_SUPABASE_URL:
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.VITE_SUPABASE_URL,
   VITE_SUPABASE_PUBLISHABLE_KEY:

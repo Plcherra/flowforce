@@ -150,6 +150,10 @@ class PageTester {
         /devtools/i,
         /source map/i,
         /hydration/i,
+        // Vercel Analytics is not served by `next start`. Chrome logs the 404
+        // without the script URL, then refuses the HTML error page as a script.
+        /_vercel\/insights\/script\.js/i,
+        /failed to load resource: the server responded with a status of 404/i,
       ];
       
       const shouldIgnore = ignoredPatterns.some(pattern => pattern.test(text));

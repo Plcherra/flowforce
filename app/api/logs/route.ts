@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "../_server/supabaseAdmin";
+import { authorizeRemoteLog } from "./authorizeRemoteLog";
+import { readBearerToken } from "../onboarding/complete/authorizeOnboarding";
+import { supabaseAdmin } from "../_server/supabaseAdmin"; // pragma: allowlist secret
 
 const MAX_LOG_BYTES = 64 * 1024;
 const VALID_LEVELS = new Set(["debug", "info", "warn", "error"]);
@@ -43,21 +45,45 @@ function normalizeContext(value: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  const expectedToken = process.env.LOG_INGEST_TOKEN;
-
-  if (expectedToken) {
-    const providedToken = request.headers.get("x-log-token");
-    if (providedToken !== expectedToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
-
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > MAX_LOG_BYTES) {
     return NextResponse.json({ error: "Payload too large" }, { status: 413 });
   }
 
-  const payload = await request.json().catch(() => null);
+  const bearerToken = readBearerToken(request.headers.get("authorization"));
+  let sessionUserId: string | null = null;
+  let bearerVerified = false;
+
+  if (bearerToken) {
+    const { data, error } = await supabaseAdmin.auth.getUser(bearerToken); // pragma: allowlist secret
+    if (!error && data.user?.id) {
+      bearerVerified = true;
+      sessionUserId = data.user.id;
+    }
+  }
+
+  const payloadForAuth = await request.clone().json().catch(() => null);
+  const bodyUserId =
+    payloadForAuth &&
+    typeof payloadForAuth === "object" &&
+    typeof (payloadForAuth as { userId?: unknown }).userId === "string"
+      ? (payloadForAuth as { userId: string }).userId
+      : null;
+
+  const decision = authorizeRemoteLog({
+    configuredToken: process.env.LOG_INGEST_TOKEN,
+    providedToken: request.headers.get("x-log-token"),
+    bearerToken,
+    sessionUserId,
+    bearerVerified,
+    bodyUserId,
+  });
+
+  if (decision.ok === false) {
+    return NextResponse.json({ error: decision.message }, { status: decision.status });
+  }
+
+  const payload = payloadForAuth;
 
   if (!payload || typeof payload !== "object") {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -66,13 +92,13 @@ export async function POST(request: NextRequest) {
   const body = payload as Record<string, unknown>;
   const message = normalizeText(body.message, "Remote client log");
 
-  const { error } = await supabaseAdmin.from("system_logs").insert({
+  const { error } = await supabaseAdmin.from("system_logs").insert({ // pragma: allowlist secret
     level: normalizeLevel(body.level),
     message,
     location: normalizeText(body.location, "client"),
     requestid: normalizeText(body.requestId),
     org_id: normalizeUuid(body.orgId),
-    user_id: normalizeUuid(body.userId),
+    user_id: normalizeUuid(decision.userId),
     context: normalizeContext(body.context),
     stack: normalizeText(body.stack),
     tags: normalizeTags(body.tags),

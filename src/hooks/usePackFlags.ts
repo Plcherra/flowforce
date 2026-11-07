@@ -14,8 +14,10 @@ import { supabase as browserClient } from "@/integrations/supabase/client"; // p
 import { useAuth } from "@/hooks/useAuth";
 import { appEnv } from "@/lib/env";
 
+const packOverrideEnabled = appEnv.DEV || appEnv.E2E_PACK_OVERRIDES;
+
 function readDevPackOverride() {
-  if (!appEnv.DEV || typeof window === "undefined") return null;
+  if (!packOverrideEnabled || typeof window === "undefined") return null;
 
   try {
     const raw = window.sessionStorage.getItem(PACK_FLAG_OVERRIDE_STORAGE_KEY);
@@ -29,10 +31,10 @@ function readDevPackOverride() {
 export function usePackFlags() {
   const { user } = useAuth();
   const [devOverride, setDevOverride] = useState<ReturnType<typeof readDevPackOverride>>(null);
-  const [devLoaded, setDevLoaded] = useState(!appEnv.DEV);
+  const [devLoaded, setDevLoaded] = useState(!packOverrideEnabled);
 
   useEffect(() => {
-    if (!appEnv.DEV) return;
+    if (!packOverrideEnabled) return;
     setDevOverride(readDevPackOverride());
     setDevLoaded(true);
   }, []);
@@ -68,7 +70,7 @@ export function usePackFlags() {
     () =>
       applyPackFlagOverride(
         settingsQuery.data ?? DEFAULT_PACK_FLAGS,
-        appEnv.DEV ? devOverride : null,
+        packOverrideEnabled ? devOverride : null,
       ),
     [devOverride, settingsQuery.data],
   );

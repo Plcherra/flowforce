@@ -2,7 +2,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js"; // pragma: allowlist secret
 
 const cwd = process.cwd();
 
@@ -58,14 +58,14 @@ async function main() {
   readEnvFiles();
 
   const baseUrl = process.env.ONBOARDING_E2E_BASE_URL ?? "http://127.0.0.1:3000";
-  const supabaseUrl = requireEnv("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL");
-  const anonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = requireEnv("SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL"); // pragma: allowlist secret
+  const anonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"); // pragma: allowlist secret
+  const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY"); // pragma: allowlist secret
 
-  const publicClient = createClient(supabaseUrl, anonKey, {
+  const publicClient = createClient(supabaseUrl, anonKey, { // pragma: allowlist secret
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
+  const admin = createClient(supabaseUrl, serviceRoleKey, { // pragma: allowlist secret
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
@@ -93,6 +93,39 @@ async function main() {
     if (signUpError) throw new Error(`Signup failed: ${signUpError.message}`);
     userId = authData.user?.id ?? null;
     assert(userId, "Signup did not return a user id");
+
+    let accessToken = authData.session?.access_token ?? null;
+    if (!accessToken) {
+      const { data: signInData, error: signInError } =
+        await publicClient.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        throw new Error(`Sign-in failed: ${signInError.message}`);
+      }
+      accessToken = signInData.session?.access_token ?? null;
+    }
+    assert(accessToken, "Signup did not create a session for onboarding");
+
+    const unauthenticated = await fetch(`${baseUrl}/api/onboarding/complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: "00000000-0000-4000-8000-000000000001",
+        userInfo: {
+          firstName: "Victim",
+          lastName: "User",
+          email: "victim@example.test",
+        },
+        companyInfo: {
+          name: "Stolen Workspace",
+          industry: "Technology",
+          size: "1-10 employees",
+        },
+      }),
+    });
+    assert(
+      unauthenticated.status === 401,
+      `Unauthenticated onboarding must be rejected, got ${unauthenticated.status}`,
+    );
 
     const payload = {
       userId,
@@ -148,10 +181,33 @@ async function main() {
       ],
     };
 
+    const { password: _signupPassword, ...userInfo } = payload.userInfo;
+    const safePayload = { ...payload, userInfo };
+
+    const mismatched = await fetch(`${baseUrl}/api/onboarding/complete`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        ...safePayload,
+        userId: "00000000-0000-4000-8000-000000000099",
+        userInfo: { ...userInfo, email: "other-owner@example.test" },
+      }),
+    });
+    assert(
+      mismatched.status === 403,
+      `Mismatched onboarding identity must be rejected, got ${mismatched.status}`,
+    );
+
     const firstResponse = await fetch(`${baseUrl}/api/onboarding/complete`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(safePayload),
     });
     const firstResult = await firstResponse.json().catch(() => ({}));
     assert(
@@ -169,11 +225,14 @@ async function main() {
 
     const retryResponse = await fetch(`${baseUrl}/api/onboarding/complete`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({
-        ...payload,
+        ...safePayload,
         companyInfo: {
-          ...payload.companyInfo,
+          ...safePayload.companyInfo,
           name: retryCompanyName,
         },
       }),

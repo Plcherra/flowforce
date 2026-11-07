@@ -13,6 +13,10 @@ import { supabaseAdmin } from "../../_server/supabaseAdmin"; // pragma: allowlis
 import { createServerLogger } from "../../_server/utils/logger";
 import { buildOnboardingCompanyPayload } from "@/lib/theme/companySavePayload";
 import { withBasicOpsPackFlags } from "@/config/packCatalog";
+import {
+  authorizeOnboardingCaller,
+  type OnboardingGetUser,
+} from "./authorizeOnboarding";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -162,12 +166,30 @@ const jsonError = (
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
+const sessionUserFromToken: OnboardingGetUser = async (token) => {
+  const { data, error } = await supabaseAdmin.auth.getUser(token); // pragma: allowlist secret
+  if (error || !data.user?.id) return { user: null };
+  const metadata = data.user.user_metadata;
+  return {
+    user: {
+      id: data.user.id,
+      email: data.user.email ?? null,
+      user_metadata:
+        metadata && typeof metadata === "object" && !Array.isArray(metadata)
+          ? (metadata as Record<string, unknown>)
+          : {},
+    },
+  };
+};
+
+export async function handleOnboardingComplete(
+  request: Request,
+  getUser: OnboardingGetUser = sessionUserFromToken,
+) {
   const requestId = randomUUID();
 
   try {
     const body = readObject(await request.json());
-    const userId = readString(body, "userId");
     const userInfo = readObject(body.userInfo);
     const companyInfo = readObject(body.companyInfo);
     const template = readObject(body.template);
@@ -177,51 +199,30 @@ export async function POST(request: Request) {
     const customRoles = transformRolesForDatabase(body.customRoles);
     const positions = transformPositionsForDatabase(body.positions);
 
-    const email = readString(userInfo, "email").trim().toLowerCase();
     const firstName = readString(userInfo, "firstName").trim();
     const lastName = readString(userInfo, "lastName").trim();
     const companyName = readString(companyInfo, "name").trim();
     const companyIndustry = readString(companyInfo, "industry").trim();
     const companySize = readString(companyInfo, "size").trim();
 
-    if (
-      !userId ||
-      !email ||
-      !firstName ||
-      !lastName ||
-      !companyName ||
-      !companyIndustry ||
-      !companySize
-    ) {
+    const caller = await authorizeOnboardingCaller({
+      authorizationHeader: request.headers.get("authorization"),
+      bodyUserId: readString(body, "userId"),
+      bodyEmail: readString(userInfo, "email"),
+      getUser,
+    });
+
+    if (caller.ok === false) {
+      return jsonError(caller.message, caller.status, undefined, requestId);
+    }
+
+    const userId = caller.userId;
+    const email = caller.email;
+
+    if (!firstName || !lastName || !companyName || !companyIndustry || !companySize) {
       return jsonError(
         "Missing required onboarding fields.",
         400,
-        undefined,
-        requestId,
-      );
-    }
-
-    const { data: userResult, error: userError } =
-      await supabaseAdmin.auth.admin.getUserById(userId); // pragma: allowlist secret
-
-    if (userError || !userResult?.user) {
-      logger.warn("Unable to verify onboarding user", {
-        error: userError,
-        requestId,
-        context: { userId },
-      });
-      return jsonError(
-        "Unable to verify account before onboarding.",
-        401,
-        publicErrorDetails(userError),
-        requestId,
-      );
-    }
-
-    if (userResult.user.email?.toLowerCase() !== email) {
-      return jsonError(
-        "Onboarding email does not match created account.",
-        403,
         undefined,
         requestId,
       );
@@ -335,7 +336,7 @@ export async function POST(request: Request) {
     const { error: metadataError } =
       await supabaseAdmin.auth.admin.updateUserById(userId, { // pragma: allowlist secret
         user_metadata: {
-          ...userResult.user.user_metadata,
+          ...caller.user.user_metadata,
           first_name: firstName,
           last_name: lastName,
           phone: ownerPhone,
@@ -368,4 +369,8 @@ export async function POST(request: Request) {
       requestId,
     );
   }
+}
+
+export async function POST(request: Request) {
+  return handleOnboardingComplete(request);
 }
