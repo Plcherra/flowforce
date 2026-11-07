@@ -653,7 +653,30 @@
     "lowStockDetail": "{{count}} artículos están en el mínimo o por debajo.",
     "openPurchasesDetail": "{{count}} compras abiertas suman {{value}}.",
     "overstaffedDetail": "{{count}} turnos superan el personal previsto en el motor de costos.",
-    "viewAllUpdates": "Ver todas las novedades ({{count}})"
+    "viewAllUpdates": "Ver todas las novedades ({{count}})",
+    "overview": {
+      "myShiftTitle": "Mi turno de hoy",
+      "myShiftEmpty": "No tienes turno hoy.",
+      "myShiftLoading": "Buscando tu turno.",
+      "myShiftError": "No pudimos cargar tu turno.",
+      "myShiftOpen": "Abrir el horario",
+      "myListsTitle": "Mis listas pendientes",
+      "myListsEmpty": "No hay listas pendientes para tu rol hoy.",
+      "myListsLoading": "Buscando tus listas.",
+      "myListsError": "No pudimos cargar tus listas.",
+      "openList": "Abrir lista",
+      "coverageTitle": "Cobertura de hoy",
+      "coverageEmpty": "No hay turnos publicados para hoy.",
+      "coverageFilled": "Turnos cubiertos: {{count}}",
+      "coverageOpen": "Turnos abiertos: {{count}}",
+      "coverageLoading": "Buscando los turnos de hoy.",
+      "coverageError": "No pudimos cargar los turnos de hoy.",
+      "listStatusTitle": "Listas atrasadas o completadas",
+      "listStatusBody": "Listas atrasadas: {{overdue}}. Listas completadas: {{completed}}.",
+      "listStatusLoading": "Buscando listas.",
+      "listStatusError": "No pudimos cargar el estado de las listas.",
+      "myShiftWhen": "{{title}} · {{when}}"
+    }
   },
   "registration": {
     "title": "Registro de Empresa",
@@ -1147,7 +1170,128 @@
         "title": "Plantilla"
       }
     },
-    "startsOnOperations": "Empiezas en Operaciones. Equipo, Perspectivas y Stock siguen apagados hasta que los añadas desde Paquetes."
+    "startsOnOperations": "Empiezas en Operaciones. Equipo, Perspectivas y Stock siguen apagados hasta que los añadas desde Paquetes.",
+    "account": {
+      "progress": "Paso {{step}} de {{total}}",
+      "next": "Continuar",
+      "back": "Atrás",
+      "skip": "Omitir por ahora",
+      "finish": "Ir al resumen",
+      "cancel": "Cancelar",
+      "signup": {
+        "title": "Crear cuenta",
+        "description": "Crea la cuenta con la que vas a usar FlowForce.",
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "email": "Correo",
+        "password": "Contraseña",
+        "passwordHint": "Usa al menos 8 caracteres."
+      },
+      "company": {
+        "title": "Datos de la empresa",
+        "description": "Añade el nombre, el tipo de negocio, la zona horaria y el idioma. El logo es opcional.",
+        "name": "Nombre de la empresa",
+        "businessType": "Tipo de negocio",
+        "choose": "Elige un tipo de negocio",
+        "timezone": "Zona horaria",
+        "locale": "Idioma",
+        "logo": "Logo",
+        "logoHint": "Opcional. PNG, JPEG o SVG de hasta 2 MB."
+      },
+      "business": {
+        "restaurant": "Restaurante",
+        "cafe": "Cafetería",
+        "retail": "Comercio",
+        "other": "Otro"
+      },
+      "locale": {
+        "en": "Inglés",
+        "es": "Español",
+        "pt": "Portugués",
+        "fr": "Francés",
+        "it": "Italiano",
+        "de": "Alemán"
+      },
+      "departments": {
+        "title": "Departamentos y roles",
+        "description": "Empieza con la plantilla de tu tipo de negocio. Desactiva los roles que no necesites."
+      },
+      "department": {
+        "foh": "Sala",
+        "boh": "Cocina",
+        "floor": "Tienda",
+        "back": "Almacén",
+        "team": "Equipo"
+      },
+      "role": {
+        "barista": "Barista",
+        "cashier": "Cajero",
+        "server": "Camarero",
+        "cook": "Cocinero",
+        "prep": "Preparación",
+        "stocker": "Reponedor",
+        "receiver": "Recepcionista de mercancía",
+        "teammate": "Compañero"
+      },
+      "permissions": {
+        "title": "Permisos",
+        "description": "Cada departamento tiene un valor sugerido. El rol empieza con ese valor. Si cambias el rol, gana el rol.",
+        "departmentDefault": "Valor del departamento",
+        "overrides": "Sustituye al departamento",
+        "classNote": "Un rol que puede editar el horario, ver listas terminadas, invitar personas o ver informes usa la clase de encargado. Los demás usan la clase de personal."
+      },
+      "permission": {
+        "viewOwnSchedules": "Ver mi horario",
+        "formsSubmit": "Completar listas",
+        "scheduleEdit": "Editar el horario",
+        "formsRead": "Ver listas terminadas",
+        "manageUsers": "Invitar personas",
+        "reportsView": "Ver informes"
+      },
+      "store": {
+        "title": "Primera tienda",
+        "description": "Añade el primer local y el horario de apertura.",
+        "name": "Nombre del local",
+        "opens": "Abre",
+        "closes": "Cierra"
+      },
+      "invite": {
+        "title": "Invita a tu equipo",
+        "description": "Opcional. Puedes invitar personas más tarde desde el directorio.",
+        "email": "Correo",
+        "role": "Rol",
+        "add": "Añadir otra persona",
+        "remove": "Quitar"
+      },
+      "starter": {
+        "title": "Primer turno o listas iniciales",
+        "description": "Opcional. Puedes añadir un turno o listas más tarde.",
+        "skip": "Omitir este paso",
+        "shift": "Añadir un turno sin publicar para mañana",
+        "shiftHint": "El turno usa tu primer rol y el horario del local. Sigue sin publicar hasta que lo publiques en el horario.",
+        "lists": "Añadir listas de apertura y cierre",
+        "listsHint": "Dos listas para tu primer rol. Quien tenga ese rol en el horario las ve en el resumen.",
+        "openingTitle": "Lista de apertura",
+        "closingTitle": "Lista de cierre",
+        "openingItem1": "Abrir y recorrer el local",
+        "openingItem2": "Comprobar que las estaciones están listas",
+        "openingItem3": "Anotar lo que necesita un encargado",
+        "closingItem1": "Limpiar las estaciones",
+        "closingItem2": "Cerrar la caja",
+        "closingItem3": "Cerrar y anotar las sobras",
+        "shiftTitle": "Primer turno"
+      },
+      "error": {
+        "name": "Añade tu nombre y apellido.",
+        "email": "Introduce un correo válido.",
+        "password": "Usa al menos 8 caracteres.",
+        "company": "Añade el nombre, el tipo de negocio, la zona horaria y el idioma.",
+        "role": "Activa al menos un rol.",
+        "store": "Añade el nombre del local y el horario.",
+        "invite": "Revisa el correo de la invitación o déjalo en blanco para omitir.",
+        "failed": "No pudimos terminar la configuración. Inténtalo de nuevo."
+      }
+    }
   },
   "footer": {
     "about": "Acerca de",
@@ -3401,7 +3545,8 @@
     "preparingWorkspace": "Preparando tu espacio de trabajo...",
     "loadingProfile": "Cargando tu perfil...",
     "loadingPage": "Cargando la página...",
-    "metaDescription": "Plataforma de operaciones empresariales de FlowForce."
+    "metaDescription": "Plataforma de operaciones empresariales de FlowForce.",
+    "companyLogo": "Logo de la empresa"
   },
   "nav": {
     "addNew": "Añadir",
@@ -5930,7 +6075,8 @@
     "providerQuickbooksDescription": "Sincronización de contabilidad y nómina",
     "providerXeroDescription": "Exportaciones contables y conciliación",
     "providerAdpDescription": "Importación de nómina y horas reales",
-    "generatedWorkspace": "Espacio de trabajo generado automáticamente"
+    "generatedWorkspace": "Espacio de trabajo generado automáticamente",
+    "standardTheme": "FlowForce usa un solo tema estándar."
   },
   "roles": {
     "aiSuggestions": "Sugerencias de IA",

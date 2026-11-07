@@ -238,7 +238,30 @@
     "lowStockDetail": "{{count}} articoli sono alla soglia o sotto.",
     "openPurchasesDetail": "{{count}} acquisti aperti per un totale di {{value}}.",
     "overstaffedDetail": "{{count}} turni superano l'organico previsto nel motore dei costi.",
-    "viewAllUpdates": "Vedi tutti gli aggiornamenti ({{count}})"
+    "viewAllUpdates": "Vedi tutti gli aggiornamenti ({{count}})",
+    "overview": {
+      "myShiftTitle": "Il mio turno oggi",
+      "myShiftEmpty": "Oggi non hai un turno.",
+      "myShiftLoading": "Cerco il tuo turno.",
+      "myShiftError": "Non siamo riusciti a caricare il tuo turno.",
+      "myShiftOpen": "Apri il piano",
+      "myListsTitle": "Le mie liste in scadenza",
+      "myListsEmpty": "Nessuna lista è in scadenza per il tuo ruolo oggi.",
+      "myListsLoading": "Cerco le tue liste.",
+      "myListsError": "Non siamo riusciti a caricare le tue liste.",
+      "openList": "Apri lista",
+      "coverageTitle": "Copertura di oggi",
+      "coverageEmpty": "Nessun turno è pubblicato per oggi.",
+      "coverageFilled": "Turni coperti: {{count}}",
+      "coverageOpen": "Turni aperti: {{count}}",
+      "coverageLoading": "Cerco i turni di oggi.",
+      "coverageError": "Non siamo riusciti a caricare i turni di oggi.",
+      "listStatusTitle": "Liste in ritardo o completate",
+      "listStatusBody": "Liste in ritardo: {{overdue}}. Liste completate: {{completed}}.",
+      "listStatusLoading": "Cerco le liste.",
+      "listStatusError": "Non siamo riusciti a caricare lo stato delle liste.",
+      "myShiftWhen": "{{title}} · {{when}}"
+    }
   },
   "navigation": {
     "communication": "Comunicazione",
@@ -1168,7 +1191,128 @@
       "templateBadge": "Modello",
       "title": "Personalizza le sezioni del tuo spazio di lavoro"
     },
-    "startsOnOperations": "Inizi con Operazioni. Team, Approfondimenti e Scorte restano disattivati finché non li aggiungi da Pacchetti."
+    "startsOnOperations": "Inizi con Operazioni. Team, Approfondimenti e Scorte restano disattivati finché non li aggiungi da Pacchetti.",
+    "account": {
+      "progress": "Passo {{step}} di {{total}}",
+      "next": "Continua",
+      "back": "Indietro",
+      "skip": "Salta per ora",
+      "finish": "Vai alla panoramica",
+      "cancel": "Annulla",
+      "signup": {
+        "title": "Crea account",
+        "description": "Crea l'account che userai per FlowForce.",
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "E-mail",
+        "password": "Password",
+        "passwordHint": "Usa almeno 8 caratteri."
+      },
+      "company": {
+        "title": "Dati dell'azienda",
+        "description": "Aggiungi nome, tipo di attività, fuso orario e lingua. Il logo è facoltativo.",
+        "name": "Nome azienda",
+        "businessType": "Tipo di attività",
+        "choose": "Scegli un tipo di attività",
+        "timezone": "Fuso orario",
+        "locale": "Lingua",
+        "logo": "Logo",
+        "logoHint": "Facoltativo. PNG, JPEG o SVG fino a 2 MB."
+      },
+      "business": {
+        "restaurant": "Ristorante",
+        "cafe": "Caffè",
+        "retail": "Negozio",
+        "other": "Altro"
+      },
+      "locale": {
+        "en": "Inglese",
+        "es": "Spagnolo",
+        "pt": "Portoghese",
+        "fr": "Francese",
+        "it": "Italiano",
+        "de": "Tedesco"
+      },
+      "departments": {
+        "title": "Reparti e ruoli",
+        "description": "Parti dal modello del tuo tipo di attività. Disattiva i ruoli che non ti servono."
+      },
+      "department": {
+        "foh": "Sala",
+        "boh": "Cucina",
+        "floor": "Negozio",
+        "back": "Magazzino",
+        "team": "Team"
+      },
+      "role": {
+        "barista": "Barista",
+        "cashier": "Cassiere",
+        "server": "Cameriere",
+        "cook": "Cuoco",
+        "prep": "Preparazione",
+        "stocker": "Rifornitore",
+        "receiver": "Ricevimento merci",
+        "teammate": "Collega"
+      },
+      "permissions": {
+        "title": "Permessi",
+        "description": "Ogni reparto ha un valore suggerito. Il ruolo parte da quel valore. Se modifichi il ruolo, vale il ruolo.",
+        "departmentDefault": "Valore del reparto",
+        "overrides": "Sostituisce il reparto",
+        "classNote": "Un ruolo che può modificare il piano, vedere le liste concluse, invitare persone o vedere i report usa la classe responsabile. Gli altri usano la classe staff."
+      },
+      "permission": {
+        "viewOwnSchedules": "Vedi il mio piano",
+        "formsSubmit": "Completa le liste",
+        "scheduleEdit": "Modifica il piano",
+        "formsRead": "Vedi le liste concluse",
+        "manageUsers": "Invita persone",
+        "reportsView": "Vedi i report"
+      },
+      "store": {
+        "title": "Primo negozio",
+        "description": "Aggiungi la prima sede e l'orario di apertura.",
+        "name": "Nome del negozio",
+        "opens": "Apre",
+        "closes": "Chiude"
+      },
+      "invite": {
+        "title": "Invita il team",
+        "description": "Facoltativo. Puoi invitare persone più tardi dalla rubrica.",
+        "email": "E-mail",
+        "role": "Ruolo",
+        "add": "Aggiungi un'altra persona",
+        "remove": "Rimuovi"
+      },
+      "starter": {
+        "title": "Primo turno o liste iniziali",
+        "description": "Facoltativo. Puoi aggiungere un turno o delle liste più tardi.",
+        "skip": "Salta questo passo",
+        "shift": "Aggiungi un turno non pubblicato per domani",
+        "shiftHint": "Il turno usa il primo ruolo e l'orario del negozio. Resta non pubblicato finché non lo pubblichi nel piano.",
+        "lists": "Aggiungi le liste di apertura e chiusura",
+        "listsHint": "Due liste per il primo ruolo. Chi è in turno con quel ruolo le vede nella panoramica.",
+        "openingTitle": "Lista di apertura",
+        "closingTitle": "Lista di chiusura",
+        "openingItem1": "Apri e fai il giro",
+        "openingItem2": "Controlla che le postazioni siano pronte",
+        "openingItem3": "Annota ciò che serve a un responsabile",
+        "closingItem1": "Pulisci le postazioni",
+        "closingItem2": "Chiudi la cassa",
+        "closingItem3": "Chiudi e annota gli avanzi",
+        "shiftTitle": "Primo turno"
+      },
+      "error": {
+        "name": "Aggiungi nome e cognome.",
+        "email": "Inserisci un'e-mail valida.",
+        "password": "Usa almeno 8 caratteri.",
+        "company": "Aggiungi nome, tipo di attività, fuso orario e lingua.",
+        "role": "Attiva almeno un ruolo.",
+        "store": "Aggiungi il nome del negozio e l'orario.",
+        "invite": "Controlla l'e-mail dell'invito o lasciala vuota per saltare.",
+        "failed": "Non siamo riusciti a completare la configurazione. Riprova."
+      }
+    }
   },
   "auth": {
     "businessPlatform": "Piattaforma Operazioni Aziendali",
@@ -3401,7 +3545,8 @@
     "preparingWorkspace": "Preparazione dell'area di lavoro...",
     "loadingProfile": "Caricamento del profilo...",
     "loadingPage": "Caricamento della pagina...",
-    "metaDescription": "Piattaforma di operazioni aziendali di FlowForce."
+    "metaDescription": "Piattaforma di operazioni aziendali di FlowForce.",
+    "companyLogo": "Logo aziendale"
   },
   "nav": {
     "addNew": "Aggiungi",
@@ -5930,7 +6075,8 @@
     "providerQuickbooksDescription": "Sincronizzazione di contabilità e buste paga",
     "providerXeroDescription": "Esportazioni contabili e riconciliazione",
     "providerAdpDescription": "Importazione di buste paga e ore effettive",
-    "generatedWorkspace": "Area di lavoro generata automaticamente"
+    "generatedWorkspace": "Area di lavoro generata automaticamente",
+    "standardTheme": "FlowForce usa un solo tema standard."
   },
   "roles": {
     "aiSuggestions": "Suggerimenti IA",

@@ -6,7 +6,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { AddNewSectionButton } from "@/app-shell/navigation/sidebar/AddNewSectionButton";
 import type { ProcessedNavigationSection } from "@/hooks/useNavigationData";
 import { cn } from "@/lib/utils";
 import { navItemLabel, navSectionLabel } from "./bottomNavDestinations";
@@ -16,7 +15,6 @@ interface BottomNavMoreSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sections: ProcessedNavigationSection[];
-  canManageSections: boolean;
   onSelect: (href: string) => void;
 }
 
@@ -24,7 +22,6 @@ export function BottomNavMoreSheet({
   open,
   onOpenChange,
   sections,
-  canManageSections,
   onSelect,
 }: BottomNavMoreSheetProps) {
   const { t } = useTranslation();
@@ -79,31 +76,11 @@ export function BottomNavMoreSheet({
                       </li>
                     );
                   })}
-                  {canManageSections ? (
-                    <li>
-                      <AddNewSectionButton
-                        category={sectionLabel}
-                        categoryKey={section.translationKey || "custom"}
-                        onNavigate={() => onOpenChange(false)}
-                      />
-                    </li>
-                  ) : null}
                 </ul>
               </section>
             );
           })}
 
-          {sections.length === 0 && canManageSections ? (
-            <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              <li>
-                <AddNewSectionButton
-                  category={t("navigation.custom", { defaultValue: "Custom" })}
-                  categoryKey="custom"
-                  onNavigate={() => onOpenChange(false)}
-                />
-              </li>
-            </ul>
-          ) : null}
         </div>
       </SheetContent>
     </Sheet>

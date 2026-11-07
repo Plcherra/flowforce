@@ -238,7 +238,30 @@
     "lowStockDetail": "{{count}} articles sont au seuil ou en dessous.",
     "openPurchasesDetail": "{{count}} achats ouverts totalisent {{value}}.",
     "overstaffedDetail": "{{count}} services dépassent l'effectif prévu dans le moteur de coûts.",
-    "viewAllUpdates": "Voir toutes les nouvelles ({{count}})"
+    "viewAllUpdates": "Voir toutes les nouvelles ({{count}})",
+    "overview": {
+      "myShiftTitle": "Mon service aujourd'hui",
+      "myShiftEmpty": "Vous n'avez pas de service aujourd'hui.",
+      "myShiftLoading": "Recherche de votre service.",
+      "myShiftError": "Impossible de charger votre service.",
+      "myShiftOpen": "Ouvrir le planning",
+      "myListsTitle": "Mes listes à faire",
+      "myListsEmpty": "Aucune liste n'est due pour votre rôle aujourd'hui.",
+      "myListsLoading": "Recherche de vos listes.",
+      "myListsError": "Impossible de charger vos listes.",
+      "openList": "Ouvrir la liste",
+      "coverageTitle": "Couverture d'aujourd'hui",
+      "coverageEmpty": "Aucun service n'est publié pour aujourd'hui.",
+      "coverageFilled": "Services pourvus : {{count}}",
+      "coverageOpen": "Services ouverts : {{count}}",
+      "coverageLoading": "Recherche des services du jour.",
+      "coverageError": "Impossible de charger les services du jour.",
+      "listStatusTitle": "Listes en retard ou terminées",
+      "listStatusBody": "Listes en retard : {{overdue}}. Listes terminées : {{completed}}.",
+      "listStatusLoading": "Recherche des listes.",
+      "listStatusError": "Impossible de charger l'état des listes.",
+      "myShiftWhen": "{{title}} · {{when}}"
+    }
   },
   "navigation": {
     "communication": "Communication",
@@ -1168,7 +1191,128 @@
       "templateBadge": "Modèle",
       "title": "Personnalisez les sections de votre espace de travail"
     },
-    "startsOnOperations": "Vous commencez sur Opérations. Équipe, Aperçus et Stock restent désactivés jusqu'à ce que vous les ajoutiez dans Packs."
+    "startsOnOperations": "Vous commencez sur Opérations. Équipe, Aperçus et Stock restent désactivés jusqu'à ce que vous les ajoutiez dans Packs.",
+    "account": {
+      "progress": "Étape {{step}} sur {{total}}",
+      "next": "Continuer",
+      "back": "Retour",
+      "skip": "Passer pour l'instant",
+      "finish": "Aller à l'aperçu",
+      "cancel": "Annuler",
+      "signup": {
+        "title": "Créer un compte",
+        "description": "Créez le compte que vous utiliserez pour FlowForce.",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "E-mail",
+        "password": "Mot de passe",
+        "passwordHint": "Utilisez au moins 8 caractères."
+      },
+      "company": {
+        "title": "Informations de l'entreprise",
+        "description": "Ajoutez le nom, le type d'activité, le fuseau horaire et la langue. Le logo est facultatif.",
+        "name": "Nom de l'entreprise",
+        "businessType": "Type d'activité",
+        "choose": "Choisissez un type d'activité",
+        "timezone": "Fuseau horaire",
+        "locale": "Langue",
+        "logo": "Logo",
+        "logoHint": "Facultatif. PNG, JPEG ou SVG jusqu'à 2 Mo."
+      },
+      "business": {
+        "restaurant": "Restaurant",
+        "cafe": "Café",
+        "retail": "Commerce",
+        "other": "Autre"
+      },
+      "locale": {
+        "en": "Anglais",
+        "es": "Espagnol",
+        "pt": "Portugais",
+        "fr": "Français",
+        "it": "Italien",
+        "de": "Allemand"
+      },
+      "departments": {
+        "title": "Départements et rôles",
+        "description": "Partez du modèle de votre type d'activité. Désactivez les rôles dont vous n'avez pas besoin."
+      },
+      "department": {
+        "foh": "Salle",
+        "boh": "Cuisine",
+        "floor": "Magasin",
+        "back": "Réserve",
+        "team": "Équipe"
+      },
+      "role": {
+        "barista": "Barista",
+        "cashier": "Caissier",
+        "server": "Serveur",
+        "cook": "Cuisinier",
+        "prep": "Préparation",
+        "stocker": "Réassort",
+        "receiver": "Réception",
+        "teammate": "Coéquipier"
+      },
+      "permissions": {
+        "title": "Autorisations",
+        "description": "Chaque département a une suggestion. Le rôle part de cette suggestion. Si vous modifiez le rôle, le rôle l'emporte.",
+        "departmentDefault": "Suggestion du département",
+        "overrides": "Remplace le département",
+        "classNote": "Un rôle qui peut modifier le planning, voir les listes terminées, inviter des personnes ou voir les rapports utilise la classe responsable. Les autres utilisent la classe équipe."
+      },
+      "permission": {
+        "viewOwnSchedules": "Voir mon planning",
+        "formsSubmit": "Compléter les listes",
+        "scheduleEdit": "Modifier le planning",
+        "formsRead": "Voir les listes terminées",
+        "manageUsers": "Inviter des personnes",
+        "reportsView": "Voir les rapports"
+      },
+      "store": {
+        "title": "Premier magasin",
+        "description": "Ajoutez le premier lieu et les heures d'ouverture.",
+        "name": "Nom du magasin",
+        "opens": "Ouvre",
+        "closes": "Ferme"
+      },
+      "invite": {
+        "title": "Invitez votre équipe",
+        "description": "Facultatif. Vous pourrez inviter des personnes plus tard depuis l'annuaire.",
+        "email": "E-mail",
+        "role": "Rôle",
+        "add": "Ajouter une autre personne",
+        "remove": "Retirer"
+      },
+      "starter": {
+        "title": "Premier service ou listes de départ",
+        "description": "Facultatif. Vous pourrez ajouter un service ou des listes plus tard.",
+        "skip": "Passer cette étape",
+        "shift": "Ajouter un service non publié pour demain",
+        "shiftHint": "Le service utilise votre premier rôle et les heures du magasin. Il reste non publié tant que vous ne le publiez pas dans le planning.",
+        "lists": "Ajouter les listes d'ouverture et de fermeture",
+        "listsHint": "Deux listes pour votre premier rôle. Les personnes planifiées sur ce rôle les voient dans l'aperçu.",
+        "openingTitle": "Liste d'ouverture",
+        "closingTitle": "Liste de fermeture",
+        "openingItem1": "Ouvrir et faire le tour",
+        "openingItem2": "Vérifier que les postes sont prêts",
+        "openingItem3": "Noter ce qui demande un responsable",
+        "closingItem1": "Nettoyer les postes",
+        "closingItem2": "Fermer la caisse",
+        "closingItem3": "Fermer et noter les restes",
+        "shiftTitle": "Premier service"
+      },
+      "error": {
+        "name": "Ajoutez votre prénom et votre nom.",
+        "email": "Saisissez un e-mail valide.",
+        "password": "Utilisez au moins 8 caractères.",
+        "company": "Ajoutez le nom, le type d'activité, le fuseau horaire et la langue.",
+        "role": "Activez au moins un rôle.",
+        "store": "Ajoutez le nom du magasin et les heures.",
+        "invite": "Vérifiez l'e-mail d'invitation ou laissez-le vide pour passer.",
+        "failed": "La configuration n'a pas abouti. Réessayez."
+      }
+    }
   },
   "auth": {
     "businessPlatform": "Plateforme d'Opérations Commerciales",
@@ -3401,7 +3545,8 @@
     "preparingWorkspace": "Préparation de votre espace de travail...",
     "loadingProfile": "Chargement de votre profil...",
     "loadingPage": "Chargement de la page...",
-    "metaDescription": "Plateforme d'opérations d'entreprise propulsée par FlowForce."
+    "metaDescription": "Plateforme d'opérations d'entreprise propulsée par FlowForce.",
+    "companyLogo": "Logo de l'entreprise"
   },
   "nav": {
     "addNew": "Ajouter",
@@ -5930,7 +6075,8 @@
     "providerQuickbooksDescription": "Synchronisation de la comptabilité et de la paie",
     "providerXeroDescription": "Exports comptables et rapprochement",
     "providerAdpDescription": "Import de la paie et des heures réelles",
-    "generatedWorkspace": "Espace de travail généré automatiquement"
+    "generatedWorkspace": "Espace de travail généré automatiquement",
+    "standardTheme": "FlowForce utilise un seul thème standard."
   },
   "roles": {
     "aiSuggestions": "Suggestions d'IA",

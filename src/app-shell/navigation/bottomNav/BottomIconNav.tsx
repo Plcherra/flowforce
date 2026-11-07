@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@/lib/router-adapter";
 import { useNavigationData } from "@/hooks/useNavigationData";
@@ -49,7 +49,6 @@ export function BottomIconNav() {
   const showMore = shouldShowMoreNav(moreSections, Boolean(canManageSections));
   const moreActive = isMoreNavActive(moreSections);
   const moreLabel = t("navigation.more", { defaultValue: "More" });
-  const addLabel = t("navigation.addNew", { defaultValue: "Add new" });
   const groups = groupWideBottomNav(sections, isActive("/dashboard") || isActive("/app/dashboard"));
   const primaryIds = new Set(primary.map((item) => item.id));
 
@@ -117,17 +116,6 @@ export function BottomIconNav() {
               </div>
             );
           })}
-          {canManageSections ? (
-            <BottomIconButton
-              label={addLabel}
-              active={false}
-              expanded={moreOpen}
-              className="hidden lg:flex"
-              onClick={() => setMoreOpen(true)}
-            >
-              <Plus className="h-6 w-6" aria-hidden="true" />
-            </BottomIconButton>
-          ) : null}
           {showMore ? (
             <BottomIconButton
               label={moreLabel}
@@ -156,7 +144,6 @@ export function BottomIconNav() {
         open={moreOpen}
         onOpenChange={setMoreOpen}
         sections={moreSections}
-        canManageSections={Boolean(canManageSections)}
         onSelect={(href) => {
           setMoreOpen(false);
           navigate(href);

@@ -14,13 +14,7 @@ import { Loader2, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
 import { LogoEditorDialog } from "./LogoEditorDialog";
-import {
-  applyTheme,
-  resolveThemeName,
-  THEME_NAMES,
-  THEME_STORAGE_KEY,
-  type ThemeName,
-} from "@/lib/theme/applyTheme";
+import { applyTheme, THEME_STORAGE_KEY } from "@/lib/theme/applyTheme";
 import { useEffect, useState } from "react";
 import { useGeneralSettings } from "../hooks/useGeneralSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
@@ -49,17 +43,10 @@ export function GeneralSettingsPanel() {
   } = useGeneralSettings(system);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSource, setEditorSource] = useState<string | null>(null);
-  const [theme, setTheme] = useState<ThemeName>("flowforce");
-
   useEffect(() => {
-    setTheme(resolveThemeName(localStorage.getItem(THEME_STORAGE_KEY)));
+    applyTheme("flowforce");
+    localStorage.setItem(THEME_STORAGE_KEY, "flowforce");
   }, []);
-
-  const chooseTheme = (next: ThemeName) => {
-    setTheme(next);
-    applyTheme(next);
-    localStorage.setItem(THEME_STORAGE_KEY, next);
-  };
 
   if (globalError) {
     return <ErrorState message={globalError.message} />;
@@ -88,32 +75,9 @@ export function GeneralSettingsPanel() {
         <CardDescription>{t("settings.updateThePublicBrandingAndContactDetailsFor")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label id="theme-switch-label">{t("settings.theme")}</Label>
-          <p className="text-xs text-muted-foreground">{t("settings.storedInThisBrowserItDoesNotChange")}</p>
-          <div
-            role="radiogroup"
-            aria-labelledby="theme-switch-label"
-            className="flex flex-wrap gap-2"
-          >
-            {THEME_NAMES.map((name) => (
-              <Button
-                key={name}
-                type="button"
-                role="radio"
-                aria-checked={theme === name}
-                variant={theme === name ? "default" : "outline"}
-                onClick={() => chooseTheme(name)}
-              >
-                {name === "flowforce"
-                  ? t("literals.flowforce")
-                  : name === "light"
-                    ? t("literals.light")
-                    : t("literals.dark")}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <p className="text-sm text-muted-foreground" data-testid="settings-standard-theme">
+          {t("settings.standardTheme")}
+        </p>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="companyName">{t("settings.companyName")}</Label>

@@ -12,8 +12,10 @@ import {
 import { BusinessTemplate, OnboardingPosition } from "@/types/templates";
 import { useProfile } from "@/hooks/useProfile";
 import { logger } from "@/utils/logger";
+import type { AccountWorkspaceInput } from "@/features/onboarding/account/accountSetupModel";
+import { sendAccountInvites, uploadAccountLogo } from "@/features/onboarding/account/accountSetupClient";
 
-interface RegistrationData {
+export interface RegistrationData {
   userInfo: UserInfo;
   companyInfo: CompanyInfo;
   branding: Branding;
@@ -22,7 +24,17 @@ interface RegistrationData {
   customRoles: OnboardingRole[];
   positions: OnboardingPosition[];
   orgSetup?: unknown;
+  workspace?: AccountWorkspaceInput;
+  invites?: { email: string; roleKey: string }[];
 }
+
+type WorkspaceRoleRef = {
+  key: string;
+  id: string;
+  name: string;
+  departmentId: string | null;
+  level: "staff" | "manager";
+};
 
 interface RegistrationError {
   type: "auth" | "validation" | "database" | "network";
@@ -125,6 +137,10 @@ export function useCompanyRegistration() {
       companyId?: string;
       message?: string;
       details?: { message?: string } | string;
+      workspace?: {
+        locationId?: string | null;
+        roles?: WorkspaceRoleRef[];
+      } | null;
     };
 
     if (!response.ok) {
@@ -142,7 +158,11 @@ export function useCompanyRegistration() {
       throw new Error("Company setup did not return a company id.");
     }
 
-    return result.companyId;
+    return {
+      companyId: result.companyId,
+      locationId: result.workspace?.locationId ?? null,
+      roles: result.workspace?.roles ?? [],
+    };
   };
 
   const updateUserMetadata = async (
@@ -247,14 +267,34 @@ export function useCompanyRegistration() {
       return { userId, companyId: null, sessionActive: false };
     }
 
-    const companyId = await completeOnboardingOnServer(
+    const setup = await completeOnboardingOnServer(
       data,
       session.user.id,
       session.access_token,
     );
-    await updateUserMetadata(data, companyId);
+    await updateUserMetadata(data, setup.companyId);
+    if (data.branding.logo) {
+      try {
+        await uploadAccountLogo(setup.companyId, data.branding.logo);
+      } catch (error) {
+        logger.warn("Unable to store the company logo during signup", {
+          error,
+          tags: ["warning"],
+        });
+      }
+    }
+    if (data.invites && data.invites.length > 0) {
+      try {
+        await sendAccountInvites(data.invites, setup);
+      } catch (error) {
+        logger.warn("Unable to send onboarding invites", {
+          error,
+          tags: ["warning"],
+        });
+      }
+    }
 
-    return { userId, companyId, sessionActive: Boolean(session) };
+    return { userId, companyId: setup.companyId, sessionActive: Boolean(session) };
   };
 
   const handleRegistrationError = (error: unknown): RegistrationError => {

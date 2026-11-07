@@ -18,10 +18,7 @@ type ThemeRoot = {
   setAttribute: (name: string, value: string) => void;
 };
 
-export function resolveThemeName(value: string | null | undefined): ThemeName {
-  if (value === "flowforce" || value === "light" || value === "dark") {
-    return value;
-  }
+export function resolveThemeName(_value: string | null | undefined): ThemeName {
   return "flowforce";
 }
 
@@ -60,16 +57,10 @@ export function applyTheme(
 
 export const themeBootScript = `(function(){
   var key="flowforce-theme";
-  function applyTheme(value){
-    var theme=value==="flowforce"||value==="light"||value==="dark"?value:"flowforce";
-    var root=document.documentElement;
-    root.setAttribute("data-theme",theme);
-    root.classList.remove("dark");
-    if(theme==="dark") root.classList.add("dark");
-    var color=theme==="dark"?"#020817":"#ffffff";
-    var meta=document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute("content",color);
-  }
-  try { applyTheme(localStorage.getItem(key)); }
-  catch(e) { applyTheme(null); }
+  var root=document.documentElement;
+  root.setAttribute("data-theme","flowforce");
+  root.classList.remove("dark");
+  var meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content","#ffffff");
+  try { localStorage.setItem(key,"flowforce"); } catch(e) {}
 })();`;
