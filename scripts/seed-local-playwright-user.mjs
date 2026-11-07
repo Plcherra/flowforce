@@ -23,6 +23,48 @@ const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const companyId = randomUUID();
 const userId = randomUUID();
 const roleId = randomUUID();
+const staffRoleId = randomUUID();
+const locationId = randomUUID();
+
+const ownerPermissions = Object.fromEntries(
+  [
+    "viewOwnProfile",
+    "viewTeamProfiles",
+    "editOwnProfile",
+    "editTeamProfiles",
+    "schedule.view",
+    "schedule.edit",
+    "schedule.create",
+    "schedule.delete",
+    "schedule.grant",
+    "viewOwnSchedules",
+    "viewTeamSchedules",
+    "editSchedules",
+    "viewOwnTasks",
+    "viewTeamTasks",
+    "editTasks",
+    "tasks.view",
+    "tasks.update",
+    "tasks.delete",
+    "tasks.custom.create_self",
+    "tasks.custom.create_others",
+    "manageUsers",
+    "systemSettings",
+    "createForms",
+    "manageForms",
+    "approveFormSubmissions",
+    "forms.submit",
+    "managePositions",
+    "viewAIInsights",
+    "managePayments",
+    "billing.view",
+    "billing.manage",
+    "admin.settings",
+    "manageInventory",
+    "inventory.view",
+    "reports.view",
+  ].map((key) => [key, true]),
+);
 const email = `playwright-${runId}@example.test`;
 const password = `FlowForce-${runId}!`;
 
@@ -72,11 +114,33 @@ await insert("company_roles", [
     company_id: companyId,
     name: "Owner",
     description: "Playwright owner role",
-    hierarchy_level: 1,
-    permissions: { all: true },
-    is_system_role: true,
+      hierarchy_level: 1,
+      product_level: "owner",
+      permissions: ownerPermissions,
+      is_system_role: true,
+      is_active: true,
+      created_by: authUserId,
+    },
+    {
+      id: staffRoleId,
+      company_id: companyId,
+      name: "Staff",
+      description: "Playwright staff class",
+      hierarchy_level: 4,
+      product_level: "staff",
+      permissions: { "forms.submit": true, viewOwnTasks: true },
+      is_system_role: true,
+      is_active: true,
+      created_by: authUserId,
+    },
+  ]);
+
+await insert("inv_locations", [
+  {
+    id: locationId,
+    company_id: companyId,
+    name: "Playwright Store",
     is_active: true,
-    created_by: authUserId,
   },
 ]);
 
