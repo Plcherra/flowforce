@@ -15,7 +15,7 @@ export function usePhoneScheduleLayout() {
   const [isPhone, setIsPhone] = useState(false);
 
   useLayoutEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)");
+    const query = window.matchMedia("(max-width: 768px)");
     const update = () => setIsPhone(query.matches);
     update();
     query.addEventListener("change", update);
