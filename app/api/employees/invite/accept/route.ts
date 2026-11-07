@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "../../../_server/supabaseAdmin";
 import { createServerLogger } from "../../../_server/utils/logger";
+import { enrollEmployeeOnboarding } from "../../../_server/enrollEmployeeOnboarding";
 import { applyInviteAccessByToken } from "../../../_server/inviteAccess";
 import { copyInviteHireDate } from "../../../_server/inviteHireDate";
 
@@ -56,6 +57,10 @@ export async function POST(request: NextRequest) {
     }
 
     await copyInviteHireDate({
+      inviteId,
+      userId: userResult.user.id,
+    });
+    await enrollEmployeeOnboarding({
       inviteId,
       userId: userResult.user.id,
     });
