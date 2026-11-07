@@ -1,0 +1,362 @@
+[
+  {
+    "path": "src/features/inventory/components/Purchasing.tsx",
+    "lines": 1886,
+    "ticket": "FF-SPLIT-01"
+  },
+  {
+    "path": "src/features/inventory/components/InventoryItemForm.tsx",
+    "lines": 1323,
+    "ticket": "FF-SPLIT-02"
+  },
+  {
+    "path": "src/features/learning/services/learningService.ts",
+    "lines": 1173,
+    "ticket": "FF-SPLIT-03"
+  },
+  {
+    "path": "src/features/inventory/components/InventoryTransfersPanel.tsx",
+    "lines": 1164,
+    "ticket": "FF-SPLIT-04"
+  },
+  {
+    "path": "src/features/inventory/repositories/countsRepository.ts",
+    "lines": 1138,
+    "ticket": "FF-SPLIT-05"
+  },
+  {
+    "path": "src/hooks/useFinancialManagement.ts",
+    "lines": 1087,
+    "ticket": "FF-SPLIT-06"
+  },
+  {
+    "path": "src/features/recognition/api/recognitionRepository.ts",
+    "lines": 1084,
+    "ticket": "FF-SPLIT-07"
+  },
+  {
+    "path": "src/features/inventory/services/inventoryService.ts",
+    "lines": 1061,
+    "ticket": "FF-SPLIT-08"
+  },
+  {
+    "path": "scripts/check-__DB_VENDOR__-contract.mjs",
+    "lines": 1021,
+    "ticket": "FF-SPLIT-09"
+  },
+  {
+    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
+    "lines": 991,
+    "ticket": "FF-SPLIT-10"
+  },
+  {
+    "path": "src/features/positions/components/PositionManagement.tsx",
+    "lines": 940,
+    "ticket": "FF-SPLIT-11"
+  },
+  {
+    "path": "src/features/inventory/repositories/purchasingRepository.ts",
+    "lines": 918,
+    "ticket": "FF-SPLIT-12"
+  },
+  {
+    "path": "src/features/forms/components/builder/FieldEditor.tsx",
+    "lines": 908,
+    "ticket": "FF-SPLIT-13"
+  },
+  {
+    "path": "scripts/smoke-visible-modules.mjs",
+    "lines": 895,
+    "ticket": "FF-SPLIT-14"
+  },
+  {
+    "path": "src/features/scheduling/services/autoScheduler.ts",
+    "lines": 877,
+    "ticket": "FF-SPLIT-15"
+  },
+  {
+    "path": "src/services/integrations/marketmanMigrationPath.ts",
+    "lines": 843,
+    "ticket": "FF-SPLIT-16"
+  },
+  {
+    "path": "src/services/intelligence/closedLoopEngine.ts",
+    "lines": 842,
+    "ticket": "FF-SPLIT-17"
+  },
+  {
+    "path": "src/components/ui/sidebar.tsx",
+    "lines": 829,
+    "ticket": "FF-SPLIT-18"
+  },
+  {
+    "path": "src/hooks/useEvents.tsx",
+    "lines": 827,
+    "ticket": "FF-SPLIT-19"
+  },
+  {
+    "path": "src/services/integrations/csvImportFramework.ts",
+    "lines": 809,
+    "ticket": "FF-SPLIT-20"
+  },
+  {
+    "path": "src/features/scheduling/components/ShiftDetailsPanel.tsx",
+    "lines": 807,
+    "ticket": "FF-SPLIT-21"
+  },
+  {
+    "path": "src/services/performance/performanceService.ts",
+    "lines": 798,
+    "ticket": "FF-SPLIT-22"
+  },
+  {
+    "path": "src/services/analytics/businessAnalyticsService.ts",
+    "lines": 781,
+    "ticket": "FF-SPLIT-23"
+  },
+  {
+    "path": "src/features/inventory/components/expenses/ManagerFinancialOverview.tsx",
+    "lines": 767,
+    "ticket": "FF-SPLIT-24"
+  },
+  {
+    "path": "src/features/system/components/IntegrationSettingsPanel.tsx",
+    "lines": 748,
+    "ticket": "FF-SPLIT-25"
+  },
+  {
+    "path": "src/features/inventory/routes/Actions.tsx",
+    "lines": 722,
+    "ticket": "FF-SPLIT-26"
+  },
+  {
+    "path": "src/features/sections/components/SectionConfigurationWizard.tsx",
+    "lines": 713,
+    "ticket": "FF-SPLIT-27"
+  },
+  {
+    "path": "src/features/analytics/components/FormAnalytics.tsx",
+    "lines": 706,
+    "ticket": "FF-SPLIT-28"
+  },
+  {
+    "path": "src/hooks/learning/useLearningCenter.ts",
+    "lines": 706,
+    "ticket": "FF-SPLIT-29"
+  },
+  {
+    "path": "src/features/analytics/pages/Reports.tsx",
+    "lines": 704,
+    "ticket": "FF-SPLIT-30"
+  },
+  {
+    "path": "src/features/scheduling/components/ShiftWizardDialog.tsx",
+    "lines": 704,
+    "ticket": "FF-SPLIT-31"
+  },
+  {
+    "path": "src/features/scheduling/repositories/schedulingRepository.ts",
+    "lines": 702,
+    "ticket": "FF-SPLIT-32"
+  },
+  {
+    "path": "src/features/forms/components/wizard/FormFieldRenderer.tsx",
+    "lines": 697,
+    "ticket": "FF-SPLIT-33"
+  },
+  {
+    "path": "src/features/inventory/components/ProductionEventForm.tsx",
+    "lines": 695,
+    "ticket": "FF-SPLIT-34"
+  },
+  {
+    "path": "src/sections/events/index.tsx",
+    "lines": 695,
+    "ticket": "FF-SPLIT-35"
+  },
+  {
+    "path": "src/features/inventory/pages/ItemsSetup.tsx",
+    "lines": 691,
+    "ticket": "FF-SPLIT-36"
+  },
+  {
+    "path": "src/features/forms/components/FormFillDialog.tsx",
+    "lines": 690,
+    "ticket": "FF-SPLIT-37"
+  },
+  {
+    "path": "src/features/availability/components/TimeOffRequestPanel.tsx",
+    "lines": 687,
+    "ticket": "FF-SPLIT-38"
+  },
+  {
+    "path": "src/features/messages/api/messagesRepository.ts",
+    "lines": 683,
+    "ticket": "FF-SPLIT-39"
+  },
+  {
+    "path": "src/lib/permissions/registry.ts",
+    "lines": 670,
+    "ticket": "FF-SPLIT-40"
+  },
+  {
+    "path": "src/features/company-updates/repositories/companyUpdatesRepository.ts",
+    "lines": 653,
+    "ticket": "FF-SPLIT-41"
+  },
+  {
+    "path": "src/features/scheduling/components/DragDropScheduleCalendar.tsx",
+    "lines": 648,
+    "ticket": "FF-SPLIT-42"
+  },
+  {
+    "path": "src/features/onboarding/components/BrandingCustomizer.tsx",
+    "lines": 645,
+    "ticket": "FF-SPLIT-43"
+  },
+  {
+    "path": "src/data/scheduling/locationRuleSets.ts",
+    "lines": 636,
+    "ticket": "FF-SPLIT-44"
+  },
+  {
+    "path": "src/features/forms/hooks/useForms.tsx",
+    "lines": 631,
+    "ticket": "FF-SPLIT-45"
+  },
+  {
+    "path": "src/hooks/useAIActionsFeed.ts",
+    "lines": 631,
+    "ticket": "FF-SPLIT-46"
+  },
+  {
+    "path": "src/features/inventory/pages/Expenses.tsx",
+    "lines": 621,
+    "ticket": "FF-SPLIT-47"
+  },
+  {
+    "path": "src/features/operations/hooks/useCopilotChecklist.ts",
+    "lines": 613,
+    "ticket": "FF-SPLIT-48"
+  },
+  {
+    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
+    "lines": 611,
+    "ticket": "FF-SPLIT-49"
+  },
+  {
+    "path": "src/features/sections/components/DynamicSection.tsx",
+    "lines": 587,
+    "ticket": "FF-SPLIT-50"
+  },
+  {
+    "path": "src/features/availability/components/AvailabilityRequestForm.tsx",
+    "lines": 583,
+    "ticket": "FF-SPLIT-51"
+  },
+  {
+    "path": "src/features/dashboard/components/OperatorCommandCenter.tsx",
+    "lines": 576,
+    "ticket": "FF-SPLIT-52"
+  },
+  {
+    "path": "src/features/ai/components/AIQuickActions.tsx",
+    "lines": 572,
+    "ticket": "FF-SPLIT-53"
+  },
+  {
+    "path": "src/services/audit/auditEvents.ts",
+    "lines": 572,
+    "ticket": "FF-SPLIT-54"
+  },
+  {
+    "path": "src/services/integrations/checklistMigrationPath.ts",
+    "lines": 560,
+    "ticket": "FF-SPLIT-55"
+  },
+  {
+    "path": "src/features/analytics/components/reports/builder/ReportInbox.tsx",
+    "lines": 559,
+    "ticket": "FF-SPLIT-56"
+  },
+  {
+    "path": "src/features/inventory/routes/CountDetail.tsx",
+    "lines": 556,
+    "ticket": "FF-SPLIT-57"
+  },
+  {
+    "path": "src/features/employees/components/TeamDirectory.tsx",
+    "lines": 551,
+    "ticket": "FF-SPLIT-58"
+  },
+  {
+    "path": "src/features/ai/components/ScenarioSimulator.tsx",
+    "lines": 550,
+    "ticket": "FF-SPLIT-59"
+  },
+  {
+    "path": "src/features/company-updates/wizard/steps/DesignContentStep.tsx",
+    "lines": 547,
+    "ticket": "FF-SPLIT-60"
+  },
+  {
+    "path": "src/features/onboarding/components/CompanyOnboardingWizard.tsx",
+    "lines": 544,
+    "ticket": "FF-SPLIT-61"
+  },
+  {
+    "path": "src/features/ai/components/AIAssistant.tsx",
+    "lines": 538,
+    "ticket": "FF-SPLIT-62"
+  },
+  {
+    "path": "src/features/scheduling/components/shift-wizard/DetailsTab.tsx",
+    "lines": 538,
+    "ticket": "FF-SPLIT-63"
+  },
+  {
+    "path": "src/features/availability/manage/useAvailabilityManagement.ts",
+    "lines": 534,
+    "ticket": "FF-SPLIT-64"
+  },
+  {
+    "path": "src/features/gamification/leaderboard/syncLeaderboard.ts",
+    "lines": 531,
+    "ticket": "FF-SPLIT-65"
+  },
+  {
+    "path": "src/features/inventory/hooks/useCookbook.tsx",
+    "lines": 529,
+    "ticket": "FF-SPLIT-66"
+  },
+  {
+    "path": "src/features/tasks/components/CreateTaskDialog.tsx",
+    "lines": 529,
+    "ticket": "FF-SPLIT-67"
+  },
+  {
+    "path": "src/features/scheduling/components/ScheduleRemindersPanel.tsx",
+    "lines": 523,
+    "ticket": "FF-SPLIT-68"
+  },
+  {
+    "path": "src/features/forms/components/FormBuilderDialog.tsx",
+    "lines": 518,
+    "ticket": "FF-SPLIT-69"
+  },
+  {
+    "path": "src/features/inventory/hooks/useInventoryCounts.tsx",
+    "lines": 504,
+    "ticket": "FF-SPLIT-70"
+  },
+  {
+    "path": "src/features/scheduling/components/WeekView.tsx",
+    "lines": 504,
+    "ticket": "FF-SPLIT-71"
+  },
+  {
+    "path": "src/features/system/components/AdminSettingsPanel.tsx",
+    "lines": 502,
+    "ticket": "FF-SPLIT-72"
+  }
+]
