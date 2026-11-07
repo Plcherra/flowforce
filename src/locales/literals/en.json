@@ -1460,5 +1460,7 @@
   "yourTrialEndedOnChooseAPlanTo": "Your trial ended on {{value0}}. Choose a plan to restore full access for managers and staff.",
   "yourTrialEndsOnUpgradeBeforeThenTo": "Your trial ends on {{value0}}. Upgrade before then to avoid interruption.",
   "yourTrialPeriodHasEndedPickAPlan": "Your trial period has ended. Pick a plan to keep your workspace active.",
-  "youVeBeenAssignedTheRole": "You've been assigned the {{name}} role."
+  "youVeBeenAssignedTheRole": "You've been assigned the {{name}} role.",
+  "eachCardNeedsARoleStartAndContact": "Each person needs a role, a start date, and an email or phone number.",
+  "eachCardNeedsARoleDepartmentStoreAndContact": "Each person needs a role, a start date, a store, and an email or phone number."
 }

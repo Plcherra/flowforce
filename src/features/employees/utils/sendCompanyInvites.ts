@@ -10,6 +10,7 @@ export type CompanyInvitePayload = {
   permissionOverrides?: PermissionDiffMap;
   locationId?: string;
   departmentId?: string;
+  startDate?: string;
   firstShift?: { start: string; end: string };
 };
 
@@ -48,6 +49,7 @@ export async function sendCompanyInvites(invites: CompanyInvitePayload[]) {
         permissionOverrides: invite.permissionOverrides ?? {},
         departmentId: invite.departmentId || undefined,
         locationId: invite.locationId || undefined,
+        startDate: invite.startDate || undefined,
         firstShift: invite.firstShift,
       })),
     }),

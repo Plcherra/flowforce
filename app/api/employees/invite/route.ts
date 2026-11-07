@@ -10,7 +10,15 @@ import {
   type InviterGrantContext,
 } from "../../_server/inviteAccess";
 import { loadInviteLocationGate } from "../../_server/inviteLocation";
+import {
+  decideInviteDepartment,
+  writeProfileHireDate,
+} from "../../_server/inviteHireDate";
 import { saveOpsInviteShift } from "../../_server/opsInviteShift";
+import {
+  inviteDepartmentRejected,
+  readHireDate,
+} from "@/features/employees/utils/inviteDepartment";
 import {
   actorCanInvite,
   inviteLocationRejected,
@@ -33,6 +41,7 @@ type InvitePersonBody = {
   permissionOverrides?: unknown;
   locationId?: unknown;
   departmentId?: unknown;
+  startDate?: unknown;
   firstShift?: unknown;
 };
 
@@ -203,7 +212,28 @@ async function sendPersonInvite({
   const phone = readString(person.phone) || null;
   const requestedRoleId = readString(person.roleId) || null;
   const requestedRoleKey = readString(person.role);
-  const departmentId = readString(person.departmentId) || null;
+  const requestedDepartmentId = readString(person.departmentId) || null;
+  const hireDate = readHireDate(person.startDate);
+  if (!hireDate) {
+    return {
+      ok: false,
+      email: email || null,
+      code: "start_date_required",
+      message: "start_date_required",
+    };
+  }
+  const departmentDecision = await decideInviteDepartment({
+    companyId,
+    requestedId: requestedDepartmentId,
+  });
+  if (inviteDepartmentRejected(departmentDecision)) {
+    return {
+      ok: false,
+      email: email || null,
+      code: departmentDecision.code,
+      message: departmentDecision.code,
+    };
+  }
   const locationDecision = resolveInviteLocationId({
     requestedId: readString(person.locationId) || null,
     allowedIds: locationGate.allowedIds,
@@ -279,7 +309,8 @@ async function sendPersonInvite({
     role: roleKey,
     role_id: role.id,
     permission_overrides: permissionOverrides,
-    department_id: departmentId,
+    department_id: departmentDecision.departmentId,
+    hire_date: hireDate,
     store_id: locationDecision.locationId,
     location_id: null,
     invite_token: inviteToken,
@@ -379,9 +410,10 @@ async function sendPersonInvite({
         phone,
         role,
         permissionOverrides,
-        departmentId,
+        departmentId: departmentDecision.departmentId,
         storeId: locationDecision.locationId,
       });
+      await writeProfileHireDate(invitedUserId, hireDate);
     } catch (error) {
       logger.warn("Invite recorded, but access diffs were not applied yet", {
         error,

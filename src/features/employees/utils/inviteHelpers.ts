@@ -77,6 +77,7 @@ export function parseCsvForBulkInvites(text: string): {
   const classIndex = headerIndex(header, ["class", "role"]);
   const locationIndex = headerIndex(header, ["location"]);
   const departmentIndex = headerIndex(header, ["department"]);
+  const startIndex = headerIndex(header, ["start_date", "hire_date", "startdate"]);
 
   if (firstNameIndex === -1 || lastNameIndex === -1) {
     return {
@@ -120,6 +121,7 @@ export function parseCsvForBulkInvites(text: string): {
       locationName: locationIndex === -1 ? "" : columns[locationIndex] ?? "",
       departmentName:
         departmentIndex === -1 ? "" : columns[departmentIndex] ?? "",
+      startDate: startIndex === -1 ? "" : columns[startIndex] ?? "",
     });
   }
 

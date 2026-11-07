@@ -10,6 +10,7 @@ import {
   sendCompanyInvites,
   type CompanyInvitePayload,
 } from "../../utils/sendCompanyInvites";
+import { readHireDate } from "../../utils/inviteDepartment";
 import { inviteErrorText } from "../../utils/inviteLocation";
 import { InvitePersonCardForm } from "./InvitePersonCard";
 
@@ -42,16 +43,18 @@ export function InvitePersonStack({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!defaultClass && locations.length !== 1) return;
+    if (!defaultClass && locations.length !== 1 && departments.length !== 1) return;
     setCards((current) =>
       current.map((card) => ({
         ...card,
         roleId: card.roleId || defaultClass?.id || "",
         locationId:
           card.locationId || (locations.length === 1 ? locations[0].id : ""),
+        departmentId:
+          card.departmentId || (departments.length === 1 ? departments[0].id : ""),
       })),
     );
-  }, [defaultClass, locations]);
+  }, [defaultClass, locations, departments]);
 
   const updateCard = (id: string, next: InvitePersonCard) => {
     setCards((current) => current.map((card) => (card.id === id ? next : card)));
@@ -61,11 +64,19 @@ export function InvitePersonStack({
     const ready = cards.filter(
       (card) => card.roleId && (card.email.trim() || card.phone.trim()),
     );
-    if (ready.length === 0) {
+    if (ready.length === 0 || ready.some((card) => !readHireDate(card.startDate))) {
       toast({
         variant: "destructive",
         title: t("literals.addAPerson"),
-        description: t("literals.eachCardNeedsAClassAndAnEmail"),
+        description: t("literals.eachCardNeedsARoleStartAndContact"),
+      });
+      return null;
+    }
+    if (showDepartments && ready.some((card) => !card.departmentId)) {
+      toast({
+        variant: "destructive",
+        title: t("literals.addAPerson"),
+        description: t("employees.departmentRequired"),
       });
       return null;
     }
@@ -73,7 +84,7 @@ export function InvitePersonStack({
       toast({
         variant: "destructive",
         title: t("literals.addAPerson"),
-        description: t("literals.eachCardNeedsAClassStoreAndContact"),
+        description: t("literals.eachCardNeedsARoleDepartmentStoreAndContact"),
       });
       return null;
     }
@@ -86,6 +97,7 @@ export function InvitePersonStack({
       permissionOverrides: card.permissionOverrides,
       departmentId: card.departmentId,
       locationId: card.locationId,
+      startDate: readHireDate(card.startDate) ?? "",
     }));
   };
 
@@ -115,8 +127,7 @@ export function InvitePersonStack({
       } else {
         toast({
           title: ready.length === 1 ? t("literals.inviteSent") : t("literals.invitesSent"),
-          description:
-            t("literals.theClassIsPaintedGiveOrTakeOn"),
+          description: t("employees.opsFlowSent"),
         });
         setCards([createInvitePersonCard(defaultClass?.id ?? "")]);
         void queryClient.invalidateQueries({ queryKey: ["invites"] });
@@ -145,7 +156,7 @@ export function InvitePersonStack({
         <div>
           <h3 className="text-lg font-semibold">{t("employees.inviteTeammates")}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t("employees.pickAClassTheBoxesPaintGiveOrTakeOnlyWhatYouCanGrant")}
+            {t("employees.pickARoleAndDepartmentThenSend")}
           </p>
         </div>
       )}
@@ -177,7 +188,10 @@ export function InvitePersonStack({
           onClick={() =>
             setCards((current) => [
               ...current,
-              createInvitePersonCard(defaultClass?.id ?? ""),
+              createInvitePersonCard(defaultClass?.id ?? "", {
+                locationId: locations.length === 1 ? locations[0].id : "",
+                departmentId: departments.length === 1 ? departments[0].id : "",
+              }),
             ])
           }
           disabled={isLoading}

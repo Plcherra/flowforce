@@ -107,7 +107,7 @@ export function InviteEmployeesModal({
         <DialogHeader>
           <DialogTitle>{t("employees.inviteTeammates")}</DialogTitle>
           <DialogDescription>
-            {t("employees.pickAClassGiveOrTakeAFewBoxesThenSendAddManyOnlyWhenYouAlreadyHaveAList")}
+            {t("employees.pickARoleAndDepartmentThenSend")}
           </DialogDescription>
         </DialogHeader>
 

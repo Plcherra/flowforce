@@ -40,17 +40,20 @@ test.beforeAll(() => {
   }
 });
 
-test("walks invite, company basics, and a first shift without storing the invite", async ({
+test("invites a person with a start date, role, and department", async ({
   page,
 }) => {
   const captured = await watchInvite(page);
+  await page.getByTestId("invite-dialog").screenshot({
+    path: "/opt/cursor/artifacts/ops-invite-person.png",
+  });
 
   await page.getByTestId("invite-continue").click();
   await expect(page.getByTestId("ops-invite-flow")).toHaveAttribute(
     "data-step",
     "basics",
   );
-  await expect(page.getByTestId("ops-basics-skip")).toBeVisible();
+  await expect(page.getByTestId("ops-shift")).toHaveCount(0);
   const basicsError = page.getByTestId("ops-basics-error");
   const welcome = page.getByTestId("ops-basics-welcome");
   await expect(welcome.or(basicsError)).toBeVisible({ timeout: 20_000 });
@@ -67,20 +70,13 @@ test("walks invite, company basics, and a first shift without storing the invite
   });
   expect(captured.calls).toBe(0);
 
-  await page.getByTestId("ops-basics-skip").click();
-  await expect(page.getByTestId("ops-invite-flow")).toHaveAttribute(
-    "data-step",
-    "shift",
-  );
-  await page.getByTestId("ops-shift-date").fill("2026-11-09");
-  await page.getByTestId("ops-shift-start").fill("09:00");
-  await page.getByTestId("ops-shift-end").fill("17:00");
-  await page.getByTestId("ops-shift").screenshot({
-    path: "/opt/cursor/artifacts/ops-invite-shift.png",
-  });
-  await page.getByTestId("ops-shift-save").click();
-
+  await page.getByTestId("ops-basics-continue").click();
   await expect.poll(() => captured.body?.email).toBe(captured.email);
+  expect(captured.body?.startDate).toBe("2026-11-16");
+  expect(captured.body?.roleId).toBeTruthy();
+  expect(captured.body?.firstShift).toBeUndefined();
+  expect(captured.departmentId).toBe("11111111-1111-4111-8111-111111111111");
+  expect(captured.body?.departmentId).toBe(captured.departmentId);
   if (captured.storeId) {
     expect(captured.body?.locationId).toBe(captured.storeId);
   } else {
@@ -91,35 +87,28 @@ test("walks invite, company basics, and a first shift without storing the invite
     ).toBe(true);
   }
   expect(captured.calls).toBe(1);
-  const shift = captured.body?.firstShift;
-  expect(shift?.start).toBeTruthy();
-  expect(shift?.end).toBeTruthy();
-  expect(new Date(shift?.end ?? 0).getTime()).toBeGreaterThan(
-    new Date(shift?.start ?? 0).getTime(),
-  );
 });
 
-test("skips company basics and sends the invite without a first shift", async ({
+test("skips company basics and still sends the start date", async ({
   page,
 }) => {
   const captured = await watchInvite(page);
   await page.getByTestId("invite-continue").click();
-  await expect(page.getByTestId("ops-basics-continue")).toBeVisible({
+  await expect(page.getByTestId("ops-basics-skip")).toBeVisible({
     timeout: 20_000,
   });
-  await page.getByTestId("ops-basics-continue").click();
-  await expect(page.getByTestId("ops-invite-flow")).toHaveAttribute(
-    "data-step",
-    "shift",
-  );
   expect(captured.calls).toBe(0);
-  await page.getByTestId("ops-shift-skip").click();
+  await page.getByTestId("ops-basics-skip").click();
   await expect.poll(() => captured.body?.email).toBe(captured.email);
+  expect(captured.body?.startDate).toBe("2026-11-16");
+  expect(captured.body?.roleId).toBeTruthy();
   expect(captured.body?.firstShift).toBeUndefined();
   expect(captured.calls).toBe(1);
 });
 
-async function openOpsInvite(page: Page): Promise<{ storeId: string | null; email: string }> {
+async function openOpsInvite(
+  page: Page,
+): Promise<{ storeId: string | null; departmentId: string | null; email: string }> {
   await signIn(page);
   await page.goto("/app/employees");
   await expect(page.getByTestId("employees-page")).toBeVisible({
@@ -130,11 +119,23 @@ async function openOpsInvite(page: Page): Promise<{ storeId: string | null; emai
   await expect(dialog).toBeVisible();
   const flow = dialog.getByTestId("ops-invite-flow");
   await expect(flow).toHaveAttribute("data-step", "invite", { timeout: 20_000 });
-  await expect(dialog.getByTestId("invite-class")).toHaveAttribute(
+  await expect(dialog.getByTestId("invite-role")).toHaveAttribute(
     "data-selected",
     "true",
     { timeout: 20_000 },
   );
+  await dialog.getByTestId("invite-start-date").fill("2026-11-16");
+
+  const department = dialog.getByTestId("invite-department");
+  let departmentId: string | null = null;
+  if (await department.isVisible().catch(() => false)) {
+    await department.click();
+    const option = page.getByTestId("invite-department-option").first();
+    await expect(option).toBeVisible();
+    departmentId = await option.getAttribute("data-department-id");
+    expect(departmentId).toBeTruthy();
+    await option.click();
+  }
 
   const location = dialog.getByTestId("invite-location");
   let storeId: string | null = null;
@@ -148,7 +149,7 @@ async function openOpsInvite(page: Page): Promise<{ storeId: string | null; emai
   }
   const email = `e2e-ops-${Date.now()}@example.com`;
   await dialog.locator('input[type="email"]').fill(email);
-  return { storeId, email };
+  return { storeId, departmentId, email };
 }
 
 async function watchInvite(page: Page) {
@@ -156,14 +157,49 @@ async function watchInvite(page: Page) {
     calls: number;
     email: string;
     storeId: string | null;
-    body: { email?: string; locationId?: string; firstShift?: { start?: string; end?: string } } | null;
-  } = { calls: 0, email: "", storeId: null, body: null };
+    departmentId: string | null;
+    body: {
+      email?: string;
+      locationId?: string;
+      roleId?: string;
+      departmentId?: string;
+      startDate?: string;
+      firstShift?: { start?: string; end?: string };
+    } | null;
+  } = { calls: 0, email: "", storeId: null, departmentId: null, body: null };
+
+  await page.route("**/rest/v1/departments*", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    const rows = ["Front of house", "Kitchen"].map((name, index) => ({
+      id: index === 0
+        ? "11111111-1111-4111-8111-111111111111"
+        : "22222222-2222-4222-8222-222222222222",
+      company_id: "company",
+      name,
+      description: null,
+      manager_id: null,
+      type: "team",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    }));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(rows),
+    });
+  });
 
   await page.route("**/api/employees/invite", async (route) => {
     const body = route.request().postDataJSON() as {
       invites?: Array<{
         email?: string;
         locationId?: string;
+        roleId?: string;
+        departmentId?: string;
+        startDate?: string;
         firstShift?: { start?: string; end?: string };
       }>;
     };
@@ -184,6 +220,7 @@ async function watchInvite(page: Page) {
   const opened = await openOpsInvite(page);
   captured.email = opened.email;
   captured.storeId = opened.storeId;
+  captured.departmentId = opened.departmentId;
   return captured;
 }
 

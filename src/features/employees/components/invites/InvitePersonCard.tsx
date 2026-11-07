@@ -154,7 +154,7 @@ export function InvitePersonCardForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label>{t("employees.class")}</Label>
+            <Label>{t("employees.role")}</Label>
             <Select
               value={card.roleId}
               onValueChange={(value) => {
@@ -173,19 +173,40 @@ export function InvitePersonCardForm({
               }}
             >
               <SelectTrigger
-                data-testid="invite-class"
+                data-testid="invite-role"
                 data-selected={card.roleId ? "true" : "false"}
               >
-                <SelectValue placeholder={t("employees.chooseAClass")} />
+                <SelectValue placeholder={t("employees.chooseARole")} />
               </SelectTrigger>
               <SelectContent>
                 {classes.map((role) => (
-                  <SelectItem key={role.id} value={role.id}>
+                  <SelectItem
+                    key={role.id}
+                    value={role.id}
+                    data-testid="invite-role-option"
+                    data-role-id={role.id}
+                  >
                     {role.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`${card.id}-start`}>{t("employees.startDate")}</Label>
+            <Input
+              id={`${card.id}-start`}
+              data-testid="invite-start-date"
+              type="date"
+              value={card.startDate}
+              aria-describedby={`${card.id}-start-help`}
+              onChange={(event) =>
+                onChange({ ...card, startDate: event.target.value })
+              }
+            />
+            <p id={`${card.id}-start-help`} className="text-sm text-muted-foreground">
+              {t("employees.startDateHelp")}
+            </p>
           </div>
           {showLocations ? (
             <div className="space-y-1.5">
@@ -220,19 +241,24 @@ export function InvitePersonCardForm({
           ) : null}
           {showDepartments ? (
             <div className="space-y-1.5">
-              <Label>{t("messages.department")}</Label>
+              <Label>{t("employees.department")}</Label>
               <Select
                 value={card.departmentId}
                 onValueChange={(value) =>
                   onChange({ ...card, departmentId: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="invite-department">
                   <SelectValue placeholder={t("employees.chooseADepartment")} />
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map((department) => (
-                    <SelectItem key={department.id} value={department.id}>
+                    <SelectItem
+                      key={department.id}
+                      value={department.id}
+                      data-testid="invite-department-option"
+                      data-department-id={department.id}
+                    >
                       {department.name}
                     </SelectItem>
                   ))}

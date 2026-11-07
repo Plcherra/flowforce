@@ -1460,5 +1460,7 @@
   "yourTrialEndedOnChooseAPlanTo": "La tua prova è terminata il {{value0}}. Scegli un piano per ripristinare l'accesso completo per manager e personale.",
   "yourTrialEndsOnUpgradeBeforeThenTo": "La tua prova termina il {{value0}}. Aggiorna prima di allora per evitare interruzioni.",
   "yourTrialPeriodHasEndedPickAPlan": "Il tuo periodo di prova è terminato. Scegli un piano per mantenere attiva la tua area di lavoro.",
-  "youVeBeenAssignedTheRole": "Ti è stato assegnato il ruolo {{name}}."
+  "youVeBeenAssignedTheRole": "Ti è stato assegnato il ruolo {{name}}.",
+  "eachCardNeedsARoleStartAndContact": "Ogni persona ha bisogno di un ruolo, di una data di inizio e di un'e-mail o di un telefono.",
+  "eachCardNeedsARoleDepartmentStoreAndContact": "Ogni persona ha bisogno di un ruolo, di una data di inizio, di un negozio e di un'e-mail o di un telefono."
 }

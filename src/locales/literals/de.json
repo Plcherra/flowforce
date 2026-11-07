@@ -1460,5 +1460,7 @@
   "yourTrialEndedOnChooseAPlanTo": "Ihre Testversion endete am {{value0}}. Wählen Sie einen Plan, um den vollständigen Zugriff für Manager und Mitarbeiter wiederherzustellen.",
   "yourTrialEndsOnUpgradeBeforeThenTo": "Ihre Testversion endet am {{value0}}. Aktualisieren Sie vorher, um Unterbrechungen zu vermeiden.",
   "yourTrialPeriodHasEndedPickAPlan": "Ihr Testzeitraum ist abgelaufen. Wählen Sie einen Plan, um Ihren Arbeitsbereich aktiv zu halten.",
-  "youVeBeenAssignedTheRole": "Ihnen wurde die Rolle {{name}} zugewiesen."
+  "youVeBeenAssignedTheRole": "Ihnen wurde die Rolle {{name}} zugewiesen.",
+  "eachCardNeedsARoleStartAndContact": "Jede Person braucht eine Rolle, ein Startdatum und eine E-Mail oder Telefonnummer.",
+  "eachCardNeedsARoleDepartmentStoreAndContact": "Jede Person braucht eine Rolle, ein Startdatum, eine Filiale und eine E-Mail oder Telefonnummer."
 }

@@ -25,6 +25,7 @@ export type InvitePersonCard = {
   roleId: string;
   locationId: string;
   departmentId: string;
+  startDate: string;
   permissionOverrides: PermissionDiffMap;
 };
 
@@ -36,6 +37,7 @@ export type SingleInviteForm = {
   roleId: string;
   locationId: string;
   departmentId: string;
+  startDate: string;
   permissionOverrides: PermissionDiffMap;
 };
 
@@ -47,6 +49,7 @@ export type BulkInviteRow = {
   className: string;
   locationName: string;
   departmentName: string;
+  startDate: string;
 };
 
 export type BulkInviteResult = {
@@ -59,6 +62,7 @@ export type BulkInviteResult = {
 
 export const createInvitePersonCard = (
   roleId = "",
+  defaults?: { locationId?: string; departmentId?: string },
 ): InvitePersonCard => ({
   id: `invite-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   firstName: "",
@@ -66,8 +70,9 @@ export const createInvitePersonCard = (
   email: "",
   phone: "",
   roleId,
-  locationId: "",
-  departmentId: "",
+  locationId: defaults?.locationId ?? "",
+  departmentId: defaults?.departmentId ?? "",
+  startDate: "",
   permissionOverrides: {},
 });
 
@@ -79,5 +84,6 @@ export const DEFAULT_SINGLE_INVITE: SingleInviteForm = {
   roleId: "",
   locationId: "",
   departmentId: "",
+  startDate: "",
   permissionOverrides: {},
 };
