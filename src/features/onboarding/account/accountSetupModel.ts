@@ -9,6 +9,13 @@ import {
   getProductRoleDefinition,
 } from "@/features/roles/constants/productRoles";
 import { rolesFromOrg, type OrgSetup } from "@/features/onboarding/utils/orgTemplates";
+import {
+  hoursFromWindow,
+  namedStores,
+  primaryWindow,
+  storesProblem,
+  type StoreDraft,
+} from "@/features/stores/storeDraft";
 
 export const COFFEE_INDUSTRY = "Coffee shop";
 
@@ -64,6 +71,8 @@ export type AccountWorkspaceInput = {
   locale: SetupLocale;
   org: OrgSetup;
   store: { name: string; opens: string; closes: string };
+  stores: StoreDraft[];
+  starterStoreKey?: string;
   starter: AccountStarter;
   starterCopy: {
     shiftTitle: string;
@@ -254,6 +263,10 @@ export function storeProblem(store: { name: string; opens: string; closes: strin
   return null;
 }
 
+export function workspaceStoresProblem(stores: StoreDraft[]): "store" | null {
+  return storesProblem(stores);
+}
+
 export function inviteEmailProblem(email: string): boolean {
   const trimmed = email.trim();
   if (!trimmed) return false;
@@ -288,7 +301,12 @@ export function clockOnNextDay(opens: string, closes: string, now = new Date()) 
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
-export function starterListSettings(roleId: string, showFrom: string, dueAt: string) {
+export function starterListSettings(
+  roleId: string,
+  showFrom: string,
+  dueAt: string,
+  storeId?: string | null,
+) {
   return withFormDistribution(null, {
     recordKind: "list",
     roleIds: roleId ? [roleId] : [],
@@ -300,6 +318,7 @@ export function starterListSettings(roleId: string, showFrom: string, dueAt: str
     dueTime: null,
     completeBy: null,
     timeMode: "legacy",
+    storeIds: storeId ? [storeId] : [],
   });
 }
 
@@ -310,5 +329,30 @@ export function readWorkspace(value: unknown): AccountWorkspaceInput | null {
   if (!source.org || !Array.isArray(source.org.departments)) return null;
   if (!source.store || typeof source.store.name !== "string") return null;
   if (!source.starterCopy || !Array.isArray(source.starterCopy.lists)) return null;
-  return source as AccountWorkspaceInput;
+  const stores = Array.isArray(source.stores) ? source.stores : [];
+  const ready = namedStores(stores);
+  return {
+    ...(source as AccountWorkspaceInput),
+    stores:
+      ready.length > 0
+        ? ready
+        : [
+            {
+              key: "store",
+              name: source.store.name,
+              address: "",
+              hours: hoursFromWindow(
+                typeof source.store.opens === "string" ? source.store.opens : "08:00",
+                typeof source.store.closes === "string" ? source.store.closes : "22:00",
+              ),
+            },
+          ],
+  };
+}
+
+export function firstStoreWindow(stores: StoreDraft[]): { name: string; opens: string; closes: string } {
+  const first = namedStores(stores)[0];
+  if (!first) return { name: "", opens: "08:00", closes: "22:00" };
+  const window = primaryWindow(first);
+  return { name: first.name.trim(), opens: window.opens, closes: window.closes };
 }

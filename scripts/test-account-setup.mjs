@@ -10,6 +10,9 @@ const importTs = jiti(import.meta.url, {
 const { runAccountSetupModelTests } = importTs(
   "../src/features/onboarding/account/accountSetupModel.test.ts",
 );
+const { runStoreDraftTests } = importTs(
+  "../src/features/stores/storeDraft.test.ts",
+);
 const { runOrgTemplateTests } = importTs(
   "../src/features/onboarding/utils/orgTemplates.test.ts",
 );
@@ -18,6 +21,7 @@ const { runOverviewModelTests } = importTs(
 );
 
 runOrgTemplateTests();
+runStoreDraftTests();
 runAccountSetupModelTests();
 runOverviewModelTests();
 process.stdout.write("account setup and overview model tests passed\n");

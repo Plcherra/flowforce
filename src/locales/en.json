@@ -2180,11 +2180,16 @@
         "reportsView": "See reports"
       },
       "store": {
-        "title": "First store",
-        "description": "Add the first location and the hours you are open.",
+        "title": "Store and hours",
+        "description": "Add every shop with its address and opening hours. At least one store is required.",
         "name": "Store name",
         "opens": "Opens",
-        "closes": "Closes"
+        "closes": "Closes",
+        "address": "Address",
+        "add": "Add another store",
+        "remove": "Remove store",
+        "hours": "Opening hours",
+        "closed": "Closed"
       },
       "invite": {
         "title": "Invite your team",
@@ -2192,7 +2197,10 @@
         "email": "Email",
         "role": "Role",
         "add": "Add another person",
-        "remove": "Remove"
+        "remove": "Remove",
+        "open": "Invite a teammate",
+        "store": "Store",
+        "dialogTitle": "Invite a teammate"
       },
       "starter": {
         "title": "First shift or starter lists",
@@ -4036,6 +4044,8 @@
     "recordKind": "Kind",
     "recordKindForm": "Form",
     "recordKindList": "List",
+    "listStore": "Store",
+    "listStoreHelp": "This list belongs to one store.",
     "attachedRoles": "Attached roles",
     "attachedRolesHelp": "People in these roles can fill this while it is open. Leave this empty to use only the fill audience.",
     "noCompanyRoles": "This company has no roles yet.",
@@ -6065,6 +6075,11 @@
     "noSettingsForCompany": "We couldn’t find any system settings for this company.",
     "profileNotLinkedToCompany": "Your profile is not linked to a company yet. Create a new company or ask an administrator to grant access.",
     "profileNotLinkedToWorkspace": "Your profile isn't linked to a workspace yet. You can create a demo workspace now or ask an administrator to grant access.",
+    "storesTitle": "Stores",
+    "storesHelp": "Add a store, rename it, change its hours, or remove it. Removed stores stay in the records and disappear from pickers.",
+    "storeNameRequired": "Each store needs a name and opening hours.",
+    "saveStore": "Save stores",
+    "storeSaved": "Stores saved",
     "tabGeneral": "General",
     "departmentsTitle": "Departments",
     "departmentName": "Department name",

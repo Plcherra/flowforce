@@ -178,18 +178,6 @@ export function ShiftWizardDialog({
     );
   }, [open, selectedDate, templateSeed]);
 
-  const distinctLocations = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (shifts ?? [])
-            .map((shift) => shift.location)
-            .filter((value): value is string => Boolean(value)),
-        ),
-      ),
-    [shifts],
-  );
-
   const hours = useMemo(() => {
     if (formData.is_all_day) {
       return { total: 24, net: 24 };
@@ -411,6 +399,7 @@ export function ShiftWizardDialog({
         start_time: start.toISOString(),
         end_time: end.toISOString(),
         location: formData.location,
+        store_id: formData.storeId || null,
         is_all_day: formData.is_all_day,
         timezone: formData.timezone,
         required_headcount: formData.required_headcount,
@@ -588,7 +577,6 @@ export function ShiftWizardDialog({
                         formData={formData}
                         setFormData={setFormData}
                         positions={positions}
-                        distinctLocations={distinctLocations}
                         hours={hours}
                         laborCost={draftLaborCost}
                         shiftTemplates={shiftTemplates}

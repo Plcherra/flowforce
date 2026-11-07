@@ -1278,11 +1278,16 @@
         "reportsView": "Vedi i report"
       },
       "store": {
-        "title": "Primo negozio",
-        "description": "Aggiungi la prima sede e l'orario di apertura.",
+        "title": "Negozio e orari",
+        "description": "Aggiungi ogni locale con indirizzo e orari. Serve almeno un negozio.",
         "name": "Nome del negozio",
         "opens": "Apre",
-        "closes": "Chiude"
+        "closes": "Chiude",
+        "address": "Indirizzo",
+        "add": "Aggiungi un altro negozio",
+        "remove": "Rimuovi negozio",
+        "hours": "Orario di apertura",
+        "closed": "Chiuso"
       },
       "invite": {
         "title": "Invita il team",
@@ -1290,7 +1295,10 @@
         "email": "E-mail",
         "role": "Ruolo",
         "add": "Aggiungi un'altra persona",
-        "remove": "Rimuovi"
+        "remove": "Rimuovi",
+        "open": "Invita un collega",
+        "store": "Negozio",
+        "dialogTitle": "Invita un collega"
       },
       "starter": {
         "title": "Primo turno o liste iniziali",
@@ -4036,6 +4044,8 @@
     "recordKind": "Tipo",
     "recordKindForm": "Modulo",
     "recordKindList": "Elenco",
+    "listStore": "Negozio",
+    "listStoreHelp": "Questo elenco appartiene a un negozio.",
     "attachedRoles": "Ruoli collegati",
     "attachedRolesHelp": "Le persone di questi ruoli possono compilarlo finché è aperto. Lascia vuoto per usare solo il pubblico che compila.",
     "noCompanyRoles": "Questa azienda non ha ancora ruoli.",
@@ -6065,6 +6075,11 @@
     "noSettingsForCompany": "Non abbiamo trovato le impostazioni di sistema di questa azienda.",
     "profileNotLinkedToCompany": "Il tuo profilo non è ancora collegato a un'azienda. Crea un'azienda o chiedi a un amministratore di concederti l'accesso.",
     "profileNotLinkedToWorkspace": "Il tuo profilo non è ancora collegato a uno spazio. Puoi creare uno spazio demo ora o chiedere a un amministratore di concederti l'accesso.",
+    "storesTitle": "Negozi",
+    "storesHelp": "Aggiungi un negozio, rinominalo, cambia gli orari o rimuovilo. I negozi rimossi restano nei registri e spariscono dagli elenchi.",
+    "storeNameRequired": "Ogni negozio ha bisogno di un nome e di un orario.",
+    "saveStore": "Salva negozi",
+    "storeSaved": "Negozi salvati",
     "tabGeneral": "Generale",
     "departmentsTitle": "Reparti",
     "departmentName": "Nome del reparto",

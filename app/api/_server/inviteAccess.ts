@@ -242,6 +242,7 @@ export async function applyInviteAccessToUser(params: {
   permissionOverrides: PermissionDiffMap;
   departmentId: string | null;
   locationId?: string | null;
+  storeId?: string | null;
 }) {
   const roleKey = profileRoleFromClass(params.role);
 
@@ -256,9 +257,7 @@ export async function applyInviteAccessToUser(params: {
       role: roleKey,
       role_id: params.role.id,
       department_id: params.departmentId,
-      ...(params.locationId !== undefined
-        ? { location_id: params.locationId }
-        : {}),
+      ...(params.storeId ? { store_id: params.storeId } : params.locationId ? { location_id: params.locationId } : {}),
       employment_status: "active",
       updated_at: new Date().toISOString(),
     },
@@ -433,7 +432,7 @@ export async function applyInviteAccessByToken(params: {
   const { data: invite, error } = await supabaseAdmin
     .from("company_invites")
     .select(
-      "id, company_id, invited_by, first_name, last_name, phone, role, role_id, permission_overrides, department_id, location_id, email",
+      "id, company_id, invited_by, first_name, last_name, phone, role, role_id, permission_overrides, department_id, location_id, store_id, email",
     )
     .eq("invite_token", params.inviteToken)
     .maybeSingle();
@@ -472,7 +471,8 @@ export async function applyInviteAccessByToken(params: {
     role,
     permissionOverrides: overrides,
     departmentId: invite.department_id,
-    locationId: invite.location_id,
+    storeId: invite.store_id,
+    locationId: invite.store_id ? null : invite.location_id,
   });
 
   await supabaseAdmin

@@ -1257,11 +1257,16 @@
         "reportsView": "Ver informes"
       },
       "store": {
-        "title": "Primera tienda",
-        "description": "Añade el primer local y el horario de apertura.",
+        "title": "Tienda y horario",
+        "description": "Añade cada local con su dirección y horario. Hace falta al menos una tienda.",
         "name": "Nombre del local",
         "opens": "Abre",
-        "closes": "Cierra"
+        "closes": "Cierra",
+        "address": "Dirección",
+        "add": "Añadir otra tienda",
+        "remove": "Quitar tienda",
+        "hours": "Horario de apertura",
+        "closed": "Cerrado"
       },
       "invite": {
         "title": "Invita a tu equipo",
@@ -1269,7 +1274,10 @@
         "email": "Correo",
         "role": "Rol",
         "add": "Añadir otra persona",
-        "remove": "Quitar"
+        "remove": "Quitar",
+        "open": "Invitar a un compañero",
+        "store": "Tienda",
+        "dialogTitle": "Invitar a un compañero"
       },
       "starter": {
         "title": "Primer turno o listas iniciales",
@@ -4036,6 +4044,8 @@
     "recordKind": "Tipo",
     "recordKindForm": "Formulario",
     "recordKindList": "Lista",
+    "listStore": "Tienda",
+    "listStoreHelp": "Esta lista pertenece a una tienda.",
     "attachedRoles": "Roles asignados",
     "attachedRolesHelp": "Las personas de estos roles pueden rellenarlo mientras esté abierto. Déjalo vacío para usar solo el público que rellena.",
     "noCompanyRoles": "Esta empresa todavía no tiene roles.",
@@ -6065,6 +6075,11 @@
     "noSettingsForCompany": "No encontramos la configuración del sistema de esta empresa.",
     "profileNotLinkedToCompany": "Tu perfil todavía no está vinculado a una empresa. Crea una empresa o pide a un administrador que te dé acceso.",
     "profileNotLinkedToWorkspace": "Tu perfil todavía no está vinculado a un espacio. Puedes crear un espacio de demo ahora o pedir a un administrador que te dé acceso.",
+    "storesTitle": "Tiendas",
+    "storesHelp": "Añade una tienda, cámbiale el nombre, edita el horario o quítala. Las tiendas quitadas siguen en los registros y desaparecen de las listas.",
+    "storeNameRequired": "Cada tienda necesita un nombre y un horario.",
+    "saveStore": "Guardar tiendas",
+    "storeSaved": "Tiendas guardadas",
     "tabGeneral": "General",
     "departmentsTitle": "Departamentos",
     "departmentName": "Nombre del departamento",

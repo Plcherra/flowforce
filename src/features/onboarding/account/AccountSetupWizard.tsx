@@ -12,11 +12,11 @@ import {
 } from "@/features/onboarding/utils/orgTemplates";
 import {
   CompanyStep,
-  InviteStep,
   SignupStep,
   StarterStep,
-  StoreStep,
 } from "./AccountSetupSteps";
+import { SignupInviteStep } from "./SignupInviteDialog";
+import { StoreStep } from "./StoreStep";
 import {
   StarterListsChoice,
   type StarterListDraft,
@@ -27,15 +27,22 @@ import {
   FIXED_OPS_SECTIONS,
   LOCALES,
   companyProblem,
+  firstStoreWindow,
   fixedOpsTemplate,
   inviteEmailProblem,
   onboardingRecordsFromWorkspace,
   signupProblem,
-  storeProblem,
+  workspaceStoresProblem,
   type AccountStarter,
   type AccountWorkspaceInput,
   type SetupLocale,
 } from "./accountSetupModel";
+import {
+  blankStore,
+  namedStores,
+  shouldAskForStore,
+  type StoreDraft,
+} from "@/features/stores/storeDraft";
 
 const STEPS = [
   "signup",
@@ -116,12 +123,11 @@ export default function AccountSetupWizard({
   const [locale, setLocale] = useState<SetupLocale>(browserLocale);
   const [logo, setLogo] = useState<File | null>(null);
   const [org, setOrg] = useState<OrgSetup>(() => coffeeShopStarter(t));
-  const [storeName, setStoreName] = useState("");
-  const [opens, setOpens] = useState("08:00");
-  const [closes, setCloses] = useState("22:00");
-  const [invites, setInvites] = useState<{ email: string; roleKey: string }[]>([
-    { email: "", roleKey: "cashier" },
-  ]);
+  const [stores, setStores] = useState<StoreDraft[]>(() => [blankStore()]);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [invites, setInvites] = useState<
+    { email: string; roleKey: string; storeKey: string }[]
+  >([]);
   const [starter, setStarter] = useState<AccountStarter>("lists");
   const [listSource, setListSource] = useState<"template" | "scratch">("template");
   const [starterLists, setStarterLists] = useState<StarterListDraft[]>(() =>
@@ -139,11 +145,13 @@ export default function AccountSetupWizard({
     [org],
   );
 
+  const readyStores = namedStores(stores);
   const workspace = (): AccountWorkspaceInput => ({
     timezone,
     locale,
     org,
-    store: { name: storeName, opens, closes },
+    store: firstStoreWindow(readyStores.length > 0 ? readyStores : stores),
+    stores: readyStores,
     starter,
     starterCopy: {
       shiftTitle: t("onboarding.account.starter.shiftTitle"),
@@ -184,7 +192,12 @@ export default function AccountSetupWizard({
       customRoles: records.customRoles,
       positions: records.positions,
       workspace: chosen,
-      invites: invites.filter((invite) => invite.email.trim()),
+      invites: invites
+        .filter((invite) => invite.email.trim())
+        .map((invite) => ({
+          ...invite,
+          storeKey: shouldAskForStore(readyStores.length) ? invite.storeKey : readyStores[0]?.key ?? "",
+        })),
     };
     try {
       await onComplete(payload);
@@ -212,7 +225,7 @@ export default function AccountSetupWizard({
       setError("onboarding.account.error.role");
       return;
     }
-    if (stepId === "store" && storeProblem({ name: storeName, opens, closes })) {
+    if (stepId === "store" && workspaceStoresProblem(stores)) {
       setError("onboarding.account.error.store");
       return;
     }
@@ -222,9 +235,9 @@ export default function AccountSetupWizard({
     }
     setStep((value) => Math.min(value + 1, STEPS.length - 1));
   };
-
   const skipInvite = () => {
-    setInvites((current) => current.map((invite) => ({ ...invite, email: "" })));
+    setInvites([]);
+    setInviteOpen(false);
     setError(null);
     setStep((value) => value + 1);
   };
@@ -286,36 +299,29 @@ export default function AccountSetupWizard({
         ) : null}
         {stepId === "store" ? (
           <StoreStep
-            name={storeName}
-            opens={opens}
-            closes={closes}
-            onChange={(patch) => {
-              if (patch.name !== undefined) setStoreName(patch.name);
-              if (patch.opens !== undefined) setOpens(patch.opens);
-              if (patch.closes !== undefined) setCloses(patch.closes);
+            stores={stores}
+            onChange={(next) => {
+              setError(null);
+              setStores(next);
             }}
           />
         ) : null}
         {stepId === "invite" ? (
-          <InviteStep
-            invites={invites}
+          <SignupInviteStep
+            open={inviteOpen}
             roles={enabledRoles}
-            onChange={(index, patch) =>
-              setInvites((current) =>
-                current.map((invite, item) =>
-                  item === index ? { ...invite, ...patch } : invite,
-                ),
-              )
-            }
-            onAdd={() =>
-              setInvites((current) => [
-                ...current,
-                { email: "", roleKey: enabledRoles[0]?.key ?? "" },
-              ])
-            }
-            onRemove={(index) =>
-              setInvites((current) => current.filter((_, item) => item !== index))
-            }
+            stores={readyStores}
+            invites={invites}
+            onOpenChange={setInviteOpen}
+            onSave={(invite) => {
+              if (inviteEmailProblem(invite.email)) {
+                setError("onboarding.account.error.invite");
+                return;
+              }
+              setError(null);
+              setInvites((current) => [...current, invite]);
+              setInviteOpen(false);
+            }}
           />
         ) : null}
         {stepId === "starter" ? (

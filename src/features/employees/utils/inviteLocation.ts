@@ -61,9 +61,12 @@ export function resolveInviteLocationId(params: {
   companyHasActiveLocations: boolean;
 }): InviteLocationDecision {
   const requested = params.requestedId?.trim() || null;
-  if (!params.companyHasActiveLocations) {
+  if (!params.companyHasActiveLocations || params.allowedIds.length === 0) {
     if (requested) return { ok: false, code: "location_forbidden" };
     return { ok: true, locationId: null };
+  }
+  if (params.allowedIds.length === 1 && !requested) {
+    return { ok: true, locationId: params.allowedIds[0] };
   }
   if (!requested) return { ok: false, code: "location_required" };
   if (!params.allowedIds.includes(requested)) {

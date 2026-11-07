@@ -8,8 +8,8 @@ import {
   type MutableRefObject,
   type ReactNode,
 } from "react";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js"; // pragma: allowlist secret
+import { supabase } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { useAuth } from "@/hooks/useAuth";
 import { appEnv } from "@/lib/env";
 import { logger } from "@/utils/logger";
@@ -27,6 +27,7 @@ type LegacyProfileFields = {
   avatar_url: string | null;
   role_id: string | null;
   locationId?: string | null;
+  storeId?: string | null;
 };
 
 type ProfileDetails = {
@@ -136,10 +137,10 @@ async function fetchProfileFromSupabase(
 ): Promise<ProfileDetails | null> {
   const userId = user.id;
   try {
-    let query = supabase
+    let query = supabase // pragma: allowlist secret
       .from("profiles")
       .select(
-        "id, company_id, role, role_id, first_name, last_name, avatar_url, employee_id, phone, location_id",
+        "id, company_id, role, role_id, first_name, last_name, avatar_url, employee_id, phone, location_id, store_id",
       )
       .eq("id", userId);
 
@@ -150,6 +151,39 @@ async function fetchProfileFromSupabase(
     const { data, error } = await query.maybeSingle();
 
     if (error) {
+      const message = error.message ?? "";
+      if (message.includes("store_id")) {
+        const retry = await supabase // pragma: allowlist secret
+          .from("profiles")
+          .select(
+            "id, company_id, role, role_id, first_name, last_name, avatar_url, employee_id, phone, location_id",
+          )
+          .eq("id", userId)
+          .maybeSingle();
+        if (!retry.error && retry.data) {
+          return {
+            userId: retry.data.id,
+            companyId: retry.data.company_id ?? null,
+            role: retry.data.role ?? "employee",
+            id: retry.data.id,
+            company_id: retry.data.company_id ?? null,
+            firstName: retry.data.first_name ?? null,
+            lastName: retry.data.last_name ?? null,
+            first_name: retry.data.first_name ?? null,
+            last_name: retry.data.last_name ?? null,
+            avatar_url: retry.data.avatar_url ?? null,
+            employeeId: retry.data.employee_id ?? null,
+            employee_id: retry.data.employee_id ?? null,
+            role_id: retry.data.role_id ?? null,
+            roleId: retry.data.role_id ?? null,
+            locationId: retry.data.location_id ?? null,
+            storeId: null,
+            locationIds: [],
+            position: null,
+            isPlaceholder: false,
+          };
+        }
+      }
       logger.error(" Failed to load profile", { error });
       return null;
     }
@@ -176,7 +210,8 @@ async function fetchProfileFromSupabase(
       employee_id: data.employee_id ?? null,
       role_id: data.role_id ?? null,
       roleId: data.role_id ?? null,
-      locationId: data.location_id ?? null,
+      locationId: data.store_id ?? data.location_id ?? null,
+      storeId: data.store_id ?? null,
       locationIds: [],
       position: null,
       isPlaceholder: false,

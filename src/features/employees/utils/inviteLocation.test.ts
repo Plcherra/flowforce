@@ -77,6 +77,14 @@ export function runInviteLocationTests() {
       allowedIds: ["store-a"],
       companyHasActiveLocations: true,
     }),
+    { ok: true, locationId: "store-a" },
+  );
+  assert.deepEqual(
+    resolveInviteLocationId({
+      requestedId: "",
+      allowedIds: ["store-a", "store-b"],
+      companyHasActiveLocations: true,
+    }),
     { ok: false, code: "location_required" },
   );
   assert.deepEqual(
@@ -86,6 +94,14 @@ export function runInviteLocationTests() {
       companyHasActiveLocations: true,
     }),
     { ok: false, code: "location_forbidden" },
+  );
+  assert.deepEqual(
+    resolveInviteLocationId({
+      requestedId: null,
+      allowedIds: ["store-a"],
+      companyHasActiveLocations: true,
+    }),
+    { ok: true, locationId: "store-a" },
   );
   assert.deepEqual(
     resolveInviteLocationId({

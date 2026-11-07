@@ -1,5 +1,6 @@
 import type { ProductLevel } from "@/features/roles/constants/productLevels";
 import { locationsAssignableByActor } from "@/features/employees/utils/inviteLocation";
+import { isPlaceholderStoreName } from "@/features/stores/storeDraft";
 import { supabaseAdmin } from "./supabaseAdmin"; // pragma: allowlist secret
 
 export async function loadInviteLocationGate(params: {
@@ -8,17 +9,19 @@ export async function loadInviteLocationGate(params: {
   actorLocationId: string | null;
 }): Promise<{ allowedIds: string[]; companyHasActiveLocations: boolean }> {
   const { data, error } = await supabaseAdmin // pragma: allowlist secret
-    .from("inv_locations")
-    .select("id, is_active")
+    .from("stores")
+    .select("id, name, archived_at")
     .eq("company_id", params.companyId);
 
   if (error) throw error;
 
-  const locations = (data ?? []).map((row) => ({
-    id: row.id,
-    name: row.id,
-    active: row.is_active !== false,
-  }));
+  const locations = (data ?? [])
+    .filter((row) => !isPlaceholderStoreName(row.name ?? ""))
+    .map((row) => ({
+      id: row.id,
+      name: row.name ?? row.id,
+      active: !row.archived_at,
+    }));
   const allowed = locationsAssignableByActor({
     locations,
     actorLevel: params.actorLevel,

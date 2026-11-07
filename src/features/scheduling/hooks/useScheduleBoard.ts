@@ -161,8 +161,9 @@ export function useScheduleBoard({
     setIsLocationsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("inv_locations")
-        .select("id, name")
+        .from("stores")
+        .select("id, name, archived_at")
+        .is("archived_at", null)
         .eq("company_id", companyId)
         .order("name", { ascending: true });
 
@@ -171,7 +172,12 @@ export function useScheduleBoard({
         return;
       }
 
-      setLocations(data ?? []);
+      setLocations(
+        (data ?? []).filter((row) => {
+          const normalized = (row.name ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+          return normalized !== "walk-in" && normalized !== "walk in" && normalized !== "walkin";
+        }),
+      );
     } finally {
       setIsLocationsLoading(false);
     }

@@ -54,3 +54,9 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
      (iii) per seat or per company?
      (iv) buy packs à la carte or only as bundles?
      (v) how packs relate to existing starter/growth/enterprise plans — additive add-ons, or replace that model?
+
+## After Ops v1
+
+Real-store locations (Pedro-approved after Ops v1) — done
+- Migration `20261107085004_company_stores` was applied to production. Shops live in `public.stores` with name, address, and hours. The Walk-in inventory row is hidden and was not deleted. No store rows were backfilled, because only Walk-in existed.
+- Ops v1 items 1–7 stay done. Item 8 stays waiting on Pedro for the five pricing questions above.

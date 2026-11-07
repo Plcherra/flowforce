@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import type { InventoryLocation } from "@/features/inventory/hooks/types";
 import { logger } from "@/utils/logger";
+import { isPlaceholderStoreName } from "@/features/stores/storeDraft";
 
 const inventoryLocationSchema: z.ZodType<InventoryLocation> = z
   .object({
@@ -53,6 +54,12 @@ export async function listInventoryLocations({
 
   if (error) throw error;
   return (data ?? [])
+    .filter((row) => {
+      const record = row as { name?: string | null; hidden_at?: string | null; location_type?: string | null };
+      if (record.hidden_at) return false;
+      if (record.location_type === "store") return false;
+      return !isPlaceholderStoreName(record.name ?? "");
+    })
     .map((row) => inventoryLocationSchema.parse(row))
     .filter((row) => row.is_active !== false);
 }
@@ -70,6 +77,9 @@ export async function createInventoryLocation({
   temperature_controlled,
   companyId,
 }: CreateInventoryLocationInput): Promise<InventoryLocation> {
+  if (isPlaceholderStoreName(name) || location_type === "store") {
+    throw new Error("placeholder-store");
+  }
   const { data, error } = await supabase
     .from("inv_locations")
     .insert({

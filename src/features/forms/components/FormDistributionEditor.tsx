@@ -38,6 +38,7 @@ export function FormDistributionEditor({
   people,
   positions,
   departments,
+  stores = [],
   onChange,
 }: {
   distribution: FormDistribution;
@@ -45,6 +46,7 @@ export function FormDistributionEditor({
   people: Choice[];
   positions: Choice[];
   departments: Choice[];
+  stores?: Choice[];
   onChange: (distribution: FormDistribution) => void;
 }) {
   const { t } = useTranslation();
@@ -92,6 +94,27 @@ export function FormDistributionEditor({
           </SelectContent>
         </Select>
       </div>
+      {stores.length > 1 ? (
+        <div className="space-y-1.5">
+          <Label htmlFor="form-store">{t("forms.listStore")}</Label>
+          <p className="text-sm text-muted-foreground">{t("forms.listStoreHelp")}</p>
+          <Select
+            value={distribution.storeIds?.[0] ?? ""}
+            onValueChange={(value) => onChange({ ...distribution, storeIds: value ? [value] : [] })}
+          >
+            <SelectTrigger id="form-store" className="min-h-11" data-testid="form-store">
+              <SelectValue placeholder={t("forms.listStore")} />
+            </SelectTrigger>
+            <SelectContent>
+              {stores.map((store) => (
+                <SelectItem key={store.id} value={store.id}>
+                  {store.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
       <div className="space-y-1.5">
         <Label>{t("forms.attachedRoles")}</Label>
         {roles.length === 0 ? (

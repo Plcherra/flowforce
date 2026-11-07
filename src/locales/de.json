@@ -1098,11 +1098,16 @@
         "reportsView": "Berichte sehen"
       },
       "store": {
-        "title": "Erster Standort",
-        "description": "Füge den ersten Standort und die Öffnungszeiten hinzu.",
+        "title": "Geschäft und Öffnungszeiten",
+        "description": "Fügen Sie jedes Café mit Adresse und Öffnungszeiten hinzu. Mindestens ein Geschäft ist nötig.",
         "name": "Name des Standorts",
         "opens": "Öffnet",
-        "closes": "Schließt"
+        "closes": "Schließt",
+        "address": "Adresse",
+        "add": "Weiteres Geschäft hinzufügen",
+        "remove": "Geschäft entfernen",
+        "hours": "Öffnungszeiten",
+        "closed": "Geschlossen"
       },
       "invite": {
         "title": "Team einladen",
@@ -1110,7 +1115,10 @@
         "email": "E-Mail",
         "role": "Rolle",
         "add": "Weitere Person hinzufügen",
-        "remove": "Entfernen"
+        "remove": "Entfernen",
+        "open": "Teammitglied einladen",
+        "store": "Geschäft",
+        "dialogTitle": "Teammitglied einladen"
       },
       "starter": {
         "title": "Erste Schicht oder Startlisten",
@@ -4036,6 +4044,8 @@
     "recordKind": "Art",
     "recordKindForm": "Formular",
     "recordKindList": "Liste",
+    "listStore": "Geschäft",
+    "listStoreHelp": "Diese Liste gehört zu einem Geschäft.",
     "attachedRoles": "Zugeordnete Rollen",
     "attachedRolesHelp": "Personen in diesen Rollen können dies ausfüllen, solange es offen ist. Leer lassen, um nur die Ausfüllgruppe zu nutzen.",
     "noCompanyRoles": "Dieses Unternehmen hat noch keine Rollen.",
@@ -6065,6 +6075,11 @@
     "noSettingsForCompany": "Wir haben keine Systemeinstellungen für dieses Unternehmen gefunden.",
     "profileNotLinkedToCompany": "Dein Profil ist noch keinem Unternehmen zugeordnet. Erstelle ein Unternehmen oder bitte einen Admin um Zugriff.",
     "profileNotLinkedToWorkspace": "Dein Profil ist noch keinem Workspace zugeordnet. Du kannst jetzt einen Demo-Workspace erstellen oder einen Admin um Zugriff bitten.",
+    "storesTitle": "Geschäfte",
+    "storesHelp": "Fügen Sie ein Geschäft hinzu, benennen Sie es um, ändern Sie die Zeiten oder entfernen Sie es. Entfernte Geschäfte bleiben in den Daten und verschwinden aus den Auswahllisten.",
+    "storeNameRequired": "Jedes Geschäft braucht einen Namen und Öffnungszeiten.",
+    "saveStore": "Geschäfte speichern",
+    "storeSaved": "Geschäfte gespeichert",
     "tabGeneral": "Allgemein",
     "departmentsTitle": "Abteilungen",
     "departmentName": "Name der Abteilung",

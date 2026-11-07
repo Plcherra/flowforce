@@ -25,7 +25,7 @@ export interface RegistrationData {
   positions: OnboardingPosition[];
   orgSetup?: unknown;
   workspace?: AccountWorkspaceInput;
-  invites?: { email: string; roleKey: string }[];
+  invites?: { email: string; roleKey: string; storeKey?: string }[];
 }
 
 type WorkspaceRoleRef = {
@@ -139,6 +139,7 @@ export function useCompanyRegistration() {
       details?: { message?: string } | string;
       workspace?: {
         locationId?: string | null;
+        stores?: { id: string; key: string; name: string }[];
         roles?: WorkspaceRoleRef[];
       } | null;
     };
@@ -161,6 +162,7 @@ export function useCompanyRegistration() {
     return {
       companyId: result.companyId,
       locationId: result.workspace?.locationId ?? null,
+      stores: result.workspace?.stores ?? [],
       roles: result.workspace?.roles ?? [],
     };
   };

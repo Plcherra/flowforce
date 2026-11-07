@@ -21,6 +21,7 @@ import {
   actorCanInvite,
   locationsAssignableByActor,
 } from "@/features/employees/utils/inviteLocation";
+import { isPlaceholderStoreName } from "@/features/stores/storeDraft";
 
 export function useInviteAccessOptions() {
   const { roles, loading: rolesLoading } = useCompanyRoles();
@@ -49,8 +50,8 @@ export function useInviteAccessOptions() {
     queryFn: async (): Promise<OrganizationLocation[]> => {
       if (!companyId) return [];
       const { data, error } = await supabase // pragma: allowlist secret
-        .from("inv_locations")
-        .select("id, name, is_active")
+        .from("stores")
+        .select("id, name, archived_at")
         .eq("company_id", companyId)
         .order("name", { ascending: true });
       if (error) {
@@ -60,11 +61,13 @@ export function useInviteAccessOptions() {
         });
         return [];
       }
-      return (data ?? []).map((row) => ({
-        id: row.id,
-        name: row.name?.trim() || row.id,
-        is_active: row.is_active !== false,
-      }));
+      return (data ?? [])
+        .filter((row) => !row.archived_at && !isPlaceholderStoreName(row.name ?? ""))
+        .map((row) => ({
+          id: row.id,
+          name: row.name?.trim() || row.id,
+          is_active: true,
+        }));
     },
   });
   const companyLocations = storesQuery.data ?? [];
@@ -79,7 +82,7 @@ export function useInviteAccessOptions() {
           active: location.is_active !== false,
         })),
         actorLevel: inviterLevel,
-        actorLocationId: profile?.locationId ?? null,
+        actorLocationId: profile?.storeId ?? profile?.locationId ?? null,
         canInvite: actorCanInvite({
           role: profile?.role ?? "",
           permissions: {
@@ -96,6 +99,7 @@ export function useInviteAccessOptions() {
     companyLocations,
     inviterLevel,
     inviterPermissions,
+    profile?.storeId,
     profile?.locationId,
     profile?.role,
   ]);
@@ -131,7 +135,7 @@ export function useInviteAccessOptions() {
     inviterLevel,
     inviterPermissions,
     invitePolicy,
-    showLocations: assignableLocations.length > 0,
+    showLocations: assignableLocations.length > 1,
     showDepartments: departments.length > 1,
     isLoading:
       rolesLoading ||

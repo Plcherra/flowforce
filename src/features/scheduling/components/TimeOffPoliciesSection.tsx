@@ -30,6 +30,7 @@ import {
   policyTemplateById,
   showPolicyStores,
 } from "@/features/scheduling/utils/policyTemplates";
+import { useCompanyStores } from "@/features/stores/useCompanyStores";
 
 const WEEKDAYS = [
   { value: 1, labelKey: "schedule.dayMonShort" },
@@ -87,7 +88,8 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
   const [error, setError] = useState<string | null>(null);
 
   const extraRoles = roles.filter((role) => !isLevelNamedRole(role.name));
-  const realStoreCount = 0;
+  const { stores } = useCompanyStores();
+  const realStoreCount = stores.length;
   const people = useMemo(
     () =>
       employees.map((person) => ({
@@ -401,6 +403,19 @@ export function TimeOffPoliciesSection({ canManage }: TimeOffPoliciesSectionProp
           {showPolicyStores(realStoreCount) ? (
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">{t("schedule.stores")}</p>
+              <div className="flex flex-wrap gap-2">
+                {stores.map((store) => (
+                  <Button
+                    key={store.id}
+                    type="button"
+                    size="sm"
+                    variant={storeIds.includes(store.id) ? "default" : "outline"}
+                    onClick={() => toggleId(store.id, storeIds, setStoreIds)}
+                  >
+                    {store.name}
+                  </Button>
+                ))}
+              </div>
             </div>
           ) : null}
           <PeoplePicker

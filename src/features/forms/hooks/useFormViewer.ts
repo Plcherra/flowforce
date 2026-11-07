@@ -122,6 +122,7 @@ export function useFormViewer(): FormAccessViewer {
         can("manageForms"),
       roles: extra.roles,
       scheduledRoleIds: extra.scheduledRoleIds,
+      storeId: profile?.storeId ?? null,
     }),
     [
       userId,
@@ -130,6 +131,7 @@ export function useFormViewer(): FormAccessViewer {
       profile?.role,
       extra,
       can,
+      profile?.storeId,
     ],
   );
 }
