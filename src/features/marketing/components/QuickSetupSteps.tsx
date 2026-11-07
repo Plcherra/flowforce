@@ -63,7 +63,7 @@ export function QuickSetupSteps() {
             {steps.map((step, index) => (
               <Card
                 key={index}
-                className={`group relative border-2 ${step.borderColor} hover:shadow-xl transition-all duration-500 hover:-translate-y-2 bg-background`}
+                className="relative border bg-card"
               >
                 <CardContent className="p-8 text-center">
                   {/* Step Number */}

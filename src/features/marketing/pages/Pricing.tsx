@@ -152,6 +152,13 @@ export default function Pricing() {
           })}
         </div>
 
+        <div className="mx-auto mt-16 max-w-3xl space-y-3 text-center" data-testid="pricing-pack-note">
+          <h2 className="text-2xl font-semibold">{t("landing.model.title")}</h2>
+          <p className="text-muted-foreground">{t("landing.model.subtitle")}</p>
+          <p className="text-sm font-medium">{t("packs.pricingComingSoon")}</p>
+          <p className="text-sm text-muted-foreground">{t("packs.separateFromPlans")}</p>
+        </div>
+
         <div className="mt-10 text-center text-sm text-muted-foreground">
           {user ? (
             <Link href="/app/settings?tab=billing" className="underline">

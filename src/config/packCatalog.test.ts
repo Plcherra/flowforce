@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
+import { isStripeTestSecret } from "@/server/billing/stripeTestMode";
 import {
   OPTIONAL_PACK_IDS,
   PACK_PRICE_ENV,
   isPackBillingMetadata,
   packCheckoutIsPaid,
   packPriceCanCheckout,
+  packSubscriptionGrantsAccess,
+  packSubscriptionRevokesAccess,
   readPackCheckoutMetadata,
   readPackPriceId,
   withBasicOpsPackFlags,
+  withPackDisabled,
   withPackEnabled,
 } from "./packCatalog";
 
@@ -30,7 +34,13 @@ export function runPackCatalogTests() {
   assert.equal(readPackCheckoutMetadata({ kind: "pack", pack: "insights" }), "insights");
   assert.equal(readPackCheckoutMetadata({ kind: "pack", pack: "starter" }), null);
   assert.equal(packCheckoutIsPaid({ payment_status: "paid" }), true);
+  assert.equal(packCheckoutIsPaid({ payment_status: "no_payment_required" }), true);
   assert.equal(packCheckoutIsPaid({ payment_status: "unpaid" }), false);
+  assert.equal(isStripeTestSecret("sk_test_example"), true);
+  assert.equal(isStripeTestSecret("rk_test_example"), true);
+  assert.equal(isStripeTestSecret("sk_live_example"), false);
+  assert.equal(isStripeTestSecret("rk_live_example"), false);
+  assert.equal(isStripeTestSecret(" pk_test_example "), false);
 
   const enabled = withPackEnabled(
     {
@@ -62,4 +72,40 @@ export function runPackCatalogTests() {
     packFlags: { team: true, insights: false, stock: false },
   };
   assert.equal(withBasicOpsPackFlags(existing), existing);
+
+  const disabled = withPackDisabled(enabled, "insights");
+  assert.deepEqual(disabled.packFlags, {
+    ops: true,
+    team: true,
+    insights: false,
+    stock: false,
+  });
+  assert.equal(
+    (disabled.tenantManagement as { plan: string }).plan,
+    "growth",
+  );
+
+  assert.equal(packSubscriptionGrantsAccess("active"), true);
+  assert.equal(packSubscriptionGrantsAccess("trialing"), true);
+  assert.equal(packSubscriptionGrantsAccess("canceled"), false);
+  assert.equal(
+    packSubscriptionRevokesAccess("active", "customer.subscription.updated"),
+    false,
+  );
+  assert.equal(
+    packSubscriptionRevokesAccess("active", "customer.subscription.deleted"),
+    true,
+  );
+  assert.equal(
+    packSubscriptionRevokesAccess("canceled", "customer.subscription.updated"),
+    true,
+  );
+  assert.equal(
+    packSubscriptionRevokesAccess("unpaid", "customer.subscription.updated"),
+    true,
+  );
+  assert.equal(
+    packSubscriptionRevokesAccess("incomplete_expired", "customer.subscription.updated"),
+    true,
+  );
 }

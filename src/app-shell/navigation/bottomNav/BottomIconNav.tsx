@@ -5,6 +5,7 @@ import { useNavigate } from "@/lib/router-adapter";
 import { useNavigationData } from "@/hooks/useNavigationData";
 import { BottomIconButton } from "./BottomIconButton";
 import { BottomNavMoreSheet } from "./BottomNavMoreSheet";
+import { PacksAddSheet } from "@/features/packs/components/PacksAddSheet";
 import {
   bottomNavGroupName,
   groupWideBottomNav,
@@ -24,6 +25,7 @@ export function BottomIconNav() {
   const { processedSections, canManageSections, getIsActive, packFlags, packFlagsReady } =
     useNavigationData();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [packsOpen, setPacksOpen] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -99,6 +101,18 @@ export function BottomIconNav() {
                       </BottomIconButton>
                     );
                   })}
+                  {group.translationKey === "dailyOperations" ||
+                  group.id === "dailyOperations" ? (
+                    <BottomIconButton
+                      label={t("packs.addMenuTitle")}
+                      testId="nav-packs-add"
+                      active={packsOpen}
+                      expanded={packsOpen}
+                      onClick={() => setPacksOpen(true)}
+                    >
+                      <Plus className="h-6 w-6" aria-hidden="true" />
+                    </BottomIconButton>
+                  ) : null}
                 </div>
               </div>
             );
@@ -128,6 +142,15 @@ export function BottomIconNav() {
           </div>
         </div>
       </nav>
+
+      <PacksAddSheet
+        open={packsOpen}
+        onOpenChange={setPacksOpen}
+        onSelect={(pack) => {
+          setPacksOpen(false);
+          navigate(`/app/packs/${pack}`);
+        }}
+      />
 
       <BottomNavMoreSheet
         open={moreOpen}

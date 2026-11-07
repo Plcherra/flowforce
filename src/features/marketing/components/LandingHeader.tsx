@@ -9,7 +9,7 @@ export function LandingHeader() {
   const { t } = useTranslation();
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 bg-primary/90 backdrop-blur-md border-b border-primary/20">
+    <header className="sticky top-0 z-50 border-b border-border bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -17,32 +17,32 @@ export function LandingHeader() {
             className="flex items-center cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <Building2 className="h-8 w-8 text-primary-foreground" />
+            <Building2 className="h-8 w-8 text-primary" />
           </div>
 
           {/* Navigation - Hidden on mobile, can be expanded later */}
           <nav className="hidden lg:flex items-center space-x-8">
             <Link
               to="/features"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              className="font-medium text-foreground hover:text-primary"
             >
               {t("landing.features")}
             </Link>
             <Link
               to="/templates"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              className="font-medium text-foreground hover:text-primary"
             >
               {t("landing.templatesNav")}
             </Link>
             <Link
               to="/pricing"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              className="font-medium text-foreground hover:text-primary"
             >
               {t("landing.pricing")}
             </Link>
             <Link
               to="/resources"
-              className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              className="font-medium text-foreground hover:text-primary"
             >
               {t("landing.resources")}
             </Link>

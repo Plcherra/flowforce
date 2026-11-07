@@ -43,11 +43,11 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
    - No sample people, schedules, inventory, or automations. No new table and no migration.
    - `e2e/cafe-starter.spec.ts` pins English, signs in with the test user, checks both lists, and stops the role and form writes before they are stored.
 8. Packs discovery and self-serve purchase — waiting-on-Pedro
-   - The packs screen is in Settings → Packs, on `/app/packs`, in the account menu, on the dashboard when a pack is off, and from a blocked pack route. Owners who can manage billing can open it.
-   - Team, Insights, and Stock cards show what each unlocks, the on or off state from `packFlags`, and the placeholder labels "Price TBD" and "Placeholder — awaiting pricing".
-   - Checkout is `POST /api/packs/checkout`. It does not charge while `STRIPE_PRICE_PACK_TEAM`, `STRIPE_PRICE_PACK_INSIGHTS`, and `STRIPE_PRICE_PACK_STOCK` are unset. A paid checkout (or the webhook) sets only that pack's flag in `system_settings.admin_config.packFlags`. No new table and no migration.
-   - A new company stores basic Ops flags: Operations on, Team, Insights, and Stock off. Signup copy says the same.
-   - `e2e/packs-discovery.spec.ts` pins English and the dev `flowforce:pack-flags` override, checks the cards, the billing permission gate, the placeholder prices, and stops checkout and confirmation before Stripe or a settings write.
+   - Packs are not on Overview. The **+** next to OPS in the bottom nav (desktop and mobile) lists Team, Insights, and Stock and what each unlocks. Opening one goes to `/app/packs/:pack` with a buy button.
+   - Cards keep "Price TBD" and "Placeholder — awaiting pricing". When `STRIPE_PRICE_PACK_TEAM`, `STRIPE_PRICE_PACK_INSIGHTS`, or `STRIPE_PRICE_PACK_STOCK` is unset, that pack shows "Pricing coming soon" and does not call Stripe.
+   - When a test price is set, `POST /api/packs/checkout` creates a Stripe test-mode subscription Checkout Session. Live keys are refused. `checkout.session.completed` (paid) sets that pack's flag in `system_settings.admin_config.packFlags`. Subscription cancel clears it. Manage or cancel uses the Stripe customer portal. No new table and no migration.
+   - A new company stores basic Ops flags: Operations on, Team, Insights, and Stock off.
+   - `e2e/packs-discovery.spec.ts` and `e2e/landing-packs.spec.ts` pin English, mock Stripe, and do not write settings.
    - Waiting on Pedro:
      (i) price for Team, Insights, and Stock packs?
      (ii) monthly vs yearly?

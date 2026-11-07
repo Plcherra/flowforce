@@ -14,9 +14,7 @@ const industries = [
       "landing.industries.retail.features.tracking",
       "landing.industries.retail.features.automation",
     ],
-    color: "text-primary",
     bgColor: "bg-primary",
-    gradient: "from-primary to-primary",
   },
   {
     icon: UtensilsCrossed,
@@ -27,9 +25,7 @@ const industries = [
       "landing.industries.hospitality.features.scheduling",
       "landing.industries.hospitality.features.feedback",
     ],
-    color: "text-warning",
     bgColor: "bg-warning",
-    gradient: "from-warning to-destructive",
   },
   {
     icon: Heart,
@@ -40,9 +36,7 @@ const industries = [
       "landing.industries.healthcare.features.tracking",
       "landing.industries.healthcare.features.alerts",
     ],
-    color: "text-success",
     bgColor: "bg-success",
-    gradient: "from-success to-success",
   },
 ];
 
@@ -51,7 +45,7 @@ export function IndustryTemplates() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-gradient-to-br from-muted to-primary/10">
+    <section className="bg-muted py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -68,19 +62,11 @@ export function IndustryTemplates() {
           {industries.map((industry, index) => (
             <Card
               key={index}
-              className="group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-4"
+              className="border bg-card"
             >
-              {/* Background Gradient */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${industry.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
-              ></div>
-
-              <CardContent className="p-8 relative">
-                {/* Icon */}
-                <div
-                  className={`w-20 h-20 bg-gradient-to-br ${industry.gradient} rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
-                >
-                  <industry.icon className="h-10 w-10 text-primary-foreground" />
+              <CardContent className="p-8">
+                <div className="mb-6 grid h-14 w-14 place-items-center rounded-md bg-primary/10 text-primary">
+                  <industry.icon className="h-7 w-7" />
                 </div>
 
                 {/* Content */}

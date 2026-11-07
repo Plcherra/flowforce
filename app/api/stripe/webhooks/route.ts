@@ -6,9 +6,15 @@ import { createServerLogger } from "../../_server/utils/logger";
 import { getStripeClient } from "@/server/billing/stripeClient";
 import {
   isPackBillingMetadata,
+  packCheckoutIsPaid,
+  packSubscriptionGrantsAccess,
+  packSubscriptionRevokesAccess,
   readPackCheckoutMetadata,
 } from "@/config/packCatalog";
-import { enablePurchasedPack } from "@/server/billing/enablePurchasedPack";
+import {
+  disablePurchasedPack,
+  enablePurchasedPack,
+} from "@/server/billing/enablePurchasedPack";
 import {
   BILLING_AUDIT,
   findCompanyIdByStripeCustomer,
@@ -55,6 +61,12 @@ async function handleCheckoutCompleted(event: Stripe.Event) {
     const pack = readPackCheckoutMetadata(session.metadata);
     if (!pack) {
       throw new Error("pack checkout is missing a pack id");
+    }
+    if (!packCheckoutIsPaid(session)) {
+      logger.info("Pack checkout is not paid yet", {
+        context: { companyId, pack, paymentStatus: session.payment_status },
+      });
+      return companyId;
     }
     const packResult = await enablePurchasedPack(supabaseAdmin, { // pragma: allowlist secret
       companyId,
@@ -111,10 +123,22 @@ async function handleSubscriptionEvent(event: Stripe.Event) {
 
   if (isPackBillingMetadata(subscription.metadata)) {
     const pack = readPackCheckoutMetadata(subscription.metadata);
-    if (
-      pack &&
-      (subscription.status === "active" || subscription.status === "trialing")
-    ) {
+    if (!pack) return companyId;
+
+    if (packSubscriptionRevokesAccess(subscription.status, event.type)) {
+      const packResult = await disablePurchasedPack(supabaseAdmin, { // pragma: allowlist secret
+        companyId,
+        pack,
+        actorId: null,
+        source: "stripe.webhook",
+      });
+      if (packResult.ok === false) {
+        throw new Error(packResult.message);
+      }
+      return companyId;
+    }
+
+    if (packSubscriptionGrantsAccess(subscription.status)) {
       const packResult = await enablePurchasedPack(supabaseAdmin, { // pragma: allowlist secret
         companyId,
         pack,
@@ -238,6 +262,7 @@ export async function POST(request: NextRequest) {
 
     switch (event.type) {
       case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded":
         companyId = await handleCheckoutCompleted(event);
         break;
       case "customer.subscription.created":
