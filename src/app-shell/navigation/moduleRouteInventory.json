@@ -120,7 +120,17 @@
       "smoke": true,
       "owner": "src/features/packs",
       "dataDependency": "tenant billing settings",
-      "notes": "Pack discovery. Opened from the account menu and settings, not the sidebar."
+      "notes": "Pack list. Opened from the account menu and settings, not the sidebar."
+    },
+    {
+      "label": "Pack",
+      "path": "/app/packs/[pack]",
+      "status": "hidden",
+      "sidebar": false,
+      "smoke": false,
+      "owner": "src/features/packs",
+      "dataDependency": "tenant billing settings",
+      "notes": "One pack page with buy or manage. Opened from the plus next to OPS."
     },
     {
       "label": "Messages Filter",
