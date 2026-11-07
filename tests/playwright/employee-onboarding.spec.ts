@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 
 const PASSWORD = "Harbor!Meal9";
@@ -5,42 +6,82 @@ const stamp = Date.now();
 const owner = {
   firstName: "Avery",
   lastName: "Cole",
-  email: `avery.cole.onboard.${stamp}@example.test`,
+  email:
+    process.env.PLAYWRIGHT_OWNER_EMAIL ??
+    `avery.cole.onboard.${stamp}@flowforce.uk`,
   company: `Harbor Coffee ${stamp}`,
 };
 const staff = {
   firstName: "Riley",
   lastName: "Quinn",
-  email: `riley.quinn.onboard.${stamp}@example.test`,
+  email: `riley.quinn.onboard.${stamp}@flowforce.uk`,
 };
 
 test.describe.configure({ mode: "serial" });
 
 async function fillOwnerSignup(page: Page) {
   await page.goto("/company-registration");
-  await expect(page.getByLabel("First Name")).toBeVisible();
-  await page.getByLabel("First Name").fill(owner.firstName);
-  await page.getByLabel("Last Name").fill(owner.lastName);
-  await page.getByLabel("Email Address").fill(owner.email);
+  await expect(page.getByRole("heading", { level: 1, name: "Sign up" })).toBeVisible();
+  await page.getByLabel("First name").fill(owner.firstName);
+  await page.getByLabel("Last name").fill(owner.lastName);
+  await page.getByLabel("Email", { exact: true }).fill(owner.email);
   await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByLabel("Company Name").fill(owner.company);
-  await page.getByText("Select industry", { exact: true }).click();
-  await page.getByRole("option", { name: "Food & Beverage" }).click();
-  await page.getByText("Select size", { exact: true }).click();
-  await page.getByRole("option", { name: "1-10 employees" }).click();
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await expect(page.getByText("Restaurant & Food Service").first()).toBeVisible();
-  await page.getByText("Restaurant & Food Service").click();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
-  await page.getByRole("button", { name: "Complete Setup" }).click();
-  await page.waitForURL("**/app/dashboard", { timeout: 45_000 });
+  await page.getByTestId("account-next").click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "Company basics" })).toBeVisible();
+  await page.getByLabel("Company name").fill(owner.company);
+  await page.getByTestId("account-next").click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "Departments and roles" })).toBeVisible();
+  await page.getByTestId("account-next").click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "Permissions" })).toBeVisible();
+  await page.getByTestId("account-next").click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "Store and hours" })).toBeVisible();
+  await page.getByTestId("store-name").fill("High Street");
+  await page.getByTestId("store-address").fill("1 High Street");
+  await page.getByTestId("account-next").click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "Invite your team" })).toBeVisible();
+  await page.getByTestId("account-skip").click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "First shift or starter lists" })).toBeVisible();
+  await page.getByTestId("account-finish").click();
+  const landed = await Promise.race([
+    page.waitForURL("**/app/dashboard", { timeout: 90_000 }).then(() => "dashboard" as const),
+    page.waitForURL("**/auth?**", { timeout: 90_000 }).then(() => "confirm" as const),
+    page.getByText("We could not finish setup.").waitFor({ timeout: 90_000 }).then(() => "failed" as const),
+    page.getByText(/confirm your email/i).waitFor({ timeout: 90_000 }).then(() => "confirm" as const),
+  ]);
+  if (landed === "failed") {
+    throw new Error("Signup did not open the workspace.");
+  }
+  if (landed === "dashboard") return;
+  const confirmFile = process.env.PLAYWRIGHT_EMAIL_CONFIRM_FILE;
+  if (!confirmFile) {
+    throw new Error("Signup is waiting for an email confirmation link.");
+  }
+  const started = Date.now();
+  let link = "";
+  while (Date.now() - started < 90_000) {
+    try {
+      link = (await readFile(confirmFile, "utf8")).trim();
+    } catch {
+      link = "";
+    }
+    if (link.startsWith("http")) break;
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+  if (!link.startsWith("http")) {
+    throw new Error("Signup is waiting for an email confirmation link.");
+  }
+  await page.goto(link);
+  await page.waitForURL("**/app/dashboard", { timeout: 60_000 });
 }
 
 test.describe("Employee onboarding with separate users", () => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
 
   test("owner sets shop steps and the invited barista finishes them", async ({ browser, page }) => {
     await fillOwnerSignup(page);
@@ -80,16 +121,19 @@ test.describe("Employee onboarding with separate users", () => {
     await inviteDialog.getByLabel("First name").fill(staff.firstName);
     await inviteDialog.getByLabel("Last name").fill(staff.lastName);
     await inviteDialog.getByLabel("Email").fill(staff.email);
-    await expect(inviteDialog.getByTestId("invite-role")).toHaveAttribute("data-selected", "true", {
-      timeout: 20_000,
-    });
+    await inviteDialog.getByTestId("invite-role").click();
+    await page.getByRole("option", { name: "Barista", exact: true }).click();
+    await expect(inviteDialog.getByTestId("invite-role")).toContainText("Barista");
     await inviteDialog.getByTestId("invite-start-date").fill("2026-11-16");
     const department = inviteDialog.getByTestId("invite-department");
     if (await department.isVisible().catch(() => false)) {
       await department.click();
-      const option = page.getByTestId("invite-department-option").first();
-      await expect(option).toBeVisible();
-      await option.click();
+      await page.getByRole("option", { name: "FOH", exact: true }).click();
+    }
+    const location = inviteDialog.getByTestId("invite-location");
+    if (await location.isVisible().catch(() => false)) {
+      await location.click();
+      await page.getByRole("option", { name: "High Street" }).click();
     }
     const inviteResponse = page.waitForResponse(
       (response) =>
@@ -116,6 +160,7 @@ test.describe("Employee onboarding with separate users", () => {
     await staffPage.waitForURL("**/app/onboarding", { timeout: 45_000 });
     await expect(staffPage.getByTestId("onboarding-welcome")).toContainText(owner.company);
     await expect(staffPage.getByTestId("onboarding-fact-start")).toContainText("2026");
+    await expect(staffPage.getByTestId("onboarding-fact-role")).toContainText("Barista");
     await expect(staffPage.getByText("Read the shop handbook")).toBeVisible();
     await staffPage.getByLabel("I've read this").click();
     await staffPage.getByTestId("onboarding-upload-input").setInputFiles({
