@@ -59,8 +59,10 @@ export async function applyAccountWorkspace(
   const warnings: string[] = [];
   const jobs = enabledJobRoles(input.workspace);
   const hours = workingHoursFor(input.workspace.store.opens, input.workspace.store.closes);
-  const activeDepartments = input.workspace.departments.filter((department) =>
-    department.roles.some((role) => role.enabled && role.name.trim()),
+  const activeDepartments = input.workspace.org.departments.filter(
+    (department) =>
+      department.name.trim().length > 0 &&
+      department.roles.some((role) => role.name.trim().length > 0),
   );
 
   let departmentIds = new Map<string, string>();
@@ -70,7 +72,7 @@ export async function applyAccountWorkspace(
       activeDepartments.map((department) => ({
         company_id: input.companyId,
         name: department.name.trim(),
-        type: department.key,
+        type: department.id,
       })),
     )
     .select("id, name, type");
@@ -197,9 +199,9 @@ export async function applyAccountWorkspace(
     admin.businessStructure = {
       workingHours: hours,
       departments: activeDepartments.map((department) => ({
-        id: departmentIds.get(department.key) ?? department.key,
+        id: departmentIds.get(department.id) ?? department.id,
         name: department.name,
-        type: department.key,
+        type: department.id,
       })),
       locations: locationId
         ? [
