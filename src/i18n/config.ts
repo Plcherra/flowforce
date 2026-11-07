@@ -2,18 +2,18 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
 // Import translation files
-import en from "../locales/en.json";
-import es from "../locales/es.json";
-import fr from "../locales/fr.json";
-import de from "../locales/de.json";
-import it from "../locales/it.json";
-import pt from "../locales/pt.json";
-import enLiterals from "../locales/literals/en.json";
-import esLiterals from "../locales/literals/es.json";
-import frLiterals from "../locales/literals/fr.json";
-import deLiterals from "../locales/literals/de.json";
-import itLiterals from "../locales/literals/it.json";
-import ptLiterals from "../locales/literals/pt.json";
+import en from "../locales/en.json" with { type: "json" };
+import es from "../locales/es.json" with { type: "json" };
+import fr from "../locales/fr.json" with { type: "json" };
+import de from "../locales/de.json" with { type: "json" };
+import it from "../locales/it.json" with { type: "json" };
+import pt from "../locales/pt.json" with { type: "json" };
+import enLiterals from "../locales/literals/en.json" with { type: "json" };
+import esLiterals from "../locales/literals/es.json" with { type: "json" };
+import frLiterals from "../locales/literals/fr.json" with { type: "json" };
+import deLiterals from "../locales/literals/de.json" with { type: "json" };
+import itLiterals from "../locales/literals/it.json" with { type: "json" };
+import ptLiterals from "../locales/literals/pt.json" with { type: "json" };
 
 const resources = {
   en: { translation: { ...en, literals: enLiterals } },

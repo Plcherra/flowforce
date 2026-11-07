@@ -180,8 +180,6 @@ process.stdout.write(
   [
     `TEST_USER_EMAIL=${email}`,
     `TEST_USER_PASSWORD=${password}`,
-    `E2E_EMAIL=${email}`,
-    `E2E_PASSWORD=${password}`,
     "",
   ].join("\n"),
 );
