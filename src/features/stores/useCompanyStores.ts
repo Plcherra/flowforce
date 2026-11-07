@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { useProfile } from "@/hooks/useProfile";
-import { isPlaceholderStoreName, type StoreHours } from "@/features/stores/storeDraft";
+import { type StoreHours } from "@/features/stores/storeDraft";
 
 export type CompanyStore = {
   id: string;
@@ -26,7 +26,7 @@ export function useCompanyStores() {
         .order("created_at", { ascending: true });
       if (error) return [];
       return (data ?? [])
-        .filter((row) => !row.archived_at && !isPlaceholderStoreName(row.name ?? ""))
+        .filter((row) => !row.archived_at)
         .map((row) => ({
           id: row.id,
           name: row.name?.trim() || row.id,

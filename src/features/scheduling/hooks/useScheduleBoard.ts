@@ -172,12 +172,7 @@ export function useScheduleBoard({
         return;
       }
 
-      setLocations(
-        (data ?? []).filter((row) => {
-          const normalized = (row.name ?? "").trim().toLowerCase().replace(/\s+/g, " ");
-          return normalized !== "walk-in" && normalized !== "walk in" && normalized !== "walkin";
-        }),
-      );
+      setLocations(data ?? []);
     } finally {
       setIsLocationsLoading(false);
     }

@@ -84,7 +84,11 @@ test("walks invite, company basics, and a first shift without storing the invite
   if (captured.storeId) {
     expect(captured.body?.locationId).toBe(captured.storeId);
   } else {
-    expect(captured.body?.locationId ?? "").not.toMatch(/walk-in/i);
+    const submitted = captured.body?.locationId ?? "";
+    expect(
+      submitted === "" ||
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(submitted),
+    ).toBe(true);
   }
   expect(captured.calls).toBe(1);
   const shift = captured.body?.firstShift;

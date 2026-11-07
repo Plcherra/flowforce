@@ -61,7 +61,7 @@ export function useAdminSettings(source: SystemSettingsHook) {
           .single(),
         supabase
           .from("inv_locations")
-          .select("id, name, location_type, temperature_controlled, is_active")
+          .select("id, name, location_type, temperature_controlled, is_active, hidden_at")
           .eq("company_id", company.id)
           .order("created_at", { ascending: true }),
         supabase
@@ -78,13 +78,15 @@ export function useAdminSettings(source: SystemSettingsHook) {
         state.businessStructure.workingHours;
 
       const locationsSnapshot =
-        locationsResult.data?.map((item) => ({
-          id: item.id,
-          name: item.name,
-          location_type: item.location_type,
-          temperature_controlled: item.temperature_controlled,
-          is_active: item.is_active,
-        })) ?? state.businessStructure.locations;
+        locationsResult.data
+          ?.filter((item) => !item.hidden_at && item.location_type !== "store")
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            location_type: item.location_type,
+            temperature_controlled: item.temperature_controlled,
+            is_active: item.is_active,
+          })) ?? state.businessStructure.locations;
 
       const roleTemplatesSnapshot =
         rolesResult.data?.map((role) => ({

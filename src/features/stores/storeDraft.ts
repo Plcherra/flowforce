@@ -27,13 +27,6 @@ export type StoreDraft = {
 
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-const PLACEHOLDER_NAMES = new Set(["walk-in", "walk in", "walkin"]);
-
-export function isPlaceholderStoreName(name: string): boolean {
-  const normalized = name.trim().toLowerCase().replace(/\s+/g, " ");
-  return PLACEHOLDER_NAMES.has(normalized);
-}
-
 export function shouldAskForStore(storeCount: number): boolean {
   return storeCount > 1;
 }
@@ -78,7 +71,7 @@ function dayProblem(day: DayHours): boolean {
 }
 
 export function storeDraftProblem(store: StoreDraft): boolean {
-  if (!store.name.trim() || isPlaceholderStoreName(store.name)) return true;
+  if (!store.name.trim()) return true;
   if (STORE_DAYS.every((day) => store.hours[day]?.closed)) return true;
   return STORE_DAYS.some((day) => dayProblem(store.hours[day]));
 }

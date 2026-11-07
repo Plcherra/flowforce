@@ -10,7 +10,6 @@ import { StoreStep } from "@/features/onboarding/account/StoreStep";
 import {
   blankStore,
   defaultStoreHours,
-  isPlaceholderStoreName,
   storeDraftProblem,
   type StoreDraft,
   type StoreHours,
@@ -57,7 +56,7 @@ export function StoresSettingsCard() {
           .eq("id", existing.id);
       }
       for (const draft of editing) {
-        if (!draft.name.trim() || isPlaceholderStoreName(draft.name)) continue;
+        if (!draft.name.trim()) continue;
         const payload = {
           company_id: companyId,
           name: draft.name.trim(),

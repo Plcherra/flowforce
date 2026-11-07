@@ -40,12 +40,7 @@ export function useLocations() {
           return [];
         }
 
-        return (data ?? [])
-          .filter((location) => {
-            const normalized = (location.name ?? "").trim().toLowerCase().replace(/\s+/g, " ");
-            return normalized !== "walk-in" && normalized !== "walk in" && normalized !== "walkin";
-          })
-          .map((location) => ({
+        return (data ?? []).map((location) => ({
             id: location.id,
             name: location.name ?? "Untitled Location",
             address: location.address ?? null,
