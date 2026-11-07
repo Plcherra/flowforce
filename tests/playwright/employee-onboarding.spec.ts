@@ -80,6 +80,17 @@ test.describe("Employee onboarding with separate users", () => {
     await inviteDialog.getByLabel("First name").fill(staff.firstName);
     await inviteDialog.getByLabel("Last name").fill(staff.lastName);
     await inviteDialog.getByLabel("Email").fill(staff.email);
+    await expect(inviteDialog.getByTestId("invite-role")).toHaveAttribute("data-selected", "true", {
+      timeout: 20_000,
+    });
+    await inviteDialog.getByTestId("invite-start-date").fill("2026-11-16");
+    const department = inviteDialog.getByTestId("invite-department");
+    if (await department.isVisible().catch(() => false)) {
+      await department.click();
+      const option = page.getByTestId("invite-department-option").first();
+      await expect(option).toBeVisible();
+      await option.click();
+    }
     const inviteResponse = page.waitForResponse(
       (response) =>
         response.url().includes("/api/employees/invite") &&
@@ -104,6 +115,7 @@ test.describe("Employee onboarding with separate users", () => {
     await staffPage.getByRole("button", { name: "Activate Account" }).click();
     await staffPage.waitForURL("**/app/onboarding", { timeout: 45_000 });
     await expect(staffPage.getByTestId("onboarding-welcome")).toContainText(owner.company);
+    await expect(staffPage.getByTestId("onboarding-fact-start")).toContainText("2026");
     await expect(staffPage.getByText("Read the shop handbook")).toBeVisible();
     await staffPage.getByLabel("I've read this").click();
     await staffPage.getByTestId("onboarding-upload-input").setInputFiles({
