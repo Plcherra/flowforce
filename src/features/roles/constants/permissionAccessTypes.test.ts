@@ -34,9 +34,10 @@ export function runPermissionAccessTypeTests() {
     accessSwitchOn(manager, findAccessSwitch("shifts", "edit")!),
     true,
   );
+  assert.equal(manager["schedule.delete"], true);
   assert.equal(
     accessSwitchOn(manager, findAccessSwitch("shifts", "delete")!),
-    false,
+    true,
   );
 
   const templates = findAccessSwitch("form_templates", "delete")!;

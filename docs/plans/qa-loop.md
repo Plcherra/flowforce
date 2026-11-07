@@ -53,6 +53,15 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
 
 ## After Ops v1
 
+Manager shift delete and foreign-key indexes — waiting-on-migration
+- Managers can delete shifts by default. An explicit `schedule.delete: false` on a manager class turns it off. Staff still cannot delete shifts.
+- Settings → Sections & Access → Role Configuration has **Managers can delete shifts**. It is on unless a manager class has that key set to false. Turning it off writes only that deny. Turning it on writes the key as true.
+- Delete Shift and Empty this week follow `schedule.delete`. The schedules DELETE policy already requires `current_user_has_permission(company_id, 'schedule.delete')`.
+- Migration `20261107190222_manager_shift_delete_default` updates the default and adds the key only where a manager pack does not mention it.
+- Migration `20261107190223_unindexed_foreign_key_indexes` adds 78 covering indexes for public foreign keys from the unindexed_foreign_keys advisor. No drops.
+- `e2e/manager-shift-delete.spec.ts` passed locally (English, test login). The toggle request was stopped before it was stored.
+- Apply both migrations before relying on the new default in production. Remote deploy readiness stays red until they are applied. Do not merge until then.
+
 Real-store locations (Pedro-approved after Ops v1) — done
 - Migration `20261107085004_company_stores` was applied to production. Shops live in `public.stores` with name, address, and hours. The Walk-in inventory row is hidden and was not deleted. No store rows were backfilled, because only Walk-in existed.
 - Ops v1 items 1–8 are done. Pack prices are the placeholder amounts in item 8.

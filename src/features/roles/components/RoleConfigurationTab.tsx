@@ -16,6 +16,7 @@ import {
   resolveProductLevel,
 } from "@/features/roles/constants/productLevels";
 import { PRODUCT_ROLE_LABELS } from "@/features/roles/constants/productRoles";
+import { ManagerShiftDeleteToggle } from "./ManagerShiftDeleteToggle";
 import RoleManagementDialog from "./RoleManagementDialog";
 import { ClassJobBoxList } from "./ClassJobBoxList";
 import { Plus, Edit, Trash2, Shield, AlertTriangle } from "lucide-react";
@@ -63,9 +64,7 @@ export default function RoleConfigurationTab() {
       return;
     }
     if (
-      window.confirm(
-        "Archive this class? It drops off invite and the Roles list. The row stays so FlowForce will not plant a stock copy.",
-      )
+      window.confirm(t("roles.archiveClassConfirm"))
     ) {
       await deleteRole.mutateAsync(role.id);
     }
@@ -225,6 +224,28 @@ export default function RoleConfigurationTab() {
           />
         </CardContent>
       </Card>
+
+      <ManagerShiftDeleteToggle
+        roles={rolesArray}
+        disabled={updateRole.isPending}
+        onChange={async (enabled) => {
+          const managers = rolesArray.filter(
+            (role) =>
+              role.is_active !== false && resolveProductLevel(role) === "manager",
+          );
+          await Promise.all(
+            managers.map((role) =>
+              updateRole.mutateAsync({
+                id: role.id,
+                permissions: {
+                  ...role.permissions,
+                  "schedule.delete": enabled,
+                },
+              }),
+            ),
+          );
+        }}
+      />
 
       <div className="grid gap-4">{activeRoles.map(renderRoleCard)}</div>
 

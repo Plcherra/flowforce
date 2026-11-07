@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ShiftDetailsActions } from "./ShiftDetailsActions";
 import { EmployeeSelector } from "./EmployeeSelector";
 import { ShiftLinkedForms } from "./shift-wizard/ShiftLinkedForms";
 import { ShiftRoleDepartmentFields } from "./shift-wizard/ShiftRoleDepartmentFields";
@@ -30,9 +31,6 @@ import { ShiftTasksPanel } from "./shift-wizard/ShiftTasksPanel";
 import type { ShiftTask } from "./shift-wizard/types";
 import {
   X,
-  Save,
-  Eye,
-  Trash2,
   Calendar as CalendarIcon,
   ShieldAlert,
 } from "lucide-react";
@@ -836,32 +834,13 @@ export function ShiftDetailsPanel({
         </Tabs>
       </CardContent>
 
-      <div className="flex shrink-0 flex-col gap-2 border-t p-6">
-        <Button onClick={handleSave} disabled={loading}>
-          <Save className="mr-2 h-4 w-4" />
-          {loading ? t("schedule.saving") : t("schedule.saveShiftChanges")}
-        </Button>
-
-        {!shift.is_published && (
-          <Button
-            variant="outline"
-            onClick={handlePublish}
-            disabled={loading}
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            {t("schedule.publishThisShiftOnly")}
-          </Button>
-        )}
-
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={loading}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          {t("schedule.deleteShift")}
-        </Button>
-      </div>
+      <ShiftDetailsActions
+        loading={loading}
+        published={Boolean(shift.is_published)}
+        onSave={() => void handleSave()}
+        onPublish={() => void handlePublish()}
+        onDelete={() => void handleDelete()}
+      />
     </Card>
   );
 }

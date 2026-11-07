@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(23);
+select plan(24);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -100,7 +100,7 @@ values
     'Manager',
     2,
     'manager',
-    '{}'::jsonb,
+    '{"schedule.delete": false}'::jsonb,
     true,
     true
   );
@@ -112,6 +112,12 @@ where id = 'a11e0000-0000-4000-8000-000000000030';
 update public.profiles
 set role_id = 'a11e0000-0000-4000-8000-000000000042'
 where id = 'a11e0000-0000-4000-8000-000000000020';
+
+select is(
+  public.product_role_default_allows('manager', 'schedule.delete'),
+  true,
+  'managers can delete shifts unless the class pack turns it off'
+);
 
 -- Poisoned rows must not grant access. These tables were member-writable.
 insert into public.user_roles (user_id, role)

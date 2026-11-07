@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { managersCanDeleteShifts } from "./managerShiftDelete";
 import {
   canDeactivateClass,
   clampPermissionsToProductLevel,
@@ -42,6 +43,12 @@ export function runProductLevelTests() {
   assert.equal(cloned.name, "Kitchen manager");
   assert.equal(cloned.permissions["admin.settings"], undefined);
   assert.equal(cloned.permissions.approveTimeOff, true);
+  assert.equal(cloned.permissions["schedule.delete"], true);
+  const managerDeleteOff = fillMissingProductRoleDefaults("manager", {
+    "schedule.delete": false,
+  });
+  assert.equal(managerDeleteOff["schedule.delete"], false);
+  assert.equal(managerDeleteOff["schedule.create"], true);
 
   assert.equal(canDeactivateClass({ name: "Owner", product_level: "owner" }), false);
   assert.equal(canDeactivateClass({ name: "Manager", product_level: "manager" }), true);
@@ -143,4 +150,28 @@ export function runProductLevelTests() {
   });
   assert.equal(legacyOwner["messages.send"], true);
   assert.equal(legacyOwner.approveTimeOff, false);
+
+  assert.equal(
+    managersCanDeleteShifts([
+      { product_level: "manager", permissions: {} },
+      { product_level: "admin", permissions: { "schedule.delete": false } },
+    ]),
+    true,
+  );
+  assert.equal(
+    managersCanDeleteShifts([
+      { product_level: "manager", permissions: { "schedule.delete": false } },
+    ]),
+    false,
+  );
+  assert.equal(
+    managersCanDeleteShifts([
+      {
+        product_level: "manager",
+        is_active: false,
+        permissions: { "schedule.delete": false },
+      },
+    ]),
+    true,
+  );
 }
