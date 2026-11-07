@@ -114,12 +114,14 @@ test("café starter adds a Barista role and opening and closing lists for My Shi
   await expect(page.getByTestId("cafe-starter-apply")).toBeVisible();
   await dialog.screenshot({ path: "/opt/cursor/artifacts/cafe-starter-dialog.png" });
 
-  const showFrom = localInput(new Date(Date.now() - 60 * 60 * 1000));
-  const dueAt = localInput(new Date(Date.now() + 4 * 60 * 60 * 1000));
-  await page.getByTestId("cafe-show-from-opening").fill(showFrom);
-  await page.getByTestId("cafe-due-at-opening").fill(dueAt);
-  await page.getByTestId("cafe-show-from-closing").fill(showFrom);
-  await page.getByTestId("cafe-due-at-closing").fill(dueAt);
+  const showAt = "00:00";
+  const dueTime = "23:58";
+  const completeBy = "23:59";
+  for (const list of ["opening", "closing"]) {
+    await page.getByTestId(`cafe-show-from-${list}`).fill(showAt);
+    await page.getByTestId(`cafe-due-at-${list}`).fill(dueTime);
+    await page.getByTestId(`cafe-complete-by-${list}`).fill(completeBy);
+  }
   await page.getByTestId("cafe-starter-apply").click();
   await expect(dialog).toBeHidden({ timeout: 20_000 });
   expect(forms).toHaveLength(2);
@@ -131,11 +133,12 @@ test("café starter adds a Barista role and opening and closing lists for My Shi
   for (const form of forms) {
     const distribution = distributionOf(form.settings);
     expect(distribution.record_kind).toBe("list");
-    expect(distribution.show_from).toBeTruthy();
-    expect(distribution.due_at).toBeTruthy();
-    expect(new Date(String(distribution.due_at)).getTime()).toBeGreaterThan(
-      new Date(String(distribution.show_from)).getTime(),
-    );
+    expect(distribution.time_mode).toBe("shift_day");
+    expect(distribution.show_at).toBe(showAt);
+    expect(distribution.due_time).toBe(dueTime);
+    expect(distribution.complete_by).toBe(completeBy);
+    expect(distribution.show_from).toBeNull();
+    expect(distribution.due_at).toBeNull();
     expect(form.settings.checklist).toBeUndefined();
     expect(form.settings.automation).toBeUndefined();
     const starter = form.settings.starter as { pack?: string; list?: string };
@@ -164,11 +167,6 @@ test("café starter adds a Barista role and opening and closing lists for My Shi
     .getByTestId(`my-shift-role-list-${forms[0]?.id}`)
     .screenshot({ path: "/opt/cursor/artifacts/cafe-starter-my-shift.png" });
 });
-
-function localInput(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
