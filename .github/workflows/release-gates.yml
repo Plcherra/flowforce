@@ -147,6 +147,8 @@ jobs:
         run: npm run typecheck
 
       - name: Build production app
+        env:
+          NEXT_PUBLIC_E2E_PACK_OVERRIDES: "1"
         run: npm run build
 
       - name: Docker image build gate
