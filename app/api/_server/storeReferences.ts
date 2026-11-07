@@ -1,5 +1,3 @@
-import { isPlaceholderStoreName } from "@/features/stores/storeDraft";
-
 type Client = {
   from: (table: string) => any;
 };
@@ -14,23 +12,16 @@ export async function remapPlaceholderReferences(client: Client, companyId: stri
     .is("archived_at", null)
     .order("created_at", { ascending: true });
   if (error) throw error;
-  const stores = ((storeRows ?? []) as StoreRow[]).filter(
-    (store) => store.id && !isPlaceholderStoreName(store.name ?? ""),
-  );
+  const stores = ((storeRows ?? []) as StoreRow[]).filter((store) => store.id);
   const first = stores[0];
   if (!first) return;
 
   const { data: rooms } = await client
     .from("inv_locations")
-    .select("id, name, hidden_at, location_type")
+    .select("id, hidden_at, location_type")
     .eq("company_id", companyId);
-  const hiddenIds = ((rooms ?? []) as { id: string; name?: string | null; hidden_at?: string | null; location_type?: string | null }[])
-    .filter(
-      (room) =>
-        Boolean(room.hidden_at) ||
-        isPlaceholderStoreName(room.name ?? "") ||
-        room.location_type === "store",
-    )
+  const hiddenIds = ((rooms ?? []) as { id: string; hidden_at?: string | null; location_type?: string | null }[])
+    .filter((room) => Boolean(room.hidden_at) || room.location_type === "store")
     .map((room) => room.id);
 
   if (hiddenIds.length > 0) {
@@ -57,15 +48,13 @@ export async function remapPlaceholderReferences(client: Client, companyId: stri
     const named = stores.find(
       (store) => (store.name ?? "").trim().toLowerCase() === (shift.location ?? "").trim().toLowerCase(),
     );
-    const placeholder = isPlaceholderStoreName(shift.location ?? "");
-    if (!named && !placeholder) continue;
-    const target = named ?? first;
+    if (!named) continue;
     await client
       .from("schedules")
       .update({
-        store_id: target.id,
-        legacy_location: placeholder ? shift.location ?? null : null,
-        location: target.name,
+        store_id: named.id,
+        legacy_location: null,
+        location: named.name,
       })
       .eq("id", shift.id);
   }

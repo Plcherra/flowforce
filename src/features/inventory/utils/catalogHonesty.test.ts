@@ -18,7 +18,7 @@ export function runInventoryCatalogHonestyTests() {
   const stock = summarizeItemStock([
     {
       item_id: "salmon",
-      location_id: "walk-in",
+      location_id: "cooler",
       quantity_on_hand: 0,
       stock_value: 0,
     },
@@ -77,7 +77,7 @@ export function runInventoryCountHonestyTests() {
     companyId: "co-1",
     userId: "user-1",
     adjustmentDate: "2026-09-18",
-    locationId: "walk-in",
+    locationId: "cooler",
     lines: [
       {
         id: "line-1",
@@ -95,7 +95,7 @@ export function runInventoryCountHonestyTests() {
       },
     ],
     itemCosts: {
-      salmon: { cost_per_unit: 12, default_location_id: "walk-in" },
+      salmon: { cost_per_unit: 12, default_location_id: "cooler" },
       unchanged: { cost_per_unit: 3 },
     },
   });
@@ -104,14 +104,14 @@ export function runInventoryCountHonestyTests() {
   assert.equal(adjustments[0]?.adjustment_type, "increase");
   assert.equal(adjustments[0]?.quantity, 10);
   assert.equal(adjustments[0]?.cost_impact, 120);
-  assert.equal(adjustments[0]?.location_id, "walk-in");
+  assert.equal(adjustments[0]?.location_id, "cooler");
 
   const shortage = buildCountApprovalAdjustments({
     countId: "count-2",
     companyId: "co-1",
     userId: "user-1",
     adjustmentDate: "2026-09-18",
-    locationId: "walk-in",
+    locationId: "cooler",
     lines: [
       {
         id: "line-3",

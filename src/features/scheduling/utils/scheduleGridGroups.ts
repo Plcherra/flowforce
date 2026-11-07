@@ -16,13 +16,7 @@ export type GridRow<T> =
   | { kind: "employee"; employee: T };
 
 function visibleStore(value: string | null | undefined): string {
-  const store = value?.trim() || "";
-  if (!store) return "No store";
-  const normalized = store.toLowerCase().replace(/\s+/g, " ");
-  if (normalized === "walk-in" || normalized === "walk in" || normalized === "walkin") {
-    return "No store";
-  }
-  return store;
+  return value?.trim() || "No store";
 }
 
 export function personStoreAndRole(shifts: GridShiftLabel[]): StoreRole {

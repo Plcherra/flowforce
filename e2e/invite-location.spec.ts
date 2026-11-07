@@ -51,7 +51,6 @@ test("invites a teammate to a real store the signed-in user can assign", async (
     const storeName = ((await option.textContent()) ?? "").trim();
     storeId = await option.getAttribute("data-location-id");
     expect(storeName.length).toBeGreaterThan(0);
-    expect(storeName.toLowerCase()).not.toBe("walk-in");
     expect(storeId).toBeTruthy();
     await option.click();
     await expect(location).toContainText(storeName);
@@ -93,7 +92,11 @@ test("invites a teammate to a real store the signed-in user can assign", async (
   if (asksForStore) {
     expect(captured?.locationId).toBe(storeId);
   } else {
-    expect(captured?.locationId ?? "").not.toMatch(/walk-in/i);
+    const submitted = captured?.locationId ?? "";
+    expect(
+      submitted === "" ||
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(submitted),
+    ).toBe(true);
   }
 });
 

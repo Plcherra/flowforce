@@ -21,8 +21,6 @@ import {
   actorCanInvite,
   locationsAssignableByActor,
 } from "@/features/employees/utils/inviteLocation";
-import { isPlaceholderStoreName } from "@/features/stores/storeDraft";
-
 export function useInviteAccessOptions() {
   const { roles, loading: rolesLoading } = useCompanyRoles();
   const { profile, loading: profileLoading } = useProfile();
@@ -62,7 +60,7 @@ export function useInviteAccessOptions() {
         return [];
       }
       return (data ?? [])
-        .filter((row) => !row.archived_at && !isPlaceholderStoreName(row.name ?? ""))
+        .filter((row) => !row.archived_at)
         .map((row) => ({
           id: row.id,
           name: row.name?.trim() || row.id,
