@@ -19,21 +19,7 @@ const staff = {
 
 test.describe.configure({ mode: "serial" });
 
-async function fillOwnerSignup(page: Page) {
-  if (process.env.PLAYWRIGHT_RESUME_SIGNUP === "1") {
-    await page.goto("/auth");
-    await page.getByLabel("Email").fill(owner.email);
-    await page.getByLabel("Password").fill(PASSWORD);
-    await page.getByRole("button", { name: "Sign In" }).click();
-    await expect(page.getByRole("button", { name: "Sign In" })).toBeHidden({ timeout: 20_000 });
-    await page.goto("/app/settings?tab=onboarding");
-    const settings = page.getByTestId("onboarding-settings");
-    const ready = await settings
-      .waitFor({ state: "visible", timeout: 20_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (ready) return;
-  }
+async function fillShopWizard(page: Page) {
   await page.goto("/company-registration");
   await expect(page.getByRole("heading", { level: 1, name: "Sign up" })).toBeVisible();
   await page.getByLabel("First name").fill(owner.firstName);
@@ -91,7 +77,16 @@ async function fillOwnerSignup(page: Page) {
     throw new Error("Signup is waiting for an email confirmation link.");
   }
   await page.goto(link);
-  await page.waitForURL("**/app/dashboard", { timeout: 60_000 });
+  await page.goto("/auth");
+  await page.getByLabel("Email").fill(owner.email);
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Sign In" }).click();
+  await expect(page.getByRole("button", { name: "Sign In" })).toBeHidden({ timeout: 20_000 });
+  await fillShopWizard(page);
+}
+
+async function fillOwnerSignup(page: Page) {
+  await fillShopWizard(page);
 }
 
 test.describe("Employee onboarding with separate users", () => {
@@ -111,24 +106,27 @@ test.describe("Employee onboarding with separate users", () => {
     await page.getByRole("button", { name: "Save welcome" }).click();
     await expect(page.getByText("Saved").first()).toBeVisible();
 
-    await page.getByLabel("Document name").fill("Shop handbook");
-    await page.getByLabel("Upload document").setInputFiles({
-      name: "handbook.pdf",
-      mimeType: "application/pdf",
-      buffer: Buffer.from("%PDF-1.4 handbook"),
-    });
-    await page.locator('button[type="submit"]').filter({ hasText: "Upload document" }).click();
-    await expect(page.getByText("Shop handbook").first()).toBeVisible();
+    const handbookStep = page.getByText("Read the shop handbook");
+    if ((await handbookStep.count()) === 0) {
+      await page.getByLabel("Document name").fill("Shop handbook");
+      await page.getByLabel("Upload document").setInputFiles({
+        name: "handbook.pdf",
+        mimeType: "application/pdf",
+        buffer: Buffer.from("%PDF-1.4 handbook"),
+      });
+      await page.locator('button[type="submit"]').filter({ hasText: "Upload document" }).click();
+      await expect(page.getByText("Shop handbook").first()).toBeVisible();
 
-    await page.getByLabel("Step title").fill("Read the shop handbook");
-    await page.getByLabel("Shop document").selectOption({ label: "Shop handbook" });
-    await page.getByTestId("onboarding-add-step").click();
-    await expect(page.getByText("Read the shop handbook").first()).toBeVisible();
+      await page.getByLabel("Step title").fill("Read the shop handbook");
+      await page.getByLabel("Shop document").selectOption({ label: "Shop handbook" });
+      await page.getByTestId("onboarding-add-step").click();
+      await expect(handbookStep.first()).toBeVisible();
 
-    await page.getByLabel("Step title").fill("Photo ID or right to work");
-    await page.getByLabel("What they do").selectOption("upload");
-    await page.getByTestId("onboarding-add-step").click();
-    await expect(page.getByText("Photo ID or right to work").first()).toBeVisible();
+      await page.getByLabel("Step title").fill("Photo ID or right to work");
+      await page.getByLabel("What they do").selectOption("upload");
+      await page.getByTestId("onboarding-add-step").click();
+      await expect(page.getByText("Photo ID or right to work").first()).toBeVisible();
+    }
 
     await page.goto("/app/employees?invite=1");
     const inviteDialog = page.getByRole("dialog");
@@ -144,17 +142,7 @@ test.describe("Employee onboarding with separate users", () => {
       await department.click();
       await page.getByRole("option", { name: "FOH", exact: true }).first().click();
     }
-    const location = inviteDialog.getByTestId("invite-location");
-    if (await location.isVisible().catch(() => false)) {
-      await location.click();
-      const storeOption = page
-        .getByTestId("invite-location-option")
-        .filter({ hasText: "High Street" })
-        .first();
-      await expect(storeOption).toBeVisible();
-      await storeOption.click();
-      await expect(location).toHaveText("High Street");
-    }
+    await expect(inviteDialog.getByTestId("invite-location")).toHaveCount(0);
     await inviteDialog.getByTestId("invite-continue").click();
     try {
       await expect(page.getByTestId("ops-basics")).toBeVisible({ timeout: 5_000 });
@@ -197,7 +185,9 @@ test.describe("Employee onboarding with separate users", () => {
     });
     await expect(staffPage.getByText("photo-id.png")).toBeVisible({ timeout: 20_000 });
     await staffPage.getByTestId("onboarding-finish").click();
-    await expect(staffPage.getByText("You're on the floor")).toBeVisible({ timeout: 20_000 });
+    await expect(staffPage.getByText("You're on the floor", { exact: true })).toBeVisible({
+      timeout: 20_000,
+    });
     await staffPage.goto("/app/dashboard");
     await expect(staffPage.getByTestId("overview-employee-onboarding")).toHaveCount(0);
     await staffContext.close();

@@ -9,6 +9,7 @@ import {
   isInviteableClass,
   profileRoleFromClass,
   resolveProductLevel,
+  storedProfileRole,
   type ProductLevel,
 } from "@/features/roles/constants/productLevels";
 import {
@@ -246,7 +247,7 @@ export async function applyInviteAccessToUser(params: {
 }) {
   const roleKey = profileRoleFromClass(params.role);
 
-  await supabaseAdmin.from("profiles").upsert(
+  const profileWrite = await supabaseAdmin.from("profiles").upsert( // pragma: allowlist secret
     {
       id: params.userId,
       company_id: params.companyId,
@@ -254,7 +255,7 @@ export async function applyInviteAccessToUser(params: {
       first_name: params.firstName || "Team",
       last_name: params.lastName || "Member",
       phone: params.phone,
-      role: roleKey,
+      role: storedProfileRole(roleKey),
       role_id: params.role.id,
       department_id: params.departmentId,
       ...(params.storeId ? { store_id: params.storeId } : params.locationId ? { location_id: params.locationId } : {}),
@@ -263,6 +264,7 @@ export async function applyInviteAccessToUser(params: {
     },
     { onConflict: "id" },
   );
+  if (profileWrite.error) throw profileWrite.error;
 
   await supabaseAdmin.from("company_members").upsert(
     {

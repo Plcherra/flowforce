@@ -61,9 +61,13 @@ export function InvitePersonStack({
   };
 
   const readyPeople = (): CompanyInvitePayload[] | null => {
-    const ready = cards.filter(
-      (card) => card.roleId && (card.email.trim() || card.phone.trim()),
-    );
+    const onlyStoreId = locations.length === 1 ? locations[0].id : "";
+    const ready = cards
+      .map((card) => ({
+        ...card,
+        locationId: card.locationId || onlyStoreId,
+      }))
+      .filter((card) => card.roleId && (card.email.trim() || card.phone.trim()));
     if (ready.length === 0 || ready.some((card) => !readHireDate(card.startDate))) {
       toast({
         variant: "destructive",

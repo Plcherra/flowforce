@@ -7,6 +7,7 @@ import {
   inferProductLevel,
   isInviteableClass,
   isOwnerMajorPermission,
+  storedProfileRole,
   OWNER_MAJOR_PERMISSION_KEYS,
   permissionAllowedAtLevel,
 } from "./productLevels";
@@ -21,6 +22,9 @@ export function runProductLevelTests() {
   );
 
   assert.equal(inferProductLevel("Employee"), "staff");
+  assert.equal(storedProfileRole("staff"), "employee");
+  assert.equal(storedProfileRole("admin"), "administrator");
+  assert.equal(storedProfileRole("owner"), "owner");
   assert.equal(inferProductLevel("Kitchen manager", 2), "manager");
 
   const kitchen = clampPermissionsToProductLevel("manager", {
