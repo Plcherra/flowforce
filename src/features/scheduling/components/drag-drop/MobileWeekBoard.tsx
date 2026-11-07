@@ -12,12 +12,10 @@ import {
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export function usePhoneScheduleLayout() {
-  // The week grid is at least 800px wide. Start on the stacked board so a
-  // 768px tablet never paints that grid before the media query is read.
-  const [isPhone, setIsPhone] = useState(true);
+  const [isPhone, setIsPhone] = useState(false);
 
   useLayoutEffect(() => {
-    const query = window.matchMedia("(max-width: 768px)");
+    const query = window.matchMedia("(max-width: 767px)");
     const update = () => setIsPhone(query.matches);
     update();
     query.addEventListener("change", update);
