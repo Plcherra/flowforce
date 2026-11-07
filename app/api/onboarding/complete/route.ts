@@ -123,6 +123,77 @@ const publicErrorDetails = (error: unknown) => {
   };
 };
 
+async function storeOrgSetup(companyId: string, orgSetup: unknown) {
+  if (!orgSetup || typeof orgSetup !== "object" || Array.isArray(orgSetup)) return;
+  const { data, error } = await supabaseAdmin // pragma: allowlist secret
+    .from("system_settings")
+    .select("admin_config")
+    .eq("company_id", companyId)
+    .maybeSingle();
+  if (error) {
+    logger.warn("Unable to read settings for org setup", { error, context: { companyId } });
+    return;
+  }
+  const root =
+    data?.admin_config && typeof data.admin_config === "object" && !Array.isArray(data.admin_config)
+      ? (data.admin_config as Record<string, unknown>)
+      : {};
+  const { error: updateError } = await supabaseAdmin // pragma: allowlist secret
+    .from("system_settings")
+    .update({
+      admin_config: { ...root, orgSetup },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("company_id", companyId);
+  if (updateError) {
+    logger.warn("Unable to store org setup", { error: updateError, context: { companyId } });
+    return;
+  }
+
+  const departments = (orgSetup as { departments?: unknown }).departments;
+  if (!Array.isArray(departments)) return;
+  for (const department of departments) {
+    if (!department || typeof department !== "object") continue;
+    const name = (department as { name?: unknown }).name;
+    if (typeof name !== "string" || !name.trim()) continue;
+    const { data: created, error: insertError } = await supabaseAdmin // pragma: allowlist secret
+      .from("departments")
+      .insert({
+        company_id: companyId,
+        name: name.trim(),
+        type: "operations",
+        description: "",
+      })
+      .select("id")
+      .maybeSingle();
+    if (insertError || !created?.id) {
+      logger.warn("Unable to insert onboarding department", {
+        error: insertError,
+        context: { companyId, name },
+      });
+      continue;
+    }
+    const roles = (department as { roles?: unknown }).roles;
+    if (!Array.isArray(roles)) continue;
+    for (const role of roles) {
+      if (!role || typeof role !== "object") continue;
+      const roleName = (role as { name?: unknown }).name;
+      if (typeof roleName !== "string" || !roleName.trim()) continue;
+      const { error: linkError } = await supabaseAdmin // pragma: allowlist secret
+        .from("company_roles")
+        .update({ department_id: created.id })
+        .eq("company_id", companyId)
+        .eq("name", roleName.trim());
+      if (linkError) {
+        logger.warn("Role department link skipped until the column exists", {
+          error: linkError,
+          context: { companyId, roleName },
+        });
+      }
+    }
+  }
+}
+
 async function ensureBasicOpsPackFlags(companyId: string) {
   const { data, error } = await supabaseAdmin // pragma: allowlist secret
     .from("system_settings")
@@ -296,6 +367,7 @@ export async function handleOnboardingComplete(
     });
 
     await ensureBasicOpsPackFlags(companyId);
+    await storeOrgSetup(companyId, body.orgSetup);
 
     const setupStatus = await verifyOnboardingSetup(supabaseAdmin, { // pragma: allowlist secret
       companyId,

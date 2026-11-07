@@ -1,6 +1,7 @@
 import { useNavigate } from "@/lib/router-adapter";
 import { useTranslation } from "react-i18next";
-import EnhancedOnboardingWizard from "@/features/onboarding/components/EnhancedOnboardingWizard";
+import { CompanySignupGuide } from "@/features/onboarding/components/CompanySignupGuide";
+import type { OrgSetup } from "@/features/onboarding/utils/orgTemplates";
 import { useCompanyRegistration } from "@/hooks/useCompanyRegistration";
 import {
   UserInfo,
@@ -23,6 +24,7 @@ export default function CompanyRegistration() {
     enabledSections: string[];
     customRoles: OnboardingRole[];
     positions: OnboardingPosition[];
+    orgSetup: OrgSetup;
   }) => {
     await register(data);
   };
@@ -45,7 +47,7 @@ export default function CompanyRegistration() {
   }
 
   return (
-    <EnhancedOnboardingWizard
+    <CompanySignupGuide
       onComplete={handleOnboardingComplete}
       onCancel={handleCancel}
     />

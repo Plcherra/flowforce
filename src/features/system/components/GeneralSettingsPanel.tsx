@@ -26,6 +26,7 @@ import { useGeneralSettings } from "../hooks/useGeneralSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useTranslation } from "react-i18next";
 import { DepartmentSettingsCard } from "./DepartmentSettingsCard";
+import { OrgSetupSettingsCard } from "./OrgSetupSettingsCard";
 
 export function GeneralSettingsPanel() {
   const { t } = useTranslation();
@@ -259,6 +260,7 @@ export function GeneralSettingsPanel() {
         />
 
         <DepartmentSettingsCard />
+        <OrgSetupSettingsCard />
 
         {saveError && <ErrorState message={saveError.message} />}
 

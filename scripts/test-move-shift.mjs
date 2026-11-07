@@ -27,6 +27,9 @@ const { runShiftLaunchTests } = importTs(
 const { runShiftRoleDepartmentTests } = importTs(
   "../src/features/scheduling/utils/shiftRoleDepartment.test.ts",
 );
+const { runOrgTemplateTests } = importTs(
+  "../src/features/onboarding/utils/orgTemplates.test.ts",
+);
 
 await runMoveShiftTests();
 runPlaceDayEventsTests();
@@ -34,4 +37,5 @@ runShiftChipPaintTests();
 runCalendarEventHrefTests();
 runShiftLaunchTests();
 runShiftRoleDepartmentTests();
+runOrgTemplateTests();
 console.log("moveShift tests passed");
