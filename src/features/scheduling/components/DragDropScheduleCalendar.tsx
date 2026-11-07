@@ -11,6 +11,7 @@ import {
   MobileWeekBoard,
   usePhoneScheduleLayout,
 } from "@/features/scheduling/components/drag-drop/MobileWeekBoard";
+import { ShiftCardLabelProvider } from "@/features/scheduling/components/drag-drop/ShiftCardLabels";
 import { ShiftDetailsPanel } from "@/features/scheduling/components/ShiftDetailsPanel";
 import {
   ShiftWizardDialog,
@@ -298,6 +299,7 @@ export function DragDropScheduleCalendar({
   const isWeekEmpty = weekSchedules.length === 0;
 
   return (
+    <ShiftCardLabelProvider>
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {!readOnly && (
@@ -644,5 +646,6 @@ export function DragDropScheduleCalendar({
         onCreateVendorEvent={createVendorEvent}
       />
     </div>
+    </ShiftCardLabelProvider>
   );
 }

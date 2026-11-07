@@ -2,6 +2,7 @@ import {
   formIsOpenForFill,
   readFormDistribution,
 } from "@/features/forms/utils/formDistribution";
+import { readShiftAssignment } from "@/features/scheduling/utils/shiftRoleDepartment";
 
 export type ScheduledRole = { id: string; name: string };
 
@@ -24,6 +25,7 @@ function normalized(value: string | null | undefined): string {
 
 export function scheduledRoleIds(input: {
   role: string | null;
+  roleId?: string | null;
   positionId?: string | null;
   roles: readonly ScheduledRole[];
   positions: readonly ScheduledPosition[];
@@ -32,6 +34,7 @@ export function scheduledRoleIds(input: {
   const roleText = normalized(input.role);
   if (roleText) names.add(roleText);
   const ids = new Set<string>();
+  if (input.roleId) ids.add(input.roleId);
   if (input.positionId) {
     const position = input.positions.find((item) => item.id === input.positionId);
     if (position?.roleId) ids.add(position.roleId);
@@ -52,6 +55,7 @@ export function roleIdsScheduledOnDay(input: {
     role: string | null;
     positionId?: string | null;
     position_id?: string | null;
+    requirements?: unknown;
     start_time: string | null;
     end_time: string | null;
     user_id: string | null;
@@ -78,6 +82,7 @@ export function roleIdsScheduledOnDay(input: {
     if (!(startMs < dayEnd.getTime() && endMs > dayStart.getTime())) continue;
     for (const id of scheduledRoleIds({
       role: row.role,
+      roleId: readShiftAssignment(row.requirements).roleId,
       positionId: row.positionId ?? row.position_id ?? null,
       roles: input.roles,
       positions: input.positions,

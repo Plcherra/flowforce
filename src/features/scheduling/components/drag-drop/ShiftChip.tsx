@@ -5,6 +5,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
+import { useShiftCardText } from "@/features/scheduling/components/drag-drop/ShiftCardLabels";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 
 export function formatShiftWindow(
@@ -73,7 +74,8 @@ export function ShiftChip({
       : undefined;
 
   const paint = shiftChipPaint(schedule.color, variant);
-  const roleLabel = schedule.job_position?.name || schedule.role || "";
+  const cardText = useShiftCardText(schedule);
+  const roleLabel = cardText.role || "";
   const windowLabel = formatShiftWindow(schedule, t("schedule.invalidTime"));
   const durationLabel = formatShiftDuration(schedule, t("schedule.hoursAbbrev"));
 
@@ -115,6 +117,11 @@ export function ShiftChip({
               {roleLabel}
             </div>
           ) : null}
+          {cardText.department ? (
+            <div data-testid="shift-chip-department" className="truncate">
+              {cardText.department}
+            </div>
+          ) : null}
           <div data-testid="shift-chip-time" className="text-xs opacity-75">
             {windowLabel}
           </div>
@@ -139,6 +146,7 @@ export function ShiftChipOverlay({
 }) {
   const { t } = useTranslation();
   const paint = shiftChipPaint(schedule.color, "assigned");
+  const cardText = useShiftCardText(schedule);
   return (
     <div
       className="rounded-md border border-black/10 px-2.5 py-1.5 text-[11px] shadow-lg cursor-grabbing"
@@ -154,10 +162,11 @@ export function ShiftChipOverlay({
         ) : null}
         {schedule.title ?? schedule.job_position?.name ?? t("schedule.shiftSingular")}
       </div>
-      {schedule.job_position?.name || schedule.role ? (
-        <div className="truncate font-medium">
-          {schedule.job_position?.name || schedule.role}
-        </div>
+      {cardText.role ? (
+        <div className="truncate font-medium">{cardText.role}</div>
+      ) : null}
+      {cardText.department ? (
+        <div className="truncate">{cardText.department}</div>
       ) : null}
       <div className="text-xs opacity-75">
         {formatShiftWindow(schedule, t("schedule.invalidTime"))}

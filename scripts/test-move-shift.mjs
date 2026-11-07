@@ -24,10 +24,14 @@ const { runCalendarEventHrefTests } = importTs(
 const { runShiftLaunchTests } = importTs(
   "../src/features/scheduling/utils/shiftLaunch.test.ts",
 );
+const { runShiftRoleDepartmentTests } = importTs(
+  "../src/features/scheduling/utils/shiftRoleDepartment.test.ts",
+);
 
 await runMoveShiftTests();
 runPlaceDayEventsTests();
 runShiftChipPaintTests();
 runCalendarEventHrefTests();
 runShiftLaunchTests();
+runShiftRoleDepartmentTests();
 console.log("moveShift tests passed");

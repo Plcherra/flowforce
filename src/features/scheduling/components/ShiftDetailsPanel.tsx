@@ -17,6 +17,15 @@ import {
 } from "@/components/ui/select";
 import { EmployeeSelector } from "./EmployeeSelector";
 import { ShiftLinkedForms } from "./shift-wizard/ShiftLinkedForms";
+import { ShiftRoleDepartmentFields } from "./shift-wizard/ShiftRoleDepartmentFields";
+import {
+  displayShiftDepartment,
+  displayShiftRole,
+  mergeShiftAssignment,
+  readShiftAssignment,
+} from "@/features/scheduling/utils/shiftRoleDepartment";
+import { useCompanyRoles } from "@/hooks/useCompanyRoles";
+import { useDepartments } from "@/features/employees/hooks/useDepartments";
 import { ShiftTasksPanel } from "./shift-wizard/ShiftTasksPanel";
 import type { ShiftTask } from "./shift-wizard/types";
 import {
@@ -156,6 +165,13 @@ export function ShiftDetailsPanel({
   const copilotMeta = copilotRequirements?.copilot;
   const copilotWarnings: CopilotDraftWarning[] = copilotMeta?.warnings ?? [];
 
+  const { roles } = useCompanyRoles();
+  const { departments } = useDepartments({
+    companyId: profile?.companyId ?? profile?.company_id ?? null,
+    profileLoading: false,
+  });
+  const [roleId, setRoleId] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     start_time: "",
@@ -170,6 +186,12 @@ export function ShiftDetailsPanel({
 
   useEffect(() => {
     if (shift) {
+      const meta = readShiftAssignment(shift.requirements);
+      const matched = roles.find(
+        (role) => role.id === meta.roleId || role.id === shift.role || role.name === shift.role,
+      );
+      setRoleId(meta.roleId || matched?.id || "");
+      setDepartmentId(meta.departmentId || "");
       setFormData({
         title: shift.title || "",
         start_time: format(new Date(shift.start_time), "yyyy-MM-dd'T'HH:mm"),
@@ -183,7 +205,7 @@ export function ShiftDetailsPanel({
           typeof shift.hourly_rate === "number" ? String(shift.hourly_rate) : "",
       });
     }
-  }, [shift]);
+  }, [roles, shift]);
 
 
   const handleSave = async () => {
@@ -192,11 +214,18 @@ export function ShiftDetailsPanel({
     setLoading(true);
     try {
       const nextStart = new Date(formData.start_time);
+      const selectedRole = roles.find((role) => role.id === roleId);
       const saved = await updateSchedule(shift.id, {
         ...formData,
         hourly_rate: parseHourlyRate(formData.hourly_rate),
         start_time: nextStart.toISOString(),
         end_time: new Date(formData.end_time).toISOString(),
+        role: selectedRole?.name ?? null,
+        requirements: mergeShiftAssignment(shift.requirements, {
+          roleId: selectedRole?.id ?? null,
+          roleName: selectedRole?.name ?? null,
+          departmentId: departmentId || null,
+        }) as Json,
       });
       if (saved) {
         try {
@@ -625,6 +654,12 @@ export function ShiftDetailsPanel({
                   placeholder={t("schedule.shiftTitle2")}
                 />
               </div>
+              <ShiftRoleDepartmentFields
+                roleId={roleId}
+                departmentId={departmentId}
+                onRoleId={setRoleId}
+                onDepartmentId={setDepartmentId}
+              />
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
@@ -709,18 +744,43 @@ export function ShiftDetailsPanel({
               <Badge variant={shift.is_published ? "default" : "secondary"}>
                 {shift.is_published ? t("schedule.published") : t("schedule.draft")}
               </Badge>
-              {(shift.job_position?.name || shift.role) && (
-                <Badge variant="outline">
-                  {shift.job_position?.name || shift.role}
+              {displayShiftRole({
+                role: shift.role,
+                requirements: shift.requirements,
+                roles,
+              }) ? (
+                <Badge variant="outline" data-testid="shift-detail-role">
+                  {displayShiftRole({
+                    role: shift.role,
+                    requirements: shift.requirements,
+                    roles,
+                  })}
                 </Badge>
-              )}
+              ) : null}
+              {displayShiftDepartment({
+                requirements: shift.requirements,
+                departments,
+              }) ? (
+                <Badge variant="outline" data-testid="shift-detail-department">
+                  {displayShiftDepartment({
+                    requirements: shift.requirements,
+                    departments,
+                  })}
+                </Badge>
+              ) : null}
             </div>
 
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-4">
             <ShiftLinkedForms
-              role={shift.role || shift.job_position?.name || shift.job_position?.role}
+              role={
+                displayShiftRole({
+                  role: shift.role,
+                  requirements: shift.requirements,
+                  roles,
+                }) || shift.role
+              }
               title={shift.title}
             />
             <ShiftTasksPanel

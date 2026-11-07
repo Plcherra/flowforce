@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { useGeneralSettings } from "../hooks/useGeneralSettings";
 import { useSystemSettingsContext } from "../hooks/SystemSettingsContext";
 import { useTranslation } from "react-i18next";
+import { DepartmentSettingsCard } from "./DepartmentSettingsCard";
 
 export function GeneralSettingsPanel() {
   const { t } = useTranslation();
@@ -256,6 +257,8 @@ export function GeneralSettingsPanel() {
           onOpenChange={setEditorOpen}
           onConfirm={handleEditorConfirm}
         />
+
+        <DepartmentSettingsCard />
 
         {saveError && <ErrorState message={saveError.message} />}
 

@@ -28,6 +28,8 @@ export interface ShiftWizardFormData {
   location: string;
   job_position_id: string;
   job_position_input: string;
+  role_id: string;
+  department_id: string;
   required_headcount: number;
   hourly_rate: string;
   required_level?: number;
