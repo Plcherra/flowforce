@@ -47,6 +47,47 @@ export function scheduledRoleIds(input: {
   return [...ids];
 }
 
+export function roleIdsScheduledOnDay(input: {
+  schedules: readonly {
+    role: string | null;
+    positionId?: string | null;
+    position_id?: string | null;
+    start_time: string | null;
+    end_time: string | null;
+    user_id: string | null;
+    is_published?: boolean | null;
+    is_template?: boolean | null;
+  }[];
+  viewerId: string;
+  now: Date;
+  roles: readonly ScheduledRole[];
+  positions: readonly ScheduledPosition[];
+}): string[] {
+  const dayStart = new Date(input.now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayEnd.getDate() + 1);
+  const ids = new Set<string>();
+  for (const row of input.schedules) {
+    if (row.user_id !== input.viewerId) continue;
+    if (row.is_template === true || row.is_published === false) continue;
+    if (!row.start_time) continue;
+    const startMs = new Date(row.start_time).getTime();
+    if (Number.isNaN(startMs)) continue;
+    const endMs = row.end_time ? new Date(row.end_time).getTime() : startMs + 60 * 60 * 1000;
+    if (!(startMs < dayEnd.getTime() && endMs > dayStart.getTime())) continue;
+    for (const id of scheduledRoleIds({
+      role: row.role,
+      positionId: row.positionId ?? row.position_id ?? null,
+      roles: input.roles,
+      positions: input.positions,
+    })) {
+      ids.add(id);
+    }
+  }
+  return [...ids];
+}
+
 export function roleListsForShift<T extends ScheduledRoleForm>(
   forms: readonly T[],
   roleIds: readonly string[],

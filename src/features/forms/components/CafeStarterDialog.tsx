@@ -33,16 +33,14 @@ import {
   pendingCafeLists,
   type CafeListKey,
 } from "@/features/forms/utils/cafeStarter";
-import { fromDatetimeLocalValue, toDatetimeLocalValue } from "@/features/tasks/utils/taskSchedule";
 import { logger } from "@/utils/logger";
 
-type Windows = Record<CafeListKey, { showFrom: string; dueAt: string }>;
+type Windows = Record<CafeListKey, { showAt: string; dueTime: string; completeBy: string }>;
 
 function freshWindows(): Windows {
-  const day = new Date();
   return {
-    opening: cafeDefaultWindow(day, "opening"),
-    closing: cafeDefaultWindow(day, "closing"),
+    opening: cafeDefaultWindow("opening"),
+    closing: cafeDefaultWindow("closing"),
   };
 }
 
@@ -71,13 +69,15 @@ export default function CafeStarterDialog({
     baristaExists: Boolean(barista),
   });
   const pendingLists = pendingCafeLists(forms);
-  const timeProblem = pendingLists.some((key) =>
-    cafeWindowProblem(windows[key].showFrom, windows[key].dueAt),
-  );
+  const timeProblem = pendingLists
+    .map((key) =>
+      cafeWindowProblem(windows[key].showAt, windows[key].dueTime, windows[key].completeBy),
+    )
+    .find((problem) => problem != null) ?? null;
 
   const setWindow = (
     key: CafeListKey,
-    field: "showFrom" | "dueAt",
+    field: "showAt" | "dueTime" | "completeBy",
     value: string,
   ) => {
     setWindows((current) => ({
@@ -87,7 +87,7 @@ export default function CafeStarterDialog({
   };
 
   const apply = async () => {
-    if (!user || !companyId || gate !== "apply" || timeProblem) return;
+    if (!user || !companyId || gate !== "apply" || timeProblem != null) return;
     setPending(true);
     try {
       const result = await applyCafeStarter({
@@ -99,8 +99,9 @@ export default function CafeStarterDialog({
           key: spec.key,
           title: t(cafeCopyKey(spec.key, "Title")),
           description: t(cafeCopyKey(spec.key, "Description")),
-          showFrom: windows[spec.key].showFrom || null,
-          dueAt: windows[spec.key].dueAt || null,
+          showAt: windows[spec.key].showAt || null,
+          dueTime: windows[spec.key].dueTime || null,
+          completeBy: windows[spec.key].completeBy || null,
           itemLabels: Array.from({ length: spec.itemCount }, (_, index) =>
             t(cafeItemCopyKey(spec.key, index)),
           ),
@@ -215,37 +216,35 @@ export default function CafeStarterDialog({
                   </li>
                 ))}
               </ul>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor={`cafe-show-from-${spec.key}`}>{t("forms.showFrom")}</Label>
+                  <Label htmlFor={`cafe-show-at-${spec.key}`}>{t("forms.showTime")}</Label>
                   <Input
-                    id={`cafe-show-from-${spec.key}`}
-                    type="datetime-local"
+                    id={`cafe-show-at-${spec.key}`}
+                    type="time"
                     data-testid={`cafe-show-from-${spec.key}`}
-                    value={toDatetimeLocalValue(windows[spec.key].showFrom)}
-                    onChange={(event) =>
-                      setWindow(
-                        spec.key,
-                        "showFrom",
-                        fromDatetimeLocalValue(event.target.value) ?? "",
-                      )
-                    }
+                    value={windows[spec.key].showAt}
+                    onChange={(event) => setWindow(spec.key, "showAt", event.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor={`cafe-due-at-${spec.key}`}>{t("forms.dueAt")}</Label>
+                  <Label htmlFor={`cafe-due-time-${spec.key}`}>{t("forms.dueTime")}</Label>
                   <Input
-                    id={`cafe-due-at-${spec.key}`}
-                    type="datetime-local"
+                    id={`cafe-due-time-${spec.key}`}
+                    type="time"
                     data-testid={`cafe-due-at-${spec.key}`}
-                    value={toDatetimeLocalValue(windows[spec.key].dueAt)}
-                    onChange={(event) =>
-                      setWindow(
-                        spec.key,
-                        "dueAt",
-                        fromDatetimeLocalValue(event.target.value) ?? "",
-                      )
-                    }
+                    value={windows[spec.key].dueTime}
+                    onChange={(event) => setWindow(spec.key, "dueTime", event.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`cafe-complete-${spec.key}`}>{t("forms.completeByTime")}</Label>
+                  <Input
+                    id={`cafe-complete-${spec.key}`}
+                    type="time"
+                    data-testid={`cafe-complete-by-${spec.key}`}
+                    value={windows[spec.key].completeBy}
+                    onChange={(event) => setWindow(spec.key, "completeBy", event.target.value)}
                   />
                 </div>
               </div>
@@ -253,7 +252,7 @@ export default function CafeStarterDialog({
           ))}
           {timeProblem ? (
             <p className="text-sm text-destructive" data-testid="cafe-starter-due">
-              {t("forms.cafe.dueOrder")}
+              {t(timeProblem === "complete" ? "forms.completeByOrder" : "forms.cafe.dueOrder")}
             </p>
           ) : null}
           {gate === "blocked" ? (
@@ -280,7 +279,7 @@ export default function CafeStarterDialog({
             <Button
               type="button"
               data-testid="cafe-starter-apply"
-              disabled={pending || rolesLoading || timeProblem || !companyId}
+              disabled={pending || rolesLoading || timeProblem != null || !companyId}
               onClick={() => void apply()}
             >
               {pending ? t("forms.cafe.applying") : t("forms.cafe.apply")}

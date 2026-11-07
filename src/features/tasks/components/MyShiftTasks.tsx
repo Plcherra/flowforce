@@ -11,6 +11,7 @@ import {
   type MyShiftListView,
   type MyShiftShiftCard,
 } from "@/features/tasks/utils/myShiftView";
+import { formatClock } from "@/features/forms/utils/formDayWindow";
 import { formatTaskWindow } from "@/features/tasks/utils/taskSchedule";
 
 const SLOT_KEYS: Record<ChecklistSlot, string> = {
@@ -41,7 +42,7 @@ export function MyShiftTasks({
   onFillForm,
   onCompleteTask,
 }: MyShiftTasksProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (board.kind === "loading") {
     return (
@@ -111,6 +112,11 @@ export function MyShiftTasks({
           data-testid={`my-shift-role-list-${list.formId}`}
         >
           <h3 className="text-sm font-semibold">{list.title || t("tasks.listsForThisRole")}</h3>
+          {list.phase === "due" && list.dueTime ? (
+            <p className="text-sm text-muted-foreground">
+              {t("forms.roleListDue", { time: formatClock(list.dueTime, i18n.language) })}
+            </p>
+          ) : null}
           {list.items.length > 0 ? (
             <ul className="space-y-1">
               {list.items.map((item) => (

@@ -5,6 +5,7 @@ import {
   canSeeFormSubmissions,
   defaultFormDistribution,
   distributionProblem,
+  formIsOpenForFill,
   formListedForViewer,
   readFormDistribution,
   withFormDistribution,
@@ -156,4 +157,76 @@ export function runFormDistributionTests() {
   const draft = { status: "draft", created_by: "manager", settings: openForm.settings };
   assert.equal(formListedForViewer(draft, viewer(), NOW), false);
   assert.equal(formListedForViewer(draft, viewer({ canManage: true }), NOW), true);
+
+  const clocks = withFormDistribution(
+    null,
+    distribution({
+      timeMode: "shift_day",
+      showAt: "06:00",
+      dueTime: "08:00",
+      completeBy: "09:00",
+      showFrom: "2020-01-01T00:00:00.000Z",
+      dueAt: "2020-01-02T00:00:00.000Z",
+    }),
+  );
+  const readClocks = readFormDistribution(clocks);
+  assert.equal(readClocks.timeMode, "shift_day");
+  assert.equal(readClocks.showAt, "06:00");
+  assert.equal(readClocks.dueTime, "08:00");
+  assert.equal(readClocks.completeBy, "09:00");
+  assert.equal(readClocks.showFrom, null);
+  assert.equal(readClocks.dueAt, null);
+  assert.equal(
+    distributionProblem(distribution({
+      timeMode: "shift_day",
+      showAt: "09:00",
+      dueTime: "08:00",
+      completeBy: "10:00",
+    })),
+    "due",
+  );
+  assert.equal(
+    distributionProblem(distribution({
+      timeMode: "shift_day",
+      showAt: "06:00",
+      dueTime: "08:00",
+      completeBy: "07:00",
+    })),
+    "complete",
+  );
+  assert.equal(
+    distributionProblem(distribution({ timeMode: "shift_day" })),
+    null,
+  );
+  const windowed = distribution({
+    timeMode: "shift_day",
+    showAt: "06:00",
+    dueTime: "08:00",
+    completeBy: "09:00",
+  });
+  assert.equal(formIsOpenForFill(windowed, new Date(2026, 10, 7, 5, 30, 0)), false);
+  assert.equal(formIsOpenForFill(windowed, new Date(2026, 10, 7, 6, 30, 0)), true);
+  assert.equal(formIsOpenForFill(windowed, new Date(2026, 10, 7, 8, 30, 0)), true);
+  assert.equal(formIsOpenForFill(windowed, new Date(2026, 10, 7, 9, 0, 0)), false);
+  assert.equal(formIsOpenForFill(distribution({ timeMode: "shift_day" }), new Date(2026, 10, 7, 23, 0, 0)), true);
+
+  const shiftList = {
+    status: "published",
+    created_by: "manager",
+    settings: withFormDistribution(null, distribution({
+      recordKind: "list",
+      roleIds: ["role-barista"],
+      timeMode: "shift_day",
+      showAt: "06:00",
+      completeBy: "09:00",
+    })),
+  };
+  assert.equal(
+    canFillForm(shiftList, viewer({ scheduledRoleIds: ["role-barista"] }), new Date(2026, 10, 7, 6, 30, 0)),
+    true,
+  );
+  assert.equal(
+    canFillForm(shiftList, viewer({ scheduledRoleIds: ["role-lead"] }), new Date(2026, 10, 7, 6, 30, 0)),
+    false,
+  );
 }

@@ -9,8 +9,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useForms, type FormFieldRow } from "@/features/forms/hooks/useForms";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/public-types";
@@ -25,21 +23,22 @@ import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useFormSchemaStore, useFormSchema, type FormSchema } from "@/stores/useFormSchemaStore";
-import { type FieldTemplate } from "@/features/forms/components/editor/FormFieldLibrary";
-import { FormBuilderWorkspace } from "@/features/forms/components/editor/FormBuilderWorkspace";
+import { FormBasicsStep } from "@/features/forms/components/builder/FormBasicsStep";
+import { FormQuestionsStep } from "@/features/forms/components/builder/FormQuestionsStep";
+import { FormWhoWhenStep } from "@/features/forms/components/builder/FormWhoWhenStep";
+import { FormPreviewStep } from "@/features/forms/components/builder/FormPreviewStep";
 import type { FormField } from "@/types/forms";
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { FormsErrorFallback } from "@/components/ui/feature-error-fallbacks";
-import { FormShiftLinkEditor } from "@/features/forms/components/FormShiftLinkEditor";
-import { FormDistributionEditor } from "@/features/forms/components/FormDistributionEditor";
 import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
 import {
+  distributionForEditor,
   distributionProblem,
-  readFormDistribution,
   withFormDistribution,
   type FormDistribution,
 } from "@/features/forms/utils/formDistribution";
+import { cn } from "@/lib/utils";
 
 interface FormBuilderDialogProps {
   open: boolean;
@@ -77,15 +76,15 @@ export default function FormBuilderDialog({
   const { toast } = useToast();
 
   const schema = useFormSchema() as FormSchema | null;
-  const activeSectionId = useFormSchemaStore((state) => state.activeSectionId);
   const loadSchema = useFormSchemaStore((state) => state.loadSchema);
-  const addField = useFormSchemaStore((state) => state.addField);
   const resetSchema = useFormSchemaStore((state) => state.reset);
+  const setSchemaTitle = useFormSchemaStore((state) => state.setTitle);
 
+  const [step, setStep] = useState(0);
   const [formTitle, setFormTitle] = useState(initialTitle ?? "");
   const [formDescription, setFormDescription] = useState(initialDescription);
   const [distribution, setDistribution] = useState<FormDistribution>(() =>
-    readFormDistribution(initialSettings),
+    distributionForEditor(initialSettings),
   );
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -107,11 +106,17 @@ export default function FormBuilderDialog({
   useEffect(() => {
     if (!open) {
       distributionDirtyRef.current = false;
+      setStep(0);
       return;
     }
     if (distributionDirtyRef.current) return;
-    setDistribution(readFormDistribution(initialSettings));
+    setDistribution(distributionForEditor(initialSettings));
   }, [open, formId, initialSettings]);
+
+  useEffect(() => {
+    if (!schema) return;
+    setSchemaTitle(formTitle);
+  }, [formTitle, schema, setSchemaTitle]);
 
   useEffect(() => {
     if (!open) return;
@@ -170,7 +175,7 @@ export default function FormBuilderDialog({
         title: initialTitle ?? t("forms.untitledForm"),
         sections: groups.map((group) => ({
           id: randomId(),
-          title: group.title || t("forms.mainSection"),
+          title: group.title || (groups.length > 1 ? t("forms.mainSection") : ""),
           fields: group.fields,
         })),
         formulas: mappedFields
@@ -204,21 +209,6 @@ export default function FormBuilderDialog({
     t,
     toast,
   ]);
-
-  const handleAddTemplate = (template: FieldTemplate) => {
-    if (!schema || !schema.sections.length) return;
-    const targetSectionId = activeSectionId ?? schema.sections[0].id;
-    addField(targetSectionId, {
-      type: template.type,
-      label: template.label,
-      options:
-        template.type === "select" ||
-        template.type === "checkbox" ||
-        template.type === "radio"
-          ? [t("forms.option1")]
-          : [],
-    });
-  };
 
   const requestClose = (nextOpen: boolean) => {
     if (nextOpen) return;
@@ -274,7 +264,9 @@ export default function FormBuilderDialog({
         description: t(
           distributionIssue === "due"
             ? "forms.dueBeforeShow"
-            : "forms.distributionIncomplete",
+            : distributionIssue === "complete"
+              ? "forms.completeByOrder"
+              : "forms.distributionIncomplete",
         ),
         variant: "destructive",
       });
@@ -399,118 +391,171 @@ export default function FormBuilderDialog({
     }
   };
 
-  const sectionCount = schema?.sections.length ?? 0;
-  const fieldCount =
-    schema?.sections.reduce((sum, section) => sum + section.fields.length, 0) ??
-    0;
+  const steps = [
+    { id: "basics", label: "forms.builderBasics" },
+    { id: "questions", label: "forms.builderQuestions" },
+    { id: "who", label: "forms.builderWho" },
+    { id: "preview", label: "forms.builderPreview" },
+  ] as const;
+
+  const showDistributionIssue = () => {
+    const issue = distributionProblem(distribution);
+    if (!issue) return false;
+    toast({
+      title: t("forms.saveFailed"),
+      description: t(
+        issue === "due"
+          ? "forms.dueBeforeShow"
+          : issue === "complete"
+            ? "forms.completeByOrder"
+            : "forms.distributionIncomplete",
+      ),
+      variant: "destructive",
+    });
+    return true;
+  };
+
+  const goNext = () => {
+    if (step === 0 && !formTitle.trim()) {
+      toast({
+        title: t("forms.formTitleRequired"),
+        description: t("forms.formTitleRequiredHelp"),
+        variant: "destructive",
+      });
+      return;
+    }
+    if (step === 2 && showDistributionIssue()) return;
+    setStep((current) => Math.min(steps.length - 1, current + 1));
+  };
+
+  const roleChoices = audienceOptions.roles.map((role) => ({
+    id: role.id,
+    label: role.name,
+  }));
+  const peopleChoices = audienceOptions.assignees.map((person) => ({
+    id: person.id,
+    label:
+      `${person.first_name ?? ""} ${person.last_name ?? ""}`.trim() ||
+      t("forms.unassigned"),
+  }));
+  const positionChoices = audienceOptions.positions.map((item) => ({
+    id: item.id,
+    label: item.name,
+  }));
+  const departmentChoices = audienceOptions.departments.map((item) => ({
+    id: item.id,
+    label: item.name,
+  }));
 
   return (
     <Dialog open={open} onOpenChange={requestClose}>
       <DialogContent
         hideClose
+        data-testid="form-builder"
         className="inset-0 left-0 top-0 z-[80] flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-none p-0 shadow-none sm:rounded-none"
       >
-        <DialogHeader className="max-h-[40vh] shrink-0 space-y-1 overflow-y-auto border-b px-4 py-3 pr-12">
+        <DialogHeader className="shrink-0 space-y-3 border-b px-4 py-3 pr-12">
           <DialogTitle className="text-lg font-semibold">
-            {t("forms.formEditor")}</DialogTitle>
-          <DialogDescription>
-            {t("forms.composeFieldsConfigureOptionsAndPreviewTheLiveFormExperience")}</DialogDescription>
-          <div className="flex flex-wrap items-center gap-4 pt-3 text-xs text-muted-foreground">
-            <div>{t("forms.sectionCount", { count: sectionCount })}</div>
-            <div>{t("forms.fieldCount", { count: fieldCount })}</div>
+            {formTitle.trim() || t("forms.formEditor")}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t(steps[step]?.label ?? "forms.formEditor")}
+          </DialogDescription>
+          <div className="grid grid-cols-4 gap-1" data-testid="form-builder-steps">
+            {steps.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                data-testid={`form-builder-nav-${item.id}`}
+                className={cn(
+                  "min-h-11 rounded-md px-1 text-xs font-medium sm:text-sm",
+                  index === step
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground",
+                )}
+                onClick={() => setStep(index)}
+              >
+                {t(item.label)}
+              </button>
+            ))}
           </div>
-          <div className="grid gap-3 pt-4 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t("forms.formTitle")}</label>
-              <Input
-                value={formTitle}
-                onChange={(event) => setFormTitle(event.target.value)}
-                placeholder={t("forms.enterFormTitle")}
-                aria-label={t("forms.formTitle")}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t("tasks.description")}</label>
-              <Textarea
-                value={formDescription}
-                onChange={(event) => setFormDescription(event.target.value)}
-                placeholder={t("forms.describeThePurposeOfThisForm")}
-                rows={2}
-                aria-label={t("forms.formDescription")}
-              />
-            </div>
-          </div>
-          <FormShiftLinkEditor formId={formId} />
         </DialogHeader>
-        <div className="max-h-56 shrink-0 overflow-y-auto border-b px-4 pb-3">
-          <FormDistributionEditor
-            distribution={distribution}
-            roles={audienceOptions.roles.map((role) => ({
-              id: role.id,
-              label: role.name,
-            }))}
-            people={audienceOptions.assignees.map((person) => ({
-              id: person.id,
-              label:
-                `${person.first_name ?? ""} ${person.last_name ?? ""}`.trim() ||
-                t("forms.unassigned"),
-            }))}
-            positions={audienceOptions.positions.map((item) => ({
-              id: item.id,
-              label: item.name,
-            }))}
-            departments={audienceOptions.departments.map((item) => ({
-              id: item.id,
-              label: item.name,
-            }))}
-            onChange={(next) => {
-              distributionDirtyRef.current = true;
-              setDistribution(next);
-            }}
-          />
-        </div>
 
         <ErrorBoundary fallbackRender={FormsErrorFallback}>
-          <div className="relative flex min-h-0 flex-1 flex-col">
-            <FormBuilderWorkspace onAddField={handleAddTemplate} />
-            {loading && (
+          <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-5" data-testid="form-builder-body">
+            {step === 0 ? (
+              <FormBasicsStep
+                title={formTitle}
+                description={formDescription}
+                onTitle={setFormTitle}
+                onDescription={setFormDescription}
+              />
+            ) : null}
+            {step === 1 ? <FormQuestionsStep /> : null}
+            {step === 2 ? (
+              <FormWhoWhenStep
+                distribution={distribution}
+                roles={roleChoices}
+                people={peopleChoices}
+                positions={positionChoices}
+                departments={departmentChoices}
+                onChange={(next) => {
+                  distributionDirtyRef.current = true;
+                  setDistribution(next);
+                }}
+              />
+            ) : null}
+            {step === 3 ? <FormPreviewStep /> : null}
+            {loading ? (
               <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/70">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Loader2
-                    className="h-4 w-4 animate-spin"
-                    aria-hidden="true"
-                  />
-                  {t("forms.loadingFormFields")}</div>
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  {t("forms.loadingFormFields")}
+                </div>
               </div>
-            )}
+            ) : null}
           </div>
         </ErrorBoundary>
 
-        <div className="flex flex-shrink-0 items-center justify-between border-t bg-muted/40 px-6 py-4">
-          <div className="flex flex-col text-xs text-muted-foreground">
-            <span>{formTitle}</span>
-            <span>
-              {loading
-                ? t("forms.loadingFormContent")
-                : t("forms.livePreviewUpdates")}
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button variant="ghost" onClick={() => requestClose(false)}>
-              {t("common.cancel")}</Button>
-            <Button variant="outline" onClick={() => void handleSave("draft")} disabled={loading || isSaving}>
-              {t("forms.saveChanges")}</Button>
-            <Button onClick={() => void handleSave("published")} disabled={loading || isSaving}>
-              {isSaving && (
-                <Loader2
-                  className="mr-2 h-4 w-4 animate-spin"
-                  aria-hidden="true"
-                />
-              )}
-              {t("forms.publishForm")}</Button>
-          </div>
+        <div className="flex shrink-0 flex-col-reverse gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:justify-end">
+          <Button variant="ghost" className="min-h-11" onClick={() => requestClose(false)}>
+            {t("common.cancel")}
+          </Button>
+          {step > 0 ? (
+            <Button
+              variant="outline"
+              className="min-h-11"
+              data-testid="form-builder-back"
+              onClick={() => setStep((current) => Math.max(0, current - 1))}
+            >
+              {t("forms.builderBack")}
+            </Button>
+          ) : null}
+          <Button
+            variant="outline"
+            className="min-h-11"
+            onClick={() => void handleSave("draft")}
+            disabled={loading || isSaving}
+          >
+            {t("forms.saveChanges")}
+          </Button>
+          {step < steps.length - 1 ? (
+            <Button className="min-h-11" data-testid="form-builder-next" onClick={goNext}>
+              {t("forms.builderNext")}
+            </Button>
+          ) : (
+            <Button
+              className="min-h-11"
+              data-testid="form-builder-publish"
+              onClick={() => void handleSave("published")}
+              disabled={loading || isSaving}
+            >
+              {isSaving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : null}
+              {t("forms.publishForm")}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -149,6 +149,17 @@ test("saves roles, fill and see audiences, and due time without storing the form
   await createDialog.locator("#new-form-title").fill("E2E distribution draft");
   await createDialog.getByRole("button", { name: "Create form" }).click();
 
+  await expect(page.getByTestId("form-builder-step-basics")).toBeVisible({ timeout: 20_000 });
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-questions-empty")).toBeVisible();
+  await page.getByTestId("form-add-question").click();
+  await page.getByTestId("form-question-type-text").click();
+  await expect(page.getByTestId("form-question-list")).toBeVisible();
+  await page.getByTestId("form-builder-step-questions").screenshot({
+    path: "/opt/cursor/artifacts/form-builder-questions.png",
+  });
+  await page.getByTestId("form-builder-next").click();
+
   const editor = page.getByTestId("form-distribution");
   await expect(editor).toBeVisible({ timeout: 20_000 });
   await editor.getByTestId("form-record-kind").click();
@@ -177,18 +188,26 @@ test("saves roles, fill and see audiences, and due time without storing the form
   await expect(seeRole).toBeVisible();
   await seeRole.click();
 
-  await editor.getByTestId("form-show-from").fill("2026-11-06T09:00");
-  await editor.getByTestId("form-due-at").fill("2026-11-06T17:00");
+  await editor.getByTestId("form-show-time-toggle").click();
+  await editor.getByTestId("form-show-time").fill("06:00");
+  await editor.getByTestId("form-due-time-toggle").click();
+  await editor.getByTestId("form-due-time").fill("08:00");
+  await editor.getByTestId("form-complete-time-toggle").click();
+  await editor.getByTestId("form-complete-time").fill("09:00");
 
-  const libraryAdd = page
-    .getByTestId("form-builder-columns")
-    .getByRole("button", { name: "Add" })
-    .first();
-  await libraryAdd.click({ force: true });
-  await editor.screenshot({
-    path: "/opt/cursor/artifacts/form-distribution-editor.png",
+  await page.setViewportSize({ width: 1280, height: 1400 });
+  await page.getByTestId("form-builder-body").evaluate((el) => {
+    el.scrollTop = 0;
   });
-  await page.getByRole("button", { name: "Publish" }).click();
+  await page.getByTestId("form-builder").screenshot({
+    path: "/opt/cursor/artifacts/form-builder-who.png",
+  });
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-builder-step-preview")).toBeVisible();
+  await page.getByTestId("form-builder-step-preview").screenshot({
+    path: "/opt/cursor/artifacts/form-builder-preview.png",
+  });
+  await page.getByTestId("form-builder-publish").click();
 
   await expect.poll(() => savedSettings).not.toBeNull();
   const distribution = savedSettings?.distribution as {
@@ -196,6 +215,10 @@ test("saves roles, fill and see audiences, and due time without storing the form
     role_ids?: string[];
     fill_audience?: { kind?: string; user_ids?: string[] };
     see_audience?: { kind?: string; role_ids?: string[] };
+    time_mode?: string;
+    show_at?: string | null;
+    due_time?: string | null;
+    complete_by?: string | null;
     show_from?: string | null;
     due_at?: string | null;
   };
@@ -205,11 +228,12 @@ test("saves roles, fill and see audiences, and due time without storing the form
   expect(distribution.fill_audience?.user_ids).toContain(fillUserId);
   expect(distribution.see_audience?.kind).toBe("role");
   expect(distribution.see_audience?.role_ids).toContain(roleId);
-  expect(distribution.show_from).toBeTruthy();
-  expect(distribution.due_at).toBeTruthy();
-  expect(new Date(distribution.due_at ?? "").getTime()).toBeGreaterThan(
-    new Date(distribution.show_from ?? "").getTime(),
-  );
+  expect(distribution.time_mode).toBe("shift_day");
+  expect(distribution.show_at).toBe("06:00");
+  expect(distribution.due_time).toBe("08:00");
+  expect(distribution.complete_by).toBe("09:00");
+  expect(distribution.show_from).toBeNull();
+  expect(distribution.due_at).toBeNull();
 });
 
 async function search(page: Page, title: string) {
