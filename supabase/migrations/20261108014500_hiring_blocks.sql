@@ -81,6 +81,10 @@ create table if not exists public.hiring_blocks (
   ),
   constraint hiring_blocks_byte_size check (
     byte_size is null or (byte_size > 0 and byte_size <= 10485760)
+  ),
+  constraint hiring_blocks_path check (
+    storage_path is null
+    or starts_with(storage_path, company_id::text || '/')
   )
 );
 
@@ -104,6 +108,10 @@ create table if not exists public.hiring_responses (
   constraint hiring_responses_one unique (block_id, profile_id),
   constraint hiring_responses_byte_size check (
     byte_size is null or (byte_size > 0 and byte_size <= 10485760)
+  ),
+  constraint hiring_responses_path check (
+    storage_path is null
+    or starts_with(storage_path, company_id::text || '/' || profile_id::text || '/')
   )
 );
 
@@ -111,6 +119,66 @@ create index if not exists hiring_blocks_company_idx
   on public.hiring_blocks (company_id, sort_order);
 create index if not exists hiring_responses_profile_idx
   on public.hiring_responses (profile_id);
+
+create or replace function public.guard_hiring_response()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+declare
+  block_company uuid;
+  can_verify boolean;
+begin
+  select block.company_id
+  into block_company
+  from public.hiring_blocks as block
+  where block.id = new.block_id;
+
+  if block_company is null or block_company is distinct from new.company_id then
+    raise exception 'hiring block is not in this shop' using errcode = '23514';
+  end if;
+
+  if tg_op = 'UPDATE' then
+    if new.company_id is distinct from old.company_id
+      or new.block_id is distinct from old.block_id
+      or new.profile_id is distinct from old.profile_id
+    then
+      raise exception 'hiring response identity is fixed' using errcode = '42501';
+    end if;
+  end if;
+
+  can_verify := public.current_user_has_any_permission(
+    new.company_id,
+    array['systemSettings', 'documents.manage', 'manageUsers']
+  );
+
+  if tg_op = 'INSERT' then
+    if (
+      new.status = 'verified'
+      or new.verified_at is not null
+      or new.verified_by is not null
+    ) and not can_verify then
+      raise exception 'only a leader can verify a hiring response' using errcode = '42501';
+    end if;
+  elsif (
+    (new.status is distinct from old.status and new.status = 'verified')
+    or new.verified_at is distinct from old.verified_at
+    or new.verified_by is distinct from old.verified_by
+  ) and not can_verify then
+    raise exception 'only a leader can verify a hiring response' using errcode = '42501';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.guard_hiring_response() from public, anon;
+grant execute on function public.guard_hiring_response() to authenticated, service_role;
+
+drop trigger if exists hiring_responses_guard on public.hiring_responses;
+create trigger hiring_responses_guard
+before insert or update on public.hiring_responses
+for each row execute function public.guard_hiring_response();
 
 alter table public.hiring_blocks enable row level security;
 alter table public.hiring_responses enable row level security;
@@ -133,7 +201,8 @@ on public.hiring_blocks
 for insert
 to authenticated
 with check (
-  public.current_user_has_any_permission(
+  company_id in (select public.current_user_company_ids())
+  and public.current_user_has_any_permission(
     company_id,
     array['systemSettings', 'onboarding.create', 'documents.manage']
   )
@@ -145,13 +214,15 @@ on public.hiring_blocks
 for update
 to authenticated
 using (
-  public.current_user_has_any_permission(
+  company_id in (select public.current_user_company_ids())
+  and public.current_user_has_any_permission(
     company_id,
     array['systemSettings', 'onboarding.create', 'documents.manage']
   )
 )
 with check (
-  public.current_user_has_any_permission(
+  company_id in (select public.current_user_company_ids())
+  and public.current_user_has_any_permission(
     company_id,
     array['systemSettings', 'onboarding.create', 'documents.manage']
   )
@@ -164,6 +235,12 @@ for select
 to authenticated
 using (
   company_id in (select public.current_user_company_ids())
+  and exists (
+    select 1
+    from public.hiring_blocks as block
+    where block.id = hiring_responses.block_id
+      and block.company_id = hiring_responses.company_id
+  )
   and (
     profile_id = auth.uid()
     or public.current_user_has_any_permission(
@@ -181,6 +258,12 @@ to authenticated
 with check (
   profile_id = auth.uid()
   and company_id in (select public.current_user_company_ids())
+  and exists (
+    select 1
+    from public.hiring_blocks as block
+    where block.id = hiring_responses.block_id
+      and block.company_id = hiring_responses.company_id
+  )
 );
 
 drop policy if exists "Hires update own hiring responses" on public.hiring_responses;
@@ -188,8 +271,26 @@ create policy "Hires update own hiring responses"
 on public.hiring_responses
 for update
 to authenticated
-using (profile_id = auth.uid())
-with check (profile_id = auth.uid());
+using (
+  profile_id = auth.uid()
+  and company_id in (select public.current_user_company_ids())
+  and exists (
+    select 1
+    from public.hiring_blocks as block
+    where block.id = hiring_responses.block_id
+      and block.company_id = hiring_responses.company_id
+  )
+)
+with check (
+  profile_id = auth.uid()
+  and company_id in (select public.current_user_company_ids())
+  and exists (
+    select 1
+    from public.hiring_blocks as block
+    where block.id = hiring_responses.block_id
+      and block.company_id = hiring_responses.company_id
+  )
+);
 
 drop policy if exists "Leaders verify hiring responses" on public.hiring_responses;
 create policy "Leaders verify hiring responses"
@@ -197,13 +298,27 @@ on public.hiring_responses
 for update
 to authenticated
 using (
-  public.current_user_has_any_permission(
+  company_id in (select public.current_user_company_ids())
+  and exists (
+    select 1
+    from public.hiring_blocks as block
+    where block.id = hiring_responses.block_id
+      and block.company_id = hiring_responses.company_id
+  )
+  and public.current_user_has_any_permission(
     company_id,
     array['systemSettings', 'documents.manage', 'manageUsers']
   )
 )
 with check (
-  public.current_user_has_any_permission(
+  company_id in (select public.current_user_company_ids())
+  and exists (
+    select 1
+    from public.hiring_blocks as block
+    where block.id = hiring_responses.block_id
+      and block.company_id = hiring_responses.company_id
+  )
+  and public.current_user_has_any_permission(
     company_id,
     array['systemSettings', 'documents.manage', 'manageUsers']
   )
