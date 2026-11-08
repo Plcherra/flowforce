@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useProfile } from "@/hooks/useProfile";
 import { useTranslation } from "react-i18next";
 import {
   Bell,
@@ -126,9 +127,14 @@ function tabIcon(key: SettingsTabKey) {
 
 export default function SettingsPage() {
   const { t } = useTranslation();
+  const { profile, loading } = useProfile();
+  const isOwner = (profile?.role ?? "").trim().toLowerCase() === "owner";
+  const tabKeys = SETTINGS_TAB_KEYS.filter(
+    (key) => key !== "billing" || (!loading && isOwner),
+  );
   return (
     <SystemSettingsLayout
-      tabs={SETTINGS_TAB_KEYS.map((key) => ({
+      tabs={tabKeys.map((key) => ({
         key,
         label: tabLabel(key, t),
         icon: tabIcon(key),
@@ -248,11 +254,6 @@ function SettingsTabContent({ tabKey }: { tabKey: SettingsTabKey }) {
       <Suspense fallback={<PanelFallback />}>
         <BillingSettingsPanel />
       </Suspense>
-      <IfCan permission={SETTINGS_CONTROL_GATES.billing.permission}>
-        <Suspense fallback={<PanelFallback />}>
-          <AdminSettingsPanel section="billing" />
-        </Suspense>
-      </IfCan>
     </ErrorBoundary>
   );
 }
