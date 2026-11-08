@@ -86,13 +86,18 @@ assertIncludes(
 );
 assertIncludes(
   billingPanel,
-  "BillingStatusBadge",
-  "billing settings UI must show billing status badge",
+  "OPS_MONTHLY_USD",
+  "billing settings UI must show the Ops base price",
 );
 assertIncludes(
   billingPanel,
-  "BillingStatusActions",
-  "billing settings UI must expose upgrade/reactivate actions",
+  "startPackCheckout",
+  "billing settings UI must add packs through pack checkout",
+);
+assertIncludes(
+  billingPanel,
+  "openStripeBillingPortal",
+  "billing settings UI must link to the Stripe customer portal",
 );
 
 const trialExpiryCron = readText("app/api/cron/billing-trial-expiry/route.ts");
