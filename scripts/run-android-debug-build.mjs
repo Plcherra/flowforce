@@ -37,10 +37,12 @@ function runOnce() {
 const attempts = 4;
 for (let attempt = 1; attempt <= attempts; attempt += 1) {
   const { code, output } = await runOnce();
-  const distributionMissing = code !== 0 && /HTTP response code: 504/.test(output);
+  const distributionMissing = code !== 0 && /HTTP response code: 50[234]/.test(output);
   if (!distributionMissing || attempt === attempts) {
     process.exit(code);
   }
-  console.error(`Gradle distribution download returned 504 (attempt ${attempt} of ${attempts}). Retrying.`);
+  console.error(
+    `Gradle distribution download returned a temporary error (attempt ${attempt} of ${attempts}). Retrying.`,
+  );
   await new Promise((resolve) => setTimeout(resolve, 20000));
 }

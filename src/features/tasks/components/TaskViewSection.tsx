@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { highlight } from "@/components/ui/highlight";
 import React from "react";
 import type {
   TaskPriorityFilter,
@@ -57,7 +58,7 @@ export function TaskViewSection({
     <section
       aria-label={t("tasks.view")}
       data-testid="tasks-view-section"
-      className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+      className={`space-y-2 rounded-xl border p-3 ${highlight.primary}`}
     >
       <div className="space-y-1">
         <h2 className="text-sm font-semibold">{t("tasks.view")}</h2>

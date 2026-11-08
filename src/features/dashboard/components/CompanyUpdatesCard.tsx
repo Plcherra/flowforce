@@ -18,6 +18,8 @@ import { CompanyUpdateBody } from "@/features/company-updates/components/Company
 import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
 import { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
 import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
+import { highlight } from "@/components/ui/highlight";
+import { cn } from "@/lib/utils";
 
 interface CompanyUpdatesCardProps {
   className?: string;
@@ -54,7 +56,7 @@ export default function CompanyUpdatesCard({
 
   return (
     <>
-      <Card className={className}>
+      <Card className={cn(highlight.accent, className)}>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

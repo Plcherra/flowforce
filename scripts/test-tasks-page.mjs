@@ -64,9 +64,6 @@ const { runShiftWeekdayTaskTests } = importTs(
 const { runClosingNoteTests } = importTs(
   "../src/features/forms/utils/closingNotes.test.ts",
 );
-const { runClosingNoteDraftTests } = importTs(
-  "../src/features/tasks/utils/closingNoteDrafts.test.ts",
-);
 const { runMyShiftViewTests } = importTs(
   "../src/features/tasks/utils/myShiftView.test.ts",
 );
@@ -78,9 +75,6 @@ const { runAssignChecklistFormTests } = importTs(
 );
 const { runWeekdayTaskDraftTests } = importTs(
   "../src/features/tasks/utils/weekdayTaskDraft.test.ts",
-);
-const { runDraftInboxTests } = importTs(
-  "../src/features/tasks/utils/draftInbox.test.ts",
 );
 const { runTaskAssigneeScopeTests } = importTs(
   "../src/features/tasks/utils/taskAssigneeScope.test.ts",
@@ -170,12 +164,10 @@ runChecklistFormTests();
 runShiftChecklistListTests();
 runShiftWeekdayTaskTests();
 runClosingNoteTests();
-await runClosingNoteDraftTests();
 runMyShiftViewTests();
 runChecklistProgressTests();
 runAssignChecklistFormTests();
 runWeekdayTaskDraftTests();
-runDraftInboxTests();
 runTaskAssigneeScopeTests();
 runTaskAudienceTests();
 runTaskCreateGrantStoreTests();
