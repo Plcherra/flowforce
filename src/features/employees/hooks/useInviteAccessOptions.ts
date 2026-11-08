@@ -16,14 +16,14 @@ import {
   isInviteableClass,
   resolveProductLevel,
 } from "@/features/roles/constants/productLevels";
-import { shouldAskForStore } from "@/features/stores/storeDraft";
+import { rolesForInvite } from "@/features/employees/utils/inviteRoleChoices";
 import type { OrganizationLocation } from "@/hooks/useLocations";
 import {
   actorCanInvite,
   locationsAssignableByActor,
 } from "@/features/employees/utils/inviteLocation";
 export function useInviteAccessOptions() {
-  const { roles, loading: rolesLoading } = useCompanyRoles();
+  const { roles, loading: rolesLoading, refetchRoles, createRole, deleteRole } = useCompanyRoles();
   const { profile, loading: profileLoading } = useProfile();
   const { company } = useCompany();
   const { permissions: inviterPermissions, isLoading: canLoading, can } =
@@ -39,7 +39,7 @@ export function useInviteAccessOptions() {
     hierarchy_level: inviterClass?.hierarchy_level,
   });
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
-  const { departments } = useDepartments({
+  const { departments, refetchDepartments } = useDepartments({
     companyId,
     profileLoading,
   });
@@ -103,20 +103,19 @@ export function useInviteAccessOptions() {
     profile?.role,
   ]);
 
-  const classes = useMemo(
-    () =>
-      (Array.isArray(roles) ? roles : []).filter(
-        (role) =>
-          role.is_active &&
-          isInviteableClass(role) &&
-          canInviteProductLevel(
-            inviterLevel,
-            resolveProductLevel(role),
-            invitePolicy,
-          ),
-      ),
-    [roles, inviterLevel, invitePolicy],
-  );
+  const classes = useMemo(() => {
+    const inviteable = (Array.isArray(roles) ? roles : []).filter(
+      (role) =>
+        role.is_active &&
+        isInviteableClass(role) &&
+        canInviteProductLevel(
+          inviterLevel,
+          resolveProductLevel(role),
+          invitePolicy,
+        ),
+    );
+    return rolesForInvite(inviteable);
+  }, [roles, inviterLevel, invitePolicy]);
 
   const defaultClass = useMemo(
     () =>
@@ -134,8 +133,14 @@ export function useInviteAccessOptions() {
     inviterLevel,
     inviterPermissions,
     invitePolicy,
-    showLocations: shouldAskForStore(assignableLocations.length),
-    showDepartments: departments.length > 1,
+    showLocations: true,
+    showDepartments: true,
+    requireLocation: assignableLocations.length > 0,
+    requireDepartment: departments.length > 0,
+    refetchDepartments,
+    refetchRoles,
+    createRole,
+    deleteRole,
     isLoading:
       rolesLoading ||
       profileLoading ||

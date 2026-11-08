@@ -22,13 +22,20 @@ import { Plus, Edit, Trash2, Shield, AlertTriangle } from "lucide-react";
 import { useCan } from "@/hooks/useCan";
 import { logger } from "@/utils/logger";
 import { useTranslation } from "react-i18next";
+import { NameCombobox } from "@/features/employees/components/invites/NameCombobox";
+import { removeRoleIfUnused } from "@/features/employees/utils/inviteCatalogActions";
+import { coffeeShopStarter } from "@/features/onboarding/utils/orgTemplates";
+import { cloneClassFromProductLevel } from "@/features/roles/constants/productLevels";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function RoleConfigurationTab() {
   const { t } = useTranslation();
   const { can } = useCan();
   const { company, updateCompany } = useCompany();
+  const { profile } = useProfile();
   const invitePolicy = parseInviteGrantPolicy(company?.template_config);
   const [savingPolicy, setSavingPolicy] = useState(false);
+  const [rolePick, setRolePick] = useState("");
   const { roles, isLoading, createRole, updateRole, deleteRole, restoreRole } =
     useCompanyRoles();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -63,9 +70,7 @@ export default function RoleConfigurationTab() {
       return;
     }
     if (
-      window.confirm(
-        "Archive this class? It drops off invite and the Roles list. The row stays so FlowForce will not plant a stock copy.",
-      )
+      window.confirm(t("roles.archiveClassConfirm"))
     ) {
       await deleteRole.mutateAsync(role.id);
     }
@@ -225,6 +230,37 @@ export default function RoleConfigurationTab() {
           />
         </CardContent>
       </Card>
+
+      <NameCombobox
+        label={t("employees.role")}
+        value={rolePick}
+        testId="settings-role-combobox"
+        options={[
+          ...(Array.isArray(roles) ? roles : [])
+            .filter((role) => role.is_active)
+            .map((role) => ({ id: role.id, name: role.name })),
+          ...coffeeShopStarter(t).departments.flatMap((department) =>
+            department.roles.map((role) => ({ id: "", name: role.name, suggested: true as const })),
+          ),
+        ]}
+        onSelect={setRolePick}
+        onCreate={(name) => {
+          const level = coffeeShopStarter(t).departments
+            .flatMap((department) => department.roles)
+            .find((role) => role.name.toLowerCase() === name.toLowerCase())?.level ?? "staff";
+          void createRole.mutateAsync({
+            ...cloneClassFromProductLevel(level, name),
+          });
+        }}
+        onDelete={async (id) => {
+          const companyId = profile?.company_id ?? profile?.companyId;
+          const role = (Array.isArray(roles) ? roles : []).find((item) => item.id === id);
+          if (!companyId || !role) return "blocked";
+          const result = await removeRoleIfUnused(companyId, id, role.name);
+          if (result === "ok") setRolePick("");
+          return result;
+        }}
+      />
 
       <div className="grid gap-4">{activeRoles.map(renderRoleCard)}</div>
 

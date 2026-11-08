@@ -27,6 +27,7 @@
         "schedule.view",
         "schedule.edit",
         "schedule.create",
+        "schedule.assign",
         "schedule.delete",
         "schedule.grant",
         "schedule.reminders.assign",
@@ -126,6 +127,8 @@
         "schedule.view",
         "schedule.edit",
         "schedule.create",
+        "schedule.assign",
+        "schedule.delete",
         "schedule.grant",
         "schedule.reminders.assign",
         "schedule.reminders.grant_deactivate",
@@ -253,7 +256,7 @@
           "schedule.reminders.assign",
           "schedule.reminders.grant_deactivate"
         ],
-        "create_delete": ["schedule.create", "schedule.delete"]
+        "create_delete": ["schedule.create", "schedule.assign", "schedule.delete"]
       }
     },
     {
@@ -420,6 +423,9 @@
       "schedule.view",
       "editSchedules",
       "schedule.edit",
+      "schedule.create",
+      "schedule.assign",
+      "schedule.delete",
       "viewTeamTasks",
       "directory.view",
       "recognition.edit",

@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { isStripeTestSecret } from "@/server/billing/stripeTestMode";
 import {
   OPTIONAL_PACK_IDS,
+  OPS_MONTHLY_USD,
+  OPS_PRICE_ENV,
+  PACK_MONTHLY_USD,
   PACK_PLACEHOLDER_MONTHLY_USD,
+  readOpsPriceId,
   PACK_PRICE_ENV,
   isPackBillingMetadata,
   packCheckoutIsPaid,
@@ -21,16 +25,21 @@ export function runPackCatalogTests() {
   assert.equal(PACK_PRICE_ENV.team, "STRIPE_PRICE_PACK_TEAM");
   assert.equal(PACK_PRICE_ENV.insights, "STRIPE_PRICE_PACK_INSIGHTS");
   assert.equal(PACK_PRICE_ENV.stock, "STRIPE_PRICE_PACK_STOCK");
+  assert.equal(OPS_PRICE_ENV, "STRIPE_PRICE_OPS");
+  assert.equal(OPS_MONTHLY_USD, 59);
+  assert.equal(readOpsPriceId({ STRIPE_PRICE_OPS: " price_ops " }), "price_ops");
+  assert.equal(readOpsPriceId({}), null);
   assert.equal(
     readPackPriceId("team", { STRIPE_PRICE_PACK_TEAM: " price_team " }),
     "price_team",
   );
   assert.equal(readPackPriceId("stock", {}), null);
-  assert.deepEqual(PACK_PLACEHOLDER_MONTHLY_USD, {
-    team: 49,
-    insights: 39,
-    stock: 49,
+  assert.deepEqual(PACK_MONTHLY_USD, {
+    team: 19,
+    insights: 19,
+    stock: 29,
   });
+  assert.equal(PACK_PLACEHOLDER_MONTHLY_USD, PACK_MONTHLY_USD);
   assert.equal(packPriceCanCheckout({ recurring: { interval: "month" } }), true);
   assert.equal(packPriceCanCheckout({ recurring: { interval: "year" } }), false);
   assert.equal(packPriceCanCheckout({ recurring: null }), false);

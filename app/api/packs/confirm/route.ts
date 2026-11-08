@@ -13,10 +13,6 @@ import { checkBillingRouteRateLimit } from "@/server/billing/rateLimitBillingRou
 import { enablePurchasedPack } from "@/server/billing/enablePurchasedPack";
 import { mapStripeRouteError } from "@/server/billing/stripeRouteErrors";
 import { getStripeClient } from "@/server/billing/stripeClient";
-import {
-  assertStripeTestSecret,
-  StripeTestModeError,
-} from "@/server/billing/stripeTestMode";
 
 const logger = createServerLogger("pack-confirm");
 
@@ -58,24 +54,8 @@ export async function POST(request: NextRequest) {
       return jsonError("Invalid pack confirmation.", 400);
     }
 
-    try {
-      assertStripeTestSecret(process.env.STRIPE_SECRET_KEY);
-    } catch (error) {
-      if (error instanceof StripeTestModeError) {
-        return jsonError("Pack checkout is available in Stripe test mode only.", 403, {
-          code: "stripe_test_mode_required",
-        });
-      }
-      throw error;
-    }
-
     const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.retrieve(parsed.data.sessionId);
-    if (session.livemode) {
-      return jsonError("Pack checkout is available in Stripe test mode only.", 403, {
-        code: "stripe_test_mode_required",
-      });
-    }
     const purchasedPack = readPackCheckoutMetadata(session.metadata);
     const sessionCompanyId =
       session.metadata?.company_id ?? session.client_reference_id ?? null;

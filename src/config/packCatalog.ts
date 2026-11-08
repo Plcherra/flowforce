@@ -1,20 +1,18 @@
 /**
  * Pack discovery catalog.
  *
- * Placeholder prices (USD, monthly, per company, changeable later):
- * Team $49, Insights $39, Stock $49. Sold à la carte. They are additive
- * add-ons on Operations and do not replace starter, growth, or enterprise.
+ * Locked prices (USD, monthly, per company). Ops is the base. Team,
+ * Insights, and Stock are à la carte add-ons and do not replace it.
  *
- * Checkout stays off until a recurring monthly Stripe test price id is set
- * in the matching server env var:
+ * Amounts are display-only. Stripe price ids come from server env:
  *
+ * - STRIPE_PRICE_OPS
  * - STRIPE_PRICE_PACK_TEAM
  * - STRIPE_PRICE_PACK_INSIGHTS
  * - STRIPE_PRICE_PACK_STOCK
  *
- * Those prices are not STRIPE_PRICE_STARTER, STRIPE_PRICE_GROWTH, or
- * STRIPE_PRICE_ENTERPRISE. Checkout quantity is 1 (one company, not per seat).
- * A yearly price is not accepted.
+ * Checkout quantity is 1 (one company, not per seat). A yearly price is refused.
+ * One Stripe account is used. Do not put price ids or secret keys in code.
  */
 
 import {
@@ -31,12 +29,25 @@ export const PACK_PRICE_ENV: Record<OptionalPackId, string> = {
   stock: "STRIPE_PRICE_PACK_STOCK",
 };
 
-/** Placeholder monthly USD amount per company. Display only; Stripe uses the env price id. */
-export const PACK_PLACEHOLDER_MONTHLY_USD: Record<OptionalPackId, number> = {
-  team: 49,
-  insights: 39,
-  stock: 49,
+/** Locked monthly USD amount per company. Display only; Stripe uses the env price id. */
+export const OPS_MONTHLY_USD = 59;
+export const OPS_PRICE_ENV = "STRIPE_PRICE_OPS";
+
+export const PACK_MONTHLY_USD: Record<OptionalPackId, number> = {
+  team: 19,
+  insights: 19,
+  stock: 29,
 };
+
+/** @deprecated Use PACK_MONTHLY_USD. Kept so older imports still read the locked amounts. */
+export const PACK_PLACEHOLDER_MONTHLY_USD = PACK_MONTHLY_USD;
+
+export function readOpsPriceId(
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const trimmed = env[OPS_PRICE_ENV]?.trim() ?? "";
+  return trimmed.length > 0 ? trimmed : null;
+}
 
 export const OPTIONAL_PACK_IDS: OptionalPackId[] = ["team", "insights", "stock"];
 

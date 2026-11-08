@@ -46,50 +46,38 @@ Server-side mapping lives in [stripePrices.ts](/src/server/billing/stripePrices.
 
 ## Packs
 
-Team, Insights, and Stock are à la carte add-on packs on top of Operations. Operations stays on. Packs do not replace Starter, Growth, or Enterprise.
+Ops is the base. Team, Insights, and Stock are à la carte add-ons on top of Ops. Prices are locked. Pedro uses one Stripe account. There is no separate test and live setup in the app. Do not commit price ids or secret keys.
 
-Pedro decided these placeholder terms on 7 Nov 2026. They can change later:
+Locked amounts, monthly, USD, per company. Checkout quantity is 1, not per seat. A yearly price is refused.
 
-1. Prices, monthly, USD, per company: Team $49, Insights $39, Stock $49.
-2. Billing interval: monthly.
-3. Metering: per company. Checkout quantity is 1, not per seat.
-4. Packs are sold à la carte. There are no bundles.
-5. Packs are additive add-ons on Operations. They do not replace starter, growth, or enterprise.
+| Product | Amount | Env var |
+| --- | --- | --- |
+| Ops | $59 | `STRIPE_PRICE_OPS` |
+| Team | $19 | `STRIPE_PRICE_PACK_TEAM` |
+| Insights | $19 | `STRIPE_PRICE_PACK_INSIGHTS` |
+| Stock | $29 | `STRIPE_PRICE_PACK_STOCK` |
 
-The discovery page, the **+** menu next to OPS, and the landing and pricing copy show those amounts and say they are placeholders. Checkout stays off, and that pack shows **Pricing coming soon**, until the matching test price env var is set. A missing price does not call Stripe.
+The landing page, pricing page, and the **+** menu show these amounts. Checkout stays off, and that pack shows **Pricing coming soon**, until the matching env var is set. A missing price does not call Stripe.
 
-When a recurring **monthly** Stripe **test** price exists, `POST /api/packs/checkout` creates a Checkout Session in `subscription` mode with quantity 1. A yearly price is refused. Pack checkout refuses live secret keys (`sk_live_` / `rk_live_`). Use a test key (`sk_test_` or `rk_test_`) only.
+When a recurring monthly price exists, `POST /api/packs/checkout` creates a Checkout Session in `subscription` mode with quantity 1.
 
-Expected server env vars (test price ids). Leave them unset in the repo until the prices exist in the project's Stripe test account:
+Create four products in the one Stripe account. Each product gets one recurring monthly USD price:
 
-- `STRIPE_PRICE_PACK_TEAM`
-- `STRIPE_PRICE_PACK_INSIGHTS`
-- `STRIPE_PRICE_PACK_STOCK`
+| Product name | Amount |
+| --- | --- |
+| FlowForce Ops | 59.00 |
+| FlowForce Team | 19.00 |
+| FlowForce Insights | 19.00 |
+| FlowForce Stock | 29.00 |
 
-### Creating the Stripe test prices
-
-This environment had no `STRIPE_SECRET_KEY`, so the test Products and Prices were not created. Create them in the Stripe Dashboard in **test mode** (the same account whose test secret is `STRIPE_SECRET_KEY` on Vercel). Do not use live mode. Do not commit secret keys.
-
-1. Open the Stripe Dashboard and switch the mode toggle to **Test mode**.
-2. Go to **Product catalog** → **Add product**.
-3. Create three products. Each product gets one recurring price:
-
-| Product name | Amount | Currency | Billing period |
-| --- | --- | --- | --- |
-| FlowForce Team pack | 49.00 | USD | Monthly |
-| FlowForce Insights pack | 39.00 | USD | Monthly |
-| FlowForce Stock pack | 49.00 | USD | Monthly |
-
-4. Open each price and copy its id (`price_...`).
-5. Set these on Vercel (and in local secrets), not in git:
+Copy each price id (`price_...`) into server env, not into git:
 
 ```bash
+STRIPE_PRICE_OPS=price_...
 STRIPE_PRICE_PACK_TEAM=price_...
 STRIPE_PRICE_PACK_INSIGHTS=price_...
 STRIPE_PRICE_PACK_STOCK=price_...
 ```
-
-Use the test secret (`sk_test_` or `rk_test_`) that belongs to that same account. A live key is refused at checkout.
 
 Routes:
 

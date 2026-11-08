@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useCan } from "@/hooks/useCan";
 import { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, SlidersHorizontal } from "lucide-react";
@@ -86,16 +87,19 @@ function DeskCommand({
   onClick,
   disabled = false,
   pressed,
+  testId,
 }: {
   label: string;
   onClick: () => void;
   disabled?: boolean;
   pressed?: boolean;
+  testId?: string;
 }) {
   return (
     <button
       type="button"
       disabled={disabled}
+      data-testid={testId}
       aria-pressed={pressed}
       className="flex w-full items-center rounded-xl px-2 py-2 text-left text-sm hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
       onClick={onClick}
@@ -133,6 +137,9 @@ export function ScheduleWeekDesk({
   onToggleSmartFill,
 }: ScheduleWeekDeskProps) {
   const { t } = useTranslation();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const canCreate = !permissionsLoading && can("schedule.create");
+  const canDelete = !permissionsLoading && can("schedule.delete");
   const [deskOpen, setDeskOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
@@ -206,7 +213,7 @@ export function ScheduleWeekDesk({
           )
         : null}
 
-      {!readOnly ? (
+      {!readOnly && canCreate ? (
         <Popover open={createOpen} onOpenChange={setCreateOpen}>
           <PopoverTrigger asChild>
             <button
@@ -295,7 +302,13 @@ export function ScheduleWeekDesk({
                       onClick={() => run(onAutoScheduleWeek)}
                     />
                   ) : null}
-                  <DeskCommand label={t("schedule.emptyThisWeek")} onClick={() => run(onClearWeek)} />
+                  {canDelete ? (
+                    <DeskCommand
+                      label={t("schedule.emptyThisWeek")}
+                      testId="empty-this-week"
+                      onClick={() => run(onClearWeek)}
+                    />
+                  ) : null}
                   <DeskCommand
                     label={t("schedule.publishToTheTeam")}
                     onClick={() => run(() => onPublishWeek(true))}

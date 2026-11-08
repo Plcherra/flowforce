@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/command";
 import { Plus, X } from "lucide-react";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useCan } from "@/hooks/useCan";
 import { useScheduling } from "@/contexts/SchedulingContext";
 import { useToast } from "@/hooks/use-toast";
 import type { AssignmentWithUser } from "@/features/scheduling/hooks/useSchedulingConsolidated";
@@ -37,6 +38,8 @@ export function EmployeeSelector({
     mutations: { assign: assignUserToShift, unassign: unassignUserFromShift },
   } = useScheduling();
   const { toast } = useToast();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const canAssign = !permissionsLoading && can("schedule.assign");
   const [open, setOpen] = useState(false);
 
   const handleAssignEmployee = async (employeeId: string) => {
@@ -135,13 +138,15 @@ export function EmployeeSelector({
                   {assignment.status || t("literals.assigned")}
                 </Badge>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleUnassignEmployee(assignment.user_id)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
+              {canAssign ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleUnassignEmployee(assignment.user_id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              ) : null}
             </div>
           ))}
         </div>
@@ -151,7 +156,7 @@ export function EmployeeSelector({
         </div>
       )}
 
-      {/* Add employee button */}
+      {canAssign ? (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -213,6 +218,7 @@ export function EmployeeSelector({
           </Command>
         </PopoverContent>
       </Popover>
+      ) : null}
     </div>
   );
 }

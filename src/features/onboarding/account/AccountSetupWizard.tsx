@@ -164,6 +164,11 @@ export default function AccountSetupWizard({
   });
 
   const finish = async (nextStarter: AccountStarter) => {
+    if (workspaceStoresProblem(stores)) {
+      setError("onboarding.account.error.store");
+      setStep(STEPS.indexOf("store"));
+      return;
+    }
     const chosen = { ...workspace(), starter: nextStarter };
     const records = onboardingRecordsFromWorkspace(chosen);
     const payload: RegistrationData = {

@@ -147,4 +147,28 @@ export function runProductLevelTests() {
   });
   assert.equal(legacyOwner["messages.send"], true);
   assert.equal(legacyOwner.approveTimeOff, false);
+
+  const managerSparse = fillMissingProductRoleDefaults("manager", {
+    "schedule.delete": false,
+  });
+  assert.equal(managerSparse["schedule.delete"], false);
+  assert.equal(managerSparse["schedule.assign"], true);
+  assert.equal(managerSparse["schedule.create"], true);
+  assert.equal(managerSparse["schedule.edit"], true);
+
+  const staffSparse = fillMissingProductRoleDefaults("staff", {
+    "schedule.assign": false,
+  });
+  assert.equal(staffSparse["schedule.assign"], false);
+  assert.equal(staffSparse["schedule.create"], undefined);
+  assert.equal(staffSparse["schedule.delete"], undefined);
+  assert.equal(permissionAllowedAtLevel("staff", "schedule.create"), true);
+  assert.equal(permissionAllowedAtLevel("staff", "schedule.assign"), true);
+  assert.equal(permissionAllowedAtLevel("staff", "schedule.delete"), true);
+  const staffGrantDelete = clampPermissionsToProductLevel("staff", {
+    "schedule.delete": true,
+    "schedule.create": false,
+  });
+  assert.equal(staffGrantDelete["schedule.delete"], true);
+  assert.equal(staffGrantDelete["schedule.create"], false);
 }

@@ -51,6 +51,15 @@ export function runOrgTemplateTests() {
     permissionValue(cafe.departments[2]!.permissions, {}, "schedule.edit"),
     true,
   );
+  for (const key of ["schedule.create", "schedule.edit", "schedule.assign", "schedule.delete"] as const) {
+    assert.equal(permissionValue(cafe.departments[2]!.permissions, {}, key), true, key);
+    assert.equal(
+      permissionValue(cafe.departments[0]!.permissions, lead?.overrides ?? {}, key),
+      key === "schedule.edit" || key === "schedule.assign",
+      key,
+    );
+    assert.equal(permissionValue(cafe.departments[0]!.permissions, {}, key), key === "schedule.view" ? true : false);
+  }
   assert.equal(
     effectivePermissions(cafe.departments[0]!.permissions, { "schedule.edit": true })[
       "schedule.edit"

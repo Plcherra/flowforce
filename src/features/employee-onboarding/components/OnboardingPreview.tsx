@@ -5,6 +5,7 @@ import { EmployeeOnboardingView } from "./EmployeeOnboardingView";
 import { OnboardingOverviewCard } from "./OnboardingOverviewCard";
 import { OnboardingSettingsView } from "./OnboardingSettingsView";
 import { sampleEmployeeOnboarding, sampleOnboardingSettings } from "../sampleOnboarding";
+import { InviteFlowPreview } from "@/features/employees/components/invites/InviteFlowPreview";
 
 function noop() {
   return undefined;
@@ -12,6 +13,9 @@ function noop() {
 
 export function OnboardingPreview() {
   const screen = useSearchParams().get("screen") ?? "employee";
+  if (screen === "invite" || screen === "hiring" || screen === "permissions") {
+    return <InviteFlowPreview screen={screen} />;
+  }
   if (screen === "settings") {
     return (
       <div className="mx-auto max-w-3xl px-4 py-6">

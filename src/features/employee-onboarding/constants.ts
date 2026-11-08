@@ -8,6 +8,12 @@ export const ONBOARDING_MIME_TYPES = [
   "image/png",
   "image/jpeg",
   "image/webp",
+  "image/gif",
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ] as const;
 
 export type OnboardingMimeType = (typeof ONBOARDING_MIME_TYPES)[number];

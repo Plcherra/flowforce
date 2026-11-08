@@ -11,7 +11,10 @@ import {
 
 const LABEL_KEYS: Record<OrgPermissionKey, string> = {
   "schedule.view": "onboarding.org.permSchedule",
+  "schedule.create": "onboarding.org.permScheduleCreate",
   "schedule.edit": "onboarding.org.permScheduleEdit",
+  "schedule.assign": "onboarding.org.permScheduleAssign",
+  "schedule.delete": "onboarding.org.permScheduleDelete",
   "forms.submit": "onboarding.org.permForms",
   "tasks.view": "onboarding.org.permTasks",
   "tasks.update": "onboarding.org.permTasksUpdate",

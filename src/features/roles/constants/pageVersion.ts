@@ -3,6 +3,7 @@ export type SchedulePageVersion = {
   draft: boolean;
   create: boolean;
   edit: boolean;
+  assign: boolean;
   delete: boolean;
 };
 
@@ -34,14 +35,17 @@ export function schedulePageVersion(
   void hierarchyLevel;
   const create = allowed(permissions, "schedule.create");
   const edit = allowed(permissions, "schedule.edit");
+  const assign = allowed(permissions, "schedule.assign");
   const remove = allowed(permissions, "schedule.delete");
   return {
     team:
       allowed(permissions, "viewTeamSchedules") &&
       allowed(permissions, "schedule.view"),
-    draft: allowed(permissions, "editSchedules") && !create && !edit && !remove,
+    draft:
+      allowed(permissions, "editSchedules") && !create && !edit && !assign && !remove,
     create,
     edit,
+    assign,
     delete: remove,
   };
 }

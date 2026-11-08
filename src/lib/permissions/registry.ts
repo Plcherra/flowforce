@@ -62,7 +62,6 @@ export const PERMISSION_DEFINITIONS = [
     category: "Profile",
   },
 
-  // Scheduling
   {
     key: "schedule.view",
     label: "Schedules: View",
@@ -87,6 +86,7 @@ export const PERMISSION_DEFINITIONS = [
     description: "Delete schedules",
     category: "Scheduling",
   },
+  { key: "schedule.assign", label: "Schedules: Assign", description: "Assign people to shifts", category: "Scheduling" },
   {
     key: "schedule.grant",
     label: "Schedules: Grant",

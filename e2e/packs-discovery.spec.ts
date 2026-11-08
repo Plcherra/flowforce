@@ -72,20 +72,20 @@ test("opens packs from the OPS plus button and shows pricing coming soon", async
     "Inventory and expenses",
   );
 
-  await expect(sheet.getByTestId("pack-add-price-team")).toHaveText("$49/mo");
-  await expect(sheet.getByTestId("pack-add-price-insights")).toHaveText("$39/mo");
-  await expect(sheet.getByTestId("pack-add-price-stock")).toHaveText("$49/mo");
+  await expect(sheet.getByTestId("pack-add-price-team")).toHaveText("$19/mo");
+  await expect(sheet.getByTestId("pack-add-price-insights")).toHaveText("$19/mo");
+  await expect(sheet.getByTestId("pack-add-price-stock")).toHaveText("$29/mo");
   await expect(page.getByTestId("packs-add-price-note")).toHaveText(
-    "Placeholder price, billed monthly per company. This amount can change.",
+    "Billed monthly per company. Add-ons sit on top of Ops.",
   );
 
   await sheet.getByTestId("pack-add-team").click();
   await page.waitForURL(/\/app\/packs\/team/, { timeout: 20_000 });
   await expect(page.getByTestId("pack-detail")).toHaveAttribute("data-pack", "team");
   await expect(page.getByTestId("pack-card-team")).toContainText("leaderboard");
-  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$19/mo");
   await expect(page.getByTestId("pack-price-note-team")).toHaveText(
-    "Placeholder price, billed monthly per company. This amount can change.",
+    "Billed monthly per company. Add-ons sit on top of Ops.",
   );
   await expect(page.getByTestId("pack-pricing-soon-team")).toHaveText(
     "Pricing coming soon",
@@ -93,9 +93,9 @@ test("opens packs from the OPS plus button and shows pricing coming soon", async
   await expect(page.getByTestId("pack-buy-team")).toHaveCount(0);
 
   await page.goto("/app/packs");
-  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
-  await expect(page.getByTestId("pack-price-insights")).toHaveText("$39/mo");
-  await expect(page.getByTestId("pack-price-stock")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$19/mo");
+  await expect(page.getByTestId("pack-price-insights")).toHaveText("$19/mo");
+  await expect(page.getByTestId("pack-price-stock")).toHaveText("$29/mo");
   await expect(page.getByTestId("pack-buy-team")).toHaveCount(0);
   await expect(page.getByTestId("pack-buy-insights")).toHaveCount(0);
   await expect(page.getByTestId("pack-buy-stock")).toHaveCount(0);
@@ -140,7 +140,7 @@ test("mocked Stripe test checkout and customer portal do not write settings", as
 
   await signIn(page);
   await page.goto("/app/packs/team");
-  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$19/mo");
   await expect(page.getByTestId("pack-pricing-soon-team")).toHaveCount(0);
   await expect(page.getByTestId("pack-buy-team")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("pack-buy-team")).toHaveAttribute(
@@ -205,8 +205,8 @@ test("hides pack purchase when billing management is denied", async ({ page }) =
   await expect(detail).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("packs-purchase-denied")).toBeVisible();
   await expect(page.getByTestId("pack-buy-team")).toHaveCount(0);
-  await expect(page.getByTestId("pack-price-team")).toHaveText("$49/mo");
-  await expect(page.getByTestId("pack-price-note-team")).toContainText("can change");
+  await expect(page.getByTestId("pack-price-team")).toHaveText("$19/mo");
+  await expect(page.getByTestId("pack-price-note-team")).toContainText("Add-ons sit on top of Ops");
 });
 
 test("turns a pack on after a mocked checkout confirmation and does not charge", async ({

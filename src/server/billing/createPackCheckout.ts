@@ -5,7 +5,6 @@ import {
   readPackPriceId,
 } from "@/config/packCatalog";
 import type { OptionalPackId } from "@/config/packFlags";
-import { assertStripeTestSecret } from "@/server/billing/stripeTestMode";
 import { getStripeClient } from "@/server/billing/stripeClient";
 
 const BLOCKING_SUBSCRIPTION_STATUSES = new Set([
@@ -70,17 +69,6 @@ export async function createPackCheckoutSession(input: {
     };
   }
 
-  try {
-    assertStripeTestSecret(process.env.STRIPE_SECRET_KEY);
-  } catch {
-    return {
-      ok: false,
-      status: 403,
-      code: "stripe_test_mode_required",
-      message: "Pack checkout is available in Stripe test mode only.",
-    };
-  }
-
   const stripe = getStripeClient();
   const price = await stripe.prices.retrieve(priceId);
   if (!packPriceCanCheckout(price)) {
@@ -88,7 +76,7 @@ export async function createPackCheckoutSession(input: {
       ok: false,
       status: 409,
       code: "pack_price_pending",
-      message: "This pack price must be a monthly recurring test price.",
+      message: "This pack price must be a monthly recurring price.",
     };
   }
 

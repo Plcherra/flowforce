@@ -10,6 +10,7 @@ import {
   enabledJobRoles,
   onboardingRecordsFromWorkspace,
   signupProblem,
+  signupRedirectForExistingAccount,
   starterListSettings,
   storeProblem,
   type AccountWorkspaceInput,
@@ -86,6 +87,38 @@ export function runAccountSetupModelTests() {
     "password",
   );
   assert.equal(storeProblem({ name: "Rua", opens: "08:00", closes: "08:00" }), "store");
+  assert.equal(
+    signupRedirectForExistingAccount({
+      inviteToken: "token",
+      companyId: null,
+      role: null,
+    }),
+    "/auth?invite=token",
+  );
+  assert.equal(
+    signupRedirectForExistingAccount({
+      inviteToken: null,
+      companyId: "shop",
+      role: "employee",
+    }),
+    "/app/onboarding",
+  );
+  assert.equal(
+    signupRedirectForExistingAccount({
+      inviteToken: null,
+      companyId: "shop",
+      role: "owner",
+    }),
+    "/app/dashboard",
+  );
+  assert.equal(
+    signupRedirectForExistingAccount({
+      inviteToken: null,
+      companyId: null,
+      role: "owner",
+    }),
+    null,
+  );
 
   const settings = starterListSettings(
     "role-1",

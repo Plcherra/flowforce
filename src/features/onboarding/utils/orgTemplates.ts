@@ -1,6 +1,9 @@
 export const ORG_PERMISSION_KEYS = [
   "schedule.view",
+  "schedule.create",
   "schedule.edit",
+  "schedule.assign",
+  "schedule.delete",
   "forms.submit",
   "tasks.view",
   "tasks.update",
@@ -31,17 +34,23 @@ export type OrgSetup = {
   departments: OrgDepartmentDraft[];
 };
 
-const FOH: OrgPermissionMap = {
+const STAFF_SCHEDULE: OrgPermissionMap = {
   "schedule.view": true,
+  "schedule.create": false,
   "schedule.edit": false,
+  "schedule.assign": false,
+  "schedule.delete": false,
+};
+
+const FOH: OrgPermissionMap = {
+  ...STAFF_SCHEDULE,
   "forms.submit": true,
   "tasks.view": true,
   "tasks.update": true,
 };
 
 const PREP: OrgPermissionMap = {
-  "schedule.view": true,
-  "schedule.edit": false,
+  ...STAFF_SCHEDULE,
   "forms.submit": true,
   "tasks.view": true,
   "tasks.update": true,
@@ -49,13 +58,20 @@ const PREP: OrgPermissionMap = {
 
 const MANAGER: OrgPermissionMap = {
   "schedule.view": true,
+  "schedule.create": true,
   "schedule.edit": true,
+  "schedule.assign": true,
+  "schedule.delete": true,
   "forms.submit": true,
   "tasks.view": true,
   "tasks.update": true,
 };
 
-const LEAD: OrgPermissionMap = { "schedule.edit": true };
+// Shift lead is the coffee-shop supervisor: assign and edit, not create or delete.
+const LEAD: OrgPermissionMap = {
+  "schedule.edit": true,
+  "schedule.assign": true,
+};
 
 const NAME_FALLBACKS: Record<string, string> = {
   "onboarding.org.names.foh": "FOH",

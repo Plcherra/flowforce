@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import { EmployeeOnboardingView } from "./EmployeeOnboardingView";
+import { HiringChecklist } from "./HiringChecklist";
 import { useEmployeeOnboarding } from "../useEmployeeOnboarding";
 
 export function EmployeeOnboardingPage() {
@@ -28,6 +29,8 @@ export function EmployeeOnboardingPage() {
   }
 
   return (
+    <div className="space-y-6">
+    <HiringChecklist />
     <EmployeeOnboardingView
       data={screen.state}
       busyId={screen.busyId}
@@ -44,5 +47,6 @@ export function EmployeeOnboardingPage() {
         void screen.onFinish();
       }}
     />
+    </div>
   );
 }

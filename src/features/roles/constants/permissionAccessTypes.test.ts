@@ -36,8 +36,16 @@ export function runPermissionAccessTypeTests() {
   );
   assert.equal(
     accessSwitchOn(manager, findAccessSwitch("shifts", "delete")!),
-    false,
+    true,
   );
+  assert.equal(
+    accessSwitchOn(manager, findAccessSwitch("shifts", "assign")!),
+    true,
+  );
+  const staff = getProductRolePermissions("staff");
+  assert.equal(accessSwitchOn(staff, findAccessSwitch("shifts", "assign")!), false);
+  assert.equal(accessSwitchOn(staff, findAccessSwitch("shifts", "create")!), false);
+  assert.equal(accessSwitchOn(staff, findAccessSwitch("shifts", "delete")!), false);
 
   const templates = findAccessSwitch("form_templates", "delete")!;
   assert.deepEqual(templates.keys, ["manageForms"]);

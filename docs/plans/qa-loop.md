@@ -44,8 +44,8 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
    - `e2e/cafe-starter.spec.ts` pins English, signs in with the test user, checks both lists, and stops the role and form writes before they are stored.
 8. Packs discovery and self-serve purchase — done
    - Packs are not on Overview. The **+** next to OPS in the bottom nav (desktop and mobile) lists Team, Insights, and Stock and what each unlocks. Opening one goes to `/app/packs/:pack` with a buy button.
-   - Pedro decided the placeholder terms (changeable later): Team $49/mo, Insights $39/mo, Stock $49/mo, USD, per company; monthly; Checkout quantity 1; à la carte; additive add-ons on Operations, not a replacement for starter, growth, or enterprise.
-   - Cards show those placeholder prices and say the amount can change. When `STRIPE_PRICE_PACK_TEAM`, `STRIPE_PRICE_PACK_INSIGHTS`, or `STRIPE_PRICE_PACK_STOCK` is unset, that pack shows "Pricing coming soon" and does not call Stripe. A yearly Stripe price is refused.
+   - Locked prices, USD, per company, monthly, quantity 1: Ops $59, Team $19, Insights $19, Stock $29. Team, Insights, and Stock are à la carte add-ons on Ops. One Stripe account. Price ids stay in `STRIPE_PRICE_OPS`, `STRIPE_PRICE_PACK_TEAM`, `STRIPE_PRICE_PACK_INSIGHTS`, and `STRIPE_PRICE_PACK_STOCK`.
+   - Cards show those amounts. When a pack env var is unset, that pack shows "Pricing coming soon" and does not call Stripe. A yearly Stripe price is refused.
    - When a monthly test price is set, `POST /api/packs/checkout` creates a Stripe test-mode subscription Checkout Session. Live keys are refused. `checkout.session.completed` (paid) sets that pack's flag in `system_settings.admin_config.packFlags`. Subscription cancel clears it. Manage or cancel uses the Stripe customer portal. No new table and no migration.
    - A new company stores basic Ops flags: Operations on, Team, Insights, and Stock off.
    - `e2e/packs-discovery.spec.ts` and `e2e/landing-packs.spec.ts` pin English, mock Stripe, and do not write settings.
@@ -55,4 +55,4 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
 
 Real-store locations (Pedro-approved after Ops v1) — done
 - Migration `20261107085004_company_stores` was applied to production. Shops live in `public.stores` with name, address, and hours. The Walk-in inventory row is hidden and was not deleted. No store rows were backfilled, because only Walk-in existed.
-- Ops v1 items 1–8 are done. Pack prices are the placeholder amounts in item 8.
+- Ops v1 items 1–8 are done. Pack prices are the locked amounts in item 8: Ops $59, Team $19, Insights $19, Stock $29.

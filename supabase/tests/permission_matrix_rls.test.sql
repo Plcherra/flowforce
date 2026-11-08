@@ -282,6 +282,15 @@ select throws_ok(
   'Manager cannot create a payment'
 );
 
+reset role;
+update public.company_roles
+set permissions = '{"schedule.delete": false}'::jsonb
+where id = 'a11e0000-0000-4000-8000-000000000042';
+
+set local role authenticated;
+select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claim.sub', 'a11e0000-0000-4000-8000-000000000020', true);
+
 with deleted as (
   delete from public.schedules
   where company_id = 'a11e0000-0000-4000-8000-000000000001'
@@ -291,7 +300,28 @@ with deleted as (
 select is(
   (select count(*) from deleted),
   0::bigint,
-  'Manager cannot delete a schedule without schedule.delete'
+  'Explicit schedule.delete false stays a deny'
+);
+
+reset role;
+update public.company_roles
+set permissions = '{}'::jsonb
+where id = 'a11e0000-0000-4000-8000-000000000042';
+
+set local role authenticated;
+select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claim.sub', 'a11e0000-0000-4000-8000-000000000020', true);
+
+with deleted as (
+  delete from public.schedules
+  where company_id = 'a11e0000-0000-4000-8000-000000000001'
+    and title = 'Manager shift'
+  returning 1
+)
+select is(
+  (select count(*) from deleted),
+  1::bigint,
+  'A manager pack that omits schedule.delete follows the default and can delete'
 );
 
 select set_config('request.jwt.claim.sub', 'a11e0000-0000-4000-8000-000000000010', true);
