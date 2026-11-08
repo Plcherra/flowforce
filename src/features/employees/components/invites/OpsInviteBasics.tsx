@@ -110,7 +110,9 @@ export function OpsInviteBasics({
             )}
           </section>
 
-          <HiringBuilder />
+          <section data-testid="ops-basics-docs">
+            <HiringBuilder />
+          </section>
 
           <section data-testid="ops-basics-rules">
             <h4 className="text-sm font-medium">{t("employees.opsFlowRules")}</h4>

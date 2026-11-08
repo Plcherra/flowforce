@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,15 +41,20 @@ export function NameCombobox({
   const { t } = useTranslation();
   const selected = options.find((option) => option.id === value && !option.suggested);
   const [query, setQuery] = useState(selected?.name ?? "");
+  const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState<"create" | "delete" | "blocked" | null>(null);
   const typed = query.trim();
   const exists = options.some(
     (option) => !option.suggested && option.name.toLowerCase() === typed.toLowerCase(),
   );
   const canCreate = typed.length > 0 && !exists;
-  const matches = options.filter((option) =>
-    option.name.toLowerCase().includes(typed.toLowerCase()),
+  const matches = options.filter(
+    (option) => !typed || option.name.toLowerCase().includes(typed.toLowerCase()),
   );
+
+  useEffect(() => {
+    if (selected) setQuery(selected.name);
+  }, [selected]);
 
   return (
     <div className="space-y-1.5">
@@ -58,11 +63,18 @@ export function NameCombobox({
         <Input
           value={query}
           data-testid={testId}
+          data-selected={selected ? "true" : "false"}
           className="min-h-11"
           aria-label={label}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setOpen(false)}
           onChange={(event) => {
-            setQuery(event.target.value);
-            if (selected) onSelect("");
+            const next = event.target.value;
+            setQuery(next);
+            setOpen(true);
+            if (selected && next.trim().toLowerCase() !== selected.name.toLowerCase()) {
+              onSelect("");
+            }
           }}
         />
         {canCreate ? (
@@ -92,7 +104,7 @@ export function NameCombobox({
           </Button>
         ) : null}
       </div>
-      {typed && !(selected && selected.name.toLowerCase() === typed.toLowerCase()) ? (
+      {open ? (
         <ul className="max-h-40 overflow-y-auto rounded-md border text-sm" data-testid={`${testId}-list`}>
           {matches.map((option) => (
             <li key={`${option.suggested ? "new" : "row"}-${option.id || option.name}`}>
@@ -100,6 +112,11 @@ export function NameCombobox({
                 type="button"
                 className="flex min-h-11 w-full items-center px-3 text-left hover:bg-muted"
                 data-testid={`${testId}-option`}
+                {...(option.id && testId.includes("department")
+                  ? { "data-department-id": option.id }
+                  : {})}
+                {...(option.id && testId.includes("role") ? { "data-role-id": option.id } : {})}
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={() => {
                   setQuery(option.name);
                   if (option.suggested || !option.id) {
@@ -107,6 +124,7 @@ export function NameCombobox({
                     return;
                   }
                   onSelect(option.id);
+                  setOpen(false);
                 }}
               >
                 {option.name}

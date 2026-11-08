@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(21);
+select plan(27);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
