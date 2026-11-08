@@ -68,6 +68,23 @@ using (
   company_id in (select public.current_user_company_ids())
   and public.current_user_has_any_permission(
     company_id,
-    array['manageUsers', 'systemSettings', 'documents.manage']
+    array['manageUsers', 'systemSettings']
+  )
+);
+
+drop policy if exists "Document managers read hire onboarding activity" on public.audit_log;
+create policy "Document managers read hire onboarding activity"
+on public.audit_log
+for select
+to authenticated
+using (
+  company_id in (select public.current_user_company_ids())
+  and public.current_user_has_any_permission(
+    company_id,
+    array['documents.manage']
+  )
+  and (
+    action like 'hire.%'
+    or action like 'onboarding.%'
   )
 );
