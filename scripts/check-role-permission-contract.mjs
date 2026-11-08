@@ -167,18 +167,39 @@ for (const permission of [
   "billing.manage",
   "admin.settings",
   "schedule.grant",
-  "schedule.create",
-  "schedule.delete",
 ]) {
   assert(
     !staffGrantable.has(permission),
     `staff ceiling must not allow ${permission}`,
   );
 }
-for (const permission of ["editSchedules", "schedule.edit"]) {
+for (const permission of [
+  "editSchedules",
+  "schedule.edit",
+  "schedule.create",
+  "schedule.assign",
+  "schedule.delete",
+]) {
   assert(
     staffGrantable.has(permission),
     `staff ceiling must allow ${permission} to be turned on for that person`,
+  );
+  if (permission !== "editSchedules") {
+    assert(
+      !staffPermissions.has(permission),
+      `staff default pack must not include ${permission}`,
+    );
+  }
+}
+for (const permission of [
+  "schedule.create",
+  "schedule.edit",
+  "schedule.assign",
+  "schedule.delete",
+]) {
+  assert(
+    managerPermissions.has(permission),
+    `manager default pack must include ${permission}`,
   );
 }
 
@@ -272,10 +293,14 @@ assert(
   "Staff ceiling must not allow schedule grant or reminder keys",
 );
 assert(
-  teamSchedule.verbs.create_delete.every(
-    (permission) => !staffGrantable.has(permission),
+  ["schedule.create", "schedule.assign", "schedule.delete"].every((permission) =>
+    teamSchedule.verbs.create_delete.includes(permission),
   ),
-  "Staff ceiling must not allow Create / delete on team schedule",
+  "Team schedule exposes create, assign, and delete",
+);
+assert(
+  teamSchedule.verbs.create_delete.every((permission) => staffGrantable.has(permission)),
+  "An owner can grant create, assign, and delete on a staff class",
 );
 const settingsArea = operatorAreas.find((area) => area.key === "settings");
 assert(

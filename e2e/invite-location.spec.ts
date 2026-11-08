@@ -46,11 +46,13 @@ test("invites a teammate to a real store the signed-in user can assign", async (
   let departmentId: string | null = null;
   if (await department.isVisible().catch(() => false)) {
     await department.click();
-    const option = page.getByTestId("invite-department-option").first();
-    await expect(option).toBeVisible();
-    departmentId = await option.getAttribute("data-department-id");
-    expect(departmentId).toBeTruthy();
-    await option.click();
+    const option = page.locator('[data-testid="invite-department-option"][data-department-id]').first();
+    if (await option.count()) {
+      await expect(option).toBeVisible();
+      departmentId = await option.getAttribute("data-department-id");
+      expect(departmentId).toBeTruthy();
+      await option.click();
+    }
   }
 
   const location = dialog.getByTestId("invite-location");

@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(21);
+select plan(27);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -72,8 +72,32 @@ select ok(
   'a manager class can keep an explicit schedule delete grant'
 );
 select ok(
-  not (public.product_level_allowed_permissions('staff') ? 'schedule.delete'),
-  'staff cannot keep a schedule delete grant'
+  public.product_level_allowed_permissions('staff') ? 'schedule.delete',
+  'an owner can grant schedule delete on a staff class'
+);
+select ok(
+  not public.product_role_default_allows('staff', 'schedule.delete'),
+  'a staff class that omits schedule.delete stays denied'
+);
+select ok(
+  public.product_role_default_allows('manager', 'schedule.assign'),
+  'a manager class that omits schedule.assign follows the default'
+);
+select ok(
+  public.product_role_default_allows('supervisor', 'schedule.edit'),
+  'supervisor default includes schedule edit'
+);
+select ok(
+  public.product_role_default_allows('supervisor', 'schedule.assign'),
+  'supervisor default includes schedule assign'
+);
+select ok(
+  not public.product_role_default_allows('supervisor', 'schedule.create'),
+  'supervisor default omits schedule create'
+);
+select ok(
+  not public.product_role_default_allows('supervisor', 'schedule.delete'),
+  'supervisor default omits schedule delete'
 );
 
 select is(

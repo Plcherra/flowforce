@@ -36,11 +36,12 @@ export function useSchedulingRole(): SchedulingRole {
       editSchedules: can("editSchedules"),
       "schedule.create": can("schedule.create"),
       "schedule.edit": can("schedule.edit"),
+      "schedule.assign": can("schedule.assign"),
       "schedule.delete": can("schedule.delete"),
     });
-    const canViewDrafts = version.draft || version.create || version.edit;
+    const canViewDrafts = version.draft || version.create || version.edit || version.assign;
     const canManageSchedule =
-      version.draft || version.create || version.edit || version.delete;
+      version.draft || version.create || version.edit || version.assign || version.delete;
     const canPublish = version.edit;
     const canApproveRequests = isManager || can("approveTimeOff");
     const canManageAvailability = version.draft || version.edit;

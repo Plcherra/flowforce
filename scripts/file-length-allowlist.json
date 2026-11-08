@@ -76,7 +76,7 @@
   },
   {
     "path": "src/features/scheduling/components/ShiftDetailsPanel.tsx",
-    "lines": 867,
+    "lines": 846,
     "ticket": "FF-SPLIT-21"
   },
   {

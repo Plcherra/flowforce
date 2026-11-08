@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { OperatorAccessGrid } from "@/features/roles/components/OperatorAccessGrid";
+import { rolesInDepartment } from "@/features/employees/utils/inviteRoleChoices";
+import { NameCombobox, type NameOption } from "./NameCombobox";
+import { coffeeShopStarter } from "@/features/onboarding/utils/orgTemplates";
 import { effectiveInvitePermissions } from "@/features/employees/utils/staffInviteScheduleDefaults";
 import { retainAllowedDiffs } from "@/features/roles/constants/personAccessDiffs";
 import {
@@ -37,6 +40,10 @@ export function InvitePersonCardForm({
   canRemove,
   onChange,
   onRemove,
+  onCreateDepartment,
+  onDeleteDepartment,
+  onCreateRole,
+  onDeleteRole,
 }: {
   card: InvitePersonCard;
   index: number;
@@ -50,9 +57,38 @@ export function InvitePersonCardForm({
   canRemove: boolean;
   onChange: (card: InvitePersonCard) => void;
   onRemove: () => void;
+  onCreateDepartment?: (name: string) => Promise<string | null>;
+  onDeleteDepartment?: (id: string) => Promise<"ok" | "blocked">;
+  onCreateRole?: (name: string, departmentId: string) => Promise<string | null>;
+  onDeleteRole?: (id: string) => Promise<"ok" | "blocked">;
 }) {
   const { t } = useTranslation();
+  void showLocations;
+  void showDepartments;
+  const shop = coffeeShopStarter(t);
+  const visibleRoles = rolesInDepartment(classes, card.departmentId);
   const selectedClass = classes.find((role) => role.id === card.roleId);
+  const departmentOptions: NameOption[] = [
+    ...departments.map((department) => ({ id: department.id, name: department.name })),
+    ...shop.departments
+      .filter(
+        (department) =>
+          !departments.some(
+            (row) => row.name.trim().toLowerCase() === department.name.trim().toLowerCase(),
+          ),
+      )
+      .map((department) => ({ id: "", name: department.name, suggested: true })),
+  ];
+  const roleOptions: NameOption[] = [
+    ...visibleRoles.map((role) => ({ id: role.id, name: role.name })),
+    ...shop.departments
+      .flatMap((department) => department.roles)
+      .filter(
+        (role) =>
+          !visibleRoles.some((row) => row.name.trim().toLowerCase() === role.name.trim().toLowerCase()),
+      )
+      .map((role) => ({ id: "", name: role.name, suggested: true })),
+  ];
   const level: ProductLevel = selectedClass
     ? resolveProductLevel(selectedClass)
     : "staff";
@@ -153,45 +189,32 @@ export function InvitePersonCardForm({
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>{t("employees.role")}</Label>
-            <Select
-              value={card.roleId}
-              onValueChange={(value) => {
-                const nextClass = classes.find((role) => role.id === value);
-                onChange({
-                  ...card,
-                  roleId: value,
-                  permissionOverrides: nextClass
-                    ? retainAllowedDiffs(
-                        resolveProductLevel(nextClass),
-                        nextClass.permissions,
-                        card.permissionOverrides,
-                      )
-                    : {},
-                });
-              }}
-            >
-              <SelectTrigger
-                data-testid="invite-role"
-                data-selected={card.roleId ? "true" : "false"}
-              >
-                <SelectValue placeholder={t("employees.chooseARole")} />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((role) => (
-                  <SelectItem
-                    key={role.id}
-                    value={role.id}
-                    data-testid="invite-role-option"
-                    data-role-id={role.id}
-                  >
-                    {role.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <NameCombobox
+            label={t("employees.role")}
+            value={card.roleId}
+            options={roleOptions}
+            testId="invite-role"
+            onSelect={(roleId) => {
+              const nextClass = classes.find((role) => role.id === roleId);
+              onChange({
+                ...card,
+                roleId,
+                permissionOverrides: nextClass
+                  ? retainAllowedDiffs(
+                      resolveProductLevel(nextClass),
+                      nextClass.permissions,
+                      card.permissionOverrides,
+                    )
+                  : {},
+              });
+            }}
+            onCreate={(name) => {
+              void onCreateRole?.(name, card.departmentId).then((roleId) => {
+                if (roleId) onChange({ ...card, roleId, permissionOverrides: {} });
+              });
+            }}
+            onDelete={async (id) => (await onDeleteRole?.(id)) ?? "ok"}
+          />
           <div className="space-y-1.5">
             <Label htmlFor={`${card.id}-start`}>{t("employees.startDate")}</Label>
             <Input
@@ -208,14 +231,16 @@ export function InvitePersonCardForm({
               {t("employees.startDateHelp")}
             </p>
           </div>
-          {showLocations ? (
-            <div className="space-y-1.5">
-              <Label htmlFor={`${card.id}-location`}>{t("forms.location")}</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor={`${card.id}-location`}>{t("forms.location")}</Label>
+            {locations.length === 0 ? (
+              <p className="text-sm text-muted-foreground" data-testid="invite-location-empty">
+                {t("employees.noStoresYet")}
+              </p>
+            ) : (
               <Select
                 value={card.locationId}
-                onValueChange={(value) =>
-                  onChange({ ...card, locationId: value })
-                }
+                onValueChange={(value) => onChange({ ...card, locationId: value })}
               >
                 <SelectTrigger
                   id={`${card.id}-location`}
@@ -237,35 +262,29 @@ export function InvitePersonCardForm({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-          ) : null}
-          {showDepartments ? (
-            <div className="space-y-1.5">
-              <Label>{t("employees.department")}</Label>
-              <Select
-                value={card.departmentId}
-                onValueChange={(value) =>
-                  onChange({ ...card, departmentId: value })
-                }
-              >
-                <SelectTrigger data-testid="invite-department">
-                  <SelectValue placeholder={t("employees.chooseADepartment")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((department) => (
-                    <SelectItem
-                      key={department.id}
-                      value={department.id}
-                      data-testid="invite-department-option"
-                      data-department-id={department.id}
-                    >
-                      {department.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : null}
+            )}
+          </div>
+          <NameCombobox
+            label={t("employees.department")}
+            value={card.departmentId}
+            options={departmentOptions}
+            testId="invite-department"
+            onSelect={(departmentId) =>
+              onChange({
+                ...card,
+                departmentId,
+                roleId: rolesInDepartment(classes, departmentId).some((role) => role.id === card.roleId)
+                  ? card.roleId
+                  : "",
+              })
+            }
+            onCreate={(name) => {
+              void onCreateDepartment?.(name).then((departmentId) => {
+                if (departmentId) onChange({ ...card, departmentId });
+              });
+            }}
+            onDelete={async (id) => (await onDeleteDepartment?.(id)) ?? "ok"}
+          />
         </div>
 
         {selectedClass ? (
@@ -280,6 +299,8 @@ export function InvitePersonCardForm({
               inviterLevel={inviterLevel}
               inviterPermissions={inviterPermissions}
               idPrefix={card.id}
+              startCollapsed
+              onUseStaffDefaults={() => onChange({ ...card, permissionOverrides: {} })}
               onAccessChange={handleAccessChange}
             />
           </div>

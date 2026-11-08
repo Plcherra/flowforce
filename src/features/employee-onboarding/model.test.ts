@@ -48,7 +48,12 @@ export function runEmployeeOnboardingModelTests() {
   assert.equal(employeeFilePath("company", "person", "progress", "id.webp").split("/")[1], "person");
 
   assert.equal(acceptedOnboardingFile({ type: "application/pdf", size: 20 }), true);
-  assert.equal(acceptedOnboardingFile({ type: "image/gif", size: 20 }), false);
+  assert.equal(acceptedOnboardingFile({ type: "image/gif", size: 20 }), true);
+  assert.equal(acceptedOnboardingFile({ type: "text/plain", size: 20, name: "notes.txt" }), false);
+  assert.equal(
+    acceptedOnboardingFile({ type: "", size: 20, name: "hours.xlsx" }),
+    true,
+  );
   assert.equal(acceptedOnboardingFile({ type: "image/png", size: 0 }), false);
   assert.equal(acceptedOnboardingFile({ type: "image/png", size: 10 * 1024 * 1024 + 1 }), false);
 

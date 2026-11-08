@@ -3,12 +3,14 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useCan } from "@/hooks/useCan";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { departmentNameProblem } from "@/features/scheduling/utils/shiftRoleDepartment";
+import { NameCombobox } from "@/features/employees/components/invites/NameCombobox";
+import { coffeeShopStarter } from "@/features/onboarding/utils/orgTemplates";
+import { insertDepartment, removeDepartmentIfUnused } from "@/features/employees/utils/inviteCatalogActions";
 
 type DepartmentRow = { id: string; name: string | null };
 
@@ -21,7 +23,6 @@ export function DepartmentSettingsCard() {
   const allowed = can("managePositions") || can("systemSettings");
   const [rows, setRows] = useState<DepartmentRow[]>([]);
   const [draft, setDraft] = useState("");
-  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     if (!companyId) return;
@@ -43,31 +44,6 @@ export function DepartmentSettingsCard() {
   }, [allowed, companyId, load]);
 
   if (!allowed) return null;
-
-  const add = async () => {
-    if (!companyId) return;
-    const problem = departmentNameProblem(draft, rows);
-    if (problem) {
-      toast({
-        title: t(problem === "empty" ? "settings.departmentEmpty" : "settings.departmentDuplicate"),
-        variant: "destructive",
-      });
-      return;
-    }
-    setBusy(true);
-    const { error } = await supabase.from("departments").insert({ // pragma: allowlist secret
-      company_id: companyId,
-      name: draft.trim(),
-    });
-    setBusy(false);
-    if (error) {
-      toast({ title: t("settings.departmentFailed"), variant: "destructive" });
-      return;
-    }
-    setDraft("");
-    toast({ title: t("settings.departmentAdded") });
-    await load();
-  };
 
   const rename = async (row: DepartmentRow, name: string) => {
     if (!companyId || name.trim() === (row.name ?? "").trim()) return;
@@ -113,29 +89,28 @@ export function DepartmentSettingsCard() {
         <CardTitle>{t("settings.departmentsTitle")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Label htmlFor="department-name" className="sr-only">
-            {t("settings.departmentName")}
-          </Label>
-          <Input
-            id="department-name"
-            className="min-h-11"
-            data-testid="department-name-input"
-            value={draft}
-            placeholder={t("settings.departmentName")}
-            aria-label={t("settings.departmentName")}
-            onChange={(event) => setDraft(event.target.value)}
-          />
-          <Button
-            type="button"
-            className="min-h-11"
-            data-testid="department-add"
-            disabled={busy}
-            onClick={() => void add()}
-          >
-            {t("settings.addDepartment")}
-          </Button>
-        </div>
+        <NameCombobox
+          label={t("settings.departmentName")}
+          value={draft}
+          options={[
+            ...rows.map((row) => ({ id: row.id, name: row.name ?? "" })),
+            ...coffeeShopStarter(t).departments
+              .filter((department) => !rows.some((row) => (row.name ?? "").trim().toLowerCase() === department.name.trim().toLowerCase()))
+              .map((department) => ({ id: "", name: department.name, suggested: true as const })),
+          ]}
+          testId="department-name-input"
+          onSelect={setDraft}
+          onCreate={(name) => {
+            if (!companyId) return;
+            void insertDepartment(companyId, name).then(() => load());
+          }}
+          onDelete={async (id) => {
+            if (!companyId) return "blocked";
+            const result = await removeDepartmentIfUnused(companyId, id);
+            await load();
+            return result;
+          }}
+        />
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("settings.departmentEmptyList")}</p>
         ) : (

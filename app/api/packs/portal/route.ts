@@ -8,10 +8,6 @@ import { requireBillingAuth } from "@/server/billing/requireBillingAuth";
 import { checkBillingRouteRateLimit } from "@/server/billing/rateLimitBillingRoute";
 import { mapStripeRouteError } from "@/server/billing/stripeRouteErrors";
 import { getStripeClient } from "@/server/billing/stripeClient";
-import {
-  assertStripeTestSecret,
-  StripeTestModeError,
-} from "@/server/billing/stripeTestMode";
 
 const logger = createServerLogger("pack-portal");
 
@@ -56,17 +52,6 @@ export async function POST(request: NextRequest) {
     const parsed = bodySchema.safeParse(await request.json().catch(() => ({})));
     if (!parsed.success || !isOptionalPackId(parsed.data.pack)) {
       return jsonError("Invalid pack portal request.", 400);
-    }
-
-    try {
-      assertStripeTestSecret(process.env.STRIPE_SECRET_KEY);
-    } catch (error) {
-      if (error instanceof StripeTestModeError) {
-        return jsonError("Pack billing is available in Stripe test mode only.", 403, {
-          code: "stripe_test_mode_required",
-        });
-      }
-      throw error;
     }
 
     const { data: company, error: companyError } = await supabaseAdmin // pragma: allowlist secret

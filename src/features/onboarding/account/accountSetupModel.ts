@@ -267,6 +267,19 @@ export function workspaceStoresProblem(stores: StoreDraft[]): "store" | null {
   return storesProblem(stores);
 }
 
+export function signupRedirectForExistingAccount(input: {
+  inviteToken: string | null;
+  companyId: string | null;
+  role: string | null;
+}): string | null {
+  const token = input.inviteToken?.trim();
+  if (token) return `/auth?invite=${encodeURIComponent(token)}`;
+  if (!input.companyId) return null;
+  const role = (input.role ?? "").trim().toLowerCase();
+  if (role === "owner") return "/app/dashboard";
+  return "/app/onboarding";
+}
+
 export function inviteEmailProblem(email: string): boolean {
   const trimmed = email.trim();
   if (!trimmed) return false;

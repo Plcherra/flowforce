@@ -241,6 +241,10 @@ select is(
   'Home staff profile does not match another company staff audience'
 );
 
+update public.company_roles
+set permissions = '{"schedule.delete": false}'::jsonb
+where id = 'c11e0000-0000-4000-8000-000000000142';
+
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', 'c11e0000-0000-4000-8000-000000000010', true);
@@ -280,7 +284,7 @@ with deleted as (
 select is(
   (select count(*) from deleted),
   1::bigint,
-  'Schedule editor can remove a shift assignment without schedule.delete'
+  'Schedule assign can remove a shift assignment without schedule.delete'
 );
 
 with deleted as (

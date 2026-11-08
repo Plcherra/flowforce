@@ -5,6 +5,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useInviteAccessOptions } from "../../hooks/useInviteAccessOptions";
+import { useProfile } from "@/hooks/useProfile";
+import {
+  insertDepartment,
+  insertShopRole,
+  removeDepartmentIfUnused,
+  removeRoleIfUnused,
+} from "../../utils/inviteCatalogActions";
 import { createInvitePersonCard, type InvitePersonCard } from "../../types/invites";
 import {
   sendCompanyInvites,
@@ -33,6 +40,10 @@ export function InvitePersonStack({
     departments,
     showLocations,
     showDepartments,
+    requireLocation,
+    requireDepartment,
+    refetchDepartments,
+    refetchRoles,
     inviterLevel,
     inviterPermissions,
     isLoading,
@@ -41,6 +52,9 @@ export function InvitePersonStack({
     createInvitePersonCard(),
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { profile } = useProfile();
+  const companyId = profile?.company_id ?? profile?.companyId ?? null;
+  const userId = profile?.id ?? null;
 
   useEffect(() => {
     if (!defaultClass && locations.length !== 1 && departments.length !== 1) return;
@@ -76,7 +90,7 @@ export function InvitePersonStack({
       });
       return null;
     }
-    if (showDepartments && ready.some((card) => !card.departmentId)) {
+    if (requireDepartment && ready.some((card) => !card.departmentId)) {
       toast({
         variant: "destructive",
         title: t("literals.addAPerson"),
@@ -84,7 +98,7 @@ export function InvitePersonStack({
       });
       return null;
     }
-    if (showLocations && ready.some((card) => !card.locationId)) {
+    if (requireLocation && ready.some((card) => !card.locationId)) {
       toast({
         variant: "destructive",
         title: t("literals.addAPerson"),
@@ -182,6 +196,37 @@ export function InvitePersonStack({
           onRemove={() =>
             setCards((current) => current.filter((item) => item.id !== card.id))
           }
+          onCreateDepartment={async (name) => {
+            if (!companyId) return null;
+            const id = await insertDepartment(companyId, name);
+            await refetchDepartments();
+            return id;
+          }}
+          onDeleteDepartment={async (id) => {
+            if (!companyId) return "blocked";
+            const result = await removeDepartmentIfUnused(companyId, id);
+            await refetchDepartments();
+            return result;
+          }}
+          onCreateRole={async (name, departmentId) => {
+            if (!companyId || !userId) return null;
+            const id = await insertShopRole({
+              companyId,
+              userId,
+              name,
+              departmentId,
+              translate: t,
+            });
+            await refetchRoles();
+            return id;
+          }}
+          onDeleteRole={async (id) => {
+            if (!companyId) return "blocked";
+            const role = classes.find((item) => item.id === id);
+            const result = await removeRoleIfUnused(companyId, id, role?.name ?? "");
+            await refetchRoles();
+            return result;
+          }}
         />
       ))}
 

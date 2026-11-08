@@ -6,6 +6,7 @@ export const ACCESS_SWITCH_TYPES = [
   "read",
   "create",
   "edit",
+  "assign",
   "delete",
   "grant",
 ] as const;
@@ -27,7 +28,12 @@ export type AccessRow = {
   switches: AccessSwitch[];
 };
 
-const WRITE_SWITCH_TYPES = new Set<AccessSwitchType>(["create", "edit", "delete"]);
+const WRITE_SWITCH_TYPES = new Set<AccessSwitchType>([
+  "create",
+  "edit",
+  "assign",
+  "delete",
+]);
 
 export function accessSwitchTypeAllowed(id: string): id is AccessSwitchType {
   return (ACCESS_SWITCH_TYPES as readonly string[]).includes(id);
@@ -52,10 +58,11 @@ export const ACCESS_ROWS: AccessRow[] = [
   { id: "team_schedule", label: "Team schedule", switches: [
     { id: "read", label: "Read", keys: ["viewTeamSchedules", "schedule.view"] },
   ]},
-  { id: "shifts", label: "Shifts", switches: [
-    { id: "create", label: "Create", keys: ["schedule.create"] },
-    { id: "edit", label: "Edit", keys: ["schedule.edit", "editSchedules"] },
-    { id: "delete", label: "Delete", keys: ["schedule.delete"] },
+  { id: "shifts", label: "Shifts", labelKey: "settings.accessShifts", switches: [
+    { id: "create", label: "Create", labelKey: "settings.accessScheduleCreate", keys: ["schedule.create"] },
+    { id: "edit", label: "Edit", labelKey: "settings.accessScheduleEdit", keys: ["schedule.edit", "editSchedules"] },
+    { id: "assign", label: "Assign", labelKey: "settings.accessScheduleAssign", keys: ["schedule.assign"] },
+    { id: "delete", label: "Delete", labelKey: "settings.accessScheduleDelete", keys: ["schedule.delete"] },
   ]},
   { id: "schedule_grant", label: "Schedule access", switches: [
     { id: "grant", label: "Grant", keys: ["schedule.grant"] },

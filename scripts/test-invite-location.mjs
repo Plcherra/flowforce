@@ -15,7 +15,11 @@ const { runInviteLocationTests } = importTs(
 const { runInviteDepartmentTests } = importTs(
   "../src/features/employees/utils/inviteDepartment.test.ts",
 );
+const { runInviteRoleChoiceTests } = importTs(
+  "../src/features/employees/utils/inviteRoleChoices.test.ts",
+);
 
 runInviteLocationTests();
 runInviteDepartmentTests();
+runInviteRoleChoiceTests();
 console.log("invite location tests passed");

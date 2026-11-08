@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase as browserClient } from "@/integrations/supabase/client"; // pragma: allowlist secret
+import { HiringBuilder } from "@/features/employee-onboarding/components/HiringBuilder";
 import { opsInviteBasics } from "../../utils/opsInviteFlow";
 
 export function OpsInviteBasics({
@@ -110,20 +111,7 @@ export function OpsInviteBasics({
           </section>
 
           <section data-testid="ops-basics-docs">
-            <h4 className="text-sm font-medium">{t("employees.opsFlowDocs")}</h4>
-            {basics.docs.length > 0 ? (
-              <ul className="mt-1 space-y-1 text-sm">
-                {basics.docs.map((doc) => (
-                  <li key={doc.id} data-testid="ops-basics-doc">
-                    {doc.title}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-1 text-sm text-muted-foreground" data-empty="true">
-                {t("employees.opsFlowNoDocs")}
-              </p>
-            )}
+            <HiringBuilder />
           </section>
 
           <section data-testid="ops-basics-rules">

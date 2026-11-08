@@ -41,7 +41,7 @@ export function runOperatorBoxTests() {
   assert.ok(teamSchedule);
   assert.equal(isVerbAvailable(teamSchedule, "see", "staff"), true);
   assert.equal(isVerbAvailable(teamSchedule, "edit", "staff"), true);
-  assert.equal(isVerbAvailable(teamSchedule, "create_delete", "staff"), false);
+  assert.equal(isVerbAvailable(teamSchedule, "create_delete", "staff"), true);
 
   const inventory = getOperatorAreaDefinition("inventory");
   assert.ok(inventory);

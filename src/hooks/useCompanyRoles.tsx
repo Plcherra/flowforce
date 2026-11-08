@@ -29,6 +29,7 @@ export interface CompanyRole {
   permissions: Record<string, boolean>;
   is_system_role: boolean;
   is_active: boolean;
+  department_id?: string | null;
 }
 
 export interface CreateRoleData {

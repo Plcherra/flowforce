@@ -27,8 +27,10 @@ export function employeeFilePath(
   return `${companyId}/${profileId}/${progressId}/${safeOnboardingFileName(fileName)}`;
 }
 
-export function acceptedOnboardingFile(file: { type: string; size: number }) {
-  return MIME_SET.has(file.type) && file.size > 0 && file.size <= MAX_ONBOARDING_BYTES;
+export function acceptedOnboardingFile(file: { type: string; size: number; name?: string }) {
+  const extension = file.name?.split(".").pop()?.toLowerCase() ?? "";
+  const office = new Set(["csv", "xls", "xlsx", "ppt", "pptx", "pdf", "png", "jpg", "jpeg", "webp", "gif"]);
+  return (MIME_SET.has(file.type) || office.has(extension)) && file.size > 0 && file.size <= MAX_ONBOARDING_BYTES;
 }
 
 export function isOnboardingMime(value: string): value is OnboardingMimeType {

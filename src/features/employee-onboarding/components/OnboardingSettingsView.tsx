@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { OnboardingDocument, OnboardingStepKind, OnboardingStepView, OnboardingSubmission } from "../types";
+import { HiringBuilder } from "./HiringBuilder";
 import { OnboardingDocumentsCard } from "./OnboardingDocumentsCard";
 import { OnboardingStepsCard } from "./OnboardingStepsCard";
 import { OnboardingSubmissionsCard } from "./OnboardingSubmissionsCard";
@@ -87,6 +88,7 @@ export function OnboardingSettingsView({
           ) : null}
         </CardContent>
       </Card>
+      <HiringBuilder />
       <OnboardingDocumentsCard
         documents={documents}
         canManage={canManageDocuments}
