@@ -9,6 +9,7 @@ import type { MessageChannel } from "@/types/messages";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 import { MessagesMainArea } from "./MessagesMainArea";
 import { NewChatPanel } from "./NewChatPanel";
+import { useCan } from "@/hooks/useCan";
 
 interface MessagesBoardProps {
   vm: MessagesViewModel;
@@ -18,17 +19,11 @@ function isDirect(channel: MessageChannel) {
   return (channel.type ?? "").toLowerCase() === "direct";
 }
 
-function isChannelAdmin(vm: MessagesViewModel) {
-  if (!vm.currentChannel || !vm.profile) return false;
-  const role = (vm.profile.role ?? "").toLowerCase();
-  return (
-    vm.currentChannel.created_by === vm.profile.id ||
-    ["admin", "owner", "company_admin"].includes(role)
-  );
-}
-
 export function MessagesBoard({ vm }: MessagesBoardProps) {
   const { t } = useTranslation();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const canSend = !permissionsLoading && can("messages.send");
+  const canManage = !permissionsLoading && can("messages.manage");
   return (
     <div className="flex h-full min-h-0 flex-col bg-muted/40">
       <div className="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
@@ -50,14 +45,17 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
         <Button variant="ghost" asChild>
           <Link to="/app/company-updates">{t("common.companyUpdates")}</Link>
         </Button>
+        {canSend ? (
         <Button
           variant={vm.showDirectMessageDialog ? "default" : "outline"}
+          data-testid="messages-new-chat"
           onClick={() => {
             vm.closeThread();
             vm.setShowDirectMessageDialog(true);
           }}
         >
           {t("messages.newChat")} </Button>
+        ) : null}
       </div>
 
       {vm.filteredChannels.length > 0 && (
@@ -101,7 +99,7 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
             channel={vm.currentChannel}
             messages={vm.messages}
             messagesLoading={vm.loading}
-            isChannelAdmin={isChannelAdmin(vm)}
+            isChannelAdmin={canManage}
             onShowChannelMembers={() => vm.setShowChannelMembers(true)}
             onShowChannelSettings={() => vm.setShowChannelSettings(true)}
             onSendMessage={vm.handleSendMessage}

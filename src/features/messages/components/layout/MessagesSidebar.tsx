@@ -103,14 +103,14 @@ export function MessagesSidebar({
                 channels={people}
                 currentChannelId={currentChannelId}
                 onChannelSelect={onChannelSelect}
-                emptyLabel="No direct messages yet"
+                emptyLabel={t("messages.noDirectMessages")}
               />
               <ChatSection
                 title={t("messages.groups")}
                 channels={groups}
                 currentChannelId={currentChannelId}
                 onChannelSelect={onChannelSelect}
-                emptyLabel="No groups yet"
+                emptyLabel={t("messages.noGroupsYet")}
               />
             </>
           )}

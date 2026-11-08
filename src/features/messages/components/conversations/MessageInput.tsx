@@ -57,7 +57,7 @@ export function MessageInput({
     const content = messageInput.trim();
     if (!content && messageAttachments.length === 0) return;
 
-    const payload = content || "[File attachment]";
+    const payload = content || t("messages.fileAttachment");
     try {
       setSending(true);
       setErrorMessage(null);
