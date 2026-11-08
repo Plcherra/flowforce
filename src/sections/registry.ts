@@ -1,16 +1,15 @@
 import type React from "react";
 import type { PageMeta } from "./PageFactory";
-import eventsConfig from "./events/section.config";
 
 export type SectionMeta = {
   title: string;
-  slug: string; // e.g., 'events'
+  slug: string;
   category: "communication" | "operations" | "hr" | "custom";
   accessLevel?: "public" | "team" | "admin";
   pages: PageMeta[];
 };
 
-export const sections: SectionMeta[] = [eventsConfig].filter(Boolean);
+export const sections: SectionMeta[] = [];
 
 export function getSectionBySlug(slug: string) {
   return sections.find((s) => s.slug === slug);

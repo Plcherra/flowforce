@@ -6,9 +6,7 @@ import { sections } from "./registry";
 const pageImports: Record<
   string,
   () => Promise<{ default: React.ComponentType<any> }>
-> = {
-  "./events/index.tsx": () => import("./events/index"),
-};
+> = {};
 
 export function buildSectionRoutes(): React.ReactElement[] {
   const routes: React.ReactElement[] = [];

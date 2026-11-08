@@ -637,10 +637,7 @@ test.describe('Scheduling smoke (Playwright)', () => {
       .getByTestId('schedule-day-event-notice')
       .filter({ hasText: '1 on this day' });
     await expect(notice.first()).toBeVisible({ timeout: 15_000 });
-    await expect(notice.first()).toHaveAttribute(
-      'href',
-      /\/app\/calendar\?date=\d{4}-\d{2}-\d{2}(&event=|$)/,
-    );
+    await expect(page.locator('a[data-testid="schedule-day-event-notice"]')).toHaveCount(0);
     await expect(page.getByText('Vendor · Health Inspection')).toHaveCount(0);
   });
 

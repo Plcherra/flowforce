@@ -49,7 +49,6 @@ export function runBottomNavDestinationTests() {
     "Company Updates",
     "Forms",
     "Operations",
-    "Calendar",
     "Inventory",
     "Expenses",
     "Reports",
@@ -94,7 +93,6 @@ export function runBottomNavDestinationTests() {
   assert.equal(wideNames[0], "Dashboard");
   assert.equal(wideNames.includes("Scheduling"), true);
   assert.equal(wideNames.includes("Company Updates"), true);
-  assert.equal(wideNames.includes("Calendar"), true);
   assert.equal(wideNames.includes("AI Insights"), true);
   assert.equal(wideNames.filter((name) => name === "Tasks").length, 1);
   assert.equal(wideNames.length, primary.length + moreNames.length);
@@ -118,10 +116,13 @@ export function runBottomNavDestinationTests() {
   assert.equal(shouldShowMoreNav([], false), false);
   assert.equal(shouldShowMoreNav([], true), true);
 
-  const withCalendarActive = partitionBottomNavigation(asProcessed(undefined, "/calendar"), false);
-  assert.equal(isMoreNavActive(withCalendarActive.moreSections), true);
+  const withUpdatesActive = partitionBottomNavigation(
+    asProcessed(undefined, "/company-updates"),
+    false,
+  );
+  assert.equal(isMoreNavActive(withUpdatesActive.moreSections), true);
   assert.equal(
-    withCalendarActive.primary.some((item) => item.isActive),
+    withUpdatesActive.primary.some((item) => item.isActive),
     false,
   );
 

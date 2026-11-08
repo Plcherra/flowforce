@@ -66,7 +66,7 @@
   },
   {
     "path": "scripts/smoke-visible-modules.mjs",
-    "lines": 895,
+    "lines": 894,
     "ticket": "FF-SPLIT-14"
   },
   {
@@ -93,11 +93,6 @@
     "path": "src/components/ui/sidebar.tsx",
     "lines": 829,
     "ticket": "FF-SPLIT-18"
-  },
-  {
-    "path": "src/hooks/useEvents.tsx",
-    "lines": 827,
-    "ticket": "FF-SPLIT-19"
   },
   {
     "path": "src/services/integrations/csvImportFramework.ts",
@@ -170,11 +165,6 @@
     "ticket": "FF-SPLIT-34"
   },
   {
-    "path": "src/sections/events/index.tsx",
-    "lines": 695,
-    "ticket": "FF-SPLIT-35"
-  },
-  {
     "path": "src/features/inventory/pages/ItemsSetup.tsx",
     "lines": 691,
     "ticket": "FF-SPLIT-36"
@@ -225,14 +215,14 @@
     "ticket": "FF-SPLIT-45"
   },
   {
-    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
-    "lines": 631,
-    "ticket": "FF-SPLIT-49"
-  },
-  {
     "path": "src/hooks/useAIActionsFeed.ts",
     "lines": 631,
     "ticket": "FF-SPLIT-46"
+  },
+  {
+    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
+    "lines": 625,
+    "ticket": "FF-SPLIT-49"
   },
   {
     "path": "src/features/inventory/pages/Expenses.tsx",
@@ -245,14 +235,14 @@
     "ticket": "FF-SPLIT-48"
   },
   {
-    "path": "src/features/sections/components/DynamicSection.tsx",
-    "lines": 587,
-    "ticket": "FF-SPLIT-50"
-  },
-  {
     "path": "src/features/availability/components/AvailabilityRequestForm.tsx",
     "lines": 583,
     "ticket": "FF-SPLIT-51"
+  },
+  {
+    "path": "src/features/sections/components/DynamicSection.tsx",
+    "lines": 578,
+    "ticket": "FF-SPLIT-50"
   },
   {
     "path": "src/features/dashboard/components/OperatorCommandCenter.tsx",

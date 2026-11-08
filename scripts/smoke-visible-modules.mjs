@@ -273,7 +273,6 @@ async function seedSmokeTenant(admin) {
         "tasks",
         "messages",
         "company-updates",
-        "calendar",
         "scheduling",
         "forms",
         "inventory",

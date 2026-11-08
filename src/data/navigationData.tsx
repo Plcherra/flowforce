@@ -3,7 +3,6 @@ import i18n from "@/i18n/config";
 import {
   BarChart3,
   Calculator,
-  CalendarDays,
   CalendarRange,
   CheckSquare,
   Crown,
@@ -91,12 +90,6 @@ export const navigationSections: NavigationSection[] = [
         icon: Wrench,
         translationKey: "operationsIntelligence",
         pack: "insights",
-      },
-      {
-        name: "Calendar",
-        href: "/calendar",
-        icon: CalendarDays,
-        translationKey: "calendar",
       },
     ],
   },

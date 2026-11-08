@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Events and meetings share the unified calendar route. */
+/** Old events calendar links open Overview. */
 export default function EventsCalendarRedirectPage() {
-  redirect("/app/calendar");
+  redirect("/app/dashboard");
 }

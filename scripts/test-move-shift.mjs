@@ -18,9 +18,6 @@ const { runPlaceDayEventsTests } = importTs(
 const { runShiftChipPaintTests } = importTs(
   "../src/features/scheduling/utils/shiftChipPaint.test.ts",
 );
-const { runCalendarEventHrefTests } = importTs(
-  "../src/features/scheduling/utils/calendarEventHref.test.ts",
-);
 const { runShiftLaunchTests } = importTs(
   "../src/features/scheduling/utils/shiftLaunch.test.ts",
 );
@@ -34,7 +31,6 @@ const { runOrgTemplateTests } = importTs(
 await runMoveShiftTests();
 runPlaceDayEventsTests();
 runShiftChipPaintTests();
-runCalendarEventHrefTests();
 runShiftLaunchTests();
 runShiftRoleDepartmentTests();
 runOrgTemplateTests();

@@ -4,7 +4,6 @@ import { useParams, Navigate, useNavigate } from "@/lib/router-adapter";
 import { useCustomSections } from "@/hooks/useCustomSections";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import CompanyUpdatesSection from "./CompanyUpdatesSection";
-import EventsIndex from "@/sections/events/index";
 import {
   Card,
   CardContent,
@@ -198,14 +197,6 @@ export default function DynamicSection({ sectionPath }: DynamicSectionProps) {
   };
 
   if (!pageSlug) {
-    if (
-      templateKey.includes("event") ||
-      sectionRoute.includes("event") ||
-      sectionName.includes("event")
-    ) {
-      return <EventsIndex />;
-    }
-
     switch (templateKey || sectionRoute || sectionName) {
       case "company-updates":
       case "/updates":

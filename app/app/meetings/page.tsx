@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Meetings live on the unified calendar; type is chosen when creating. */
+/** Meetings lived on the calendar. Old links open Overview. */
 export default function MeetingsRedirectPage() {
-  redirect("/app/calendar");
+  redirect("/app/dashboard");
 }

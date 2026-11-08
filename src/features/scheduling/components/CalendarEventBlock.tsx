@@ -1,10 +1,16 @@
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import type { CalendarEvent } from "@/hooks/useCalendarEvents";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
 import { cn } from "@/lib/utils";
 
 const EVENT_COLOR = "#0f766e";
+
+export type ScheduleOverlayEvent = {
+  id: string;
+  title: string;
+  start: string;
+  color: string | null;
+};
 
 export function CalendarEventBlock({
   event,
@@ -12,7 +18,7 @@ export function CalendarEventBlock({
   compact = false,
   onSelect,
 }: {
-  event: CalendarEvent;
+  event: ScheduleOverlayEvent;
   selected?: boolean;
   compact?: boolean;
   onSelect?: (eventId: string) => void;

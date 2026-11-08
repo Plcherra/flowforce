@@ -88,7 +88,6 @@ export const FIXED_OPS_SECTIONS = [
   "employees",
   "forms",
   "company-updates",
-  "calendar",
 ];
 
 export const DEFAULT_COMPANY_SIZE = "1-10 employees";

@@ -10,7 +10,7 @@ import type {
   ShiftWithAssignments,
   AssignmentWithUser,
 } from "@/features/scheduling/hooks/useSchedulingConsolidated";
-import type { CalendarEvent } from "@/hooks/useCalendarEvents";
+import type { ScheduleOverlayEvent as CalendarEvent } from "@/features/scheduling/components/CalendarEventBlock";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { getShiftColor, calculateCoverageStats } from "@/utils/schedulingUtils";
 import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";

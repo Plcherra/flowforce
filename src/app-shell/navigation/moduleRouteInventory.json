@@ -305,22 +305,22 @@
     {
       "label": "Calendar",
       "path": "/app/calendar",
-      "status": "beta",
-      "sidebar": true,
+      "status": "deprecated",
+      "sidebar": false,
       "smoke": false,
-      "owner": "src/features/calendar",
-      "dataDependency": "tenant calendar/event tables",
-      "notes": "Unified calendar for meetings, events, and vendor visits under Daily Operations."
+      "owner": "app/app/calendar/page.tsx",
+      "dataDependency": "none",
+      "notes": "Removed. Redirects to Overview at /app/dashboard."
     },
     {
       "label": "Events Calendar",
       "path": "/app/events/calendar",
-      "status": "beta",
+      "status": "deprecated",
       "sidebar": false,
       "smoke": false,
-      "owner": "src/features/calendar",
-      "dataDependency": "tenant calendar/event tables",
-      "notes": "Redirects to /app/calendar."
+      "owner": "app/app/events/calendar/page.tsx",
+      "dataDependency": "none",
+      "notes": "Removed. Redirects to Overview at /app/dashboard."
     },
     {
       "label": "Expenses",
@@ -465,12 +465,12 @@
     {
       "label": "Meetings",
       "path": "/app/meetings",
-      "status": "beta",
+      "status": "deprecated",
       "sidebar": false,
       "smoke": false,
-      "owner": "src/features/calendar",
-      "dataDependency": "tenant meetings/event tables",
-      "notes": "Redirects to /app/calendar; meeting type is selected when creating."
+      "owner": "app/app/meetings/page.tsx",
+      "dataDependency": "none",
+      "notes": "Removed with Calendar. Redirects to Overview at /app/dashboard."
     },
     {
       "label": "App Redirect",
