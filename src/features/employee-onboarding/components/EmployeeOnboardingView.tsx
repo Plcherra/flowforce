@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coffee } from "lucide-react";
+import { plainHiringText, type HiringBlock } from "../hiringModel";
 import { formatStartDate, onboardingCompletion, visibleOnboardingSteps } from "../model";
 import type { EmployeeOnboardingReady, OnboardingStepView } from "../types";
 import { OnboardingStepCard } from "./OnboardingStepCard";
@@ -14,6 +15,8 @@ export function EmployeeOnboardingView({
   onAcknowledge,
   onUpload,
   onFinish,
+  hiringBlocks = [],
+  openRequired = 0,
 }: {
   data: EmployeeOnboardingReady;
   busyId: string | null;
@@ -21,17 +24,25 @@ export function EmployeeOnboardingView({
   onAcknowledge: (step: OnboardingStepView) => void;
   onUpload: (step: OnboardingStepView, file: File) => void;
   onFinish: () => void;
+  hiringBlocks?: HiringBlock[];
+  openRequired?: number;
 }) {
   const { t, i18n } = useTranslation();
   const steps = visibleOnboardingSteps(data.steps);
   const progress = onboardingCompletion(data.steps);
+  const sharedPage = hiringBlocks.find((block) => block.kind === "share_card" && block.title.trim());
   const title =
     data.welcomeTitle.trim() ||
+    sharedPage?.title ||
     t("employeeOnboarding.welcomeFallbackTitle", {
       company: data.companyName || t("employeeOnboarding.theShop"),
     });
-  const body = data.welcomeBody.trim() || t("employeeOnboarding.welcomeFallbackBody");
+  const body =
+    data.welcomeBody.trim() ||
+    (sharedPage ? plainHiringText(sharedPage.body) : "") ||
+    t("employeeOnboarding.welcomeFallbackBody");
   const finished = data.status === "complete";
+  const canFinish = progress.canFinish && openRequired === 0;
   const facts = [
     ["role", t("employeeOnboarding.role"), data.facts.role],
     ["department", t("employeeOnboarding.department"), data.facts.department],
@@ -80,7 +91,9 @@ export function EmployeeOnboardingView({
         </Card>
         <h2 className="text-lg font-semibold">{t("employeeOnboarding.checklistTitle")}</h2>
         {steps.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("employeeOnboarding.noStepsForHire")}</p>
+          hiringBlocks.length > 0 ? null : (
+            <p className="text-sm text-muted-foreground">{t("employeeOnboarding.noStepsForHire")}</p>
+          )
         ) : (
           steps.map((step) => (
             <OnboardingStepCard
@@ -107,12 +120,14 @@ export function EmployeeOnboardingView({
             <Button
               type="button"
               data-testid="onboarding-finish"
-              disabled={!progress.canFinish || Boolean(busyId)}
+              disabled={!canFinish || Boolean(busyId)}
               onClick={onFinish}
             >
               {t("employeeOnboarding.finish")}
             </Button>
-            <p className="text-sm text-muted-foreground">{t("employeeOnboarding.finishHelp")}</p>
+            <p className="text-sm text-muted-foreground">
+              {openRequired > 0 ? t("hireActivity.finishBlocked") : t("employeeOnboarding.finishHelp")}
+            </p>
           </div>
         )}
       </div>

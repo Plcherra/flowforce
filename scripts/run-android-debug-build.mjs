@@ -17,14 +17,30 @@ function writeFiltered(chunk, stream) {
   }
 }
 
-const child = spawn("./gradlew", ["assembleDebug", "--no-daemon", "--console=plain"], {
-  cwd: "android",
-  env: process.env,
-});
+function runOnce() {
+  return new Promise((resolve) => {
+    let output = "";
+    const child = spawn("./gradlew", ["assembleDebug", "--no-daemon", "--console=plain"], {
+      cwd: "android",
+      env: process.env,
+    });
+    const capture = (chunk, stream) => {
+      output += chunk.toString();
+      writeFiltered(chunk, stream);
+    };
+    child.stdout.on("data", (chunk) => capture(chunk, process.stdout));
+    child.stderr.on("data", (chunk) => capture(chunk, process.stderr));
+    child.on("close", (code) => resolve({ code: code ?? 1, output }));
+  });
+}
 
-child.stdout.on("data", (chunk) => writeFiltered(chunk, process.stdout));
-child.stderr.on("data", (chunk) => writeFiltered(chunk, process.stderr));
-
-child.on("close", (code) => {
-  process.exit(code ?? 1);
-});
+const attempts = 4;
+for (let attempt = 1; attempt <= attempts; attempt += 1) {
+  const { code, output } = await runOnce();
+  const distributionMissing = code !== 0 && /HTTP response code: 504/.test(output);
+  if (!distributionMissing || attempt === attempts) {
+    process.exit(code);
+  }
+  console.error(`Gradle distribution download returned 504 (attempt ${attempt} of ${attempts}). Retrying.`);
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+}

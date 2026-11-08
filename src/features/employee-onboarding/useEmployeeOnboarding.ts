@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { COMPANY_DOCS_BUCKET } from "./constants";
+import { logHireActivity } from "@/features/employees/hireActivity";
 import { acknowledgeOnboardingStep, completeOnboarding, uploadOnboardingRequirement } from "./employeeActions";
 import type { OnboardingFailureReason } from "./failure";
 import { loadEmployeeOnboarding } from "./loadEmployeeOnboarding";
@@ -72,6 +73,7 @@ export function useEmployeeOnboarding() {
       fail(result.reason);
       return;
     }
+    void logHireActivity({ profileId: userId, action: "hire.step_completed", step: step.title });
     await reload();
   };
 
@@ -89,19 +91,25 @@ export function useEmployeeOnboarding() {
       fail(result.reason);
       return;
     }
+    void logHireActivity({ profileId: userId, action: "hire.file_submitted", step: step.title });
     await reload();
   };
 
   const onFinish = async () => {
     if (!userId || state.kind !== "ready") return;
     setBusyId("finish");
-    const result = await completeOnboarding(state.enrollmentId, userId);
+    const result = await completeOnboarding({
+      enrollmentId: state.enrollmentId,
+      userId,
+      companyId: state.companyId,
+    });
     setBusyId(null);
     if (result.ok === false) {
       fail(result.reason);
       return;
     }
     toast({ title: t("employeeOnboarding.finishedTitle") });
+    void logHireActivity({ profileId: userId, action: "hire.onboarding_finished" });
     await reload();
   };
 

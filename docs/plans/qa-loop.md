@@ -56,3 +56,10 @@ Ops v1 block, Friday 6 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not star
 Real-store locations (Pedro-approved after Ops v1) — done
 - Migration `20261107085004_company_stores` was applied to production. Shops live in `public.stores` with name, address, and hours. The Walk-in inventory row is hidden and was not deleted. No store rows were backfilled, because only Walk-in existed.
 - Ops v1 items 1–8 are done. Pack prices are the locked amounts in item 8: Ops $59, Team $19, Insights $19, Stock $29.
+
+## Sunday 8 Nov 2026, 4:00–6:00 AM America/New_York
+
+Invite and onboarding follow-up — done in this block
+- Sending an invite saves the Company basics hiring blocks. The hire sees the shared welcome page. A required collect step, including a file, blocks "I'm ready for the floor".
+- The directory shows the company job role apart from the access level. Status is "Invited, not signed in yet" until activation, then "Active", with last sign-in written by the app after a password sign-in.
+- Production already has `hire_followup` as version `20261108023544` and `security_invoker_views` as version `20261108085636`. Both files are in the repo under those versions. They were applied by Patron. This block does not apply SQL.

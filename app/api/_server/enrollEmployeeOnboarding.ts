@@ -40,6 +40,17 @@ export async function enrollEmployeeOnboarding(params: { inviteId: string; userI
       throw createError ?? new Error("enrollment");
     }
 
+    await admin.from("audit_log").insert({
+      company_id: invite.company_id,
+      actor_id: params.userId,
+      target_user_id: params.userId,
+      action: "hire.activated",
+      table_name: "profiles",
+      record_id: params.userId,
+      new_values: {},
+      metadata: {},
+    });
+
     const { data: steps, error: stepsError } = await admin
       .from("employee_onboarding_steps")
       .select("id")

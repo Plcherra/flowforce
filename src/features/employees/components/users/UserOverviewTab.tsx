@@ -12,7 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { EngagementPanel } from "@/features/employees/components/users/EngagementPanel";
+import { HireActivityCard } from "@/features/employees/components/users/HireActivityCard";
 import type { Employee } from "@/hooks/useEmployees";
+import { accessLevelKey, directoryMembership } from "@/features/employees/directoryPresence";
 
 interface UserOverviewTabProps {
   user: Employee;
@@ -56,6 +58,7 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
         role={user.role}
         displayName={displayName}
       />
+      <HireActivityCard profileId={user.id} companyId={user.company_id} name={displayName} />
 
       {/* Contact Information */}
       <Card>
@@ -139,21 +142,31 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium">{t("messages.role")}</p>
-              <Badge variant="outline" className="mt-1 capitalize">
-                {user.role ?? t("literals.unassigned")}
+              <Badge variant="outline" className="mt-1">
+                {user.jobRole?.trim() || t("hireActivity.roleUnset")}
               </Badge>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("hireActivity.accessLabel")}: {accessLevelKey(user.role) ? t(accessLevelKey(user.role)!) : user.role}
+              </p>
             </div>
 
             <div>
               <p className="text-sm font-medium">{t("dashboard.profile.employmentStatus")}</p>
               <Badge
-                variant={
-                  user.employment_status === "active" ? "default" : "secondary"
-                }
-                className="mt-1 capitalize"
+                variant={directoryMembership(user) === "active" ? "default" : "secondary"}
+                className="mt-1"
               >
-                {user.employment_status ?? t("literals.unknown")}
+                {directoryMembership(user) === "invited"
+                  ? t("hireActivity.invited")
+                  : directoryMembership(user) === "active"
+                    ? t("hireActivity.active")
+                    : user.employment_status ?? t("literals.unknown")}
               </Badge>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {user.last_sign_in_at
+                  ? t("hireActivity.lastSignIn", { when: new Date(user.last_sign_in_at).toLocaleString() })
+                  : t("hireActivity.noSignIn")}
+              </p>
             </div>
 
             <div>

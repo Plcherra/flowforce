@@ -6619,5 +6619,36 @@
       "collect_ack": "Conferma",
       "collect_link": "Configurazione esterna"
     }
+  },
+  "hireActivity": {
+    "title": "Cronologia attività",
+    "empty": "Nessuna attività di inserimento per ora.",
+    "activated": "{{name}} ha attivato l'account.",
+    "completedStep": "{{name}} ha completato {{step}}.",
+    "submittedFile": "{{name}} ha inviato {{step}}.",
+    "finished": "{{name}} ha finito l'inserimento.",
+    "progress": "{{done}} di {{total}} passaggi obbligatori fatti",
+    "finishBlocked": "Completa i passaggi obbligatori prima di segnarti come pronto.",
+    "invited": "Invitato, non ha ancora effettuato l'accesso",
+    "active": "Attivo",
+    "lastSignIn": "Ultimo accesso {{when}}",
+    "noSignIn": "Nessun accesso ancora",
+    "resend": "Reinvia invito",
+    "resendDone": "Invito inviato di nuovo",
+    "resendFailed": "Impossibile reinviare l'invito",
+    "accessLabel": "Accesso",
+    "accessStaff": "Team",
+    "accessManager": "Responsabile",
+    "accessAdmin": "Amministrazione",
+    "accessOwner": "Proprietario",
+    "roleUnset": "Nessun ruolo ancora",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "confirmPassword": "Conferma password",
+    "theHire": "Questa persona",
+    "previewWelcomeTitle": "Benvenuto nel locale",
+    "previewWelcomeBody": "Apriamo alle 7. La prima bevanda è offerta dalla casa.",
+    "previewFileTitle": "Documento d'identità",
+    "previewFileBody": "Documento d'identità, fronte, PDF o foto"
   }
 }

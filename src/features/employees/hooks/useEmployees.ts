@@ -30,6 +30,9 @@ export type Employee = ProfileRow & {
   positiveReportCount?: number;
   lateCount?: number;
   noShowCount?: number;
+  jobRole?: string | null;
+  inviteAcceptedAt?: string | null;
+  invitePending?: boolean;
 };
 
 export type UseEmployeesOptions = {
@@ -91,6 +94,30 @@ const buildEmployeeRecords = async (
 
     if (!Array.isArray(employeeList) || employeeList.length === 0) {
       return [];
+    }
+
+    const roleIds = [
+      ...new Set(
+        employeeList
+          .map((employee) => employee.role_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    const [{ data: roleRows }, { data: inviteRows }] = await Promise.all([
+      roleIds.length
+        ? supabase.from("company_roles").select("id, name").in("id", roleIds) // pragma: allowlist secret
+        : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+      supabase.from("company_invites").select("email, accepted_at, status").eq("company_id", companyId), // pragma: allowlist secret
+    ]);
+    const jobRoleById = new Map((roleRows ?? []).map((row) => [row.id, row.name]));
+    const inviteByEmail = new Map<string, { acceptedAt: string | null; pending: boolean }>();
+    for (const row of inviteRows ?? []) {
+      const email = typeof row.email === "string" ? row.email.toLowerCase() : "";
+      if (!email) continue;
+      const current = inviteByEmail.get(email) ?? { acceptedAt: null, pending: false };
+      if (row.accepted_at) current.acceptedAt = row.accepted_at;
+      if (!row.accepted_at && row.status !== "accepted") current.pending = true;
+      inviteByEmail.set(email, current);
     }
 
     const ids = employeeList.map((employee) => employee.id);
@@ -224,8 +251,12 @@ const buildEmployeeRecords = async (
         ),
       );
 
+      const invite = inviteByEmail.get((employee.email ?? "").toLowerCase());
       return {
         ...employee,
+        jobRole: employee.role_id ? jobRoleById.get(employee.role_id) ?? null : null,
+        inviteAcceptedAt: invite?.acceptedAt ?? null,
+        invitePending: Boolean(invite?.pending) && !invite?.acceptedAt,
         skillLevel: skill.level,
         skillXp: skill.xp,
         badges,

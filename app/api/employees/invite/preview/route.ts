@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const { data: invite, error } = await supabaseAdmin
       .from("company_invites")
       .select(
-        "email, first_name, last_name, phone, birth_date, role, status, accepted_at, expires_at",
+        "email, first_name, last_name, phone, birth_date, role, role_id, status, accepted_at, expires_at",
       )
       .eq("invite_token", inviteToken)
       .maybeSingle();
@@ -50,6 +50,16 @@ export async function POST(request: NextRequest) {
       return jsonError("This invitation has expired.", 410);
     }
 
+    let roleName = "";
+    if (invite.role_id) {
+      const { data: job } = await supabaseAdmin // pragma: allowlist secret
+        .from("company_roles")
+        .select("name")
+        .eq("id", invite.role_id)
+        .maybeSingle();
+      roleName = job?.name ?? "";
+    }
+
     return NextResponse.json({
       email: invite.email,
       first_name: invite.first_name,
@@ -57,6 +67,7 @@ export async function POST(request: NextRequest) {
       phone: invite.phone,
       birth_date: invite.birth_date,
       role: invite.role,
+      role_name: roleName,
     });
   } catch (error) {
     scopedLogger.error("Unexpected invite preview error", { error });

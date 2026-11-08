@@ -10,6 +10,10 @@ const importTs = jiti(import.meta.url, {
 const { runEmployeeOnboardingModelTests } = importTs(
   "../src/features/employee-onboarding/model.test.ts",
 );
+const { runHiringFollowupTests } = importTs(
+  "../src/features/employee-onboarding/hiringModel.test.ts",
+);
 
 runEmployeeOnboardingModelTests();
+runHiringFollowupTests();
 process.stdout.write("employee onboarding model tests passed\n");

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
@@ -8,19 +8,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase as db } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { HIRING_FILE_ACCEPT } from "../hiringFiles";
-import { hiringAnswerDone, type HiringAnswer, type HiringBlock } from "../hiringModel";
+import { hiringAnswerDone, openRequiredHiringBlocks, type HiringAnswer, type HiringBlock } from "../hiringModel";
+import { logHireActivity } from "@/features/employees/hireActivity";
 import { loadHiringBlocks } from "../hiringStore";
 import { COMPANY_DOCS_BUCKET, EMPLOYEE_FILES_BUCKET } from "../constants";
 import { acceptedOnboardingFile, employeeFilePath } from "../model";
 import { openPrivateOnboardingFile, uploadPrivateOnboardingFile } from "../storage";
 
-export function HiringChecklist() {
+export function HiringChecklist({
+  onProgress,
+}: {
+  onProgress?: (progress: { blocks: HiringBlock[]; openRequired: number }) => void;
+}) {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const profileId = profile?.id ?? null;
   const [blocks, setBlocks] = useState<HiringBlock[]>([]);
   const [answers, setAnswers] = useState<Record<string, HiringAnswer>>({});
+  const onProgressRef = useRef(onProgress);
+  onProgressRef.current = onProgress;
 
   useEffect(() => {
     if (!companyId || !profileId) return;
@@ -49,6 +56,13 @@ export function HiringChecklist() {
     });
   }, [companyId, profileId]);
 
+  useEffect(() => {
+    onProgressRef.current?.({
+      blocks,
+      openRequired: openRequiredHiringBlocks(blocks, answers).length,
+    });
+  }, [answers, blocks]);
+
   if (!companyId || blocks.length === 0) return null;
 
   const save = async (block: HiringBlock, patch: Partial<HiringAnswer>) => {
@@ -63,8 +77,13 @@ export function HiringChecklist() {
       verified: false,
     };
     const next = { ...current, ...patch };
+    const wasDone = hiringAnswerDone(block, current);
     next.done = hiringAnswerDone(block, next);
     setAnswers((map) => ({ ...map, [block.id]: next }));
+    if (next.done && !wasDone && profileId) {
+      const action = block.kind === "collect_file" ? "hire.file_submitted" : "hire.step_completed";
+      void logHireActivity({ profileId, action, step: block.title });
+    }
     await db.from("hiring_responses").upsert({
       company_id: companyId,
       block_id: block.id,

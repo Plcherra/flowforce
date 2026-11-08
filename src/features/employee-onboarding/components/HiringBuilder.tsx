@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -7,7 +7,27 @@ import type { HiringBlock } from "../hiringModel";
 import { loadHiringBlocks, saveHiringBlocks, uploadHiringShare } from "../hiringStore";
 import { HiringBuilderView } from "./HiringBuilderView";
 
-export function HiringBuilder() {
+function hiringFingerprint(blocks: HiringBlock[]) {
+  return JSON.stringify(
+    blocks.map((block) => ({
+      id: block.id,
+      kind: block.kind,
+      title: block.title,
+      body: block.body,
+      required: block.required,
+      sortOrder: block.sortOrder,
+      linkUrl: block.linkUrl,
+      fileName: block.fileName,
+      storagePath: block.storagePath,
+    })),
+  );
+}
+
+export type HiringBuilderHandle = {
+  save: () => Promise<boolean>;
+};
+
+export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuilder(_props, ref) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -15,14 +35,33 @@ export function HiringBuilder() {
   const userId = profile?.id ?? null;
   const [blocks, setBlocks] = useState<HiringBlock[]>([]);
   const [ready, setReady] = useState(false);
+  const baseline = useRef("");
 
   useEffect(() => {
     if (!companyId) return;
     void loadHiringBlocks(companyId).then((rows) => {
-      if (rows) setBlocks(rows);
+      if (rows) {
+        setBlocks(rows);
+        baseline.current = hiringFingerprint(rows);
+      }
       setReady(true);
     });
   }, [companyId]);
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      if (!companyId || !userId) return blocks.every((block) => !block.title.trim());
+      if (hiringFingerprint(blocks) === baseline.current) return true;
+      const result = await saveHiringBlocks({ companyId, userId, blocks });
+      if (!result.ok) return false;
+      const rows = await loadHiringBlocks(companyId);
+      if (rows) {
+        setBlocks(rows);
+        baseline.current = hiringFingerprint(rows);
+      }
+      return true;
+    },
+  }), [blocks, companyId, userId]);
 
   if (!ready) {
     return <p className="text-sm text-muted-foreground">{t("employeeOnboarding.loading")}</p>;
@@ -77,4 +116,4 @@ export function HiringBuilder() {
       </Button>
     </div>
   );
-}
+});

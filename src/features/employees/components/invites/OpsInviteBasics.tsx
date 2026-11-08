@@ -1,8 +1,13 @@
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase as browserClient } from "@/integrations/supabase/client"; // pragma: allowlist secret
-import { HiringBuilder } from "@/features/employee-onboarding/components/HiringBuilder";
+import {
+  HiringBuilder,
+  type HiringBuilderHandle,
+} from "@/features/employee-onboarding/components/HiringBuilder";
+import { useToast } from "@/hooks/use-toast";
 import { opsInviteBasics } from "../../utils/opsInviteFlow";
 
 export function OpsInviteBasics({
@@ -17,6 +22,16 @@ export function OpsInviteBasics({
   onSend: () => void;
 }) {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const hiringRef = useRef<HiringBuilderHandle>(null);
+  const send = async () => {
+    const saved = await hiringRef.current?.save();
+    if (saved === false) {
+      toast({ title: t("employeeOnboarding.saveFailed"), variant: "destructive" });
+      return;
+    }
+    onSend();
+  };
   const basicsQuery = useQuery({
     queryKey: ["ops-invite-basics", companyId],
     enabled: Boolean(companyId),
@@ -111,7 +126,7 @@ export function OpsInviteBasics({
           </section>
 
           <section data-testid="ops-basics-docs">
-            <HiringBuilder />
+            <HiringBuilder ref={hiringRef} />
           </section>
 
           <section data-testid="ops-basics-rules">
@@ -150,7 +165,7 @@ export function OpsInviteBasics({
           <Button
             type="button"
             data-testid="ops-basics-continue"
-            onClick={onSend}
+            onClick={() => void send()}
             disabled={isSubmitting}
           >
             {isSubmitting ? t("literals.sending") : t("employees.opsFlowSend")}

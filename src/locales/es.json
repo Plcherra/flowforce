@@ -6619,5 +6619,36 @@
       "collect_ack": "Confirmación",
       "collect_link": "Alta externa"
     }
+  },
+  "hireActivity": {
+    "title": "Historial de actividad",
+    "empty": "Todavía no hay actividad de incorporación.",
+    "activated": "{{name}} activó su cuenta.",
+    "completedStep": "{{name}} completó {{step}}.",
+    "submittedFile": "{{name}} envió {{step}}.",
+    "finished": "{{name}} terminó la incorporación.",
+    "progress": "{{done}} de {{total}} pasos obligatorios hechos",
+    "finishBlocked": "Termina los pasos obligatorios antes de marcarte como listo.",
+    "invited": "Invitado, aún no ha entrado",
+    "active": "Activo",
+    "lastSignIn": "Último acceso {{when}}",
+    "noSignIn": "Sin acceso todavía",
+    "resend": "Reenviar invitación",
+    "resendDone": "Invitación enviada de nuevo",
+    "resendFailed": "No se pudo reenviar la invitación",
+    "accessLabel": "Acceso",
+    "accessStaff": "Equipo",
+    "accessManager": "Encargado",
+    "accessAdmin": "Administración",
+    "accessOwner": "Propietario",
+    "roleUnset": "Sin puesto todavía",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "theHire": "Esta persona",
+    "previewWelcomeTitle": "Bienvenido a la tienda",
+    "previewWelcomeBody": "Abrimos a las 7. Tu primera bebida va por la casa.",
+    "previewFileTitle": "Documento de identidad",
+    "previewFileBody": "Documento de identidad, anverso, PDF o foto"
   }
 }

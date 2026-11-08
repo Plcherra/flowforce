@@ -21,7 +21,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import type { Employee } from "@/hooks/useEmployees";
+import { accessLevelKey, directoryMembership } from "../directoryPresence";
+import { resendCompanyInvite } from "../utils/resendCompanyInvite";
 import { getDepartmentName } from "../utils/departmentHelpers";
 
 interface EmployeeTableProps {
@@ -36,6 +40,30 @@ export function EmployeeTable({
   onEmployeeClick,
 }: EmployeeTableProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const [resending, setResending] = useState<string | null>(null);
+  const jobTitle = (employee: Employee) =>
+    employee.jobRole?.trim() || t("hireActivity.roleUnset");
+  const accessLabel = (employee: Employee) => {
+    const key = accessLevelKey(employee.role);
+    return key ? t(key) : employee.role;
+  };
+  const statusLabel = (employee: Employee) => {
+    const membership = directoryMembership(employee);
+    if (membership === "invited") return t("hireActivity.invited");
+    if (membership === "active") return t("hireActivity.active");
+    return employee.employment_status || t("literals.unknown");
+  };
+  const resend = async (employee: Employee) => {
+    if (!employee.email) return;
+    setResending(employee.id);
+    const result = await resendCompanyInvite(employee.email);
+    setResending(null);
+    toast({
+      title: result.ok ? t("hireActivity.resendDone") : t("hireActivity.resendFailed"),
+      variant: result.ok ? "default" : "destructive",
+    });
+  };
   const getDisplayName = (employee: Employee) => {
     const fullName =
       `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim();
@@ -82,13 +110,19 @@ export function EmployeeTable({
                       <Mail className="h-3 w-3" />
                       <span className="truncate">{employee.email}</span>
                     </div>
+                    <p className="mt-1 text-xs text-muted-foreground md:hidden" data-testid="directory-mobile-status">
+                      {jobTitle(employee)} · {statusLabel(employee)}
+                    </p>
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="hidden md:table-cell capitalize">
-                <Badge variant="outline">
-                  {employee.role ?? t("literals.unassigned")}
+              <TableCell className="hidden md:table-cell">
+                <Badge variant="outline" data-testid="directory-job-role">
+                  {jobTitle(employee)}
                 </Badge>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("hireActivity.accessLabel")}: {accessLabel(employee)}
+                </p>
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <div className="flex items-center gap-2">
@@ -109,15 +143,18 @@ export function EmployeeTable({
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <Badge
-                  variant={
-                    employee.employment_status === "active"
-                      ? "default"
-                      : "secondary"
-                  }
+                  variant={directoryMembership(employee) === "active" ? "default" : "secondary"}
+                  data-testid="directory-status"
                 >
-                  {employee.employment_status}
-                  {!employee.employment_status && "Unknown"}
+                  {statusLabel(employee)}
                 </Badge>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {employee.last_sign_in_at
+                    ? t("hireActivity.lastSignIn", {
+                        when: new Date(employee.last_sign_in_at).toLocaleString(),
+                      })
+                    : t("hireActivity.noSignIn")}
+                </p>
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
@@ -139,6 +176,18 @@ export function EmployeeTable({
                     >
                       {t("employees.viewDetails")}
                     </DropdownMenuItem>
+                    {directoryMembership(employee) === "invited" ? (
+                      <DropdownMenuItem
+                        data-testid="directory-resend"
+                        disabled={resending === employee.id}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void resend(employee);
+                        }}
+                      >
+                        {t("hireActivity.resend")}
+                      </DropdownMenuItem>
+                    ) : null}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

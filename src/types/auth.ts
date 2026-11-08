@@ -16,6 +16,7 @@ export interface InviteData {
   phone?: string;
   birthDate?: string;
   role: string;
+  accessRole?: string;
 }
 
 import type { User, Session } from "@supabase/supabase-js";
