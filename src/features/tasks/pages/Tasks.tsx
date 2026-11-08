@@ -39,7 +39,6 @@ import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
-import { DraftInbox } from "@/features/tasks/components/DraftInbox";
 import { MyShiftTasks } from "@/features/tasks/components/MyShiftTasks";
 import { TodayShiftMonitor } from "@/features/tasks/components/TodayShiftMonitor";
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
@@ -85,8 +84,6 @@ export default function Tasks() {
     keysSet: taskCreateKeysAreSet("custom", getSource),
   });
   const showCreateMenu = !permissionsLoading && customCreateLevel !== "none";
-  const showDrafts =
-    !permissionsLoading && (can("editTasks") || can("ai.actions.approve"));
   const canSeeTeam =
     !permissionsLoading && (can("viewTeamTasks") || can("editTasks"));
   const { user } = useAuth();
@@ -225,7 +222,6 @@ export default function Tasks() {
       <TasksBoardSwitch mode={boardMode} onChange={setBoardMode} />
       <ListIssueSync />
       {boardMode === "shift" && can("editTasks") ? <TodayShiftMonitor /> : null}
-      {boardMode === "shift" && showDrafts ? <DraftInbox tasks={visibleTasks} /> : null}
       {boardMode === "shift" ? (
         <MyShiftTasks
           board={shift.board}
