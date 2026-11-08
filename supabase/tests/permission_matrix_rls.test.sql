@@ -221,7 +221,7 @@ select throws_ok(
        false
      ) $$,
   '42501',
-  'new row violates row-level security policy for table "schedules"',
+  'schedule.create required',
   'Staff cannot create a schedule'
 );
 
