@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { highlight } from "@/components/ui/highlight";
 import CompanyUpdatesCard from "@/features/dashboard/components/CompanyUpdatesCard";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
 import { useProfile } from "@/hooks/useProfile";
@@ -87,7 +88,7 @@ function MyShiftCard({
   const ready = board.kind === "ready";
   const when = ready ? formatWhen(board.shiftStartsAt) : "";
   return (
-    <Card data-testid="overview-my-shift">
+    <Card className={highlight.primary} data-testid="overview-my-shift">
       <CardHeader>
         <CardTitle>{t("dashboard.overview.myShiftTitle")}</CardTitle>
       </CardHeader>
@@ -124,7 +125,7 @@ function MyListsCard({
 }) {
   const roleLists = board.kind === "ready" ? board.view.roleLists : [];
   return (
-    <Card data-testid="overview-my-lists">
+    <Card className={highlight.accent} data-testid="overview-my-lists">
       <CardHeader>
         <CardTitle>{t("dashboard.overview.myListsTitle")}</CardTitle>
       </CardHeader>
@@ -148,7 +149,14 @@ function CoverageCard({
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
   return (
-    <Card data-testid="overview-coverage">
+    <Card
+      className={
+        coverage.status === "ready" && coverage.value.open > 0
+          ? highlight.watch
+          : highlight.steady
+      }
+      data-testid="overview-coverage"
+    >
       <CardHeader>
         <CardTitle>{t("dashboard.overview.coverageTitle")}</CardTitle>
       </CardHeader>
@@ -177,7 +185,14 @@ function ListStatusCard({
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
   return (
-    <Card data-testid="overview-list-status">
+    <Card
+      className={
+        lists.status === "ready" && lists.value.overdue > 0
+          ? highlight.watch
+          : highlight.steady
+      }
+      data-testid="overview-list-status"
+    >
       <CardHeader>
         <CardTitle>{t("dashboard.overview.listStatusTitle")}</CardTitle>
       </CardHeader>

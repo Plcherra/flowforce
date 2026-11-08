@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { highlight } from "@/components/ui/highlight";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -126,7 +127,7 @@ export function TodayShiftMonitor() {
     <section className="space-y-3" data-testid="today-shift-monitor">
       <h2 className="text-lg font-semibold">{t("tasks.todayLists")}</h2>
       {rows.map((row) => (
-        <article key={row.shiftId} className="space-y-2 rounded-xl border border-border/70 bg-background p-3">
+        <article key={row.shiftId} className={`space-y-2 rounded-xl border p-3 ${highlight.watch}`}>
           <div>
             <p className="font-medium">
               {row.personId ? names[row.personId] || t("tasks.unassigned") : t("tasks.unassigned")}

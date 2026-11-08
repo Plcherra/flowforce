@@ -13,6 +13,7 @@ import {
 } from "@/features/tasks/utils/myShiftView";
 import { formatClock } from "@/features/forms/utils/formDayWindow";
 import { formatTaskWindow } from "@/features/tasks/utils/taskSchedule";
+import { highlight } from "@/components/ui/highlight";
 
 const SLOT_KEYS: Record<ChecklistSlot, string> = {
   opening: "tasks.openingList",
@@ -108,7 +109,7 @@ export function MyShiftTasks({
       {(board.view.roleLists ?? []).map((list) => (
         <div
           key={list.formId}
-          className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+          className={`space-y-2 rounded-xl border p-3 ${highlight.primary}`}
           data-testid={`my-shift-role-list-${list.formId}`}
         >
           <h3 className="text-sm font-semibold">{list.title || t("tasks.listsForThisRole")}</h3>
@@ -139,7 +140,7 @@ export function MyShiftTasks({
       ))}
       {board.view.weekdayTasks.length > 0 ? (
         <div
-          className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+          className={`space-y-2 rounded-xl border p-3 ${highlight.primary}`}
           data-testid="my-shift-weekday-tasks"
         >
           <h3 className="text-sm font-semibold">{t("tasks.weekdayTasks")}</h3>
@@ -177,7 +178,7 @@ function ShiftList({
   }, [list.savedNote]);
   return (
     <div
-      className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+      className={`space-y-2 rounded-xl border p-3 ${highlight.accent}`}
       data-testid={`my-shift-list-${list.slot}`}
     >
       <h3 className="text-sm font-semibold">{t(SLOT_KEYS[list.slot])}</h3>
@@ -275,7 +276,7 @@ function ShiftTaskCard({
   const canMarkDone = shiftTaskMarkDoneAllowed(task.status);
   return (
     <article
-      className="space-y-2 rounded-xl border border-border/70 bg-background p-3"
+      className={`space-y-2 rounded-xl border p-3 ${highlight.watch}`}
       data-testid={`my-shift-task-${task.id}`}
     >
       <div className="space-y-1">
