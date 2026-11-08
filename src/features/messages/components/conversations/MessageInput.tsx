@@ -24,8 +24,8 @@ export function MessageInput({
   onSendMessage,
 }: MessageInputProps) {
   const { t } = useTranslation();
-  const { can } = useCan();
-  const canSend = can("messages.send");
+  const { can, isLoading: permissionsLoading } = useCan();
+  const canSend = permissionsLoading || can("messages.send");
   const [messageInput, setMessageInput] = useState("");
   const [messageAttachments, setMessageAttachments] = useState<
     MessageAttachment[]
@@ -114,6 +114,7 @@ export function MessageInput({
         onSubmit={handleFormSubmit}
         className="mt-3 flex flex-col gap-2"
         aria-busy={sending}
+        data-testid="chat-composer"
       >
         <Textarea
           ref={textareaRef}

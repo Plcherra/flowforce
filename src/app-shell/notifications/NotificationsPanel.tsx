@@ -21,6 +21,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useTaskNotifications } from "@/features/tasks";
+import { useNavigate } from "@/lib/router-adapter";
 import { formatDistanceToNow } from "date-fns";
 import { logger } from "@/utils/logger";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -33,6 +34,7 @@ export function NotificationsPanel({
   onUnreadCount?: (count: number) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     notifications,
     unreadCount,
@@ -58,6 +60,8 @@ export function NotificationsPanel({
         return <MessageSquare className="h-4 w-4 text-secondary" />;
       case "task_comment":
         return <MessageSquare className="h-4 w-4 text-primary" />;
+      case "direct_message":
+        return <MessageSquare className="h-4 w-4 text-primary" />;
       default:
         return <Bell className="h-4 w-4 text-muted-foreground" />;
     }
@@ -77,6 +81,10 @@ export function NotificationsPanel({
         return t("literals.taskStatusUpdated");
       case "task_comment":
         return t("literals.newComment");
+      case "direct_message":
+        return t("messages.newMessageNotification", {
+          name: notification.title || t("messages.teamMember"),
+        });
       default:
         return notification.title || t("literals.notification");
     }
@@ -124,8 +132,17 @@ export function NotificationsPanel({
       await markAsRead(notification.id);
     }
     // Navigate to task if task_id exists
+    const metadata = notification.metadata;
+    const channelId =
+      metadata && typeof metadata === "object" && "channel_id" in metadata
+        ? String((metadata as { channel_id?: unknown }).channel_id ?? "")
+        : "";
+    if (notification.type === "direct_message" && channelId) {
+      navigate(`/app/messages?channel=${encodeURIComponent(channelId)}`);
+      setIsOpen(false);
+      return;
+    }
     if (notification.task_id) {
-      // You can implement navigation here
       logger.debug("Navigate to task", {
         context: { taskId: notification.task_id },
       });

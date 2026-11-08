@@ -4723,7 +4723,9 @@
     "writeAReply": "Write a reply",
     "writeTheFirstMessage": "Write the first message...",
     "writeYourAnnouncementContentHere": "Write your announcement content here...",
-    "youReTheFirstOneHere": "You're the first one here."
+    "youReTheFirstOneHere": "You're the first one here.",
+    "newMessageNotification": "New message from {{name}}",
+    "unreadChat": "Unread"
   },
   "analytics": {
     "12FromLastMonth": "+12% from last month",

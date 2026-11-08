@@ -180,11 +180,6 @@
     "ticket": "FF-SPLIT-38"
   },
   {
-    "path": "src/features/messages/api/messagesRepository.ts",
-    "lines": 683,
-    "ticket": "FF-SPLIT-39"
-  },
-  {
     "path": "src/lib/permissions/registry.ts",
     "lines": 670,
     "ticket": "FF-SPLIT-40"
@@ -193,6 +188,11 @@
     "path": "src/features/company-updates/repositories/companyUpdatesRepository.ts",
     "lines": 653,
     "ticket": "FF-SPLIT-41"
+  },
+  {
+    "path": "src/features/messages/api/messagesRepository.ts",
+    "lines": 651,
+    "ticket": "FF-SPLIT-39"
   },
   {
     "path": "src/features/scheduling/components/DragDropScheduleCalendar.tsx",

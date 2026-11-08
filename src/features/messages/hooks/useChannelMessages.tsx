@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Message } from "@/types/messages";
 import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import { useRealtime } from "@/hooks/useRealtime";
+import { useRefreshWhileVisible } from "@/features/messages/hooks/useRefreshWhileVisible";
 import { logger } from "@/utils/logger";
 import {
   asArray,
@@ -21,9 +22,9 @@ export function useChannelMessages(channelId: string | null) {
   const isInitialLoadRef = useRef(true);
 
   const fetchMessages = useCallback(
-    async (targetChannelId: string, incremental = false) => {
+    async (targetChannelId: string, incremental = false, silent = false) => {
       if (!user?.id) return;
-      setLoading(true);
+      if (!silent) setLoading(true);
       try {
         // Phase 4 optimization: Incremental append for new messages
         const options =
@@ -67,13 +68,20 @@ export function useChannelMessages(channelId: string | null) {
           error: issue,
           tags: ["error"],
         });
-        setError(issue);
+        if (!silent) setError(issue);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [user?.id],
   );
+
+  const refreshMessages = useCallback(() => {
+    if (!channelId) return;
+    void fetchMessages(channelId, false, true);
+  }, [channelId, fetchMessages]);
+
+  useRefreshWhileVisible(Boolean(channelId && user?.id), refreshMessages);
 
   useEffect(() => {
     if (!channelId || !user?.id) {
@@ -103,31 +111,11 @@ export function useChannelMessages(channelId: string | null) {
         ]
       : [],
     enabled: Boolean(channelId && user?.id),
-    onPayload: (payload) => {
-      if (channelId && payload.new) {
-        // Phase 4 optimization: Incremental append instead of full refetch
-        const newMessage = payload.new as Message;
-        setMessages((prev) => {
-          const safePrev = asArray(prev);
-          // Check if message already exists (avoid duplicates)
-          if (safePrev.some((m) => m.id === newMessage.id)) {
-            return safePrev;
-          }
-          // Append new message and sort
-          const updated = [...safePrev, newMessage].sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-          // Update last timestamp
-          if (safeArrayLength(updated) > 0) {
-            const lastIndex = safeArrayLength(updated) - 1;
-            lastMessageTimestampRef.current =
-              updated[lastIndex]?.created_at ?? null;
-          }
-          return updated;
-        });
-      }
+    onPayload: () => {
+      if (!channelId) return;
+      // Refetch so the row includes the sender profile. The realtime payload
+      // is the raw table row and is not enough to render a chat bubble.
+      void fetchMessages(channelId, true, true);
     },
   });
 
