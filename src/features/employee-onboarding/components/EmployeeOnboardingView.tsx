@@ -17,6 +17,7 @@ export function EmployeeOnboardingView({
   onFinish,
   hiringBlocks = [],
   openRequired = 0,
+  hideWelcome = false,
 }: {
   data: EmployeeOnboardingReady;
   busyId: string | null;
@@ -26,6 +27,7 @@ export function EmployeeOnboardingView({
   onFinish: () => void;
   hiringBlocks?: HiringBlock[];
   openRequired?: number;
+  hideWelcome?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const steps = visibleOnboardingSteps(data.steps);
@@ -56,6 +58,7 @@ export function EmployeeOnboardingView({
 
   return (
     <div data-testid="employee-onboarding">
+      {hideWelcome ? null : (
       <div className="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
         <div className="mr-auto">
           <h1 className="text-xl font-semibold">{t("employeeOnboarding.pageTitle")}</h1>
@@ -68,7 +71,9 @@ export function EmployeeOnboardingView({
           })}
         </Badge>
       </div>
+      )}
       <div className="space-y-4 px-4 py-6">
+        {hideWelcome ? null : (
         <Card className="bg-primary/5 ring-2 ring-primary/20" data-testid="onboarding-welcome">
           <div className="h-2 w-full bg-primary" />
           <CardHeader className="pb-3">
@@ -89,7 +94,10 @@ export function EmployeeOnboardingView({
             </div>
           </CardContent>
         </Card>
+        )}
+        {hideWelcome ? null : (
         <h2 className="text-lg font-semibold">{t("employeeOnboarding.checklistTitle")}</h2>
+        )}
         {steps.length === 0 ? (
           hiringBlocks.length > 0 ? null : (
             <p className="text-sm text-muted-foreground">{t("employeeOnboarding.noStepsForHire")}</p>

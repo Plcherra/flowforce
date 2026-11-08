@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, FileText, User, Calendar } from "lucide-react";
+import { Download, User, Calendar } from "lucide-react";
 import { Link } from "@/lib/router-adapter";
 import { useForms } from "@/features/forms/hooks/useForms";
 import { useFormAnswerTranslations } from "@/features/forms/hooks/useFormAnswerTranslations";
@@ -22,6 +22,8 @@ import {
   submissionHasAnswer,
   submissionIsFile,
 } from "@/features/forms/utils/submissionValue";
+import { submissionLoadState } from "@/features/forms/utils/submissionLoadState";
+import { FormSubmissionsEmpty } from "./FormSubmissionsEmpty";
 
 interface FormSubmissionsDialogProps {
   open: boolean;
@@ -79,6 +81,12 @@ export default function FormSubmissionsDialog({
     }
     setLoading(false);
   };
+
+  const listState = submissionLoadState({
+    loading,
+    failed: loadError,
+    count: submissions.length,
+  });
 
   const exportToCSV = () => {
     if (submissions.length === 0) return;
@@ -154,22 +162,14 @@ export default function FormSubmissionsDialog({
           </DialogHeader>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-          {loading ? (
+          {listState === "loading" ? (
             <div className="text-center py-8">{t("forms.loadingSubmissions")}</div>
-          ) : loadError ? (
-            <p className="py-6 text-sm text-destructive">{t("forms.unableToLoadSubmissions")}</p>
-          ) : submissions.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center">
-                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  {t("forms.noSubmissionsYet")}</h3>
-                <p className="text-muted-foreground mb-4">
-                  {t("forms.thisFormHasnTReceivedAnySubmissionsYet")}</p>
-                <Button onClick={() => setFillDialogOpen(true)}>
-                  {t("forms.fillForm")}</Button>
-              </CardContent>
-            </Card>
+          ) : listState === "error" ? (
+            <p className="py-6 text-sm text-destructive" data-testid="form-submissions-error">
+              {t("forms.unableToLoadSubmissions")}
+            </p>
+          ) : listState === "empty" ? (
+            <FormSubmissionsEmpty onFill={() => setFillDialogOpen(true)} />
           ) : (
             <div className="space-y-4">
               <div className="flex justify-between items-center">

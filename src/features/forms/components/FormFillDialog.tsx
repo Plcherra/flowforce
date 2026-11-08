@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,6 @@ import { useTasks } from "@/hooks/useTasks";
 import { logger } from "@/utils/logger";
 import { FormSubmissionData } from "@/types/api";
 import { orderFormFields } from "@/features/forms/components/utils/orderFormFields";
-import { FormReviewLayout } from "@/features/forms/components/presentation";
 import { exportFormResponseToPdf } from "@/utils/formExport";
 import { readFormSourceLocale } from "@/features/forms/formContentFields";
 import {
@@ -25,32 +23,20 @@ import {
 } from "@/features/forms/formFieldContent";
 import { useFormFieldTranslations } from "@/features/forms/hooks/useFormFieldTranslations";
 import { groupFieldsByCategory } from "../utils/formFieldHelpers";
-import { buildWizardSteps } from "../utils/wizardSteps";
 import { canSubmitForm } from "@/features/forms/utils/formLifecycle";
 import { formulaAnswerMap } from "@/features/forms/utils/formulaValue";
 import { buildReviewSections } from "../utils/reviewSections";
 import { getDefaultValueForField } from "../utils/formValueFormatters";
-import { useFormWizard } from "../hooks/useFormWizard";
-import {
-  FormFieldRenderer,
-  WizardTopBar,
-  StepNavigation,
-  WizardFooter,
-} from "./wizard";
+import { WizardTopBar } from "./wizard";
+import { FormFillList } from "./FormFillList";
 import { useFormContentDisplay } from "./FormContentText";
 import type { FormContentTranslation } from "@/features/forms/formContentFields";
-import { HandoverNotesField } from "./HandoverNotesField";
-import { FlagIssueControls } from "./FlagIssueControls";
 import { handoverTaskDraft } from "../utils/handoverTask";
 import { supabase } from "@/integrations/supabase/client";
 import { draftsForSubmission, listIssueKeyFromLinks, newListIssueDrafts } from "@/features/tasks/utils/listIssueInsert";
 import { taskCreateLevel } from "@/features/tasks/utils/taskCreateLevel";
 import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
-import type {
-  FormFieldDataLocal,
-  ValidationRules,
-  WizardStepId,
-} from "../types/formFill";
+import type { ValidationRules } from "../types/formFill";
 interface FormFillDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -118,18 +104,6 @@ export default function FormFillDialog({
     orderedFields,
     readFormSourceLocale(hydratedForm?.settings),
   );
-  const buckets = useMemo(
-    () => groupFieldsByCategory(orderedFields),
-    [orderedFields],
-  );
-  const steps = useMemo(() => buildWizardSteps(buckets), [buckets]);
-
-  const wizard = useFormWizard({
-    steps,
-    form,
-    visibleFields,
-  });
-
   const formValues = form.watch();
 
   const statusLabel = useMemo(() => {
@@ -148,9 +122,8 @@ export default function FormFillDialog({
       setHandoverNote("");
       setMakeHandoverTask(false);
       setFlaggedFieldIds([]);
-      wizard.reset();
     }
-  }, [open, form, wizard]);
+  }, [open, form]);
 
   useEffect(() => {
     if (!hasInitialized && orderedFields.length > 0) {
@@ -255,28 +228,6 @@ export default function FormFillDialog({
   useEffect(() => {
     updateVisibleFields();
   }, [updateVisibleFields]);
-
-  const getFieldsForStep = useCallback(
-    (stepId: WizardStepId) => {
-      switch (stepId) {
-        case "questions":
-          return buckets.questions.filter((field) =>
-            visibleFields.has(field.id),
-          );
-        case "operations":
-          return buckets.operations.filter((field) =>
-            visibleFields.has(field.id),
-          );
-        case "attachments":
-          return buckets.attachments.filter((field) =>
-            visibleFields.has(field.id),
-          );
-        default:
-          return [];
-      }
-    },
-    [buckets, visibleFields],
-  );
 
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!canSubmitForm(orderedFields.length)) {
@@ -415,7 +366,6 @@ export default function FormFillDialog({
               },
       );
       onSubmitted?.();
-      wizard.setCurrentStepIndex(steps.length - 1);
     } catch (err) {
       toast({
         title: t("forms.submissionFailed"),
@@ -508,7 +458,10 @@ export default function FormFillDialog({
     }
     onOpenChange(nextOpen);
   };
-  const renderStepContent = () => {
+  const visibleOrderedFields = orderedFields.filter((field) => visibleFields.has(field.id));
+  const canSend = !isLoading && canSubmitForm(orderedFields.length);
+
+  const fillBody = () => {
     if (isLoading) {
       return (
         <div className="space-y-4">
@@ -523,11 +476,10 @@ export default function FormFillDialog({
       return (
         <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-sm text-destructive">
           <p className="font-semibold">{t("forms.unableToLoadFormFields")}</p>
-          <p className="mt-1 text-muted-foreground">
-            {t("forms.pleaseTryAgain")}
-          </p>
+          <p className="mt-1 text-muted-foreground">{t("forms.pleaseTryAgain")}</p>
           <Button variant="outline" className="mt-4" onClick={() => refetch()}>
-            {t("forms.tryAgain")}</Button>
+            {t("forms.tryAgain")}
+          </Button>
         </div>
       );
     }
@@ -535,80 +487,35 @@ export default function FormFillDialog({
     if (orderedFields.length === 0) {
       return (
         <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-          {t("forms.thisFormDoesntHaveAnyFieldsConfiguredYet")}</div>
+          {t("forms.thisFormDoesntHaveAnyFieldsConfiguredYet")}
+        </div>
       );
     }
 
-    switch (wizard.currentStep.id) {
-      case "overview":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">
-                {content.title || t("forms.formResponse")}
-              </h3>
-              {content.description && (
-                <p className="text-sm text-muted-foreground">
-                  {content.description}
-                </p>
-              )}
-            </div>
-            <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
-              {t("forms.completeTheFollowingSectionsRequiredFieldsAreMarkedAndValidationRunsOnEachStep")}</div>
-          </div>
-        );
-      case "questions":
-      case "operations":
-      case "attachments":
-        return (
-          <div className="space-y-6">
-            {getFieldsForStep(wizard.currentStep.id).map((field) => (
-              <FormFieldRenderer
-                key={field.id}
-                field={field}
-                form={form}
-                formulaData={formulaData}
-                translation={fieldTranslations.get(field.id) ?? null}
-              />
-            ))}
-          </div>
-        );
-      case "review":
-        return (
-          <div className="space-y-6">
-            <FormReviewLayout
-              headerTitle={content.title || t("forms.formResponse")}
-              headerSubtitle={t("forms.previewAnswers")}
-              meta={metaCardProps}
-              sections={reviewSections}
-            />
-            <FlagIssueControls
-              fields={orderedFields}
-              flaggedIds={flaggedFieldIds}
-              onToggle={(fieldId, flagged) =>
-                setFlaggedFieldIds((current) =>
-                  flagged
-                    ? Array.from(new Set([...current, fieldId]))
-                    : current.filter((id) => id !== fieldId),
-                )
-              }
-            />
-            <HandoverNotesField
-              note={handoverNote}
-              onNoteChange={setHandoverNote}
-              makeTask={makeHandoverTask}
-              onMakeTaskChange={setMakeHandoverTask}
-              canMakeTask={canMakeHandoverTask}
-            />
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="outline" onClick={handleExport}>
-                {t("forms.downloadPdf")}</Button>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
+    return (
+      <FormFillList
+        title={content.title || t("forms.formResponse")}
+        description={content.description}
+        fields={visibleOrderedFields}
+        form={form}
+        formulaData={formulaData}
+        translations={fieldTranslations}
+        flaggedIds={flaggedFieldIds}
+        onToggleFlag={(fieldId, flagged) =>
+          setFlaggedFieldIds((current) =>
+            flagged
+              ? Array.from(new Set([...current, fieldId]))
+              : current.filter((id) => id !== fieldId),
+          )
+        }
+        handoverNote={handoverNote}
+        onHandoverNote={setHandoverNote}
+        makeHandoverTask={makeHandoverTask}
+        onMakeHandoverTask={setMakeHandoverTask}
+        canMakeHandoverTask={canMakeHandoverTask}
+        onExport={handleExport}
+      />
+    );
   };
 
   return (
@@ -620,71 +527,31 @@ export default function FormFillDialog({
         <div className="flex h-full flex-col">
           <WizardTopBar
             title={content.title || t("forms.fillFormTitle")}
-            description={
-              content.description || t("forms.fillFormHelp")
-            }
+            description={content.description || t("forms.fillFormHelp")}
             control={content.control}
             onToggleOriginal={content.toggle}
-            currentStepIndex={wizard.currentStepIndex}
-            totalSteps={steps.length}
             statusLabel={statusLabel}
-            progress={wizard.progress}
             onClose={() => handleDialogChange(false)}
           />
 
           <div className="flex min-h-0 flex-1 overflow-hidden">
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              <StepNavigation
-                currentIndex={wizard.currentStepIndex}
-                steps={steps}
-                onStepChange={(next) => {
-                  if (next <= wizard.currentStepIndex) {
-                    wizard.setCurrentStepIndex(next);
-                  }
-                }}
-              />
-
-              <div className="flex min-h-0 flex-1 overflow-hidden">
-                <Form {...form}>
-                  <form
-                    className="min-h-0 w-full flex-1 overflow-y-auto px-4 py-4 sm:px-6"
-                    onSubmit={handleSubmit}
-                  >
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={wizard.currentStep.id}
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -16 }}
-                        transition={{ duration: 0.25, ease: "easeOut" }}
-                        className="space-y-6"
-                      >
-                        {renderStepContent()}
-                      </motion.div>
-                    </AnimatePresence>
-                  </form>
-                </Form>
-              </div>
-
-              <WizardFooter
-                progress={wizard.progress}
-                isSubmitting={isSubmitting}
-                currentIndex={wizard.currentStepIndex}
-                isLastStep={wizard.currentStep.id === "review"}
-                onBack={wizard.handleBack}
-                onNext={wizard.handleNext}
+            <Form {...form}>
+              <form
+                className="min-h-0 w-full flex-1 overflow-y-auto px-4 py-4 sm:px-6"
                 onSubmit={handleSubmit}
-                canProceedNext={!isLoading && canSubmitForm(orderedFields.length)}
-              />
-            </div>
+              >
+                {fillBody()}
+              </form>
+            </Form>
           </div>
+
+          <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-muted/20 px-4 py-2.5 sm:px-6">
+            <Button type="button" size="sm" onClick={handleSubmit} disabled={isSubmitting || !canSend}>
+              {isSubmitting ? t("forms.submitting") : t("forms.submitForm")}
+            </Button>
+          </footer>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-// renderField, WizardTopBar, StepNavigation, and WizardFooter have been extracted to:
-// - FormFieldRenderer component (wizard/FormFieldRenderer.tsx)
-// - WizardTopBar component (wizard/WizardTopBar.tsx)
-// - StepNavigation component (wizard/StepNavigation.tsx)
-// - WizardFooter component (wizard/WizardFooter.tsx)

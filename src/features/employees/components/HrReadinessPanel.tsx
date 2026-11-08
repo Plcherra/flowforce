@@ -34,6 +34,7 @@ interface HrReadinessPanelProps {
   loading?: boolean;
   canManageEmployees?: boolean;
   onOpenInvite: () => void;
+  preview?: HrReadiness;
 }
 
 const toneStyles = {
@@ -134,6 +135,7 @@ export function HrReadinessPanel({
   loading = false,
   canManageEmployees = false,
   onOpenInvite,
+  preview,
 }: HrReadinessPanelProps) {
   const { t } = useTranslation();
   const {
@@ -144,9 +146,9 @@ export function HrReadinessPanel({
   } = useHrReadiness({
     companyId,
     employees,
-    enabled: !loading,
+    enabled: !loading && !preview,
   });
-  const current = readiness ?? {
+  const current = preview ?? readiness ?? {
     employeeCount: employees.length,
     activeEmployeeCount: employees.filter(
       (employee) =>
@@ -163,12 +165,13 @@ export function HrReadinessPanel({
     (sum, item) => sum + (typeof item.value === "number" ? item.value : 0),
     0,
   );
-  const panelLoading = loading || isLoading;
+  const panelLoading = !preview && (loading || isLoading);
 
   return (
     <section
       className="space-y-4 rounded-lg border bg-background p-4"
       aria-label={t("employees.employeeReadiness")}
+      data-testid="hr-readiness-panel"
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
@@ -206,7 +209,7 @@ export function HrReadinessPanel({
         </div>
       </div>
 
-      {error && (
+      {error && !preview ? (
         <Alert variant="destructive">
           <AlertTitle>{t("employees.hrReadinessDataUnavailable")}</AlertTitle>
           <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -225,7 +228,7 @@ export function HrReadinessPanel({
             </Button>
           </AlertDescription>
         </Alert>
-      )}
+      ) : null}
 
       {panelLoading ? (
         <ReadinessSkeleton />

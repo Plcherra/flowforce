@@ -170,11 +170,6 @@
     "ticket": "FF-SPLIT-36"
   },
   {
-    "path": "src/features/forms/components/FormFillDialog.tsx",
-    "lines": 690,
-    "ticket": "FF-SPLIT-37"
-  },
-  {
     "path": "src/features/availability/components/TimeOffRequestPanel.tsx",
     "lines": 687,
     "ticket": "FF-SPLIT-38"
@@ -275,14 +270,14 @@
     "ticket": "FF-SPLIT-56"
   },
   {
+    "path": "src/features/forms/components/FormFillDialog.tsx",
+    "lines": 557,
+    "ticket": "FF-SPLIT-37"
+  },
+  {
     "path": "src/features/inventory/routes/CountDetail.tsx",
     "lines": 556,
     "ticket": "FF-SPLIT-57"
-  },
-  {
-    "path": "src/features/employees/components/TeamDirectory.tsx",
-    "lines": 551,
-    "ticket": "FF-SPLIT-58"
   },
   {
     "path": "src/features/ai/components/ScenarioSimulator.tsx",
@@ -298,6 +293,11 @@
     "path": "src/features/onboarding/components/CompanyOnboardingWizard.tsx",
     "lines": 544,
     "ticket": "FF-SPLIT-61"
+  },
+  {
+    "path": "src/features/employees/components/TeamDirectory.tsx",
+    "lines": 542,
+    "ticket": "FF-SPLIT-58"
   },
   {
     "path": "src/features/ai/components/AIAssistant.tsx",

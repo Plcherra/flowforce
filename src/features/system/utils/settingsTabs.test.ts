@@ -50,6 +50,7 @@ export function runSettingsTabTests() {
     "src/features/employees/components/TeamDirectory.tsx",
   );
   assert.equal(/settings/i.test(teamDirectory), false);
+  assert.equal(teamDirectory.includes("HrReadinessPanel"), false);
   assert.equal(
     readWorkspaceFile("src/features/employees/types/directory.ts").includes(
       '"settings"',

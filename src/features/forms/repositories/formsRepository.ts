@@ -16,6 +16,7 @@ import {
 import { scheduleFormContentTranslation } from "@/features/forms/scheduleFormContent";
 import { scheduleFormFieldTranslation } from "@/features/forms/scheduleFormField";
 import { parseFormFieldRows } from "@/features/forms/utils/formFieldRows";
+import { attachSubmissionProfiles, submissionRowForParse } from "./submissionProfiles";
 
 const jsonSchema: z.ZodType<Json> = z.lazy(() =>
   z.union([
@@ -438,12 +439,7 @@ export async function fetchFormSubmissions(
   await ensureCompanyScope(companyId);
   const { data, error } = await supabase
     .from("form_submissions")
-    .select(
-      `
-        *,
-        submittedprofile:profiles(first_name, last_name)
-      `,
-    )
+    .select("*")
     .eq("form_id", formId)
     .eq("company_id", companyId)
     .order("submitted_at", { ascending: false });
@@ -452,7 +448,10 @@ export async function fetchFormSubmissions(
     throw error;
   }
 
-  return z.array(formSubmissionWithProfileSchema).parse(data ?? []);
+  const rows = z.array(formSubmissionWithProfileSchema).parse(
+    ((data ?? []) as Record<string, unknown>[]).map(submissionRowForParse),
+  );
+  return attachSubmissionProfiles(rows);
 }
 
 export async function insertFormSubmission(

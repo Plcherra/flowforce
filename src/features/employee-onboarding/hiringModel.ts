@@ -79,6 +79,39 @@ export function hiringAnswerDone(block: HiringBlock, answer: HiringAnswer | unde
   return answer.textValue.trim().length > 0;
 }
 
+/** A shared file is already on the block. Every other block waits on the hire. */
+export function hiringBlockCountedDone(block: HiringBlock, answer: HiringAnswer | undefined) {
+  if (block.kind === "share_file") return Boolean(block.storagePath || block.fileName || answer?.fileName);
+  return hiringAnswerDone(block, answer);
+}
+
+export function hiringChecklistProgress(
+  blocks: readonly HiringBlock[],
+  answers: Readonly<Record<string, HiringAnswer | undefined>>,
+) {
+  const done = blocks.filter((block) => hiringBlockCountedDone(block, answers[block.id])).length;
+  return { done, total: blocks.length };
+}
+
+export function mergeHiringAnswer(
+  block: HiringBlock,
+  current: HiringAnswer | undefined,
+  patch: Partial<HiringAnswer>,
+): HiringAnswer {
+  const base: HiringAnswer = current ?? {
+    blockId: block.id,
+    textValue: "",
+    boolValue: null,
+    dateValue: null,
+    fileName: null,
+    done: false,
+    verified: false,
+  };
+  const next: HiringAnswer = { ...base, ...patch, blockId: block.id };
+  next.done = hiringAnswerDone(block, next);
+  return next;
+}
+
 /** A shared file is already on the block. Every other required block waits on the hire. */
 export function hiringBlockStillOpen(block: HiringBlock, answer: HiringAnswer | undefined) {
   if (!block.required || block.kind === "share_file") return false;

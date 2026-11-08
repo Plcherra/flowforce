@@ -136,6 +136,9 @@ const { runFormTemplateCopyTests } = importTs(
 const { runFormsReadinessTests } = importTs(
   "../src/features/forms/utils/formsReadiness.test.ts",
 );
+const { runSubmissionLoadStateTests } = importTs(
+  "../src/features/forms/utils/submissionLoadState.test.ts",
+);
 const { runFormDistributionTests } = importTs(
   "../src/features/forms/utils/formDistribution.test.ts",
 );
@@ -188,6 +191,7 @@ runFormulaValueTests();
 runSubmissionValueTests();
 runFormTemplateCopyTests();
 runFormsReadinessTests();
+runSubmissionLoadStateTests();
 runFormDistributionTests();
 runScheduledRoleListTests();
 const { runCafeStarterTests, runCafeStarterApplyTests } = importTs(

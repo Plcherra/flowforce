@@ -1,7 +1,17 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { HIRING_BLOCK_KINDS, blankHiringBlock, moveHiringBlock, type HiringBlock, type HiringBlockKind } from "../hiringModel";
+import {
+  HIRING_BLOCK_KINDS,
+  blankHiringBlock,
+  mergeHiringAnswer,
+  moveHiringBlock,
+  type HiringAnswer,
+  type HiringBlock,
+  type HiringBlockKind,
+} from "../hiringModel";
 import { HiringBlockFields } from "./HiringBlockFields";
+import { HiringChecklistView } from "./HiringChecklistView";
 
 export function HiringBuilderView({
   blocks,
@@ -15,6 +25,7 @@ export function HiringBuilderView({
   onUpload: (block: HiringBlock, file: File) => void;
 }) {
   const { t } = useTranslation();
+  const [answers, setAnswers] = useState<Record<string, HiringAnswer>>({});
   const add = (kind: HiringBlockKind) => {
     const block = blankHiringBlock(kind, blocks.length);
     block.id = `draft-${kind}-${blocks.length}`;
@@ -63,6 +74,33 @@ export function HiringBuilderView({
               </Button>
             ))}
           </div>
+        </div>
+      ) : null}
+      {blocks.length > 0 ? (
+        <div className="space-y-3 border-t pt-4" data-testid="hiring-hire-preview">
+          <div>
+            <h3 className="text-lg font-semibold">{t("hiring.previewTitle")}</h3>
+            <p className="text-sm text-muted-foreground">{t("hiring.previewHelp")}</p>
+          </div>
+          <HiringChecklistView
+            blocks={blocks}
+            answers={answers}
+            onAnswer={(block, patch) =>
+              setAnswers((current) => ({
+                ...current,
+                [block.id]: mergeHiringAnswer(block, current[block.id], patch),
+              }))
+            }
+            onUpload={(block, file) =>
+              setAnswers((current) => ({
+                ...current,
+                [block.id]: mergeHiringAnswer(block, current[block.id], {
+                  fileName: file.name,
+                  done: true,
+                }),
+              }))
+            }
+          />
         </div>
       ) : null}
     </div>

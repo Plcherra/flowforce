@@ -38,7 +38,21 @@ export function runOverviewModelTests() {
       leadership: true,
       packs: { team: true, insights: true, stock: true },
     }),
-    ["myShift", "myLists", "companyUpdates", "coverage", "listStatus"],
+    ["myShift", "myLists", "companyUpdates", "coverage", "listStatus", "hrReadiness"],
+  );
+  assert.equal(
+    overviewWidgets({
+      leadership: false,
+      packs: { team: true, insights: false, stock: true },
+    }).includes("hrReadiness"),
+    false,
+  );
+  assert.equal(
+    overviewWidgets({
+      leadership: false,
+      packs: { team: false, insights: true, stock: false },
+    }).includes("hrReadiness"),
+    true,
   );
   assert.equal(
     overviewWidgets({ leadership: false }).includes("coverage"),
