@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "@/lib/router-adapter";
 import { cn } from "@/lib/utils";
 import type { MessageChannel } from "@/types/messages";
+import { chatIsUnread, directChatTitle } from "@/features/messages/channelScope";
 import type { MessagesViewModel } from "../../hooks/useMessagesViewModel";
 import { MessagesMainArea } from "./MessagesMainArea";
 import { NewChatPanel } from "./NewChatPanel";
@@ -52,6 +53,7 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
         </Button>
         <Button
           variant={vm.showDirectMessageDialog ? "default" : "outline"}
+          data-testid="new-chat"
           onClick={() => {
             vm.closeThread();
             vm.setShowDirectMessageDialog(true);
@@ -65,10 +67,22 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
           {vm.filteredChannels.map((channel) => {
             const active =
               !vm.showDirectMessageDialog && vm.currentChannelId === channel.id;
+            const title = directChatTitle(
+              channel,
+              vm.profile?.id,
+              t("messages.teamMember"),
+            );
+            const unread = chatIsUnread(
+              channel,
+              vm.profile?.id,
+              vm.currentChannelId,
+            );
             return (
               <button
                 key={channel.id}
                 type="button"
+                data-testid="chat-channel"
+                data-channel-name={title}
                 onClick={() => {
                   vm.setShowDirectMessageDialog(false);
                   vm.setCurrentChannelId(channel.id);
@@ -80,9 +94,13 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
                     : "bg-background hover:border-foreground/40",
                 )}
               >
-                {isDirect(channel)
-                  ? channel.name
-                  : t("messages.groupChip", { name: channel.name })}
+                {isDirect(channel) ? title : t("messages.groupChip", { name: title })}
+                {unread ? (
+                  <span
+                    className="ml-2 inline-block h-2 w-2 rounded-full bg-primary align-middle"
+                    aria-label={t("messages.unreadChat")}
+                  />
+                ) : null}
               </button>
             );
           })}

@@ -63,10 +63,15 @@ const ownerPermissions = Object.fromEntries(
     "manageInventory",
     "inventory.view",
     "reports.view",
+    "messages.send",
+    "messages.manage",
   ].map((key) => [key, true]),
 );
 const email = `playwright-${runId}@example.test`;
 const password = `FlowForce-${runId}!`;
+const staffUserId = randomUUID();
+const staffEmail = `playwright-staff-${runId}@example.test`;
+const staffPassword = `FlowForce-staff-${runId}!`;
 
 const { data: createdUser, error: createUserError } = await admin.auth.admin.createUser({
   id: userId,
@@ -128,7 +133,11 @@ await insert("company_roles", [
       description: "Playwright staff class",
       hierarchy_level: 4,
       product_level: "staff",
-      permissions: { "forms.submit": true, viewOwnTasks: true },
+      permissions: {
+        "forms.submit": true,
+        viewOwnTasks: true,
+        "messages.send": true,
+      },
       is_system_role: true,
       is_active: true,
       created_by: authUserId,
@@ -144,6 +153,26 @@ await insert("inv_locations", [
   },
 ]);
 
+const { error: staffUserError } = await admin.auth.admin.createUser({
+  id: staffUserId,
+  email: staffEmail,
+  password: staffPassword,
+  email_confirm: true,
+  user_metadata: {
+    first_name: "Relay",
+    last_name: "Tester",
+    company_id: companyId,
+    active_company_id: companyId,
+  },
+  app_metadata: {
+    company_id: companyId,
+    active_company_id: companyId,
+  },
+});
+if (staffUserError) {
+  throw new Error(`Playwright staff seed failed: ${staffUserError.message}`);
+}
+
 await insert("profiles", [
   {
     id: authUserId,
@@ -156,6 +185,17 @@ await insert("profiles", [
     is_company_admin: true,
     employment_status: "active",
   },
+  {
+    id: staffUserId,
+    company_id: companyId,
+    first_name: "Relay",
+    last_name: "Tester",
+    email: staffEmail,
+    role: "staff",
+    role_id: staffRoleId,
+    is_company_admin: false,
+    employment_status: "active",
+  },
 ]);
 
 await insert("company_members", [
@@ -163,6 +203,12 @@ await insert("company_members", [
     company_id: companyId,
     user_id: authUserId,
     role: "owner",
+    added_at: new Date().toISOString(),
+  },
+  {
+    company_id: companyId,
+    user_id: staffUserId,
+    role: "staff",
     added_at: new Date().toISOString(),
   },
 ]);
@@ -180,6 +226,8 @@ process.stdout.write(
   [
     `TEST_USER_EMAIL=${email}`,
     `TEST_USER_PASSWORD=${password}`,
+    `TEST_RECIPIENT_EMAIL=${staffEmail}`,
+    `TEST_RECIPIENT_PASSWORD=${staffPassword}`,
     "",
   ].join("\n"),
 );

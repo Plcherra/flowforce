@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { MessageChannel } from "@/types/messages";
+import { directChatTitle } from "@/features/messages/channelScope";
+import { useProfile } from "@/hooks/useProfile";
 
 interface MessagesHeaderProps {
   channel: MessageChannel;
@@ -28,7 +30,9 @@ export function MessagesHeader({
   onBack,
 }: MessagesHeaderProps) {
   const { t } = useTranslation();
+  const { profile } = useProfile();
   const isDirect = (channel.type ?? "").toLowerCase() === "direct";
+  const title = directChatTitle(channel, profile?.id, t("messages.teamMember"));
   const memberCount = channel.channel_members?.length ?? 0;
 
   return (
@@ -47,13 +51,13 @@ export function MessagesHeader({
           )}
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
             {isDirect ? (
-              (channel.name || "?").trim().charAt(0).toUpperCase()
+              title.trim().charAt(0).toUpperCase()
             ) : (
               <Users className="h-4 w-4 text-muted-foreground" />
             )}
           </div>
           <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold">{channel.name}</h3>
+            <h3 className="truncate text-base font-semibold">{title}</h3>
             <p className="truncate text-xs text-muted-foreground">
               {isDirect
                 ? t("messages.chatLabel")

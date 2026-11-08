@@ -25,6 +25,7 @@ import { logger } from "@/utils/logger";
 import { useAvailabilityStatus } from "./useAvailabilityStatus";
 import { useChannelActions } from "./useChannelActions";
 import { useMessageActions } from "./useMessageActions";
+import { useOpenChannelFromQuery } from "./useOpenChannelFromQuery";
 
 type FilterType = "all" | "unread" | "teams";
 type ProfileDetails = ReturnType<typeof useProfile>["profile"];
@@ -161,6 +162,8 @@ export function useMessagesViewModel(): MessagesViewModelState {
   );
 
   const activeFilter = routeFilter ?? queryFilter ?? "all";
+
+  useOpenChannelFromQuery(location.search, channels, setCurrentChannelId);
 
   useEffect(() => {
     const basePath = "/app/messages";
