@@ -51,6 +51,9 @@ const { runTaskCreateScopeTests } = importTs(
 const { runTaskAudienceTests } = importTs(
   "../src/features/tasks/utils/taskAudience.test.ts",
 );
+const { runTemplateShiftWindowTests } = importTs(
+  "../src/features/scheduling/utils/templateShiftWindow.test.ts",
+);
 
 await runProductRolesSetupTests();
 runProductLevelTests();
@@ -66,6 +69,7 @@ runPageVersionTests();
 runPrimaryActionLabelTests();
 runTaskCreateScopeTests();
 runTaskAudienceTests();
+runTemplateShiftWindowTests();
 console.log("productRolesSetup tests passed");
 console.log("productLevels tests passed");
 console.log("operatorBoxes tests passed");
@@ -79,3 +83,4 @@ console.log("pageVersion tests passed");
 console.log("primaryActionLabel tests passed");
 console.log("taskCreateScope tests passed");
 console.log("taskAudience tests passed");
+console.log("templateShiftWindow tests passed");

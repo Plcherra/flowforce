@@ -30,7 +30,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { parse, differenceInMinutes } from "date-fns";
+import { differenceInMinutes } from "date-fns";
+import { templateShiftWindow } from "@/features/scheduling/utils/templateShiftWindow";
 import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
 import { DetailsTab } from "./shift-wizard/DetailsTab";
 import { UsersTab } from "./shift-wizard/UsersTab";
@@ -56,6 +57,7 @@ export interface ShiftWizardTemplateSeed {
   startTime: string;
   endTime: string;
   role: string;
+  positionId?: string;
   color?: string;
 }
 
@@ -76,13 +78,11 @@ const DEFAULT_BREAK = {
 } as const;
 
 const timezoneFallback = "America/New_York";
-
 const parseHourlyRate = (value: string) => {
   if (value.trim().length === 0) return null;
   const rate = Number(value);
   return Number.isFinite(rate) && rate >= 0 ? rate : null;
 };
-
 const createDefaultFormState = (date: Date): ShiftWizardFormData => ({
   title: "",
   date,
@@ -166,6 +166,7 @@ export function ShiftWizardDialog({
         next.start_time = templateSeed.startTime;
         next.end_time = templateSeed.endTime;
         next.job_position_input = templateSeed.role;
+        next.job_position_id = templateSeed.positionId ?? "";
       }
       setFormData(next);
       setActiveTab("details");
@@ -183,9 +184,8 @@ export function ShiftWizardDialog({
       return { total: 24, net: 24 };
     }
 
-    const start = parse(formData.start_time, "HH:mm", formData.date);
-    const end = parse(formData.end_time, "HH:mm", formData.date);
-    const totalMinutes = differenceInMinutes(end, start);
+    const window = templateShiftWindow(formData.date, formData.start_time, formData.end_time);
+    const totalMinutes = differenceInMinutes(window.endTime, window.startTime);
     const unpaidBreakMinutes = formData.breaks
       .filter((item) => !item.is_paid)
       .reduce((sum, item) => sum + item.duration_minutes, 0);
@@ -205,10 +205,10 @@ export function ShiftWizardDialog({
     const date = formData.date;
     const start = formData.is_all_day
       ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0)
-      : parse(formData.start_time, "HH:mm", date);
+      : templateShiftWindow(date, formData.start_time, formData.end_time).startTime;
     const end = formData.is_all_day
       ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59)
-      : parse(formData.end_time, "HH:mm", date);
+      : templateShiftWindow(date, formData.start_time, formData.end_time).endTime;
     return { start, end };
   }, [
     formData.date,

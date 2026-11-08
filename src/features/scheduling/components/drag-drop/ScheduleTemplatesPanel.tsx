@@ -45,6 +45,7 @@ function savedTemplateCard(
     endTime: times.endTime,
     minStaff: template.required_headcount ?? 1,
     maxStaff: template.required_headcount ?? 1,
+    positionId: template.job_position_id ?? undefined,
   };
 }
 

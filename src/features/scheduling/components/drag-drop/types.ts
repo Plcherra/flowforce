@@ -48,6 +48,7 @@ export interface ShiftTemplate {
   endTime: string;
   minStaff: number;
   maxStaff: number;
+  positionId?: string;
 }
 
 export interface PendingVendorEvent {
