@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@/lib/router-adapter";
 import { EmployeeOnboardingView } from "./EmployeeOnboardingView";
+import type { HiringBlock } from "../hiringModel";
 import { HiringChecklist } from "./HiringChecklist";
 import { useEmployeeOnboarding } from "../useEmployeeOnboarding";
 
 export function EmployeeOnboardingPage() {
   const { t } = useTranslation();
   const screen = useEmployeeOnboarding();
+  const [hiring, setHiring] = useState<{ blocks: HiringBlock[]; openRequired: number }>({
+    blocks: [],
+    openRequired: 0,
+  });
 
   if (screen.state.kind === "loading") {
     return <p className="px-4 py-6 text-sm text-muted-foreground">{t("employeeOnboarding.loading")}</p>;
@@ -30,9 +36,11 @@ export function EmployeeOnboardingPage() {
 
   return (
     <div className="space-y-6">
-    <HiringChecklist />
+    <HiringChecklist onProgress={setHiring} />
     <EmployeeOnboardingView
       data={screen.state}
+      hiringBlocks={hiring.blocks}
+      openRequired={hiring.openRequired}
       busyId={screen.busyId}
       onOpenDocument={(step) => {
         void screen.onOpenDocument(step);

@@ -6619,5 +6619,32 @@
       "collect_ack": "Accusé",
       "collect_link": "Configuration externe"
     }
+  },
+  "hireActivity": {
+    "title": "Historique d'activité",
+    "empty": "Pas encore d'activité d'intégration.",
+    "activated": "{{name}} a activé son compte.",
+    "completedStep": "{{name}} a terminé {{step}}.",
+    "submittedFile": "{{name}} a envoyé {{step}}.",
+    "finished": "{{name}} a terminé l'intégration.",
+    "progress": "{{done}} sur {{total}} étapes obligatoires faites",
+    "finishBlocked": "Terminez les étapes obligatoires avant de vous déclarer prêt.",
+    "invited": "Invité, pas encore connecté",
+    "active": "Actif",
+    "lastSignIn": "Dernière connexion {{when}}",
+    "noSignIn": "Pas encore de connexion",
+    "resend": "Renvoyer l'invitation",
+    "resendDone": "Invitation renvoyée",
+    "resendFailed": "Impossible de renvoyer l'invitation",
+    "accessLabel": "Accès",
+    "accessStaff": "Équipe",
+    "accessManager": "Responsable",
+    "accessAdmin": "Administration",
+    "accessOwner": "Propriétaire",
+    "roleUnset": "Pas encore de poste",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "theHire": "Cette personne"
   }
 }

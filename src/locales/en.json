@@ -6619,5 +6619,32 @@
       "collect_ack": "Acknowledgement",
       "collect_link": "External setup"
     }
+  },
+  "hireActivity": {
+    "title": "Activity history",
+    "empty": "No onboarding activity yet.",
+    "activated": "{{name}} activated their account.",
+    "completedStep": "{{name}} completed {{step}}.",
+    "submittedFile": "{{name}} submitted {{step}}.",
+    "finished": "{{name}} finished onboarding.",
+    "progress": "{{done}} of {{total}} required steps done",
+    "finishBlocked": "Finish the required steps before you mark yourself ready.",
+    "invited": "Invited, not signed in yet",
+    "active": "Active",
+    "lastSignIn": "Last sign-in {{when}}",
+    "noSignIn": "No sign-in yet",
+    "resend": "Resend invite",
+    "resendDone": "Invite sent again",
+    "resendFailed": "Could not resend the invite",
+    "accessLabel": "Access",
+    "accessStaff": "Staff",
+    "accessManager": "Manager",
+    "accessAdmin": "Admin",
+    "accessOwner": "Owner",
+    "roleUnset": "No job role yet",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "confirmPassword": "Confirm password",
+    "theHire": "This person"
   }
 }

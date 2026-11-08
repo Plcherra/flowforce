@@ -16,6 +16,7 @@ import { InviteEmployeePanel } from "./InviteEmployeePanel";
 import { UserPermissionsTab } from "./users/UserPermissionsTab";
 import { RoleConfigPanel } from "./RoleConfigPanel";
 import { UserOverviewTab } from "@/features/employees/components/users/UserOverviewTab";
+import { directoryMembership } from "@/features/employees/directoryPresence";
 import { useCanCheck } from "@/hooks/useCan";
 import { usePermission } from "@/hooks/usePermission";
 import "@/styles/employee.css";
@@ -208,23 +209,16 @@ function HeaderContent({ employee }: { employee: Employee | null }) {
         <div>
           <DrawerTitle className="text-2xl">{displayName}</DrawerTitle>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {employee.role && (
-              <Badge variant="secondary" className="capitalize">
-                {employee.role}
-              </Badge>
-            )}
-            {employee.employment_status && (
-              <Badge
-                variant={
-                  employee.employment_status === "active"
-                    ? "default"
-                    : "outline"
-                }
-                className="capitalize"
-              >
-                {employee.employment_status}
-              </Badge>
-            )}
+            <Badge variant="secondary">
+              {employee.jobRole?.trim() || t("hireActivity.roleUnset")}
+            </Badge>
+            <Badge variant={directoryMembership(employee) === "active" ? "default" : "outline"}>
+              {directoryMembership(employee) === "invited"
+                ? t("hireActivity.invited")
+                : directoryMembership(employee) === "active"
+                  ? t("hireActivity.active")
+                  : employee.employment_status}
+            </Badge>
             {employee.employee_id && (
               <Badge
                 variant="outline"

@@ -6619,5 +6619,32 @@
       "collect_ack": "Bestätigung",
       "collect_link": "Externes Konto"
     }
+  },
+  "hireActivity": {
+    "title": "Aktivitätsverlauf",
+    "empty": "Noch keine Einarbeitungsaktivität.",
+    "activated": "{{name}} hat das Konto aktiviert.",
+    "completedStep": "{{name}} hat {{step}} abgeschlossen.",
+    "submittedFile": "{{name}} hat {{step}} eingereicht.",
+    "finished": "{{name}} hat die Einarbeitung beendet.",
+    "progress": "{{done}} von {{total}} Pflichtschritten erledigt",
+    "finishBlocked": "Schließe die Pflichtschritte ab, bevor du dich als bereit markierst.",
+    "invited": "Eingeladen, noch nicht angemeldet",
+    "active": "Aktiv",
+    "lastSignIn": "Letzte Anmeldung {{when}}",
+    "noSignIn": "Noch keine Anmeldung",
+    "resend": "Einladung erneut senden",
+    "resendDone": "Einladung erneut gesendet",
+    "resendFailed": "Einladung konnte nicht erneut gesendet werden",
+    "accessLabel": "Zugriff",
+    "accessStaff": "Team",
+    "accessManager": "Leitung",
+    "accessAdmin": "Verwaltung",
+    "accessOwner": "Inhaber",
+    "roleUnset": "Noch keine Stelle",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "confirmPassword": "Passwort bestätigen",
+    "theHire": "Diese Person"
   }
 }

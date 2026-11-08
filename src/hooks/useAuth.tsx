@@ -249,10 +249,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({ // pragma: allowlist secret
         email,
         password,
       });
+
+      if (!error && data.user?.id) {
+        void supabase // pragma: allowlist secret
+          .from("profiles")
+          .update({ last_sign_in_at: new Date().toISOString() })
+          .eq("id", data.user.id);
+      }
 
       if (error) {
         // Provide more helpful error messages

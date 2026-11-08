@@ -4836,6 +4836,7 @@ export type Database = {
           is_company_admin: boolean | null
           language: string | null
           last_name: string
+          last_sign_in_at: string | null
           location_id: string | null
           phone: string | null
           position_id: string | null
@@ -4861,6 +4862,7 @@ export type Database = {
           is_company_admin?: boolean | null
           language?: string | null
           last_name: string
+          last_sign_in_at?: string | null
           location_id?: string | null
           phone?: string | null
           position_id?: string | null
@@ -4886,6 +4888,7 @@ export type Database = {
           is_company_admin?: boolean | null
           language?: string | null
           last_name?: string
+          last_sign_in_at?: string | null
           location_id?: string | null
           phone?: string | null
           position_id?: string | null

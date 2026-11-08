@@ -78,3 +78,20 @@ export function hiringAnswerDone(block: HiringBlock, answer: HiringAnswer | unde
   if (block.kind === "share_card") return answer.done;
   return answer.textValue.trim().length > 0;
 }
+
+/** A shared file is already on the block. Every other required block waits on the hire. */
+export function hiringBlockStillOpen(block: HiringBlock, answer: HiringAnswer | undefined) {
+  if (!block.required || block.kind === "share_file") return false;
+  return !hiringAnswerDone(block, answer);
+}
+
+export function openRequiredHiringBlocks(
+  blocks: readonly HiringBlock[],
+  answers: Readonly<Record<string, HiringAnswer | undefined>>,
+) {
+  return blocks.filter((block) => hiringBlockStillOpen(block, answers[block.id]));
+}
+
+export function plainHiringText(value: string) {
+  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { hireActivityKey } from "@/features/employees/hireActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -66,6 +67,18 @@ export default function AuditLog() {
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
   const describeChange = (log: AuditLogEntry) => {
+    const hireKey = hireActivityKey(log.action);
+    if (hireKey) {
+      const next = log.new_values as Record<string, string> | null;
+      const person = log.userprofile
+        ? `${log.userprofile.first_name ?? ""} ${log.userprofile.last_name ?? ""}`.trim()
+        : "";
+      return t(hireKey, {
+        name: person || t("hireActivity.theHire"),
+        step: next?.step ?? "",
+      });
+    }
+
     if (log.action === "user.role_updated") {
       return `Role changed from ${(log.old_values as Record<string, string> | null)?.role ?? "unknown"} to ${(log.new_values as Record<string, string> | null)?.role ?? "unknown"}.`;
     }

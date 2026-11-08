@@ -30,7 +30,7 @@ import {
   getAuditEventMetadata,
 } from "@/services/audit/auditEvents";
 import { profileRoleFromClass } from "@/features/roles/constants/productLevels";
-
+import { sendInviteEmail } from "../../_server/inviteEmail";
 type InvitePersonBody = {
   email?: unknown;
   firstName?: unknown;
@@ -350,19 +350,20 @@ async function sendPersonInvite({
   let invitedUserId: string | null = null;
 
   if (email) {
-    const { data: inviteUser, error: inviteError } =
-      await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          role: roleKey,
-          role_id: role.id,
-          company_id: companyId,
-          invite_id: inviteId,
-          invite_token: inviteToken,
-        },
-        redirectTo: inviteLink,
-      });
+    const { data: inviteUser, error: inviteError } = await sendInviteEmail({
+      email,
+      redirectTo: inviteLink,
+      firstName,
+      lastName,
+      roleKey,
+      roleId: role.id,
+      roleName: role.name,
+      companyId,
+      inviteId,
+      inviteToken,
+      storeId: locationDecision.locationId,
+      startDate: hireDate,
+    });
 
     if (inviteError) {
       await supabaseAdmin

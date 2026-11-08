@@ -6619,5 +6619,32 @@
       "collect_ack": "Confirmação",
       "collect_link": "Configuração externa"
     }
+  },
+  "hireActivity": {
+    "title": "Histórico de atividade",
+    "empty": "Ainda não há atividade de integração.",
+    "activated": "{{name}} ativou a conta.",
+    "completedStep": "{{name}} concluiu {{step}}.",
+    "submittedFile": "{{name}} enviou {{step}}.",
+    "finished": "{{name}} terminou a integração.",
+    "progress": "{{done}} de {{total}} passos obrigatórios feitos",
+    "finishBlocked": "Conclua os passos obrigatórios antes de se marcar como pronto.",
+    "invited": "Convidado, ainda não entrou",
+    "active": "Ativo",
+    "lastSignIn": "Último acesso {{when}}",
+    "noSignIn": "Sem acesso ainda",
+    "resend": "Reenviar convite",
+    "resendDone": "Convite enviado outra vez",
+    "resendFailed": "Não foi possível reenviar o convite",
+    "accessLabel": "Acesso",
+    "accessStaff": "Equipe",
+    "accessManager": "Encarregado",
+    "accessAdmin": "Administração",
+    "accessOwner": "Proprietário",
+    "roleUnset": "Sem função ainda",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "confirmPassword": "Confirmar senha",
+    "theHire": "Esta pessoa"
   }
 }

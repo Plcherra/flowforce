@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -7,7 +7,11 @@ import type { HiringBlock } from "../hiringModel";
 import { loadHiringBlocks, saveHiringBlocks, uploadHiringShare } from "../hiringStore";
 import { HiringBuilderView } from "./HiringBuilderView";
 
-export function HiringBuilder() {
+export type HiringBuilderHandle = {
+  save: () => Promise<boolean>;
+};
+
+export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuilder(_props, ref) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -23,6 +27,18 @@ export function HiringBuilder() {
       setReady(true);
     });
   }, [companyId]);
+
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      if (!companyId || !userId) return blocks.every((block) => !block.title.trim());
+      const result = await saveHiringBlocks({ companyId, userId, blocks });
+      if (result.ok) {
+        const rows = await loadHiringBlocks(companyId);
+        if (rows) setBlocks(rows);
+      }
+      return result.ok;
+    },
+  }), [blocks, companyId, userId]);
 
   if (!ready) {
     return <p className="text-sm text-muted-foreground">{t("employeeOnboarding.loading")}</p>;
@@ -77,4 +93,4 @@ export function HiringBuilder() {
       </Button>
     </div>
   );
-}
+});
