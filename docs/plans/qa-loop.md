@@ -84,7 +84,11 @@ Sunday 8 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not start a new area a
    - Role templates come from the company's saved shift templates. The sample Barista and Cook pack is not shown.
    - `e2e/schedule-permissions.spec.ts` pins English, signs in with the test user, opens the desk and the new-shift form (role, department, tasks), and checks each write permission on its own. Nothing is stored.
    - `e2e/shift-role-department.spec.ts` and `e2e/my-shift-role-lists.spec.ts` passed again.
-2. Messages — todo
+2. Messages — done
+   - New chat and the group form need `messages.send`. Channel settings need `messages.manage`. Those two stay separate.
+   - Empty chat lists, the new-group steps, the creating label, and a file-only message go through all six locales.
+   - `e2e/messages-permissions.spec.ts` pins English, signs in with the test user, opens new chat and the group name field, and checks send on and off. Nothing is stored.
+   - Production already has `messages_realtime_publication` as version `20261108151539`. The file is in the repo under that version. It was applied outside this block. This block does not apply SQL.
 3. Company Updates — todo
 4. Tasks — todo
 5. Forms — todo

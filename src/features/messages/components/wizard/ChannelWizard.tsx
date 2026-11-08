@@ -139,7 +139,7 @@ export function ChannelWizard({
                 </div>
                 <div className="ml-2 flex-1">
                   <p className="text-sm font-medium text-foreground">
-                    {step.title}
+                    {t(step.titleKey)}
                   </p>
                 </div>
                 {index < WIZARD_STEPS.length - 1 && (
@@ -208,7 +208,7 @@ export function ChannelWizard({
                 className="flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
-                <span>{loading ? "Creating…" : t("literals.createGroup")}</span>
+                <span>{loading ? t("messages.creatingGroup") : t("literals.createGroup")}</span>
               </Button>
             )}
           </div>

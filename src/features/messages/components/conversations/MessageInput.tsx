@@ -25,7 +25,7 @@ export function MessageInput({
 }: MessageInputProps) {
   const { t } = useTranslation();
   const { can, isLoading: permissionsLoading } = useCan();
-  const canSend = permissionsLoading || can("messages.send");
+  const canSend = !permissionsLoading && can("messages.send");
   const [messageInput, setMessageInput] = useState("");
   const [messageAttachments, setMessageAttachments] = useState<
     MessageAttachment[]
@@ -57,7 +57,7 @@ export function MessageInput({
     const content = messageInput.trim();
     if (!content && messageAttachments.length === 0) return;
 
-    const payload = content || "[File attachment]";
+    const payload = content || t("messages.fileAttachment");
     try {
       setSending(true);
       setErrorMessage(null);
