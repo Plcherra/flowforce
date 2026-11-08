@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { Message } from "@/types/messages";
+import { loadInsertedMessage } from "@/features/messages/api/insertedMessage";
 import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import { useRealtime } from "@/hooks/useRealtime";
 import { useRefreshWhileVisible } from "@/features/messages/hooks/useRefreshWhileVisible";
@@ -83,6 +84,21 @@ export function useChannelMessages(channelId: string | null) {
 
   useRefreshWhileVisible(Boolean(channelId && user?.id), refreshMessages);
 
+  const appendMessage = useCallback((message: Message) => {
+    setMessages((prev) => {
+      const safePrev = asArray(prev);
+      const withoutDuplicate = safePrev.filter((item) => item.id !== message.id);
+      return [...withoutDuplicate, message].sort(
+        (left, right) =>
+          new Date(left.created_at ?? 0).getTime() -
+          new Date(right.created_at ?? 0).getTime(),
+      );
+    });
+    if (message.created_at) {
+      lastMessageTimestampRef.current = message.created_at;
+    }
+  }, []);
+
   useEffect(() => {
     if (!channelId || !user?.id) {
       setMessages([]);
@@ -111,25 +127,24 @@ export function useChannelMessages(channelId: string | null) {
         ]
       : [],
     enabled: Boolean(channelId && user?.id),
-    onPayload: () => {
-      if (!channelId) return;
-      // Refetch so the row includes the sender profile. The realtime payload
-      // is the raw table row and is not enough to render a chat bubble.
-      void fetchMessages(channelId, true, true);
+    onPayload: (payload) => {
+      if (!channelId || payload.eventType !== "INSERT") return;
+      const inserted = payload.new as { id?: string; channel_id?: string } | null;
+      if (!inserted?.id || inserted.channel_id !== channelId) return;
+      void loadInsertedMessage(inserted.id)
+        .then((message) => {
+          if (!message) return;
+          appendMessage(message);
+        })
+        .catch((error) => {
+          logger.error("Failed to load realtime message", {
+            error,
+            tags: ["error", "realtime"],
+          });
+          void fetchMessages(channelId, true, true);
+        });
     },
   });
-
-  const appendMessage = useCallback((message: Message) => {
-    setMessages((prev) => {
-      const safePrev = asArray(prev);
-      const withoutDuplicate = safePrev.filter((item) => item.id !== message.id);
-      return [...withoutDuplicate, message].sort(
-        (left, right) =>
-          new Date(left.created_at ?? 0).getTime() -
-          new Date(right.created_at ?? 0).getTime(),
-      );
-    });
-  }, []);
 
   const clearError = useCallback(() => setError(null), []);
 
