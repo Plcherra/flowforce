@@ -221,7 +221,7 @@ export function ShiftWizardDialog({
     () => ({
       id: "draft-shift",
       company_id: companyId,
-      title: formData.title || "Draft shift",
+      title: formData.title || t("schedule.draftShift"),
       role: shiftDraftRole(
         formData.job_position_input,
         t("schedule.unassignedPosition"),
@@ -337,7 +337,7 @@ export function ShiftWizardDialog({
           companyId,
           createdBy: user.id,
           scheduleId: shiftId,
-          shiftTitle: formData.title || "Untitled shift",
+          shiftTitle: formData.title || t("schedule.untitledShift"),
           fallbackDue: shiftEnd.toISOString(),
         });
         await insertTask({ ...row, links: row.links as Json });

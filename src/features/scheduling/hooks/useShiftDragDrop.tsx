@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
+import { isSameDay } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { useCan } from "@/hooks/useCan";
 import {
   DragOverlay,
   PointerSensor,
@@ -59,6 +61,9 @@ export function useShiftDragDrop({
 }: UseShiftDragDropParams) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const canEdit = !permissionsLoading && can("schedule.edit");
+  const canAssign = !permissionsLoading && can("schedule.assign");
   const [activeShift, setActiveShift] = useState<ShiftWithAssignments | null>(
     null,
   );
@@ -71,13 +76,13 @@ export function useShiftDragDrop({
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
-      if (!enabled) return;
+      if (!enabled || (!canEdit && !canAssign)) return;
       const data = event.active.data.current;
       if (data?.type === "shift" && data.shift) {
         setActiveShift(data.shift as ShiftWithAssignments);
       }
     },
-    [enabled],
+    [canAssign, canEdit, enabled],
   );
 
   const handleDragEnd = useCallback(
@@ -97,6 +102,24 @@ export function useShiftDragDrop({
       const sourceEmployeeId = (activeData.employeeId as string | null) ?? null;
       const targetEmployeeId = (overData.employeeId as string | null) ?? null;
       const targetDay = overData.day as Date;
+      const oldStart = shift.start_time ? new Date(shift.start_time) : null;
+      const dayChanged = oldStart ? !isSameDay(oldStart, targetDay) : true;
+      const employeeChanged =
+        (sourceEmployeeId ?? null) !== (targetEmployeeId ?? null);
+      if (dayChanged && !canEdit) {
+        toast({
+          title: t("schedule.moveNeedsEdit"),
+          variant: "destructive",
+        });
+        return;
+      }
+      if (employeeChanged && !canAssign) {
+        toast({
+          title: t("schedule.moveNeedsAssign"),
+          variant: "destructive",
+        });
+        return;
+      }
 
       const result = await moveShift({
         shift,
@@ -149,6 +172,8 @@ export function useShiftDragDrop({
     },
     [
       assign,
+      canAssign,
+      canEdit,
       enabled,
       getCellAvailability,
       refetchAll,

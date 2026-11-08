@@ -59,8 +59,9 @@ export const ACCESS_ROWS: AccessRow[] = [
     { id: "read", label: "Read", keys: ["viewTeamSchedules", "schedule.view"] },
   ]},
   { id: "shifts", label: "Shifts", labelKey: "settings.accessShifts", switches: [
+    { id: "read", label: "Drafts", labelKey: "settings.accessScheduleDrafts", keys: ["editSchedules"] },
     { id: "create", label: "Create", labelKey: "settings.accessScheduleCreate", keys: ["schedule.create"] },
-    { id: "edit", label: "Edit", labelKey: "settings.accessScheduleEdit", keys: ["schedule.edit", "editSchedules"] },
+    { id: "edit", label: "Edit", labelKey: "settings.accessScheduleEdit", keys: ["schedule.edit"] },
     { id: "assign", label: "Assign", labelKey: "settings.accessScheduleAssign", keys: ["schedule.assign"] },
     { id: "delete", label: "Delete", labelKey: "settings.accessScheduleDelete", keys: ["schedule.delete"] },
   ]},

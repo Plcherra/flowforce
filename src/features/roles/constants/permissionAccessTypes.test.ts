@@ -42,6 +42,30 @@ export function runPermissionAccessTypeTests() {
     accessSwitchOn(manager, findAccessSwitch("shifts", "assign")!),
     true,
   );
+  assert.deepEqual(findAccessSwitch("shifts", "read")!.keys, ["editSchedules"]);
+  assert.deepEqual(findAccessSwitch("shifts", "create")!.keys, ["schedule.create"]);
+  assert.deepEqual(findAccessSwitch("shifts", "edit")!.keys, ["schedule.edit"]);
+  assert.deepEqual(findAccessSwitch("shifts", "assign")!.keys, ["schedule.assign"]);
+  assert.deepEqual(findAccessSwitch("shifts", "delete")!.keys, ["schedule.delete"]);
+  const createOnly = diffsForAccessSwitch(
+    {
+      editSchedules: true,
+      "schedule.create": false,
+      "schedule.edit": true,
+      "schedule.assign": true,
+      "schedule.delete": false,
+    },
+    {},
+    "shifts",
+    "create",
+    true,
+  );
+  assert.equal(createOnly["schedule.create"], "allow");
+  assert.equal(createOnly["schedule.edit"], undefined);
+  assert.equal(createOnly["schedule.assign"], undefined);
+  assert.equal(createOnly["schedule.delete"], undefined);
+  assert.equal(createOnly.editSchedules, undefined);
+
   const staff = getProductRolePermissions("staff");
   assert.equal(accessSwitchOn(staff, findAccessSwitch("shifts", "assign")!), false);
   assert.equal(accessSwitchOn(staff, findAccessSwitch("shifts", "create")!), false);

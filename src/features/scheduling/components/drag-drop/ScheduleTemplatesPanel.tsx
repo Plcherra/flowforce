@@ -3,6 +3,8 @@ import { Calendar, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { shiftChipPaint } from "@/features/scheduling/utils/shiftChipPaint";
+import { useShiftTemplates } from "@/features/scheduling/hooks/useShiftTemplates";
+import type { ShiftTemplate as SavedShiftTemplate } from "@/features/scheduling/hooks/useShiftTemplates";
 import type { ShiftTemplate } from "./types";
 
 interface ScheduleTemplatesPanelProps {
@@ -14,12 +16,55 @@ interface ScheduleTemplatesPanelProps {
   onTemplateClick?: (template: ShiftTemplate) => void;
 }
 
+function clock(hours: number | null) {
+  const span = hours && hours > 0 ? hours : 8;
+  const start = 9 * 60;
+  const end = start + Math.round(span * 60);
+  const format = (minutes: number) => {
+    const wrapped = ((minutes % (24 * 60)) + 24 * 60) % (24 * 60);
+    const hour = Math.floor(wrapped / 60);
+    const minute = wrapped % 60;
+    return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  };
+  return { startTime: format(start), endTime: format(end) };
+}
+
+function savedTemplateCard(
+  template: SavedShiftTemplate,
+  unnamed: string,
+  roleFallback: string,
+): ShiftTemplate {
+  const times = clock(template.duration_hours);
+  const role = template.job_position?.role || template.job_position?.name || roleFallback;
+  return {
+    id: template.id,
+    name: template.name || unnamed,
+    role,
+    color: template.color || "#3b82f6",
+    startTime: times.startTime,
+    endTime: times.endTime,
+    minStaff: template.required_headcount ?? 1,
+    maxStaff: template.required_headcount ?? 1,
+  };
+}
+
 export function ScheduleTemplatesPanel({
   templates,
   onTemplateDragStart,
   onTemplateClick,
 }: ScheduleTemplatesPanelProps) {
   const { t } = useTranslation();
+  const { templates: savedTemplates, loading } = useShiftTemplates();
+  const injected = templates.some((template) => template.id.includes("-"));
+  const rows = injected
+    ? templates
+    : savedTemplates.map((template) =>
+        savedTemplateCard(
+          template,
+          t("schedule.untitledShift"),
+          t("schedule.unassignedPosition"),
+        ),
+      );
   return (
     <Card className="lg:w-80 flex-shrink-0">
       <CardHeader className="pb-4">
@@ -29,7 +74,15 @@ export function ScheduleTemplatesPanel({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {templates.map((template) => {
+        {loading && rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("schedule.loading")}</p>
+        ) : null}
+        {!loading && rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground" data-testid="role-templates-empty">
+            {t("schedule.noSavedShiftTemplates")}
+          </p>
+        ) : null}
+        {rows.map((template) => {
           const paint = shiftChipPaint(template.color, "unassigned");
           return (
             <div

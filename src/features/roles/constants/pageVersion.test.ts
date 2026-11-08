@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import {
+  canSeeScheduleDrafts,
   pageVersion,
+  scheduleDeskControls,
   schedulePageVersion,
   type ActionPageVersion,
 } from "./pageVersion";
@@ -51,6 +53,29 @@ export function runPageVersionTests() {
   assert.equal(deleteOnly.delete, true);
   assert.equal(deleteOnly.create, false);
   assert.equal(deleteOnly.edit, false);
+
+  const createOnlyControls = scheduleDeskControls({ "schedule.create": true });
+  assert.equal(createOnlyControls.addShift, true);
+  assert.equal(createOnlyControls.copyWeek, true);
+  assert.equal(createOnlyControls.publish, false);
+  assert.equal(createOnlyControls.emptyWeek, false);
+  assert.equal(createOnlyControls.assign, false);
+  const editOnlyControls = scheduleDeskControls({ "schedule.edit": true });
+  assert.equal(editOnlyControls.publish, true);
+  assert.equal(editOnlyControls.addShift, false);
+  assert.equal(editOnlyControls.emptyWeek, false);
+  const deleteOnlyControls = scheduleDeskControls({ "schedule.delete": true });
+  assert.equal(deleteOnlyControls.emptyWeek, true);
+  assert.equal(deleteOnlyControls.publish, false);
+  const assignOnlyControls = scheduleDeskControls({ "schedule.assign": true });
+  assert.equal(assignOnlyControls.assign, true);
+  assert.equal(assignOnlyControls.addShift, false);
+  assert.equal(assignOnlyControls.publish, false);
+  assert.equal(assignOnlyControls.emptyWeek, false);
+  assert.equal(canSeeScheduleDrafts({ editSchedules: true }), true);
+  assert.equal(canSeeScheduleDrafts({ "schedule.edit": true }), true);
+  assert.equal(canSeeScheduleDrafts({ "schedule.create": true }), false);
+  assert.equal(canSeeScheduleDrafts({}), false);
 
   const samePermissions = {
     "inventory.view": true,

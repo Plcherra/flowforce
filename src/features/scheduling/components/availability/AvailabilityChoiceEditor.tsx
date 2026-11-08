@@ -76,7 +76,7 @@ export function AvailabilityChoiceEditor({
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (choice !== "open" && choice !== "fixed") {
-        throw new Error("Choose open or fixed.");
+        throw new Error(t("schedule.chooseOpenOrFixed"));
       }
       const { error } = await supabase.from("org_prefs").upsert(
         {
