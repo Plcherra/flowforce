@@ -6645,6 +6645,10 @@
     "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha",
     "confirmPassword": "Confirmar senha",
-    "theHire": "Esta pessoa"
+    "theHire": "Esta pessoa",
+    "previewWelcomeTitle": "Bem-vindo à loja",
+    "previewWelcomeBody": "Abrimos às 7. A primeira bebida é por nossa conta.",
+    "previewFileTitle": "Documento de identidade",
+    "previewFileBody": "Documento de identidade, frente, PDF ou foto"
   }
 }

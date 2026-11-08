@@ -6645,6 +6645,10 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "confirmPassword": "Confirm password",
-    "theHire": "This person"
+    "theHire": "This person",
+    "previewWelcomeTitle": "Welcome to the shop",
+    "previewWelcomeBody": "We open at 7. Your first drink is on the house.",
+    "previewFileTitle": "Photo ID",
+    "previewFileBody": "Photo ID, front side, PDF or photo"
   }
 }

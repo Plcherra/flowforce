@@ -17,20 +17,24 @@ function stepName(row: Record<string, unknown>) {
 
 export function HireActivityCard({
   profileId,
+  companyId,
   name,
 }: {
   profileId: string;
+  companyId: string | null;
   name: string;
 }) {
   const { t } = useTranslation();
   const activity = useQuery({
-    queryKey: ["hire-activity", profileId],
+    queryKey: ["hire-activity", profileId, companyId],
+    enabled: Boolean(companyId),
     queryFn: async () => {
       const [events, blocks, responses] = await Promise.all([
         db
           .from("audit_log")
           .select("id, action, created_at, new_values")
           .eq("target_user_id", profileId)
+          .eq("company_id", companyId ?? "")
           .in("action", [
             "hire.activated",
             "hire.step_completed",
@@ -41,11 +45,13 @@ export function HireActivityCard({
           .limit(30),
         db
           .from("hiring_blocks")
-          .select("id, kind, title, body, required, sort_order, link_url, file_name, storage_path, archived_at"),
+          .select("id, kind, title, body, required, sort_order, link_url, file_name, storage_path, archived_at")
+          .eq("company_id", companyId ?? ""),
         db
           .from("hiring_responses")
           .select("block_id, text_value, bool_value, date_value, file_name, status")
-          .eq("profile_id", profileId),
+          .eq("profile_id", profileId)
+          .eq("company_id", companyId ?? ""),
       ]);
       const blockRows = ((blocks.data ?? []) as Record<string, unknown>[])
         .filter((row) => !row.archived_at)

@@ -255,10 +255,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!error && data.user?.id) {
+        const signedInUserId = data.user.id;
         void supabase // pragma: allowlist secret
           .from("profiles")
           .update({ last_sign_in_at: new Date().toISOString() })
-          .eq("id", data.user.id);
+          .eq("id", signedInUserId)
+          .then(
+            () => undefined,
+            () => undefined,
+          );
       }
 
       if (error) {

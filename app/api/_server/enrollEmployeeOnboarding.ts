@@ -23,16 +23,6 @@ export async function enrollEmployeeOnboarding(params: { inviteId: string; userI
       if (isMissingTableError(existingError, ["employee_onboarding_enrollments"])) return;
       throw existingError;
     }
-    await admin.from("audit_log").insert({
-      company_id: invite.company_id,
-      actor_id: params.userId,
-      target_user_id: params.userId,
-      action: "hire.activated",
-      table_name: "profiles",
-      record_id: params.userId,
-      new_values: {},
-      metadata: {},
-    });
     if (existing) return;
 
     const { data: created, error: createError } = await admin
@@ -49,6 +39,17 @@ export async function enrollEmployeeOnboarding(params: { inviteId: string; userI
       if (isMissingTableError(createError, ["employee_onboarding_enrollments"])) return;
       throw createError ?? new Error("enrollment");
     }
+
+    await admin.from("audit_log").insert({
+      company_id: invite.company_id,
+      actor_id: params.userId,
+      target_user_id: params.userId,
+      action: "hire.activated",
+      table_name: "profiles",
+      record_id: params.userId,
+      new_values: {},
+      metadata: {},
+    });
 
     const { data: steps, error: stepsError } = await admin
       .from("employee_onboarding_steps")

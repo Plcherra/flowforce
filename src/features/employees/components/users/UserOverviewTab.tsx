@@ -55,10 +55,10 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
     <div className="space-y-6">
       <EngagementPanel
         employeeId={user.id}
-        role={user.jobRole || user.role}
+        role={user.role}
         displayName={displayName}
       />
-      <HireActivityCard profileId={user.id} name={displayName} />
+      <HireActivityCard profileId={user.id} companyId={user.company_id} name={displayName} />
 
       {/* Contact Information */}
       <Card>

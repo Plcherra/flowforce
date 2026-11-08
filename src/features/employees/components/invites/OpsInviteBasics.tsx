@@ -157,7 +157,7 @@ export function OpsInviteBasics({
             type="button"
             variant="outline"
             data-testid="ops-basics-skip"
-            onClick={() => void send()}
+            onClick={onSend}
             disabled={isSubmitting}
           >
             {t("employees.opsFlowSkip")}

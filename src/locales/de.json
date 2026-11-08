@@ -6645,6 +6645,10 @@
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort verbergen",
     "confirmPassword": "Passwort bestätigen",
-    "theHire": "Diese Person"
+    "theHire": "Diese Person",
+    "previewWelcomeTitle": "Willkommen im Laden",
+    "previewWelcomeBody": "Wir öffnen um 7. Das erste Getränk geht aufs Haus.",
+    "previewFileTitle": "Lichtbildausweis",
+    "previewFileBody": "Lichtbildausweis, Vorderseite, PDF oder Foto"
   }
 }

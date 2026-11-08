@@ -6645,6 +6645,10 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
-    "theHire": "Cette personne"
+    "theHire": "Cette personne",
+    "previewWelcomeTitle": "Bienvenue dans la boutique",
+    "previewWelcomeBody": "Nous ouvrons à 7 h. Votre première boisson est offerte.",
+    "previewFileTitle": "Pièce d'identité",
+    "previewFileBody": "Pièce d'identité, recto, PDF ou photo"
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "next/navigation";
 import { EmployeeOnboardingView } from "./EmployeeOnboardingView";
 import { OnboardingOverviewCard } from "./OnboardingOverviewCard";
@@ -13,6 +14,7 @@ function noop() {
 }
 
 export function OnboardingPreview() {
+  const { t } = useTranslation();
   const screen = useSearchParams().get("screen") ?? "employee";
   if (screen === "invite" || screen === "hiring" || screen === "permissions") {
     return <InviteFlowPreview screen={screen} />;
@@ -22,8 +24,8 @@ export function OnboardingPreview() {
       {
         id: "welcome",
         kind: "share_card",
-        title: "Welcome to the shop",
-        body: "We open at 7. Your first drink is on the house.",
+        title: t("hireActivity.previewWelcomeTitle"),
+        body: t("hireActivity.previewWelcomeBody"),
         required: true,
         sortOrder: 0,
         linkUrl: null,
@@ -33,8 +35,8 @@ export function OnboardingPreview() {
       {
         id: "id",
         kind: "collect_file",
-        title: "Photo ID",
-        body: "Photo ID, front side, PDF or photo",
+        title: t("hireActivity.previewFileTitle"),
+        body: t("hireActivity.previewFileBody"),
         required: true,
         sortOrder: 1,
         linkUrl: null,

@@ -56,6 +56,13 @@ export async function POST(request: NextRequest) {
   });
   if (!role) return NextResponse.json({ message: "That role is no longer available." }, { status: 404 });
 
+  const renewedExpiry = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+  const { error: renewError } = await supabaseAdmin // pragma: allowlist secret
+    .from("company_invites")
+    .update({ expires_at: renewedExpiry, status: "pending" })
+    .eq("id", invite.id);
+  if (renewError) return NextResponse.json({ message: "Unable to resend invite email." }, { status: 500 }); // pragma: allowlist secret
+
   const origin = request.headers.get("origin") ?? request.nextUrl.origin;
   const { error } = await sendInviteEmail({
     email,
