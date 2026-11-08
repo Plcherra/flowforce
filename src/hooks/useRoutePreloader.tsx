@@ -9,10 +9,9 @@ const routePreloadMap: Record<string, string[]> = {
   "/app/dashboard": [
     "/app/messages",
     "/app/employees",
-    "/app/calendar",
     "/app/settings",
   ],
-  "/app/messages": ["/app/calendar", "/app/employees"],
+  "/app/messages": ["/app/employees"],
   "/app/employees": ["/app/position-management"],
   "/templates": [
     "/templates/retail",

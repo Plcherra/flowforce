@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
-import type { CalendarEvent } from "@/hooks/useCalendarEvents";
+import type { ScheduleOverlayEvent as CalendarEvent } from "@/features/scheduling/components/CalendarEventBlock";
 import { useMemo, useState } from "react";
 import { ShiftWizardDialog } from "./ShiftWizardDialog";
 import { CalendarEventBlock } from "@/features/scheduling/components/CalendarEventBlock";

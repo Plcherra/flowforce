@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import EventsHubPage from "@/features/calendar/pages/events/EventsHub";
-
-export default function Calendar() {
-  return <EventsHubPage />;
+/** Old calendar links open Overview. */
+export default function CalendarRedirectPage() {
+  redirect("/app/dashboard");
 }

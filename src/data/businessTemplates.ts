@@ -70,7 +70,6 @@ export const BUSINESS_TEMPLATES: BusinessTemplate[] = [
       "tasks",
       "documents",
       "messages",
-      "calendar",
       "expenses",
       "reports",
       "performance",

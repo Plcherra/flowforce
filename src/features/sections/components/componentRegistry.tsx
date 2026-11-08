@@ -9,12 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
 import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useEmployees } from "@/hooks/useEmployees";
-import { useEvents } from "@/hooks/useEvents";
 import { formatDistanceToNow } from "date-fns";
 import type {
   CustomSection,
@@ -241,72 +239,6 @@ function EmployeeDirectoryComponent() {
   );
 }
 
-function EventsSnapshotComponent() {
-  const { t } = useTranslation();
-  const { events, loading } = useEvents();
-  const upcoming = useMemo(
-    () =>
-      events
-        .filter((event) => Date.parse(event.start) >= Date.now())
-        .sort((a, b) => Date.parse(a.start) - Date.parse(b.start))
-        .slice(0, 6),
-    [events],
-  );
-
-  if (loading) {
-    return (
-      <div className="text-sm text-muted-foreground">{t("sections.loadingEvents")}</div>
-    );
-  }
-
-  if (upcoming.length === 0) {
-    return (
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="text-base">{t("sections.noUpcomingEvents")}</CardTitle>
-          <CardDescription>
-            {t("sections.scheduleAnEventToSeeItAppearHere")}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">{t("sections.upcomingEvents")}</CardTitle>
-        <CardDescription>{t("sections.nextOnTheCalendarForYourTeam")}</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <ScrollArea className="max-h-72">
-          <div className="space-y-3 pr-2">
-            {upcoming.map((event) => (
-              <div key={event.id} className="border rounded-lg p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-sm">{event.title}</span>
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {event.type || t("literals.event2")}
-                  </Badge>
-                </div>
-                <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-2">
-                  <span>{new Date(event.start).toLocaleString()}</span>
-                  {event.location && <span>• {event.location}</span>}
-                </div>
-                {event.description && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {event.description}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
-  );
-}
-
 const SECTION_COMPONENTS: SectionComponentDefinition[] = [
   {
     id: "feed",
@@ -332,14 +264,6 @@ const SECTION_COMPONENTS: SectionComponentDefinition[] = [
     icon: "Users",
     category: "hr",
     render: () => <EmployeeDirectoryComponent />,
-  },
-  {
-    id: "events",
-    label: "Events Snapshot",
-    description: "Upcoming meetings and schedule highlights.",
-    icon: "Calendar",
-    category: "operations",
-    render: () => <EventsSnapshotComponent />,
   },
 ];
 

@@ -73,8 +73,8 @@ const nextConfig = {
     return [
       { source: '/dashboard', destination: '/app/dashboard', permanent: false },
       { source: '/messages', destination: '/app/messages', permanent: false },
-      { source: '/calendar', destination: '/app/calendar', permanent: false },
-      { source: '/meetings', destination: '/app/meetings', permanent: false },
+      { source: '/calendar', destination: '/app/dashboard', permanent: false },
+      { source: '/meetings', destination: '/app/dashboard', permanent: false },
       { source: '/employees', destination: '/app/employees', permanent: false },
       { source: '/employee-directory', destination: '/app/employees', permanent: false },
       { source: '/invite-employee', destination: '/app/employees?invite=1', permanent: false },
