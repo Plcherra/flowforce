@@ -8,7 +8,11 @@ test.beforeEach(async ({ page }) => {
 
 test("invite, hiring flow, and schedule permissions", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/onboarding-preview?screen=invite");
+  const preview = await page.goto("/onboarding-preview?screen=invite");
+  test.skip(
+    preview?.status() === 404,
+    "The onboarding preview route is disabled in production.",
+  );
   await expect(page.getByTestId("invite-role")).toBeVisible();
   await expect(page.getByTestId("invite-department")).toBeVisible();
   await expect(page.getByTestId("invite-location")).toBeVisible();
