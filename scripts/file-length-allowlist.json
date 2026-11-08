@@ -215,14 +215,14 @@
     "ticket": "FF-SPLIT-45"
   },
   {
-    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
-    "lines": 631,
-    "ticket": "FF-SPLIT-49"
-  },
-  {
     "path": "src/hooks/useAIActionsFeed.ts",
     "lines": 631,
     "ticket": "FF-SPLIT-46"
+  },
+  {
+    "path": "src/features/scheduling/components/drag-drop/WeekGrid.tsx",
+    "lines": 625,
+    "ticket": "FF-SPLIT-49"
   },
   {
     "path": "src/features/inventory/pages/Expenses.tsx",

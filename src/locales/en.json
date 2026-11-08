@@ -2835,7 +2835,7 @@
     "appliesToLevelsHelp": "Who this policy applies to. This does not change who can view or edit it.",
     "appliesToRoles": "Applies to roles",
     "dayEventCount": "{{count}} on this day",
-    "eventsLiveOnCalendar": "Events belong to the day. Set them up on Calendar.",
+    "eventsLiveOnCalendar": "Events belong to this day.",
     "boardTitle": "Schedule",
     "mySchedule": "My schedule",
     "newShift": "New shift",

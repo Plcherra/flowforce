@@ -2835,7 +2835,7 @@
     "appliesToLevelsHelp": "Für wen diese Richtlinie gilt. Das ändert nicht, wer sie sehen oder bearbeiten kann.",
     "appliesToRoles": "Gilt für Rollen",
     "dayEventCount": "{{count}} an diesem Tag",
-    "eventsLiveOnCalendar": "Ereignisse gehören zum Tag. Richte sie im Kalender ein.",
+    "eventsLiveOnCalendar": "Ereignisse gehören zu diesem Tag.",
     "boardTitle": "Dienstplan",
     "mySchedule": "Mein Dienstplan",
     "newShift": "Neue Schicht",

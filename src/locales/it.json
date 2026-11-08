@@ -2835,7 +2835,7 @@
     "appliesToLevelsHelp": "A chi si applica questa politica. Non cambia chi può vederla o modificarla.",
     "appliesToRoles": "Si applica ai ruoli",
     "dayEventCount": "{{count}} in questo giorno",
-    "eventsLiveOnCalendar": "Gli eventi appartengono al giorno. Impostali nel Calendario.",
+    "eventsLiveOnCalendar": "Gli eventi appartengono a questo giorno.",
     "boardTitle": "Turni",
     "mySchedule": "I miei turni",
     "newShift": "Nuovo turno",

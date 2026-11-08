@@ -2835,7 +2835,7 @@
     "appliesToLevelsHelp": "A quem esta política se aplica. Isso não muda quem pode vê-la ou editá-la.",
     "appliesToRoles": "Aplica-se aos papéis",
     "dayEventCount": "{{count}} neste dia",
-    "eventsLiveOnCalendar": "Os eventos pertencem ao dia. Configure-os no Calendário.",
+    "eventsLiveOnCalendar": "Os eventos pertencem a este dia.",
     "boardTitle": "Escala",
     "mySchedule": "A minha escala",
     "newShift": "Novo turno",

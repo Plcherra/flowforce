@@ -2835,7 +2835,7 @@
     "appliesToLevelsHelp": "À qui cette politique s'applique. Cela ne change pas qui peut la voir ou la modifier.",
     "appliesToRoles": "S'applique aux rôles",
     "dayEventCount": "{{count}} ce jour-là",
-    "eventsLiveOnCalendar": "Les événements appartiennent au jour. Réglez-les dans Calendrier.",
+    "eventsLiveOnCalendar": "Les événements appartiennent à ce jour.",
     "boardTitle": "Planning",
     "mySchedule": "Mon planning",
     "newShift": "Nouveau quart",

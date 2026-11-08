@@ -504,19 +504,13 @@ export function WeekGrid({
           {weekDays.map((day) => {
             const dayKey = dayIso(day);
             const dayEvents = eventsByDay.get(dayKey) ?? [];
-            const onlyEvent = dayEvents.length === 1 ? dayEvents[0] : null;
             return (
               <div key={day.toISOString()} className="border-l bg-background p-2 text-center">
                 <div className="font-medium text-sm">{format(day, "EEE", { locale })}</div>
                 <div className="text-xs text-muted-foreground">
                   {format(day, "MMM d", { locale })}
                 </div>
-                <DayEventNotice
-                  count={dayEvents.length}
-                  date={dayKey}
-                  eventId={onlyEvent?.linked_event_id || onlyEvent?.id || null}
-                  className="mt-1"
-                />
+                <DayEventNotice count={dayEvents.length} className="mt-1" />
               </div>
             );
           })}
