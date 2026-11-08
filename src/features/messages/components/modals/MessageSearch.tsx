@@ -128,8 +128,7 @@ export function MessageSearch({
         .order("created_at", { ascending: false })
         .limit(10);
 
-      // Search channels - RLS will filter by membership
-      // Filter by creator's company_id via createdprofile
+      // Search channels in this company. RLS still limits rows to participants.
       const { data: channelResults, error: channelError } = await supabase
         .from("message_channels")
         .select(
@@ -140,9 +139,10 @@ export function MessageSearch({
           type,
           is_private,
           created_at,
-          createdprofile:profiles!created_by(company_id)
+          company_id
         `,
         )
+        .eq("company_id", companyId)
         .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
         .order("created_at", { ascending: false })
         .limit(5);
@@ -150,14 +150,7 @@ export function MessageSearch({
       if (messageError) throw messageError;
       if (channelError) throw channelError;
 
-      // Filter channels by company_id from createdprofile
-      const filteredChannels = (channelResults || []).filter((channel) => {
-        const createdProfile = channel.createdprofile as
-          | { company_id?: string }
-          | null
-          | undefined;
-        return createdProfile?.company_id === companyId;
-      });
+      const filteredChannels = channelResults || [];
 
       const formattedResults: SearchResult[] = [
         ...(messageResults || []).map((msg) => ({

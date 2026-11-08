@@ -62,7 +62,7 @@ test("messages new chat form follows send and manage separately", async ({ page 
   });
 
   await page.goto("/app/messages");
-  const newChat = page.getByTestId("messages-new-chat");
+  const newChat = page.getByTestId("new-chat");
   await expect(newChat).toBeVisible({ timeout: 30_000 });
   await newChat.click();
   await expect(page.getByRole("heading", { name: "Choose someone" })).toBeVisible();
@@ -76,11 +76,11 @@ test("messages new chat form follows send and manage separately", async ({ page 
   await expect(page.getByRole("heading", { name: "Messages", exact: true })).toBeVisible({
     timeout: 30_000,
   });
-  await expect(page.getByTestId("messages-new-chat")).toHaveCount(0);
+  await expect(page.getByTestId("new-chat")).toHaveCount(0);
 
   await showOnly(page, ["messages.send"]);
   await page.reload();
-  await expect(page.getByTestId("messages-new-chat")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("new-chat")).toBeVisible({ timeout: 30_000 });
   await page.screenshot({ path: "/opt/cursor/artifacts/messages-send-only.png" });
 });
 

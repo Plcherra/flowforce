@@ -12,6 +12,7 @@ import {
   updateLastRead as updateLastReadService,
   deleteChannel as deleteChannelService,
 } from "@/features/messages/api/channelService";
+import { useRefreshWhileVisible } from "@/features/messages/hooks/useRefreshWhileVisible";
 
 // UUID validation pattern
 const UUID_PATTERN =
@@ -45,7 +46,7 @@ export function useMessageChannels() {
   // Only fetch when user is authenticated
   const enabled = !!session?.user;
 
-  const fetchChannels = useCallback(async () => {
+  const fetchChannels = useCallback(async (silent = false) => {
     if (!userId) return;
 
     // Prevent concurrent fetches and infinite retries
@@ -56,7 +57,7 @@ export function useMessageChannels() {
       return;
     }
 
-    if (retryCountRef.current >= MAX_RETRIES) {
+    if (!silent && retryCountRef.current >= MAX_RETRIES) {
       logger.warn("Max retries reached for channel fetch", {
         retryCount: retryCountRef.current,
         tags: ["channels", "error"],
@@ -65,7 +66,7 @@ export function useMessageChannels() {
     }
 
     isFetchingRef.current = true;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       // companyId is already validated (null if not a valid UUID)
       // This allows fetching channels even without a company context
@@ -81,13 +82,21 @@ export function useMessageChannels() {
         retryCount: retryCountRef.current,
         tags: ["error"],
       });
-      setError(issue);
-      retryCountRef.current += 1;
+      if (!silent) {
+        setError(issue);
+        retryCountRef.current += 1;
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
       isFetchingRef.current = false;
     }
   }, [userId, companyId]);
+
+  const refreshChannels = useCallback(() => {
+    void fetchChannels(true);
+  }, [fetchChannels]);
+
+  useRefreshWhileVisible(enabled && Boolean(userId), refreshChannels);
 
   useEffect(() => {
     // Prevent running when not logged in
@@ -116,7 +125,7 @@ export function useMessageChannels() {
     onPayload: () => {
       // Reset retry count on realtime updates to allow fresh fetches
       retryCountRef.current = 0;
-      void fetchChannels();
+      void fetchChannels(true);
     },
   });
 

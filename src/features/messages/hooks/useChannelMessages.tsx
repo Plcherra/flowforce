@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { Message } from "@/types/messages";
+import { loadInsertedMessage } from "@/features/messages/api/insertedMessage";
 import { messagesRepository } from "@/features/messages/api/messagesRepository";
 import { useRealtime } from "@/hooks/useRealtime";
+import { useRefreshWhileVisible } from "@/features/messages/hooks/useRefreshWhileVisible";
 import { logger } from "@/utils/logger";
 import {
   asArray,
@@ -21,9 +23,9 @@ export function useChannelMessages(channelId: string | null) {
   const isInitialLoadRef = useRef(true);
 
   const fetchMessages = useCallback(
-    async (targetChannelId: string, incremental = false) => {
+    async (targetChannelId: string, incremental = false, silent = false) => {
       if (!user?.id) return;
-      setLoading(true);
+      if (!silent) setLoading(true);
       try {
         // Phase 4 optimization: Incremental append for new messages
         const options =
@@ -67,13 +69,35 @@ export function useChannelMessages(channelId: string | null) {
           error: issue,
           tags: ["error"],
         });
-        setError(issue);
+        if (!silent) setError(issue);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [user?.id],
   );
+
+  const refreshMessages = useCallback(() => {
+    if (!channelId) return;
+    void fetchMessages(channelId, false, true);
+  }, [channelId, fetchMessages]);
+
+  useRefreshWhileVisible(Boolean(channelId && user?.id), refreshMessages);
+
+  const appendMessage = useCallback((message: Message) => {
+    setMessages((prev) => {
+      const safePrev = asArray(prev);
+      const withoutDuplicate = safePrev.filter((item) => item.id !== message.id);
+      return [...withoutDuplicate, message].sort(
+        (left, right) =>
+          new Date(left.created_at ?? 0).getTime() -
+          new Date(right.created_at ?? 0).getTime(),
+      );
+    });
+    if (message.created_at) {
+      lastMessageTimestampRef.current = message.created_at;
+    }
+  }, []);
 
   useEffect(() => {
     if (!channelId || !user?.id) {
@@ -104,44 +128,23 @@ export function useChannelMessages(channelId: string | null) {
       : [],
     enabled: Boolean(channelId && user?.id),
     onPayload: (payload) => {
-      if (channelId && payload.new) {
-        // Phase 4 optimization: Incremental append instead of full refetch
-        const newMessage = payload.new as Message;
-        setMessages((prev) => {
-          const safePrev = asArray(prev);
-          // Check if message already exists (avoid duplicates)
-          if (safePrev.some((m) => m.id === newMessage.id)) {
-            return safePrev;
-          }
-          // Append new message and sort
-          const updated = [...safePrev, newMessage].sort(
-            (a, b) =>
-              new Date(a.created_at).getTime() -
-              new Date(b.created_at).getTime(),
-          );
-          // Update last timestamp
-          if (safeArrayLength(updated) > 0) {
-            const lastIndex = safeArrayLength(updated) - 1;
-            lastMessageTimestampRef.current =
-              updated[lastIndex]?.created_at ?? null;
-          }
-          return updated;
+      if (!channelId || payload.eventType !== "INSERT") return;
+      const inserted = payload.new as { id?: string; channel_id?: string } | null;
+      if (!inserted?.id || inserted.channel_id !== channelId) return;
+      void loadInsertedMessage(inserted.id)
+        .then((message) => {
+          if (!message) return;
+          appendMessage(message);
+        })
+        .catch((error) => {
+          logger.error("Failed to load realtime message", {
+            error,
+            tags: ["error", "realtime"],
+          });
+          void fetchMessages(channelId, true, true);
         });
-      }
     },
   });
-
-  const appendMessage = useCallback((message: Message) => {
-    setMessages((prev) => {
-      const safePrev = asArray(prev);
-      const withoutDuplicate = safePrev.filter((item) => item.id !== message.id);
-      return [...withoutDuplicate, message].sort(
-        (left, right) =>
-          new Date(left.created_at ?? 0).getTime() -
-          new Date(right.created_at ?? 0).getTime(),
-      );
-    });
-  }, []);
 
   const clearError = useCallback(() => setError(null), []);
 

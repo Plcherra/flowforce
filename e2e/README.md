@@ -36,6 +36,9 @@ Local runs need these variables in the environment (or in `.env.local`, which Ne
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `TEST_USER_EMAIL`
 - `TEST_USER_PASSWORD`
+- `TEST_RECIPIENT_EMAIL` and `TEST_RECIPIENT_PASSWORD` for the two-user message test
+
+The message test signs in as both users through the app. It does not use a service role key. The local seed script creates the second user and prints those variables. `TEST_USER_NAME` defaults to `Playwright Owner` and `TEST_RECIPIENT_NAME` defaults to `Relay Tester`.
 
 The test user must be able to sign in and create a task. A preview run still needs `TEST_USER_EMAIL` and `TEST_USER_PASSWORD`. The preview build already contains the public Supabase keys.
 

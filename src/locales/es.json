@@ -4733,7 +4733,9 @@
     "writeAReply": "Escribe una respuesta",
     "writeTheFirstMessage": "Escribe el primer mensaje...",
     "writeYourAnnouncementContentHere": "Escribe aquí el contenido del anuncio...",
-    "youReTheFirstOneHere": "Eres el primero aquí."
+    "youReTheFirstOneHere": "Eres el primero aquí.",
+    "newMessageNotification": "Nuevo mensaje de {{name}}",
+    "unreadChat": "No leído"
   },
   "analytics": {
     "12FromLastMonth": "+12% respecto al mes pasado",
