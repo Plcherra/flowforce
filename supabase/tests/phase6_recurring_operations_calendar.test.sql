@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap;
 
-select plan(12);
+select plan(14);
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 reset role;
@@ -211,6 +211,26 @@ select is(
   1::integer,
   'daily workload view exposes pending reviews'
 );
+
+select is(
+  (
+    select count(*)
+    from public.operations_daily_workload_v
+    where company_id <> '63000000-0000-4000-8000-000000000001'
+  ),
+  0::bigint,
+  'Tenant A workload view does not expose another company'
+);
+
+select set_config('request.jwt.claim.sub', '63100000-0000-4000-8000-000000000002', true);
+
+select is(
+  (select count(*) from public.operations_daily_workload_v),
+  0::bigint,
+  'Tenant B cannot read Tenant A daily workload'
+);
+
+select set_config('request.jwt.claim.sub', '63100000-0000-4000-8000-000000000001', true);
 
 select throws_ok(
   $$ select public.generate_recurring_workflow_runs(
