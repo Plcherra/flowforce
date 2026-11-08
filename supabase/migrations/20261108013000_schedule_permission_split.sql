@@ -27,9 +27,6 @@ as $$
     );
 $$;
 
-revoke all on function public.product_role_default_allows(text, text) from public, anon, authenticated;
-grant execute on function public.product_role_default_allows(text, text) to service_role;
-
 -- Any class the owner can edit may store any combination of the four keys.
 -- The default function still decides a missing key. This list is only the ceiling.
 create or replace function public.product_level_allowed_permissions(level text)
@@ -65,9 +62,6 @@ begin
   return base || extra;
 end;
 $$;
-
-revoke all on function public.product_level_allowed_permissions(text) from public, anon, authenticated;
-grant execute on function public.product_level_allowed_permissions(text) to service_role;
 
 create or replace function public.enforce_schedule_write_permissions()
 returns trigger
