@@ -11,6 +11,7 @@ import {
 } from "@/features/scheduling/components/drag-drop/ShiftChip";
 import type { ShiftWithAssignments } from "@/features/scheduling/hooks/useSchedulingConsolidated";
 import { useShiftCardText } from "@/features/scheduling/components/drag-drop/ShiftCardLabels";
+import { useCan } from "@/hooks/useCan";
 
 export function usePhoneScheduleLayout() {
   const [isPhone, setIsPhone] = useState(false);
@@ -62,6 +63,8 @@ export function MobileWeekBoard({
   onAddShift,
 }: MobileWeekBoardProps) {
   const { t, i18n } = useTranslation();
+  const { can, isLoading: permissionsLoading } = useCan();
+  const canCreate = !permissionsLoading && can("schedule.create");
   const locale = dateLocale(i18n.resolvedLanguage || i18n.language);
   const shiftsByDay = useMemo(
     () => weekDays.map((day) => ({ day, shifts: shiftsOnDay(shifts, day) })),
@@ -74,7 +77,7 @@ export function MobileWeekBoard({
         <section key={day.toISOString()} className="space-y-2">
           <h3 className="flex items-center justify-between text-sm font-medium text-foreground">
             {format(day, "EEEE, MMM d", { locale })}
-            {onAddShift ? (
+            {onAddShift && canCreate ? (
               <Button
                 type="button"
                 size="sm"

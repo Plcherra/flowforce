@@ -12,7 +12,10 @@ const SCHEDULE_KEYS = [
   { key: "viewTeamSchedules", labelKey: "schedule.permissionTeam" },
   { key: "schedule.view", labelKey: "schedule.permissionPublished" },
   { key: "editSchedules", labelKey: "schedule.permissionDrafts" },
-  { key: "schedule.edit", labelKey: "schedule.permissionAssign" },
+  { key: "schedule.create", labelKey: "schedule.permissionCreate" },
+  { key: "schedule.edit", labelKey: "schedule.permissionEdit" },
+  { key: "schedule.assign", labelKey: "schedule.permissionAssign" },
+  { key: "schedule.delete", labelKey: "schedule.permissionDelete" },
 ] as const satisfies ReadonlyArray<{ key: PermissionKey; labelKey: string }>;
 
 type ScheduleKey = (typeof SCHEDULE_KEYS)[number]["key"];
@@ -171,7 +174,7 @@ export function TeamHoursPermissionMatrix({
           {(matrixQuery.data?.people ?? []).map((person) => {
             const name =
               `${person.first_name ?? ""} ${person.last_name ?? ""}`.trim() ||
-              "Unnamed";
+              t("schedule.unnamedPerson");
             return (
               <div
                 key={person.id}

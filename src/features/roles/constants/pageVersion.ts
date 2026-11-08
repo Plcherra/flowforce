@@ -28,6 +28,28 @@ function allowed(permissions: PermissionMap, key: string): boolean {
   return Boolean(permissions?.[key]);
 }
 
+/** Draft rows are visible when the person can edit them or was granted draft weeks. */
+export function canSeeScheduleDrafts(permissions: PermissionMap): boolean {
+  return allowed(permissions, "editSchedules") || allowed(permissions, "schedule.edit");
+}
+
+/**
+ * Week-desk controls follow the four schedule keys on their own.
+ * Create does not imply edit, assign, or delete.
+ */
+export function scheduleDeskControls(permissions: PermissionMap) {
+  const version = schedulePageVersion(permissions);
+  return {
+    addShift: version.create,
+    copyWeek: version.create,
+    autoFill: version.create,
+    templates: version.create,
+    publish: version.edit,
+    emptyWeek: version.delete,
+    assign: version.assign,
+  };
+}
+
 export function schedulePageVersion(
   permissions: PermissionMap,
   hierarchyLevel?: number | null,

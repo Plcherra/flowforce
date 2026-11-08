@@ -162,9 +162,7 @@ export function WeekTemplateDialog({
     }
 
     if (weekSchedules.length > 0) {
-      const confirmed = window.confirm(
-        "This week already has shifts. Loading a template will add shifts on top. Continue?",
-      );
+      const confirmed = window.confirm(t("schedule.loadTemplateConfirm"));
       if (!confirmed) return;
     }
 
@@ -195,7 +193,7 @@ export function WeekTemplateDialog({
   };
 
   const handleDeleteTemplate = async (id: string) => {
-    const confirmed = window.confirm("Delete this template permanently?");
+    const confirmed = window.confirm(t("schedule.deleteTemplateConfirm"));
     if (!confirmed) return;
     const { error } = await deleteTemplate(id);
     if (error) {

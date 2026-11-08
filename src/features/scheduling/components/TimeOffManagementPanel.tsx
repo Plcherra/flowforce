@@ -46,15 +46,20 @@ interface TimeOffManagementPanelProps {
   staffOnly?: boolean;
 }
 
-function getDisplayName(user?: {
-  first_name?: string | null;
-  last_name?: string | null;
-}) {
+function getDisplayName(
+  user:
+    | {
+        first_name?: string | null;
+        last_name?: string | null;
+      }
+    | undefined,
+  fallback: string,
+) {
   const name = [user?.first_name, user?.last_name]
     .filter(Boolean)
     .join(" ")
     .trim();
-  return name || "Team member";
+  return name || fallback;
 }
 
 function getInitials(user?: {
@@ -278,7 +283,7 @@ export function TimeOffManagementPanel({
 
                   <div>
                     <div className="font-medium">
-                      {getDisplayName(request.user)}
+                      {getDisplayName(request.user, t("schedule.teamMember"))}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       <span data-testid="time-off-start">

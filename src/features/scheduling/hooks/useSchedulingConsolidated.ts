@@ -5,8 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { scheduleShiftTextTranslation } from "@/features/scheduling/scheduleShiftText";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
-import { canViewScheduleDrafts } from "@/utils/authRoles";
+import { useCan } from "@/hooks/useCan";
+import { canSeeScheduleDrafts } from "@/features/roles/constants/pageVersion";
 import { logger } from "@/utils/logger";
 import { isMissingBackendResourceError } from "@/shared/utils/supabaseErrors";
 import {
@@ -72,7 +72,6 @@ interface SchedulingConsolidatedResult {
   isUsingFallbackData: boolean;
 }
 
-const DEFAULT_ERROR = "Unable to load the latest scheduling data.";
 const SCHEDULING_RESOURCE_NAMES = [
   "schedules",
   "schedule_assignments",
@@ -89,7 +88,7 @@ export function useSchedulingConsolidated(
   const { companyId, start, end, enabled = true } = params;
   const { toast } = useToast();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { can, isLoading: permissionsLoading } = useCan();
   const { t, i18n } = useTranslation();
   const sourceLocale = appLanguageFromTag(i18n.resolvedLanguage || i18n.language);
 
@@ -137,7 +136,12 @@ export function useSchedulingConsolidated(
     }
   }, [companyId]);
 
-  const includeDrafts = canViewScheduleDrafts(user, profile?.role);
+  const includeDrafts =
+    !permissionsLoading &&
+    canSeeScheduleDrafts({
+      editSchedules: can("editSchedules"),
+      "schedule.edit": can("schedule.edit"),
+    });
   const schedulesQueryKey =
     companyId && range.start && range.end
       ? buildSchedulesWeekQueryKey({
@@ -200,7 +204,7 @@ export function useSchedulingConsolidated(
             schedulesQuery.error !== null &&
             "message" in schedulesQuery.error
           ? String((schedulesQuery.error as { message?: unknown }).message)
-          : DEFAULT_ERROR;
+          : t("schedule.unableToLoadSchedule");
     const missingSchema = isMissingBackendResourceError(
       schedulesQuery.error,
       SCHEDULING_RESOURCE_NAMES,

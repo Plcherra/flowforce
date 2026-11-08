@@ -360,8 +360,8 @@ function CompactStatus({
   const { t } = useTranslation();
   const statusMessage =
     needsAttention > 0
-      ? `${needsAttention} shift${needsAttention === 1 ? "" : "s"} need coverage`
-      : "Week looks covered — run Smart Fill to optimize";
+      ? t("schedule.shiftsNeedCoverage", { count: needsAttention })
+      : t("schedule.weekLooksCovered");
 
   return (
     <div className="space-y-2 rounded-lg border border-dashed border-border/70 p-2.5">

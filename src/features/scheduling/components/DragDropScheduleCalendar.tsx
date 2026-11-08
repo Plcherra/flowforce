@@ -259,7 +259,7 @@ export function DragDropScheduleCalendar({
       title: template.name,
       startTime: template.startTime,
       endTime: template.endTime,
-      role: template.role,
+      role: template.role, positionId: template.positionId,
       color: template.color,
     });
     setShowAddShift(true);

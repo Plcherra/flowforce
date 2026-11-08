@@ -62,8 +62,8 @@ function weekdayLabel(day: string, labels: Record<string, string>) {
 }
 
 function personName(
-  person?: { first_name?: string | null; last_name?: string | null },
-  fallback = "Team member",
+  person: { first_name?: string | null; last_name?: string | null } | undefined,
+  fallback: string,
 ) {
   const name = [person?.first_name, person?.last_name].filter(Boolean).join(" ").trim();
   return name || fallback;

@@ -104,10 +104,10 @@ export function PersonalAvailabilityPanel({
       windowStart?: string,
     ) => {
       if (!employeeId) {
-        throw new Error("We need your profile details to save availability.");
+        throw new Error(t("schedule.profileRequiredForAvailability"));
       }
       if (!windowStart) {
-        throw new Error("Next availability window is not set.");
+        throw new Error(t("schedule.availabilityWindowMissing"));
       }
       const ranges = rangesFromGrid(nextGrid);
 
@@ -119,7 +119,7 @@ export function PersonalAvailabilityPanel({
       if (deleteResult.error) {
         throw new Error(
           deleteResult.error.message ||
-            "Unable to update your availability right now.",
+            t("schedule.availabilityUpdateFailed"),
         );
       }
 
@@ -161,7 +161,7 @@ export function PersonalAvailabilityPanel({
         if (insertResult.error) {
           throw new Error(
             insertResult.error.message ||
-              "Unable to save the updated availability.",
+              t("schedule.availabilitySaveFailed"),
           );
         }
       }
@@ -171,7 +171,7 @@ export function PersonalAvailabilityPanel({
       });
       await refetchAll();
     },
-    [employeeId, queryClient, refetchAll, weekStart],
+    [employeeId, queryClient, refetchAll, t, weekStart],
   );
 
   if (isFallbackData) {

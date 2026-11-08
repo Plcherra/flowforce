@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useCan } from "@/hooks/useCan";
+import { scheduleDeskControls } from "@/features/roles/constants/pageVersion";
 import { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, SlidersHorizontal } from "lucide-react";
@@ -138,8 +139,15 @@ export function ScheduleWeekDesk({
 }: ScheduleWeekDeskProps) {
   const { t } = useTranslation();
   const { can, isLoading: permissionsLoading } = useCan();
-  const canCreate = !permissionsLoading && can("schedule.create");
-  const canDelete = !permissionsLoading && can("schedule.delete");
+  const desk = scheduleDeskControls({
+    "schedule.create": can("schedule.create"),
+    "schedule.edit": can("schedule.edit"),
+    "schedule.assign": can("schedule.assign"),
+    "schedule.delete": can("schedule.delete"),
+  });
+  const canCreate = !permissionsLoading && desk.addShift;
+  const canEdit = !permissionsLoading && desk.publish;
+  const canDelete = !permissionsLoading && desk.emptyWeek;
   const [deskOpen, setDeskOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
@@ -273,11 +281,20 @@ export function ScheduleWeekDesk({
             {!readOnly ? (
               <section aria-label={t("schedule.patterns")}>
                 <h3 className="px-2 text-xs text-muted-foreground">{t("schedule.patterns")}</h3>
-                <DeskCommand label={t("schedule.roleTemplates2")} onClick={() => run(onToggleTemplates)} />
-                <DeskCommand
-                  label={t("schedule.weekBlueprints")}
-                  onClick={() => run(onOpenWeekTemplates)}
-                />
+                {canCreate ? (
+                  <DeskCommand
+                    label={t("schedule.roleTemplates2")}
+                    testId="role-templates"
+                    onClick={() => run(onToggleTemplates)}
+                  />
+                ) : null}
+                {canCreate ? (
+                  <DeskCommand
+                    label={t("schedule.weekBlueprints")}
+                    testId="week-blueprints"
+                    onClick={() => run(onOpenWeekTemplates)}
+                  />
+                ) : null}
                 {onToggleSmartFill ? (
                   <DeskCommand
                     label={t("schedule.coverageCoach")}
@@ -291,11 +308,14 @@ export function ScheduleWeekDesk({
               <section aria-label={t("schedule.thisWeek")} className="sm:col-span-2">
                 <h3 className="px-2 text-xs text-muted-foreground">{t("schedule.thisWeek")}</h3>
                 <div className="grid sm:grid-cols-2">
-                  <DeskCommand
-                    label={t("schedule.repeatPreviousWeek")}
-                    onClick={() => run(onCopyPreviousWeek)}
-                  />
-                  {onAutoScheduleWeek ? (
+                  {canCreate ? (
+                    <DeskCommand
+                      label={t("schedule.repeatPreviousWeek")}
+                      testId="repeat-previous-week"
+                      onClick={() => run(onCopyPreviousWeek)}
+                    />
+                  ) : null}
+                  {canCreate && onAutoScheduleWeek ? (
                     <DeskCommand
                       label={t("schedule.autoFillWeek")}
                       disabled={autoScheduleDisabled}
@@ -309,14 +329,20 @@ export function ScheduleWeekDesk({
                       onClick={() => run(onClearWeek)}
                     />
                   ) : null}
-                  <DeskCommand
-                    label={t("schedule.publishToTheTeam")}
-                    onClick={() => run(() => onPublishWeek(true))}
-                  />
-                  <DeskCommand
-                    label={t("schedule.returnToDraft")}
-                    onClick={() => run(() => onPublishWeek(false))}
-                  />
+                  {canEdit ? (
+                    <DeskCommand
+                      label={t("schedule.publishToTheTeam")}
+                      testId="publish-to-team"
+                      onClick={() => run(() => onPublishWeek(true))}
+                    />
+                  ) : null}
+                  {canEdit ? (
+                    <DeskCommand
+                      label={t("schedule.returnToDraft")}
+                      testId="return-to-draft"
+                      onClick={() => run(() => onPublishWeek(false))}
+                    />
+                  ) : null}
                   <DeskCommand label={t("schedule.downloadCsv")} onClick={() => run(onExportWeekCsv)} />
                   <DeskCommand label={t("schedule.printThisWeek")} onClick={() => run(onPrintWeek)} />
                 </div>

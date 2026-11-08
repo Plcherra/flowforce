@@ -560,6 +560,17 @@ test.describe('Scheduling smoke (Playwright)', () => {
     );
     seedHandles.availabilityId = availabilitySeed.availabilityId;
 
+    const { error: templateError } = await adminClient.from('shift_templates').upsert({
+      id: 'e1000000-0000-4000-8000-000000000201',
+      company_id: SCHEDULING_PW_TENANT.companyId,
+      name: 'Smoke evening',
+      duration_hours: 8,
+      color: '#f59e0b',
+      required_headcount: 1,
+      created_by: SCHEDULING_PW_TENANT.managerId,
+    });
+    if (templateError) throw templateError;
+
     await page.reload();
     await expect(page.getByTestId('schedule-availability-legend')).toBeVisible();
     await expect(
@@ -572,7 +583,8 @@ test.describe('Scheduling smoke (Playwright)', () => {
     );
 
     await toggleRoleTemplates(page);
-    const template = page.getByText('Barista Evening');
+    const template = page.getByTestId('role-template-e1000000-0000-4000-8000-000000000201');
+    await expect(template).toContainText('Smoke evening');
     const targetCell = page.getByTestId(
       `schedule-cell-${SCHEDULING_PW_TENANT.staffId}-${availabilitySeed.dayIso}`,
     );

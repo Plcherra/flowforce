@@ -63,3 +63,35 @@ Invite and onboarding follow-up — done in this block
 - Sending an invite saves the Company basics hiring blocks. The hire sees the shared welcome page. A required collect step, including a file, blocks "I'm ready for the floor".
 - The directory shows the company job role apart from the access level. Status is "Invited, not signed in yet" until activation, then "Active", with last sign-in written by the app after a password sign-in.
 - Production already has `hire_followup` as version `20261108023544` and `security_invoker_views` as version `20261108085636`. Both files are in the repo under those versions. They were applied by Patron. This block does not apply SQL.
+
+Language save and activity sentences — done (#51)
+- A language change applies only when the person saves it.
+- Activity history names the person and the setting that changed.
+- The business-structure snapshot and the high-risk admin cards are removed.
+
+Closing notes and card tint — done (#52)
+- Closing notes no longer offer Draft.
+- Overview and Tasks cards use the same highlight tint as Schedule and Team Directory, in light and dark.
+
+## General areas
+
+Sunday 8 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not start a new area after 1:00 PM.
+
+1. Schedule — done
+   - Create, edit, assign, and delete are separate switches. The compact access matrix no longer ties edit to draft weeks. Team hours lists the four write keys on their own.
+   - The week desk shows add, copy, and templates for create, publish for edit, and empty-week for delete. Moving a shift to another day needs edit. Moving it onto a person needs assign.
+   - Draft shifts load for edit or draft-week access. The job title and user metadata no longer decide that.
+   - Role templates come from the company's saved shift templates. The sample Barista and Cook pack is not shown.
+   - `e2e/schedule-permissions.spec.ts` pins English, signs in with the test user, opens the desk and the new-shift form (role, department, tasks), and checks each write permission on its own. Nothing is stored.
+   - `e2e/shift-role-department.spec.ts` and `e2e/my-shift-role-lists.spec.ts` passed again.
+2. Messages — todo
+3. Company Updates — todo
+4. Tasks — todo
+5. Forms — todo
+6. Calendar — skipped. Removed in #47. Do not bring it back.
+7. Goals — todo
+8. Docs — todo
+9. Reviews — todo
+10. Time off — todo
+11. Analytics — todo
+12. Settings and roles — todo

@@ -11,6 +11,7 @@ import type { VendorPaletteItem } from "@/features/scheduling/components/drag-dr
 import type { PendingVendorEvent } from "@/features/scheduling/components/drag-drop/types";
 import type { GridCellAvailability } from "@/types/platform";
 import { evaluateAssignment } from "@/features/scheduling/services/availability/scheduleAvailabilityEngine";
+import { templateShiftWindow } from "@/features/scheduling/utils/templateShiftWindow";
 
 interface UseDragDropHandlersProps {
   draggedTemplate: ShiftTemplate | null;
@@ -107,18 +108,11 @@ export function useDragDropHandlers({
       const draggedVendor = draggedVendorRef.current;
 
       if (draggedTemplate) {
-        const startHour = Number.parseInt(
-          draggedTemplate.startTime.split(":")[0] ?? "9",
-          10,
+        const { startTime, endTime } = templateShiftWindow(
+          day,
+          draggedTemplate.startTime,
+          draggedTemplate.endTime,
         );
-        const endHour = Number.parseInt(
-          draggedTemplate.endTime.split(":")[0] ?? "17",
-          10,
-        );
-        const startTime = new Date(day);
-        startTime.setHours(startHour, 0, 0, 0);
-        const endTime = new Date(day);
-        endTime.setHours(endHour, 0, 0, 0);
 
         const cell = getCellAvailability?.(userId, day);
         if (cell) {
@@ -164,7 +158,7 @@ export function useDragDropHandlers({
             is_published: false,
             is_template: false,
             template_id: null,
-            position_id: null,
+            position_id: draggedTemplate.positionId ?? null,
             status: "scheduled",
             user_id: null,
             requirements: [],
@@ -237,18 +231,11 @@ export function useDragDropHandlers({
       const draggedVendor = draggedVendorRef.current;
 
       if (draggedTemplate) {
-        const startHour = Number.parseInt(
-          draggedTemplate.startTime.split(":")[0] ?? "9",
-          10,
+        const { startTime, endTime } = templateShiftWindow(
+          day,
+          draggedTemplate.startTime,
+          draggedTemplate.endTime,
         );
-        const endHour = Number.parseInt(
-          draggedTemplate.endTime.split(":")[0] ?? "17",
-          10,
-        );
-        const startTime = new Date(day);
-        startTime.setHours(startHour, 0, 0, 0);
-        const endTime = new Date(day);
-        endTime.setHours(endHour, 0, 0, 0);
 
         try {
           const newSchedule = await createSchedule({
@@ -267,7 +254,7 @@ export function useDragDropHandlers({
             is_published: false,
             is_template: false,
             template_id: null,
-            position_id: null,
+            position_id: draggedTemplate.positionId ?? null,
             status: "scheduled",
             user_id: null,
             requirements: [],

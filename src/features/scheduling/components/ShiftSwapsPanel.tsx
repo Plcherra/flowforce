@@ -30,15 +30,20 @@ interface ShiftSwapsPanelProps {
   staffOnly?: boolean;
 }
 
-function getDisplayName(user?: {
-  first_name?: string | null;
-  last_name?: string | null;
-}) {
+function getDisplayName(
+  user:
+    | {
+        first_name?: string | null;
+        last_name?: string | null;
+      }
+    | undefined,
+  fallback: string,
+) {
   const name = [user?.first_name, user?.last_name]
     .filter(Boolean)
     .join(" ")
     .trim();
-  return name || "Team member";
+  return name || fallback;
 }
 
 function getInitials(user?: {
@@ -235,7 +240,7 @@ export function ShiftSwapsPanel({
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-medium">
-                      {getDisplayName(swap.requestinguser)}
+                      {getDisplayName(swap.requestinguser, t("schedule.teamMember"))}
                     </span>
 
                     {swap.targetuser && (
@@ -247,7 +252,7 @@ export function ShiftSwapsPanel({
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm font-medium">
-                          {getDisplayName(swap.targetuser)}
+                          {getDisplayName(swap.targetuser, t("schedule.teamMember"))}
                         </span>
                       </>
                     )}
