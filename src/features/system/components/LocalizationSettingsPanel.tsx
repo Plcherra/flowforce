@@ -108,13 +108,6 @@ export function LocalizationSettingsPanel() {
               value={state.language}
               onValueChange={(value) => {
                 setState((prev) => ({ ...prev, language: value }));
-                if (
-                  profileLanguageReady &&
-                  !profileLanguage &&
-                  isAppLanguage(value)
-                ) {
-                  void changeLanguage(value, "resolved");
-                }
               }}
               disabled={!canEdit || loading}
             >
@@ -204,7 +197,21 @@ export function LocalizationSettingsPanel() {
             onClick={reset}
           >{t("settings.discard")}</Button>
           <Button
-            onClick={save}
+            onClick={() => {
+              const nextLanguage = state.language;
+              const shouldApply =
+                profileLanguageReady &&
+                !profileLanguage &&
+                isAppLanguage(nextLanguage);
+              void (async () => {
+                try {
+                  await save();
+                  if (shouldApply) await changeLanguage(nextLanguage, "resolved");
+                } catch {
+                  // save already stores the error for the panel
+                }
+              })();
+            }}
             disabled={!canEdit || !dirty || saving || loading}
           >
             {saving ? (

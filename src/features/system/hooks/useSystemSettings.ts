@@ -7,6 +7,7 @@ import type { Tables } from "@/integrations/supabase/public-types";
 import type { SystemSettings as SystemSettingsModel } from "@/types/system-settings";
 import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
 import { logAuditEvent } from "@/services/audit/auditService";
+import { settingsChangeDetails } from "@/features/system/utils/activityHistory";
 import { handleError } from "@/utils/errorHandler";
 import { buildCreateCompanyData } from "@/lib/theme/companySavePayload";
 import { seedSystemSettings } from "./systemSettingsDefaults";
@@ -244,12 +245,15 @@ export function useSystemSettings(
       }
 
       const auditChanges = filterAuditChanges(settingChanges);
+      const oldValues = pickAuditValues(settings, auditChanges);
+      const details = settingsChangeDetails(oldValues, auditChanges);
       await logAuditEvent({
         action: AUDIT_ACTIONS.settingsUpdated,
         tableName: "system_settings",
         recordId: companyId,
-        oldValues: pickAuditValues(settings, auditChanges),
+        oldValues,
         newValues: auditChanges,
+        metadata: details.length > 0 ? { details } : null,
       });
 
       const normalized = normalizeSystemSettingsRow(
