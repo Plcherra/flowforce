@@ -343,10 +343,5 @@
     "path": "src/features/scheduling/components/WeekView.tsx",
     "lines": 504,
     "ticket": "FF-SPLIT-71"
-  },
-  {
-    "path": "src/features/system/components/AdminSettingsPanel.tsx",
-    "lines": 502,
-    "ticket": "FF-SPLIT-72"
   }
 ]

@@ -33,6 +33,9 @@ const { runPermissionAccessTypeTests } = importTs(
 const { runSettingsTabTests } = importTs(
   "../src/features/system/utils/settingsTabs.test.ts",
 );
+const { runActivityHistoryTests } = importTs(
+  "../src/features/system/utils/activityHistory.test.ts",
+);
 const { runPermissionGrantTests } = importTs(
   "../src/features/roles/constants/permissionGrant.test.ts",
 );
@@ -57,6 +60,7 @@ runGrantCeilingTests();
 runStaffInviteScheduleDefaultTests();
 runPermissionAccessTypeTests();
 runSettingsTabTests();
+runActivityHistoryTests();
 runPermissionGrantTests();
 runPageVersionTests();
 runPrimaryActionLabelTests();

@@ -90,6 +90,13 @@ export async function writePackFlag(
         pack: input.pack,
         packEnabled: input.enabled,
         checkoutSessionId: input.checkoutSessionId ?? null,
+        details: [
+          {
+            field: "pack",
+            pack: input.pack,
+            after: input.enabled,
+          },
+        ],
       },
     });
 
