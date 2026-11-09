@@ -470,6 +470,13 @@
       "notFound": "not found",
       "requestedNotFound": "The requested {{type}} could not be found.",
       "lastUpdated": "Last updated"
+    },
+    "docs": {
+      "sampleApiTitle": "API Documentation",
+      "sampleApiDescription": "Complete guide to FlowForce API endpoints and authentication.",
+      "sampleApiContent": "This is the full documentation content...",
+      "sampleReadTime": "10 min read",
+      "sampleCategory": "Developer Guide"
     }
   },
   "features": {
@@ -4948,6 +4955,10 @@
     "uploaded": "Uploaded",
     "uploadFailed": "Upload failed",
     "uploadReport": "Upload report",
+    "documentStatusPending": "Pending",
+    "documentStatusProcessing": "Processing",
+    "documentStatusReady": "Ready",
+    "documentStatusError": "Error",
     "uploadYourFirstDailyReportToKickOffAutomaticEventExtraction": "Upload your first daily report to kick off automatic event extraction.",
     "velocity": "Velocity",
     "volumeTrend": "Volume trend",

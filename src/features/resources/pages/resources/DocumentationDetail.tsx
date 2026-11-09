@@ -9,13 +9,12 @@ export default function DocumentationDetail() {
 
   const doc = {
     id: 1,
-    title: "API Documentation",
-    description:
-      "Complete guide to FlowForce API endpoints and authentication.",
-    content: "This is the full documentation content...",
+    title: t("resources.docs.sampleApiTitle"),
+    description: t("resources.docs.sampleApiDescription"),
+    content: t("resources.docs.sampleApiContent"),
     lastUpdated: "2024-01-20",
-    readTime: "10 min read",
-    category: "Developer Guide",
+    readTime: t("resources.docs.sampleReadTime"),
+    category: t("resources.docs.sampleCategory"),
     version: "v2.1",
   };
 
@@ -35,7 +34,7 @@ export default function DocumentationDetail() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8" data-testid="resources-documentation-detail">
       <Breadcrumbs
         items={[
           { label: t("resources.title"), href: "/resources" },

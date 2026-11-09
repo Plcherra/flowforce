@@ -1,5 +1,6 @@
 import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
@@ -58,19 +59,27 @@ import { getReportsBucket } from "@/services/ingestion";
 import { CreateDocumentTaskDialog } from "@/features/analytics/components/reports/builder/CreateDocumentTaskDialog";
 import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
 
-const STATUS_META: Record<
+function buildStatusMeta(
+  t: TFunction,
+): Record<
   DocumentProcessingState,
   {
     label: string;
     tone: "default" | "warning" | "success" | "destructive";
     icon: React.ComponentType<{ className?: string }>;
   }
-> = {
-  pending: { label: "Pending", tone: "warning", icon: Timer },
-  processing: { label: "Processing", tone: "warning", icon: Loader2 },
-  ready: { label: "Ready", tone: "success", icon: CheckCircle2 },
-  error: { label: "Error", tone: "destructive", icon: AlertCircle },
-};
+> {
+  return {
+    pending: { label: t("analytics.documentStatusPending"), tone: "warning", icon: Timer },
+    processing: {
+      label: t("analytics.documentStatusProcessing"),
+      tone: "warning",
+      icon: Loader2,
+    },
+    ready: { label: t("analytics.documentStatusReady"), tone: "success", icon: CheckCircle2 },
+    error: { label: t("analytics.documentStatusError"), tone: "destructive", icon: AlertCircle },
+  };
+}
 
 function statusClass(tone: "default" | "warning" | "success" | "destructive") {
   switch (tone) {
@@ -102,6 +111,7 @@ function summarizeText(text?: string | null) {
 
 export default function ReportsPage() {
   const { t } = useTranslation();
+  const statusMeta = useMemo(() => buildStatusMeta(t), [t]);
   const { can: canUse } = useCan();
   const canManageDocuments = canUse("documents.manage");
   const { user } = useAuth();
@@ -309,6 +319,7 @@ export default function ReportsPage() {
             onClick={() => uploadInputRef.current?.click()}
             disabled={!canManageDocuments || uploadMutation.isPending}
             className="gap-2"
+            data-testid="reports-upload-button"
           >
             {uploadMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -429,7 +440,7 @@ export default function ReportsPage() {
               <TableBody>
                 {filteredDocuments.map((doc) => {
                   const processingState = doc.processing_state ?? "ready";
-                  const status = STATUS_META[processingState];
+                  const status = statusMeta[processingState];
                   const Icon = status.icon;
 
                   return (
@@ -529,7 +540,7 @@ export default function ReportsPage() {
                 <SheetDescription>
                   {t("analytics.source")} {selectedDocument.source ?? t("literals.uploaded")} {t("analytics.status")}{" "}
                   {
-                    STATUS_META[selectedDocument.processing_state ?? "ready"]
+                    statusMeta[selectedDocument.processing_state ?? "ready"]
                       .label
                   }
                 </SheetDescription>

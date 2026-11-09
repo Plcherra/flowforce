@@ -441,6 +441,13 @@
       "notFound": "non trouvé",
       "requestedNotFound": "Le {{type}} demandé n'a pas pu être trouvé.",
       "lastUpdated": "Mis à jour"
+    },
+    "docs": {
+      "sampleApiTitle": "Documentation API",
+      "sampleApiDescription": "Guide complet des points de terminaison et de l'authentification de l'API FlowForce.",
+      "sampleApiContent": "Voici le contenu complet de la documentation...",
+      "sampleReadTime": "10 min de lecture",
+      "sampleCategory": "Guide développeur"
     }
   },
   "features": {
@@ -4948,6 +4955,10 @@
     "uploaded": "Envoyé",
     "uploadFailed": "L'envoi a échoué",
     "uploadReport": "Envoyer un rapport",
+    "documentStatusPending": "En attente",
+    "documentStatusProcessing": "Traitement",
+    "documentStatusReady": "Prêt",
+    "documentStatusError": "Erreur",
     "uploadYourFirstDailyReportToKickOffAutomaticEventExtraction": "Envoyez votre premier rapport du jour pour lancer l'extraction automatique des événements.",
     "velocity": "Vélocité",
     "volumeTrend": "Tendance du volume",
