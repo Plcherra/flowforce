@@ -5,6 +5,8 @@ import {
   isRequestedOffDay,
   timeLeftLabel,
   timeOffStatusLabel,
+  timeOffStatusTranslationKey,
+  timeOffTypeTranslationKey,
 } from "./timeOffRequestDetail";
 
 export function runTimeOffRequestDetailTest() {
@@ -13,6 +15,21 @@ export function runTimeOffRequestDetailTest() {
   assert.equal(timeOffStatusLabel("approved"), "approved");
   assert.equal(timeOffStatusLabel("denied"), "rejected");
   assert.equal(timeOffStatusLabel("rejected"), "rejected");
+  assert.equal(timeOffTypeTranslationKey("vacation"), "schedule.vacation");
+  assert.equal(timeOffTypeTranslationKey("SICK"), "schedule.sick");
+  assert.equal(timeOffTypeTranslationKey(null), "schedule.other");
+  assert.equal(
+    timeOffStatusTranslationKey("approved"),
+    "schedule.timeOffStatusApproved",
+  );
+  assert.equal(
+    timeOffStatusTranslationKey("denied"),
+    "schedule.timeOffStatusRejected",
+  );
+  assert.equal(
+    timeOffStatusTranslationKey("pending"),
+    "schedule.timeOffStatusPending",
+  );
 
   const day = new Date(2026, 9, 23, 12, 0, 0);
   const requests = [

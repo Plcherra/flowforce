@@ -61,6 +61,11 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCan } from "@/hooks/useCan";
+import {
+  timeOffStatusLabel,
+  timeOffStatusTranslationKey,
+  timeOffTypeTranslationKey,
+} from "@/features/scheduling/utils/timeOffRequestDetail";
 
 const BASE_TIME_OFF_ALLOWANCE = 25; // matches summary used in standalone Time Off page
 
@@ -70,26 +75,17 @@ type TimeOffRequestPanelProps = {
 };
 
 type TimeOffType = "vacation" | "sick" | "personal" | "other";
-type TimeOffStatus = "requested" | "approved" | "denied";
-
-const STATUS_STYLES: Record<TimeOffStatus, string> = {
-  requested: "bg-warning-muted text-warning-foreground border-warning/40",
+const STATUS_STYLES = {
+  pending: "bg-warning-muted text-warning-foreground border-warning/40",
   approved: "bg-success-muted text-success border-success/40",
-  denied: "bg-accent text-accent-foreground border-accent/40",
-};
+  rejected: "bg-accent text-accent-foreground border-accent/40",
+} as const;
 
 const TYPE_STYLES: Record<TimeOffType, string> = {
   vacation: "bg-primary/10 text-primary border-primary/40",
   sick: "bg-accent text-accent-foreground border-accent/40",
   personal: "bg-secondary/10 text-secondary border-secondary/40",
   other: "bg-muted text-foreground border-border",
-};
-
-const TIME_OFF_TYPE_LABEL: Record<TimeOffType, string> = {
-  vacation: "Vacation",
-  sick: "Sick",
-  personal: "Personal",
-  other: "Other",
 };
 
 const REQUEST_TYPES: TimeOffType[] = ["vacation", "sick", "personal", "other"];
@@ -396,7 +392,13 @@ export function TimeOffRequestPanel({
           {canRequestTimeOff ? (
           <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" disabled={!employeeId || loading}>{t("schedule.requestTimeOff")}</Button>
+            <Button
+              size="sm"
+              disabled={!employeeId || loading}
+              data-testid="time-off-request-btn"
+            >
+              {t("schedule.requestTimeOff")}
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
@@ -435,7 +437,7 @@ export function TimeOffRequestPanel({
                   <SelectContent>
                     {REQUEST_TYPES.map((type) => (
                       <SelectItem key={type} value={type}>
-                        {TIME_OFF_TYPE_LABEL[type]}
+                        {t(timeOffTypeTranslationKey(type))}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -502,28 +504,47 @@ export function TimeOffRequestPanel({
             <SummaryTile
               icon={Calendar}
               label={t("availability.balanceRemaining")}
-              value={`${allowanceRemaining} days`}
-              hint={`You’ve used ${approvedDays} of ${BASE_TIME_OFF_ALLOWANCE} days`}
+              value={t("schedule.timeOffDaysCount", { count: allowanceRemaining })}
+              hint={t("schedule.timeOffAllowanceUsedHint", {
+                used: approvedDays,
+                total: BASE_TIME_OFF_ALLOWANCE,
+              })}
             />
           )}
           <SummaryTile
             icon={CheckCircle2}
             label={t("inventory.requested")}
-            value={`${requestedRequestCount} open`}
-            hint={`${requestedDays} day${requestedDays === 1 ? "" : "s"} awaiting approval`}
+            value={t("schedule.timeOffOpenRequests", {
+              count: requestedRequestCount,
+            })}
+            hint={
+              requestedDays === 1
+                ? t("schedule.timeOffOneDayAwaitingApproval")
+                : t("schedule.timeOffDaysAwaitingApproval", {
+                    count: requestedDays,
+                  })
+            }
             tone={requestedRequestCount > 0 ? "warning" : "default"}
           />
           <SummaryTile
             icon={Clock}
             label={t("availability.weeklyAvailability")}
-            value={`${availabilityHours} hrs`}
-            hint="Configured availability this week"
+            value={t("schedule.timeOffAvailabilityHours", {
+              hours: availabilityHours,
+            })}
+            hint={t("schedule.timeOffConfiguredAvailabilityHint")}
           />
           <SummaryTile
             icon={AlertTriangle}
             label={t("availability.coverageImpact")}
-            value={`${requestedConflicts} shift${requestedConflicts === 1 ? "" : "s"}`}
-            hint="Shifts overlapping requested time off"
+            value={
+              requestedConflicts === 1
+                ? t("schedule.timeOffOneShiftOverlapping")
+                : t("schedule.timeOffShiftsOverlapping", {
+                    count: requestedConflicts,
+                  })
+            }
+            hint={t("schedule.timeOffCoverageShiftsHint")}
             tone={requestedConflicts > 0 ? "warning" : "default"}
           />
         </div>
@@ -567,15 +588,17 @@ export function TimeOffRequestPanel({
                             </h4>
                             <Badge
                               className={cn(
-                                "border text-xs capitalize",
+                                "border text-xs",
                                 TYPE_STYLES[
                                   (request.type as TimeOffType) ?? "other"
                                 ] ?? TYPE_STYLES.other,
                               )}
                             >
-                              {TIME_OFF_TYPE_LABEL[
-                                (request.type as TimeOffType) ?? "other"
-                              ] ?? t("literals.other")}
+                              {t(
+                                timeOffTypeTranslationKey(
+                                  (request.type as TimeOffType) ?? "other",
+                                ),
+                              )}
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
@@ -605,13 +628,14 @@ export function TimeOffRequestPanel({
                         </div>
                         <Badge
                           className={cn(
-                            "border text-xs capitalize",
+                            "border text-xs",
                             STATUS_STYLES[
-                              (request.status as TimeOffStatus) ?? "pending"
-                            ] ?? STATUS_STYLES.requested,
+                              timeOffStatusLabel(request.status)
+                            ] ?? STATUS_STYLES.pending,
                           )}
+                          data-testid="time-off-request-status"
                         >
-                          {request.status}
+                          {t(timeOffStatusTranslationKey(request.status))}
                         </Badge>
                       </div>
                       {conflicts.length > 0 && (

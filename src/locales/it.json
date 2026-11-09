@@ -3167,7 +3167,20 @@
     "workflowReminderDescription": "Ultimo promemoria prima che inizi la settimana",
     "workflowSendScheduleReminder": "Invia il promemoria dei turni",
     "workflowConfirmCovered": "Conferma che tutti i turni sono coperti",
-    "shiftEndsHint": "Il turno finisce alle {{time}}, {{hint}}."
+    "shiftEndsHint": "Il turno finisce alle {{time}}, {{hint}}.",
+    "timeOffAllowanceUsedHint": "Hai usato {{used}} di {{total}} giorni",
+    "timeOffAvailabilityHours": "{{hours}} h",
+    "timeOffConfiguredAvailabilityHint": "Disponibilità configurata questa settimana",
+    "timeOffCoverageShiftsHint": "Turni in sovrapposizione con permessi richiesti",
+    "timeOffDaysAwaitingApproval": "{{count}} giorni in attesa di approvazione",
+    "timeOffDaysCount": "{{count}} giorni",
+    "timeOffOneDayAwaitingApproval": "1 giorno in attesa di approvazione",
+    "timeOffOneShiftOverlapping": "1 turno",
+    "timeOffOpenRequests": "{{count}} aperte",
+    "timeOffShiftsOverlapping": "{{count}} turni",
+    "timeOffStatusApproved": "Approvato",
+    "timeOffStatusPending": "In attesa",
+    "timeOffStatusRejected": "Rifiutato"
   },
   "tasks": {
     "aTitleIsRequired": "Il titolo è obbligatorio.",

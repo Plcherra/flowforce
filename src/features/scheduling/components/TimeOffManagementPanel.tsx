@@ -27,6 +27,8 @@ import {
   formatRequestedWhen,
   timeLeftLabel,
   timeOffStatusLabel,
+  timeOffStatusTranslationKey,
+  timeOffTypeTranslationKey,
 } from "@/features/scheduling/utils/timeOffRequestDetail";
 import {
   usePolicySubject,
@@ -311,8 +313,8 @@ export function TimeOffManagementPanel({
                         asOf={asOf}
                       />
                     ) : null}
-                    <Badge variant="outline" className="mt-1 capitalize">
-                      {request.type}
+                    <Badge variant="outline" className="mt-1">
+                      {t(timeOffTypeTranslationKey(request.type))}
                     </Badge>
                   </div>
                 </div>
@@ -328,15 +330,14 @@ export function TimeOffManagementPanel({
                             ? "destructive"
                             : "secondary"
                       }
-                      className="capitalize"
                       data-testid="time-off-status"
                     >
-                      {timeOffStatusLabel(request.status)}
+                      {t(timeOffStatusTranslationKey(request.status))}
                     </Badge>
                   </div>
 
                   {canApprove && timeOffStatusLabel(request.status) === "pending" && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2" data-testid="time-off-approve-actions">
                       <Button
                         size="sm"
                         onClick={() =>

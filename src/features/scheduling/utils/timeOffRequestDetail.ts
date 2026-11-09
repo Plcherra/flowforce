@@ -50,8 +50,27 @@ export function isRequestedOffDay(
   );
 }
 
+export function timeOffTypeTranslationKey(
+  type: string | null | undefined,
+): "schedule.vacation" | "schedule.sick" | "schedule.personal" | "schedule.other" {
+  const value = (type ?? "other").toLowerCase();
+  if (value === "vacation") return "schedule.vacation";
+  if (value === "sick") return "schedule.sick";
+  if (value === "personal") return "schedule.personal";
+  return "schedule.other";
+}
+
+export function timeOffStatusTranslationKey(
+  status: string | null | undefined,
+): "schedule.timeOffStatusApproved" | "schedule.timeOffStatusRejected" | "schedule.timeOffStatusPending" {
+  const label = timeOffStatusLabel(status);
+  if (label === "approved") return "schedule.timeOffStatusApproved";
+  if (label === "rejected") return "schedule.timeOffStatusRejected";
+  return "schedule.timeOffStatusPending";
+}
+
 export function formatRequestedWhen(value: string | null | undefined): string {
-  if (!value) return "Not set";
+  if (!value) return i18n.t("literals.notSet");
   const dateOnly = value.slice(0, 10);
   const hasTime = value.includes("T");
   const parsed = hasTime ? new Date(value) : new Date(`${dateOnly}T00:00:00`);

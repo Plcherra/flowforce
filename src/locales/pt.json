@@ -3167,7 +3167,20 @@
     "workflowReminderDescription": "Último lembrete antes de a semana começar",
     "workflowSendScheduleReminder": "Enviar lembrete da escala",
     "workflowConfirmCovered": "Confirmar que todos os turnos estão cobertos",
-    "shiftEndsHint": "O turno termina às {{time}}, {{hint}}."
+    "shiftEndsHint": "O turno termina às {{time}}, {{hint}}.",
+    "timeOffAllowanceUsedHint": "Usou {{used}} de {{total}} dias",
+    "timeOffAvailabilityHours": "{{hours}} h",
+    "timeOffConfiguredAvailabilityHint": "Disponibilidade configurada nesta semana",
+    "timeOffCoverageShiftsHint": "Turnos sobrepostos ao tempo livre solicitado",
+    "timeOffDaysAwaitingApproval": "{{count}} dias à espera de aprovação",
+    "timeOffDaysCount": "{{count}} dias",
+    "timeOffOneDayAwaitingApproval": "1 dia à espera de aprovação",
+    "timeOffOneShiftOverlapping": "1 turno",
+    "timeOffOpenRequests": "{{count}} em aberto",
+    "timeOffShiftsOverlapping": "{{count}} turnos",
+    "timeOffStatusApproved": "Aprovado",
+    "timeOffStatusPending": "Pendente",
+    "timeOffStatusRejected": "Rejeitado"
   },
   "tasks": {
     "aTitleIsRequired": "O título é obrigatório.",
