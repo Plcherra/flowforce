@@ -9,6 +9,7 @@ import { usePackFlags } from "@/hooks/usePackFlags";
 import { isLeadershipLevel } from "@/features/scheduling/utils/leadershipLevel";
 import { TodayRoleLists } from "@/features/dashboard/components/TodayRoleLists";
 import { EmployeeOnboardingOverview } from "@/features/employee-onboarding/components/EmployeeOnboardingOverview";
+import { InsightsHrReadiness } from "./InsightsHrReadiness";
 import { overviewWidgets, type OverviewWidgetId } from "./overviewModel";
 import { useListStatus, useTodayCoverage } from "./useRoleOverviewData";
 
@@ -75,6 +76,7 @@ function OverviewWidget({
   if (widget === "myShift") return <MyShiftCard board={board} t={t} />;
   if (widget === "myLists") return <MyListsCard board={board} t={t} />;
   if (widget === "coverage") return <CoverageCard coverage={coverage} t={t} />;
+  if (widget === "hrReadiness") return <InsightsHrReadiness />;
   return <ListStatusCard lists={lists} t={t} />;
 }
 

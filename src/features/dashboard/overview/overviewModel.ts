@@ -6,6 +6,7 @@ export const OVERVIEW_WIDGETS = [
   "companyUpdates",
   "coverage",
   "listStatus",
+  "hrReadiness",
 ] as const;
 
 export type OverviewWidgetId = (typeof OVERVIEW_WIDGETS)[number];
@@ -27,11 +28,10 @@ export function overviewWidgets(input: {
   if (input.leadership) {
     widgets.push("coverage", "listStatus");
   }
-  // Pack cards belong here. Team, Insights, and Stock have none on Overview yet,
-  // so a turned-off pack cannot add a card.
+  // Pack cards belong here. A turned-off pack cannot add a card.
   const packWidgets: Record<keyof OverviewPacks, readonly OverviewWidgetId[]> = {
     team: [],
-    insights: [],
+    insights: ["hrReadiness"],
     stock: [],
   };
   for (const pack of ["team", "insights", "stock"] as const) {

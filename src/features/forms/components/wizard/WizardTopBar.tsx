@@ -13,10 +13,10 @@ interface WizardTopBarProps {
   description?: string;
   control?: string | null;
   onToggleOriginal?: () => void;
-  currentStepIndex: number;
-  totalSteps: number;
+  currentStepIndex?: number;
+  totalSteps?: number;
   statusLabel: string;
-  progress: number;
+  progress?: number;
   onClose: () => void;
 }
 
@@ -54,19 +54,21 @@ export function WizardTopBar({
         </div>
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
-            <Badge variant="outline" className="border-dashed">
-              {t("forms.stepProgress", {
-                current: currentStepIndex + 1,
-                total: totalSteps,
-              })}
-            </Badge>
+            {typeof totalSteps === "number" && typeof currentStepIndex === "number" ? (
+              <Badge variant="outline" className="border-dashed">
+                {t("forms.stepProgress", {
+                  current: currentStepIndex + 1,
+                  total: totalSteps,
+                })}
+              </Badge>
+            ) : null}
             <span>{statusLabel}</span>
           </div>
           <Button variant="outline" size="sm" onClick={onClose}>
             {t("common.close")}</Button>
         </div>
       </div>
-      <Progress value={progress} className="mt-3 h-1" />
+      {typeof progress === "number" ? <Progress value={progress} className="mt-3 h-1" /> : null}
     </header>
   );
 }

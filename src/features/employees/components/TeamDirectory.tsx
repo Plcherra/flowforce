@@ -45,7 +45,6 @@ import {
   DirectoryPagination,
   AddVendorDialog,
 } from "./";
-import { HrReadinessPanel } from "./HrReadinessPanel";
 import type { EmployeesTab } from "../types/directory";
 
 export function TeamDirectory() {
@@ -286,14 +285,6 @@ export function TeamDirectory() {
             />
           </div>
         </div>
-
-        <HrReadinessPanel
-          companyId={companyId}
-          employees={employees}
-          loading={loading}
-          canManageEmployees={tools.invitations}
-          onOpenInvite={() => handleInviteChange(true)}
-        />
 
         {combinedErrorMessage && (
           <Alert

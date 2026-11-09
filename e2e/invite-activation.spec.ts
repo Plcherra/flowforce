@@ -55,8 +55,10 @@ test("a required hiring file keeps the hire from finishing", async ({ page }) =>
   await page.setViewportSize({ width: 390, height: 844 });
   const preview = await page.goto("/onboarding-preview?screen=hire");
   test.skip(preview?.status() === 404, "The onboarding preview route is disabled in production.");
-  await expect(page.getByTestId("onboarding-welcome")).toContainText("Welcome to the shop");
-  await expect(page.getByTestId("onboarding-fact-role")).toContainText("Barista");
+  await expect(page.getByTestId("hiring-checklist")).toBeVisible();
+  await expect(page.getByTestId("hiring-progress")).toContainText("0 of 2 done");
+  await expect(page.getByTestId("hiring-check-share_card")).toContainText("Welcome to the shop");
+  await expect(page.getByTestId("onboarding-welcome")).toHaveCount(0);
   await expect(page.getByTestId("onboarding-finish")).toBeDisabled();
   try {
     mkdirSync("/opt/cursor/artifacts", { recursive: true });

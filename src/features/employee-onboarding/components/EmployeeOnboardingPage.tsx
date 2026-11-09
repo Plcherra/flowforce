@@ -9,9 +9,10 @@ import { useEmployeeOnboarding } from "../useEmployeeOnboarding";
 export function EmployeeOnboardingPage() {
   const { t } = useTranslation();
   const screen = useEmployeeOnboarding();
-  const [hiring, setHiring] = useState<{ blocks: HiringBlock[]; openRequired: number }>({
+  const [hiring, setHiring] = useState<{ blocks: HiringBlock[]; openRequired: number; ready: boolean }>({
     blocks: [],
     openRequired: 0,
+    ready: false,
   });
 
   if (screen.state.kind === "loading") {
@@ -37,8 +38,10 @@ export function EmployeeOnboardingPage() {
   return (
     <div className="space-y-6">
     <HiringChecklist onProgress={setHiring} />
+    {hiring.ready ? (
     <EmployeeOnboardingView
       data={screen.state}
+      hideWelcome={hiring.blocks.length > 0}
       hiringBlocks={hiring.blocks}
       openRequired={hiring.openRequired}
       busyId={screen.busyId}
@@ -55,6 +58,9 @@ export function EmployeeOnboardingPage() {
         void screen.onFinish();
       }}
     />
+    ) : (
+      <p className="px-4 py-6 text-sm text-muted-foreground">{t("employeeOnboarding.loading")}</p>
+    )}
     </div>
   );
 }
