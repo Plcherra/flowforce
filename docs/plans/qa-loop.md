@@ -105,7 +105,10 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - Create UI follows `createForms`. `manageForms` is required for delete (not `createForms` alone). Fill uses `forms.submit`. Other people's submissions use `forms.submissions.read` / `approveFormSubmissions` / `manageForms`, with deny override on read hiding team submissions.
    - `e2e/forms-permissions.spec.ts` and `e2e/form-distribution.spec.ts` pin English, sign in with the test user, inject a published open form, block form writes before sign-in, and exercise each gate. Distribution spec still stops save before storing settings.
 6. Calendar — skipped. Removed in #47. Do not bring it back.
-7. Goals — todo
+7. Goals — done
+   - `/app/goals` redirects to `/app/tasks`. Goal UX lives on `/app/performance` under Goal progress, gated by `goals.view` or `goals.manage` (`goals.manage` is matrix edit; no standalone Goals module).
+   - Performance KPI labels use `performance.kpi*` locale keys across all six locales. `performanceMocks` is not wired into live loads.
+   - `e2e/goals-permissions.spec.ts` pins English, signs in with the test user, checks the redirect, blocks goal writes before sign-in, and hides Goal progress when both goal keys are denied.
 8. Docs — todo
 9. Reviews — todo
 10. Time off — todo

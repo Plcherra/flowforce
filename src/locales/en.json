@@ -6529,7 +6529,19 @@
     "topGoalsRankedByCompletionPercentage": "Top goals ranked by completion percentage",
     "trackCoachingSignalsXpProgressionAndReviewOutcomes": "Track coaching signals, XP progression, and review outcomes for every employee.",
     "unableToLoadSomePerformanceData": "Unable to load some performance data",
-    "xpTrends": "XP trends"
+    "xpTrends": "XP trends",
+    "kpiEmployeesTracked": "Employees tracked",
+    "kpiEmployeesTrackedDesc": "Profiles with recent reviews",
+    "kpiActiveGoals": "Active goals",
+    "kpiActiveGoalsValue": "{{active}} active / {{completed}} completed",
+    "kpiActiveGoalsDesc": "Across all employees",
+    "kpiAvgReviewScore": "Avg. review score",
+    "kpiNoReviews": "No reviews",
+    "kpiAvgReviewScoreDesc": "Weighted across cycles",
+    "kpiRecognitions": "Recognitions",
+    "kpiRecognitionsDesc": "Lookback period",
+    "kpiTaskPoints": "Task points",
+    "kpiTaskPointsDesc": "The same total as leaderboard task XP"
   },
   "recognition": {
     "celebrateWinsMonitorBadgeUnlocksAndKeepCopilot": "Celebrate wins, monitor badge unlocks, and keep Copilot automation informed.",
