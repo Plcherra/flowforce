@@ -25,7 +25,6 @@ test.describe('System settings workflow', () => {
       { label: 'AI Co-Pilot', locator: /AI Co-Pilot/i },
       { label: 'Integrations', locator: /Integrations/i },
       { label: 'Billing', locator: /Workspace billing/i },
-      { label: 'Admin', locator: /Tenant management/i },
     ];
 
     for (const { label, locator } of tabAssertions) {

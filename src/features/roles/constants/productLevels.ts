@@ -81,6 +81,12 @@ export const OWNER_MAJOR_PERMISSION_KEYS = [
   "billing.manage",
 ] as const satisfies readonly PermissionKey[];
 
+/** Owner always keeps these operational keys after clamp (seed uses owner `*`). */
+export const OWNER_ENSURED_OPERATIONAL_KEYS = [
+  "approveTimeOff",
+  "reports.view",
+] as const satisfies readonly PermissionKey[];
+
 export function isOwnerMajorPermission(key: string): boolean {
   return (OWNER_MAJOR_PERMISSION_KEYS as readonly string[]).includes(key);
 }
@@ -98,6 +104,9 @@ export function applyOwnerMajorPermissions(
 ): Record<string, boolean> {
   const next = { ...(permissions ?? {}) };
   for (const key of OWNER_MAJOR_PERMISSION_KEYS) {
+    next[key] = true;
+  }
+  for (const key of OWNER_ENSURED_OPERATIONAL_KEYS) {
     next[key] = true;
   }
   return next;

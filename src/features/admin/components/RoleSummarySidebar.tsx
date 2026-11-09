@@ -99,12 +99,12 @@ export function RoleSummarySidebar({
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => navigate("/settings?tab=roles")}
+            onClick={() => navigate("/app/sections-permissions?tab=roles")}
           >{t("admin.manageRoles")}</Button>
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => navigate("/settings?tab=positions")}
+            onClick={() => navigate("/app/settings?tab=general")}
           >{t("admin.managePositions")}</Button>
         </div>
       </CardContent>
