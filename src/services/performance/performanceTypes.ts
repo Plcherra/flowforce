@@ -31,17 +31,17 @@ export interface PerformanceGoal {
 }
 
 export interface PerformanceReview {
-  id: Tables<"performance_reviews">["id"];
-  goalId: Tables<"performance_reviews">["goal_id"];
-  date: Tables<"performance_reviews">["review_date"];
-  score: Tables<"performance_reviews">["score"];
-  summary: Tables<"performance_reviews">["summary"];
-  reviewerId: Tables<"performance_reviews">["reviewerid"];
+  id: string;
+  goalId: string | null;
+  date: string | null;
+  score: number | null;
+  summary: string | null;
+  reviewerId: string | null;
   status: PerformanceReviewStatus;
-  aiSummary: Tables<"performance_reviews">["ai_summary"];
-  aiInsightId: Tables<"performance_reviews">["ai_insightid"];
-  actionItems: Tables<"performance_reviews">["action_items"];
-  reviewCycle: Tables<"performance_reviews">["review_cycle"];
+  aiSummary: string | null;
+  aiInsightId: string | null;
+  actionItems: unknown;
+  reviewCycle: string | null;
 }
 
 export interface PerformanceMetrics {

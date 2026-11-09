@@ -26,24 +26,34 @@ const staffPerformanceRowSchema = z
   })
   .passthrough();
 
+/** Columns present on production `performance_reviews` (no goal_id / review_date / score). */
+const PRODUCTION_PERFORMANCE_REVIEW_COLUMNS = [
+  "id",
+  "company_id",
+  "employee_id",
+  "reviewerid",
+  "created_at",
+  "updated_at",
+] as const;
+
 const performanceReviewRowSchema = z
   .object({
     id: z.string(),
     company_id: z.string().nullable(),
     employee_id: z.string().nullable(),
-    goal_id: z.string().nullable(),
-    review_cycle: z.string().nullable(),
-    review_period_start: z.string().nullable(),
-    review_period_end: z.string().nullable(),
-    review_date: z.string().nullable(),
     reviewerid: z.string().nullable(),
-    score: z.number().nullable(),
-    summary: z.string().nullable(),
-    ai_summary: z.string().nullable(),
-    action_items: z.unknown().nullable(),
-    ai_insightid: z.string().nullable(),
     created_at: z.string().nullable(),
     updated_at: z.string().nullable(),
+    goal_id: z.string().nullable().optional(),
+    review_cycle: z.string().nullable().optional(),
+    review_period_start: z.string().nullable().optional(),
+    review_period_end: z.string().nullable().optional(),
+    review_date: z.string().nullable().optional(),
+    score: z.number().nullable().optional(),
+    summary: z.string().nullable().optional(),
+    ai_summary: z.string().nullable().optional(),
+    action_items: z.unknown().nullable().optional(),
+    ai_insightid: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -149,27 +159,8 @@ export async function fetchPerformanceReviewsSince(
 ): Promise<PerformanceReviewRow[]> {
   let query = client
     .from("performance_reviews")
-    .select(
-      [
-        "id",
-        "company_id",
-        "employee_id",
-        "goal_id",
-        "review_cycle",
-        "review_period_start",
-        "review_period_end",
-        "review_date",
-        "reviewerid",
-        "score",
-        "summary",
-        "ai_summary",
-        "action_items",
-        "ai_insightid",
-        "created_at",
-        "updated_at",
-      ].join(","),
-    )
-    .gte("review_date", sinceDate);
+    .select(PRODUCTION_PERFORMANCE_REVIEW_COLUMNS.join(","))
+    .gte("created_at", sinceDate);
 
   if (companyId) {
     query = query.eq("company_id", companyId);
@@ -230,7 +221,7 @@ export async function fetchPerformanceGoalReviewRows(
   let query = client
     .from("performance_goal_reviews")
     .select("*")
-    .order("review_date", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(limit);
 
   if (companyId) {
@@ -238,6 +229,31 @@ export async function fetchPerformanceGoalReviewRows(
   }
 
   const { data, error } = await query;
-  if (error) throw error;
-  return performanceGoalReviewRowSchema.array().parse(data ?? []);
+  if (error) {
+    logger.warn("[performance] performance_goal_reviews query unavailable", {
+      error,
+      tags: ["warning"],
+    });
+    return [];
+  }
+
+  const rows = data ?? [];
+  if (
+    rows.length === 0 ||
+    typeof rows[0] !== "object" ||
+    rows[0] === null ||
+    !("review_date" in (rows[0] as Record<string, unknown>))
+  ) {
+    return [];
+  }
+
+  try {
+    return performanceGoalReviewRowSchema.array().parse(rows);
+  } catch (parseError) {
+    logger.warn("[performance] performance_goal_reviews row shape mismatch", {
+      error: parseError,
+      tags: ["warning"],
+    });
+    return [];
+  }
 }

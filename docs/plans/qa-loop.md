@@ -112,7 +112,10 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
 8. Docs — done
    - Help getting-started uses locale keys; documentation detail drops the English stub. Report inbox status labels and upload use `documents.manage` (`documents.view` paired in the matrix).
    - `e2e/docs-permissions.spec.ts` pins English, signs in with the test user, opens getting started (Team pack), blocks document writes before sign-in, checks report upload when `documents.manage` is denied, and opens onboarding settings documents upload. Nothing is stored.
-9. Reviews — todo
+9. Reviews — done
+   - Production `performance_reviews` has only `id`, `company_id`, `employee_id`, `reviewerid`, `created_at`, and `updated_at`. Loads use those columns and `created_at` filtering instead of missing `goal_id` / `review_date` fields. `performance_goal_reviews` returns an empty list when the table has no enriched review columns (no migration).
+   - Recent reviews on `/app/performance` gates on `reviews.manage` or `reviews.view_own`. KPI avg score ignores unscored stub rows.
+   - `e2e/reviews-permissions.spec.ts` pins English, signs in with the test user, checks the reviews section permission gates, and asserts the reviews REST select omits `goal_id`. Review writes are blocked before sign-in.
 10. Time off — todo
 11. Analytics — todo
 12. Settings and roles — todo

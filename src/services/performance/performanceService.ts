@@ -111,28 +111,35 @@ export function determineReviewStatus(
   return performanceReviewStatusSchema.parse("on_track");
 }
 
+function reviewRowSortDate(row: PerformanceReviewRecord) {
+  return row.review_date ?? row.created_at ?? null;
+}
+
 function buildReviewEntries(
   rows: PerformanceReviewRecord[],
 ): PerformanceReview[] {
   return rows
     .sort(
-      (a, b) => dayjs(b.review_date).valueOf() - dayjs(a.review_date).valueOf(),
+      (a, b) =>
+        dayjs(reviewRowSortDate(b)).valueOf() -
+        dayjs(reviewRowSortDate(a)).valueOf(),
     )
     .map((row) => {
-      const status = determineReviewStatus(row.review_date, row.score);
+      const reviewDate = reviewRowSortDate(row);
+      const status = determineReviewStatus(reviewDate, row.score ?? null);
       return {
         id: row.id,
-        goalId: row.goal_id,
-        date: row.review_date,
-        score: row.score,
-        summary: row.summary,
+        goalId: row.goal_id ?? null,
+        date: reviewDate,
+        score: row.score ?? null,
+        summary: row.summary ?? null,
         reviewerId: row.reviewerid,
         status,
-        aiSummary: row.ai_summary,
-        aiInsightId: row.ai_insightid,
+        aiSummary: row.ai_summary ?? null,
+        aiInsightId: row.ai_insightid ?? null,
         actionItems: (row.action_items ??
           []) as PerformanceReview["actionItems"],
-        reviewCycle: row.review_cycle,
+        reviewCycle: row.review_cycle ?? null,
       };
     });
 }
@@ -483,8 +490,6 @@ export async function createPerformanceReview(
   client: SupabaseClient = supabase,
 ) {
   const payload: TablesInsert<"performance_reviews"> = {
-    review_cycle: "Quarterly",
-    action_items: [],
     ...review,
   };
   const { data, error } = await client
