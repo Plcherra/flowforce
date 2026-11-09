@@ -101,7 +101,9 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
 4. Tasks — done
    - Custom create follows `tasks.custom.create_self` / `create_others`, with `editTasks` as legacy others. The floating + menu is the only create control; self-only shows Assigned to you in the dialog. List issues need `tasks.list_issues.read`.
    - `e2e/task-create.spec.ts` and `e2e/tasks-permissions.spec.ts` pin English, sign in with the test user, walk My shift and All tasks, block writes for the permission run, and exercise create gates. Create/delete in task-create stores one row then removes it.
-5. Forms — todo
+5. Forms — done
+   - Create UI follows `createForms`. `manageForms` is required for delete (not `createForms` alone). Fill uses `forms.submit`. Other people's submissions use `forms.submissions.read` / `approveFormSubmissions` / `manageForms`, with deny override on read hiding team submissions.
+   - `e2e/forms-permissions.spec.ts` and `e2e/form-distribution.spec.ts` pin English, sign in with the test user, inject a published open form, block form writes before sign-in, and exercise each gate. Distribution spec still stops save before storing settings.
 6. Calendar — skipped. Removed in #47. Do not bring it back.
 7. Goals — todo
 8. Docs — todo
