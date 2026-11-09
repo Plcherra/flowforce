@@ -223,7 +223,7 @@ export default function AIInsightsPanel({
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
-                onClick={() => navigate("/settings/permissions")}
+                onClick={() => navigate("/app/sections-permissions?tab=permissions")}
               >{t("ai.viewPermissions")}</Button>
               <Button
                 size="sm"

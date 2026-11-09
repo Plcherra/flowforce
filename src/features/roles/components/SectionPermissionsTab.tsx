@@ -135,7 +135,7 @@ export default function SectionPermissionsTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="section-permissions-matrix">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">

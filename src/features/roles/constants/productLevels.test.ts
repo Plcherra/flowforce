@@ -67,7 +67,8 @@ export function runProductLevelTests() {
     assert.equal(ownerStub[key], true, `Owner keeps ${key}`);
     assert.equal(isOwnerMajorPermission(key), true);
   }
-  assert.equal(ownerStub.approveTimeOff, false);
+  assert.equal(ownerStub.approveTimeOff, true);
+  assert.equal(ownerStub["reports.view"], true);
   assert.equal(isOwnerMajorPermission("approveTimeOff"), false);
 
   assert.equal(permissionAllowedAtLevel("staff", "viewTeamSchedules"), true);

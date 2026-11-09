@@ -124,4 +124,7 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - Report inbox gates on matrix `reports.view` (not legacy ACL metadata roles). CSV export renders only with `reports.export`.
    - AI insights restricted state uses `data-testid="ai-insights-restricted"`. Engagement upsert writes `update_id` (production column) instead of missing `updateid`.
    - `e2e/analytics-permissions.spec.ts` pins English, insights pack, signs in with the test user, checks reports view/export gates and AI insights permission. Document writes blocked before sign-in.
-12. Settings and roles — todo
+12. Settings and roles — done
+   - Sections & permissions opens role classes, operator grant grid (edit class), and the legacy module matrix. Broken links to `/settings?tab=roles` and `/settings/permissions` now target `/app/sections-permissions`.
+   - Settings General shows the audit card behind `systemSettings`. Billing tab stays owner-profile only. Owner clamp in code always restores `approveTimeOff` and `reports.view` (seed contract already grants them for owner `*` and manager defaults).
+   - Dashboard role overview smoke stays in `e2e/role-overview.spec.ts`; settings gates in `e2e/settings-roles-permissions.spec.ts`. Writes blocked before sign-in.

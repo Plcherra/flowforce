@@ -196,10 +196,19 @@ for (const permission of [
   "schedule.edit",
   "schedule.assign",
   "schedule.delete",
+  "approveTimeOff",
+  "reports.view",
 ]) {
   assert(
     managerPermissions.has(permission),
     `manager default pack must include ${permission}`,
+  );
+}
+
+for (const permission of ["approveTimeOff", "reports.view"]) {
+  assert(
+    ownerPermissions.has(permission),
+    `owner must include ${permission}`,
   );
 }
 

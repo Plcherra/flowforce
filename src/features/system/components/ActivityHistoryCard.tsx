@@ -34,7 +34,7 @@ export function ActivityHistoryCard() {
     system.company?.timezone || system.settings?.localization.timezone || null;
 
   return (
-    <Card>
+    <Card data-testid="settings-activity-history">
       <CardHeader>
         <CardTitle>{t("settings.recentAuditActivity")}</CardTitle>
         <CardDescription>{t("settings.trackPrivilegedConfigurationChangesAcrossTheTenant")}</CardDescription>

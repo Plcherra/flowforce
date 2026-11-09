@@ -1,5 +1,8 @@
+"use client";
+
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -24,10 +27,27 @@ import {
   Users,
 } from "lucide-react";
 
+const SECTIONS_TAB_KEYS = ["sections", "roles", "permissions"] as const;
+
+type SectionsTabKey = (typeof SECTIONS_TAB_KEYS)[number];
+
+function resolveSectionsTab(value: string | null): SectionsTabKey {
+  if (value && SECTIONS_TAB_KEYS.includes(value as SectionsTabKey)) {
+    return value as SectionsTabKey;
+  }
+  return "sections";
+}
+
 export default function SectionsPermissions() {
   const { t } = useTranslation();
   const { can } = useCan();
   const { hasRole } = usePermissions();
+  const searchParams = useSearchParams();
+  const initialTab = useMemo(
+    () => resolveSectionsTab(searchParams.get("tab")),
+    [searchParams],
+  );
+  const [activeTab, setActiveTab] = useState<SectionsTabKey>(initialTab);
   const [enabledSections, setEnabledSections] = useState<string[]>(
     AVAILABLE_SECTIONS.filter((s) => s.enabled).map((s) => s.id),
   );
@@ -47,7 +67,7 @@ export default function SectionsPermissions() {
   // Check for broader admin permissions using role checking
   if (!can("systemSettings") && !hasRole(["company_admin", "owner", "admin"])) {
     return (
-      <div className="p-6">
+      <div className="p-6" data-testid="sections-access-denied">
         <div className="text-center py-12">
           <Shield className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">
@@ -62,7 +82,7 @@ export default function SectionsPermissions() {
   }
 
   return (
-    <div>
+    <div data-testid="sections-permissions-page">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -77,11 +97,21 @@ export default function SectionsPermissions() {
 
         <SectionsReadinessPanel />
 
-        <Tabs defaultValue="sections" className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) =>
+            setActiveTab(resolveSectionsTab(value))
+          }
+          className="space-y-6"
+        >
           <TabsList>
             <TabsTrigger value="sections">{t("sections.sectionManagement")}</TabsTrigger>
-            <TabsTrigger value="roles">{t("sections.roleConfiguration")}</TabsTrigger>
-            <TabsTrigger value="permissions">{t("sections.permissionsMatrix")}</TabsTrigger>
+            <TabsTrigger value="roles" data-testid="sections-tab-roles">
+              {t("sections.roleConfiguration")}
+            </TabsTrigger>
+            <TabsTrigger value="permissions" data-testid="sections-tab-permissions">
+              {t("sections.permissionsMatrix")}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="sections" className="space-y-6">

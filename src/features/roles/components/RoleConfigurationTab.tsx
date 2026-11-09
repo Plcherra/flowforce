@@ -206,7 +206,7 @@ export default function RoleConfigurationTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="role-configuration-tab">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">{t("sections.roleConfiguration")}</h3>
