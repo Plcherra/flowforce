@@ -140,11 +140,6 @@
     "ticket": "FF-SPLIT-29"
   },
   {
-    "path": "src/features/analytics/pages/Reports.tsx",
-    "lines": 681,
-    "ticket": "FF-SPLIT-30"
-  },
-  {
     "path": "src/features/scheduling/repositories/schedulingRepository.ts",
     "lines": 702,
     "ticket": "FF-SPLIT-32"
@@ -173,6 +168,11 @@
     "path": "src/features/availability/components/TimeOffRequestPanel.tsx",
     "lines": 687,
     "ticket": "FF-SPLIT-38"
+  },
+  {
+    "path": "src/features/analytics/pages/Reports.tsx",
+    "lines": 681,
+    "ticket": "FF-SPLIT-30"
   },
   {
     "path": "src/lib/permissions/registry.ts",
