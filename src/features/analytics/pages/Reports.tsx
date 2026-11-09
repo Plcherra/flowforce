@@ -1,17 +1,14 @@
 import i18n from "@/i18n/config";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   AlertCircle,
   ArrowDownToLine,
-  CheckCircle2,
   ClipboardList,
   FileText,
   Loader2,
   Search,
-  Timer,
   Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,41 +55,10 @@ import { can, type Role, type UserIdentity } from "@/lib/auth/acl";
 import { getReportsBucket } from "@/services/ingestion";
 import { CreateDocumentTaskDialog } from "@/features/analytics/components/reports/builder/CreateDocumentTaskDialog";
 import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
-
-function buildStatusMeta(
-  t: TFunction,
-): Record<
-  DocumentProcessingState,
-  {
-    label: string;
-    tone: "default" | "warning" | "success" | "destructive";
-    icon: React.ComponentType<{ className?: string }>;
-  }
-> {
-  return {
-    pending: { label: t("analytics.documentStatusPending"), tone: "warning", icon: Timer },
-    processing: {
-      label: t("analytics.documentStatusProcessing"),
-      tone: "warning",
-      icon: Loader2,
-    },
-    ready: { label: t("analytics.documentStatusReady"), tone: "success", icon: CheckCircle2 },
-    error: { label: t("analytics.documentStatusError"), tone: "destructive", icon: AlertCircle },
-  };
-}
-
-function statusClass(tone: "default" | "warning" | "success" | "destructive") {
-  switch (tone) {
-    case "warning":
-      return "border-warning/40 text-warning bg-warning/10";
-    case "success":
-      return "border-success/40 text-success bg-success/10";
-    case "destructive":
-      return "border-destructive/40 text-destructive bg-destructive/10";
-    default:
-      return "";
-  }
-}
+import {
+  buildDocumentStatusMeta,
+  documentStatusClass,
+} from "@/features/analytics/pages/reportsDocumentStatusMeta";
 
 function buildIdentity(
   user: ReturnType<typeof useAuth>["user"],
@@ -111,7 +77,7 @@ function summarizeText(text?: string | null) {
 
 export default function ReportsPage() {
   const { t } = useTranslation();
-  const statusMeta = useMemo(() => buildStatusMeta(t), [t]);
+  const statusMeta = useMemo(() => buildDocumentStatusMeta(t), [t]);
   const { can: canUse } = useCan();
   const canManageDocuments = canUse("documents.manage");
   const { user } = useAuth();
@@ -464,7 +430,7 @@ export default function ReportsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={`flex items-center gap-1 ${statusClass(status.tone)}`}
+                          className={`flex items-center gap-1 ${documentStatusClass(status.tone)}`}
                         >
                           <Icon
                             className={`h-3.5 w-3.5 ${status.tone === "warning" ? "animate-spin" : ""}`}
