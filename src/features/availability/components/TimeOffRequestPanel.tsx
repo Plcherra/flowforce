@@ -1,8 +1,7 @@
-import { useMemo, useState, type ComponentType } from "react";
+import { useMemo, useState } from "react";
 import {
   addDays,
   areIntervalsOverlapping,
-  differenceInCalendarDays,
   endOfDay,
   format,
   parseISO,
@@ -66,55 +65,22 @@ import {
   timeOffStatusTranslationKey,
   timeOffTypeTranslationKey,
 } from "@/features/scheduling/utils/timeOffRequestDetail";
-
-const BASE_TIME_OFF_ALLOWANCE = 25; // matches summary used in standalone Time Off page
+import { TimeOffSummaryTile } from "@/features/availability/components/TimeOffSummaryTile";
+import {
+  BASE_TIME_OFF_ALLOWANCE,
+  REQUEST_TYPES,
+  STATUS_STYLES,
+  TYPE_STYLES,
+  calculateAvailabilityHours,
+  dayCount,
+  formatRange,
+  type TimeOffType,
+} from "@/features/availability/components/timeOffRequestPanelShared";
 
 type TimeOffRequestPanelProps = {
   employeeId?: string | null;
   availabilityGrid?: AvailabilityGrid;
 };
-
-type TimeOffType = "vacation" | "sick" | "personal" | "other";
-const STATUS_STYLES = {
-  pending: "bg-warning-muted text-warning-foreground border-warning/40",
-  approved: "bg-success-muted text-success border-success/40",
-  rejected: "bg-accent text-accent-foreground border-accent/40",
-} as const;
-
-const TYPE_STYLES: Record<TimeOffType, string> = {
-  vacation: "bg-primary/10 text-primary border-primary/40",
-  sick: "bg-accent text-accent-foreground border-accent/40",
-  personal: "bg-secondary/10 text-secondary border-secondary/40",
-  other: "bg-muted text-foreground border-border",
-};
-
-const REQUEST_TYPES: TimeOffType[] = ["vacation", "sick", "personal", "other"];
-
-function calculateAvailabilityHours(grid?: AvailabilityGrid) {
-  if (!grid) return 0;
-  return Object.values(grid).reduce(
-    (total, hours) => total + (Array.isArray(hours) ? hours.length : 0),
-    0,
-  );
-}
-
-function formatRange(start: string, end: string) {
-  const startDate = parseISO(start);
-  const endDate = parseISO(end);
-  if (differenceInCalendarDays(endDate, startDate) === 0) {
-    return format(startDate, "MMM d, yyyy");
-  }
-  return `${format(startDate, "MMM d, yyyy")} → ${format(endDate, "MMM d, yyyy")}`;
-}
-
-function dayCount(start: string, end: string) {
-  return (
-    differenceInCalendarDays(
-      endOfDay(parseISO(end)),
-      startOfDay(parseISO(start)),
-    ) + 1
-  );
-}
 
 export function TimeOffRequestPanel({
   employeeId,
@@ -501,7 +467,7 @@ export function TimeOffRequestPanel({
               ))}
             </div>
           ) : (
-            <SummaryTile
+            <TimeOffSummaryTile
               icon={Calendar}
               label={t("availability.balanceRemaining")}
               value={t("schedule.timeOffDaysCount", { count: allowanceRemaining })}
@@ -511,7 +477,7 @@ export function TimeOffRequestPanel({
               })}
             />
           )}
-          <SummaryTile
+          <TimeOffSummaryTile
             icon={CheckCircle2}
             label={t("inventory.requested")}
             value={t("schedule.timeOffOpenRequests", {
@@ -526,7 +492,7 @@ export function TimeOffRequestPanel({
             }
             tone={requestedRequestCount > 0 ? "warning" : "default"}
           />
-          <SummaryTile
+          <TimeOffSummaryTile
             icon={Clock}
             label={t("availability.weeklyAvailability")}
             value={t("schedule.timeOffAvailabilityHours", {
@@ -534,7 +500,7 @@ export function TimeOffRequestPanel({
             })}
             hint={t("schedule.timeOffConfiguredAvailabilityHint")}
           />
-          <SummaryTile
+          <TimeOffSummaryTile
             icon={AlertTriangle}
             label={t("availability.coverageImpact")}
             value={
@@ -670,42 +636,5 @@ export function TimeOffRequestPanel({
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-interface SummaryTileProps {
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  hint: string;
-  tone?: "default" | "warning";
-}
-
-function SummaryTile({
-  icon: Icon,
-  label,
-  value,
-  hint,
-  tone = "default",
-}: SummaryTileProps) {
-  return (
-    <div
-      className={cn(
-        "rounded-lg border p-3 shadow-sm transition",
-        tone === "warning" ? "border-warning/40 bg-warning-muted" : "bg-muted/40",
-      )}
-    >
-      <div className="flex items-center justify-between text-xs font-semibold uppercase text-muted-foreground">
-        {label}
-        <Icon
-          className={cn(
-            "h-4 w-4",
-            tone === "warning" ? "text-warning" : "text-muted-foreground",
-          )}
-        />
-      </div>
-      <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
-      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
-    </div>
   );
 }

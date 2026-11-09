@@ -165,11 +165,6 @@
     "ticket": "FF-SPLIT-36"
   },
   {
-    "path": "src/features/availability/components/TimeOffRequestPanel.tsx",
-    "lines": 687,
-    "ticket": "FF-SPLIT-38"
-  },
-  {
     "path": "src/features/analytics/pages/Reports.tsx",
     "lines": 681,
     "ticket": "FF-SPLIT-30"
@@ -198,6 +193,11 @@
     "path": "src/features/onboarding/components/BrandingCustomizer.tsx",
     "lines": 645,
     "ticket": "FF-SPLIT-43"
+  },
+  {
+    "path": "src/features/availability/components/TimeOffRequestPanel.tsx",
+    "lines": 640,
+    "ticket": "FF-SPLIT-38"
   },
   {
     "path": "src/data/scheduling/locationRuleSets.ts",
