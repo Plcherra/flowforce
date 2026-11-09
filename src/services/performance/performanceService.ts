@@ -21,6 +21,7 @@ import {
   type PerformanceReviewRow as PerformanceReviewRecord,
   type StaffPerformanceRow,
 } from "@/repositories/performanceRepository";
+import { buildReviewEntries } from "./performanceReviewEntries";
 import {
   goalStatusSchema,
   performanceReviewStatusSchema,
@@ -33,6 +34,8 @@ import {
   type PerformanceRadarMetric,
   type GoalStatus,
 } from "./performanceTypes";
+
+export { determineReviewStatus } from "./performanceReviewEntries";
 
 const REVIEW_STATUS_WEIGHTS: Record<PerformanceReviewStatus, number> = {
   on_track: 100,
@@ -85,56 +88,6 @@ async function resolveActiveCompanyId(
     });
     return null;
   }
-}
-
-export function determineReviewStatus(
-  reviewDate: string | null,
-  score: number | null,
-  referenceDate: dayjs.Dayjs = dayjs(),
-): PerformanceReviewStatus {
-  if (!reviewDate) {
-    return performanceReviewStatusSchema.parse("due_soon");
-  }
-
-  const diff = referenceDate.diff(dayjs(reviewDate), "day");
-  if (diff > 180) {
-    return performanceReviewStatusSchema.parse("overdue");
-  }
-  if (diff > 90) {
-    return performanceReviewStatusSchema.parse("due_soon");
-  }
-
-  if ((score ?? 3) <= 2) {
-    return performanceReviewStatusSchema.parse("needs_coaching");
-  }
-
-  return performanceReviewStatusSchema.parse("on_track");
-}
-
-function buildReviewEntries(
-  rows: PerformanceReviewRecord[],
-): PerformanceReview[] {
-  return rows
-    .sort(
-      (a, b) => dayjs(b.review_date).valueOf() - dayjs(a.review_date).valueOf(),
-    )
-    .map((row) => {
-      const status = determineReviewStatus(row.review_date, row.score);
-      return {
-        id: row.id,
-        goalId: row.goal_id,
-        date: row.review_date,
-        score: row.score,
-        summary: row.summary,
-        reviewerId: row.reviewerid,
-        status,
-        aiSummary: row.ai_summary,
-        aiInsightId: row.ai_insightid,
-        actionItems: (row.action_items ??
-          []) as PerformanceReview["actionItems"],
-        reviewCycle: row.review_cycle,
-      };
-    });
 }
 
 function buildPerformanceGoals(
@@ -483,8 +436,6 @@ export async function createPerformanceReview(
   client: SupabaseClient = supabase,
 ) {
   const payload: TablesInsert<"performance_reviews"> = {
-    review_cycle: "Quarterly",
-    action_items: [],
     ...review,
   };
   const { data, error } = await client

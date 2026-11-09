@@ -33,7 +33,7 @@ export interface PerformanceReviewEntry {
   employeeName: string;
   goalId: string | null;
   date: string;
-  score: number;
+  score: number | null;
   summary: string | null;
   aiSummary: string | null;
   reviewerId: string | null;
@@ -172,8 +172,8 @@ export function usePerformanceOverview() {
           employeeId: employee.id,
           employeeName: fullName,
           goalId: review.goalId ?? null,
-          date: review.date,
-          score: review.score ?? 0,
+          date: review.date ?? "",
+          score: review.score,
           summary: review.summary ?? null,
           aiSummary: review.aiSummary ?? null,
           reviewerId: review.reviewerId ?? null,

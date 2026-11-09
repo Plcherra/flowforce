@@ -50,9 +50,12 @@ function buildKpis({
     (sum, employee) => sum + employee.completedGoals,
     0,
   );
+  const scoredReviews = reviews.filter(
+    (review) => typeof review.score === "number",
+  );
   const averageReviewScore =
-    reviews.length > 0
-      ? `${(reviews.reduce((sum, review) => sum + review.score, 0) / reviews.length).toFixed(1)} / 5`
+    scoredReviews.length > 0
+      ? `${(scoredReviews.reduce((sum, review) => sum + (review.score ?? 0), 0) / scoredReviews.length).toFixed(1)} / 5`
       : t("performance.kpiNoReviews");
   return [
     {
@@ -116,7 +119,7 @@ function LatestReviewsCard({
   const { t } = useTranslation();
   if (loading && reviews.length === 0) {
     return (
-      <Card className="shadow-sm">
+      <Card className="shadow-sm" data-testid="performance-reviews-section">
         <CardHeader>
           <Skeleton className="h-5 w-48" />
           <Skeleton className="mt-2 h-3 w-64" />
@@ -139,7 +142,7 @@ function LatestReviewsCard({
 
   if (!loading && reviews.length === 0) {
     return (
-      <Card className="border-dashed">
+      <Card className="border-dashed" data-testid="performance-reviews-section">
         <CardHeader>
           <CardTitle className="text-base">{t("performance.recentReviews")}</CardTitle>
           <CardDescription>{t("performance.noReviewActivityRecorded")}</CardDescription>
@@ -149,7 +152,7 @@ function LatestReviewsCard({
   }
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm" data-testid="performance-reviews-section">
       <CardHeader>
         <CardTitle className="text-base">{t("performance.recentReviews")}</CardTitle>
         <CardDescription>{t("performance.latestSubmissionsAcrossEmployees")}</CardDescription>
@@ -185,6 +188,8 @@ export function PerformancePage() {
   const { user } = useAuth();
   const { can } = useCan();
   const canManageReviews = can("reviews.manage");
+  const canViewOwnReviews = can("reviews.view_own");
+  const canViewReviews = canManageReviews || canViewOwnReviews;
   const canViewGoals = can("goals.view") || can("goals.manage");
   const {
     employees,
@@ -295,7 +300,9 @@ export function PerformancePage() {
         />
       </div>
 
-      <LatestReviewsCard reviews={visibleReviews} loading={performanceLoading} />
+      {canViewReviews ? (
+        <LatestReviewsCard reviews={visibleReviews} loading={performanceLoading} />
+      ) : null}
     </div>
   );
 }
