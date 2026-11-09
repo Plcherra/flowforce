@@ -70,29 +70,21 @@ test("performance page loads recent reviews without invalid column query", async
   page,
 }) => {
   test.setTimeout(180_000);
-  let reviewSelectUrl: string | null = null;
   await pinTeamPack(page);
-  await page.route("**/rest/v1/performance_reviews*", async (route) => {
-    const request = route.request();
-    if (request.method() === "GET" || request.method() === "HEAD") {
-      if (request.method() === "GET") {
-        reviewSelectUrl = request.url();
-      }
-      await route.continue();
-      return;
-    }
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify([]),
-    });
-  });
+  await blockReviewWrites(page);
+  const reviewRequest = page.waitForRequest(
+    (request) =>
+      request.method() === "GET" &&
+      request.url().includes("performance_reviews"),
+    { timeout: 30_000 },
+  );
   await signIn(page);
   await page.goto("/app/performance");
   await expect(page.getByTestId("performance-reviews-section")).toBeVisible({
     timeout: 30_000,
   });
-  expect(reviewSelectUrl).not.toBeNull();
+  const request = await reviewRequest;
+  const reviewSelectUrl = request.url();
   expect(reviewSelectUrl).not.toMatch(/goal_id/);
   expect(reviewSelectUrl).toMatch(/created_at=gte/);
   await expect(
