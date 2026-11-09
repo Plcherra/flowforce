@@ -45,7 +45,7 @@ export function runCompanyUpdateRowTests() {
   const reactions = parseCompanyUpdateReactions([
     { update_id: "u1", reaction_type: "like" },
     { update_id: "u1", reaction_type: "nope" },
-    { updateid: "u1", reaction_type: "view" },
+    { update_id: "u1", reaction_type: "view" },
   ]);
   assert.equal(reactions.length, 1);
   assert.equal(reactions[0]?.update_id, "u1");

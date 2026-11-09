@@ -211,7 +211,7 @@ export default function AIInsightsPanel({
   // Only show AI insights if user has permission - but do this AFTER all hooks
   if (!can("viewAIInsights")) {
     return (
-      <div className={containerClass}>
+      <div className={containerClass} data-testid="ai-insights-restricted">
         <Card className="h-full border-dashed">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">

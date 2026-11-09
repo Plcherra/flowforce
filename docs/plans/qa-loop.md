@@ -120,5 +120,8 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - Team time off loads filter `time_off_requests` by `company_id` (not embedded `user.company_id`). Approve/reject gates on `approveTimeOff` only (no manager-role bypass). Request UI gates on `timeoff.request`.
    - My time off and team rows use translated type/status labels; panel summary tiles and `formatRequestedWhen` empty state use locale keys across all six locales.
    - `e2e/time-off-permissions.spec.ts` pins English, signs in with the test user, checks request and approval gates, and asserts the team list REST query uses `company_id`. Writes are blocked before sign-in.
-11. Analytics — todo
+11. Analytics — done
+   - Report inbox gates on matrix `reports.view` (not legacy ACL metadata roles). CSV export renders only with `reports.export`.
+   - AI insights restricted state uses `data-testid="ai-insights-restricted"`. Engagement upsert writes `update_id` (production column) instead of missing `updateid`.
+   - `e2e/analytics-permissions.spec.ts` pins English, insights pack, signs in with the test user, checks reports view/export gates and AI insights permission. Document writes blocked before sign-in.
 12. Settings and roles — todo
