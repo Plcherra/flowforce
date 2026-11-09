@@ -348,7 +348,10 @@ export default function CompanyUpdates() {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-3rem)] flex-col bg-muted/40">
+    <div
+      className="flex min-h-[calc(100dvh-3rem)] flex-col bg-muted/40"
+      data-testid="company-updates-page"
+    >
       <CompanyUpdatesHeader
         canCreateUpdate={canCreateUpdate}
         onCreate={openCreateWizard}

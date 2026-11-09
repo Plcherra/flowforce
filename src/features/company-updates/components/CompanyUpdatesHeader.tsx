@@ -69,6 +69,7 @@ export function CompanyUpdatesHeader({
           onClick={onCreate}
           aria-expanded={wizardOpen}
           aria-controls="company-updates-wizard"
+          data-testid="company-updates-new"
         >
           {t("updates.newUpdate")} </Button>
       )}

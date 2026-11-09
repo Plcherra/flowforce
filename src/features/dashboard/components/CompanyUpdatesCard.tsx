@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, ChevronRight, Plus, Pin, MessageSquare } from "lucide-react";
 import { useCan } from "@/hooks/useCan";
+import { useProfile } from "@/hooks/useProfile";
+import { canManageCompanyUpdates } from "@/features/company-updates/companyUpdateAccess";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "@/lib/router-adapter";
 import CreateUpdateWizard from "@/features/company-updates/wizard/CreateUpdateWizard";
@@ -30,6 +32,11 @@ export default function CompanyUpdatesCard({
 }: CompanyUpdatesCardProps) {
   const { t } = useTranslation();
   const { can } = useCan();
+  const { profile } = useProfile();
+  const canCreateUpdate = canManageCompanyUpdates({
+    role: profile?.role,
+    can: (key) => can(key),
+  });
   const navigate = useNavigate();
   const [createWizardOpen, setCreateWizardOpen] = useState(false);
   const { updates } = useCompanyUpdates({
@@ -66,13 +73,14 @@ export default function CompanyUpdatesCard({
               <CardDescription>
                 {t("dashboard.latestAnnouncementsAndCompanyNews")}</CardDescription>
             </div>
-            {can("systemSettings") && (
+            {canCreateUpdate && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCreateWizardOpen(true)}
                 aria-expanded={createWizardOpen}
                 aria-controls="company-updates-dashboard-wizard"
+                data-testid="company-updates-dashboard-add"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 {t("dashboard.addUpdate")}</Button>
@@ -85,7 +93,7 @@ export default function CompanyUpdatesCard({
               <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
               <p className="text-muted-foreground mb-3">
                 {t("dashboard.noCompanyUpdatesYet")}</p>
-              {can("systemSettings") && (
+              {canCreateUpdate && (
                 <Button
                   variant="outline"
                   onClick={() => setCreateWizardOpen(true)}
