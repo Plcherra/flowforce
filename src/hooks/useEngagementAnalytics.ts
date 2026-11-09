@@ -128,7 +128,7 @@ export function useEngagementAnalytics() {
       const { error } = await supabase
         .from("company_update_engagement")
         .upsert({
-          updateid: update.id,
+          update_id: update.id,
           company_id: update.companyId,
           likes_count: update.metrics.likes,
           comments_count: update.metrics.comments,

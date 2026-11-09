@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type CompanyUpdateEngagementRow = {
   id: string;
-  updateid: string;
+  update_id: string;
   company_id: string | null;
   likes_count: number;
   comments_count: number;

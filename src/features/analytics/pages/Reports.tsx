@@ -40,7 +40,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import {
   useDocumentInbox,
@@ -51,7 +50,6 @@ import type {
   DocumentProcessingState,
   DocumentWithRelations,
 } from "@/types/ingestion";
-import { can, type Role, type UserIdentity } from "@/lib/auth/acl";
 import { getReportsBucket } from "@/services/ingestion";
 import { CreateDocumentTaskDialog } from "@/features/analytics/components/reports/builder/CreateDocumentTaskDialog";
 import { openSignedStorageUrl } from "@/lib/signedStorageUrls";
@@ -59,14 +57,6 @@ import {
   buildDocumentStatusMeta,
   documentStatusClass,
 } from "@/features/analytics/pages/reportsDocumentStatusMeta";
-
-function buildIdentity(
-  user: ReturnType<typeof useAuth>["user"],
-): UserIdentity | null {
-  if (!user) return null;
-  const role = (user.user_metadata?.role ?? "manager") as Role;
-  return { id: user.id, role };
-}
 
 function summarizeText(text?: string | null) {
   if (!text) return i18n.t("literals.noExtractedTextAvailableYet");
@@ -79,12 +69,11 @@ export default function ReportsPage() {
   const { t } = useTranslation();
   const statusMeta = useMemo(() => buildDocumentStatusMeta(t), [t]);
   const { can: canUse } = useCan();
+  const canView = canUse("reports.view");
+  const canExport = canUse("reports.export");
   const canManageDocuments = canUse("documents.manage");
-  const { user } = useAuth();
   const { profile } = useProfile();
   const companyId = profile?.companyId ?? profile?.company_id ?? null;
-  const identity = useMemo(() => buildIdentity(user), [user]);
-  const canView = can(identity, "reports.view");
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const inboxOptions = useMemo(
     () => ({ limit: 50, companyId: companyId ?? undefined }),
@@ -197,6 +186,7 @@ export default function ReportsPage() {
   };
 
   const handleExportInbox = () => {
+    if (!canExport) return;
     const rows = [
       ["Report", "Status", "Events", "Critical events", "Follow-ups", "Uploaded"],
       ...filteredDocuments.map((doc) => [
@@ -228,7 +218,7 @@ export default function ReportsPage() {
 
   if (!canView) {
     return (
-      <div className="container mx-auto px-6 py-16">
+      <div className="container mx-auto px-6 py-16" data-testid="reports-access-restricted">
         <Card>
           <CardContent className="py-16 text-center space-y-3">
             <AlertCircle className="mx-auto h-10 w-10 text-warning" />
@@ -243,7 +233,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 space-y-6">
+    <div className="container mx-auto px-6 py-8 space-y-6" data-testid="reports-page">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold flex items-center gap-2">
@@ -272,15 +262,18 @@ export default function ReportsPage() {
             className="hidden"
             onChange={handleFileChange}
           />
-          <Button
-            variant="outline"
-            onClick={handleExportInbox}
-            disabled={filteredDocuments.length === 0}
-            className="gap-2"
-          >
-            <ArrowDownToLine className="h-4 w-4" />
-            {t("forms.exportCsv")}
-          </Button>
+          {canExport ? (
+            <Button
+              variant="outline"
+              onClick={handleExportInbox}
+              disabled={filteredDocuments.length === 0}
+              className="gap-2"
+              data-testid="reports-export-button"
+            >
+              <ArrowDownToLine className="h-4 w-4" />
+              {t("forms.exportCsv")}
+            </Button>
+          ) : null}
           <Button
             onClick={() => uploadInputRef.current?.click()}
             disabled={!canManageDocuments || uploadMutation.isPending}

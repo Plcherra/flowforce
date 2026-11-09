@@ -166,7 +166,7 @@
   },
   {
     "path": "src/features/analytics/pages/Reports.tsx",
-    "lines": 681,
+    "lines": 674,
     "ticket": "FF-SPLIT-30"
   },
   {
