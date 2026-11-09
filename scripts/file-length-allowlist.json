@@ -101,7 +101,7 @@
   },
   {
     "path": "src/services/performance/performanceService.ts",
-    "lines": 798,
+    "lines": 749,
     "ticket": "FF-SPLIT-22"
   },
   {
