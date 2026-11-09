@@ -98,7 +98,9 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - Main `/app/company-updates` uses `canManageCompanyUpdates` (`updates.manage`, settings keys, manager role). Dashboard card and custom section table no longer gate on `systemSettings` alone.
    - Section builder opens `CreateUpdateWizard` instead of a dead New Update log. Table badges and priorities use locale keys; unused filter and export buttons are removed.
    - `e2e/company-updates-permissions.spec.ts` pins English, signs in with the test user, opens the wizard, and hides New update when `updates.manage` is denied on a staff role. Nothing is stored.
-4. Tasks — todo
+4. Tasks — done
+   - Custom create follows `tasks.custom.create_self` / `create_others`, with `editTasks` as legacy others. The floating + menu is the only create control; self-only shows Assigned to you in the dialog. List issues need `tasks.list_issues.read`.
+   - `e2e/task-create.spec.ts` and `e2e/tasks-permissions.spec.ts` pin English, sign in with the test user, walk My shift and All tasks, block writes for the permission run, and exercise create gates. Create/delete in task-create stores one row then removes it.
 5. Forms — todo
 6. Calendar — skipped. Removed in #47. Do not bring it back.
 7. Goals — todo
