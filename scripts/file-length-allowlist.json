@@ -100,11 +100,6 @@
     "ticket": "FF-SPLIT-20"
   },
   {
-    "path": "src/services/performance/performanceService.ts",
-    "lines": 749,
-    "ticket": "FF-SPLIT-22"
-  },
-  {
     "path": "src/services/analytics/businessAnalyticsService.ts",
     "lines": 781,
     "ticket": "FF-SPLIT-23"
@@ -113,6 +108,11 @@
     "path": "src/features/inventory/components/expenses/ManagerFinancialOverview.tsx",
     "lines": 767,
     "ticket": "FF-SPLIT-24"
+  },
+  {
+    "path": "src/services/performance/performanceService.ts",
+    "lines": 749,
+    "ticket": "FF-SPLIT-22"
   },
   {
     "path": "src/features/system/components/IntegrationSettingsPanel.tsx",
