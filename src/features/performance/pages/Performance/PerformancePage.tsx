@@ -27,6 +27,7 @@ import {
 import { XPTrendsSection, type XpTrendEntry } from "./XPTrendsSection";
 import { performanceTaskPoints } from "@/features/performance/utils/taskPointsTotal";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
 
@@ -34,10 +35,12 @@ function buildKpis({
   employees,
   reviews,
   recognitionsCount,
+  t,
 }: {
   employees: ReturnType<typeof usePerformanceOverview>["employees"];
   reviews: PerformanceReviewEntry[];
   recognitionsCount: number;
+  t: TFunction;
 }): PerformanceKpi[] {
   const activeGoals = employees.reduce(
     (sum, employee) => sum + employee.activeGoals,
@@ -50,31 +53,34 @@ function buildKpis({
   const averageReviewScore =
     reviews.length > 0
       ? `${(reviews.reduce((sum, review) => sum + review.score, 0) / reviews.length).toFixed(1)} / 5`
-      : "No reviews";
+      : t("performance.kpiNoReviews");
   return [
     {
       id: "employees",
-      label: "Employees tracked",
+      label: t("performance.kpiEmployeesTracked"),
       value: `${employees.length}`,
-      description: "Profiles with recent reviews",
+      description: t("performance.kpiEmployeesTrackedDesc"),
     },
     {
       id: "goal-progress",
-      label: "Active goals",
-      value: `${activeGoals} active / ${completedGoals} completed`,
-      description: "Across all employees",
+      label: t("performance.kpiActiveGoals"),
+      value: t("performance.kpiActiveGoalsValue", {
+        active: activeGoals,
+        completed: completedGoals,
+      }),
+      description: t("performance.kpiActiveGoalsDesc"),
     },
     {
       id: "review-score",
-      label: "Avg. review score",
+      label: t("performance.kpiAvgReviewScore"),
       value: averageReviewScore,
-      description: "Weighted across cycles",
+      description: t("performance.kpiAvgReviewScoreDesc"),
     },
     {
       id: "recognitions",
-      label: "Recognitions",
+      label: t("performance.kpiRecognitions"),
       value: recognitionsCount.toString(),
-      description: "Lookback period",
+      description: t("performance.kpiRecognitionsDesc"),
     },
   ];
 }
@@ -216,14 +222,15 @@ export function PerformancePage() {
       employees: visibleEmployees,
       reviews: visibleReviews,
       recognitionsCount: recognitions.length,
+      t,
     }),
     {
       id: "task-points",
-      label: "Task points",
+      label: t("performance.kpiTaskPoints"),
       value: performanceTaskPoints(
         entries.map((entry) => entry.xp.tasks),
       ).toLocaleString(),
-      description: "The same total as leaderboard task XP",
+      description: t("performance.kpiTaskPointsDesc"),
     },
   ];
   const goalCards = buildGoalCards(visibleGoals);

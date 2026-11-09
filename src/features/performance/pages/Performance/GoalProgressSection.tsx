@@ -37,7 +37,7 @@ export function GoalProgressSection({
   const translations = useGoalTranslations(goalSources);
   if (loading && goals.length === 0) {
     return (
-      <Card className="shadow-sm">
+      <Card className="shadow-sm" data-testid="performance-goal-progress">
         <CardHeader>
           <Skeleton className="h-5 w-40" />
           <Skeleton className="mt-2 h-3 w-60" />
@@ -56,7 +56,7 @@ export function GoalProgressSection({
 
   if (!loading && goals.length === 0) {
     return (
-      <Card className="border-dashed">
+      <Card className="border-dashed" data-testid="performance-goal-progress">
         <CardHeader>
           <CardTitle className="text-base">{t("performance.goalProgress")}</CardTitle>
           <CardDescription>{t("performance.noActiveGoalsWereFound")}</CardDescription>
@@ -67,7 +67,7 @@ export function GoalProgressSection({
   }
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm" data-testid="performance-goal-progress">
       <CardHeader>
         <CardTitle className="text-base">{t("performance.goalProgress")}</CardTitle>
         <CardDescription>{t("performance.topGoalsRankedByCompletionPercentage")}</CardDescription>

@@ -6529,7 +6529,19 @@
     "topGoalsRankedByCompletionPercentage": "Objectifs principaux selon le pourcentage d'avancement",
     "trackCoachingSignalsXpProgressionAndReviewOutcomes": "Suivez les signaux d'accompagnement, la progression XP et le résultat des évaluations de chaque personne.",
     "unableToLoadSomePerformanceData": "Impossible de charger certaines données de performance",
-    "xpTrends": "Tendances XP"
+    "xpTrends": "Tendances XP",
+    "kpiEmployeesTracked": "Employés suivis",
+    "kpiEmployeesTrackedDesc": "Profils avec des évaluations récentes",
+    "kpiActiveGoals": "Objectifs actifs",
+    "kpiActiveGoalsValue": "{{active}} actifs / {{completed}} terminés",
+    "kpiActiveGoalsDesc": "Tous les employés",
+    "kpiAvgReviewScore": "Note moyenne d'évaluation",
+    "kpiNoReviews": "Aucune évaluation",
+    "kpiAvgReviewScoreDesc": "Pondérée sur tous les cycles",
+    "kpiRecognitions": "Reconnaissances",
+    "kpiRecognitionsDesc": "Période de référence",
+    "kpiTaskPoints": "Points de tâches",
+    "kpiTaskPointsDesc": "Le même total que les XP tâches du classement"
   },
   "recognition": {
     "celebrateWinsMonitorBadgeUnlocksAndKeepCopilot": "Célébrez les réussites, suivez les badges débloqués et tenez l'automatisation Copilot informée.",

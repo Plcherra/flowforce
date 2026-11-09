@@ -6529,7 +6529,19 @@
     "topGoalsRankedByCompletionPercentage": "Wichtigste Ziele nach Abschlussquote",
     "trackCoachingSignalsXpProgressionAndReviewOutcomes": "Verfolge Coaching-Signale, XP-Fortschritt und Beurteilungsergebnisse jeder Person.",
     "unableToLoadSomePerformanceData": "Einige Leistungsdaten konnten nicht geladen werden",
-    "xpTrends": "XP-Trends"
+    "xpTrends": "XP-Trends",
+    "kpiEmployeesTracked": "Erfasste Mitarbeitende",
+    "kpiEmployeesTrackedDesc": "Profile mit aktuellen Beurteilungen",
+    "kpiActiveGoals": "Aktive Ziele",
+    "kpiActiveGoalsValue": "{{active}} aktiv / {{completed}} abgeschlossen",
+    "kpiActiveGoalsDesc": "Über alle Mitarbeitenden",
+    "kpiAvgReviewScore": "Durchschnittliche Beurteilung",
+    "kpiNoReviews": "Keine Beurteilungen",
+    "kpiAvgReviewScoreDesc": "Über alle Zyklen gewichtet",
+    "kpiRecognitions": "Anerkennungen",
+    "kpiRecognitionsDesc": "Rückblickzeitraum",
+    "kpiTaskPoints": "Aufgabenpunkte",
+    "kpiTaskPointsDesc": "Gleiche Summe wie Aufgaben-XP in der Bestenliste"
   },
   "recognition": {
     "celebrateWinsMonitorBadgeUnlocksAndKeepCopilot": "Feiere Erfolge, verfolge freigeschaltete Abzeichen und halte die Copilot-Automatisierung auf dem Laufenden.",
