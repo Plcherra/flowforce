@@ -50,7 +50,9 @@ test("company updates page loads and updates.manage gates the new button", async
   await expect(page.getByTestId("company-updates-page")).toBeVisible({
     timeout: 30_000,
   });
-  await expect(page.getByRole("heading", { name: "Updates" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Updates", exact: true }),
+  ).toBeVisible();
   await expect(page.getByLabel("Search updates")).toBeVisible();
   await expect(page.getByRole("button", { name: "Feed" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Grid" })).toBeVisible();
