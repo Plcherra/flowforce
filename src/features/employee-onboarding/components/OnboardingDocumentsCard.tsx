@@ -76,7 +76,11 @@ export function OnboardingDocumentsCard({
               <Label htmlFor="onboarding-document-file">{t("employeeOnboarding.uploadDocument")}</Label>
               <Input id="onboarding-document-file" name="file" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" />
             </div>
-            <Button type="submit" disabled={busy || !title.trim()}>
+            <Button
+              type="submit"
+              data-testid="onboarding-document-upload"
+              disabled={busy || !title.trim()}
+            >
               {t("employeeOnboarding.uploadDocument")}
             </Button>
           </form>

@@ -109,7 +109,9 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - `/app/goals` redirects to `/app/tasks`. Goal UX lives on `/app/performance` under Goal progress, gated by `goals.view` or `goals.manage` (`goals.manage` is matrix edit; no standalone Goals module).
    - Performance KPI labels use `performance.kpi*` locale keys across all six locales. `performanceMocks` is not wired into live loads.
    - `e2e/goals-permissions.spec.ts` pins English, signs in with the test user, checks the redirect, blocks goal writes before sign-in, and hides Goal progress when both goal keys are denied.
-8. Docs — todo
+8. Docs — done
+   - Help getting-started uses locale keys; documentation detail drops the English stub. Report inbox status labels and upload use `documents.manage` (`documents.view` paired in the matrix).
+   - `e2e/docs-permissions.spec.ts` pins English, signs in with the test user, opens getting started (Team pack), blocks document writes before sign-in, checks report upload when `documents.manage` is denied, and opens onboarding settings documents upload. Nothing is stored.
 9. Reviews — todo
 10. Time off — todo
 11. Analytics — todo
