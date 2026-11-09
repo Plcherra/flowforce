@@ -10,6 +10,7 @@ import type {
   MessageChannel,
   SearchResult,
 } from "@/types/messages";
+import { listVisibleChannels } from "@/features/messages/api/channelDirectory";
 import { logger } from "@/utils/logger";
 
 const ProfileSchema = z.object({
@@ -157,40 +158,7 @@ async function listChannels(
   userId: string,
   companyId?: string | null,
 ): Promise<MessageChannel[]> {
-  let query = supabase
-    .from("message_channels")
-    .select(
-      `
-      *,
-      createdprofile:profiles!created_by(first_name, last_name, company_id),
-      department:departments(name),
-      channel_members!inner(user_id, role, last_read_at)
-    `,
-    )
-    .eq("channel_members.user_id", userId);
-
-  // Filter by creator's company_id if provided for additional security
-  // Note: message_channels table doesn't have company_id column, so we filter via creator's profile
-  if (companyId) {
-    query = query.eq("createdprofile.company_id", companyId);
-  }
-
-  query = query.order("updated_at", { ascending: false });
-
-  const { data, error } = await query;
-
-  if (error) throw error;
-  const parsed = MessageChannelSchema.array().parse(data ?? []);
-
-  // The nested profile schema does not keep company_id, so match the channel row.
-  if (companyId) {
-    const filtered = parsed.filter(
-      (channel) => channel.company_id === companyId,
-    );
-    return filtered as MessageChannel[];
-  }
-
-  return parsed as MessageChannel[];
+  return listVisibleChannels(userId, companyId);
 }
 
 async function createChannel(

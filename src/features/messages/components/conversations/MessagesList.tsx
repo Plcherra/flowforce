@@ -1,25 +1,22 @@
 import { useTranslation } from "react-i18next";
-import React, { useMemo, useRef, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { MessageCircle, Trash2, Edit2, Check, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { MessageReactions } from "./MessageReactions";
 import { MessageAttachments } from "./MessageAttachments";
 import { useMessageTranslations } from "@/features/messages/hooks/useMessageTranslations";
 import { MessageBody } from "@/features/messages/components/conversations/MessageBody";
 import {
-  collectThreadReplies,
   normalizeMessageAttachments,
-  replyParentId,
   senderDisplayName,
 } from "@/features/messages/threadReplies";
-import { format } from "date-fns";
+import { formatChatTime } from "@/features/messages/chatTime";
 import type { Message, ThreadMessage } from "@/types/messages";
 import { Skeleton } from "@/components/ui/skeleton";
-import { logger } from "@/utils/logger";
 import { useCan } from "@/hooks/useCan";
+import { cn } from "@/lib/utils";
 import {
   safeArrayLength,
   safeArrayMap,
@@ -49,13 +46,10 @@ interface MessagesListProps {
 export function MessagesList({
   messages,
   loading,
-  onThreadMessage,
   currentUserId,
   onDeleteMessage,
-  onUpdateMessage,
-  channelMembers = [],
 }: MessagesListProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { can } = useCan();
   const canModerateMessages = can("messages.manage");
   const messageSources = useMemo(
@@ -68,47 +62,18 @@ export function MessagesList({
     [messages],
   );
   const translations = useMessageTranslations(messageSources);
-  const replyCounts = useMemo(() => {
-    const sources = messages.map((message) => ({
-      id: message.id,
-      replyToId: replyParentId(message),
-      createdAt: new Date(message.created_at ?? 0).getTime(),
-    }));
-    return new Map(
-      sources.map((message) => [
-        message.id,
-        collectThreadReplies(sources, message.id).length,
-      ]),
-    );
-  }, [messages]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messagePendingDelete, setMessagePendingDelete] =
     useState<Message | null>(null);
   const safeMessages = asArray(messages);
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [updating, setUpdating] = useState(false);
+  const locale = i18n.resolvedLanguage || i18n.language;
 
+  const lastMessageId = safeMessages[safeArrayLength(safeMessages) - 1]?.id;
   useEffect(() => {
-    if (safeArrayLength(safeMessages) > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [safeMessages]);
-
-  const handleSaveEdit = async (messageId: string) => {
-    if (!onUpdateMessage || !editContent.trim()) return;
-    setUpdating(true);
-    try {
-      await onUpdateMessage(messageId, editContent.trim());
-      setEditingMessageId(null);
-      setEditContent("");
-    } catch (error) {
-      logger.error("Failed to update message", { error, tags: ["error"] });
-    } finally {
-      setUpdating(false);
-    }
-  };
+    if (!lastMessageId) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [lastMessageId]);
 
   if (loading) {
     return (
@@ -118,13 +83,11 @@ export function MessagesList({
       >
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={`messages-skeleton-${index}`} className="flex gap-3">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-3 w-2/3" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
+            <div
+              key={`messages-skeleton-${index}`}
+              className={cn("flex", index % 2 === 0 ? "justify-start" : "justify-end")}
+            >
+              <Skeleton className="h-12 w-40 rounded-2xl" />
             </div>
           ))}
         </div>
@@ -133,12 +96,13 @@ export function MessagesList({
   }
 
   return (
-    <ScrollArea className="flex-1 p-4">
-      <div className="space-y-4" role="log" aria-live="polite">
+    <ScrollArea className="flex-1 p-4" data-testid="chat-transcript">
+      <div className="space-y-3" role="log" aria-live="polite">
         {safeArrayLength(safeMessages) === 0 ? (
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <p className="text-muted-foreground">
-              {t("messages.noMessagesYetBeTheFirstToSendOne")} </p>
+              {t("messages.noMessagesYetBeTheFirstToSendOne")}
+            </p>
           </div>
         ) : (
           safeArrayMap(safeMessages, (message) => {
@@ -147,221 +111,89 @@ export function MessagesList({
               last_name: "",
               avatar_url: null,
             };
-            const firstName = senderProfile.first_name ?? "";
-            const lastName = senderProfile.last_name ?? "";
             const displayName = senderDisplayName(
               senderProfile,
               t("messages.teamMember"),
             );
             const initials =
-              `${firstName.charAt(0) ?? ""}${lastName.charAt(0) ?? ""}`.trim() ||
+              `${senderProfile.first_name?.charAt(0) ?? ""}${senderProfile.last_name?.charAt(0) ?? ""}`.trim() ||
               displayName.charAt(0).toUpperCase() ||
               "U";
-            const createdAt = message.created_at
-              ? new Date(message.created_at)
-              : null;
-            const formattedTimestamp =
-              createdAt && !Number.isNaN(createdAt.getTime())
-                ? format(createdAt, "MMM dd, yyyy at h:mm a")
-                : "";
-
-            const parentId = replyParentId(message);
-            const parentMessage = parentId
-              ? safeMessages.find((item) => item.id === parentId)
-              : undefined;
-            const replyProfile =
-              message.reply_to_message?.senderprofile ??
-              parentMessage?.senderprofile;
-            const replyName = senderDisplayName(
-              replyProfile,
-              t("messages.teammate"),
-            );
-            const replyContent =
-              message.reply_to_message?.content ||
-              parentMessage?.content ||
-              t("messages.sharedAMessage");
+            const mine = message.senderid === currentUserId;
+            const timestamp = formatChatTime(message.created_at, locale);
             const attachments = normalizeMessageAttachments(message.attachments);
-            const replyCount = replyCounts.get(message.id) ?? 0;
-            const openThread = () => {
-              onThreadMessage({
-                id: message.id,
-                content: message.content,
-                sender: {
-                  id: message.senderid,
-                  name: displayName,
-                  avatar: senderProfile.avatar_url ?? undefined,
-                },
-                createdAt: createdAt ?? new Date(),
-                replyCount,
-              });
-            };
-
-            // Calculate read receipts
-            const messageTime = createdAt ? createdAt.getTime() : 0;
-            const readBy = channelMembers
-              .filter((member) => {
-                if (member.user_id === message.senderid) return false; // Don't show sender as read
-                if (!member.last_read_at) return false;
-                const readTime = new Date(member.last_read_at).getTime();
-                return readTime >= messageTime;
-              })
-              .map((m) => m.user_id);
-            const unreadCount = channelMembers.length - readBy.length - 1; // -1 for sender
+            const canDelete = mine || canModerateMessages;
 
             return (
               <div
                 key={message.id}
-                className="group flex gap-3 rounded-lg p-2 transition hover:bg-muted/60 focus-within:bg-muted/60 dark:hover:bg-muted/40"
+                data-testid="chat-bubble"
+                data-own={mine ? "true" : "false"}
+                className={cn("flex w-full", mine ? "justify-end" : "justify-start")}
               >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={senderProfile.avatar_url || undefined} />
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium text-foreground">
-                      {displayName}
-                    </p>
-                    {formattedTimestamp && (
-                      <p className="text-xs text-muted-foreground">
-                        {formattedTimestamp}
-                      </p>
+                <div
+                  className={cn(
+                    "flex max-w-[85%] items-end gap-2 sm:max-w-[75%]",
+                    mine ? "flex-row-reverse" : "flex-row",
+                  )}
+                >
+                  {!mine && (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={senderProfile.avatar_url || undefined} />
+                      <AvatarFallback>{initials}</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div className="flex min-w-0 flex-col">
+                  <div
+                    className={cn(
+                      "rounded-2xl px-3 py-2 text-sm shadow-sm",
+                      mine
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-foreground",
                     )}
-                  </div>
-                  {(message.reply_to_message || parentMessage) && (
-                    <div className="mt-1 rounded border-l-2 border-border bg-muted/50 p-2">
-                      <p className="text-xs text-muted-foreground">
-                        {t("messages.replyingTo")} {replyName}
-                      </p>
-                      <p className="truncate text-sm text-foreground/80">
-                        {replyContent}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Message Content - Edit or Display */}
-                  {editingMessageId === message.id ? (
-                    <div className="mt-2 space-y-2">
-                      <Input
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSaveEdit(message.id);
-                          }
-                          if (e.key === "Escape") {
-                            setEditingMessageId(null);
-                            setEditContent("");
-                          }
-                        }}
-                        autoFocus
-                        className="text-sm"
-                      />
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSaveEdit(message.id)}
-                          disabled={updating || !editContent.trim()}
-                        >
-                          <Check className="h-3 w-3 mr-1" />
-                          {t("common.save")} </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setEditingMessageId(null);
-                            setEditContent("");
-                          }}
-                          disabled={updating}
-                        >
-                          <X className="h-3 w-3 mr-1" />
-                          {t("common.cancel")} </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <MessageBody
-                        content={message.content}
-                        translation={translations.get(message.id) ?? null}
-                      />
-                      {attachments.length > 0 && (
-                        <MessageAttachments
-                          attachments={attachments}
-                          readOnly
-                        />
+                  >
+                    {!mine && (
+                      <p className="mb-1 text-xs font-medium">{displayName}</p>
+                    )}
+                    <MessageBody
+                      content={message.content}
+                      translation={translations.get(message.id) ?? null}
+                      className={cn(
+                        "whitespace-pre-wrap break-words text-sm",
+                        mine ? "text-primary-foreground" : "text-foreground",
                       )}
-                      {message.edited_at && (
-                        <span className="ml-2 text-xs text-muted-foreground italic">
-                          {t("messages.edited")}
-                        </span>
+                    />
+                    {attachments.length > 0 && (
+                      <MessageAttachments attachments={attachments} readOnly />
+                    )}
+                    <div
+                      className={cn(
+                        "mt-1 flex items-center gap-2 text-[11px]",
+                        mine ? "justify-end text-primary-foreground/80" : "text-muted-foreground",
                       )}
-
-                      {replyCount > 0 && (
+                    >
+                      {timestamp && <time dateTime={message.created_at}>{timestamp}</time>}
+                      {message.edited_at && <span>{t("messages.edited")}</span>}
+                      {canDelete && (
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="mt-1 h-7 px-2 text-xs"
-                          onClick={openThread}
-                        >
-                          {t("messages.replyCount", { count: replyCount })}
-                        </Button>
-                      )}
-
-                      {/* Message Actions */}
-                      <div className="mt-2 flex items-center gap-2 opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:transition-opacity [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          aria-label={t("messages.openThread")}
-                          onClick={openThread}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                        </Button>
-                        {message.senderid === currentUserId &&
-                          onUpdateMessage && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              aria-label={t("messages.editMessage")}
-                              onClick={() => {
-                                setEditingMessageId(message.id);
-                                setEditContent(message.content);
-                              }}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
+                          className={cn(
+                            "h-6 w-6 p-0",
+                            mine && "text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground",
                           )}
-                        {(message.senderid === currentUserId ||
-                          canModerateMessages) && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            aria-label={t("messages.deleteMessage")}
-                            onClick={() => setMessagePendingDelete(message)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </>
-                  )}
-
-                  {/* Message Reactions */}
-                  <MessageReactions messageId={message.id} className="mt-2" />
-
-                  {/* Read Receipts */}
-                  {readBy.length > 0 && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                      <span>{t("messages.readByCount", { count: readBy.length })}</span>
-                      {unreadCount > 0 && <span>• {t("messages.countUnread", { count: unreadCount })}</span>}
+                          data-testid="chat-delete"
+                          aria-label={t("messages.deleteMessage")}
+                          onClick={() => setMessagePendingDelete(message)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <MessageReactions messageId={message.id} className="mt-1" />
+                  </div>
                 </div>
               </div>
             );
@@ -376,7 +208,8 @@ export function MessagesList({
             <AlertDialogHeader>
               <AlertDialogTitle>{t("messages.deleteMessage")}</AlertDialogTitle>
               <AlertDialogDescription>
-                {t("messages.thisWillPermanentlyDeleteYourMessageThisActionCannotBeUndone")} </AlertDialogDescription>
+                {t("messages.thisWillPermanentlyDeleteYourMessageThisActionCannotBeUndone")}
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleting}>{t("common.cancel")}</AlertDialogCancel>
@@ -394,7 +227,8 @@ export function MessagesList({
                   }
                 }}
               >
-                {t("common.delete")} </AlertDialogAction>
+                {t("common.delete")}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -4636,6 +4636,16 @@
     "newChatsUnlockAutomaticallyAsColleaguesJoinTheWorkspace": "New chats unlock automatically as colleagues join the workspace.",
     "newGroup": "New group",
     "noChatsYet": "No chats yet",
+    "noDirectMessages": "No direct messages yet",
+    "noGroupsYet": "No groups yet",
+    "wizardAddPeople": "Add people",
+    "wizardAddPeopleHelp": "Choose who is in this group",
+    "wizardGroupDetails": "Group details",
+    "wizardGroupDetailsHelp": "Name the group",
+    "wizardPrivacy": "Privacy",
+    "wizardPrivacyHelp": "Choose who can see it",
+    "creatingGroup": "Creating…",
+    "fileAttachment": "File attachment",
     "noConversationOpen": "No conversation open",
     "noMembersFound": "No members found.",
     "noMessagesYet": "No messages yet",
@@ -4728,7 +4738,9 @@
     "writeAReply": "Write a reply",
     "writeTheFirstMessage": "Write the first message...",
     "writeYourAnnouncementContentHere": "Write your announcement content here...",
-    "youReTheFirstOneHere": "You're the first one here."
+    "youReTheFirstOneHere": "You're the first one here.",
+    "newMessageNotification": "New message from {{name}}",
+    "unreadChat": "Unread"
   },
   "analytics": {
     "12FromLastMonth": "+12% from last month",

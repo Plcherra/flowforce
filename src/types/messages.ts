@@ -5,7 +5,11 @@ export type MessageChannel = Tables<"message_channels"> & {
     user_id: string;
     role: string;
     last_read_at: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
+    avatar_url?: string | null;
   }[];
+  latest_message_at?: string | null;
   createdprofile?: {
     first_name: string;
     last_name: string;

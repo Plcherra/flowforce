@@ -2,29 +2,29 @@ import { Users, MessageSquare, Settings } from "lucide-react";
 
 export interface WizardStep {
   id: number;
-  title: string;
+  titleKey: string;
   icon: typeof Users;
-  description: string;
+  descriptionKey: string;
 }
 
 export const WIZARD_STEPS: WizardStep[] = [
   {
     id: 1,
-    title: "Add People",
+    titleKey: "messages.wizardAddPeople",
     icon: Users,
-    description: "Choose who is in this group",
+    descriptionKey: "messages.wizardAddPeopleHelp",
   },
   {
     id: 2,
-    title: "Group details",
+    titleKey: "messages.wizardGroupDetails",
     icon: MessageSquare,
-    description: "Name the group",
+    descriptionKey: "messages.wizardGroupDetailsHelp",
   },
   {
     id: 3,
-    title: "Privacy",
+    titleKey: "messages.wizardPrivacy",
     icon: Settings,
-    description: "Choose who can see it",
+    descriptionKey: "messages.wizardPrivacyHelp",
   },
 ];
 

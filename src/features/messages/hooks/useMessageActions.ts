@@ -10,6 +10,8 @@ import {
   deleteMessage as deleteMessageService,
   updateMessage as updateMessageService,
 } from "@/features/messages/api/messageService";
+import { notifyMessageRecipients } from "@/features/messages/api/messageDelivery";
+import { logger } from "@/utils/logger";
 
 export function useMessageActions() {
   const { t, i18n } = useTranslation();
@@ -33,12 +35,31 @@ export function useMessageActions() {
       options: { replyToId?: string; attachments?: MessageAttachment[] } = {},
     ) => {
       const userId = ensureUser();
+      const senderName = [
+        profile?.firstName ?? profile?.first_name,
+        profile?.lastName ?? profile?.last_name,
+      ]
+        .filter((part): part is string => Boolean(part && part.trim()))
+        .join(" ")
+        .trim();
       try {
-        return await sendMessageService(channelId, userId, content, {
+        const sent = await sendMessageService(channelId, userId, content, {
           ...options,
           companyId: companyId ?? undefined,
           sourceLocale,
         });
+        void notifyMessageRecipients({
+          channelId,
+          senderId: userId,
+          senderName,
+          content,
+        }).catch((error) => {
+          logger.error("Failed to notify message recipients", {
+            error,
+            tags: ["error", "messages"],
+          });
+        });
+        return sent;
       } catch (error) {
         toast({
           title: t("literals.unableToSendMessage"),
@@ -51,7 +72,7 @@ export function useMessageActions() {
         throw error;
       }
     },
-    [companyId, ensureUser, sourceLocale, toast],
+    [companyId, ensureUser, profile, sourceLocale, toast],
   );
 
   const updateMessage = useCallback(

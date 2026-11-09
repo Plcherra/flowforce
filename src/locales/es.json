@@ -4636,6 +4636,16 @@
     "newChatsUnlockAutomaticallyAsColleaguesJoinTheWorkspace": "Los chats nuevos se desbloquean solos cuando los compañeros se unen al espacio de trabajo.",
     "newGroup": "Grupo nuevo",
     "noChatsYet": "Aún no hay chats",
+    "noDirectMessages": "Aún no hay mensajes directos",
+    "noGroupsYet": "Aún no hay grupos",
+    "wizardAddPeople": "Añadir personas",
+    "wizardAddPeopleHelp": "Elige quién está en este grupo",
+    "wizardGroupDetails": "Datos del grupo",
+    "wizardGroupDetailsHelp": "Ponle nombre al grupo",
+    "wizardPrivacy": "Privacidad",
+    "wizardPrivacyHelp": "Elige quién puede verlo",
+    "creatingGroup": "Creando…",
+    "fileAttachment": "Archivo adjunto",
     "noConversationOpen": "Ninguna conversación abierta",
     "noMembersFound": "No se encontraron miembros.",
     "noMessagesYet": "Aún no hay mensajes",
@@ -4728,7 +4738,9 @@
     "writeAReply": "Escribe una respuesta",
     "writeTheFirstMessage": "Escribe el primer mensaje...",
     "writeYourAnnouncementContentHere": "Escribe aquí el contenido del anuncio...",
-    "youReTheFirstOneHere": "Eres el primero aquí."
+    "youReTheFirstOneHere": "Eres el primero aquí.",
+    "newMessageNotification": "Nuevo mensaje de {{name}}",
+    "unreadChat": "No leído"
   },
   "analytics": {
     "12FromLastMonth": "+12% respecto al mes pasado",
