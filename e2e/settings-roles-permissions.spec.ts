@@ -73,8 +73,10 @@ test("sections permissions and role classes follow systemSettings", async ({
     timeout: 20_000,
   });
 
+  await pinStaffProfile(page);
   await denyKeys(page, [SETTINGS_KEY]);
   await page.reload();
+  await expect(page.getByTestId("sections-permissions-page")).toHaveCount(0);
   await expect(page.getByTestId("sections-access-denied")).toBeVisible({
     timeout: 30_000,
   });
