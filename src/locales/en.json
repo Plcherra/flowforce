@@ -3167,7 +3167,20 @@
     "workflowReminderDescription": "Final reminder before week starts",
     "workflowSendScheduleReminder": "Send schedule reminder",
     "workflowConfirmCovered": "Confirm all shifts covered",
-    "shiftEndsHint": "Shift ends {{time}}, {{hint}}."
+    "shiftEndsHint": "Shift ends {{time}}, {{hint}}.",
+    "timeOffAllowanceUsedHint": "You've used {{used}} of {{total}} days",
+    "timeOffAvailabilityHours": "{{hours}} hrs",
+    "timeOffConfiguredAvailabilityHint": "Configured availability this week",
+    "timeOffCoverageShiftsHint": "Shifts overlapping requested time off",
+    "timeOffDaysAwaitingApproval": "{{count}} days awaiting approval",
+    "timeOffDaysCount": "{{count}} days",
+    "timeOffOneDayAwaitingApproval": "1 day awaiting approval",
+    "timeOffOneShiftOverlapping": "1 shift",
+    "timeOffOpenRequests": "{{count}} open",
+    "timeOffShiftsOverlapping": "{{count}} shifts",
+    "timeOffStatusApproved": "Approved",
+    "timeOffStatusPending": "Pending",
+    "timeOffStatusRejected": "Rejected"
   },
   "tasks": {
     "aTitleIsRequired": "A title is required.",

@@ -3167,7 +3167,20 @@
     "workflowReminderDescription": "Dernier rappel avant le début de la semaine",
     "workflowSendScheduleReminder": "Envoyer le rappel du planning",
     "workflowConfirmCovered": "Confirmer que tous les postes sont couverts",
-    "shiftEndsHint": "Le poste se termine à {{time}}, {{hint}}."
+    "shiftEndsHint": "Le poste se termine à {{time}}, {{hint}}.",
+    "timeOffAllowanceUsedHint": "Vous avez utilisé {{used}} jours sur {{total}}",
+    "timeOffAvailabilityHours": "{{hours}} h",
+    "timeOffConfiguredAvailabilityHint": "Disponibilité configurée cette semaine",
+    "timeOffCoverageShiftsHint": "Équipes chevauchant les congés demandés",
+    "timeOffDaysAwaitingApproval": "{{count}} jours en attente d'approbation",
+    "timeOffDaysCount": "{{count}} jours",
+    "timeOffOneDayAwaitingApproval": "1 jour en attente d'approbation",
+    "timeOffOneShiftOverlapping": "1 équipe",
+    "timeOffOpenRequests": "{{count}} ouvertes",
+    "timeOffShiftsOverlapping": "{{count}} équipes",
+    "timeOffStatusApproved": "Approuvé",
+    "timeOffStatusPending": "En attente",
+    "timeOffStatusRejected": "Refusé"
   },
   "tasks": {
     "aTitleIsRequired": "Un titre est obligatoire.",

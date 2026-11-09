@@ -101,7 +101,7 @@ export async function fetchTimeOffRequests(params: {
         user:profiles(id, first_name, last_name, avatar_url, company_id)
       `,
     )
-    .eq("user.company_id", companyId)
+    .eq("company_id", companyId)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 

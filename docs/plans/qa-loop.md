@@ -116,6 +116,9 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - Production `performance_reviews` has only `id`, `company_id`, `employee_id`, `reviewerid`, `created_at`, and `updated_at`. Loads use those columns and `created_at` filtering instead of missing `goal_id` / `review_date` fields. `performance_goal_reviews` returns an empty list when the table has no enriched review columns (no migration).
    - Recent reviews on `/app/performance` gates on `reviews.manage` or `reviews.view_own`. KPI avg score ignores unscored stub rows.
    - `e2e/reviews-permissions.spec.ts` pins English, signs in with the test user, checks the reviews section permission gates, and asserts the reviews REST select omits `goal_id`. Review writes are blocked before sign-in.
-10. Time off — todo
+10. Time off — done
+   - Team time off loads filter `time_off_requests` by `company_id` (not embedded `user.company_id`). Approve/reject gates on `approveTimeOff` only (no manager-role bypass). Request UI gates on `timeoff.request`.
+   - My time off and team rows use translated type/status labels; panel summary tiles and `formatRequestedWhen` empty state use locale keys across all six locales.
+   - `e2e/time-off-permissions.spec.ts` pins English, signs in with the test user, checks request and approval gates, and asserts the team list REST query uses `company_id`. Writes are blocked before sign-in.
 11. Analytics — todo
 12. Settings and roles — todo

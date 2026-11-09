@@ -43,7 +43,7 @@ export function useSchedulingRole(): SchedulingRole {
     const canManageSchedule =
       version.draft || version.create || version.edit || version.assign || version.delete;
     const canPublish = version.edit;
-    const canApproveRequests = isManager || can("approveTimeOff");
+    const canApproveRequests = can("approveTimeOff");
     const canManageAvailability = version.draft || version.edit;
 
     return {

@@ -3167,7 +3167,20 @@
     "workflowReminderDescription": "Letzte Erinnerung bevor die Woche beginnt",
     "workflowSendScheduleReminder": "Dienstplanerinnerung senden",
     "workflowConfirmCovered": "Bestätigen, dass alle Schichten besetzt sind",
-    "shiftEndsHint": "Die Schicht endet um {{time}}, {{hint}}."
+    "shiftEndsHint": "Die Schicht endet um {{time}}, {{hint}}.",
+    "timeOffAllowanceUsedHint": "{{used}} von {{total}} Tagen genutzt",
+    "timeOffAvailabilityHours": "{{hours}} Std.",
+    "timeOffConfiguredAvailabilityHint": "Verfügbarkeit diese Woche konfiguriert",
+    "timeOffCoverageShiftsHint": "Schichten überschneiden sich mit beantragter Abwesenheit",
+    "timeOffDaysAwaitingApproval": "{{count}} Tage warten auf Freigabe",
+    "timeOffDaysCount": "{{count}} Tage",
+    "timeOffOneDayAwaitingApproval": "1 Tag wartet auf Freigabe",
+    "timeOffOneShiftOverlapping": "1 Schicht",
+    "timeOffOpenRequests": "{{count}} offen",
+    "timeOffShiftsOverlapping": "{{count}} Schichten",
+    "timeOffStatusApproved": "Genehmigt",
+    "timeOffStatusPending": "Ausstehend",
+    "timeOffStatusRejected": "Abgelehnt"
   },
   "tasks": {
     "aTitleIsRequired": "Ein Titel ist erforderlich.",
