@@ -89,7 +89,15 @@ Sunday 8 Nov 2026, 9:00 AM–1:00 PM America/New_York. Do not start a new area a
    - Empty chat lists, the new-group steps, the creating label, and a file-only message go through all six locales.
    - `e2e/messages-permissions.spec.ts` pins English, signs in with the test user, opens new chat and the group name field, and checks send on and off. Nothing is stored.
    - Production already has `messages_realtime_publication` as version `20261108151539`. The file is in the repo under that version. It was applied outside this block. This block does not apply SQL.
-3. Company Updates — todo
+Hire flow, forms layout, and HR readiness on Insights — done (#55)
+   - New-hire onboarding uses the same tinted cards as the shop welcome. The owner checklist counts owner blocks, not an empty welcome slot. Invite preview uses `HiringChecklistView`.
+   - Form fill is one scrolling field list with submit at the bottom. Submissions empty state says no forms submitted yet. Submissions load profiles without the broken embed join.
+   - HR readiness moved from Team Directory to Overview when the Insights pack is on.
+   - `e2e/invite-activation.spec.ts`, `tests/playwright/employee-onboarding-preview.spec.ts`, and the onboarding or overview unit scripts passed. No new migration.
+3. Company Updates — done
+   - Main `/app/company-updates` uses `canManageCompanyUpdates` (`updates.manage`, settings keys, manager role). Dashboard card and custom section table no longer gate on `systemSettings` alone.
+   - Section builder opens `CreateUpdateWizard` instead of a dead New Update log. Table badges and priorities use locale keys; unused filter and export buttons are removed.
+   - `e2e/company-updates-permissions.spec.ts` pins English, signs in with the test user, opens the wizard, and hides New update when `updates.manage` is denied on a staff role. Nothing is stored.
 4. Tasks — todo
 5. Forms — todo
 6. Calendar — skipped. Removed in #47. Do not bring it back.

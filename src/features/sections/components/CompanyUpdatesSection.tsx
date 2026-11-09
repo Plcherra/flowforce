@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next";
-import React, { useMemo, useState } from "react";
+import React, { lazy, Suspense, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List, Plus } from "lucide-react";
 import { useCan } from "@/hooks/useCan";
-import { logger } from "@/utils/logger";
+import { useProfile } from "@/hooks/useProfile";
+import { canManageCompanyUpdates } from "@/features/company-updates/companyUpdateAccess";
+import { WizardFallback } from "@/features/company-updates/components/CompanyUpdatesSkeletons";
 import { useCompanyUpdates } from "@/hooks/useCompanyUpdates";
 import { useCompanyUpdateComments } from "@/features/company-updates/hooks/useCompanyUpdateComments";
 import { useCompanyUpdateMutations } from "@/features/company-updates/hooks/useCompanyUpdateMutations";
@@ -11,11 +13,22 @@ import { UpdatesTableView } from "./updates/UpdatesTableView";
 import { UpdatesFeedView } from "./updates/UpdatesFeedView";
 import { EditUpdateDialog } from "@/features/company-updates/components/EditUpdateDialog";
 import type { CompanyUpdate } from "@/types/companyUpdates";
+import type { WizardFormData } from "@/features/company-updates/wizard/CreateUpdateWizard";
+
+const CreateUpdateWizard = lazy(
+  () => import("@/features/company-updates/wizard/CreateUpdateWizard"),
+);
 
 export default function CompanyUpdatesSection() {
   const { t } = useTranslation();
   const { can } = useCan();
+  const { profile } = useProfile();
+  const canManageUpdates = canManageCompanyUpdates({
+    role: profile?.role,
+    can: (key) => can(key),
+  });
   const [viewMode, setViewMode] = useState<"table" | "feed">("table");
+  const [createWizardOpen, setCreateWizardOpen] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState<CompanyUpdate | null>(
     null,
   );
@@ -28,12 +41,22 @@ export default function CompanyUpdatesSection() {
     () => Object.values(commentsByUpdate).flat(),
     [commentsByUpdate],
   );
-  const { toggleLike, addComment, markAsViewed, togglePin, deleteUpdate } =
+  const { toggleLike, addComment, markAsViewed, togglePin, deleteUpdate, createUpdate } =
     useCompanyUpdateMutations();
 
   const handleAddNew = () => {
-    // TODO: Open create update dialog
-    logger.debug("Add new update");
+    setCreateWizardOpen(true);
+  };
+
+  const handleUpdateComplete = (formData: WizardFormData) => {
+    void createUpdate({
+      title: formData.title,
+      body: formData.body,
+      richContent: formData.richContent,
+      type: formData.type,
+      priority: formData.priority,
+      isPinned: false,
+    });
   };
 
   const handleEdit = (update: CompanyUpdate) => {
@@ -118,7 +141,7 @@ export default function CompanyUpdatesSection() {
                   </Button>
                 </div>
 
-                {can("systemSettings") && (
+                {canManageUpdates && (
                   <Button onClick={handleAddNew}>
                     <Plus className="h-4 w-4 mr-2" />
                     {t("sections.newUpdate")}
@@ -138,6 +161,7 @@ export default function CompanyUpdatesSection() {
           {viewMode === "table" ? (
             <UpdatesTableView
               updates={updates}
+              canManage={canManageUpdates}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onTogglePin={handleTogglePin}
@@ -170,6 +194,16 @@ export default function CompanyUpdatesSection() {
           setEditingUpdate(null);
         }}
       />
+
+      <div id="company-updates-section-wizard">
+        <Suspense fallback={<WizardFallback />}>
+          <CreateUpdateWizard
+            open={createWizardOpen}
+            onOpenChange={setCreateWizardOpen}
+            onComplete={handleUpdateComplete}
+          />
+        </Suspense>
+      </div>
     </div>
   );
 }

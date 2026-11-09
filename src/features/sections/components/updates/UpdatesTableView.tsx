@@ -15,8 +15,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
-  Filter,
-  Download,
   Plus,
   Pin,
   Eye,
@@ -35,10 +33,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CompanyUpdate } from "@/types/companyUpdates";
-import { useCan } from "@/hooks/useCan";
 
 interface UpdatesTableViewProps {
   updates: CompanyUpdate[];
+  canManage?: boolean;
   onEdit?: (update: CompanyUpdate) => void;
   onDelete?: (updateId: string) => void;
   onTogglePin?: (updateId: string) => void;
@@ -47,13 +45,13 @@ interface UpdatesTableViewProps {
 
 export function UpdatesTableView({
   updates,
+  canManage = false,
   onEdit,
   onDelete,
   onTogglePin,
   onAddNew,
 }: UpdatesTableViewProps) {
   const { t } = useTranslation();
-  const { can } = useCan();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("published");
 
@@ -64,12 +62,14 @@ export function UpdatesTableView({
       scheduled: "outline",
       archived: "destructive",
     } as const;
+    const labels: Record<CompanyUpdate["status"], string> = {
+      published: t("forms.statusPublished"),
+      draft: t("forms.statusDraft"),
+      scheduled: t("updates.scheduledBadge"),
+      archived: t("forms.statusArchived"),
+    };
 
-    return (
-      <Badge variant={variants[status]} className="capitalize">
-        {status}
-      </Badge>
-    );
+    return <Badge variant={variants[status]}>{labels[status]}</Badge>;
   };
 
   const getTypeBadge = (type: CompanyUpdate["type"]) => {
@@ -82,8 +82,16 @@ export function UpdatesTableView({
       policy:
         "bg-warning-muted text-warning-foreground",
     };
+    const labels: Record<CompanyUpdate["type"], string> = {
+      announcement: t("dashboard.announcement"),
+      news: t("dashboard.news"),
+      event: t("dashboard.event"),
+      policy: t("dashboard.policy"),
+    };
 
-    return <Badge className={`${colors[type]} text-xs`}>{type}</Badge>;
+    return (
+      <Badge className={`${colors[type]} text-xs`}>{labels[type]}</Badge>
+    );
   };
 
   const getPriorityBadge = (priority: CompanyUpdate["priority"]) => {
@@ -93,8 +101,15 @@ export function UpdatesTableView({
         "bg-warning-muted text-warning-foreground",
       low: "bg-muted text-foreground",
     };
+    const labels: Record<CompanyUpdate["priority"], string> = {
+      high: t("dashboard.high"),
+      medium: t("dashboard.medium"),
+      low: t("dashboard.low"),
+    };
 
-    return <Badge className={`${colors[priority]} text-xs`}>{priority}</Badge>;
+    return (
+      <Badge className={`${colors[priority]} text-xs`}>{labels[priority]}</Badge>
+    );
   };
 
   const filteredUpdates = updates.filter((update) => {
@@ -133,17 +148,9 @@ export function UpdatesTableView({
               className="pl-10 w-[300px]"
             />
           </div>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            {t("sections.filter")}
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            {t("schedule.export")}
-          </Button>
         </div>
 
-        {can("systemSettings") && (
+        {canManage && (
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
             {t("sections.addNew")}
@@ -245,7 +252,7 @@ export function UpdatesTableView({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {can("systemSettings") && (
+                          {canManage && (
                             <>
                               <DropdownMenuItem
                                 onClick={() => onEdit?.(update)}
