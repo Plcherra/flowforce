@@ -1593,7 +1593,8 @@
     "trackCoverageAcrossRolesAndEnsurePermissionsReflect": "Track coverage across roles and ensure permissions reflect your operating model.",
     "trackPrivilegedUserPermissionSettingsInviteAndAutomation": "Track privileged user, permission, settings, invite, and automation actions.",
     "updateClass": "Update class",
-    "viewNotes": "View notes"
+    "viewNotes": "View notes",
+    "performerWithEmail": "Changed by: {{name}} ({{email}})"
   },
   "footer": {
     "about": "About",
@@ -5671,7 +5672,9 @@
     "inviteOtherRoles": "Other roles",
     "deleteNamed": "Delete {{name}}",
     "noDepartmentsYet": "No department is set up yet.",
-    "deleteBlockedHelp": "Move those people or shifts first, then delete it."
+    "deleteBlockedHelp": "Move those people or shifts first, then delete it.",
+    "loadingAccessControls": "Loading access controls...",
+    "loadingActivityTimeline": "Loading activity timeline..."
   },
   "profile": {
     "saving": "Saving...",
@@ -6224,7 +6227,12 @@
     "accessScheduleAssign": "Assign",
     "accessHideDetails": "Hide details",
     "accessGroupTasks": "Tasks and lists",
-    "accessCustomize": "Customize"
+    "accessCustomize": "Customize",
+    "activityChangedRole": "Changed access from {{from}} to {{to}}",
+    "activityChangedEmploymentStatus": "Changed employment status from {{from}} to {{to}}",
+    "activityUpdatedPermissions": "Updated permission overrides",
+    "activitySentEmployeeInvite": "Sent invite to {{email}}",
+    "activityInviteEmailFailed": "Invite email failed for {{email}}"
   },
   "roles": {
     "aiSuggestions": "AI Suggestions",

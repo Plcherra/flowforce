@@ -59,9 +59,15 @@ export function ActivityHistoryCard() {
             </TableHeader>
             <TableBody>
               {auditLogs.data.slice(0, 8).map((entry) => (
-                <TableRow key={entry.id}>
+                <TableRow key={entry.id} data-testid="settings-activity-row">
                   <TableCell className="font-medium">
-                    {describeActivity(t, entry)}
+                    {describeActivity(t, {
+                      action: entry.action,
+                      metadata: entry.metadata,
+                      new_values: entry.new_values,
+                      old_values: entry.old_values,
+                      subject: entry.userprofile ?? entry.performed_byprofile,
+                    })}
                   </TableCell>
                   <TableCell>
                     {activityActorName(

@@ -1500,7 +1500,8 @@
     "trackCoverageAcrossRolesAndEnsurePermissionsReflect": "Segui la copertura tra i ruoli e assicurati che i permessi riflettano come operi.",
     "trackPrivilegedUserPermissionSettingsInviteAndAutomation": "Segui le azioni privilegiate su utenti, permessi, impostazioni, inviti e automazione.",
     "updateClass": "Aggiorna classe",
-    "viewNotes": "Vedi note"
+    "viewNotes": "Vedi note",
+    "performerWithEmail": "Modificato da: {{name}} ({{email}})"
   },
   "certifications": {
     "available": "Disponibile",
@@ -5671,7 +5672,9 @@
     "inviteOtherRoles": "Altri ruoli",
     "deleteNamed": "Elimina {{name}}",
     "noDepartmentsYet": "Non c'è ancora un reparto.",
-    "deleteBlockedHelp": "Sposta quelle persone o quei turni, poi eliminalo."
+    "deleteBlockedHelp": "Sposta quelle persone o quei turni, poi eliminalo.",
+    "loadingAccessControls": "Caricamento controlli di accesso...",
+    "loadingActivityTimeline": "Caricamento cronologia attività..."
   },
   "profile": {
     "saving": "Salvataggio...",
@@ -6224,7 +6227,12 @@
     "accessScheduleAssign": "Assegna",
     "accessHideDetails": "Nascondi i dettagli",
     "accessGroupTasks": "Attività e liste",
-    "accessCustomize": "Personalizza"
+    "accessCustomize": "Personalizza",
+    "activityChangedRole": "Ha cambiato l'accesso da {{from}} a {{to}}",
+    "activityChangedEmploymentStatus": "Ha cambiato lo stato di impiego da {{from}} a {{to}}",
+    "activityUpdatedPermissions": "Ha aggiornato le autorizzazioni personalizzate",
+    "activitySentEmployeeInvite": "Invito inviato a {{email}}",
+    "activityInviteEmailFailed": "Invito non inviato a {{email}}"
   },
   "roles": {
     "aiSuggestions": "Suggerimenti IA",

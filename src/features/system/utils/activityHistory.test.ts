@@ -12,9 +12,13 @@ const labels: Record<string, string> = {
   "settings.activityTurnedOffPack": "Turned off {{pack}} pack",
   "settings.activityChangedStoreHours": "Changed store hours for {{store}}",
   "settings.activityChangedSettings": "Changed company settings",
+  "settings.activityChangedRole": "Changed access from {{from}} to {{to}}",
+  "settings.activitySentEmployeeInvite": "Sent invite to {{email}}",
   "settings.languageName.en": "English",
   "settings.languageName.pt": "Portuguese",
   "packs.stock.title": "Stock",
+  "hireActivity.completedStep": "{{name}} completed {{step}}.",
+  "hireActivity.theHire": "This person",
   "literals.unknown": "Unknown",
 };
 
@@ -69,7 +73,15 @@ export function runActivityHistoryTests() {
   );
   assert.equal(humanizeAuditAction("employee.invite_created"), "Employee invite created");
   assert.equal(
-    describeActivity(t, { action: "employee.invite_created" }),
-    "Employee invite created",
+    describeActivity(t, { action: "employee.invite.created", new_values: { email: "alex@example.com" } }),
+    "Sent invite to alex@example.com",
+  );
+  assert.equal(
+    describeActivity(t, {
+      action: "hire.step_completed",
+      new_values: { step: "Photo ID" },
+      subject: { first_name: "Alex", last_name: "Rivera" },
+    }),
+    "Alex Rivera completed Photo ID.",
   );
 }
