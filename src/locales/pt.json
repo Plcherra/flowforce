@@ -5674,7 +5674,12 @@
     "noDepartmentsYet": "Ainda não há um departamento.",
     "deleteBlockedHelp": "Muda essas pessoas ou turnos e depois elimina.",
     "loadingAccessControls": "Carregando controles de acesso...",
-    "loadingActivityTimeline": "Carregando histórico de atividade..."
+    "loadingActivityTimeline": "Carregando histórico de atividade...",
+    "departmentNotAssigned": "Não atribuído",
+    "relativeOneDayAgo": "Há 1 dia",
+    "relativeDaysAgo": "Há {{count}} dias",
+    "relativeMonthsAgo": "Há {{count}} meses",
+    "relativeYearsAgo": "Há {{count}} anos"
   },
   "profile": {
     "saving": "Salvando...",

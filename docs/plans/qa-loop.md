@@ -153,5 +153,7 @@ Do not start a new area after 1:00 PM ET.
 17. Packs and billing — done
    - Owner billing tab lists Ops at \$59/mo, Team/Insights/Stock add-on prices, monthly total, and mocked checkout with no `system_settings` or live Stripe network writes. Staff never see the Billing tab.
    - `e2e/packs-billing.spec.ts` complements `e2e/packs-discovery.spec.ts` and `e2e/landing-packs.spec.ts`. Checkout and portal stay mocked; `billing.manage` deny gate remains in discovery spec.
-18. Profile, account, and notifications — todo
+18. Profile, account, and notifications — done
+   - Employee drawer overview uses locale keys for department, hire date, and relative times. Profile and notification panels expose stable test ids.
+   - `e2e/profile-account-notifications.spec.ts` covers `/app/profile`, personal language select-then-save (writes stubbed), and notification settings. Writes blocked before sign-in.
 19. My Shift — todo

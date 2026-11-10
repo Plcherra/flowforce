@@ -91,7 +91,7 @@ export function NotificationSettingsPanel() {
   }
 
   return (
-    <Card>
+    <Card data-testid="notification-settings-panel">
       <CardHeader>
         <CardTitle>{t("settings.notificationCenter")}</CardTitle>
         <CardDescription>{t("settings.chooseDeliveryChannelsAndOverridesForEachProduct")}</CardDescription>

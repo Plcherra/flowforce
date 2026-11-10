@@ -5674,7 +5674,12 @@
     "noDepartmentsYet": "Non c'è ancora un reparto.",
     "deleteBlockedHelp": "Sposta quelle persone o quei turni, poi eliminalo.",
     "loadingAccessControls": "Caricamento controlli di accesso...",
-    "loadingActivityTimeline": "Caricamento cronologia attività..."
+    "loadingActivityTimeline": "Caricamento cronologia attività...",
+    "departmentNotAssigned": "Non assegnato",
+    "relativeOneDayAgo": "1 giorno fa",
+    "relativeDaysAgo": "{{count}} giorni fa",
+    "relativeMonthsAgo": "{{count}} mesi fa",
+    "relativeYearsAgo": "{{count}} anni fa"
   },
   "profile": {
     "saving": "Salvataggio...",
