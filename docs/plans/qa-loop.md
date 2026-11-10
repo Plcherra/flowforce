@@ -183,11 +183,19 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
 24. Help desk — done
    - `/app/help-desk` redirects to `/app/messages`; no helpdesk module remains.
    - `e2e/help-desk-redirect.spec.ts` pins English, signs in with the test user, and asserts the messages heading after navigation.
-25. Marketing — `/features`, `/hr-development`, `/templates`, `/register` beyond landing/pricing packs spec.
-26. In-app notification center — header/task notifications distinct from profile notification prefs (`e2e/profile-account-notifications.spec.ts`).
-27. Availability — `/app/availability`, `/app/availability/manage` (scheduling embed may partially cover).
-28. Schedule lobby — `/app/schedule-lobby`.
-29. Custom sections — `/app/add-section`, `/app/section/[path]`.
-30. Standalone invite — `/app/invite-employee`.
-31. Public previews — `/onboarding-preview`, `/forms-preview`, `/onboarding`.
-32. Legacy inventory aliases — flat `/app/purchasing`, `/app/cookbook`, etc. (redirect smoke only).
+25. Marketing — done
+   - `e2e/marketing-routes.spec.ts` covers `/features`, `/hr-development`, `/templates`, and `/register` in English. Complements `e2e/landing-packs.spec.ts` for `/` and `/pricing`.
+26. In-app notification center — done
+   - `e2e/notification-center.spec.ts` opens the account-cluster inbox versus profile notification prefs, and the Tasks bell popover. Complements `e2e/profile-account-notifications.spec.ts`.
+27. Availability — done (with item 28 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/availability` and `/app/availability/manage` redirect into enhanced scheduling with the availability panel.
+28. Schedule lobby — done (with item 27 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/schedule-lobby` and `/schedule-lobby` land on enhanced scheduling.
+29. Custom sections — done (with items 30–32 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/add-section` and `/app/section/[path]` redirect to dashboard.
+30. Standalone invite — done (with items 29–32 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/invite-employee` client-redirects to `/app/employees?invite=1`.
+31. Public previews — done (with items 29–32 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/onboarding` → company registration; dev-only `/onboarding-preview` and `/forms-preview` render without writes.
+32. Legacy inventory aliases — done (with items 29–31 in `e2e/pilot-route-smoke.spec.ts`)
+   - On-hold modules stay visible: owner smoke on `/app/purchasing` and `/app/cookbook` loads signed-in shell without a server error (no redirect).
