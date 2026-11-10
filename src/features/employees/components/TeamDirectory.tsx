@@ -275,6 +275,7 @@ export function TeamDirectory() {
             )}
             <TeamActionsBar
               canInvite={tools.invitations}
+              canExportCsv={tools.exportCsv}
               canManageRoles={tools.roles}
               canManagePermissions={tools.permissions}
               onOpenInvite={() => handleInviteChange(true)}
@@ -427,6 +428,7 @@ export function TeamDirectory() {
                     employees={paginatedEmployees}
                     departmentMap={departmentNameMap}
                     onEmployeeClick={openEmployeeDrawer}
+                    canResendInvites={tools.resendInvites}
                   />
                 )}
               </TabsContent>

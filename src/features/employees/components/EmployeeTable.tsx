@@ -32,12 +32,14 @@ interface EmployeeTableProps {
   employees: Employee[];
   departmentMap: Map<string, string>;
   onEmployeeClick: (employee: Employee) => void;
+  canResendInvites: boolean;
 }
 
 export function EmployeeTable({
   employees,
   departmentMap,
   onEmployeeClick,
+  canResendInvites,
 }: EmployeeTableProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -67,13 +69,13 @@ export function EmployeeTable({
   const getDisplayName = (employee: Employee) => {
     const fullName =
       `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim();
-    return fullName || employee.email || "Unnamed teammate";
+    return fullName || employee.email || t("employees.unnamedTeammate");
   };
 
   const getInitials = (employee: Employee) => {
     const first = employee.first_name?.trim()[0] ?? "";
     const last = employee.last_name?.trim()[0] ?? "";
-    return `${first}${last}`.toUpperCase() || "TM";
+    return `${first}${last}`.toUpperCase() || t("employees.teammateInitials");
   };
 
   return (
@@ -139,7 +141,7 @@ export function EmployeeTable({
               <TableCell className="hidden md:table-cell">
                 {employee.hire_date
                   ? new Date(employee.hire_date).toLocaleDateString()
-                  : "—"}
+                  : t("employees.hireDateUnset")}
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <Badge
@@ -176,7 +178,7 @@ export function EmployeeTable({
                     >
                       {t("employees.viewDetails")}
                     </DropdownMenuItem>
-                    {directoryMembership(employee) === "invited" ? (
+                    {directoryMembership(employee) === "invited" && canResendInvites ? (
                       <DropdownMenuItem
                         data-testid="directory-resend"
                         disabled={resending === employee.id}

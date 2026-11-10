@@ -10,6 +10,7 @@ import { Download } from "lucide-react";
 
 type TeamActionsBarProps = {
   canInvite: boolean;
+  canExportCsv: boolean;
   canManageRoles: boolean;
   canManagePermissions: boolean;
   onOpenInvite: () => void;
@@ -21,6 +22,7 @@ type TeamActionsBarProps = {
 
 export function TeamActionsBar({
   canInvite,
+  canExportCsv,
   canManageRoles,
   canManagePermissions,
   onOpenInvite,
@@ -32,19 +34,25 @@ export function TeamActionsBar({
   const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="whitespace-nowrap">
-            <Download className="mr-2 h-4 w-4" /> {t("schedule.export")}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onExportFiltered}>
-            {t("employees.csvFiltered")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onExportAll}>{t("employees.csvAll")}</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {canExportCsv ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="whitespace-nowrap"
+              data-testid="employees-csv-export"
+            >
+              <Download className="mr-2 h-4 w-4" /> {t("schedule.export")}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onExportFiltered}>
+              {t("employees.csvFiltered")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onExportAll}>{t("employees.csvAll")}</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
 
       {canInvite || canManageRoles || canManagePermissions ? (
         <div className="flex gap-2">
