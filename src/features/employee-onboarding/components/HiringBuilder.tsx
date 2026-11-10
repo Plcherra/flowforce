@@ -27,7 +27,10 @@ export type HiringBuilderHandle = {
   save: () => Promise<boolean>;
 };
 
-export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuilder(_props, ref) {
+export const HiringBuilder = forwardRef<HiringBuilderHandle, { canManage?: boolean }>(function HiringBuilder(
+  { canManage = true },
+  ref,
+) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -50,6 +53,7 @@ export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuil
 
   useImperativeHandle(ref, () => ({
     save: async () => {
+      if (!canManage) return false;
       if (!companyId || !userId) return blocks.every((block) => !block.title.trim());
       if (hiringFingerprint(blocks) === baseline.current) return true;
       const result = await saveHiringBlocks({ companyId, userId, blocks });
@@ -61,7 +65,7 @@ export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuil
       }
       return true;
     },
-  }), [blocks, companyId, userId]);
+  }), [blocks, canManage, companyId, userId]);
 
   if (!ready) {
     return <p className="text-sm text-muted-foreground">{t("employeeOnboarding.loading")}</p>;
@@ -71,7 +75,7 @@ export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuil
     <div className="space-y-3">
       <HiringBuilderView
         blocks={blocks}
-        canManage
+        canManage={canManage}
         onChange={setBlocks}
         onUpload={(block, file) => {
           if (!companyId || block.id.startsWith("draft-")) {
@@ -93,6 +97,7 @@ export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuil
           });
         }}
       />
+      {canManage ? (
       <Button
         type="button"
         data-testid="hiring-save"
@@ -114,6 +119,7 @@ export const HiringBuilder = forwardRef<HiringBuilderHandle>(function HiringBuil
       >
         {t("hiring.save")}
       </Button>
+      ) : null}
     </div>
   );
 });

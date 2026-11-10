@@ -139,7 +139,9 @@ Do not start a new area after 6:00 AM ET.
 14. Team Directory and invites — done
    - CSV export and resend invite follow `manageUsers` (export also allows `directory.manage`). Directory table copy uses locale keys for unnamed rows, initials fallback, and unset hire dates.
    - `e2e/employees-permissions.spec.ts` pins English, signs in with the test user, checks `directory.view`, `manageUsers`, invite, CSV export, and resend gates. Invite API writes are blocked. Nothing is stored.
-15. Employee onboarding and welcome — todo
+15. Employee onboarding and welcome — done
+   - Settings onboarding passes `canManageSteps` into `HiringBuilder`, so managers without `systemSettings` see the hire preview read-only and cannot save hiring blocks.
+   - `e2e/employee-onboarding-welcome.spec.ts` pins English, checks the shop welcome layout (`Welcome to the shop` / `Before your first shift`), settings preview, hire checklist, invite activation, and onboarding settings gates. `e2e/invite-activation.spec.ts` passed again. Writes blocked before sign-in.
 16. Activity history — todo
 17. Packs and billing — todo
 18. Profile, account, and notifications — todo

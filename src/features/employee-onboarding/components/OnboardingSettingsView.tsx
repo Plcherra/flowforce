@@ -88,7 +88,7 @@ export function OnboardingSettingsView({
           ) : null}
         </CardContent>
       </Card>
-      <HiringBuilder />
+      <HiringBuilder canManage={canManageSteps} />
       <OnboardingDocumentsCard
         documents={documents}
         canManage={canManageDocuments}
