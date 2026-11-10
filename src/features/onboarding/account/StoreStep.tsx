@@ -12,7 +12,9 @@ import {
 export function StoreStep(props: {
   stores: StoreDraft[];
   onChange: (stores: StoreDraft[]) => void;
+  readOnly?: boolean;
 }) {
+  const readOnly = props.readOnly === true;
   const { t } = useTranslation();
   const update = (key: string, patch: (store: StoreDraft) => StoreDraft) => {
     props.onChange(props.stores.map((store) => (store.key === key ? patch(store) : store)));
@@ -29,6 +31,8 @@ export function StoreStep(props: {
                 id={`store-name-${store.key}`}
                 data-testid={index === 0 ? "store-name" : `store-name-${index}`}
                 value={store.name}
+                readOnly={readOnly}
+                disabled={readOnly}
                 onChange={(event) =>
                   update(store.key, (current) => ({ ...current, name: event.target.value }))
                 }
@@ -42,6 +46,8 @@ export function StoreStep(props: {
                 id={`store-address-${store.key}`}
                 data-testid={index === 0 ? "store-address" : `store-address-${index}`}
                 value={store.address}
+                readOnly={readOnly}
+                disabled={readOnly}
                 onChange={(event) =>
                   update(store.key, (current) => ({ ...current, address: event.target.value }))
                 }
@@ -55,6 +61,7 @@ export function StoreStep(props: {
                 key={day}
                 day={day}
                 storeKey={store.key}
+                readOnly={readOnly}
                 closed={store.hours[day].closed}
                 open={store.hours[day].open}
                 close={store.hours[day].close}
@@ -79,7 +86,7 @@ export function StoreStep(props: {
               />
             ))}
           </div>
-          {props.stores.length > 1 ? (
+          {!readOnly && props.stores.length > 1 ? (
             <Button
               type="button"
               variant="ghost"
@@ -91,14 +98,16 @@ export function StoreStep(props: {
           ) : null}
         </section>
       ))}
-      <Button
-        type="button"
-        variant="outline"
-        data-testid="store-add"
-        onClick={() => props.onChange([...props.stores, blankStore()])}
-      >
-        {t("onboarding.account.store.add")}
-      </Button>
+      {!readOnly ? (
+        <Button
+          type="button"
+          variant="outline"
+          data-testid="store-add"
+          onClick={() => props.onChange([...props.stores, blankStore()])}
+        >
+          {t("onboarding.account.store.add")}
+        </Button>
+      ) : null}
     </div>
   );
 }
@@ -106,6 +115,7 @@ export function StoreStep(props: {
 function DayRow(props: {
   day: StoreDay;
   storeKey: string;
+  readOnly?: boolean;
   closed: boolean;
   open: string;
   close: string;
@@ -113,6 +123,7 @@ function DayRow(props: {
   onOpen: (value: string) => void;
   onClose: (value: string) => void;
 }) {
+  const readOnly = props.readOnly === true;
   const { t } = useTranslation();
   return (
     <div className="grid grid-cols-[7rem_auto_1fr_1fr] items-center gap-2">
@@ -122,6 +133,7 @@ function DayRow(props: {
           type="checkbox"
           data-testid={`store-closed-${props.day}`}
           checked={props.closed}
+          disabled={readOnly}
           onChange={(event) => props.onClosed(event.target.checked)}
         />
         {t("onboarding.account.store.closed")}
@@ -131,7 +143,7 @@ function DayRow(props: {
         aria-label={t("onboarding.account.store.opens")}
         data-testid={`store-open-${props.day}`}
         value={props.open}
-        disabled={props.closed}
+        disabled={readOnly || props.closed}
         onChange={(event) => props.onOpen(event.target.value)}
       />
       <Input
@@ -139,7 +151,7 @@ function DayRow(props: {
         aria-label={t("onboarding.account.store.closes")}
         data-testid={`store-close-${props.day}`}
         value={props.close}
-        disabled={props.closed}
+        disabled={readOnly || props.closed}
         onChange={(event) => props.onClose(event.target.value)}
       />
     </div>
