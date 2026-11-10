@@ -177,7 +177,9 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
 22. Company registration end-to-end — done
    - `e2e/account-setup.spec.ts`, `e2e/signup-org-setup.spec.ts`, and `e2e/signup-stores.spec.ts` cover the English walk-through, coffee shop org defaults, and store or invite steps.
    - `e2e/company-registration-locale.spec.ts` pins Spanish, lists all six company locales on the company step, scans the permission matrix defaults, and walks through starter without calling onboarding complete.
-23. Messages attachments — composer upload; permissions spec covers send/manage only (`e2e/direct-message.spec.ts` is text-only).
+23. Messages attachments — done
+   - `e2e/messages-attachments.spec.ts` pins English, signs in with the test user, stubs storage upload, attaches `e2e/fixtures/tiny-e2e.png` in the composer, and stubs message insert so nothing reaches production.
+   - `e2e/direct-message.spec.ts` and `e2e/messages-permissions.spec.ts` stay text and permission coverage.
 24. Help desk — done
    - `/app/help-desk` redirects to `/app/messages`; no helpdesk module remains.
    - `e2e/help-desk-redirect.spec.ts` pins English, signs in with the test user, and asserts the messages heading after navigation.
