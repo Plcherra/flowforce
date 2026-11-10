@@ -25,13 +25,15 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
   const displayName =
     `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() ||
     user.email ||
-    "Unnamed teammate";
+    t("employees.unnamedTeammate");
   const departmentName =
-    user.department?.name ?? user.departmentid ?? "Not assigned";
+    user.department?.name ??
+    user.departmentid ??
+    t("employees.departmentNotAssigned");
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Not set";
-    return new Date(dateString).toLocaleDateString("en-US", {
+    if (!dateString) return t("employees.hireDateUnset");
+    return new Date(dateString).toLocaleDateString(undefined, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -39,16 +41,18 @@ export function UserOverviewTab({ user }: UserOverviewTabProps) {
   };
 
   const getTimeAgo = (dateString: string | null) => {
-    if (!dateString) return "Never";
+    if (!dateString) return t("literals.never");
     const now = new Date();
     const date = new Date(dateString);
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 30) return `${diffDays} days ago`;
-    if (diffDays < 365) return `${Math.ceil(diffDays / 30)} months ago`;
-    return `${Math.ceil(diffDays / 365)} years ago`;
+    if (diffDays === 1) return t("employees.relativeOneDayAgo");
+    if (diffDays < 30) return t("employees.relativeDaysAgo", { count: diffDays });
+    if (diffDays < 365) {
+      return t("employees.relativeMonthsAgo", { count: Math.ceil(diffDays / 30) });
+    }
+    return t("employees.relativeYearsAgo", { count: Math.ceil(diffDays / 365) });
   };
 
   return (

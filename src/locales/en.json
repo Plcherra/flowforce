@@ -5674,7 +5674,12 @@
     "noDepartmentsYet": "No department is set up yet.",
     "deleteBlockedHelp": "Move those people or shifts first, then delete it.",
     "loadingAccessControls": "Loading access controls...",
-    "loadingActivityTimeline": "Loading activity timeline..."
+    "loadingActivityTimeline": "Loading activity timeline...",
+    "departmentNotAssigned": "Not assigned",
+    "relativeOneDayAgo": "1 day ago",
+    "relativeDaysAgo": "{{count}} days ago",
+    "relativeMonthsAgo": "{{count}} months ago",
+    "relativeYearsAgo": "{{count}} years ago"
   },
   "profile": {
     "saving": "Saving...",

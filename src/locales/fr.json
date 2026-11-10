@@ -5674,7 +5674,12 @@
     "noDepartmentsYet": "Aucun service pour le moment.",
     "deleteBlockedHelp": "Déplacez ces personnes ou ces postes, puis supprimez.",
     "loadingAccessControls": "Chargement des contrôles d'accès...",
-    "loadingActivityTimeline": "Chargement de l'historique d'activité..."
+    "loadingActivityTimeline": "Chargement de l'historique d'activité...",
+    "departmentNotAssigned": "Non attribué",
+    "relativeOneDayAgo": "Il y a 1 jour",
+    "relativeDaysAgo": "Il y a {{count}} jours",
+    "relativeMonthsAgo": "Il y a {{count}} mois",
+    "relativeYearsAgo": "Il y a {{count}} ans"
   },
   "profile": {
     "saving": "Enregistrement...",
