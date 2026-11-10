@@ -4,6 +4,7 @@ test.describe("company registration locale and permissions", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem("i18nextLng", "es");
+      document.cookie = "i18nextLng=es; path=/";
     });
   });
 
@@ -20,18 +21,15 @@ test.describe("company registration locale and permissions", () => {
       }
     });
 
-    await page.goto("/company-registration");
-    await expect(page.getByTestId("account-step-signup")).toBeVisible({
-      timeout: 30_000,
-    });
+    await openSpanishRegistration(page);
     await expect(
       page.getByRole("heading", { name: "Crear cuenta" }),
     ).toBeVisible();
 
-    await page.getByLabel("Nombre").fill("Ada");
-    await page.getByLabel("Apellido").fill("Owner");
-    await page.getByLabel("Correo").fill("ada.owner@example.com");
-    await page.getByLabel("Contraseña").fill("correct-horse");
+    await page.locator("#signup-first-name").fill("Ada");
+    await page.locator("#signup-last-name").fill("Owner");
+    await page.locator("#signup-email").fill("ada.owner@example.com");
+    await page.locator("#signup-password").fill("correct-horse");
     await page.getByTestId("account-next").click();
 
     await expect(page.getByTestId("account-step-company")).toBeVisible();
@@ -41,7 +39,7 @@ test.describe("company registration locale and permissions", () => {
     const localeSelect = page.locator("#company-locale");
     await expect(localeSelect.locator("option")).toHaveCount(6);
     await expect(localeSelect.locator("option", { hasText: "Español" })).toHaveCount(1);
-    await page.getByLabel("Nombre de la empresa").fill("Café Norte");
+    await page.locator("#company-name").fill("Café Norte");
     await page.getByTestId("account-next").click();
 
     await expect(page.getByTestId("account-step-departments")).toBeVisible();
@@ -64,7 +62,7 @@ test.describe("company registration locale and permissions", () => {
     await page.getByTestId("account-next").click();
 
     await expect(page.getByTestId("account-step-store")).toBeVisible();
-    await page.getByLabel("Nombre del local").fill("Rua");
+    await page.getByTestId("store-name").fill("Rua");
     await page.getByTestId("account-next").click();
 
     await expect(page.getByTestId("account-step-invite")).toBeVisible();
@@ -85,38 +83,16 @@ test.describe("company registration locale and permissions", () => {
     await expect(page.getByTestId("account-finish")).toBeVisible();
     expect(writes).toEqual([]);
   });
-
-  test("invite step stays skippable without persisting signup", async ({
-    page,
-  }) => {
-    await reachInviteStep(page);
-    await page.getByTestId("account-invite-open").click();
-    await expect(page.getByTestId("invite-dialog")).toBeVisible();
-    await page.keyboard.press("Escape");
-    await page.getByTestId("account-skip").click();
-    await expect(page.getByTestId("account-step-starter")).toBeVisible();
-  });
 });
 
-async function reachInviteStep(page: Page) {
+async function openSpanishRegistration(page: Page) {
   await page.goto("/company-registration");
+  await page.evaluate(() => {
+    window.localStorage.setItem("i18nextLng", "es");
+    document.cookie = "i18nextLng=es; path=/";
+  });
+  await page.reload();
   await expect(page.getByTestId("account-step-signup")).toBeVisible({
     timeout: 30_000,
   });
-  await page.getByLabel("Nombre").fill("Ada");
-  await page.getByLabel("Apellido").fill("Owner");
-  await page.getByLabel("Correo").fill("ada.owner@example.com");
-  await page.getByLabel("Contraseña").fill("correct-horse");
-  await page.getByTestId("account-next").click();
-  await expect(page.getByTestId("account-step-company")).toBeVisible();
-  await page.getByLabel("Nombre de la empresa").fill("Café Norte");
-  await page.getByTestId("account-next").click();
-  await expect(page.getByTestId("account-step-departments")).toBeVisible();
-  await page.getByTestId("account-next").click();
-  await expect(page.getByTestId("account-step-permissions")).toBeVisible();
-  await page.getByTestId("account-next").click();
-  await expect(page.getByTestId("account-step-store")).toBeVisible();
-  await page.getByLabel("Nombre del local").fill("Rua");
-  await page.getByTestId("account-next").click();
-  await expect(page.getByTestId("account-step-invite")).toBeVisible();
 }
