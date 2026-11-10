@@ -174,7 +174,9 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
    - `e2e/stores-settings.spec.ts` pins English, signs in with the test user, checks the stores card and save control for the owner, blocks `stores` writes, and asserts staff see the settings empty state without the stores card.
 21. Auth — done
    - `/auth` sign-in, forgot-password email request (`/auth/v1/recover` stubbed), `?reset=true` new-password form, and `redirectTo` sign-in covered in `e2e/auth-flows.spec.ts`. Invite activation stays in `e2e/invite-activation.spec.ts`.
-22. Company registration end-to-end — walk `e2e/account-setup.spec.ts`; permission and locale scan on remaining steps.
+22. Company registration end-to-end — done
+   - `e2e/account-setup.spec.ts`, `e2e/signup-org-setup.spec.ts`, and `e2e/signup-stores.spec.ts` cover the English walk-through, coffee shop org defaults, and store or invite steps.
+   - `e2e/company-registration-locale.spec.ts` pins Spanish, lists all six company locales on the company step, scans the permission matrix defaults, and walks through starter without calling onboarding complete.
 23. Messages attachments — done
    - `e2e/messages-attachments.spec.ts` pins English, signs in with the test user, stubs storage upload, attaches `e2e/fixtures/tiny-e2e.png` in the composer, and stubs message insert so nothing reaches production.
    - `e2e/direct-message.spec.ts` and `e2e/messages-permissions.spec.ts` stay text and permission coverage.
