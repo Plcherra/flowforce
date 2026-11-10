@@ -141,6 +141,7 @@ async function pinManagerRole(page: Page) {
       return {
         ...(row as Record<string, unknown>),
         role: "manager",
+        role_id: null,
         language: "en",
       };
     };
