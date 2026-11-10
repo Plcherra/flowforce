@@ -154,4 +154,5 @@ Do not start a new area after 1:00 PM ET.
    - Owner billing tab lists Ops at \$59/mo, Team/Insights/Stock add-on prices, monthly total, and mocked checkout with no `system_settings` or live Stripe network writes. Staff never see the Billing tab.
    - `e2e/packs-billing.spec.ts` complements `e2e/packs-discovery.spec.ts` and `e2e/landing-packs.spec.ts`. Checkout and portal stay mocked; `billing.manage` deny gate remains in discovery spec.
 18. Profile, account, and notifications — todo
-19. My Shift — todo
+19. My Shift — done
+   - `e2e/my-shift.spec.ts` pins English, signs in with the test user, checks Tasks My Shift for published role lists (no Draft closing labels), dashboard `overview-my-shift` highlight, and blocks submission writes. Complements `e2e/my-shift-role-lists.spec.ts`.
