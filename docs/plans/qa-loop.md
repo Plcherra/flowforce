@@ -156,4 +156,5 @@ Do not start a new area after 1:00 PM ET.
 18. Profile, account, and notifications — done
    - Employee drawer overview uses locale keys for department, hire date, and relative times. Profile and notification panels expose stable test ids.
    - `e2e/profile-account-notifications.spec.ts` covers `/app/profile`, personal language select-then-save (writes stubbed), and notification settings. Writes blocked before sign-in.
-19. My Shift — todo
+19. My Shift — done
+   - `e2e/my-shift.spec.ts` pins English, signs in with the test user, checks Tasks My Shift for published role lists (no Draft closing labels), dashboard `overview-my-shift` highlight, and blocks submission writes. Complements `e2e/my-shift-role-lists.spec.ts`.
