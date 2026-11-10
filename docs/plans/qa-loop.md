@@ -172,7 +172,8 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
 20. Stores/locations management — done
    - Settings → General uses `StoresSettingsCard` on `public.stores`. Save follows the same manager-or-owner `canEdit` gate as other general settings; `StoreStep` is read-only when `canEdit` is false. Staff roles do not open settings (`RoleGuard`).
    - `e2e/stores-settings.spec.ts` pins English, signs in with the test user, checks the stores card and save control for the owner, blocks `stores` writes, and asserts staff see the settings empty state without the stores card.
-21. Auth — login, signup intent, password reset, invite entry at `/auth` (no dedicated Playwright spec).
+21. Auth — done
+   - `/auth` sign-in, forgot-password email request (`/auth/v1/recover` stubbed), `?reset=true` new-password form, and `redirectTo` sign-in covered in `e2e/auth-flows.spec.ts`. Invite activation stays in `e2e/invite-activation.spec.ts`.
 22. Company registration end-to-end — walk `e2e/account-setup.spec.ts`; permission and locale scan on remaining steps.
 23. Messages attachments — composer upload; permissions spec covers send/manage only (`e2e/direct-message.spec.ts` is text-only).
 24. Help desk — `/app/help-desk` redirects to messages (verify, no feature module).
