@@ -158,3 +158,29 @@ Do not start a new area after 1:00 PM ET.
    - `e2e/profile-account-notifications.spec.ts` covers `/app/profile`, personal language select-then-save (writes stubbed), and notification settings. Writes blocked before sign-in.
 19. My Shift — done
    - `e2e/my-shift.spec.ts` pins English, signs in with the test user, checks Tasks My Shift for published role lists (no Draft closing labels), dashboard `overview-my-shift` highlight, and blocks submission writes. Complements `e2e/my-shift-role-lists.spec.ts`.
+
+## Tuesday 10 Nov 2026, 2:00–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navigationData.tsx`, and `src/app-shell/navigation/moduleRouteInventory.json` against general areas 1–19.
+
+**In scope for 1–19 or earlier blocks:** pilot sidebar routes (dashboard, scheduling, tasks, messages, company updates, forms, employees, settings, packs), goals redirect, time off on scheduling, reports/docs/help getting-started, analytics permissions, hire onboarding, registration smoke (`e2e/account-setup.spec.ts`, `e2e/signup-stores.spec.ts`, `e2e/signup-org-setup.spec.ts`), landing `/` and `/pricing` (`e2e/landing-packs.spec.ts`).
+
+**Out of scope (do not hide or delete on-hold modules):** Operations Intelligence (`/app/operations`), Team pack modules (performance beyond goals QA, recognition, leaderboard, learning, certifications, resources), Stock/inventory surfaces, AI photo-match, removed Calendar, Prep/Cookbook/Inventory Reports on hold.
+
+**Remaining user-facing areas (20+):**
+
+20. Stores/locations management — done
+   - Settings → General uses `StoresSettingsCard` on `public.stores`. Save follows the same manager-or-owner `canEdit` gate as other general settings; `StoreStep` is read-only when `canEdit` is false. Staff roles do not open settings (`RoleGuard`).
+   - `e2e/stores-settings.spec.ts` pins English, signs in with the test user, checks the stores card and save control for the owner, blocks `stores` writes, and asserts staff see the settings empty state without the stores card.
+21. Auth — login, signup intent, password reset, invite entry at `/auth` (no dedicated Playwright spec).
+22. Company registration end-to-end — walk `e2e/account-setup.spec.ts`; permission and locale scan on remaining steps.
+23. Messages attachments — composer upload; permissions spec covers send/manage only (`e2e/direct-message.spec.ts` is text-only).
+24. Help desk — `/app/help-desk` redirects to messages (verify, no feature module).
+25. Marketing — `/features`, `/hr-development`, `/templates`, `/register` beyond landing/pricing packs spec.
+26. In-app notification center — header/task notifications distinct from profile notification prefs (`e2e/profile-account-notifications.spec.ts`).
+27. Availability — `/app/availability`, `/app/availability/manage` (scheduling embed may partially cover).
+28. Schedule lobby — `/app/schedule-lobby`.
+29. Custom sections — `/app/add-section`, `/app/section/[path]`.
+30. Standalone invite — `/app/invite-employee`.
+31. Public previews — `/onboarding-preview`, `/forms-preview`, `/onboarding`.
+32. Legacy inventory aliases — flat `/app/purchasing`, `/app/cookbook`, etc. (redirect smoke only).
