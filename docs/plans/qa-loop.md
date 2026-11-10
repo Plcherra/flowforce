@@ -199,3 +199,13 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
    - `/onboarding` → company registration; dev-only `/onboarding-preview` and `/forms-preview` render without writes.
 32. Legacy inventory aliases — done (with items 29–31 in `e2e/pilot-route-smoke.spec.ts`)
    - On-hold modules stay visible: owner smoke on `/app/purchasing` and `/app/cookbook` loads signed-in shell without a server error (no redirect).
+
+### Block wrap-up log (Tue 10 Nov 2026, ~3:45–5:00 PM ET) <!-- pragma: allowlist secret -->
+
+- **Merged:** #79 (item 23, `e2e/messages-attachments.spec.ts`) and #80 (items 25–32, marketing/notification/pilot-route specs) after Release gates, Remote deploy readiness, and Vercel preview were green (squash merge).
+- **Full e2e on `main` (post-merge, hosted anon client + local dev server):**
+  - First run: **73 passed, 2 failed, 1 skipped** (~6.5m). Failures: `e2e/invite-location.spec.ts` (Team-on direct invite no longer auto-selects a role; `data-selected` stayed false) and `e2e/overview-permissions.spec.ts` (`response.json()` after `route.fetch()` threw “Response has been disposed”).
+  - After fix PR: **74 passed, 0 failed, 1 skipped** (~5.7m). Skipped: `e2e/direct-message.spec.ts` — `TEST_RECIPIENT_EMAIL` / `TEST_RECIPIENT_PASSWORD` are unset in the Cloud Agent env (no local stack seed; two-user test stays disabled here per QA rules).
+- **Fixes shipped:** pick the first `invite-role-option` when no default role is selected; read mocked REST bodies via `response.text()` before `JSON.parse`.
+- **Migrations:** none applied or opened.
+- **Open for Pedro:** optional Cloud Agent / CI env vars for the second Playwright user so `direct-message` can run outside Release gates’ local seed.

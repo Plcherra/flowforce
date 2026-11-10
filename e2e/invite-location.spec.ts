@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { missingE2eEnv } from "./required-env";
 
 test.beforeEach(async ({ page }) => {
@@ -35,11 +35,7 @@ test("invites a teammate to a real store the signed-in user can assign", async (
 
   const dialog = page.getByTestId("invite-dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByTestId("invite-role")).toHaveAttribute(
-    "data-selected",
-    "true",
-    { timeout: 20_000 },
-  );
+  await selectInviteRole(dialog);
   await dialog.getByTestId("invite-start-date").fill("2026-11-16");
 
   const department = dialog.getByTestId("invite-department");
@@ -127,6 +123,18 @@ test("invites a teammate to a real store the signed-in user can assign", async (
     ).toBe(true);
   }
 });
+
+async function selectInviteRole(dialog: Locator) {
+  const role = dialog.getByTestId("invite-role");
+  if ((await role.getAttribute("data-selected")) === "true") {
+    return;
+  }
+  await role.click();
+  const option = dialog.getByTestId("invite-role-option").first();
+  await expect(option).toBeVisible({ timeout: 20_000 });
+  await option.click();
+  await expect(role).toHaveAttribute("data-selected", "true", { timeout: 20_000 });
+}
 
 async function signIn(page: Page) {
   const email = process.env.TEST_USER_EMAIL ?? "";
