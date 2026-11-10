@@ -176,7 +176,9 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
    - `/auth` sign-in, forgot-password email request (`/auth/v1/recover` stubbed), `?reset=true` new-password form, and `redirectTo` sign-in covered in `e2e/auth-flows.spec.ts`. Invite activation stays in `e2e/invite-activation.spec.ts`.
 22. Company registration end-to-end — walk `e2e/account-setup.spec.ts`; permission and locale scan on remaining steps.
 23. Messages attachments — composer upload; permissions spec covers send/manage only (`e2e/direct-message.spec.ts` is text-only).
-24. Help desk — `/app/help-desk` redirects to messages (verify, no feature module).
+24. Help desk — done
+   - `/app/help-desk` redirects to `/app/messages`; no helpdesk module remains.
+   - `e2e/help-desk-redirect.spec.ts` pins English, signs in with the test user, and asserts the messages heading after navigation.
 25. Marketing — `/features`, `/hr-development`, `/templates`, `/register` beyond landing/pricing packs spec.
 26. In-app notification center — header/task notifications distinct from profile notification prefs (`e2e/profile-account-notifications.spec.ts`).
 27. Availability — `/app/availability`, `/app/availability/manage` (scheduling embed may partially cover).
