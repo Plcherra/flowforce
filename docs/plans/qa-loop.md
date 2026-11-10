@@ -128,3 +128,17 @@ Hire flow, forms layout, and HR readiness on Insights — done (#55)
    - Sections & permissions opens role classes, operator grant grid (edit class), and the legacy module matrix. Broken links to `/settings?tab=roles` and `/settings/permissions` now target `/app/sections-permissions`.
    - Settings General shows the audit card behind `systemSettings`. Billing tab stays owner-profile only. Owner clamp in code always restores `approveTimeOff` and `reports.view` (seed contract already grants them for owner `*` and manager defaults).
    - Dashboard role overview smoke stays in `e2e/role-overview.spec.ts`; settings gates in `e2e/settings-roles-permissions.spec.ts`. Writes blocked before sign-in.
+
+## Tuesday 10 Nov 2026, 4:00–6:00 AM America/New_York
+
+Do not start a new area after 6:00 AM ET.
+
+13. Overview / dashboard — done
+   - Dashboard company-update type badges use `dashboard.*` locale keys instead of raw stored types.
+   - `e2e/overview-permissions.spec.ts` pins English, signs in with the test user, checks My shift and My lists highlight classes in light and dark, gates Insights HR readiness with pack flags, and hides the dashboard Add Update control when `updates.manage` is denied for staff. `e2e/role-overview.spec.ts` and `e2e/overview-role-list.spec.ts` passed again. Nothing is stored.
+14. Team Directory and invites — todo
+15. Employee onboarding and welcome — todo
+16. Activity history — todo
+17. Packs and billing — todo
+18. Profile, account, and notifications — todo
+19. My Shift — todo
