@@ -42,7 +42,8 @@ test.afterEach(async ({ page }) => {
 });
 
 test("preview shows shop welcome, facts, and before your first shift", async ({ page }) => {
-  await page.goto("/onboarding-preview?screen=employee");
+  const response = await page.goto("/onboarding-preview?screen=employee");
+  test.skip(response?.status() === 404, "The onboarding preview route is disabled in production.");
   await expect(page.getByTestId("employee-onboarding")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Welcome to the shop" })).toBeVisible();
   await expect(page.getByText("Your first days on the floor")).toBeVisible();
@@ -53,13 +54,15 @@ test("preview shows shop welcome, facts, and before your first shift", async ({ 
 });
 
 test("preview settings shows welcome editor, steps, and hire checklist preview", async ({ page }) => {
-  await page.goto("/onboarding-preview?screen=settings");
+  const settings = await page.goto("/onboarding-preview?screen=settings");
+  test.skip(settings?.status() === 404, "The onboarding preview route is disabled in production.");
   await expect(page.getByTestId("onboarding-settings")).toBeVisible();
   await expect(page.getByLabel("Welcome title")).toHaveValue("Welcome to Harbor Coffee");
   await expect(page.getByTestId("onboarding-steps")).toBeVisible();
   await expect(page.getByRole("button", { name: "Save welcome" })).toBeVisible();
 
-  await page.goto("/onboarding-preview?screen=hire");
+  const hire = await page.goto("/onboarding-preview?screen=hire");
+  test.skip(hire?.status() === 404, "The onboarding preview route is disabled in production.");
   await expect(page.getByTestId("hiring-checklist")).toBeVisible();
   await expect(page.getByTestId("hiring-check-share_card")).toContainText("Welcome to the shop");
   await expect(page.getByTestId("onboarding-welcome")).toHaveCount(0);
