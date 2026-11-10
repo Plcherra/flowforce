@@ -273,17 +273,7 @@ export function TeamDirectory() {
                 isMobile={isMobile}
               />
             )}
-            <TeamActionsBar
-              canInvite={tools.invitations}
-              canExportCsv={tools.exportCsv}
-              canManageRoles={tools.roles}
-              canManagePermissions={tools.permissions}
-              onOpenInvite={() => handleInviteChange(true)}
-              onOpenRoles={() => setRoleManagerOpen(true)}
-              onOpenPermissions={() => setPermissionManagerOpen(true)}
-              onExportFiltered={() => exportEmployeesToCSV(filteredEmployees)}
-              onExportAll={() => exportEmployeesToCSV(employees ?? [])}
-            />
+            <TeamActionsBar canInvite={tools.invitations} canExportCsv={tools.exportCsv} canManageRoles={tools.roles} canManagePermissions={tools.permissions} onOpenInvite={() => handleInviteChange(true)} onOpenRoles={() => setRoleManagerOpen(true)} onOpenPermissions={() => setPermissionManagerOpen(true)} onExportFiltered={() => exportEmployeesToCSV(filteredEmployees)} onExportAll={() => exportEmployeesToCSV(employees ?? [])} />
           </div>
         </div>
 
@@ -428,7 +418,6 @@ export function TeamDirectory() {
                     employees={paginatedEmployees}
                     departmentMap={departmentNameMap}
                     onEmployeeClick={openEmployeeDrawer}
-                    canResendInvites={tools.resendInvites}
                   />
                 )}
               </TabsContent>

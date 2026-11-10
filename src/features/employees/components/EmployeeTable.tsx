@@ -23,26 +23,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
+import type { PermissionKey } from "@/hooks/useUserPermissions";
 import type { Employee } from "@/hooks/useEmployees";
 import { accessLevelKey, directoryMembership } from "../directoryPresence";
 import { resendCompanyInvite } from "../utils/resendCompanyInvite";
 import { getDepartmentName } from "../utils/departmentHelpers";
+import { directoryTools } from "../utils/directoryTools";
 
 interface EmployeeTableProps {
   employees: Employee[];
   departmentMap: Map<string, string>;
   onEmployeeClick: (employee: Employee) => void;
-  canResendInvites: boolean;
 }
 
 export function EmployeeTable({
   employees,
   departmentMap,
   onEmployeeClick,
-  canResendInvites,
 }: EmployeeTableProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { can } = useCan();
+  const canResendInvites = directoryTools((key) => can(key as PermissionKey)).resendInvites;
   const [resending, setResending] = useState<string | null>(null);
   const jobTitle = (employee: Employee) =>
     employee.jobRole?.trim() || t("hireActivity.roleUnset");
