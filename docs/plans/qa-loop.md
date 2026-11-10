@@ -174,16 +174,27 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
    - `e2e/stores-settings.spec.ts` pins English, signs in with the test user, checks the stores card and save control for the owner, blocks `stores` writes, and asserts staff see the settings empty state without the stores card.
 21. Auth — done
    - `/auth` sign-in, forgot-password email request (`/auth/v1/recover` stubbed), `?reset=true` new-password form, and `redirectTo` sign-in covered in `e2e/auth-flows.spec.ts`. Invite activation stays in `e2e/invite-activation.spec.ts`.
-22. Company registration end-to-end — walk `e2e/account-setup.spec.ts`; permission and locale scan on remaining steps.
-23. Messages attachments — composer upload; permissions spec covers send/manage only (`e2e/direct-message.spec.ts` is text-only).
+22. Company registration end-to-end — done (#78)
+   - Existing English walk-through: `e2e/account-setup.spec.ts`, `e2e/signup-org-setup.spec.ts`, `e2e/signup-stores.spec.ts`.
+   - `e2e/company-registration-locale.spec.ts` pins Spanish, lists six company locales, and scans coffee-shop permission defaults through starter without persisting signup.
+23. Messages attachments — done (#79)
+   - `e2e/messages-attachments.spec.ts` with `e2e/fixtures/tiny-e2e.png`: storage and message stubs, composer attach. Complements text chat and permission specs.
 24. Help desk — done
    - `/app/help-desk` redirects to `/app/messages`; no helpdesk module remains.
    - `e2e/help-desk-redirect.spec.ts` pins English, signs in with the test user, and asserts the messages heading after navigation.
-25. Marketing — `/features`, `/hr-development`, `/templates`, `/register` beyond landing/pricing packs spec.
-26. In-app notification center — header/task notifications distinct from profile notification prefs (`e2e/profile-account-notifications.spec.ts`).
-27. Availability — `/app/availability`, `/app/availability/manage` (scheduling embed may partially cover).
-28. Schedule lobby — `/app/schedule-lobby`.
-29. Custom sections — `/app/add-section`, `/app/section/[path]`.
-30. Standalone invite — `/app/invite-employee`.
-31. Public previews — `/onboarding-preview`, `/forms-preview`, `/onboarding`.
-32. Legacy inventory aliases — flat `/app/purchasing`, `/app/cookbook`, etc. (redirect smoke only).
+25. Marketing — done
+   - `e2e/marketing-routes.spec.ts` covers `/features`, `/hr-development`, `/templates`, and `/register` in English. Complements `e2e/landing-packs.spec.ts` for `/` and `/pricing`.
+26. In-app notification center — done
+   - `e2e/notification-center.spec.ts` opens the account-cluster inbox versus profile notification prefs, and the Tasks bell popover. Complements `e2e/profile-account-notifications.spec.ts`.
+27. Availability — done (with item 28 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/availability` and `/app/availability/manage` redirect into enhanced scheduling with the availability panel.
+28. Schedule lobby — done (with item 27 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/schedule-lobby` and `/schedule-lobby` land on enhanced scheduling.
+29. Custom sections — done (with items 30–32 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/add-section` and `/app/section/[path]` redirect to dashboard.
+30. Standalone invite — done (with items 29–32 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/app/invite-employee` client-redirects to `/app/employees?invite=1`.
+31. Public previews — done (with items 29–32 in `e2e/pilot-route-smoke.spec.ts`)
+   - `/onboarding` → company registration; dev-only `/onboarding-preview` and `/forms-preview` render without writes.
+32. Legacy inventory aliases — done (with items 29–31 in `e2e/pilot-route-smoke.spec.ts`)
+   - On-hold modules stay visible: owner smoke on `/app/purchasing` and `/app/cookbook` loads an `h1` (no redirect).
