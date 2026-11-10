@@ -295,11 +295,6 @@
     "ticket": "FF-SPLIT-61"
   },
   {
-    "path": "src/features/employees/components/TeamDirectory.tsx",
-    "lines": 533,
-    "ticket": "FF-SPLIT-58"
-  },
-  {
     "path": "src/features/ai/components/AIAssistant.tsx",
     "lines": 538,
     "ticket": "FF-SPLIT-62"
@@ -308,6 +303,11 @@
     "path": "src/features/availability/manage/useAvailabilityManagement.ts",
     "lines": 534,
     "ticket": "FF-SPLIT-64"
+  },
+  {
+    "path": "src/features/employees/components/TeamDirectory.tsx",
+    "lines": 533,
+    "ticket": "FF-SPLIT-58"
   },
   {
     "path": "src/features/tasks/utils/myShiftView.ts",
