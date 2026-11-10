@@ -296,7 +296,7 @@
   },
   {
     "path": "src/features/employees/components/TeamDirectory.tsx",
-    "lines": 542,
+    "lines": 533,
     "ticket": "FF-SPLIT-58"
   },
   {
