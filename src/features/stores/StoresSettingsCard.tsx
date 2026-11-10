@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { useProfile } from "@/hooks/useProfile";
+import { useSystemSettingsContext } from "@/features/system/hooks/SystemSettingsContext";
 import { useToast } from "@/hooks/use-toast";
 import { StoreStep } from "@/features/onboarding/account/StoreStep";
 import {
@@ -30,13 +31,12 @@ export function StoresSettingsCard() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { canEdit } = useSystemSettingsContext();
   const queryClient = useQueryClient();
   const { stores, loading } = useCompanyStores();
   const [drafts, setDrafts] = useState<StoreDraft[] | null>(null);
   const [saving, setSaving] = useState(false);
   const companyId = profile?.company_id ?? profile?.companyId ?? null;
-  const role = (profile?.role ?? "").toLowerCase();
-  const canEdit = role === "owner" || role === "admin" || role === "company_admin";
   const editing = drafts ?? (stores.length > 0 ? stores.map(draftFromStore) : [blankStore()]);
 
   const save = async () => {
@@ -94,7 +94,7 @@ export function StoresSettingsCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? <p className="text-sm text-muted-foreground">{t("common.loading")}</p> : null}
-        <StoreStep stores={editing} onChange={setDrafts} />
+        <StoreStep stores={editing} onChange={setDrafts} readOnly={!canEdit} />
         {canEdit ? (
           <Button type="button" data-testid="settings-save-stores" onClick={() => void save()} disabled={saving || !companyId}>
             {t("settings.saveStore")}

@@ -169,7 +169,7 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
 
 **Remaining user-facing areas (20+):**
 
-20. Stores/locations management — done (PR #75)
+20. Stores/locations management — done
    - Settings → General uses `StoresSettingsCard` on `public.stores`. Save follows the same manager-or-owner `canEdit` gate as other general settings; `StoreStep` is read-only when `canEdit` is false. Staff roles do not open settings (`RoleGuard`).
    - `e2e/stores-settings.spec.ts` pins English, signs in with the test user, checks the stores card and save control for the owner, blocks `stores` writes, and asserts staff see the settings empty state without the stores card.
 21. Auth — done
