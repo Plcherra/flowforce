@@ -115,7 +115,7 @@ export default function CompanyUpdatesCard({
                     <CompanyUpdateBody update={update} variant="compact" />
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs">
-                        {update.type}
+                        {t(`dashboard.${update.type}`)}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(update.publishDate), {
@@ -139,7 +139,7 @@ export default function CompanyUpdatesCard({
                       <CompanyUpdateBody update={update} variant="compact" />
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="text-xs">
-                          {update.type}
+                          {t(`dashboard.${update.type}`)}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(update.publishDate), {
