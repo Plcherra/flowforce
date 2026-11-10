@@ -150,6 +150,8 @@ Do not start a new area after 1:00 PM ET.
 16. Activity history — done
    - `describeActivity` covers settings detail sentences, hire onboarding events, invites, role and status changes, and permission overrides. Settings, admin audit, directory hire card, and per-employee audit tab stop showing internal action codes.
    - `e2e/activity-history.spec.ts` pins English, signs in with the test user, checks settings history and directory hire or audit copy, and gates the settings card on `systemSettings`. Writes blocked before sign-in.
-17. Packs and billing — todo
+17. Packs and billing — done
+   - Owner billing tab lists Ops at \$59/mo, Team/Insights/Stock add-on prices, monthly total, and mocked checkout with no `system_settings` or live Stripe network writes. Staff never see the Billing tab.
+   - `e2e/packs-billing.spec.ts` complements `e2e/packs-discovery.spec.ts` and `e2e/landing-packs.spec.ts`. Checkout and portal stay mocked; `billing.manage` deny gate remains in discovery spec.
 18. Profile, account, and notifications — todo
 19. My Shift — todo
