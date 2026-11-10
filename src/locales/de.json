@@ -5674,7 +5674,12 @@
     "noDepartmentsYet": "Noch keine Abteilung eingerichtet.",
     "deleteBlockedHelp": "Verschiebe diese Personen oder Schichten und lösche danach.",
     "loadingAccessControls": "Zugriffskontrollen werden geladen...",
-    "loadingActivityTimeline": "Aktivitätsverlauf wird geladen..."
+    "loadingActivityTimeline": "Aktivitätsverlauf wird geladen...",
+    "departmentNotAssigned": "Nicht zugewiesen",
+    "relativeOneDayAgo": "Vor 1 Tag",
+    "relativeDaysAgo": "Vor {{count}} Tagen",
+    "relativeMonthsAgo": "Vor {{count}} Monaten",
+    "relativeYearsAgo": "Vor {{count}} Jahren"
   },
   "profile": {
     "saving": "Wird gespeichert...",
