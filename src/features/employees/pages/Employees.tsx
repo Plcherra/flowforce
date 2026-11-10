@@ -24,7 +24,7 @@ export default function EmployeesPage() {
 
   if (profile && !permissionsLoading && !can("directory.view")) {
     return (
-      <div className="p-6">
+      <div className="p-6" data-testid="employees-directory-hidden">
         <EmptyStateCard
           title={t("employees.employeeDirectory")}
           description={t("employees.directoryHidden")}

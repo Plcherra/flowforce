@@ -23,10 +23,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCan } from "@/hooks/useCan";
+import type { PermissionKey } from "@/hooks/useUserPermissions";
 import type { Employee } from "@/hooks/useEmployees";
 import { accessLevelKey, directoryMembership } from "../directoryPresence";
 import { resendCompanyInvite } from "../utils/resendCompanyInvite";
 import { getDepartmentName } from "../utils/departmentHelpers";
+import { directoryTools } from "../utils/directoryTools";
 
 interface EmployeeTableProps {
   employees: Employee[];
@@ -41,6 +44,8 @@ export function EmployeeTable({
 }: EmployeeTableProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { can } = useCan();
+  const canResendInvites = directoryTools((key) => can(key as PermissionKey)).resendInvites;
   const [resending, setResending] = useState<string | null>(null);
   const jobTitle = (employee: Employee) =>
     employee.jobRole?.trim() || t("hireActivity.roleUnset");
@@ -67,13 +72,13 @@ export function EmployeeTable({
   const getDisplayName = (employee: Employee) => {
     const fullName =
       `${employee.first_name ?? ""} ${employee.last_name ?? ""}`.trim();
-    return fullName || employee.email || "Unnamed teammate";
+    return fullName || employee.email || t("employees.unnamedTeammate");
   };
 
   const getInitials = (employee: Employee) => {
     const first = employee.first_name?.trim()[0] ?? "";
     const last = employee.last_name?.trim()[0] ?? "";
-    return `${first}${last}`.toUpperCase() || "TM";
+    return `${first}${last}`.toUpperCase() || t("employees.teammateInitials");
   };
 
   return (
@@ -139,7 +144,7 @@ export function EmployeeTable({
               <TableCell className="hidden md:table-cell">
                 {employee.hire_date
                   ? new Date(employee.hire_date).toLocaleDateString()
-                  : "—"}
+                  : t("employees.hireDateUnset")}
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 <Badge
@@ -176,7 +181,7 @@ export function EmployeeTable({
                     >
                       {t("employees.viewDetails")}
                     </DropdownMenuItem>
-                    {directoryMembership(employee) === "invited" ? (
+                    {directoryMembership(employee) === "invited" && canResendInvites ? (
                       <DropdownMenuItem
                         data-testid="directory-resend"
                         disabled={resending === employee.id}

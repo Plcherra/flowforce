@@ -136,7 +136,9 @@ Do not start a new area after 6:00 AM ET.
 13. Overview / dashboard — done
    - Dashboard company-update type badges use `dashboard.*` locale keys instead of raw stored types.
    - `e2e/overview-permissions.spec.ts` pins English, signs in with the test user, checks My shift and My lists highlight classes in light and dark, gates Insights HR readiness with pack flags, and hides the dashboard Add Update control when `updates.manage` is denied for staff. `e2e/role-overview.spec.ts` and `e2e/overview-role-list.spec.ts` passed again. Nothing is stored.
-14. Team Directory and invites — todo
+14. Team Directory and invites — done
+   - CSV export and resend invite follow `manageUsers` (export also allows `directory.manage`). Directory table copy uses locale keys for unnamed rows, initials fallback, and unset hire dates.
+   - `e2e/employees-permissions.spec.ts` pins English, signs in with the test user, checks `directory.view`, `manageUsers`, invite, CSV export, and resend gates. Invite API writes are blocked. Nothing is stored.
 15. Employee onboarding and welcome — todo
 16. Activity history — todo
 17. Packs and billing — todo

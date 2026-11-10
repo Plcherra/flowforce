@@ -12,6 +12,8 @@ export function runDirectoryToolsTests() {
   assert.equal(none.vendors, false);
   assert.equal(none.addVendor, false);
   assert.equal(none.invitations, false);
+  assert.equal(none.exportCsv, false);
+  assert.equal(none.resendInvites, false);
   assert.equal(none.roles, false);
   assert.equal(none.permissions, false);
 
@@ -34,7 +36,13 @@ export function runDirectoryToolsTests() {
 
   const invites = directoryTools(allow(["manageUsers"]));
   assert.equal(invites.invitations, true);
+  assert.equal(invites.exportCsv, true);
+  assert.equal(invites.resendInvites, true);
   assert.equal(invites.roles, false);
+
+  const directoryManage = directoryTools(allow(["directory.view", "directory.manage"]));
+  assert.equal(directoryManage.exportCsv, true);
+  assert.equal(directoryManage.resendInvites, false);
 
   const roles = directoryTools(allow(["admin.roles"]));
   assert.equal(roles.roles, true);
@@ -54,8 +62,10 @@ export function runDirectoryToolsTests() {
     Object.keys(directoryTools(allow(["systemSettings", "admin.settings"]))).sort(),
     [
       "addVendor",
+      "exportCsv",
       "invitations",
       "permissions",
+      "resendInvites",
       "roles",
       "vendors",
       "wholeStore",
