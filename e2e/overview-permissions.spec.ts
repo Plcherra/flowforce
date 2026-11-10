@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type APIResponse, type Page } from "@playwright/test";
 import { missingE2eEnv } from "./required-env";
 
 const PACK_FLAG_OVERRIDE_STORAGE_KEY = "flowforce:pack-flags";
@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
       return;
     }
     const response = await route.fetch();
-    const json = (await response.json()) as unknown;
+    const json = await readJsonResponse(response);
     const pin = (row: unknown) =>
       row && typeof row === "object"
         ? { ...(row as Record<string, unknown>), language: "en" }
@@ -91,6 +91,11 @@ test("shows Insights HR readiness on overview when the Insights pack is on", asy
   await expect(page.getByTestId("hr-readiness-panel")).toBeVisible();
 });
 
+async function readJsonResponse(response: APIResponse): Promise<unknown> {
+  const text = await response.text();
+  return JSON.parse(text) as unknown;
+}
+
 async function signIn(page: Page) {
   const email = process.env.TEST_USER_EMAIL ?? "";
   const password = process.env.TEST_USER_PASSWORD ?? "";
@@ -123,7 +128,7 @@ async function pinStaffRole(page: Page) {
       return;
     }
     const response = await route.fetch();
-    const json = (await response.json()) as unknown;
+    const json = await readJsonResponse(response);
     const demote = (row: unknown) => {
       if (!row || typeof row !== "object") return row;
       return {
@@ -165,7 +170,7 @@ async function denyManageKeys(page: Page) {
       return;
     }
     const response = await route.fetch();
-    const json = (await response.json()) as unknown;
+    const json = await readJsonResponse(response);
     const rows = Array.isArray(json) ? json : [];
     const kept = rows.filter((row) => {
       const key =
