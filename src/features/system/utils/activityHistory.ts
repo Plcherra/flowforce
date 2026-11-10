@@ -1,9 +1,24 @@
+import { hireActivityKey } from "@/features/employees/hireActivity";
+import { AUDIT_ACTIONS } from "@/services/audit/auditEvents";
+
 export type ActivityDetail = {
   field: string;
   before?: unknown;
   after?: unknown;
   pack?: string;
   store?: string;
+};
+
+export type ActivityDescribeInput = {
+  action?: string | null;
+  metadata?: Record<string, unknown> | null;
+  new_values?: unknown;
+  old_values?: unknown;
+  subject?: {
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+  } | null;
 };
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
@@ -147,15 +162,94 @@ function readDetails(metadata: Record<string, unknown> | null | undefined): Acti
   }));
 }
 
+function subjectDisplayName(
+  t: Translate,
+  subject: ActivityDescribeInput["subject"],
+) {
+  const name = [subject?.first_name, subject?.last_name].filter(Boolean).join(" ").trim();
+  if (name) return name;
+  if (subject?.email) return subject.email;
+  return t("hireActivity.theHire");
+}
+
+function readHireStep(newValues: unknown) {
+  if (!isRecord(newValues)) return "";
+  const step = newValues.step;
+  return typeof step === "string" ? step.trim() : "";
+}
+
+function describeHireAction(
+  t: Translate,
+  action: string,
+  subject: ActivityDescribeInput["subject"],
+  newValues: unknown,
+): string | null {
+  const key = hireActivityKey(action);
+  if (!key) return null;
+  return t(key, {
+    name: subjectDisplayName(t, subject),
+    step: readHireStep(newValues),
+  });
+}
+
+function readStringField(root: unknown, key: string) {
+  if (!isRecord(root)) return null;
+  const value = root[key];
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 export function describeActivity(
   t: Translate,
-  entry: {
-    action?: string | null;
-    metadata?: Record<string, unknown> | null;
-  },
+  entry: ActivityDescribeInput,
 ): string {
   const action = entry.action ?? "";
   const metadata = entry.metadata ?? null;
+  const hireSentence = describeHireAction(
+    t,
+    action,
+    entry.subject,
+    entry.new_values,
+  );
+  if (hireSentence) return hireSentence;
+
+  if (action === AUDIT_ACTIONS.userRoleUpdated) {
+    return t("settings.activityChangedRole", {
+      from: readStringField(entry.old_values, "role") ?? t("literals.unknown"),
+      to: readStringField(entry.new_values, "role") ?? t("literals.unknown"),
+    });
+  }
+
+  if (action === AUDIT_ACTIONS.userStatusUpdated) {
+    return t("settings.activityChangedEmploymentStatus", {
+      from:
+        readStringField(entry.old_values, "employment_status") ??
+        t("literals.unknown"),
+      to:
+        readStringField(entry.new_values, "employment_status") ??
+        t("literals.unknown"),
+    });
+  }
+
+  if (action === AUDIT_ACTIONS.permissionOverridesUpdated) {
+    return t("settings.activityUpdatedPermissions");
+  }
+
+  if (action === AUDIT_ACTIONS.employeeInviteCreated) {
+    const email =
+      (typeof metadata?.email === "string" ? metadata.email : null) ??
+      readStringField(entry.new_values, "email") ??
+      t("literals.unknown");
+    return t("settings.activitySentEmployeeInvite", { email });
+  }
+
+  if (action === AUDIT_ACTIONS.employeeInviteEmailFailed) {
+    const email =
+      (typeof metadata?.email === "string" ? metadata.email : null) ??
+      readStringField(entry.new_values, "email") ??
+      t("literals.unknown");
+    return t("settings.activityInviteEmailFailed", { email });
+  }
+
   const details = readDetails(metadata);
   if (
     details.length === 0 &&

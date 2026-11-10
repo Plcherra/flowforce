@@ -1,13 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { hireActivityKey } from "@/features/employees/hireActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   useAuditLogs,
   type AuditLog as AuditLogEntry,
 } from "@/hooks/useAuditLogs";
+import {
+  activityActorName,
+  describeActivity,
+  formatActivityTime,
+} from "@/features/system/utils/activityHistory";
 import { Activity, User, Clock } from "lucide-react";
-import { format } from "date-fns";
 
 export default function AuditLog() {
   const { t } = useTranslation();
@@ -61,46 +64,14 @@ export default function AuditLog() {
     );
   };
 
-  const formatAction = (action: string) =>
-    action
-      .replace(/[._-]/g, " ")
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-  const describeChange = (log: AuditLogEntry) => {
-    const hireKey = hireActivityKey(log.action);
-    if (hireKey) {
-      const next = log.new_values as Record<string, string> | null;
-      const person = log.userprofile
-        ? `${log.userprofile.first_name ?? ""} ${log.userprofile.last_name ?? ""}`.trim()
-        : "";
-      return t(hireKey, {
-        name: person || t("hireActivity.theHire"),
-        step: next?.step ?? "",
-      });
-    }
-
-    if (log.action === "user.role_updated") {
-      return `Role changed from ${(log.old_values as Record<string, string> | null)?.role ?? "unknown"} to ${(log.new_values as Record<string, string> | null)?.role ?? "unknown"}.`;
-    }
-
-    if (log.action === "user.status_updated") {
-      return `Status changed from ${(log.old_values as Record<string, string> | null)?.employment_status ?? "unknown"} to ${(log.new_values as Record<string, string> | null)?.employment_status ?? "unknown"}.`;
-    }
-
-    if (log.action === "permission.overrides_updated") {
-      return "Permission overrides were updated.";
-    }
-
-    if (log.action === "system_settings.updated") {
-      return `Updated settings: ${Object.keys(log.new_values ?? {}).join(", ") || "unknown"}.`;
-    }
-
-    if (log.action.includes("invite")) {
-      return `Invite activity for ${log.metadata?.email ?? (log.new_values as Record<string, string> | null)?.email ?? "unknown recipient"}.`;
-    }
-
-    return `${log.table_name}${log.record_id ? `:${log.record_id}` : ""}`;
-  };
+  const sentenceFor = (log: AuditLogEntry) =>
+    describeActivity(t, {
+      action: log.action,
+      metadata: log.metadata,
+      new_values: log.new_values,
+      old_values: log.old_values,
+      subject: log.userprofile ?? log.performed_byprofile,
+    });
 
   return (
     <div className="space-y-6">
@@ -131,7 +102,7 @@ export default function AuditLog() {
                       <Activity className="h-5 w-5 text-primary" />
                       <div>
                         <CardTitle className="text-base">
-                          {formatAction(log.action)}
+                          {sentenceFor(log)}
                         </CardTitle>
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <User className="h-4 w-4" />
@@ -146,9 +117,7 @@ export default function AuditLog() {
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
-                      <span>
-                        {format(new Date(log.created_at), "MMM d, yyyy h:mm a")}
-                      </span>
+                      <span>{formatActivityTime(log.created_at, null)}</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -161,16 +130,15 @@ export default function AuditLog() {
                       </Badge>
                       <Badge variant="secondary">{log.table_name}</Badge>
                     </div>
-                    <p className="text-sm text-foreground">
-                      {describeChange(log)}
-                    </p>
-
                     {log.performed_byprofile && (
                       <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
-                        <strong>{t("admin.changedBy")}</strong>{" "}
-                        {log.performed_byprofile.first_name}{" "}
-                        {log.performed_byprofile.last_name} (
-                        {log.performed_byprofile.email})
+                        {t("admin.performerWithEmail", {
+                          name: activityActorName(
+                            log.performed_byprofile,
+                            t("literals.system"),
+                          ),
+                          email: log.performed_byprofile.email ?? "",
+                        })}
                       </div>
                     )}
                   </div>

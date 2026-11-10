@@ -191,7 +191,7 @@ export function UserProfileDrawer({
                 <TabsContent value="permissions" className="mt-4 space-y-4">
                   <Suspense
                     fallback={
-                      <TabPanelSkeleton message="Loading access controls..." />
+                      <TabPanelSkeleton message={t("employees.loadingAccessControls")} />
                     }
                   >
                     <UserPermissionsTabLazy user={user} />
@@ -202,7 +202,7 @@ export function UserProfileDrawer({
                   <TabsContent value="audit" className="mt-4 space-y-4">
                     <Suspense
                       fallback={
-                        <TabPanelSkeleton message="Loading activity timeline..." />
+                        <TabPanelSkeleton message={t("employees.loadingActivityTimeline")} />
                       }
                     >
                       <UserAuditTabLazy user={user} />

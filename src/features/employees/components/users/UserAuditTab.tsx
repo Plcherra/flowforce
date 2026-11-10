@@ -22,6 +22,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuditLogs, type AuditLog } from "@/hooks/useAuditLogs";
+import {
+  activityActorName,
+  describeActivity,
+  formatActivityTime,
+} from "@/features/system/utils/activityHistory";
 import type { Tables } from "@/integrations/supabase/public-types";
 
 type Profile = Tables<"profiles">;
@@ -60,11 +65,21 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
     ) || [];
 
   // Apply additional filters
+  const sentenceFor = (log: AuditLog) =>
+    describeActivity(t, {
+      action: log.action,
+      metadata: log.metadata,
+      new_values: log.new_values,
+      old_values: log.old_values,
+      subject: user,
+    });
+
   const filteredLogs = userAuditLogs.filter((log) => {
+    const sentence = sentenceFor(log).toLowerCase();
     const matchesSearch =
       searchTerm === "" ||
+      sentence.includes(searchTerm.toLowerCase()) ||
       log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.table_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (log.userprofile?.first_name + " " + log.userprofile?.last_name)
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -79,39 +94,11 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
     new Set(userAuditLogs.map((log) => log.action)),
   );
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const getActionBadgeVariant = (action: string) => {
     if (action.includes("create")) return "default";
     if (action.includes("update")) return "secondary";
     if (action.includes("delete")) return "destructive";
     return "outline";
-  };
-
-  const getActionDescription = (log: AuditLog) => {
-    const actionParts = log.action.split("_");
-    const action = actionParts[0];
-    const target = log.table_name.replace("_", " ");
-
-    switch (action) {
-      case "created":
-        return t("employees.createdTarget", { target });
-      case "updated":
-        return t("employees.updatedTarget", { target });
-      case "deleted":
-        return t("employees.deletedTarget", { target });
-      default:
-        return log.action.replace("_", " ");
-    }
   };
 
   if (error) {
@@ -127,7 +114,7 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="user-audit-tab">
       {/* Activity Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -216,11 +203,15 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("employees.allActions")}</SelectItem>
-                {uniqueActions.map((action) => (
-                  <SelectItem key={action} value={action}>
-                    {action.replace("_", " ")}
-                  </SelectItem>
-                ))}
+                {uniqueActions.map((action) => {
+                  const sample = userAuditLogs.find((log) => log.action === action);
+                  const label = sample ? sentenceFor(sample) : action;
+                  return (
+                    <SelectItem key={action} value={action}>
+                      {label}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -249,11 +240,11 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                 </TableHeader>
                 <TableBody>
                   {filteredLogs.map((log) => (
-                    <TableRow key={log.id}>
+                    <TableRow key={log.id} data-testid="user-audit-row">
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Badge variant={getActionBadgeVariant(log.action)}>
-                            {getActionDescription(log)}
+                            {sentenceFor(log)}
                           </Badge>
                         </div>
                       </TableCell>
@@ -268,9 +259,10 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm">
-                            {log.performed_byprofile
-                              ? t("literals.text", { first_name: log.performed_byprofile.first_name, last_name: log.performed_byprofile.last_name })
-                              : t("literals.system")}
+                            {activityActorName(
+                              log.performed_byprofile,
+                              t("literals.system"),
+                            )}
                           </span>
                         </div>
                       </TableCell>
@@ -279,15 +271,14 @@ export function UserAuditTab({ user }: UserAuditTabProps) {
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">
-                            {formatDate(log.created_at)}
+                            {formatActivityTime(log.created_at, null)}
                           </span>
                         </div>
                       </TableCell>
 
                       <TableCell>
                         <div className="text-sm text-muted-foreground max-w-xs truncate">
-                          {log.table_name} {t("literals.recordId")}{" "}
-                          {log.record_id?.slice(0, 8)}...
+                          {log.table_name}
                         </div>
                       </TableCell>
                     </TableRow>

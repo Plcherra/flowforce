@@ -142,7 +142,14 @@ Do not start a new area after 6:00 AM ET.
 15. Employee onboarding and welcome — done
    - Settings onboarding passes `canManageSteps` into `HiringBuilder`, so managers without `systemSettings` see the hire preview read-only and cannot save hiring blocks.
    - `e2e/employee-onboarding-welcome.spec.ts` pins English, checks the shop welcome layout (`Welcome to the shop` / `Before your first shift`), settings preview, hire checklist, invite activation, and onboarding settings gates. `e2e/invite-activation.spec.ts` passed again. Writes blocked before sign-in.
-16. Activity history — todo
+
+## Tuesday 10 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Do not start a new area after 1:00 PM ET.
+
+16. Activity history — done
+   - `describeActivity` covers settings detail sentences, hire onboarding events, invites, role and status changes, and permission overrides. Settings, admin audit, directory hire card, and per-employee audit tab stop showing internal action codes.
+   - `e2e/activity-history.spec.ts` pins English, signs in with the test user, checks settings history and directory hire or audit copy, and gates the settings card on `systemSettings`. Writes blocked before sign-in.
 17. Packs and billing — todo
 18. Profile, account, and notifications — todo
 19. My Shift — todo

@@ -1320,7 +1320,8 @@
     "trackCoverageAcrossRolesAndEnsurePermissionsReflect": "Verfolge die Abdeckung über Rollen und prüfe, ob die Berechtigungen zum Betrieb passen.",
     "trackPrivilegedUserPermissionSettingsInviteAndAutomation": "Verfolge privilegierte Aktionen an Benutzern, Berechtigungen, Einstellungen, Einladungen und Automatisierung.",
     "updateClass": "Klasse aktualisieren",
-    "viewNotes": "Notizen ansehen"
+    "viewNotes": "Notizen ansehen",
+    "performerWithEmail": "Geändert von: {{name}} ({{email}})"
   },
   "certifications": {
     "available": "Verfügbar",
@@ -5671,7 +5672,9 @@
     "inviteOtherRoles": "Weitere Rollen",
     "deleteNamed": "{{name}} löschen",
     "noDepartmentsYet": "Noch keine Abteilung eingerichtet.",
-    "deleteBlockedHelp": "Verschiebe diese Personen oder Schichten und lösche danach."
+    "deleteBlockedHelp": "Verschiebe diese Personen oder Schichten und lösche danach.",
+    "loadingAccessControls": "Zugriffskontrollen werden geladen...",
+    "loadingActivityTimeline": "Aktivitätsverlauf wird geladen..."
   },
   "profile": {
     "saving": "Wird gespeichert...",
@@ -6224,7 +6227,12 @@
     "accessScheduleAssign": "Zuweisen",
     "accessHideDetails": "Details ausblenden",
     "accessGroupTasks": "Aufgaben und Listen",
-    "accessCustomize": "Anpassen"
+    "accessCustomize": "Anpassen",
+    "activityChangedRole": "Zugriff von {{from}} auf {{to}} geändert",
+    "activityChangedEmploymentStatus": "Beschäftigungsstatus von {{from}} auf {{to}} geändert",
+    "activityUpdatedPermissions": "Individuelle Berechtigungen aktualisiert",
+    "activitySentEmployeeInvite": "Einladung an {{email}} gesendet",
+    "activityInviteEmailFailed": "Einladungs-E-Mail an {{email}} fehlgeschlagen"
   },
   "roles": {
     "aiSuggestions": "KI-Vorschläge",

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase as db } from "@/integrations/supabase/client"; // pragma: allowlist secret
 import { hireActivityKey } from "../../hireActivity";
+import { describeActivity } from "@/features/system/utils/activityHistory";
 import { openRequiredHiringBlocks, type HiringAnswer, type HiringBlock } from "@/features/employee-onboarding/hiringModel";
 import { hiringBlockFromRow } from "@/features/employee-onboarding/hiringStore";
 
@@ -107,7 +108,15 @@ export function HireActivityCard({
               const when = typeof record.created_at === "string" ? record.created_at : "";
               return (
                 <li key={String(record.id)} className="text-sm" data-testid="hire-activity-row">
-                  <p>{key ? t(key, { name, step: stepName(record) }) : action}</p>
+                  <p>
+                    {key
+                      ? t(key, { name, step: stepName(record) })
+                      : describeActivity(t, {
+                          action,
+                          new_values: record.new_values,
+                          subject: { first_name: name.split(" ")[0], last_name: name.split(" ").slice(1).join(" ") },
+                        })}
+                  </p>
                   {when ? (
                     <p className="text-xs text-muted-foreground">
                       {new Date(when).toLocaleString()}
