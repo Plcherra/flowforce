@@ -85,16 +85,38 @@ jobs:
       - name: Install Playwright Chromium
         shell: bash
         run: |
-          for attempt in 1 2; do
-            if timeout 600s npx playwright install --with-deps chromium; then
+          set -euo pipefail
+          playwright_install() {
+            local with_deps="$1"
+            if [ "$with_deps" = "1" ]; then
+              npx playwright install --with-deps chromium
+            else
+              npx playwright install chromium
+            fi
+          }
+
+          refresh_apt() {
+            echo "Refreshing apt mirrors (best-effort before Playwright deps)..."
+            for attempt in 1 2 3 4; do
+              if sudo apt-get update -o Acquire::Retries=5 -o Acquire::http::Timeout=120; then
+                return 0
+              fi
+              echo "apt-get update failed on attempt $attempt; sleeping."
+              sleep $((attempt * 30))
+            done
+            return 1
+          }
+
+          for attempt in 1 2 3; do
+            if refresh_apt && timeout 600s playwright_install 1; then
               exit 0
             fi
-
-            echo "Playwright Chromium install failed or timed out on attempt $attempt; retrying."
-            sleep $((attempt * 20))
+            echo "Playwright Chromium install (--with-deps) failed on attempt $attempt; retrying."
+            sleep $((attempt * 30))
           done
 
-          timeout 600s npx playwright install --with-deps chromium
+          echo "Falling back to browser download without apt deps (GitHub runner base image often has libraries)."
+          timeout 300s playwright_install 0
 
       - name: Start local Supabase
         shell: bash
