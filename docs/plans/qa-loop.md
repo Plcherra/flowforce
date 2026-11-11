@@ -246,3 +246,15 @@ Hard stop at 1:00 PM ET. Deepen general-area Playwright coverage where specs are
 - **Migrations:** none.
 - **Open for Pedro:** unchanged (`TEST_RECIPIENT_*` for two-user DM). Optional: re-run Release gates when GitHub runner apt is healthy, then merge #83.
 - **Next:** Item 37 Schedule desk publish/assign UI depth; item 38 Messages `messages.manage` channel settings.
+
+37. Schedule — week desk publish and assign depth — done
+   - `e2e/schedule-desk-depth.spec.ts`: week grid draft + published shifts, `publish-to-team` issues mocked `publish_schedules_week_with_validation` RPC (writes stubbed), shift details assignment panel; assign-only denies create/edit/publish desk controls while keeping `employee-selector-add`.
+38. Messages — channel settings (`messages.manage`) — done
+   - `e2e/messages-channel-settings.spec.ts`: injected group channel with membership; `messages.send` alone shows members but hides Group options; send + manage opens Group settings dialog (channel writes blocked).
+39. Company Updates — orphaned readiness panel — done
+   - Removed unused `CompanyUpdatesReadinessPanel.tsx` (hard-coded English, no imports). Update readiness stays on the main company-updates surface covered in item 36.
+
+### Block wrap-up log (Wed 11 Nov 2026, 9:00 AM–1:00 PM ET, in progress) <!-- pragma: allowlist secret -->
+
+- **#83:** Release gates re-run in progress after apt DNS flake on earlier attempts; squash-merge when green.
+- **#84 (this branch):** items 37–39 — e2e + delete orphan panel; full e2e tally recorded when the suite finishes.
