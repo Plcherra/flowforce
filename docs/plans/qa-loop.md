@@ -225,7 +225,7 @@ Hard stop at 6:00 AM ET. Cross-area regression and quality sweep; items 33+.
 
 ### Block wrap-up log (Wed 11 Nov 2026, ~4:00–6:00 AM ET) <!-- pragma: allowlist secret -->
 
-- **Merged:** (pending CI) — e2e flake fixes + invite phone i18n.
+- **Merged:** [#82](https://github.com/Plcherra/flowforce/pull/82) — e2e flake fixes + invite phone i18n (Release gates, Remote deploy readiness, Vercel preview green).
 - **Full e2e on branch:** 74 passed / 0 failed / 1 skipped after items 33–34; baseline before fixes 73/2/1.
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional second Playwright user env for `direct-message`.
