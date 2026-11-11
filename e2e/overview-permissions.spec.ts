@@ -1,4 +1,5 @@
-import { expect, test, type APIResponse, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { fulfillGetWithJson } from "./routeJson";
 import { missingE2eEnv } from "./required-env";
 
 const PACK_FLAG_OVERRIDE_STORAGE_KEY = "flowforce:pack-flags";
@@ -15,19 +16,18 @@ test.beforeEach(async ({ page }) => {
       await route.continue();
       return;
     }
-    const response = await route.fetch();
-    const json = await readJsonResponse(response);
-    const pin = (row: unknown) =>
-      row && typeof row === "object"
-        ? { ...(row as Record<string, unknown>), language: "en" }
-        : row;
-    const body = Array.isArray(json) ? json.map(pin) : pin(json);
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify(body),
+    await fulfillGetWithJson(route, (json) => {
+      const pin = (row: unknown) =>
+        row && typeof row === "object"
+          ? { ...(row as Record<string, unknown>), language: "en" }
+          : row;
+      return Array.isArray(json) ? json.map(pin) : pin(json);
     });
   });
+});
+
+test.afterEach(async ({ page }) => {
+  await page.unrouteAll({ behavior: "ignoreErrors" });
 });
 
 test.beforeAll(() => {
@@ -68,7 +68,7 @@ test("overview cards use highlight tint, pack gates HR readiness, and updates.ma
 
   await pinStaffRole(page);
   await denyManageKeys(page);
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByTestId("role-overview")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("company-updates-dashboard-add")).toHaveCount(0);
 
@@ -90,11 +90,6 @@ test("shows Insights HR readiness on overview when the Insights pack is on", asy
   await expect(page.getByTestId("insights-hr-readiness")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("hr-readiness-panel")).toBeVisible();
 });
-
-async function readJsonResponse(response: APIResponse): Promise<unknown> {
-  const text = await response.text();
-  return JSON.parse(text) as unknown;
-}
 
 async function signIn(page: Page) {
   const email = process.env.TEST_USER_EMAIL ?? "";
@@ -122,26 +117,16 @@ async function pinPackFlags(
 async function pinStaffRole(page: Page) {
   await page.unroute("**/rest/v1/profiles*").catch(() => undefined);
   await page.route("**/rest/v1/profiles*", async (route) => {
-    const request = route.request();
-    if (request.method() !== "GET") {
-      await route.continue();
-      return;
-    }
-    const response = await route.fetch();
-    const json = await readJsonResponse(response);
-    const demote = (row: unknown) => {
-      if (!row || typeof row !== "object") return row;
-      return {
-        ...(row as Record<string, unknown>),
-        role: "staff",
-        language: "en",
+    await fulfillGetWithJson(route, (json) => {
+      const demote = (row: unknown) => {
+        if (!row || typeof row !== "object") return row;
+        return {
+          ...(row as Record<string, unknown>),
+          role: "staff",
+          language: "en",
+        };
       };
-    };
-    const body = Array.isArray(json) ? json.map(demote) : demote(json);
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify(body),
+      return Array.isArray(json) ? json.map(demote) : demote(json);
     });
   });
 }
@@ -164,29 +149,20 @@ async function blockCompanyUpdateWrites(page: Page) {
 async function denyManageKeys(page: Page) {
   await page.unroute("**/rest/v1/user_permissions*").catch(() => undefined);
   await page.route("**/rest/v1/user_permissions*", async (route) => {
-    const request = route.request();
-    if (request.method() !== "GET") {
-      await route.continue();
-      return;
-    }
-    const response = await route.fetch();
-    const json = await readJsonResponse(response);
-    const rows = Array.isArray(json) ? json : [];
-    const kept = rows.filter((row) => {
-      const key =
-        row && typeof row === "object"
-          ? (row as { permission_key?: string }).permission_key
-          : "";
-      return !MANAGE_KEYS.includes(key as (typeof MANAGE_KEYS)[number]);
-    });
-    const denied = MANAGE_KEYS.map((key) => ({
-      permission_key: key,
-      permission_value: "deny",
-    }));
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify([...denied, ...kept]),
+    await fulfillGetWithJson(route, (json) => {
+      const rows = Array.isArray(json) ? json : [];
+      const kept = rows.filter((row) => {
+        const key =
+          row && typeof row === "object"
+            ? (row as { permission_key?: string }).permission_key
+            : "";
+        return !MANAGE_KEYS.includes(key as (typeof MANAGE_KEYS)[number]);
+      });
+      const denied = MANAGE_KEYS.map((key) => ({
+        permission_key: key,
+        permission_value: "deny",
+      }));
+      return [...denied, ...kept];
     });
   });
 }

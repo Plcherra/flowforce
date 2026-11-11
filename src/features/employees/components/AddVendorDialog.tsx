@@ -126,7 +126,7 @@ export function AddVendorDialog({
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="+1 (555) 123-4567"
+                        placeholder={t("onboarding.userInfo.placeholders.phone")}
                         autoComplete="tel"
                       />
                     </FormControl>

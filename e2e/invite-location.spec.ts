@@ -37,6 +37,10 @@ test("invites a teammate to a real store the signed-in user can assign", async (
   await expect(dialog).toBeVisible();
   await selectInviteRole(dialog);
   await dialog.getByTestId("invite-start-date").fill("2026-11-16");
+  await expect(dialog.getByTestId("invite-phone")).toHaveAttribute(
+    "placeholder",
+    "+1 (555) 123-4567",
+  );
 
   const department = dialog.getByTestId("invite-department");
   let departmentId: string | null = null;
@@ -130,7 +134,9 @@ async function selectInviteRole(dialog: Locator) {
     return;
   }
   await role.click();
-  const option = dialog.getByTestId("invite-role-option").first();
+  const option = dialog
+    .locator('[data-testid="invite-role-option"][data-role-id]')
+    .first();
   await expect(option).toBeVisible({ timeout: 20_000 });
   await option.click();
   await expect(role).toHaveAttribute("data-selected", "true", { timeout: 20_000 });

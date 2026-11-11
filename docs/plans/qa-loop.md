@@ -209,3 +209,23 @@ Hard stop at 5:00 PM ET. Route inventory uses `app/**/page.tsx`, `src/data/navig
 - **Fixes shipped:** pick the first `invite-role-option` when no default role is selected; read mocked REST bodies via `response.text()` before `JSON.parse`.
 - **Migrations:** none applied or opened.
 - **Open for Pedro:** optional Cloud Agent / CI env vars for the second Playwright user so `direct-message` can run outside Release gates’ local seed.
+
+## Wednesday 11 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. Cross-area regression and quality sweep; items 33+.
+
+33. Playwright baseline and e2e flakes — done
+   - Full suite before fixes: **73 passed, 2 failed, 1 skipped** (~6.3m). Failures: `e2e/invite-location.spec.ts` (first role option was shop-suggested without `data-role-id`, so `data-selected` stayed false) and `e2e/overview-permissions.spec.ts` (`Response has been disposed` while mocking profiles on reload).
+   - Added `e2e/routeJson.ts` (`readFetchJson`, `fulfillGetWithJson`) with passthrough on fetch errors; `overview-permissions` uses it and `unrouteAll` after each test; invite role picker targets `[data-role-id]`.
+   - After fix PR: **74 passed, 0 failed, 1 skipped** (~5.5m full run; one `activity-history` run hit a trace-artifact ENOENT flake on rerun — spec passed in isolation). Skipped: `e2e/direct-message.spec.ts` (no `TEST_RECIPIENT_*` in this env).
+34. Invite phone placeholder i18n — done
+   - `InvitePersonCard` and `AddVendorDialog` use `onboarding.userInfo.placeholders.phone` (all six locales already had the key). `data-testid="invite-phone"`; `e2e/invite-location.spec.ts` asserts the English placeholder when locale is pinned.
+35. Pilot sidebar manual sweep — done (no code change)
+   - Browser pass over dashboard, scheduling, tasks, messages, company updates, forms, employees, settings Billing tab, profile: no new hard-coded UI leaks; “Café starter” is the intentional Ops template control; billing lives on Settings → Billing (`/app/packs/billing` is not a catalog pack and correctly shows pack not found).
+
+### Block wrap-up log (Wed 11 Nov 2026, ~4:00–6:00 AM ET) <!-- pragma: allowlist secret -->
+
+- **Merged:** (pending CI) — e2e flake fixes + invite phone i18n.
+- **Full e2e on branch:** 74 passed / 0 failed / 1 skipped after items 33–34; baseline before fixes 73/2/1.
+- **Migrations:** none.
+- **Open for Pedro:** unchanged — optional second Playwright user env for `direct-message`.
