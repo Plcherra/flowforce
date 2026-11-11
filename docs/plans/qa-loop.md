@@ -257,4 +257,4 @@ Hard stop at 1:00 PM ET. Deepen general-area Playwright coverage where specs are
 ### Block wrap-up log (Wed 11 Nov 2026, 9:00 AM–1:00 PM ET, in progress) <!-- pragma: allowlist secret -->
 
 - **#83:** Release gates re-run in progress after apt DNS flake on earlier attempts; squash-merge when green.
-- **#84 (this branch):** items 37–39 — e2e + delete orphan panel; full e2e tally recorded when the suite finishes.
+- **#84 (this branch):** items 37–39 — e2e + delete orphan panel. Full e2e on branch: **80 passed / 0 failed / 1 skipped** (~6.3m); skipped `e2e/direct-message.spec.ts`.
