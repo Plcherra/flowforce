@@ -229,3 +229,12 @@ Hard stop at 6:00 AM ET. Cross-area regression and quality sweep; items 33+.
 - **Full e2e on branch:** 74 passed / 0 failed / 1 skipped after items 33–34; baseline before fixes 73/2/1.
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional second Playwright user env for `direct-message`.
+
+## Wednesday 11 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. Deepen general-area Playwright coverage where specs are thinnest (Ops v1 complete). **E2e inventory (tests per file, Wed AM):** Company Updates 1; Messages 1 (+ attachments); Schedule 1 (+ shift-role, my-shift lists); Analytics/Docs/Reviews/Goals 2 each; Forms/Tasks/Time off stronger (1 spec each but broader asserts). **Weakest pilot module:** Company Updates (permissions only). **Queue 37+:** Schedule desk publish/assign UI, Messages channel settings gate, enhanced scheduling time-off panel.
+
+36. Company Updates — feed, search, staff read filter — done
+   - `e2e/company-updates-feed.spec.ts`: Feed/Grid/List `aria-pressed`, no-match search empty state, dashboard View all → `/app/company-updates`, staff `status=eq.published` list query and no manage/new controls. Writes blocked.
+   - `e2e/company-updates-permissions.spec.ts`: `routeJson` + `unrouteAll` flake hardening (item 33 pattern).
+   - Scoped pass: 3/3 company-updates specs green locally (~18s). No product code changes; orphaned `CompanyUpdatesReadinessPanel` English strings remain out of scope for this item.

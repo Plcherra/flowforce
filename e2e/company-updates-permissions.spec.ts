@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { fulfillGetWithJson } from "./routeJson";
 import { missingE2eEnv } from "./required-env";
 
 const MANAGE_KEYS = [
@@ -17,19 +18,18 @@ test.beforeEach(async ({ page }) => {
       await route.continue();
       return;
     }
-    const response = await route.fetch();
-    const json = (await response.json()) as unknown;
-    const pin = (row: unknown) =>
-      row && typeof row === "object"
-        ? { ...(row as Record<string, unknown>), language: "en" }
-        : row;
-    const body = Array.isArray(json) ? json.map(pin) : pin(json);
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify(body),
+    await fulfillGetWithJson(route, (json) => {
+      const pin = (row: unknown) =>
+        row && typeof row === "object"
+          ? { ...(row as Record<string, unknown>), language: "en" }
+          : row;
+      return Array.isArray(json) ? json.map(pin) : pin(json);
     });
   });
+});
+
+test.afterEach(async ({ page }) => {
+  await page.unrouteAll({ behavior: "ignoreErrors" });
 });
 
 test.beforeAll(() => {
@@ -109,21 +109,16 @@ async function pinStaffRole(page: Page) {
       await route.continue();
       return;
     }
-    const response = await route.fetch();
-    const json = (await response.json()) as unknown;
-    const demote = (row: unknown) => {
-      if (!row || typeof row !== "object") return row;
-      return {
-        ...(row as Record<string, unknown>),
-        role: "staff",
-        language: "en",
+    await fulfillGetWithJson(route, (json) => {
+      const demote = (row: unknown) => {
+        if (!row || typeof row !== "object") return row;
+        return {
+          ...(row as Record<string, unknown>),
+          role: "staff",
+          language: "en",
+        };
       };
-    };
-    const body = Array.isArray(json) ? json.map(demote) : demote(json);
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify(body),
+      return Array.isArray(json) ? json.map(demote) : demote(json);
     });
   });
 }
@@ -136,24 +131,20 @@ async function denyManageKeys(page: Page) {
       await route.continue();
       return;
     }
-    const response = await route.fetch();
-    const json = (await response.json()) as unknown;
-    const rows = Array.isArray(json) ? json : [];
-    const kept = rows.filter((row) => {
-      const key =
-        row && typeof row === "object"
-          ? (row as { permission_key?: string }).permission_key
-          : "";
-      return !MANAGE_KEYS.includes(key as (typeof MANAGE_KEYS)[number]);
-    });
-    const denied = MANAGE_KEYS.map((key) => ({
-      permission_key: key,
-      permission_value: "deny",
-    }));
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify([...denied, ...kept]),
+    await fulfillGetWithJson(route, (json) => {
+      const rows = Array.isArray(json) ? json : [];
+      const kept = rows.filter((row) => {
+        const key =
+          row && typeof row === "object"
+            ? (row as { permission_key?: string }).permission_key
+            : "";
+        return !MANAGE_KEYS.includes(key as (typeof MANAGE_KEYS)[number]);
+      });
+      const denied = MANAGE_KEYS.map((key) => ({
+        permission_key: key,
+        permission_value: "deny",
+      }));
+      return [...denied, ...kept];
     });
   });
 }
