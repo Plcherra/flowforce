@@ -179,11 +179,12 @@ export function InvitePersonCardForm({
             <Label htmlFor={`${card.id}-phone`}>{t("onboarding.userInfo.fields.phone")}</Label>
             <Input
               id={`${card.id}-phone`}
+              data-testid="invite-phone"
               value={card.phone}
               onChange={(event) =>
                 onChange({ ...card, phone: event.target.value })
               }
-              placeholder="+1 (555) 123-4567"
+              placeholder={t("onboarding.userInfo.placeholders.phone")}
             />
           </div>
         </div>
