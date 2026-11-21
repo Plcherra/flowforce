@@ -317,9 +317,10 @@ Hard stop at 5:00 PM ET. **Queue 45+:** Tasks list depth (filters, detail dialog
 47. Settings — billing gates depth — done
    - `e2e/settings-billing-gates.spec.ts`: manager with mocked `billing.manage` still has no Billing tab; owner `billing-manage` mocks `/api/stripe/create-portal-session` without live Stripe.
 
-### Block wrap-up log (Sat 21 Nov 2026, ~2:00–3:30 PM ET) <!-- pragma: allowlist secret -->
+### Block wrap-up log (Sat 21 Nov 2026, 2:00–5:00 PM ET) <!-- pragma: allowlist secret -->
 
-- **In progress:** PR for items 45–47 — tasks list depth + task comment fetch fix, docs getting-started walkthrough, settings billing portal gate e2e.
-- **Local e2e:** 5/5 on new specs; task-create and tasks-permissions regression passed.
+- **Merged:** [#87](https://github.com/Plcherra/flowforce/pull/87) — items 45–47 at `525b7ec0` (Release gates + Remote deploy readiness + Vercel preview green; round 2 fixed `TaskDetailsDialog` file-length cap and CI-empty tasks search).
+- **Local e2e:** new specs 5/5; full Release gates e2e on branch before merge.
 - **Migrations:** none (optional follow-up FK `task_comments.user_id` → `profiles.id` for embedded selects).
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** schedule/messages/forms remain candidates for deeper e2e if time remains in block.
