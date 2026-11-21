@@ -270,7 +270,7 @@ Hard stop at 6:00 AM ET. **E2e inventory (Sat AM):** `/app/analytics` hub had no
 40. Analytics hub (`/app/analytics`) — done
    - `e2e/analytics-hub.spec.ts`: Insights pack gate, readiness panel, four tabs (Business KPIs, Form Analytics, Reports Analyzer, Insights). Writes blocked.
    - `AnalyticsReadinessPanel` health cards and owner/manager toggle use locale keys (six locales). `data-testid` on `analytics-page` and readiness panel.
-41. Time off legacy routes — in progress
+41. Time off legacy routes — done
    - `/app/time-off` and `/app/scheduling/timeoff` redirect to enhanced scheduling time-off panel (`e2e/time-off-routes.spec.ts`).
-42. Forms fill dialog depth — queued
-   - Open E2E open form fill UI, assert `form-fill-list`, stub submission writes (`e2e/forms-fill-depth.spec.ts`).
+42. Forms fill dialog depth — done
+   - Open E2E open form fill UI, assert `form-fill-list`, stub `form_fields` and block `form_submissions` writes (`e2e/forms-fill-depth.spec.ts`).
