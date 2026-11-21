@@ -274,3 +274,10 @@ Hard stop at 6:00 AM ET. **E2e inventory (Sat AM):** `/app/analytics` hub had no
    - `/app/time-off` and `/app/scheduling/timeoff` redirect to enhanced scheduling time-off panel (`e2e/time-off-routes.spec.ts`).
 42. Forms fill dialog depth — done
    - Open E2E open form fill UI, assert `form-fill-list`, stub `form_fields` and block `form_submissions` writes (`e2e/forms-fill-depth.spec.ts`).
+
+### Block wrap-up log (Sat 21 Nov 2026, ~4:00–4:15 AM ET) <!-- pragma: allowlist secret -->
+
+- **#85 (open, CI rerun):** items 40–42 — analytics hub + readiness i18n, time-off route aliases, forms fill depth. Local scoped e2e: 5/5 new specs green; first Release gates run failed on analytics-hub Form Analytics tab strict locator (empty-tenant shows heading + paragraph; fixed to single heading branch).
+- **Migrations:** none.
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** Performance goal-progress UI depth; analytics readiness metric rows still use English from `buildAnalyticsReadinessSummary` (deeper i18n follow-up).
