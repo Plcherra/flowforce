@@ -316,3 +316,10 @@ Hard stop at 5:00 PM ET. **Queue 45+:** Tasks list depth (filters, detail dialog
    - Setup steps expose `getting-started-step-*` and `getting-started-next-steps`. `e2e/docs-getting-started-depth.spec.ts` walks four steps and next-step copy (Team pack, English).
 47. Settings — billing gates depth — done
    - `e2e/settings-billing-gates.spec.ts`: manager with mocked `billing.manage` still has no Billing tab; owner `billing-manage` mocks `/api/stripe/create-portal-session` without live Stripe.
+
+### Block wrap-up log (Sat 21 Nov 2026, ~2:00–3:30 PM ET) <!-- pragma: allowlist secret -->
+
+- **In progress:** PR for items 45–47 — tasks list depth + task comment fetch fix, docs getting-started walkthrough, settings billing portal gate e2e.
+- **Local e2e:** 5/5 on new specs; task-create and tasks-permissions regression passed.
+- **Migrations:** none (optional follow-up FK `task_comments.user_id` → `profiles.id` for embedded selects).
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
