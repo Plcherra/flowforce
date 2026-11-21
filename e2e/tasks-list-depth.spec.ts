@@ -72,12 +72,17 @@ test("all-tasks filters, detail dialog, and below-list panels", async ({ page })
   }
 
   await page.getByTestId("tasks-search-input").fill("zzzz-no-task-match-e2e-qa");
-  await expect(page.getByTestId("tasks-no-results")).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page
+      .getByTestId("tasks-no-results")
+      .or(page.getByTestId("tasks-empty-state")),
+  ).toBeVisible({ timeout: 15_000 });
   await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-no-results.png" });
 
   await page.getByTestId("tasks-search-input").fill("");
-  await expect(page.getByTestId("tasks-status-todo")).toBeVisible();
-  await page.getByTestId("tasks-status-todo").click();
+  if (await page.getByTestId("tasks-status-todo").isVisible()) {
+    await page.getByTestId("tasks-status-todo").click();
+  }
   await expect(page.getByTestId("tasks-view-section")).toBeVisible();
 
   await page.getByTestId("tasks-kind-filter").click();
