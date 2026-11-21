@@ -70,8 +70,7 @@ test("analytics hub loads tabs when Insights pack is on", async ({ page }) => {
     page
       .getByRole("combobox")
       .first()
-      .or(page.getByText("Create a form first to view analytics"))
-      .or(page.getByText("No Forms Available")),
+      .or(page.getByRole("heading", { name: "No Forms Available" })),
   ).toBeVisible({ timeout: 20_000 });
 
   await page.getByRole("tab", { name: "Reports Analyzer" }).click();
