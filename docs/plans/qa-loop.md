@@ -258,3 +258,26 @@ Hard stop at 1:00 PM ET. Deepen general-area Playwright coverage where specs are
 
 - **#84:** items 37–39 — schedule desk + messages channel settings e2e, delete orphan readiness panel. Full e2e on branch before rebase onto `main` (post-#83): **80 passed / 0 failed / 1 skipped** (~6.3m); skipped `e2e/direct-message.spec.ts`.
 - **Migrations:** none.
+
+## Saturday 21 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **E2e inventory (Sat AM):** `/app/analytics` hub had no `e2e/` coverage (only `/app/reports` and `/app/ai-insights` in `e2e/analytics-permissions.spec.ts`). Time-off legacy paths only in `tests/playwright`. Forms had permissions but no fill-dialog depth. Performance/Reviews/Goals already have permission specs; Tasks/Schedule/Messages deepened in items 37–38.
+
+**Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+**Queue 40+:** Analytics hub, time-off route aliases, forms fill dialog.
+
+40. Analytics hub (`/app/analytics`) — done
+   - `e2e/analytics-hub.spec.ts`: Insights pack gate, readiness panel, four tabs (Business KPIs, Form Analytics, Reports Analyzer, Insights). Writes blocked.
+   - `AnalyticsReadinessPanel` health cards and owner/manager toggle use locale keys (six locales). `data-testid` on `analytics-page` and readiness panel.
+41. Time off legacy routes — done
+   - `/app/time-off` and `/app/scheduling/timeoff` redirect to enhanced scheduling time-off panel (`e2e/time-off-routes.spec.ts`).
+42. Forms fill dialog depth — done
+   - Open E2E open form fill UI, assert `form-fill-list`, stub `form_fields` and block `form_submissions` writes (`e2e/forms-fill-depth.spec.ts`).
+
+### Block wrap-up log (Sat 21 Nov 2026, ~4:00–4:15 AM ET) <!-- pragma: allowlist secret -->
+
+- **#85 (open, CI rerun):** items 40–42 — analytics hub + readiness i18n, time-off route aliases, forms fill depth. Local scoped e2e: 5/5 new specs green; first Release gates run failed on analytics-hub Form Analytics tab strict locator (empty-tenant shows heading + paragraph; fixed to single heading branch).
+- **Migrations:** none.
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** Performance goal-progress UI depth; analytics readiness metric rows still use English from `buildAnalyticsReadinessSummary` (deeper i18n follow-up).

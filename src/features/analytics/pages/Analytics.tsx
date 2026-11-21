@@ -91,7 +91,10 @@ export default function Analytics() {
   );
 
   return (
-    <div className={isMobile ? "space-y-4" : "space-y-6"}>
+    <div
+      className={isMobile ? "space-y-4" : "space-y-6"}
+      data-testid="analytics-page"
+    >
       <div
         className={
           isMobile ? "px-4 py-3 space-y-2" : "flex items-center justify-between"

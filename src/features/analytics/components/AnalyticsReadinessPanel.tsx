@@ -65,33 +65,50 @@ export function AnalyticsReadinessPanel() {
 
   const healthCards = [
     {
-      label: "Live data",
-      value: summary.liveDataReady ? "Ready" : "Fallback",
-      detail: businessQuery.data?.notice ?? "Tenant-scoped module data",
+      id: "live-data",
+      labelKey: "analytics.readinessHealthLiveData",
+      value: summary.liveDataReady
+        ? t("analytics.ready")
+        : t("analytics.readinessHealthFallback"),
+      detail:
+        businessQuery.data?.notice ??
+        t("analytics.readinessHealthTenantScopedDetail"),
       icon: ShieldCheck,
     },
     {
-      label: "Exports",
-      value: summary.exportReady ? "Ready" : "Thin",
-      detail: "CSV-ready owner and manager metrics",
+      id: "exports",
+      labelKey: "analytics.readinessHealthExports",
+      value: summary.exportReady
+        ? t("analytics.ready")
+        : t("analytics.readinessHealthThin"),
+      detail: t("analytics.readinessHealthExportsDetail"),
       icon: Download,
     },
     {
-      label: "Cost engine",
-      value: summary.costEngineReady ? "Connected" : "Needs signal",
-      detail: "Labor, revenue, inventory, expenses",
+      id: "cost-engine",
+      labelKey: "analytics.readinessHealthCostEngine",
+      value: summary.costEngineReady
+        ? t("analytics.readinessHealthConnected")
+        : t("analytics.readinessHealthNeedsSignal"),
+      detail: t("analytics.readinessHealthCostEngineDetail"),
       icon: Gauge,
     },
     {
-      label: "AI insights",
-      value: summary.aiReady ? "Contextual" : "Limited",
-      detail: "Assistant receives current report context",
+      id: "ai-insights",
+      labelKey: "analytics.readinessHealthAi",
+      value: summary.aiReady
+        ? t("analytics.readinessHealthContextual")
+        : t("analytics.readinessHealthLimited"),
+      detail: t("analytics.readinessHealthAiDetail"),
       icon: Bot,
     },
-  ];
+  ] as const;
 
   return (
-    <Card className="border-border/70 bg-background/95 shadow-sm">
+    <Card
+      className="border-border/70 bg-background/95 shadow-sm"
+      data-testid="analytics-readiness-panel"
+    >
       <CardHeader className="space-y-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -112,9 +129,14 @@ export function AnalyticsReadinessPanel() {
                   variant={viewMode === mode ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode(mode)}
-                  className="h-8 capitalize"
+                  className="h-8"
+                  data-testid={`analytics-readiness-view-${mode}`}
                 >
-                  {mode}
+                  {t(
+                    mode === "owner"
+                      ? "analytics.readinessViewOwner"
+                      : "analytics.readinessViewManager",
+                  )}
                 </Button>
               ))}
             </div>
@@ -136,12 +158,13 @@ export function AnalyticsReadinessPanel() {
             const Icon = item.icon;
             return (
               <div
-                key={item.label}
+                key={item.id}
                 className="rounded-lg border border-border/70 bg-muted/30 p-3"
+                data-testid={`analytics-readiness-health-${item.id}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-medium uppercase text-muted-foreground">
-                    {item.label}
+                    {t(item.labelKey)}
                   </p>
                   <Icon className="h-4 w-4 text-muted-foreground" />
                 </div>
