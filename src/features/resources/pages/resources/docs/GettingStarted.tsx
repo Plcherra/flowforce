@@ -85,6 +85,7 @@ export default function GettingStarted() {
                 {steps.map((step, index) => (
                   <div
                     key={index}
+                    data-testid={`getting-started-step-${index}`}
                     className="flex items-start space-x-3 p-4 border rounded-lg"
                   >
                     <div className="flex-shrink-0">
@@ -108,7 +109,9 @@ export default function GettingStarted() {
                 ))}
               </div>
 
-              <h3 className="mt-8">{t("resources.nextSteps")}</h3>
+              <h3 className="mt-8" data-testid="getting-started-next-steps">
+                {t("resources.nextSteps")}
+              </h3>
               <p>{t("resources.onceSetupComplete")}</p>
               <ul>
                 <li>{t("resources.apiDocumentationForIntegrationGuidance")}</li>
