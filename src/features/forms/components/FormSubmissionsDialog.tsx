@@ -138,7 +138,7 @@ export default function FormSubmissionsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="flex max-h-[min(40rem,calc(100dvh-2rem))] w-[min(56rem,calc(100vw-1.5rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-[56rem]">
+        <DialogContent className="flex max-h-[min(40rem,calc(100dvh-2rem))] w-[min(56rem,calc(100vw-1.5rem))] flex-col gap-0 overflow-hidden p-0 sm:max-w-[56rem]" data-testid="form-submissions-dialog">
           <DialogHeader className="shrink-0 space-y-2 border-b px-4 py-3 pr-12">
             <div className="flex justify-between items-center">
               <DialogTitle>{t("forms.formSubmissions")}</DialogTitle>
@@ -146,7 +146,7 @@ export default function FormSubmissionsDialog({
                 <Button onClick={() => setFillDialogOpen(true)}>
                   {t("forms.fillForm")}</Button>
                 {submissions.length > 0 && (
-                  <Button variant="outline" onClick={exportToCSV}>
+                  <Button variant="outline" onClick={exportToCSV} data-testid="form-submissions-export">
                     <Download className="h-4 w-4 mr-2" />
                     {t("forms.exportCsv")}</Button>
                 )}
@@ -171,7 +171,7 @@ export default function FormSubmissionsDialog({
           ) : listState === "empty" ? (
             <FormSubmissionsEmpty onFill={() => setFillDialogOpen(true)} />
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4" data-testid="form-submissions-list">
               <div className="flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
                   {t(

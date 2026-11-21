@@ -324,3 +324,6 @@ Hard stop at 5:00 PM ET. **Queue 45+:** Tasks list depth (filters, detail dialog
 - **Migrations:** none (optional follow-up FK `task_comments.user_id` → `profiles.id` for embedded selects).
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** schedule/messages/forms remain candidates for deeper e2e if time remains in block.
+
+48. Forms — submissions dialog depth — done
+   - `data-testid` on submissions dialog, list, and export. `e2e/forms-submissions-depth.spec.ts`: empty state + fill CTA, mocked row list + CSV export (writes blocked).
