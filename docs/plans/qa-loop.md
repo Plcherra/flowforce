@@ -281,3 +281,23 @@ Hard stop at 6:00 AM ET. **E2e inventory (Sat AM):** `/app/analytics` hub had no
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** Performance goal-progress UI depth; analytics readiness metric rows still use English from `buildAnalyticsReadinessSummary` (deeper i18n follow-up).
+
+## Saturday 21 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. **Queue 43+:** goal-progress UI depth; analytics readiness metric i18n.
+
+**Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+43. Performance / Goals — goal-progress UI depth — done
+   - `e2e/goals-progress-depth.spec.ts`: Team pack performance KPI grid (`performance-kpi-goal-progress`), goal progress card, refresh control, `goals.manage` OR `goals.view` gate, writes blocked.
+   - Stable test ids on `performance-kpi-grid`, `performance-kpi-*`, and `performance-refresh`.
+44. Analytics readiness metric rows — done
+   - `buildAnalyticsReadinessSummary` emits locale keys; panel translates via `displayAnalyticsReadinessSummary` across six locales.
+   - `e2e/analytics-readiness-metrics.spec.ts` asserts owner/manager metric rows and toggles view mode. Metric and review rows expose `data-testid`s.
+
+### Block wrap-up log (Sat 21 Nov 2026, 9:00 AM–1:00 PM ET) <!-- pragma: allowlist secret -->
+
+- **PR:** items 43–44 — goal-progress e2e depth; analytics readiness metric i18n + e2e.
+- **Migrations:** none.
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** deepen another thin e2e area (Tasks list depth, Docs getting-started walkthrough, or Settings billing gates).

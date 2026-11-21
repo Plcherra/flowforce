@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { BusinessAnalyticsSnapshotResult } from "@/services/analytics/businessAnalyticsService";
 import type { FormWithMeta } from "@/features/forms/hooks/useForms";
 import type { DocumentWithRelations } from "@/types/ingestion";
@@ -6,10 +7,20 @@ export type AnalyticsViewMode = "owner" | "manager";
 
 export interface AnalyticsReadinessMetric {
   id: string;
-  label: string;
+  labelKey: string;
+  detailKey: string;
+  detailParams?: Record<string, string | number>;
   value: string;
-  detail: string;
+  valueKey?: string;
   status: "ready" | "watch" | "blocked";
+}
+
+export interface AnalyticsReadinessReviewItem {
+  id: string;
+  labelKey: string;
+  detailKey: string;
+  detailParams?: Record<string, string | number>;
+  severity: "critical" | "warning" | "info";
 }
 
 export interface AnalyticsReadinessSummary {
@@ -19,12 +30,32 @@ export interface AnalyticsReadinessSummary {
   aiReady: boolean;
   costEngineReady: boolean;
   metrics: AnalyticsReadinessMetric[];
-  reviewItems: Array<{
-    id: string;
-    label: string;
-    detail: string;
-    severity: "critical" | "warning" | "info";
-  }>;
+  reviewItems: AnalyticsReadinessReviewItem[];
+}
+
+export interface AnalyticsReadinessMetricDisplay {
+  id: string;
+  label: string;
+  value: string;
+  detail: string;
+  status: AnalyticsReadinessMetric["status"];
+}
+
+export interface AnalyticsReadinessReviewItemDisplay {
+  id: string;
+  label: string;
+  detail: string;
+  severity: AnalyticsReadinessReviewItem["severity"];
+}
+
+export interface AnalyticsReadinessSummaryDisplay {
+  viewMode: AnalyticsViewMode;
+  liveDataReady: boolean;
+  exportReady: boolean;
+  aiReady: boolean;
+  costEngineReady: boolean;
+  metrics: AnalyticsReadinessMetricDisplay[];
+  reviewItems: AnalyticsReadinessReviewItemDisplay[];
 }
 
 const percent = (value: number) => `${Math.round(value)}%`;
@@ -41,6 +72,28 @@ export function resolveAnalyticsViewMode(role?: string | null) {
   return normalized.includes("owner") || normalized.includes("admin")
     ? "owner"
     : "manager";
+}
+
+export function displayAnalyticsReadinessSummary(
+  summary: AnalyticsReadinessSummary,
+  t: TFunction,
+): AnalyticsReadinessSummaryDisplay {
+  return {
+    ...summary,
+    metrics: summary.metrics.map((metric) => ({
+      id: metric.id,
+      label: t(metric.labelKey),
+      value: metric.valueKey ? t(metric.valueKey) : metric.value,
+      detail: t(metric.detailKey, metric.detailParams ?? {}),
+      status: metric.status,
+    })),
+    reviewItems: summary.reviewItems.map((item) => ({
+      id: item.id,
+      label: t(item.labelKey),
+      detail: t(item.detailKey, item.detailParams ?? {}),
+      severity: item.severity,
+    })),
+  };
 }
 
 export function buildAnalyticsReadinessSummary({
@@ -93,71 +146,97 @@ export function buildAnalyticsReadinessSummary({
       ? [
           {
             id: "forecast-confidence",
-            label: "Forecast confidence",
+            labelKey: "analytics.readinessMetricForecastConfidence",
             value: percent(forecastConfidence),
-            detail: `${money(snapshot?.breakdown.revenue.forecastNext30 ?? 0)} projected`,
+            detailKey: "analytics.readinessMetricForecastDetail",
+            detailParams: {
+              projected: money(snapshot?.breakdown.revenue.forecastNext30 ?? 0),
+            },
             status: !isFallback && forecastConfidence >= 55 ? "ready" : "watch",
           },
           {
             id: "margin",
-            label: "Margin",
+            labelKey: "analytics.readinessMetricMargin",
             value: percent(marginRate),
-            detail: `${money(trailingRevenue)} trailing revenue`,
+            detailKey: "analytics.readinessMetricMarginDetail",
+            detailParams: { trailing: money(trailingRevenue) },
             status: costEngineReady ? "ready" : "watch",
           },
           {
             id: "report-exports",
-            label: "Exportable reports",
+            labelKey: "analytics.readinessMetricExportableReports",
             value: String(readyReports.length + formsWithSubmissions.length),
-            detail: `${readyReports.length} ready docs, ${formsWithSubmissions.length} active forms`,
+            detailKey: "analytics.readinessMetricExportableReportsDetail",
+            detailParams: {
+              readyDocs: readyReports.length,
+              activeForms: formsWithSubmissions.length,
+            },
             status: exportReady ? "ready" : "blocked",
           },
           {
             id: "ai-context",
-            label: "AI context",
-            value: aiReady ? "Live" : "Needs data",
-            detail: `${followUpActions} follow-up actions linked`,
+            labelKey: "analytics.readinessMetricAiContext",
+            value: "",
+            valueKey: aiReady
+              ? "analytics.readinessAiLive"
+              : "analytics.readinessAiNeedsData",
+            detailKey: "analytics.readinessMetricAiContextDetail",
+            detailParams: { followUps: followUpActions },
             status: aiReady ? "ready" : "watch",
           },
         ]
       : [
           {
             id: "open-shifts",
-            label: "Open shifts",
+            labelKey: "analytics.readinessMetricOpenShifts",
             value: String(openShifts),
-            detail: `${percent((snapshot?.metrics.scheduleCoverage ?? 0) * 100)} coverage`,
+            detailKey: "analytics.readinessMetricOpenShiftsDetail",
+            detailParams: {
+              coverage: percent((snapshot?.metrics.scheduleCoverage ?? 0) * 100),
+            },
             status: openShifts === 0 ? "ready" : "watch",
           },
           {
             id: "overdue-tasks",
-            label: "Overdue tasks",
+            labelKey: "analytics.readinessMetricOverdueTasks",
             value: String(overdueTasks),
-            detail: `${snapshot?.breakdown.tasks.backlog ?? 0} task backlog`,
+            detailKey: "analytics.readinessMetricOverdueTasksDetail",
+            detailParams: { backlog: snapshot?.breakdown.tasks.backlog ?? 0 },
             status: overdueTasks === 0 ? "ready" : "watch",
           },
           {
             id: "published-forms",
-            label: "Published forms",
+            labelKey: "analytics.readinessMetricPublishedForms",
             value: String(publishedForms.length),
-            detail: `${formsWithSubmissions.length} with submissions`,
+            detailKey: "analytics.readinessMetricPublishedFormsDetail",
+            detailParams: { withSubmissions: formsWithSubmissions.length },
             status: publishedForms.length > 0 ? "ready" : "watch",
           },
           {
             id: "report-processing",
-            label: "Report processing",
+            labelKey: "analytics.readinessMetricReportProcessing",
             value: String(pendingReports.length),
-            detail: `${readyReports.length} ready, ${erroredReports.length} errors`,
+            detailKey: "analytics.readinessMetricReportProcessingDetail",
+            detailParams: {
+              ready: readyReports.length,
+              errors: erroredReports.length,
+            },
             status: erroredReports.length > 0 ? "blocked" : "ready",
           },
         ];
 
-  const reviewItems = [
+  const reviewItems: AnalyticsReadinessReviewItem[] = [
     ...(isFallback
       ? [
           {
             id: "fallback-data",
-            label: "Live analytics data unavailable",
-            detail: business?.notice ?? "Business analytics is using simulator defaults.",
+            labelKey: "analytics.readinessReviewFallbackLabel",
+            detailKey: business?.notice
+              ? "analytics.readinessReviewFallbackNoticeDetail"
+              : "analytics.readinessReviewFallbackDefaultDetail",
+            detailParams: business?.notice
+              ? { notice: business.notice }
+              : undefined,
             severity: "info" as const,
           },
         ]
@@ -166,8 +245,9 @@ export function buildAnalyticsReadinessSummary({
       ? [
           {
             id: "errored-reports",
-            label: "Report extraction errors",
-            detail: `${erroredReports.length} uploaded reports need attention.`,
+            labelKey: "analytics.readinessReviewErroredLabel",
+            detailKey: "analytics.readinessReviewErroredDetail",
+            detailParams: { count: erroredReports.length },
             severity: "critical" as const,
           },
         ]
@@ -176,8 +256,8 @@ export function buildAnalyticsReadinessSummary({
       ? [
           {
             id: "no-export-data",
-            label: "No exportable reporting data",
-            detail: "Upload reports or collect form submissions before pilot reporting.",
+            labelKey: "analytics.readinessReviewNoExportLabel",
+            detailKey: "analytics.readinessReviewNoExportDetail",
             severity: "info" as const,
           },
         ]
@@ -186,8 +266,8 @@ export function buildAnalyticsReadinessSummary({
       ? [
           {
             id: "cost-engine-data",
-            label: "Cost engine data is thin",
-            detail: "Revenue, inventory, expense, or labor data is needed for stronger owner reports.",
+            labelKey: "analytics.readinessReviewCostEngineLabel",
+            detailKey: "analytics.readinessReviewCostEngineDetail",
             severity: "info" as const,
           },
         ]

@@ -20,6 +20,7 @@ import { useForms } from "@/features/forms/hooks/useForms";
 import { exportAnalyticsReadiness } from "@/features/analytics/utils/exportHelpers";
 import {
   buildAnalyticsReadinessSummary,
+  displayAnalyticsReadinessSummary,
   resolveAnalyticsViewMode,
   type AnalyticsViewMode,
 } from "@/features/analytics/utils/analyticsReadiness";
@@ -61,6 +62,11 @@ export function AnalyticsReadinessPanel() {
         documents,
       }),
     [businessQuery.data, documents, forms, viewMode],
+  );
+
+  const summaryDisplay = useMemo(
+    () => displayAnalyticsReadinessSummary(summary, t),
+    [summary, t],
   );
 
   const healthCards = [
@@ -144,7 +150,7 @@ export function AnalyticsReadinessPanel() {
               type="button"
               variant="outline"
               className="gap-2"
-              onClick={() => exportAnalyticsReadiness(summary)}
+              onClick={() => exportAnalyticsReadiness(summaryDisplay)}
             >
               <Download className="h-4 w-4" />
               {t("schedule.export")}
@@ -180,15 +186,16 @@ export function AnalyticsReadinessPanel() {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {summary.metrics.map((metric) => (
+          {summaryDisplay.metrics.map((metric) => (
             <div
               key={metric.id}
               className={`rounded-lg border p-3 ${statusTone[metric.status]}`}
+              data-testid={`analytics-readiness-metric-${metric.id}`}
             >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium">{metric.label}</p>
                 <Badge variant="outline" className="text-[10px] capitalize">
-                  {metric.status}
+                  {t(`analytics.readinessStatus_${metric.status}`)}
                 </Badge>
               </div>
               <p className="mt-2 text-2xl font-semibold">{metric.value}</p>
@@ -197,21 +204,22 @@ export function AnalyticsReadinessPanel() {
           ))}
         </div>
 
-        {summary.reviewItems.length > 0 ? (
+        {summaryDisplay.reviewItems.length > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>{t("analytics.reportingReviewNeeded")}</AlertTitle>
             <AlertDescription>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
-                {summary.reviewItems.map((item) => (
+                {summaryDisplay.reviewItems.map((item) => (
                   <div
                     key={item.id}
                     className={`rounded-md border px-3 py-2 text-sm ${reviewTone[item.severity]}`}
+                    data-testid={`analytics-readiness-review-${item.id}`}
                   >
                     <span className="flex items-center justify-between gap-2">
                       <span className="font-medium">{item.label}</span>
                       <Badge variant="outline" className="text-[10px]">
-                        {item.severity}
+                        {t(`analytics.readinessSeverity_${item.severity}`)}
                       </Badge>
                     </span>
                     <span className="mt-1 block">{item.detail}</span>
