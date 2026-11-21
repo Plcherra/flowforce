@@ -361,12 +361,7 @@ export async function fetchTaskComments(
 ): Promise<TaskCommentWithUser[]> {
   const { data, error } = await supabase
     .from("task_comments")
-    .select(
-      `
-        *,
-        user:profiles(first_name, last_name)
-      `,
-    )
+    .select("id, task_id, user_id, comment, created_at, updated_at")
     .eq("task_id", taskId)
     .order("created_at", { ascending: true });
 
@@ -374,5 +369,34 @@ export async function fetchTaskComments(
     throw error;
   }
 
-  return taskCommentWithUserSchema.array().parse(data ?? []);
+  const rows = taskCommentSchema.array().parse(data ?? []);
+  const userIds = [...new Set(rows.map((row) => row.user_id).filter(Boolean))];
+  const profilesById = new Map<
+    string,
+    { first_name: string | null; last_name: string | null }
+  >();
+
+  if (userIds.length > 0) {
+    // Load authors separately — PostgREST has no task_comments → profiles FK.
+    const { data: profiles, error: profileError } = await supabase // pragma: allowlist secret
+      .from("profiles")
+      .select("id, first_name, last_name")
+      .in("id", userIds);
+
+    if (profileError) {
+      throw profileError;
+    }
+
+    for (const profile of profiles ?? []) {
+      profilesById.set(profile.id, {
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+      });
+    }
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    user: profilesById.get(row.user_id) ?? null,
+  }));
 }

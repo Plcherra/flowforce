@@ -526,7 +526,10 @@ export function TaskDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto p-4 sm:max-w-[720px] sm:p-6">
+      <DialogContent
+        data-testid="task-details-dialog"
+        className="max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto p-4 sm:max-w-[720px] sm:p-6"
+      >
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">

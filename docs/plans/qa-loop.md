@@ -301,3 +301,18 @@ Hard stop at 1:00 PM ET. **Queue 43+:** goal-progress UI depth; analytics readin
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** deepen another thin e2e area (Tasks list depth, Docs getting-started walkthrough, or Settings billing gates).
+
+## Saturday 21 Nov 2026, 2:00 PM–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 45+:** Tasks list depth (filters, detail dialog, below-list panels); Docs getting-started walkthrough; Settings billing gates.
+
+**Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+45. Tasks — list, filters, and detail depth — done
+   - `e2e/tasks-list-depth.spec.ts`: My Shift shell, All tasks filters (search no-match, status todo tab, kind filter), first task opens `task-details-dialog`, reminders below list, notifications popover; task writes blocked.
+   - `fetchTaskComments` loads profiles in a second query (no `task_comments` → `profiles` FK in PostgREST schema).
+   - `data-testid="task-details-dialog"` on task details.
+46. Docs — getting-started walkthrough — done
+   - Setup steps expose `getting-started-step-*` and `getting-started-next-steps`. `e2e/docs-getting-started-depth.spec.ts` walks four steps and next-step copy (Team pack, English).
+47. Settings — billing gates depth — done
+   - `e2e/settings-billing-gates.spec.ts`: manager with mocked `billing.manage` still has no Billing tab; owner `billing-manage` mocks `/api/stripe/create-portal-session` without live Stripe.
