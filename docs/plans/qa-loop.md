@@ -297,7 +297,7 @@ Hard stop at 1:00 PM ET. **Queue 43+:** goal-progress UI depth; analytics readin
 
 ### Block wrap-up log (Sat 21 Nov 2026, 9:00 AM–1:00 PM ET) <!-- pragma: allowlist secret -->
 
-- **PR:** items 43–44 — goal-progress e2e depth; analytics readiness metric i18n + e2e.
+- **Merged:** [#86](https://github.com/Plcherra/flowforce/pull/86) — items 43–44 (goal-progress e2e depth; analytics readiness metric i18n + e2e). Release gates, Remote deploy readiness, and Vercel preview green on branch; merged at `58671824`.
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** deepen another thin e2e area (Tasks list depth, Docs getting-started walkthrough, or Settings billing gates).
