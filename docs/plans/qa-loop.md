@@ -258,3 +258,19 @@ Hard stop at 1:00 PM ET. Deepen general-area Playwright coverage where specs are
 
 - **#84:** items 37–39 — schedule desk + messages channel settings e2e, delete orphan readiness panel. Full e2e on branch before rebase onto `main` (post-#83): **80 passed / 0 failed / 1 skipped** (~6.3m); skipped `e2e/direct-message.spec.ts`.
 - **Migrations:** none.
+
+## Saturday 21 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **E2e inventory (Sat AM):** `/app/analytics` hub had no `e2e/` coverage (only `/app/reports` and `/app/ai-insights` in `e2e/analytics-permissions.spec.ts`). Time-off legacy paths only in `tests/playwright`. Forms had permissions but no fill-dialog depth. Performance/Reviews/Goals already have permission specs; Tasks/Schedule/Messages deepened in items 37–38.
+
+**Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+**Queue 40+:** Analytics hub, time-off route aliases, forms fill dialog.
+
+40. Analytics hub (`/app/analytics`) — done
+   - `e2e/analytics-hub.spec.ts`: Insights pack gate, readiness panel, four tabs (Business KPIs, Form Analytics, Reports Analyzer, Insights). Writes blocked.
+   - `AnalyticsReadinessPanel` health cards and owner/manager toggle use locale keys (six locales). `data-testid` on `analytics-page` and readiness panel.
+41. Time off legacy routes — in progress
+   - `/app/time-off` and `/app/scheduling/timeoff` redirect to enhanced scheduling time-off panel (`e2e/time-off-routes.spec.ts`).
+42. Forms fill dialog depth — queued
+   - Open E2E open form fill UI, assert `form-fill-list`, stub submission writes (`e2e/forms-fill-depth.spec.ts`).
