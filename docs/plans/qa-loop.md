@@ -277,7 +277,7 @@ Hard stop at 6:00 AM ET. **E2e inventory (Sat AM):** `/app/analytics` hub had no
 
 ### Block wrap-up log (Sat 21 Nov 2026, ~4:00–4:15 AM ET) <!-- pragma: allowlist secret -->
 
-- **#85 (open, CI rerun):** items 40–42 — analytics hub + readiness i18n, time-off route aliases, forms fill depth. Local scoped e2e: 5/5 new specs green; first Release gates run failed on analytics-hub Form Analytics tab strict locator (empty-tenant shows heading + paragraph; fixed to single heading branch).
+- **Merged:** [#85](https://github.com/Plcherra/flowforce/pull/85) — items 40–42 (analytics hub + readiness i18n, time-off route aliases, forms fill depth). Release gates failed once on analytics-hub Form Analytics strict locator; fixed in `80c7f636` before green merge (~85 e2e passed in CI, 1 skipped `direct-message`).
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** Performance goal-progress UI depth; analytics readiness metric rows still use English from `buildAnalyticsReadinessSummary` (deeper i18n follow-up).
