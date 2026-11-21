@@ -55,9 +55,16 @@ export function PerformanceKpiGrid({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <div
+      className="grid gap-4 md:grid-cols-2 xl:grid-cols-5"
+      data-testid="performance-kpi-grid"
+    >
       {metrics.map((metric) => (
-        <Card key={metric.id} className="shadow-sm">
+        <Card
+          key={metric.id}
+          className="shadow-sm"
+          data-testid={`performance-kpi-${metric.id}`}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground">
               {metric.label}

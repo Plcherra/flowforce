@@ -36,6 +36,7 @@ export function PerformanceHeader({
           size="icon"
           onClick={onRefresh}
           disabled={loading}
+          data-testid="performance-refresh"
         >
           <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
           <span className="sr-only">{t("common.refresh")}</span>

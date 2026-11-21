@@ -4,7 +4,7 @@
 
 import { format } from "date-fns";
 import type { ComparisonRecord } from "../types/reports";
-import type { AnalyticsReadinessSummary } from "@/features/analytics/utils/analyticsReadiness";
+import type { AnalyticsReadinessSummaryDisplay } from "@/features/analytics/utils/analyticsReadiness";
 
 /**
  * Export reports analytics data to CSV
@@ -40,7 +40,7 @@ export function exportReportsData(
 }
 
 export function exportAnalyticsReadiness(
-  summary: AnalyticsReadinessSummary,
+  summary: AnalyticsReadinessSummaryDisplay,
 ): void {
   const rows = [
     ["View", summary.viewMode],
