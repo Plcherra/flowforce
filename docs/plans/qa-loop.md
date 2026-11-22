@@ -371,7 +371,7 @@ Hard stop at 1:00 PM ET. **Queue 50+:** forms builder window validation; message
 
 ### Block wrap-up log (Sun 22 Nov 2026, 2:00–5:00 PM ET) <!-- pragma: allowlist secret -->
 
-- **Merged:** (pending PR) — items 52–54; shift editor flake fix + three new e2e depth specs.
+- **Merged:** [#90](https://github.com/Plcherra/flowforce/pull/90) at `d3258d4c` — items 52–54; shift editor flake fix + three new e2e depth specs. Release gates, Remote deploy readiness, and Vercel preview green on branch; post-merge main Release gates + Deploy Readiness green.
 - **Local e2e:** `schedule-shift-editor-depth` 2/2, `time-off-panel-depth` 1/1, `reviews-followups-depth` 2/2; `schedule-desk-depth` 2/2 regression.
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for two-user DM unchanged.
