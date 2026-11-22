@@ -195,6 +195,16 @@ export function runFormDistributionTests() {
     "complete",
   );
   assert.equal(
+    distributionProblem(distribution({
+      timeMode: "shift_day",
+      showAt: "00:00",
+      dueTime: "00:00",
+      completeBy: "00:00",
+    })),
+    null,
+    "untouched midnight defaults do not block the builder",
+  );
+  assert.equal(
     distributionProblem(distribution({ timeMode: "shift_day" })),
     null,
   );

@@ -64,8 +64,7 @@ test("edit published form walks builder steps with fields and blocks publish wri
   await page.getByTestId("form-builder-nav-who").click();
   await expect(page.getByTestId("form-builder-step-who")).toBeVisible();
   await expect(page.getByTestId("form-distribution")).toBeVisible();
-  await page.getByTestId("form-complete-time-toggle").click();
-  await page.getByTestId("form-builder-nav-preview").click();
+  await page.getByTestId("form-builder-next").click();
   await expect(page.getByTestId("form-builder-step-preview")).toBeVisible();
 
   await page.getByTestId("form-builder-publish").click();
@@ -92,7 +91,54 @@ test("new form button opens empty questions step", async ({ page }) => {
   await expect(page.getByTestId("form-questions-empty")).toBeVisible({
     timeout: 20_000,
   });
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-builder-step-who")).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.getByTestId("form-show-time-toggle").click();
+  await page.getByTestId("form-due-time-toggle").click();
+  await page.getByTestId("form-complete-time-toggle").click();
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-builder-step-preview")).toBeVisible({
+    timeout: 15_000,
+  });
   await page.screenshot({ path: "/opt/cursor/artifacts/forms-builder-new-empty.png" });
+});
+
+test("who step blocks invalid complete-by with inline error", async ({ page }) => {
+  test.setTimeout(180_000);
+  await blockFormWrites(page);
+  await signIn(page);
+
+  await page.goto("/app/forms");
+  await expect(page.getByTestId("forms-new-button")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("forms-new-button").click();
+  await page.getByLabel("Form title").fill("E2E builder invalid window");
+  await page.getByRole("button", { name: "Create form" }).click();
+  await expect(page.getByTestId("form-builder")).toBeVisible({ timeout: 30_000 });
+  await page.getByTestId("form-builder-next").click();
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-builder-step-who")).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.getByTestId("form-show-time-toggle").click();
+  await page.getByTestId("form-due-time-toggle").click();
+  await page.getByTestId("form-complete-time-toggle").click();
+  await page.getByTestId("form-show-time").fill("00:00");
+  await page.getByTestId("form-due-time").fill("00:00");
+  await page.getByTestId("form-complete-time").fill("00:00");
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-builder-step-preview")).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.getByTestId("form-builder-nav-who").click();
+  await page.getByTestId("form-show-time").fill("09:00");
+  await page.getByTestId("form-due-time").fill("08:00");
+  await page.getByTestId("form-complete-time").fill("07:00");
+  await expect(page.getByTestId("form-distribution-time-error")).toBeVisible();
+  await page.getByTestId("form-builder-next").click();
+  await expect(page.getByTestId("form-builder-step-who")).toBeVisible();
+  await page.screenshot({ path: "/opt/cursor/artifacts/forms-builder-invalid-window.png" });
 });
 
 test("createForms and manageForms gate edit and new form", async ({ page }) => {
