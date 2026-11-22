@@ -275,6 +275,7 @@ export function FormsSection({
                             variant="outline"
                             size="sm"
                             className="min-h-11"
+                            data-testid={`form-edit-${form.id}`}
                             onClick={() => onEdit(form.id)}
                           >
                             {t("forms.editForm")}
