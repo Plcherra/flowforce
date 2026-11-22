@@ -517,7 +517,7 @@ export function ShiftDetailsPanel({
 
   if (!shift) {
     return (
-      <Card>
+      <Card data-testid="shift-details-not-found">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{t("schedule.shiftDetails")}</CardTitle>

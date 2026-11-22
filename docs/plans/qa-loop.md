@@ -360,9 +360,19 @@ Hard stop at 1:00 PM ET. **Queue 50+:** forms builder window validation; message
 51. Messages — conversation list and composer — done
    - `e2e/messages-conversation-depth.spec.ts`: roster search, channel transcript, composer send gate (writes blocked), `messages.send` deny.
 
-52. Schedule — shift editor fields — open
-   - `e2e/schedule-shift-editor-depth.spec.ts` drafted; shift-details fetch mocking still flakes in Cloud Agent (120s timeout). Desk coverage remains in `e2e/schedule-desk-depth.spec.ts` and `e2e/schedule-permissions.spec.ts`.
+52. Schedule — shift editor fields — done
+   - Root cause for Cloud Agent flakes: mocked shift dates used Monday `weekStartsOn: 1` while the week grid uses Sunday week start, so chips never rendered; stacked `schedules` route handlers could also skip the GET mock. `e2e/schedule-shift-editor-depth.spec.ts` pins shifts to the visible week, merges write-block + GET mock in one handler, and asserts details / tasks / templates tabs plus assign-only save/delete gates. `shift-details-not-found` test id added for fast diagnosis.
 
-53. Time off — request form/panel depth — not started (hard stop).
+53. Time off — request form/panel depth — done
+   - `e2e/time-off-panel-depth.spec.ts`: summary tiles, request dialog fields (`timeoff-type`, dates, reason), blocked `time_off_requests` submit.
 
-54. Reviews follow-ups — not started (hard stop).
+54. Reviews follow-ups — done
+   - `e2e/reviews-followups-depth.spec.ts`: mocked `performance_reviews` row in Recent reviews, refresh control, `goal_id` still omitted from REST select.
+
+### Block wrap-up log (Sun 22 Nov 2026, 2:00–5:00 PM ET) <!-- pragma: allowlist secret -->
+
+- **Merged:** (pending PR) — items 52–54; shift editor flake fix + three new e2e depth specs.
+- **Local e2e:** `schedule-shift-editor-depth` 2/2, `time-off-panel-depth` 1/1, `reviews-followups-depth` 2/2; `schedule-desk-depth` 2/2 regression.
+- **Migrations:** none.
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` for two-user DM unchanged.
+- **Next:** thin e2e in messages/forms/schedule if another block runs; optional shared shift mock helper for desk specs.
