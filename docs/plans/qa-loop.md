@@ -345,3 +345,24 @@ Hard stop at 6:00 AM ET. **Queue 49+:** Forms builder/edit depth; Messages conve
 - **Migrations:** none (optional `task_comments.user_id` → `profiles.id` FK unchanged).
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** Messages channel list + composer depth; schedule shift editor fields; time-off request form depth.
+
+## Sunday 22 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. **Queue 50+:** forms builder window validation; messages conversation depth; schedule shift editor fields; time-off panel; reviews follow-ups.
+
+**Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+50. Forms — builder complete-by / midnight defaults — done
+   - `clockWindowProblem` treats untouched `00:00` shift-day clocks as unset; legacy editor migration no longer copies due into complete-by.
+   - Who step shows inline `form-distribution-time-error` for real ordering issues.
+   - `e2e/forms-builder-depth.spec.ts` walks Next without toggling complete-by off; invalid window test added. Unit: `formDistribution.test.ts`.
+
+51. Messages — conversation list and composer — done
+   - `e2e/messages-conversation-depth.spec.ts`: roster search, channel transcript, composer send gate (writes blocked), `messages.send` deny.
+
+52. Schedule — shift editor fields — open
+   - `e2e/schedule-shift-editor-depth.spec.ts` drafted; shift-details fetch mocking still flakes in Cloud Agent (120s timeout). Desk coverage remains in `e2e/schedule-desk-depth.spec.ts` and `e2e/schedule-permissions.spec.ts`.
+
+53. Time off — request form/panel depth — not started (hard stop).
+
+54. Reviews follow-ups — not started (hard stop).
