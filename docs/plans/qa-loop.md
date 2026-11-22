@@ -340,7 +340,7 @@ Hard stop at 6:00 AM ET. **Queue 49+:** Forms builder/edit depth; Messages conve
 
 ### Block wrap-up log (Sun 22 Nov 2026, ~4:00–6:00 AM ET) <!-- pragma: allowlist secret -->
 
-- **Branch:** `cursor/forms-builder-e2e-depth-4957` — item 49 (opens PR after push).
+- **Merged:** [#88](https://github.com/Plcherra/flowforce/pull/88) — item 49 at `176ba2fc` (Release gates, Remote deploy readiness, Vercel preview green on branch; post-merge main Release gates + Deploy Readiness green).
 - **Local e2e:** `e2e/forms-builder-depth.spec.ts` 3/3 green (~16s).
 - **Migrations:** none (optional `task_comments.user_id` → `profiles.id` FK unchanged).
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
