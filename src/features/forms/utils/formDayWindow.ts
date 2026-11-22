@@ -34,6 +34,16 @@ export function formatClock(clock: string, locale: string): string {
   }).format(date);
 }
 
+/** Builder defaults sometimes land on midnight before the creator picks real times. */
+function isMidnightPristineWindow(
+  show: number | null,
+  due: number | null,
+  complete: number | null,
+): boolean {
+  if (show !== 0 || complete !== 0) return false;
+  return due === null || due === 0;
+}
+
 /** Show, due, and complete-by are optional. Compare only the ones that are set. */
 export function clockWindowProblem(
   showAt: string | null,
@@ -43,6 +53,7 @@ export function clockWindowProblem(
   const show = showAt ? clockMinutes(showAt) : null;
   const due = dueTime ? clockMinutes(dueTime) : null;
   const complete = completeBy ? clockMinutes(completeBy) : null;
+  if (isMidnightPristineWindow(show, due, complete)) return null;
   if (show != null && due != null && due < show) return "due";
   if (due != null && complete != null && complete < due) return "complete";
   if (show != null && complete != null && complete <= show) return "complete";

@@ -143,7 +143,7 @@ export function distributionForEditor(settings: unknown): FormDistribution {
     timeMode: "shift_day",
     showAt,
     dueTime,
-    completeBy: dueTime,
+    completeBy: read.completeBy,
     showFrom: null,
     dueAt: null,
     storeIds: read.storeIds ?? [],

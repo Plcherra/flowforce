@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { FormDistributionEditor } from "@/features/forms/components/FormDistributionEditor";
-import type { FormDistribution } from "@/features/forms/utils/formDistribution";
+import {
+  distributionProblem,
+  type FormDistribution,
+} from "@/features/forms/utils/formDistribution";
 import { shouldAskForStore } from "@/features/stores/storeDraft";
 import { useCompanyStores } from "@/features/stores/useCompanyStores";
 
@@ -30,9 +33,26 @@ export function FormWhoWhenStep({
     if (!only || distribution.storeIds?.[0] === only && (distribution.storeIds?.length ?? 0) === 1) return;
     onChange({ ...distribution, storeIds: [only] });
   }, [distribution, onChange, stores]);
+  const timeIssue = distributionProblem(distribution);
+  const timeIssueMessage =
+    timeIssue === "due"
+      ? t("forms.dueBeforeShow")
+      : timeIssue === "complete"
+        ? t("forms.completeByOrder")
+        : null;
+
   return (
     <section className="mx-auto w-full max-w-xl space-y-5" data-testid="form-builder-step-who">
       <h2 className="text-xl font-semibold">{t("forms.builderWho")}</h2>
+      {timeIssueMessage ? (
+        <p
+          className="text-sm text-destructive"
+          role="alert"
+          data-testid="form-distribution-time-error"
+        >
+          {timeIssueMessage}
+        </p>
+      ) : null}
       <FormDistributionEditor
         distribution={distribution}
         roles={roles}
