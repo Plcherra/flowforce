@@ -327,3 +327,21 @@ Hard stop at 5:00 PM ET. **Queue 45+:** Tasks list depth (filters, detail dialog
 
 48. Forms — submissions dialog depth — done
    - `data-testid` on submissions dialog, list, and export. `e2e/forms-submissions-depth.spec.ts`: empty state + fill CTA, mocked row list + CSV export (writes blocked).
+
+## Sunday 22 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **Queue 49+:** Forms builder/edit depth; Messages conversation list; Schedule shift-edit UI; Time off panel depth; Reviews follow-ups.
+
+**Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+49. Forms — builder and edit depth — done
+   - `data-testid` `form-edit-{id}` on the list edit action.
+   - `e2e/forms-builder-depth.spec.ts`: edit walks basics → questions → who (complete-by off) → preview with blocked publish; create dialog → builder empty questions; `createForms`/`manageForms` gates on edit and new. Writes blocked.
+
+### Block wrap-up log (Sun 22 Nov 2026, ~4:00–6:00 AM ET) <!-- pragma: allowlist secret -->
+
+- **Branch:** `cursor/forms-builder-e2e-depth-4957` — item 49 (opens PR after push).
+- **Local e2e:** `e2e/forms-builder-depth.spec.ts` 3/3 green (~16s).
+- **Migrations:** none (optional `task_comments.user_id` → `profiles.id` FK unchanged).
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** Messages channel list + composer depth; schedule shift editor fields; time-off request form depth.
