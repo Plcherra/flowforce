@@ -443,7 +443,8 @@ Hard stop at 5:00 PM ET. **Queue 62+:** Tasks, Goals, Docs, Forms, Time off, Set
 ### Block wrap-up log (Mon 23 Nov 2026, 2:00–~3:50 PM ET) <!-- pragma: allowlist secret -->
 
 - **Shipped (merged):** [#93](https://github.com/Plcherra/flowforce/pull/93) item 62 (`e2e/tasks-details-depth.spec.ts`, `task-details-timeline` test id); [#94](https://github.com/Plcherra/flowforce/pull/94) item 63 (report inbox depth + `literals.refreshingData` on inbox fetch).
-- **Open:** [#95](https://github.com/Plcherra/flowforce/pull/95) item 64 — merge when Release gates, Remote deploy readiness, and Vercel preview are green.
+- **Merged:** [#95](https://github.com/Plcherra/flowforce/pull/95) item 64 at `3a2ca027` (Release gates, Remote deploy readiness, Vercel preview green).
+- **Post-merge main (item 63):** Release Gates **success** (`45252404761`); Deploy Readiness **success** (`45252404869`).
 - **Findings:** PR #93 failed Release gates once — `TaskDetailsDialog.tsx` allowlist is 991 lines (reverted dialog test-id growth). Reports inbox had hard-coded `"Refreshing…"` (fixed via literals catalog).
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
