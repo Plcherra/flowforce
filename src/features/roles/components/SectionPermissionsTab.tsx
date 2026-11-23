@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -38,6 +40,7 @@ export default function SectionPermissionsTab() {
   const { positions, assignments, updatePosition } = usePositions();
 
   const [selectedRole, setSelectedRole] = useState<RoleKey>("manager");
+  const [moduleQuery, setModuleQuery] = useState("");
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(
     new Set(),
   );
@@ -156,7 +159,19 @@ export default function SectionPermissionsTab() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="space-y-4 overflow-x-auto">
+          <div className="max-w-sm">
+            <Label htmlFor="permission-matrix-search" className="sr-only">
+              {t("roles.filterModules")}
+            </Label>
+            <Input
+              id="permission-matrix-search"
+              data-testid="permission-matrix-search"
+              value={moduleQuery}
+              onChange={(event) => setModuleQuery(event.target.value)}
+              placeholder={t("roles.filterModules")}
+            />
+          </div>
           <RoleMatrixTable
             matrix={matrix}
             selectedRole={selectedRole}
@@ -164,6 +179,7 @@ export default function SectionPermissionsTab() {
             onModuleToggle={handleModuleToggle}
             dirtyRoles={dirtyRoles}
             assignmentByRole={assignmentByRole}
+            moduleQuery={moduleQuery}
           />
         </CardContent>
       </Card>

@@ -59,6 +59,15 @@ export function MessagesBoard({ vm }: MessagesBoardProps) {
         ) : null}
       </div>
 
+      {vm.channels.length > 0 && vm.filteredChannels.length === 0 ? (
+        <p
+          className="px-4 pb-3 text-sm text-muted-foreground sm:px-6"
+          data-testid="message-roster-empty"
+        >
+          {t("messages.noChatsMatchSearch")}
+        </p>
+      ) : null}
+
       {vm.filteredChannels.length > 0 && (
         <div className="flex gap-2 overflow-x-auto px-4 pb-3 sm:px-6">
           {vm.filteredChannels.map((channel) => {
