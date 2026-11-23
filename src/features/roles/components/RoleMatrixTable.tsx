@@ -5,6 +5,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 import type { RoleKey, ModuleId } from "../types/permissions";
 import { ROLE_ORDER, ROLE_LABELS, ROLE_ACCENTS } from "../constants/roles";
 import { ROLE_MODULES } from "../constants/modules";
@@ -17,6 +18,7 @@ interface RoleMatrixTableProps {
   onModuleToggle: (role: RoleKey, moduleId: ModuleId, value: boolean) => void;
   dirtyRoles: Set<RoleKey>;
   assignmentByRole: Map<RoleKey, { positions: unknown[]; employees: string[] }>;
+  moduleQuery?: string;
 }
 
 export function RoleMatrixTable({
@@ -26,8 +28,20 @@ export function RoleMatrixTable({
   onModuleToggle,
   dirtyRoles,
   assignmentByRole,
+  moduleQuery = "",
 }: RoleMatrixTableProps) {
   const { t } = useTranslation();
+  const visibleModules = useMemo(() => {
+    const keyword = moduleQuery.trim().toLowerCase();
+    if (!keyword) return ROLE_MODULES;
+    return ROLE_MODULES.filter((module) => {
+      const haystack = `${module.label} ${module.description} ${module.id}`
+        .toLowerCase()
+        .replace(/-/g, " ");
+      return haystack.includes(keyword);
+    });
+  }, [moduleQuery]);
+
   return (
     <table className="min-w-[720px] w-full text-sm">
       <thead>
@@ -68,8 +82,23 @@ export function RoleMatrixTable({
         </tr>
       </thead>
       <tbody>
-        {ROLE_MODULES.map((module) => (
-          <tr key={module.id} className="border-b last:border-0">
+        {visibleModules.length === 0 ? (
+          <tr>
+            <td
+              colSpan={ROLE_ORDER.length + 1}
+              className="py-8 text-center text-sm text-muted-foreground"
+              data-testid="permission-matrix-no-modules"
+            >
+              {t("roles.noModulesMatchSearch")}
+            </td>
+          </tr>
+        ) : null}
+        {visibleModules.map((module) => (
+          <tr
+            key={module.id}
+            className="border-b last:border-0"
+            data-testid={`permission-matrix-module-${module.id}`}
+          >
             <td className="align-top py-4 pr-4">
               <div className="flex items-start gap-3">
                 <module.icon className="mt-0.5 h-5 w-5 text-muted-foreground" />
@@ -106,6 +135,7 @@ export function RoleMatrixTable({
                     <Switch
                       checked={value}
                       disabled={isOwner}
+                      data-testid={`permission-toggle-${role}-${module.id}`}
                       onCheckedChange={(checked) =>
                         onModuleToggle(role, module.id, Boolean(checked))
                       }

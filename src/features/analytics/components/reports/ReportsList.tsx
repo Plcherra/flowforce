@@ -38,6 +38,11 @@ export function ReportsList({
           return (
             <button
               key={document.id}
+              type="button"
+              data-testid="reports-analyzer-row"
+              data-report-id={document.id}
+              data-selected={isActive ? "true" : "false"}
+              aria-pressed={isActive}
               onClick={() => onReportSelect(isActive ? null : document.id)}
               className={`w-full rounded-lg border p-4 text-left transition ${
                 isActive
