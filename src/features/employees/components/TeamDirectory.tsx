@@ -396,7 +396,6 @@ export function TeamDirectory() {
                   <TableSkeleton />
                 ) : showEmployeeFilterEmptyState ? (
                   <EmptyStateCard
-                    data-testid="directory-filter-empty"
                     icon={<SearchX className="h-5 w-5" />}
                     title={t("employees.noTeammatesMatchTheseFilters")}
                     description={t("employees.tryDifferentSearch")}

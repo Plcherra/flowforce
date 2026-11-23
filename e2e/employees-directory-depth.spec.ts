@@ -49,13 +49,11 @@ test("directory search, tabs, and clear-filters empty state", async ({ page }) =
   }
 
   await page.getByTestId("directory-search").fill("zzzz-qa-no-match-e2e");
-  await expect(page.getByTestId("directory-filter-empty")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("No teammates match these filters")).toBeVisible();
+  const filterEmpty = page.getByText("No teammates match these filters");
+  await expect(filterEmpty).toBeVisible({ timeout: 20_000 });
 
   await page.getByRole("button", { name: "Clear filters" }).click();
-  await expect(page.getByTestId("directory-filter-empty")).toHaveCount(0, {
-    timeout: 20_000,
-  });
+  await expect(filterEmpty).toHaveCount(0, { timeout: 20_000 });
   await expect(page.getByTestId("directory-search")).toHaveValue("");
 
   await page.getByRole("tab", { name: /Leads/i }).click();

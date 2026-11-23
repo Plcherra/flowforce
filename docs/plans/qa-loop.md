@@ -384,7 +384,7 @@ Hard stop at 6:00 AM ET. **Queue 55+:** shared schedule week-shift mocks; employ
 55. Schedule — shared `e2e/scheduleShiftMock.ts` — done
    - Centralizes week-shift window pinning (Sunday week grid), desk draft/published rows, editor row merge, write-block handlers, and `denyScheduleWritesExcept`. `schedule-desk-depth` and `schedule-shift-editor-depth` import the helper; behavior unchanged from items 37 and 52.
 56. Employees — directory search, tabs, filter empty state — done
-   - `data-testid` `directory-search` and `directory-filter-empty`. `e2e/employees-directory-depth.spec.ts` pins English, signs in with the test user, no-match search, Clear filters, and All/Leads/Inactive tabs. Invite writes blocked.
+   - `data-testid` `directory-search` only (`TeamDirectory.tsx` is allowlisted at 533 lines; filter empty state asserted by copy). `e2e/employees-directory-depth.spec.ts` pins English, signs in with the test user, no-match search, Clear filters, and All/Leads/Inactive tabs. Invite writes blocked.
 57. Company Updates — create wizard five-step walkthrough — done
    - `e2e/company-updates-wizard-depth.spec.ts` walks Template → Design → Audience → Publish → Review and stubs `company_updates` insert (publish asserted, no prod write).
 58. Overview — leadership coverage and list-status cards — done
