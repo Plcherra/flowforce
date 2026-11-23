@@ -436,3 +436,6 @@ Hard stop at 5:00 PM ET. **Queue 62+:** Tasks, Goals, Docs, Forms, Time off, Set
 63. Docs — report inbox search and review sheet — done
    - Report inbox `CardDescription` uses `literals.refreshingData` instead of hard-coded English.
    - `e2e/docs-report-inbox-depth.spec.ts`: mocked inbox row, client search filter, Review opens detail sheet; document writes blocked.
+
+64. Time off — team approve row depth — done
+   - `e2e/time-off-team-approve-depth.spec.ts`: mocked pending team request, Approve/Reject visible with `approveTimeOff`, approve click stubbed (no prod write).
