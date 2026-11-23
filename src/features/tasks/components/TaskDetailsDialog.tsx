@@ -586,7 +586,10 @@ export function TaskDetailsDialog({
               {t("tasks.fillAndSend")}
             </Button>
           ) : null}
-          <div className="rounded-md border bg-muted/40 p-4 space-y-4">
+          <div
+            className="rounded-md border bg-muted/40 p-4 space-y-4"
+            data-testid="task-details-workflow"
+          >
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {t("tasks.workflow")}
@@ -643,6 +646,7 @@ export function TaskDetailsDialog({
                     variant={action.variant}
                     size="sm"
                     className="min-h-11"
+                    data-testid={`task-details-status-${action.target}`}
                     onClick={() => handleStatusChange(action.target)}
                     disabled={!!pendingTarget}
                   >
@@ -660,7 +664,7 @@ export function TaskDetailsDialog({
           </div>
 
           {canEdit ? (
-          <Card>
+          <Card data-testid="task-details-execution">
             <CardHeader className="pb-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-base">{t("tasks.executionControls")}</CardTitle>
@@ -925,7 +929,7 @@ export function TaskDetailsDialog({
 
           <Separator />
 
-          <div className="space-y-4">
+          <div className="space-y-4" data-testid="task-details-comments">
             <div className="flex items-center space-x-2">
               <MessageSquare className="h-5 w-5" />
               <h3 className="text-lg font-semibold">{t("tasks.comments")}</h3>
@@ -933,6 +937,7 @@ export function TaskDetailsDialog({
 
             <div className="space-y-2">
               <Textarea
+                data-testid="task-details-comment-input"
                 placeholder={t("tasks.addAComment")}
                 value={newComment}
                 onChange={(event) => setNewComment(event.target.value)}
@@ -940,6 +945,7 @@ export function TaskDetailsDialog({
               />
               <div className="flex justify-end">
                 <Button
+                  data-testid="task-details-comment-submit"
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || addingComment}
                   size="sm"
