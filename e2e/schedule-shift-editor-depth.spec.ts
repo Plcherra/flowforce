@@ -1,15 +1,11 @@
-import { expect, test, type Page, type Route } from "@playwright/test";
-import { setHours, setMinutes } from "date-fns";
-import { fulfillGetWithJson, readFetchJson } from "./routeJson";
+import { expect, test, type Page } from "@playwright/test";
+import { fulfillGetWithJson } from "./routeJson";
 import { missingE2eEnv } from "./required-env";
-
-const SHIFT_ID = "dddddddd-dddd-4ddd-8ddd-dddddddddd01";
-const WRITE_KEYS = [
-  "schedule.create",
-  "schedule.edit",
-  "schedule.assign",
-  "schedule.delete",
-] as const;
+import {
+  EDITOR_SHIFT_ID,
+  denyScheduleWritesExcept,
+  installEditorWeekShiftMock,
+} from "./scheduleShiftMock";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -42,7 +38,7 @@ test("shift details sheet shows editor fields on details, tasks, and templates t
 }) => {
   test.setTimeout(180_000);
   await signIn(page);
-  await installWeekShiftMock(page, { blockWrites: true });
+  await installEditorWeekShiftMock(page, { blockWrites: true });
 
   const schedulesReady = page.waitForResponse(
     (response) =>
@@ -55,7 +51,7 @@ test("shift details sheet shows editor fields on details, tasks, and templates t
   await page.goto("/app/enhanced-scheduling");
   await schedulesReady;
 
-  await openShiftFromWeekGrid(page, SHIFT_ID);
+  await openShiftFromWeekGrid(page, EDITOR_SHIFT_ID);
 
   const panel = page.getByTestId("shift-details-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
@@ -95,7 +91,7 @@ test("assign-only keeps assignment UI but hides save and delete in shift details
   test.setTimeout(180_000);
   await signIn(page);
   await denyScheduleWritesExcept(page, ["schedule.assign"]);
-  await installWeekShiftMock(page);
+  await installEditorWeekShiftMock(page);
 
   await page.goto("/app/enhanced-scheduling");
   await page
@@ -108,7 +104,7 @@ test("assign-only keeps assignment UI but hides save and delete in shift details
     )
     .catch(() => undefined);
 
-  await openShiftFromWeekGrid(page, SHIFT_ID);
+  await openShiftFromWeekGrid(page, EDITOR_SHIFT_ID);
 
   const panel = page.getByTestId("shift-details-panel");
   await expect(panel).toBeVisible({ timeout: 30_000 });
@@ -135,111 +131,5 @@ async function openShiftFromWeekGrid(page: Page, shiftId: string) {
   await card.click();
   await expect(page.getByTestId("shift-details-not-found")).toHaveCount(0, {
     timeout: 5_000,
-  });
-}
-
-async function installWeekShiftMock(
-  page: Page,
-  options?: { blockWrites?: boolean },
-) {
-  await page.route("**/rest/v1/schedules*", async (route) => {
-    const method = route.request().method();
-    if (method !== "GET") {
-      if (options?.blockWrites) {
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({}),
-        });
-        return;
-      }
-      await route.continue();
-      return;
-    }
-    const url = route.request().url();
-    if (!url.includes("start_time")) {
-      await route.continue();
-      return;
-    }
-    await appendEditorShift(route);
-  });
-}
-
-async function denyScheduleWritesExcept(page: Page, allow: string[]) {
-  await page.route("**/rest/v1/user_permissions*", async (route) => {
-    const request = route.request();
-    if (request.method() !== "GET") {
-      await route.continue();
-      return;
-    }
-    const response = await route.fetch();
-    const json = await readFetchJson(response);
-    const rows = Array.isArray(json) ? json : [];
-    const kept = rows.filter((row) => {
-      const key =
-        row && typeof row === "object"
-          ? (row as { permission_key?: string }).permission_key
-          : "";
-      return !WRITE_KEYS.includes(key as (typeof WRITE_KEYS)[number]);
-    });
-    const denied = WRITE_KEYS.filter((key) => !allow.includes(key)).map((key) => ({
-      permission_key: key,
-      permission_value: "deny",
-    }));
-    await route.fulfill({
-      status: response.status(),
-      contentType: "application/json",
-      body: JSON.stringify([...denied, ...kept]),
-    });
-  });
-}
-
-function weekShiftWindow() {
-  const day = new Date();
-  const start = setMinutes(setHours(day, 9), 0);
-  const end = setMinutes(setHours(day, 15), 0);
-  return { start, end };
-}
-
-async function appendEditorShift(route: Route) {
-  const response = await route.fetch();
-  const json = await readFetchJson(response);
-  const rows = Array.isArray(json) ? json : [];
-  const { start, end } = weekShiftWindow();
-  const companyId =
-    rows[0] && typeof rows[0] === "object"
-      ? ((rows[0] as { company_id?: string }).company_id ?? null)
-      : null;
-  const extra = {
-    id: SHIFT_ID,
-    company_id: companyId,
-    title: "QA editor shift",
-    role: "Barista",
-    start_time: start.toISOString(),
-    end_time: end.toISOString(),
-    location: "Front counter",
-    required_headcount: 1,
-    break_minutes: 0,
-    color: "#3b82f6",
-    timezone: "UTC",
-    notes: "E2E shift editor",
-    created_at: start.toISOString(),
-    created_by: null,
-    updated_at: null,
-    is_all_day: false,
-    is_published: true,
-    is_template: false,
-    position_id: null,
-    template_id: null,
-    status: "scheduled",
-    requirements: { role_name: "Barista" },
-    hourly_rate: null,
-    user_id: null,
-  };
-  const merged = [...rows.filter((row) => (row as { id?: string }).id !== SHIFT_ID), extra];
-  await route.fulfill({
-    status: response.status(),
-    contentType: "application/json",
-    body: JSON.stringify(merged),
   });
 }
