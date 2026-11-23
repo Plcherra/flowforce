@@ -415,3 +415,12 @@ Hard stop at 1:00 PM ET. **Queue 59+:** thin Tasks, Goals, Docs, Forms, Calendar
 61. Analytics — Reports Analyzer row click — done
    - Report rows expose `reports-analyzer-row` with `data-selected`; inbox mock for spotlight.
    - `e2e/analytics-reports-analyzer-depth.spec.ts`: row select toggles Co-Pilot context title; document writes blocked.
+
+### Block wrap-up log (Mon 23 Nov 2026, 9:00 AM–1:00 PM ET) <!-- pragma: allowlist secret -->
+
+- **Merged:** [#92](https://github.com/Plcherra/flowforce/pull/92) at `e65ad7ad` — items 59–61. PR branch: Release Gates, Remote deploy readiness, and Vercel preview **success**. Post-merge **main**: Deploy Readiness **success** (`45191254199`); Release Gates **success** (`45191254190`). Vercel production deploy from merge in progress — refresh [flowforce.uk](https://www.flowforce.uk) when ready.
+- **Local e2e:** three new depth specs 3/3 green (~40s); no product regressions beyond intentional empty-roster copy and matrix search.
+- **Product fixes:** module filter on permissions matrix; `messages.noChatsMatchSearch` empty roster; report row selection test hooks.
+- **Migrations:** none.
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** thinnest remaining areas if another block runs (Tasks, Goals, Docs, Forms, Time off, Settings/Roles polish).
