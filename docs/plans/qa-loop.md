@@ -392,8 +392,10 @@ Hard stop at 6:00 AM ET. **Queue 55+:** shared schedule week-shift mocks; employ
 
 ### Block wrap-up log (Mon 23 Nov 2026, ~4:00–6:00 AM ET) <!-- pragma: allowlist secret -->
 
-- **Local e2e:** items 55–58 specs 7/7 green (~4m scoped run after fixes); schedule desk/editor regressions included in the same pass.
-- **Product fixes:** directory filter empty state and search field test ids only; no permission or i18n product bugs found in this block.
+- **Merged:** [#91](https://github.com/Plcherra/flowforce/pull/91) at `13ad68a5` (Vercel preview green). Release Gates failed on PR branch: `TeamDirectory.tsx` grew 533→534 on allowlist (`check:file-length`). **Fix-forward on `main`:** `d6dec968` — keep allowlist line count, `directory-search` test id only, filter empty asserted by copy.
+- **Post-fix CI on `main`:** Release Gates **success** (run `45143988898`); Deploy Readiness **success**.
+- **Local e2e:** items 55–58 specs 7/7 green (~4m scoped run after fixes); schedule desk/editor regressions included.
+- **Product fixes:** directory search test id; no permission or i18n product bugs in this block.
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** deeper settings sections-permissions matrix search; messages roster edge cases; analytics Reports Analyzer row click.
