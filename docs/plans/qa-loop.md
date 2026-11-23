@@ -432,3 +432,7 @@ Hard stop at 5:00 PM ET. **Queue 62+:** Tasks, Goals, Docs, Forms, Time off, Set
 62. Tasks — task details dialog depth — done
    - `task-details-timeline` test id on `TaskTimeline`; dialog depth asserts workflow, execution, and comments via stable English copy (locale pinned).
    - `e2e/tasks-details-depth.spec.ts`: injected todo task, workflow + blocked comment/status writes, `editTasks` deny hides execution. Writes stubbed.
+
+63. Docs — report inbox search and review sheet — done
+   - Report inbox `CardDescription` uses `literals.refreshingData` instead of hard-coded English.
+   - `e2e/docs-report-inbox-depth.spec.ts`: mocked inbox row, client search filter, Review opens detail sheet; document writes blocked.
