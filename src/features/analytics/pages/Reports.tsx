@@ -361,7 +361,7 @@ export default function ReportsPage() {
             <CardTitle>{t("analytics.recentUploads")}</CardTitle>
             <CardDescription>
               {isFetching
-                ? "Refreshing…"
+                ? t("literals.refreshingData")
                 : t("literals.documentsSynced", { length: documents.length })}
             </CardDescription>
           </div>
