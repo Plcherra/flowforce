@@ -424,3 +424,11 @@ Hard stop at 1:00 PM ET. **Queue 59+:** thin Tasks, Goals, Docs, Forms, Calendar
 - **Migrations:** none.
 - **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
 - **Next:** thinnest remaining areas if another block runs (Tasks, Goals, Docs, Forms, Time off, Settings/Roles polish).
+
+## Monday 23 Nov 2026, 2:00 PM–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 62+:** Tasks, Goals, Docs, Forms, Time off, Settings/Roles polish (thinnest remaining e2e). **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+62. Tasks — task details dialog depth — done
+   - `task-details-timeline` test id on `TaskTimeline`; dialog depth asserts workflow, execution, and comments via stable English copy (locale pinned).
+   - `e2e/tasks-details-depth.spec.ts`: injected todo task, workflow + blocked comment/status writes, `editTasks` deny hides execution. Writes stubbed.

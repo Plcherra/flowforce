@@ -112,7 +112,7 @@ export function TaskTimeline({ taskId, open }: TaskTimelineProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="task-details-timeline">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{t("tasks.timeline")}</h3>
         {hasTimeline && (
