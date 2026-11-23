@@ -376,3 +376,24 @@ Hard stop at 1:00 PM ET. **Queue 50+:** forms builder window validation; message
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for two-user DM unchanged.
 - **Next:** thin e2e in messages/forms/schedule if another block runs; optional shared shift mock helper for desk specs.
+
+## Monday 23 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **Queue 55+:** shared schedule week-shift mocks; employees directory search/tabs; company-updates wizard steps; overview leadership coverage widgets. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+55. Schedule — shared `e2e/scheduleShiftMock.ts` — done
+   - Centralizes week-shift window pinning (Sunday week grid), desk draft/published rows, editor row merge, write-block handlers, and `denyScheduleWritesExcept`. `schedule-desk-depth` and `schedule-shift-editor-depth` import the helper; behavior unchanged from items 37 and 52.
+56. Employees — directory search, tabs, filter empty state — done
+   - `data-testid` `directory-search` and `directory-filter-empty`. `e2e/employees-directory-depth.spec.ts` pins English, signs in with the test user, no-match search, Clear filters, and All/Leads/Inactive tabs. Invite writes blocked.
+57. Company Updates — create wizard five-step walkthrough — done
+   - `e2e/company-updates-wizard-depth.spec.ts` walks Template → Design → Audience → Publish → Review and stubs `company_updates` insert (publish asserted, no prod write).
+58. Overview — leadership coverage and list-status cards — done
+   - `e2e/overview-leadership-depth.spec.ts` asserts `data-leadership="true"` coverage + list-status widgets for the test owner; skips when the login is not leadership.
+
+### Block wrap-up log (Mon 23 Nov 2026, ~4:00–6:00 AM ET) <!-- pragma: allowlist secret -->
+
+- **Local e2e:** items 55–58 specs 7/7 green (~4m scoped run after fixes); schedule desk/editor regressions included in the same pass.
+- **Product fixes:** directory filter empty state and search field test ids only; no permission or i18n product bugs found in this block.
+- **Migrations:** none.
+- **Open for Pedro:** unchanged — optional `TEST_RECIPIENT_*` for two-user DM.
+- **Next:** deeper settings sections-permissions matrix search; messages roster edge cases; analytics Reports Analyzer row click.
