@@ -436,3 +436,15 @@ Hard stop at 5:00 PM ET. **Queue 62+:** Tasks, Goals, Docs, Forms, Time off, Set
 63. Docs — report inbox search and review sheet — done
    - Report inbox `CardDescription` uses `literals.refreshingData` instead of hard-coded English.
    - `e2e/docs-report-inbox-depth.spec.ts`: mocked inbox row, client search filter, Review opens detail sheet; document writes blocked.
+
+64. Time off — team approve row depth — done
+   - `e2e/time-off-team-approve-depth.spec.ts`: mocked pending team request, Approve/Reject visible with `approveTimeOff`, approve click stubbed (no prod write).
+
+### Block wrap-up log (Mon 23 Nov 2026, 2:00–~3:50 PM ET) <!-- pragma: allowlist secret -->
+
+- **Shipped (merged):** [#93](https://github.com/Plcherra/flowforce/pull/93) item 62 (`e2e/tasks-details-depth.spec.ts`, `task-details-timeline` test id); [#94](https://github.com/Plcherra/flowforce/pull/94) item 63 (report inbox depth + `literals.refreshingData` on inbox fetch).
+- **Open:** [#95](https://github.com/Plcherra/flowforce/pull/95) item 64 — merge when Release gates, Remote deploy readiness, and Vercel preview are green.
+- **Findings:** PR #93 failed Release gates once — `TaskDetailsDialog.tsx` allowlist is 991 lines (reverted dialog test-id growth). Reports inbox had hard-coded `"Refreshing…"` (fixed via literals catalog).
+- **Migrations:** none.
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next (if block continues):** Goals performance refresh with mocked rows; Settings/Roles role-class dialog; Forms fill edge cases.
