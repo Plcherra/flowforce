@@ -501,13 +501,13 @@ Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs tim
 71. Schedule — availability panel depth — done ([#102](https://github.com/Plcherra/flowforce/pull/102) merged `38eeb0a3`)
    - `e2e/schedule-availability-depth.spec.ts`: personal weekday grid / open notice, team-hours tab with mocked `schedule.edit` + `editSchedules`, deny gate without owner-only assumptions. Availability lock/loading copy i18n (six locales).
 
-### Block wrap-up log (Tue 24 Nov 2026, 2:00–~2:45 PM ET, in progress) <!-- pragma: allowlist secret -->
+### Block wrap-up log (Tue 24 Nov 2026, 2:00–~3:15 PM ET) <!-- pragma: allowlist secret -->
 
-- **Merged:** [#102](https://github.com/Plcherra/flowforce/pull/102) item 71 at `38eeb0a3` (Release gates, Remote deploy readiness, Vercel preview green).
-- **Findings:** weekday test ids use `availability-day-mon` not `monday`; hard-coded lock/loading strings on availability path.
+- **Merged:** [#102](https://github.com/Plcherra/flowforce/pull/102) item 71 at `38eeb0a3`; [#103](https://github.com/Plcherra/flowforce/pull/103) item 72 at `5eca7f36` (Release gates, Remote deploy readiness, Vercel preview green).
+- **Findings (71):** weekday test ids use `availability-day-mon` not `monday`; hard-coded lock/loading strings on availability path.
 - **Migrations:** none.
 - **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68 (untouched). Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
-- **Next:** item 72 (thinnest remaining: schedule desk copy-week or messages unread badge).
+- **Next:** item 73+ if another block runs (messages or settings polish).
 
-72. Schedule — desk copy week and empty week — in progress (PR pending)
+72. Schedule — desk copy week and empty week — done ([#103](https://github.com/Plcherra/flowforce/pull/103) merged `5eca7f36`)
    - `e2e/schedule-desk-actions-depth.spec.ts`: repeat-previous-week schedules read, empty-this-week delete with mocked `schedule.create` / `schedule.delete` gates. Writes blocked.
