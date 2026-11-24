@@ -478,5 +478,5 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
 
 Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
 
-69. Docs — resources manual, API, integrations pages — in progress
+69. Docs — resources manual, API, integrations pages — done ([#100](https://github.com/Plcherra/flowforce/pull/100) merged `77d73a15`)
    - `data-testid` hooks on user manual, API, and integration guide pages; `e2e/docs-resources-pages-depth.spec.ts` (Team pack, English).
