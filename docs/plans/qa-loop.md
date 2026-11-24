@@ -481,7 +481,7 @@ Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, T
 68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (3 CI fix rounds; read-only grant test fails on seeded Playwright user — owner/list-issue act bypass).
 69. Docs — resources manual, API, integrations pages — done ([#100](https://github.com/Plcherra/flowforce/pull/100) merged `77d73a15`)
    - `data-testid` hooks on user manual, API, and integration guide pages; `e2e/docs-resources-pages-depth.spec.ts` (Team pack, English).
-70. Time off — my request history depth — done ([#101](https://github.com/Plcherra/flowforce/pull/101), merge pending rebase onto `main`)
+70. Time off — my request history depth — done ([#101](https://github.com/Plcherra/flowforce/pull/101) merged `d7842b1b`)
    - `time-off-history-list` test id; `e2e/time-off-my-history-depth.spec.ts` mocks personal approved row (writes blocked).
 
 ### Block wrap-up log (Tue 24 Nov 2026, 9:00 AM–~10:30 AM ET, in progress) <!-- pragma: allowlist secret -->
