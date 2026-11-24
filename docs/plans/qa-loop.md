@@ -458,6 +458,18 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
    - `data-testid` `performance-goal-row-{id}` on goal progress list rows.
    - `e2e/goals-refresh-mock-depth.spec.ts`: injects `goals` + `goal_participants`, asserts row after refresh (writes blocked).
 
-66. Settings/Roles — role-class dialog depth — done
+66. Settings/Roles — role-class dialog depth — done ([#97](https://github.com/Plcherra/flowforce/pull/97) merged)
    - `role-management-dialog`, `role-create-class`, and `role-class-edit-{id}` test hooks.
    - `e2e/settings-role-class-dialog-depth.spec.ts`: edit + create class dialogs, Access tab grid, `systemSettings` gate (writes blocked).
+
+67. Forms — fill required-field edge — done (PR [#98](https://github.com/Plcherra/flowforce/pull/98), merge pending)
+   - `e2e/forms-fill-edge.spec.ts`: required validation before submit, stubbed submission write (no `FormFillDialog` allowlist growth).
+
+### Block wrap-up log (Tue 24 Nov 2026, ~4:00–~5:50 AM ET) <!-- pragma: allowlist secret -->
+
+- **Merged:** [#96](https://github.com/Plcherra/flowforce/pull/96) item 65; [#97](https://github.com/Plcherra/flowforce/pull/97) item 66; fix-forward `b0ba3bce` on main hardens goals refresh mock per Codex P2.
+- **Open:** [#98](https://github.com/Plcherra/flowforce/pull/98) item 67 — fixed Release Gates file-length (`FormFillDialog` allowlist 557; dropped dialog test id).
+- **Local e2e:** `goals-refresh-mock-depth` 1/1; `settings-role-class-dialog-depth` 2/2; `forms-fill-edge` 1/1.
+- **Migrations:** none.
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** thinnest remaining e2e polish in Tasks, Docs, Time off if another block runs.
