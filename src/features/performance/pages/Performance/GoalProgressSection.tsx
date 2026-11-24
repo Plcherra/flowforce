@@ -74,7 +74,11 @@ export function GoalProgressSection({
       </CardHeader>
       <CardContent className="space-y-4">
         {goals.map((goal) => (
-          <div key={goal.id} className="space-y-1">
+          <div
+            key={goal.id}
+            className="space-y-1"
+            data-testid={`performance-goal-row-${goal.id}`}
+          >
             <div className="flex flex-col justify-between gap-1 text-sm font-medium text-foreground sm:flex-row sm:items-center">
               <GoalTitle
                 goalId={goal.id}
