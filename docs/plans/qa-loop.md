@@ -477,3 +477,6 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
 ## Tuesday 24 Nov 2026, 9:00 AM–1:00 PM America/New_York
 
 Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas (Schedule, Messages, Company Updates, Forms, Goals, Reviews, Analytics). **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+
+68. Tasks — list issues act depth — in progress
+   - `e2e/tasks-list-issues-depth.spec.ts`: mocked list-issue row, `tasks.list_issues.act` mark-done write stub, read-only hides done control.
