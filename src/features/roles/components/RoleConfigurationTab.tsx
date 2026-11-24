@@ -181,6 +181,7 @@ export default function RoleConfigurationTab() {
                 variant="outline"
                 size="sm"
                 onClick={() => handleEditRole(role)}
+                data-testid={`role-class-edit-${role.id}`}
               >
                 <Edit className="h-4 w-4 mr-1" />{t("common.edit")}</Button>
               {role.is_active === false ? (
@@ -212,7 +213,7 @@ export default function RoleConfigurationTab() {
           <h3 className="text-lg font-semibold">{t("sections.roleConfiguration")}</h3>
           <p className="text-muted-foreground mt-1">{t("roles.plantClassesOnALockedLevelThenGive")}</p>
         </div>
-        <Button onClick={handleCreateRole}>
+        <Button onClick={handleCreateRole} data-testid="role-create-class">
           <Plus className="h-4 w-4 mr-2" />{t("onboarding.createClass")}</Button>
       </div>
 

@@ -454,6 +454,10 @@ Hard stop at 5:00 PM ET. **Queue 62+:** Tasks, Goals, Docs, Forms, Time off, Set
 
 Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked rows; Settings/Roles role-class dialog; Forms fill edge cases; then thinnest e2e in Tasks, Docs, Time off, Settings. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
 
-65. Goals — performance refresh with mocked goal rows — done
+65. Goals — performance refresh with mocked goal rows — done ([#96](https://github.com/Plcherra/flowforce/pull/96) merged)
    - `data-testid` `performance-goal-row-{id}` on goal progress list rows.
    - `e2e/goals-refresh-mock-depth.spec.ts`: injects `goals` + `goal_participants`, asserts row after refresh (writes blocked).
+
+66. Settings/Roles — role-class dialog depth — done
+   - `role-management-dialog`, `role-create-class`, and `role-class-edit-{id}` test hooks.
+   - `e2e/settings-role-class-dialog-depth.spec.ts`: edit + create class dialogs, Access tab grid, `systemSettings` gate (writes blocked).
