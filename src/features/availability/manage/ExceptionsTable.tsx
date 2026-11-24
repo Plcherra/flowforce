@@ -145,7 +145,7 @@ export function ExceptionsTable({
           <h3 className="text-sm font-semibold text-muted-foreground">{t("availability.existingExceptions")}</h3>
           {isLoading ? (
             <div className="py-4">
-              <LoadingSpinner text="Loading exceptions..." />
+              <LoadingSpinner text={t("availability.loadingExceptions")} />
             </div>
           ) : exceptions.length > 0 ? (
             <ScrollArea className="max-h-48 rounded-md border">

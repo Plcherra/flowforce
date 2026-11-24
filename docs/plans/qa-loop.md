@@ -493,3 +493,10 @@ Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, T
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
 - **Next:** fix or narrow item 68 e2e; Settings / Schedule depth if time before 1:00 PM ET.
+
+## Tuesday 24 Nov 2026, 2:00 PM–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs time-off panel); remaining polish in Schedule/Messages/Settings. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+71. Schedule — availability panel depth — in progress (PR pending)
+   - `e2e/schedule-availability-depth.spec.ts`: personal weekday grid / open notice, team-hours tab with mocked `schedule.edit` + `editSchedules`, deny gate without owner-only assumptions. Availability lock/loading copy i18n (six locales).
