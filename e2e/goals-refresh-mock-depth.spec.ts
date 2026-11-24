@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
-import { fulfillGetWithJson, readFetchJson } from "./routeJson";
+import { fulfillGetWithJson } from "./routeJson";
 import { missingE2eEnv } from "./required-env";
 
 const PACK_FLAG_OVERRIDE_STORAGE_KEY = "flowforce:pack-flags";
@@ -7,8 +7,10 @@ const GOAL_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const PARTICIPANT_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 let signedInUserId = "";
 let signedInCompanyId: string | null = null;
+let goalMockVersion = 0;
 
 test.beforeEach(async ({ page }) => {
+  goalMockVersion = 0;
   await page.addInitScript(() => {
     window.localStorage.setItem("i18nextLng", "en");
   });
@@ -66,21 +68,12 @@ test("performance refresh reloads mocked goal progress row", async ({ page }) =>
   await expect(page.getByTestId(`performance-goal-row-${GOAL_ID}`)).toBeVisible();
   await expect(page.getByTestId("performance-kpi-goal-progress")).toBeVisible();
 
-  let goalsFetches = 0;
-  await page.route("**/rest/v1/goals*", async (route) => {
-    if (route.request().method() !== "GET") {
-      await route.continue();
-      return;
-    }
-    goalsFetches += 1;
-    await injectGoalsResponse(route);
-  });
-
+  goalMockVersion = 1;
   await page.getByTestId("performance-refresh").click();
-  await expect
-    .poll(() => goalsFetches, { timeout: 20_000 })
-    .toBeGreaterThanOrEqual(1);
-  await expect(goalSection.getByText("E2E mocked goal refresh")).toBeVisible();
+  await expect(goalSection.getByText("E2E mocked goal after refresh")).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(goalSection.getByText("E2E mocked goal refresh")).toHaveCount(0);
   await expect(page.getByTestId(`performance-goal-row-${GOAL_ID}`)).toBeVisible();
 
   await page.screenshot({
@@ -144,70 +137,62 @@ async function injectMockGoal(page: Page) {
       await route.continue();
       return;
     }
-    await injectGoalsResponse(route);
+    await fulfillGoalsFixture(route);
   });
   await page.route("**/rest/v1/goal_participants*", async (route) => {
     if (route.request().method() !== "GET") {
       await route.continue();
       return;
     }
-    const response = await route.fetch();
-    const json = await readFetchJson(response);
-    const rows = Array.isArray(json) ? json : [];
-    const userId = signedInUserId;
-    if (!userId) {
-      await route.fulfill({
-        status: response.status(),
-        contentType: "application/json",
-        body: JSON.stringify(rows),
-      });
-      return;
-    }
-  const injected = {
-    id: PARTICIPANT_ID,
-    goal_id: GOAL_ID,
-    user_id: userId,
-    role: "owner",
-    contribution_score: 72,
-  };
-  const merged = [
-    ...rows.filter((row) => (row as { id?: string }).id !== PARTICIPANT_ID),
-    injected,
-  ];
-  await route.fulfill({
-    status: response.status(),
-    contentType: "application/json",
-    body: JSON.stringify(merged),
-  });
+    await fulfillParticipantsFixture(route);
   });
 }
 
-async function injectGoalsResponse(route: Route) {
-  const response = await route.fetch();
-  const json = await readFetchJson(response);
-  const rows = Array.isArray(json) ? json : [];
-  const companyId =
-    signedInCompanyId ??
-    (rows[0] && typeof rows[0] === "object"
-      ? ((rows[0] as { company_id?: string }).company_id ?? null)
-      : null);
+function buildGoalRow(companyId: string | null) {
   const createdAt = new Date().toISOString();
-  const injected = {
+  const refreshed = goalMockVersion >= 1;
+  return {
     id: GOAL_ID,
-    title: "E2E mocked goal refresh",
+    title: refreshed
+      ? "E2E mocked goal after refresh"
+      : "E2E mocked goal refresh",
     status: "active",
-    progress: 65,
+    progress: refreshed ? 82 : 65,
     target_completion_date: createdAt.slice(0, 10),
     created_at: createdAt,
     company_id: companyId,
   };
-  const merged = [
-    ...rows.filter((row) => (row as { id?: string }).id !== GOAL_ID),
-    injected,
-  ];
+}
+
+async function fulfillGoalsFixture(route: Route) {
   await route.fulfill({
-    status: response.status(),
+    status: 200,
     contentType: "application/json",
-    body: JSON.stringify(merged),
+    body: JSON.stringify([buildGoalRow(signedInCompanyId)]),
+  });
+}
+
+async function fulfillParticipantsFixture(route: Route) {
+  const userId = signedInUserId;
+  if (!userId) {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([]),
+    });
+    return;
+  }
+  await route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([
+      {
+        id: PARTICIPANT_ID,
+        goal_id: GOAL_ID,
+        user_id: userId,
+        role: "owner",
+        contribution_score: 72,
+      },
+    ]),
   });
 }
