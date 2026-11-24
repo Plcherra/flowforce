@@ -9,15 +9,6 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem("i18nextLng", "en");
   });
-  await page.route("**/rest/v1/profiles*", async (route) => {
-    await fulfillGetWithJson(route, (json) => {
-      const pin = (row: unknown) =>
-        row && typeof row === "object"
-          ? { ...(row as Record<string, unknown>), language: "en", role: "staff" }
-          : row;
-      return Array.isArray(json) ? json.map(pin) : pin(json);
-    });
-  });
 });
 
 test.afterEach(async ({ page }) => {
@@ -38,6 +29,7 @@ test("list issues: mark done issues task write with act permission", async ({ pa
     statusWriteAttempts += 1;
   });
   await patchListIssuePermissions(page, { read: "allow", act: "allow" });
+  await pinNonOwnerStaff(page);
   await signIn(page);
 
   await page.goto("/app/tasks");
@@ -58,6 +50,7 @@ test("list issues: read-only grant hides mark done control", async ({ page }) =>
   test.setTimeout(180_000);
   await installListIssueTask(page);
   await patchListIssuePermissions(page, { read: "allow", act: "deny" });
+  await pinNonOwnerStaff(page);
   await signIn(page);
 
   await page.goto("/app/tasks");
@@ -130,6 +123,43 @@ async function installListIssueTask(page: Page, onWrite?: () => void) {
       status: response.status(),
       contentType: "application/json",
       body: JSON.stringify(rows),
+    });
+  });
+}
+
+async function pinNonOwnerStaff(page: Page) {
+  await page.unroute("**/rest/v1/profiles*").catch(() => undefined);
+  await page.route("**/rest/v1/profiles*", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    await fulfillGetWithJson(route, (json) => {
+      const demote = (row: unknown) => {
+        if (!row || typeof row !== "object") return row;
+        return {
+          ...(row as Record<string, unknown>),
+          role: "staff",
+          language: "en",
+        };
+      };
+      return Array.isArray(json) ? json.map(demote) : demote(json);
+    });
+  });
+  await page.route("**/rest/v1/company_roles*", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    await fulfillGetWithJson(route, (json) => {
+      const demote = (row: unknown) => {
+        if (!row || typeof row !== "object") return row;
+        return {
+          ...(row as Record<string, unknown>),
+          product_level: "staff",
+        };
+      };
+      return Array.isArray(json) ? json.map(demote) : demote(json);
     });
   });
 }
