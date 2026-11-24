@@ -480,5 +480,16 @@ Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, T
 
 68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (3 CI fix rounds; read-only grant test fails on seeded Playwright user — owner/list-issue act bypass).
 69. Docs — resources manual, API, integrations — PR [#100](https://github.com/Plcherra/flowforce/pull/100).
-70. Time off — my request history depth — in progress
+70. Time off — my request history depth — PR [#101](https://github.com/Plcherra/flowforce/pull/101).
    - `time-off-history-list` test id; `e2e/time-off-my-history-depth.spec.ts` mocks personal approved row (writes blocked).
+
+### Block wrap-up log (Tue 24 Nov 2026, 9:00 AM–~10:00 AM ET, in progress) <!-- pragma: allowlist secret -->
+
+- **Worked:** Item 68 (Tasks list issues act depth), 69 (Docs resources pages), 70 (Time off my history); opened qa-loop section for this block; #98 merged on main before block.
+- **Findings:** CI seed Playwright user still resolves as owner for `ListIssueGather` (`listIssueGrant` owner bypass) — read-only `tasks.list_issues.act` deny test fails Release gates while mark-done path passes; profile + `get_company_roles` RPC mocks insufficient in full local-DB CI run.
+- **Fixed:** Item 69 Team docs pages got stable test ids; item 70 history list hook + mocked personal row e2e.
+- **Merged:** none this slice (awaiting green CI on [#100](https://github.com/Plcherra/flowforce/pull/100), [#101](https://github.com/Plcherra/flowforce/pull/101)).
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) after 3 CI fix rounds on read-only list-issue test.
+- **Migrations:** none.
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** merge 100/101 when green; rework item 68 read-only assertion (staff-seeded user or drop owner-incompatible case); Settings / Schedule polish if time before 1:00 PM ET hard stop.
