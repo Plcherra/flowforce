@@ -508,3 +508,6 @@ Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs tim
 - **Migrations:** none.
 - **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68 (untouched). Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
 - **Next:** item 72 (thinnest remaining: schedule desk copy-week or messages unread badge).
+
+72. Schedule — desk copy week and empty week — in progress (PR pending)
+   - `e2e/schedule-desk-actions-depth.spec.ts`: repeat-previous-week schedules read, empty-this-week delete with mocked `schedule.create` / `schedule.delete` gates. Writes blocked.
