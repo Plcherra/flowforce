@@ -531,7 +531,7 @@ export function TimeOffRequestPanel({
           {personalRequests.length === 0 ? (
             <div className="mt-3 rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">{t("availability.noTimeOffRequestsYetSubmitYourFirst")}</div>
           ) : (
-            <ScrollArea className="mt-3 max-h-80 pr-3">
+            <ScrollArea className="mt-3 max-h-80 pr-3" data-testid="time-off-history-list">
               <div className="space-y-3">
                 {personalRequests.map((request) => {
                   const conflicts = conflictsByRequest.get(request.id) ?? [];
