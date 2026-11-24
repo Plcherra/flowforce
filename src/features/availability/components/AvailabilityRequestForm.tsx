@@ -349,16 +349,16 @@ export function AvailabilityRequestForm({
   });
 
   const lockLabel = useMemo(() => {
-    if (!lockInfo) return "Loading...";
+    if (!lockInfo) return t("availability.lockStateLoading");
     switch (lockInfo.state) {
       case "open":
-        return "Open";
+        return t("availability.lockStateOpen");
       case "locked":
-        return "Locked";
+        return t("availability.lockStateLocked");
       default:
-        return "Locked (with exceptions)";
+        return t("availability.lockStateLockedWithExceptions");
     }
-  }, [lockInfo]);
+  }, [lockInfo, t]);
 
   const nextLockFormatted = useMemo(() => {
     if (!lockInfo?.nextLock) return null;
