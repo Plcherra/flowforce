@@ -479,17 +479,17 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
 Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
 
 68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (3 CI fix rounds; read-only grant test fails on seeded Playwright user — owner/list-issue act bypass).
-69. Docs — resources manual, API, integrations — PR [#100](https://github.com/Plcherra/flowforce/pull/100).
-70. Time off — my request history depth — PR [#101](https://github.com/Plcherra/flowforce/pull/101).
+69. Docs — resources manual, API, integrations pages — done ([#100](https://github.com/Plcherra/flowforce/pull/100) merged `77d73a15`)
+   - `data-testid` hooks on user manual, API, and integration guide pages; `e2e/docs-resources-pages-depth.spec.ts` (Team pack, English).
+70. Time off — my request history depth — done ([#101](https://github.com/Plcherra/flowforce/pull/101), merge pending rebase onto `main`)
    - `time-off-history-list` test id; `e2e/time-off-my-history-depth.spec.ts` mocks personal approved row (writes blocked).
 
-### Block wrap-up log (Tue 24 Nov 2026, 9:00 AM–~10:00 AM ET, in progress) <!-- pragma: allowlist secret -->
+### Block wrap-up log (Tue 24 Nov 2026, 9:00 AM–~10:30 AM ET, in progress) <!-- pragma: allowlist secret -->
 
-- **Worked:** Item 68 (Tasks list issues act depth), 69 (Docs resources pages), 70 (Time off my history); opened qa-loop section for this block; #98 merged on main before block.
-- **Findings:** CI seed Playwright user still resolves as owner for `ListIssueGather` (`listIssueGrant` owner bypass) — read-only `tasks.list_issues.act` deny test fails Release gates while mark-done path passes; profile + `get_company_roles` RPC mocks insufficient in full local-DB CI run.
-- **Fixed:** Item 69 Team docs pages got stable test ids; item 70 history list hook + mocked personal row e2e.
-- **Merged:** none this slice (awaiting green CI on [#100](https://github.com/Plcherra/flowforce/pull/100), [#101](https://github.com/Plcherra/flowforce/pull/101)).
-- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) after 3 CI fix rounds on read-only list-issue test.
+- **Worked:** Items 68–70; #98 / item 67 already on `main` at block start.
+- **Findings:** CI Playwright user owner bypass breaks read-only list-issue UI test ([#99](https://github.com/Plcherra/flowforce/pull/99)).
+- **Merged:** [#100](https://github.com/Plcherra/flowforce/pull/100) item 69; [#101](https://github.com/Plcherra/flowforce/pull/101) item 70 after CI green (rebase).
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99).
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
-- **Next:** merge 100/101 when green; rework item 68 read-only assertion (staff-seeded user or drop owner-incompatible case); Settings / Schedule polish if time before 1:00 PM ET hard stop.
+- **Next:** fix or narrow item 68 e2e; Settings / Schedule depth if time before 1:00 PM ET.
