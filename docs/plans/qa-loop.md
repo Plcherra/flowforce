@@ -498,5 +498,13 @@ Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, T
 
 Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs time-off panel); remaining polish in Schedule/Messages/Settings. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-71. Schedule — availability panel depth — in progress (PR pending)
+71. Schedule — availability panel depth — done ([#102](https://github.com/Plcherra/flowforce/pull/102) merged `38eeb0a3`)
    - `e2e/schedule-availability-depth.spec.ts`: personal weekday grid / open notice, team-hours tab with mocked `schedule.edit` + `editSchedules`, deny gate without owner-only assumptions. Availability lock/loading copy i18n (six locales).
+
+### Block wrap-up log (Tue 24 Nov 2026, 2:00–~2:45 PM ET, in progress) <!-- pragma: allowlist secret -->
+
+- **Merged:** [#102](https://github.com/Plcherra/flowforce/pull/102) item 71 at `38eeb0a3` (Release gates, Remote deploy readiness, Vercel preview green).
+- **Findings:** weekday test ids use `availability-day-mon` not `monday`; hard-coded lock/loading strings on availability path.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68 (untouched). Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** item 72 (thinnest remaining: schedule desk copy-week or messages unread badge).
