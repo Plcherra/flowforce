@@ -146,17 +146,28 @@ async function pinNonOwnerStaff(page: Page) {
       return Array.isArray(json) ? json.map(demote) : demote(json);
     });
   });
-  await page.route("**/rest/v1/company_roles*", async (route) => {
-    if (route.request().method() !== "GET") {
-      await route.continue();
-      return;
-    }
+  await page.route("**/rest/v1/rpc/get_company_roles", async (route) => {
     await fulfillGetWithJson(route, (json) => {
       const demote = (row: unknown) => {
         if (!row || typeof row !== "object") return row;
+        const record = row as Record<string, unknown>;
+        const rawPermissions = record.permissions;
+        let permissions: Record<string, unknown> = {};
+        if (typeof rawPermissions === "string") {
+          try {
+            permissions = JSON.parse(rawPermissions) as Record<string, unknown>;
+          } catch {
+            permissions = {};
+          }
+        } else if (rawPermissions && typeof rawPermissions === "object") {
+          permissions = { ...(rawPermissions as Record<string, unknown>) };
+        }
         return {
-          ...(row as Record<string, unknown>),
+          ...record,
           product_level: "staff",
+          hierarchy_level:
+            typeof record.hierarchy_level === "number" ? record.hierarchy_level : 1,
+          permissions,
         };
       };
       return Array.isArray(json) ? json.map(demote) : demote(json);
