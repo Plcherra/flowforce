@@ -540,6 +540,9 @@ Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Sett
 
 Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99), Forms approval gate, Company Updates read detail, Analytics tabs, Time off team approve edges; then Messages, Settings/Roles, Goals, Docs, Reviews, Schedule. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-76. Tasks — activity feed and execution warnings depth — done
+76. Tasks — activity feed and execution warnings depth — done ([#107](https://github.com/Plcherra/flowforce/pull/107) merged `999cd7ee`)
    - `task-activity-feed`, `task-activity-empty`, and `task-activity-row-{id}` test hooks on `TaskActivityFeed`.
    - `e2e/tasks-activity-warnings-depth.spec.ts`: mocked overdue task opens warnings panel and detail dialog; mocked `task_activities` row in below-list feed. Writes blocked.
+
+77. Forms — approval / submissions read gate — in progress
+   - `e2e/forms-approval-gate.spec.ts`: `approveFormSubmissions` allow-only (role keys stripped) opens submissions; deny override on `forms.submissions.read` hides team submissions even when approve is allowed.
