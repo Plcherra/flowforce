@@ -99,6 +99,7 @@ export function UpdateFeedCard({
   return (
     <Card
       ref={cardRef}
+      data-testid={`company-update-card-${update.id}`}
       className={update.isPinned ? "ring-2 ring-primary/20 bg-primary/5" : ""}
     >
       {update.backgroundStyle && (

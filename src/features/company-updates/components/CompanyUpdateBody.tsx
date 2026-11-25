@@ -49,9 +49,11 @@ export function CompanyUpdateBody({
   ];
 
   return (
-    <TranslatedRecord
-      sourceLocale={translated?.sourceLocale ?? null}
-      fields={fields}
-    />
+    <div data-testid="company-update-body">
+      <TranslatedRecord
+        sourceLocale={translated?.sourceLocale ?? null}
+        fields={fields}
+      />
+    </div>
   );
 }
