@@ -3,6 +3,7 @@ import { format, addDays } from "date-fns";
 import { missingE2eEnv } from "./required-env";
 
 const PENDING_REQUEST_ID = "dddddddd-dddd-4ddd-8ddd-dddddddddd64";
+const APPROVE_KEY = "approveTimeOff" as const;
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -68,6 +69,63 @@ test("team time off pending row shows approve actions and blocked writes", async
   });
 });
 
+test("team time off reject action is stubbed without prod write", async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  let rejectAttempted = false;
+  await installPendingTeamRequest(page, () => {
+    rejectAttempted = true;
+  });
+  await signIn(page);
+
+  await page.goto("/app/enhanced-scheduling?panel=staff");
+  await expect(page.getByTestId("team-requests")).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("tab", { name: "Time Off" }).click();
+  await expect(page.getByTestId("time-off-approve-actions")).toBeVisible({
+    timeout: 30_000,
+  });
+
+  await page.getByRole("button", { name: "Reject", exact: true }).click();
+  await expect.poll(() => rejectAttempted, { timeout: 15_000 }).toBe(true);
+
+  await page.screenshot({
+    path: "/opt/cursor/artifacts/time-off-team-reject-depth.png",
+  });
+});
+
+test("deny approveTimeOff switches team time off tab to staff-only view", async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  await installPendingTeamRequest(page);
+  await signIn(page);
+
+  await page.goto("/app/enhanced-scheduling?panel=staff");
+  await expect(page.getByTestId("team-requests")).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("tab", { name: "Time Off" }).click();
+  await expect(page.getByTestId("time-off-approve-actions")).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(page.getByText("E2E team approve depth", { exact: true })).toBeVisible();
+
+  await denyKeys(page, [APPROVE_KEY]);
+  await page.reload();
+  await expect(page.getByTestId("team-requests")).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("tab", { name: "Time Off" }).click();
+  await expect(page.getByTestId("time-off-approve-actions")).toHaveCount(0);
+  await expect(page.getByText("E2E team approve depth", { exact: true })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("heading", { name: "Request history", exact: true }),
+  ).toBeVisible({ timeout: 20_000 });
+
+  await page.screenshot({
+    path: "/opt/cursor/artifacts/time-off-team-approve-denied-mock.png",
+  });
+});
+
 async function signIn(page: Page) {
   const email = process.env.TEST_USER_EMAIL ?? "";
   const password = process.env.TEST_USER_PASSWORD ?? "";
@@ -130,6 +188,36 @@ async function installPendingTeamRequest(page: Page, onWrite?: () => void) {
           },
         },
       ]),
+    });
+  });
+}
+
+async function denyKeys(page: Page, keys: readonly string[]) {
+  await page.unroute("**/rest/v1/user_permissions*").catch(() => undefined);
+  await page.route("**/rest/v1/user_permissions*", async (route) => {
+    const request = route.request();
+    if (request.method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    const json = (await response.json()) as unknown;
+    const rows = Array.isArray(json) ? json : [];
+    const kept = rows.filter((row) => {
+      const key =
+        row && typeof row === "object"
+          ? (row as { permission_key?: string }).permission_key
+          : "";
+      return !keys.includes(key as (typeof keys)[number]);
+    });
+    const overrides = keys.map((key) => ({
+      permission_key: key,
+      permission_value: "deny",
+    }));
+    await route.fulfill({
+      status: response.status(),
+      contentType: "application/json",
+      body: JSON.stringify([...overrides, ...kept]),
     });
   });
 }

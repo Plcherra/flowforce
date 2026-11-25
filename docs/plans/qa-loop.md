@@ -547,4 +547,13 @@ Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#
 77. Forms — approval / submissions read gate — done ([#108](https://github.com/Plcherra/flowforce/pull/108) merged `e371bdbd`)
    - `e2e/forms-approval-gate.spec.ts`: `approveFormSubmissions` allow-only (role keys stripped) opens submissions; deny override on `forms.submissions.read` hides team submissions even when approve is allowed.
 
-78. Company Updates — read detail — done (PR open)
+78. Company Updates — read detail — done ([#109](https://github.com/Plcherra/flowforce/pull/109) merged `08b8559d`)
+   - `company-update-card-{id}`, `company-update-body` test hooks.
+   - `e2e/company-updates-read-detail.spec.ts`: mocked feed publish row, view reaction + comment writes blocked.
+
+79. Analytics — hub tab panels depth — in progress ([#110](https://github.com/Plcherra/flowforce/pull/110))
+   - `analytics-tab-*` and `analytics-panel-*` test hooks on `Analytics.tsx`.
+   - `e2e/analytics-tabs-depth.spec.ts`: cycles four hub tabs with Insights pack on.
+
+80. Time off — team approve edges — in progress
+   - `e2e/time-off-team-approve-depth.spec.ts`: reject click stubbed; `approveTimeOff` deny flips team tab to staff-only (no mocked team row, no approve actions).
