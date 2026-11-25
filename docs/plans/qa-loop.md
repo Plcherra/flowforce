@@ -565,5 +565,7 @@ Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Sett
 81. Schedule — company policies panel depth — done ([#112](https://github.com/Plcherra/flowforce/pull/112) merged)
    - `e2e/schedule-company-policies-depth.spec.ts`: mocked `company_policies` row, create form save stubbed; `approveTimeOff` deny shows limited card.
 
-82. Tasks — readiness filter chips depth — in progress
+82. Tasks — readiness filter chips depth — done ([#113](https://github.com/Plcherra/flowforce/pull/113) merged)
    - `e2e/tasks-readiness-depth.spec.ts`: mocked overdue + unassigned tasks, readiness chip counts and filter toggle.
+
+83. Settings — org permissions card depth — in progress
