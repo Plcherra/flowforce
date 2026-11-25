@@ -516,5 +516,8 @@ Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs tim
 
 Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Settings/Roles, Company Updates, Tasks, Forms, Goals, Docs, Reviews, Time off, Analytics, Schedule. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-73. Messages — delete confirm and moderation gate — in progress
+73. Messages — delete confirm and moderation gate — done ([#104](https://github.com/Plcherra/flowforce/pull/104) merged `d198b1a4`)
    - `e2e/messages-delete-depth.spec.ts`: own-message delete dialog with stubbed REST delete; peer delete gated on `messages.manage` (deny mock, not owner-only). Writes blocked.
+
+74. Settings — departments card depth — in progress
+   - `e2e/settings-departments-depth.spec.ts`: mocked department row, `managePositions` + `systemSettings` deny gate hides `department-settings`. Table writes blocked.
