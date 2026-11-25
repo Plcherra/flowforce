@@ -522,5 +522,16 @@ Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Sett
 74. Settings — departments card depth — done ([#105](https://github.com/Plcherra/flowforce/pull/105) merged `9e0c520c`)
    - `e2e/settings-departments-depth.spec.ts`: mocked department row, `managePositions` + `systemSettings` deny gate hides `department-settings`. Table writes blocked.
 
-75. Settings — personal language cancel — in progress
+75. Settings — personal language cancel — done ([#106](https://github.com/Plcherra/flowforce/pull/106) merged `aedfc157`)
    - `e2e/settings-localization-depth.spec.ts`: cancel after staging Deutsch restores English with no profile write after the panel loads.
+
+### Block wrap-up log (Wed 25 Nov 2026, ~4:00–~4:52 AM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 73–75 (Messages delete, Settings departments, Settings localization cancel). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Findings:** Message “own” bubbles need `senderid` + profile id pinned via `TEST_USER_EMAIL`; personal language select needs `select=language` stub when asserting English before cancel.
+- **Merged:** [#104](https://github.com/Plcherra/flowforce/pull/104) item 73; [#105](https://github.com/Plcherra/flowforce/pull/105) item 74; [#106](https://github.com/Plcherra/flowforce/pull/106) item 75. Main Release Gates / Deploy Readiness green after each merge.
+- **Local e2e:** `messages-delete-depth` 2/2; `settings-departments-depth` 2/2; `settings-localization-depth` 1/1.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_EMAIL` / `TEST_RECIPIENT_PASSWORD` for `direct-message` (unchanged).
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
+- **Next:** item 76+ thin e2e (Tasks list panels beyond #99, Forms approval gate, Company Updates read detail, Analytics tabs, Time off team approve edges).
