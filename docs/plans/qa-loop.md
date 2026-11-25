@@ -562,5 +562,8 @@ Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#
 
 Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks (beyond item 68), Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-81. Schedule — company policies panel depth — done (PR pending)
+81. Schedule — company policies panel depth — done ([#112](https://github.com/Plcherra/flowforce/pull/112) merged)
    - `e2e/schedule-company-policies-depth.spec.ts`: mocked `company_policies` row, create form save stubbed; `approveTimeOff` deny shows limited card.
+
+82. Tasks — readiness filter chips depth — in progress
+   - `e2e/tasks-readiness-depth.spec.ts`: mocked overdue + unassigned tasks, readiness chip counts and filter toggle.
