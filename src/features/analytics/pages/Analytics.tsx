@@ -127,10 +127,12 @@ export default function Analytics() {
           className={isMobile ? "space-y-4" : "space-y-6"}
         >
           <TabsList
+            data-testid="analytics-tabs-list"
             className={`grid w-full ${isMobile ? "grid-cols-1 h-auto flex-col space-y-1" : "grid-cols-4"}`}
           >
             <TabsTrigger
               value="business"
+              data-testid="analytics-tab-business"
               className={
                 isMobile ? "w-full justify-start" : "flex items-center gap-2"
               }
@@ -140,6 +142,7 @@ export default function Analytics() {
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
+              data-testid="analytics-tab-form-analytics"
               className={
                 isMobile ? "w-full justify-start" : "flex items-center gap-2"
               }
@@ -149,6 +152,7 @@ export default function Analytics() {
             </TabsTrigger>
             <TabsTrigger
               value="reports"
+              data-testid="analytics-tab-reports"
               className={
                 isMobile ? "w-full justify-start" : "flex items-center gap-2"
               }
@@ -158,6 +162,7 @@ export default function Analytics() {
             </TabsTrigger>
             <TabsTrigger
               value="insights"
+              data-testid="analytics-tab-insights"
               className={
                 isMobile ? "w-full justify-start" : "flex items-center gap-2"
               }
@@ -167,14 +172,14 @@ export default function Analytics() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="business" className="space-y-6">
+          <TabsContent value="business" data-testid="analytics-panel-business" className="space-y-6">
             <BusinessAnalyticsBoard
               companyId={company?.id}
               onContextChange={setBusinessContext}
             />
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
+          <TabsContent value="analytics" data-testid="analytics-panel-form" className="space-y-6">
             <FormAnalytics
               onFormSelect={handleFormSelect}
               onContextChange={setFormContext}
@@ -182,12 +187,13 @@ export default function Analytics() {
             />
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-6">
+          <TabsContent value="reports" data-testid="analytics-panel-reports" className="space-y-6">
             <ReportsAnalyzer onContextChange={setReportsContext} />
           </TabsContent>
 
           <TabsContent
             value="insights"
+            data-testid="analytics-panel-insights"
             className={isMobile ? "space-y-4" : "space-y-6"}
           >
             <div className={isMobile ? "space-y-4" : "space-y-6"}>
