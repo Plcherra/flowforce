@@ -511,3 +511,10 @@ Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs tim
 
 72. Schedule — desk copy week and empty week — done ([#103](https://github.com/Plcherra/flowforce/pull/103) merged `5eca7f36`)
    - `e2e/schedule-desk-actions-depth.spec.ts`: repeat-previous-week schedules read, empty-this-week delete with mocked `schedule.create` / `schedule.delete` gates. Writes blocked.
+
+## Wednesday 25 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Settings/Roles, Company Updates, Tasks, Forms, Goals, Docs, Reviews, Time off, Analytics, Schedule. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+73. Messages — delete confirm and moderation gate — in progress
+   - `e2e/messages-delete-depth.spec.ts`: own-message delete dialog with stubbed REST delete; peer delete gated on `messages.manage` (deny mock, not owner-only). Writes blocked.
