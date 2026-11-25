@@ -519,5 +519,8 @@ Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Sett
 73. Messages — delete confirm and moderation gate — done ([#104](https://github.com/Plcherra/flowforce/pull/104) merged `d198b1a4`)
    - `e2e/messages-delete-depth.spec.ts`: own-message delete dialog with stubbed REST delete; peer delete gated on `messages.manage` (deny mock, not owner-only). Writes blocked.
 
-74. Settings — departments card depth — in progress
+74. Settings — departments card depth — done ([#105](https://github.com/Plcherra/flowforce/pull/105) merged `9e0c520c`)
    - `e2e/settings-departments-depth.spec.ts`: mocked department row, `managePositions` + `systemSettings` deny gate hides `department-settings`. Table writes blocked.
+
+75. Settings — personal language cancel — in progress
+   - `e2e/settings-localization-depth.spec.ts`: cancel after staging Deutsch restores English with no profile write after the panel loads.
