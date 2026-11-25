@@ -535,3 +535,11 @@ Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Sett
 - **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_EMAIL` / `TEST_RECIPIENT_PASSWORD` for `direct-message` (unchanged).
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
 - **Next:** item 76+ thin e2e (Tasks list panels beyond #99, Forms approval gate, Company Updates read detail, Analytics tabs, Time off team approve edges).
+
+## Wednesday 25 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99), Forms approval gate, Company Updates read detail, Analytics tabs, Time off team approve edges; then Messages, Settings/Roles, Goals, Docs, Reviews, Schedule. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+76. Tasks — activity feed and execution warnings depth — done
+   - `task-activity-feed`, `task-activity-empty`, and `task-activity-row-{id}` test hooks on `TaskActivityFeed`.
+   - `e2e/tasks-activity-warnings-depth.spec.ts`: mocked overdue task opens warnings panel and detail dialog; mocked `task_activities` row in below-list feed. Writes blocked.
