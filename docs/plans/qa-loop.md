@@ -568,4 +568,15 @@ Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Sett
 82. Tasks — readiness filter chips depth — done ([#113](https://github.com/Plcherra/flowforce/pull/113) merged)
    - `e2e/tasks-readiness-depth.spec.ts`: mocked overdue + unassigned tasks, readiness chip counts and filter toggle.
 
-83. Settings — org permissions card depth — in progress
+83. Settings — org permissions card depth — done ([#114](https://github.com/Plcherra/flowforce/pull/114) merged)
+   - `e2e/settings-org-permissions-depth.spec.ts`: mocked café `orgSetup` in `system_settings`, save blocked; card hidden when `managePositions` and `systemSettings` denied.
+
+### Block wrap-up log (Wed 25 Nov 2026, 2:00–~3:15 PM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 81–83 (Schedule company policies panel, Tasks readiness chips, Settings org permissions card). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Merged:** [#112](https://github.com/Plcherra/flowforce/pull/112) item 81; [#113](https://github.com/Plcherra/flowforce/pull/113) item 82; [#114](https://github.com/Plcherra/flowforce/pull/114) item 83. Release gates, Remote deploy readiness, and Vercel preview green on each PR branch before merge.
+- **Local e2e:** item 81 `2/2`, item 82 `1/1`, item 83 `2/2` (~6m scoped total).
+- **Findings:** Company policies panel needs explicit `approveTimeOff` allow in CI seed; Playwright route handlers for `company_policies` must merge GET mocks with write stubs (last handler wins); tasks readiness specs need deterministic task mocks and tabular-nums assertions.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** item 84+ thin e2e (Messages group complete, Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows).
