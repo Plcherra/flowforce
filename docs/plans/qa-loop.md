@@ -555,5 +555,5 @@ Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#
    - `analytics-tab-*` and `analytics-panel-*` test hooks on `Analytics.tsx`.
    - `e2e/analytics-tabs-depth.spec.ts`: cycles four hub tabs with Insights pack on.
 
-80. Time off — team approve edges — in progress ([#111](https://github.com/Plcherra/flowforce/pull/111))
+80. Time off — team approve edges — done ([#111](https://github.com/Plcherra/flowforce/pull/111) merged `ff282bfe`)
    - `e2e/time-off-team-approve-depth.spec.ts`: reject click stubbed; `approveTimeOff` deny flips team tab to staff-only (no mocked team row, no approve actions).
