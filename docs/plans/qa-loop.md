@@ -557,3 +557,10 @@ Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#
 
 80. Time off — team approve edges — done ([#111](https://github.com/Plcherra/flowforce/pull/111) merged `ff282bfe`)
    - `e2e/time-off-team-approve-depth.spec.ts`: reject click stubbed; `approveTimeOff` deny flips team tab to staff-only (no mocked team row, no approve actions).
+
+## Wednesday 25 Nov 2026, 2:00–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks (beyond item 68), Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+81. Schedule — company policies panel depth — done (PR pending)
+   - `e2e/schedule-company-policies-depth.spec.ts`: mocked `company_policies` row, create form save stubbed; `approveTimeOff` deny shows limited card.
