@@ -33,7 +33,7 @@ test.beforeEach(async ({ page }) => {
           signedInUserId = record.id;
         }
       };
-      let body = Array.isArray(json) ? json.map(pin) : pin(json);
+      const body = Array.isArray(json) ? json.map(pin) : pin(json);
       if (Array.isArray(body)) {
         body.forEach(capture);
       } else {
