@@ -165,14 +165,14 @@
     "ticket": "FF-SPLIT-36"
   },
   {
-    "path": "src/features/analytics/pages/Reports.tsx",
-    "lines": 655,
-    "ticket": "FF-SPLIT-30"
-  },
-  {
     "path": "src/lib/permissions/registry.ts",
     "lines": 670,
     "ticket": "FF-SPLIT-40"
+  },
+  {
+    "path": "src/features/analytics/pages/Reports.tsx",
+    "lines": 655,
+    "ticket": "FF-SPLIT-30"
   },
   {
     "path": "src/features/company-updates/repositories/companyUpdatesRepository.ts",
