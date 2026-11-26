@@ -57,6 +57,8 @@ import {
   buildDocumentStatusMeta,
   documentStatusClass,
 } from "@/features/analytics/pages/reportsDocumentStatusMeta";
+import { ReportInboxStatusFilters } from "@/features/analytics/pages/ReportInboxStatusFilters";
+import { useReportInboxFilters } from "@/features/analytics/pages/useReportInboxFilters";
 
 function summarizeText(text?: string | null) {
   if (!text) return i18n.t("literals.noExtractedTextAvailableYet");
@@ -90,42 +92,15 @@ export default function ReportsPage() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
-  const [search, setSearch] = useState("");
+  const {
+    search,
+    setSearch,
+    processingFilter,
+    setProcessingFilter,
+    filteredDocuments,
+    reportSummary,
+  } = useReportInboxFilters(documents);
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
-
-  const filteredDocuments = useMemo(() => {
-    if (!search) return documents;
-    const term = search.toLowerCase();
-    return documents.filter((doc) => {
-      const text =
-        `${doc.title ?? ""} ${doc.source ?? ""} ${doc.file?.filename ?? ""}`.toLowerCase();
-      return text.includes(term);
-    });
-  }, [documents, search]);
-
-  const reportSummary = useMemo(() => {
-    const ready = filteredDocuments.filter(
-      (doc) => doc.processing_state === "ready",
-    ).length;
-    const processing = filteredDocuments.filter((doc) =>
-      ["pending", "processing"].includes(doc.processing_state ?? "pending"),
-    ).length;
-    const errors = filteredDocuments.filter(
-      (doc) => doc.processing_state === "error",
-    ).length;
-    const criticalEvents = filteredDocuments.reduce(
-      (sum, doc) =>
-        sum +
-        doc.events.filter((event) => event.severity === "critical").length,
-      0,
-    );
-    const followUps = filteredDocuments.reduce(
-      (sum, doc) => sum + (doc.originating_tasks?.length ?? 0),
-      0,
-    );
-
-    return { ready, processing, errors, criticalEvents, followUps };
-  }, [filteredDocuments]);
 
   const selectedDocument = useMemo(
     () => documents.find((doc) => doc.id === selectedDocumentId) ?? null,
@@ -355,6 +330,11 @@ export default function ReportsPage() {
         </Card>
       </div>
 
+      <ReportInboxStatusFilters
+        value={processingFilter}
+        onChange={setProcessingFilter}
+      />
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -406,6 +386,7 @@ export default function ReportsPage() {
                     <TableRow
                       key={doc.id}
                       className="cursor-pointer"
+                      data-testid={`reports-inbox-row-${doc.id}`}
                       onClick={() => handleOpenDetails(doc.id)}
                     >
                       <TableCell>
