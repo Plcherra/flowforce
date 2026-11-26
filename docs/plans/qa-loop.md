@@ -598,3 +598,10 @@ Hard stop at 6:00 AM ET. **Queue 84+:** Messages group complete, Forms distribut
 - **Migrations:** none.
 - **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
 - **Next:** item 85 Forms distribution editor; Goals KPI deny; Docs report inbox filters; Analytics business tab rows.
+
+## Thursday 26 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows; then thinnest remaining areas among Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+85. Forms — distribution editor depth — in progress
+   - `e2e/forms-distribution-editor-depth.spec.ts`: two-store list picker, incomplete people fill blocks preview with `distributionIncomplete` toast, edit loads mocked list + store + department fill + attached role. Writes blocked.
