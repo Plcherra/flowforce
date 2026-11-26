@@ -580,3 +580,11 @@ Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Sett
 - **Migrations:** none.
 - **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
 - **Next:** item 84+ thin e2e (Messages group complete, Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows).
+
+## Thursday 26 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **Queue 84+:** Messages group complete, Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows; then thinnest remaining areas among Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+84. Messages — group create complete flow — in progress
+   - `data-testid="new-chat-create-group"` on `NewChatPanel`.
+   - `e2e/messages-group-complete-depth.spec.ts`: group mode, disabled Create group until name + member, stubbed channel/member writes, roster chip + transcript after create; cancel without writes.

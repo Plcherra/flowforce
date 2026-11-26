@@ -163,6 +163,7 @@ export function NewChatPanel({
                 />
               </div>
               <Button
+                data-testid="new-chat-create-group"
                 onClick={() => void startGroup()}
                 disabled={
                   busy || selectedIds.length < 1 || groupName.trim().length === 0
