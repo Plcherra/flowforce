@@ -606,6 +606,10 @@ Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI den
 85. Forms — distribution editor depth — done ([#116](https://github.com/Plcherra/flowforce/pull/116) merged `d3faf139`)
    - `e2e/forms-distribution-editor-depth.spec.ts`: two-store list picker, incomplete people fill blocks preview with `distributionIncomplete` toast, edit loads mocked list + store + department fill + attached role. Writes blocked.
 
-86. Goals — KPI deny gate — in progress ([#117](https://github.com/Plcherra/flowforce/pull/117))
+86. Goals — KPI deny gate — done ([#117](https://github.com/Plcherra/flowforce/pull/117) merged `18ab0d77`)
    - `PerformancePage` drops `goal-progress` KPI tile when both `goals.view` and `goals.manage` are denied (matches goal progress section gate).
    - `e2e/goals-kpi-deny-depth.spec.ts`: deny hides `performance-kpi-goal-progress`; `goals.view` alone keeps tile. Updated `goals-progress-depth` deny expectation. Writes blocked.
+
+87. Docs — report inbox status filters — in progress ([#118](https://github.com/Plcherra/flowforce/pull/118))
+   - `ReportInboxStatusFilters`, `useReportInboxFilters`; row `reports-inbox-row-{id}`.
+   - `e2e/docs-report-inbox-filters-depth.spec.ts`: ready vs error mocks, status chip filters. Writes blocked.
