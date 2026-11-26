@@ -633,4 +633,8 @@ Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI den
 
 Hard stop at 5:00 PM ET. **Queue 89+:** thinnest remaining e2e in Messages, Settings/Roles, Reviews, Schedule, Tasks (beyond item 68), Forms, Company Updates, Time off, Analytics, Goals, Docs. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-89. Reviews — view_own row scope — in progress
+89. Reviews — view_own row scope — done ([#120](https://github.com/Plcherra/flowforce/pull/120) merged `b40cc5e5`)
+   - `data-testid="performance-review-row-{id}"` on recent review rows.
+   - `e2e/reviews-view-own-depth.spec.ts`: merged permission patch (`reviews.manage` deny + `reviews.view_own` allow), mocked own/peer rows, KPI employees/score scoped; manage shows both. Writes blocked.
+
+90. Company Updates — list view table depth — in progress
