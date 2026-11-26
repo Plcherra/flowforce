@@ -614,6 +614,17 @@ Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI den
    - `ReportInboxStatusFilters`, `useReportInboxFilters`; row `reports-inbox-row-{id}`.
    - `e2e/docs-report-inbox-filters-depth.spec.ts`: ready vs error mocks, status chip filters. Writes blocked.
 
-88. Analytics — business tab rows — in progress ([#119](https://github.com/Plcherra/flowforce/pull/119))
+88. Analytics — business tab rows — done ([#119](https://github.com/Plcherra/flowforce/pull/119) merged `3dd7c682`)
    - `analytics-business-*` test hooks on `BusinessAnalyticsBoard` metrics, breakdown rows, predictions.
    - `e2e/analytics-business-rows-depth.spec.ts`: Insights pack, business tab, asserts rows load from live or fallback snapshot. Writes blocked.
+
+### Block wrap-up log (Thu 26 Nov 2026, 9:00 AM–~10:25 AM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 85–88 (forms distribution editor depth, goals KPI deny, report inbox status filters, analytics business tab rows). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Merged:** [#116](https://github.com/Plcherra/flowforce/pull/116) item 85; [#117](https://github.com/Plcherra/flowforce/pull/117) item 86; [#118](https://github.com/Plcherra/flowforce/pull/118) item 87; [#119](https://github.com/Plcherra/flowforce/pull/119) item 88. Release gates, Remote deploy readiness, and Vercel preview green on each branch before merge; main Release Gates success on post-merge run.
+- **Local e2e:** `forms-distribution-editor-depth` 3/3; `goals-kpi-deny-depth` 2/2 + `goals-progress-depth` deny 3/3 total 5/5; `docs-report-inbox-filters-depth` 1/1; `analytics-business-rows-depth` 1/1.
+- **Findings:** Multi-store forms need mocked `stores` GET; incomplete audience toast needs `exact: true`; goals KPI leaked counts when section hidden — fixed in `PerformancePage`; report inbox lacked status chips — added filter toolbar; CI file-length failed when allowlist sort put `Reports.tsx` above `registry.ts`.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
+- **Next:** thin e2e among Messages, Settings/Roles, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics if another block runs before hard stop; otherwise pause at 1:00 PM ET.
