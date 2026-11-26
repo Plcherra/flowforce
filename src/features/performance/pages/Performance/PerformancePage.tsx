@@ -159,7 +159,11 @@ function LatestReviewsCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {reviews.slice(0, 5).map((review) => (
-          <div key={review.id} className="flex items-center gap-3">
+          <div
+            key={review.id}
+            className="flex items-center gap-3"
+            data-testid={`performance-review-row-${review.id}`}
+          >
             <Avatar className="h-10 w-10">
               <AvatarImage src={undefined} alt={review.employeeName} />
               <AvatarFallback>

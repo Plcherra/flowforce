@@ -628,3 +628,9 @@ Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI den
 - **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
 - **Next:** thin e2e among Messages, Settings/Roles, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics if another block runs before hard stop; otherwise pause at 1:00 PM ET.
+
+## Thursday 26 Nov 2026, 2:00 PM–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 89+:** thinnest remaining e2e in Messages, Settings/Roles, Reviews, Schedule, Tasks (beyond item 68), Forms, Company Updates, Time off, Analytics, Goals, Docs. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+89. Reviews — view_own row scope — in progress
