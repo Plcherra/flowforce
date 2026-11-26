@@ -610,6 +610,10 @@ Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI den
    - `PerformancePage` drops `goal-progress` KPI tile when both `goals.view` and `goals.manage` are denied (matches goal progress section gate).
    - `e2e/goals-kpi-deny-depth.spec.ts`: deny hides `performance-kpi-goal-progress`; `goals.view` alone keeps tile. Updated `goals-progress-depth` deny expectation. Writes blocked.
 
-87. Docs — report inbox status filters — in progress ([#118](https://github.com/Plcherra/flowforce/pull/118))
+87. Docs — report inbox status filters — done ([#118](https://github.com/Plcherra/flowforce/pull/118) merged `46c1ef17`)
    - `ReportInboxStatusFilters`, `useReportInboxFilters`; row `reports-inbox-row-{id}`.
    - `e2e/docs-report-inbox-filters-depth.spec.ts`: ready vs error mocks, status chip filters. Writes blocked.
+
+88. Analytics — business tab rows — in progress ([#119](https://github.com/Plcherra/flowforce/pull/119))
+   - `analytics-business-*` test hooks on `BusinessAnalyticsBoard` metrics, breakdown rows, predictions.
+   - `e2e/analytics-business-rows-depth.spec.ts`: Insights pack, business tab, asserts rows load from live or fallback snapshot. Writes blocked.
