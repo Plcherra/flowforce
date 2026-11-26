@@ -603,5 +603,9 @@ Hard stop at 6:00 AM ET. **Queue 84+:** Messages group complete, Forms distribut
 
 Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows; then thinnest remaining areas among Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-85. Forms — distribution editor depth — in progress
+85. Forms — distribution editor depth — done ([#116](https://github.com/Plcherra/flowforce/pull/116) merged `d3faf139`)
    - `e2e/forms-distribution-editor-depth.spec.ts`: two-store list picker, incomplete people fill blocks preview with `distributionIncomplete` toast, edit loads mocked list + store + department fill + attached role. Writes blocked.
+
+86. Goals — KPI deny gate — in progress ([#117](https://github.com/Plcherra/flowforce/pull/117))
+   - `PerformancePage` drops `goal-progress` KPI tile when both `goals.view` and `goals.manage` are denied (matches goal progress section gate).
+   - `e2e/goals-kpi-deny-depth.spec.ts`: deny hides `performance-kpi-goal-progress`; `goals.view` alone keeps tile. Updated `goals-progress-depth` deny expectation. Writes blocked.

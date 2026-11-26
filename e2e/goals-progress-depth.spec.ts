@@ -104,7 +104,7 @@ test("denying both goal permissions hides goal progress", async ({ page }) => {
   await denyKeys(page, [GOAL_VIEW_KEY, GOAL_MANAGE_KEY]);
   await page.reload();
   await expect(page.getByTestId("performance-goal-progress")).toHaveCount(0);
-  await expect(page.getByTestId("performance-kpi-goal-progress")).toBeVisible();
+  await expect(page.getByTestId("performance-kpi-goal-progress")).toHaveCount(0);
 });
 
 async function signIn(page: Page) {

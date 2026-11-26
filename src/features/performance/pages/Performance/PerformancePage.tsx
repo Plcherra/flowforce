@@ -222,13 +222,16 @@ export function PerformancePage() {
     ? reviews
     : reviews.filter((review) => review.employeeId === user?.id);
   const visibleGoals = canViewGoals ? goals : [];
+  const baseKpis = buildKpis({
+    employees: visibleEmployees,
+    reviews: visibleReviews,
+    recognitionsCount: recognitions.length,
+    t,
+  });
   const kpis = [
-    ...buildKpis({
-      employees: visibleEmployees,
-      reviews: visibleReviews,
-      recognitionsCount: recognitions.length,
-      t,
-    }),
+    ...(canViewGoals
+      ? baseKpis
+      : baseKpis.filter((metric) => metric.id !== "goal-progress")),
     {
       id: "task-points",
       label: t("performance.kpiTaskPoints"),
