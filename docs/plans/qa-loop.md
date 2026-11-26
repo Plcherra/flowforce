@@ -637,4 +637,17 @@ Hard stop at 5:00 PM ET. **Queue 89+:** thinnest remaining e2e in Messages, Sett
    - `data-testid="performance-review-row-{id}"` on recent review rows.
    - `e2e/reviews-view-own-depth.spec.ts`: merged permission patch (`reviews.manage` deny + `reviews.view_own` allow), mocked own/peer rows, KPI employees/score scoped; manage shows both. Writes blocked.
 
-90. Company Updates — list view table depth — in progress
+90. Company Updates — list view table depth — done ([#121](https://github.com/Plcherra/flowforce/pull/121) merged `2b6a7407`)
+   - `data-testid="company-update-list-row-{id}"` on list table rows.
+   - `e2e/company-updates-list-depth.spec.ts`: List view, mocked high-priority announcement, type badge and manage menu visible. Writes blocked.
+
+### Block wrap-up log (Thu 26 Nov 2026, 2:00–~3:05 PM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 89–90 (Reviews `view_own` row scope, Company Updates list table). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Merged:** [#120](https://github.com/Plcherra/flowforce/pull/120) item 89; [#121](https://github.com/Plcherra/flowforce/pull/121) item 90. Release gates, Remote deploy readiness, and Vercel preview green on each branch before merge.
+- **Local e2e:** `reviews-view-own-depth` 2/2 + reviews regression 4/4; `company-updates-list-depth` 1/1 + feed regression 2/2.
+- **Findings:** Split deny/allow permission stubs restore owner `reviews.manage`; use one patch for both review keys. Capture Playwright user id by `TEST_USER_EMAIL`, not first roster row. List view lacked row test hooks for table columns.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
+- **Next:** item 91+ thin e2e in Messages, Settings/Roles, Schedule, Tasks, Forms, Time off, Analytics, Goals, Docs if another block runs; hard stop 5:00 PM ET for new areas.
