@@ -585,6 +585,16 @@ Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Sett
 
 Hard stop at 6:00 AM ET. **Queue 84+:** Messages group complete, Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows; then thinnest remaining areas among Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
 
-84. Messages — group create complete flow — in progress
+84. Messages — group create complete flow — done ([#115](https://github.com/Plcherra/flowforce/pull/115) merged `5b166ce4`)
    - `data-testid="new-chat-create-group"` on `NewChatPanel`.
    - `e2e/messages-group-complete-depth.spec.ts`: group mode, disabled Create group until name + member, stubbed channel/member writes, roster chip + transcript after create; cancel without writes.
+
+### Block wrap-up log (Thu 26 Nov 2026, ~4:00–~5:30 AM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Item 84 (Messages group create complete). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Findings:** Roster peer mock must include nullable employee schema fields (`avatar_url`, `hire_date`, `employee_id`, `company_id`) or workspace bootstrap fails; stub `channel_members` GET for post-create transcript load; split roster vs language `profiles` interceptors.
+- **Merged:** [#115](https://github.com/Plcherra/flowforce/pull/115) item 84. Release gates, Remote deploy readiness, and Vercel preview green before merge.
+- **Local e2e:** `messages-group-complete-depth` 2/2.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** item 85 Forms distribution editor; Goals KPI deny; Docs report inbox filters; Analytics business tab rows.
