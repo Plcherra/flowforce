@@ -478,7 +478,8 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
 
 Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
 
-68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (e2e: staff+act mark-done stub; owner keeps Mark done with read-only list-issue grants; unit grant matrix for non-owner read-only).
+68. Tasks — list issues act depth — done ([#99](https://github.com/Plcherra/flowforce/pull/99) merged `41ec6ecd`)
+   - `e2e/tasks-list-issues-depth.spec.ts` (staff+act mark-done stub; owner keeps Mark done with read-only list-issue grants; unit grant matrix in `listIssueGather.test.ts`).
    - `e2e/tasks-list-issues-depth.spec.ts`; read-only gather act for managers/staff covered in `listIssueGather.test.ts` (RLS: `tasks.list_issues.act` on `source = form` updates).
 69. Docs — resources manual, API, integrations pages — done ([#100](https://github.com/Plcherra/flowforce/pull/100) merged `77d73a15`)
    - `data-testid` hooks on user manual, API, and integration guide pages; `e2e/docs-resources-pages-depth.spec.ts` (Team pack, English).
@@ -488,9 +489,8 @@ Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, T
 ### Block wrap-up log (Tue 24 Nov 2026, 9:00 AM–~10:30 AM ET, in progress) <!-- pragma: allowlist secret -->
 
 - **Worked:** Items 68–70; #98 / item 67 already on `main` at block start.
-- **Findings:** CI Playwright user owner bypass breaks read-only list-issue UI test ([#99](https://github.com/Plcherra/flowforce/pull/99)).
-- **Merged:** [#100](https://github.com/Plcherra/flowforce/pull/100) item 69; [#101](https://github.com/Plcherra/flowforce/pull/101) item 70 after CI green (rebase).
-- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99).
+- **Findings:** Initial read-only UI test conflicted with owner `listIssueGrant` bypass; fixed on branch before merge (`f60c7c1c`).
+- **Merged (this block):** [#100](https://github.com/Plcherra/flowforce/pull/100) item 69; [#101](https://github.com/Plcherra/flowforce/pull/101) item 70. **Later merged:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68 (`41ec6ecd`, Fri 27 Nov CI green).
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
 - **Next:** fix or narrow item 68 e2e; Settings / Schedule depth if time before 1:00 PM ET.
