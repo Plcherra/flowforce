@@ -26,29 +26,23 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CreateReminderDialog } from "@/features/tasks/components/reminders/CreateReminderDialog";
 import { useTaskFormOptions } from "@/hooks/useTaskFormOptions";
 import { logger } from "@/utils/logger";
-import {
-  dueDateFromWindowEnd,
-  fromDatetimeLocalValue,
-  mergeTaskSchedule,
-  withTaskPoints,
-  type TaskPublishState,
-} from "@/features/tasks/utils/taskSchedule";
+import type { TaskPublishState } from "@/features/tasks/utils/taskSchedule";
 import type { TaskCreateScope } from "@/features/roles/constants/taskCreateScope";
 import { peopleWithinTaskCreateScope } from "@/features/tasks/utils/taskAssigneeScope";
 import { TaskAudienceFields } from "@/features/tasks/components/TaskAudienceFields";
 import {
   defaultTaskAudience,
-  taskAudienceJson,
-  taskAudienceReady,
   type TaskAudience,
 } from "@/features/tasks/utils/taskAudience";
-import type { Json } from "@/integrations/supabase/public-types";
 import {
   TaskDueByFields,
   type TaskDueByValue,
 } from "@/features/tasks/components/TaskDueByFields";
-import { buildDuePayload } from "@/features/tasks/utils/taskDueTiming";
 import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
+import {
+  buildCreateTaskInsert,
+  validateCreateTaskForm,
+} from "@/features/tasks/utils/createTaskDialogSubmit";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -166,35 +160,6 @@ export function CreateTaskDialog({
     setErrors({});
   };
 
-  const validateForm = () => {
-    const nextErrors: Record<string, string> = {};
-    if (!formData.title.trim()) {
-      nextErrors.title = t("tasks.aTitleIsRequired");
-    }
-    if (!onlySelf && scope && !formData.assigned_to) {
-      nextErrors.assigned_to = t("tasks.chooseAssignee");
-    }
-    if (!taskAudienceReady(viewAudience) || !taskAudienceReady(editAudience)) {
-      nextErrors.audience = t("tasks.audienceNeedsAChoice");
-    }
-    if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
-      nextErrors.points = t("tasks.pointsMustBeWholeNumber");
-    }
-    if (dueBy.enabled && (!dueBy.dateYmd.trim() || !dueBy.timeHm.trim())) {
-      nextErrors.due_by = t("tasks.dueByIncomplete");
-    }
-    if (formData.starts_at || formData.ends_at) {
-      const startsAt = fromDatetimeLocalValue(formData.starts_at);
-      const endsAt = fromDatetimeLocalValue(formData.ends_at);
-      if (!startsAt || !endsAt) {
-        nextErrors.ends_at = t("tasks.windowNeedsStartAndEnd");
-      } else if (new Date(endsAt).getTime() < new Date(startsAt).getTime()) {
-        nextErrors.ends_at = t("tasks.endMustBeAfterStart");
-      }
-    }
-    return nextErrors;
-  };
-
   const handleDialogChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       resetForm();
@@ -206,7 +171,15 @@ export function CreateTaskDialog({
     e.preventDefault();
     if (!user) return;
 
-    const validationErrors = validateForm();
+    const validationErrors = validateCreateTaskForm({
+      formData,
+      dueBy,
+      viewAudience,
+      editAudience,
+      onlySelf,
+      scope,
+      t,
+    });
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -214,50 +187,17 @@ export function CreateTaskDialog({
 
     setLoading(true);
     try {
-      const startsAt = fromDatetimeLocalValue(formData.starts_at);
-      const endsAt = fromDatetimeLocalValue(formData.ends_at);
-      const points =
-        formData.points.trim() === "" ? null : Number(formData.points);
-      const dueFields = buildDuePayload({
-        dueByEnabled: dueBy.enabled,
-        dueByDate: dueBy.dateYmd,
-        dueByTime: dueBy.timeHm,
-        timeZone: shopTimeZone,
-        windowDueDate: dueDateFromWindowEnd(endsAt),
+      const { row: taskData } = buildCreateTaskInsert({
+        formData,
+        dueBy,
+        shopTimeZone,
+        userId: user.id,
+        onlySelf,
+        viewAudience,
+        editAudience,
       });
-      const taskData = {
-        title: formData.title,
-        description: formData.description || null,
-        status: "todo" as const,
-        priority: formData.priority as any,
-        created_by: user.id,
-        due_date: dueFields.due_date,
-        due_at: dueFields.due_at,
-        links: withTaskPoints(
-          mergeTaskSchedule(null, {
-            startsAt,
-            endsAt,
-            publishState: formData.publish_state,
-          }),
-          points,
-        ),
-        assigned_to: onlySelf
-          ? user.id
-          : formData.assigned_to
-            ? formData.assigned_to
-            : null,
-        view_audience: taskAudienceJson(viewAudience) as Json,
-        edit_audience: taskAudienceJson(editAudience) as Json,
-        departmentid: null,
-        tags: null,
-        attachments: [],
-        parent_task_id: null,
-        workflowid: null,
-        actual_hours: null,
-        goal_id: null,
-      };
 
-      const { data: newTask, error } = await createTask(taskData);
+      const { data: newTask, error } = await createTask(taskData as never);
 
       if (error) {
         toast({
