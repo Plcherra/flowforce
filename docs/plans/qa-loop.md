@@ -478,7 +478,8 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
 
 Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
 
-68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (3 CI fix rounds; read-only grant test fails on seeded Playwright user — owner/list-issue act bypass).
+68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (e2e: staff+act mark-done stub; owner keeps Mark done with read-only list-issue grants; unit grant matrix for non-owner read-only).
+   - `e2e/tasks-list-issues-depth.spec.ts`; read-only gather act for managers/staff covered in `listIssueGather.test.ts` (RLS: `tasks.list_issues.act` on `source = form` updates).
 69. Docs — resources manual, API, integrations pages — done ([#100](https://github.com/Plcherra/flowforce/pull/100) merged `77d73a15`)
    - `data-testid` hooks on user manual, API, and integration guide pages; `e2e/docs-resources-pages-depth.spec.ts` (Team pack, English).
 70. Time off — my request history depth — done ([#101](https://github.com/Plcherra/flowforce/pull/101) merged `d7842b1b`)
