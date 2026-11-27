@@ -22,7 +22,7 @@ test.beforeAll(() => {
   }
 });
 
-test("list issues: mark done issues task write with act permission", async ({ page }) => {
+test("list issues: Complete issues task write with act permission", async ({ page }) => {
   test.setTimeout(180_000);
   let statusWriteAttempts = 0;
   await installListIssueTask(page, () => {
@@ -38,15 +38,16 @@ test("list issues: mark done issues task write with act permission", async ({ pa
   await expect(gather).toBeVisible({ timeout: 30_000 });
   await expect(gather.getByText("e2e list issue depth act")).toBeVisible();
 
-  const doneButton = page.getByTestId(`list-issue-done-${LIST_ISSUE_TASK_ID}`);
-  await expect(doneButton).toBeVisible();
-  await doneButton.click();
+  const completeButton = page.getByTestId(`list-issue-done-${LIST_ISSUE_TASK_ID}`);
+  await expect(completeButton).toBeVisible();
+  await expect(completeButton).toHaveText("Complete");
+  await completeButton.click();
   await expect.poll(() => statusWriteAttempts >= 1, { timeout: 15_000 }).toBe(true);
 
-  await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-issues-mark-done.png" });
+  await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-issues-complete.png" });
 });
 
-test("list issues: owner keeps mark done when act grant is read-only", async ({ page }) => {
+test("list issues: owner keeps Complete when act grant is read-only", async ({ page }) => {
   test.setTimeout(180_000);
   let statusWriteAttempts = 0;
   await installListIssueTask(page, () => {
@@ -59,9 +60,10 @@ test("list issues: owner keeps mark done when act grant is read-only", async ({ 
   await page.getByTestId("tasks-mode-all").click();
   await expect(page.getByTestId("list-issue-gather")).toBeVisible({ timeout: 30_000 });
 
-  const doneButton = page.getByTestId(`list-issue-done-${LIST_ISSUE_TASK_ID}`);
-  await expect(doneButton).toBeVisible();
-  await doneButton.click();
+  const completeButton = page.getByTestId(`list-issue-done-${LIST_ISSUE_TASK_ID}`);
+  await expect(completeButton).toBeVisible();
+  await expect(completeButton).toHaveText("Complete");
+  await completeButton.click();
   await expect.poll(() => statusWriteAttempts >= 1, { timeout: 15_000 }).toBe(true);
   await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-issues-owner-read-grant.png" });
 });
