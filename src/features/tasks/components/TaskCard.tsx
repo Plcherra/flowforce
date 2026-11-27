@@ -5,6 +5,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
+import { formatTaskDueLabel } from "@/features/tasks/utils/formatTaskDue";
+import { isTaskOverdue } from "@/features/tasks/utils/taskDueTiming";
+import { DEFAULT_SHOP_TIMEZONE } from "@/features/tasks/utils/taskDueTiming";
 import { Calendar, User, Flag, Target } from "lucide-react";
 import {
   Card,
@@ -57,6 +61,7 @@ interface TaskCardProps {
   translation?: TaskContentTranslation | null;
   onFillForm?: (formId: string) => void;
   onComplete?: (taskId: string) => void;
+  timeZone?: string;
 }
 
 export function TaskCard({
@@ -67,8 +72,12 @@ export function TaskCard({
   translation = null,
   onFillForm,
   onComplete,
+  timeZone = DEFAULT_SHOP_TIMEZONE,
 }: TaskCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const shopTimeZone = timeZone;
+  const language = appLanguageFromTag(i18n.language);
+  const overdue = isTaskOverdue(task, shopTimeZone);
   const display = useFormContentDisplay({
     recordId: task.id,
     title: task.title,
@@ -96,8 +105,13 @@ export function TaskCard({
       onClick={selectionHandlers.onClick}
       onKeyDown={selectionHandlers.onKeyDown}
       className={`cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-        highlighted ? "ring-2 ring-primary" : ""
+        overdue
+          ? "border-destructive/50 bg-destructive/5 ring-2 ring-destructive/40"
+          : highlighted
+            ? "ring-2 ring-primary"
+            : ""
       }`}
+      data-overdue={overdue ? "true" : "false"}
     >
       <CardHeader className="pb-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -139,14 +153,15 @@ export function TaskCard({
                 </Badge>
               ) : null}
             </div>
-            {dueBadge && (
+            {dueBadge ? (
               <Badge
-                variant="outline"
-                className={`text-xs ${dueBadge.className}`}
+                variant={overdue ? "destructive" : "outline"}
+                className={`text-xs ${overdue ? "" : dueBadge.className}`}
+                data-testid="task-due-badge"
               >
                 {dueBadgeText(t, dueBadge.label)}
               </Badge>
-            )}
+            ) : null}
           </div>
         </div>
       </CardHeader>
@@ -176,12 +191,17 @@ export function TaskCard({
                 <span>{windowLabel}</span>
               </div>
             ) : null}
-            {task.due_date && (
-              <div className="flex items-center gap-1">
+            {task.due_date || task.due_at ? (
+              <div
+                className={`flex items-center gap-1 ${overdue ? "font-medium text-destructive" : ""}`}
+                data-testid="task-due-label"
+              >
                 <Calendar className="h-4 w-4" />
-                <span>{format(new Date(task.due_date), "MMM dd, yyyy")}</span>
+                <span>
+                  {formatTaskDueLabel(task, t, language, shopTimeZone)}
+                </span>
               </div>
-            )}
+            ) : null}
             <div className="flex items-center gap-1">
               <Flag className="h-4 w-4" />
               <span className="capitalize">

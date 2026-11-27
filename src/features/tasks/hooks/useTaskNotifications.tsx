@@ -10,8 +10,7 @@ import {
   createTaskNotification,
   deleteNotification as deleteNotificationRecord,
   fetchNotificationsForUser,
-  fetchOverdueTasks,
-  fetchTasksDueSoon,
+  fetchActiveDueTasksForUser,
   findRecentNotification,
   markAllNotificationsAsRead,
   markNotificationAsRead,
@@ -19,12 +18,18 @@ import {
   type TaskNotification,
 } from "@/features/tasks/repositories/taskNotificationsRepository";
 import { translatedStatusLabel } from "@/features/tasks/utils/taskCopy";
+import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
+import {
+  isTaskDueSoon,
+  isTaskOverdue,
+} from "@/features/tasks/utils/taskDueTiming";
 
 const NOTIFICATION_QUERY_KEY = "task-notifications";
 
 export function useTaskNotifications() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const shopTimeZone = useShopTimeZone();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [serviceError, setServiceError] = useState<string | null>(null);
@@ -119,23 +124,24 @@ export function useTaskNotifications() {
     };
 
     runChecks();
-    const interval = setInterval(runChecks, 5 * 60 * 1000);
+    const interval = setInterval(runChecks, 60 * 1000);
 
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [user?.id]);
+  }, [user?.id, shopTimeZone]);
 
   const checkDueTasks = async (userId: string) => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const lastDayIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const now = new Date();
+    const lastDayIso = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const activeWithDue = await fetchActiveDueTasksForUser(userId);
 
-    const dueSoon = await fetchTasksDueSoon(userId, tomorrow.toISOString());
+    const dueSoon = activeWithDue.filter((task) =>
+      isTaskDueSoon(task, shopTimeZone, now),
+    );
     for (const task of dueSoon) {
-      if (!task.due_date) continue;
       const existing = await findRecentNotification(
         userId,
         task.id,
@@ -153,19 +159,22 @@ export function useTaskNotifications() {
             task_title: task.title,
             priority: task.priority,
             due_date: task.due_date,
+            due_at: task.due_at ?? null,
           },
         });
       }
     }
 
-    const overdue = await fetchOverdueTasks(userId);
+    const overdue = activeWithDue.filter((task) =>
+      isTaskOverdue(task, shopTimeZone, now),
+    );
     for (const task of overdue) {
-      if (!task.due_date) continue;
+      const sinceIso = task.due_at ?? lastDayIso;
       const existing = await findRecentNotification(
         userId,
         task.id,
         "task_overdue",
-        lastDayIso,
+        sinceIso,
       );
       if (!existing) {
         await createTaskNotification({
@@ -178,6 +187,7 @@ export function useTaskNotifications() {
             task_title: task.title,
             priority: task.priority,
             due_date: task.due_date,
+            due_at: task.due_at ?? null,
           },
         });
       }

@@ -43,6 +43,12 @@ import {
   type TaskAudience,
 } from "@/features/tasks/utils/taskAudience";
 import type { Json } from "@/integrations/supabase/public-types";
+import {
+  TaskDueByFields,
+  type TaskDueByValue,
+} from "@/features/tasks/components/TaskDueByFields";
+import { buildDuePayload } from "@/features/tasks/utils/taskDueTiming";
+import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
 
 interface CreateTaskDialogProps {
   open: boolean;
@@ -61,6 +67,7 @@ export function CreateTaskDialog({
   const { createTask } = useTasks();
   const { user } = useAuth();
   const { toast } = useToast();
+  const shopTimeZone = useShopTimeZone();
   const {
     assignees,
     positions,
@@ -84,6 +91,11 @@ export function CreateTaskDialog({
     assigned_to: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [dueBy, setDueBy] = useState<TaskDueByValue>({
+    enabled: false,
+    dateYmd: "",
+    timeHm: "",
+  });
   const [audienceTouched, setAudienceTouched] = useState(false);
   const [viewAudience, setViewAudience] = useState<TaskAudience>(defaultTaskAudience(null));
   const [editAudience, setEditAudience] = useState<TaskAudience>(defaultTaskAudience(null));
@@ -150,6 +162,7 @@ export function CreateTaskDialog({
     setAudienceTouched(false);
     setViewAudience(defaultTaskAudience(null));
     setEditAudience(defaultTaskAudience(null));
+    setDueBy({ enabled: false, dateYmd: "", timeHm: "" });
     setErrors({});
   };
 
@@ -166,6 +179,9 @@ export function CreateTaskDialog({
     }
     if (formData.points.trim() !== "" && !/^\d+$/.test(formData.points.trim())) {
       nextErrors.points = t("tasks.pointsMustBeWholeNumber");
+    }
+    if (dueBy.enabled && (!dueBy.dateYmd.trim() || !dueBy.timeHm.trim())) {
+      nextErrors.due_by = t("tasks.dueByIncomplete");
     }
     if (formData.starts_at || formData.ends_at) {
       const startsAt = fromDatetimeLocalValue(formData.starts_at);
@@ -202,13 +218,21 @@ export function CreateTaskDialog({
       const endsAt = fromDatetimeLocalValue(formData.ends_at);
       const points =
         formData.points.trim() === "" ? null : Number(formData.points);
+      const dueFields = buildDuePayload({
+        dueByEnabled: dueBy.enabled,
+        dueByDate: dueBy.dateYmd,
+        dueByTime: dueBy.timeHm,
+        timeZone: shopTimeZone,
+        windowDueDate: dueDateFromWindowEnd(endsAt),
+      });
       const taskData = {
         title: formData.title,
         description: formData.description || null,
         status: "todo" as const,
         priority: formData.priority as any,
         created_by: user.id,
-        due_date: dueDateFromWindowEnd(endsAt),
+        due_date: dueFields.due_date,
+        due_at: dueFields.due_at,
         links: withTaskPoints(
           mergeTaskSchedule(null, {
             startsAt,
@@ -432,6 +456,17 @@ export function CreateTaskDialog({
           <p className="text-sm text-muted-foreground">
             {t("tasks.theWindowIsWhenTheTaskIsOpen")}
           </p>
+
+          <TaskDueByFields
+            idPrefix="create-task"
+            value={dueBy}
+            timeZone={shopTimeZone}
+            onChange={(next) => {
+              setDueBy(next);
+              clearError("due_by");
+            }}
+            error={errors.due_by}
+          />
 
           <TaskAudienceFields
             idPrefix="create-task"

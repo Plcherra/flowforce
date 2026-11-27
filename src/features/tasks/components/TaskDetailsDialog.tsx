@@ -52,6 +52,17 @@ import {
   type TaskAudience,
 } from "@/features/tasks/utils/taskAudience";
 import type { Json } from "@/integrations/supabase/public-types";
+import {
+  TaskDueByFields,
+  type TaskDueByValue,
+} from "@/features/tasks/components/TaskDueByFields";
+import { buildDuePayload } from "@/features/tasks/utils/taskDueTiming";
+import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
+import {
+  formatTaskDueLabel,
+  readDueByFormState,
+} from "@/features/tasks/utils/formatTaskDue";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useTaskComments } from "@/features/tasks/hooks";
 import {
   dueDateFromWindowEnd,
@@ -113,7 +124,9 @@ export function TaskDetailsDialog({
   translation = null,
   onFillForm,
 }: TaskDetailsDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const shopTimeZone = useShopTimeZone();
+  const language = appLanguageFromTag(i18n.language);
   const { user } = useAuth();
   const { can } = useCan();
   const canEdit = can("editTasks");
@@ -148,6 +161,11 @@ export function TaskDetailsDialog({
     publish_state: "published" as TaskPublishState,
   });
   const [savingExecution, setSavingExecution] = useState(false);
+  const [dueBy, setDueBy] = useState<TaskDueByValue>({
+    enabled: false,
+    dateYmd: "",
+    timeHm: "",
+  });
   const [deletingTask, setDeletingTask] = useState(false);
   const { comments, loadingComments, addingComment, submitComment } =
     useTaskComments(currentTask, open);
@@ -186,7 +204,8 @@ export function TaskDetailsDialog({
       ends_at: toDatetimeLocalValue(schedule.endsAt),
       publish_state: schedule.publishState,
     });
-  }, [currentTask]);
+  setDueBy(readDueByFormState(task, shopTimeZone));
+  }, [currentTask, shopTimeZone]);
 
   const handleSaveExecution = async () => {
     if (!currentTask) return;
@@ -214,15 +233,31 @@ export function TaskDetailsDialog({
       return;
     }
 
+    if (dueBy.enabled && (!dueBy.dateYmd.trim() || !dueBy.timeHm.trim())) {
+      toast({
+        title: t("tasks.dueByIncomplete"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSavingExecution(true);
     try {
+      const dueFields = buildDuePayload({
+        dueByEnabled: dueBy.enabled,
+        dueByDate: dueBy.dateYmd,
+        dueByTime: dueBy.timeHm,
+        timeZone: shopTimeZone,
+        windowDueDate: dueDateFromWindowEnd(endsAt),
+      });
       const { data, error } = await updateTask(currentTask.id, {
         ...executionContentPatch(currentTask, {
           title: executionForm.title,
           description: executionForm.description,
         }),
         priority: executionForm.priority,
-        due_date: dueDateFromWindowEnd(endsAt),
+        due_date: dueFields.due_date,
+        due_at: dueFields.due_at,
         links: mergeTaskSchedule(currentTask.links, {
           startsAt,
           endsAt,
@@ -718,6 +753,15 @@ export function TaskDetailsDialog({
                 </Select>
               </div>
 
+              <div className="sm:col-span-2 lg:col-span-4">
+                <TaskDueByFields
+                  idPrefix="task-details"
+                  value={dueBy}
+                  timeZone={shopTimeZone}
+                  onChange={setDueBy}
+                />
+              </div>
+
               <div className="flex justify-stretch sm:col-span-2 sm:justify-end lg:col-span-4">
                 <Button
                   type="button"
@@ -790,15 +834,15 @@ export function TaskDetailsDialog({
             </div>
 
             <div className="space-y-3">
-              {currentTask.due_date && (
+              {currentTask.due_date || currentTask.due_at ? (
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">{t("tasks.due")}</span>
                   <span>
-                    {format(new Date(currentTask.due_date), "MMM dd, yyyy")}
+                    {formatTaskDueLabel(currentTask, t, language, shopTimeZone)}
                   </span>
                 </div>
-              )}
+              ) : null}
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{t("tasks.created")}</span>

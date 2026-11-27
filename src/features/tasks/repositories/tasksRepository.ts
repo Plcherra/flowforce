@@ -48,6 +48,7 @@ const taskRowObjectSchema = z
     created_by: z.string(),
     goal_id: z.string().nullable(),
     due_date: z.string().nullable(),
+    due_at: z.string().nullable().optional(),
     estimated_hours: z.preprocess(
       (value) =>
         typeof value === "string" && value.trim() !== "" ? Number(value) : value,

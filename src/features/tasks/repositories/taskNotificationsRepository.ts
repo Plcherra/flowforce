@@ -25,6 +25,7 @@ const taskSummarySchema = z
     id: z.string(),
     title: z.string(),
     due_date: z.string().nullable(),
+    due_at: z.string().nullable().optional(),
     priority: z.string().nullable(),
     assigned_to: z.string().nullable(),
     status: z.string(),
@@ -63,19 +64,56 @@ export async function fetchNotificationsForUser(
   return notificationSchema.array().parse(data ?? []);
 }
 
-export type NewNotificationInput = Omit<
-  TaskNotificationRow,
-  "id" | "created_at" | "read_at"
-> & {
+export type NewNotificationInput = {
+  user_id: string;
+  company_id?: string;
+  task_id?: string | null;
+  title: string;
+  message: string;
+  type: string;
+  metadata?: TaskNotificationRow["metadata"];
   read_at?: string | null;
 };
+
+async function resolveTaskCompanyId(taskId: string): Promise<string | null> {
+  const { data, error } = await supabase // pragma: allowlist secret
+    .from("tasks")
+    .select("company_id")
+    .eq("id", taskId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.company_id ?? null;
+}
+
+async function resolveProfileCompanyId(userId: string): Promise<string | null> {
+  const { data, error } = await supabase // pragma: allowlist secret
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.company_id ?? null;
+}
 
 export async function createTaskNotification(
   input: NewNotificationInput,
 ): Promise<TaskNotification> {
+  let companyId = input.company_id?.trim() ?? "";
+  if (!companyId && input.task_id) {
+    companyId = (await resolveTaskCompanyId(input.task_id)) ?? "";
+  }
+  if (!companyId) {
+    companyId = (await resolveProfileCompanyId(input.user_id)) ?? "";
+  }
+  if (!companyId) {
+    throw new Error("company_id is required for task notifications");
+  }
+
+  const payload = { ...input, company_id: companyId };
+
   const { data, error } = await supabase
     .from("task_notifications")
-    .insert(input)
+    .insert(payload)
     .select()
     .single();
 
@@ -157,38 +195,31 @@ export async function findRecentNotification(
   return data ? notificationSchema.parse(data) : null;
 }
 
-export async function fetchTasksDueSoon(
+export async function fetchActiveDueTasksForUser(
   userId: string,
-  upperBoundIso: string,
 ): Promise<TaskSummary[]> {
-  // Use explicit status filter to avoid enum validation errors
-  // Only query for active task statuses (exclude completed/cancelled)
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, title, due_date, priority, assigned_to, status")
+    .select("id, title, due_date, due_at, priority, assigned_to, status")
     .eq("assigned_to", userId)
-    .gte("due_date", new Date().toISOString())
-    .lte("due_date", upperBoundIso)
-    .in("status", ["todo", "in_progress", "review"]);
+    .in("status", ["todo", "in_progress", "review"])
+    .or("due_date.not.is.null,due_at.not.is.null");
 
   if (error) {
     if (isMissingTableError(error)) {
       return [];
     }
 
-    // Handle enum validation errors gracefully
     if (error.message?.includes("invalid input value for enum task_status")) {
       logger.warn(
         "Some tasks have invalid status values. Filtering them out.",
         { error, tags: ["warning"] },
       );
-      // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
       return [];
     }
     throw error;
   }
 
-  // Additional client-side filtering as safety net
   const validStatuses = [
     "todo",
     "in_progress",
@@ -203,46 +234,15 @@ export async function fetchTasksDueSoon(
   return taskSummarySchema.array().parse(validData);
 }
 
-export async function fetchOverdueTasks(
+/** @deprecated Prefer fetchActiveDueTasksForUser plus client due timing filters. */
+export async function fetchTasksDueSoon(
   userId: string,
+  _upperBoundIso: string,
 ): Promise<TaskSummary[]> {
-  // Use explicit status filter to avoid enum validation errors
-  // Only query for active task statuses (exclude completed/cancelled)
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("id, title, due_date, priority, assigned_to, status")
-    .eq("assigned_to", userId)
-    .lt("due_date", new Date().toISOString())
-    .in("status", ["todo", "in_progress", "review"]);
+  return fetchActiveDueTasksForUser(userId);
+}
 
-  if (error) {
-    if (isMissingTableError(error)) {
-      return [];
-    }
-
-    // Handle enum validation errors gracefully
-    if (error.message?.includes("invalid input value for enum task_status")) {
-      logger.warn(
-        "Some tasks have invalid status values. Filtering them out.",
-        { error, tags: ["warning"] },
-      );
-      // Return empty array if enum validation fails - likely means there are tasks with invalid statuses
-      return [];
-    }
-    throw error;
-  }
-
-  // Additional client-side filtering as safety net
-  const validStatuses = [
-    "todo",
-    "in_progress",
-    "review",
-    "completed",
-    "cancelled",
-  ];
-  const validData = (data ?? []).filter((task) =>
-    validStatuses.includes(task.status),
-  );
-
-  return taskSummarySchema.array().parse(validData);
+/** @deprecated Prefer fetchActiveDueTasksForUser plus client due timing filters. */
+export async function fetchOverdueTasks(userId: string): Promise<TaskSummary[]> {
+  return fetchActiveDueTasksForUser(userId);
 }

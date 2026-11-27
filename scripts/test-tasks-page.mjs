@@ -37,6 +37,9 @@ const { runHandoverTaskTests } = importTs(
 const { runTaskScheduleTests } = importTs(
   "../src/features/tasks/utils/taskSchedule.test.ts",
 );
+const { runTaskDueTimingTests } = importTs(
+  "../src/features/tasks/utils/taskDueTiming.test.ts",
+);
 const { runTomorrowShiftTests } = importTs(
   "../src/features/scheduling/utils/tomorrowShift.test.ts",
 );
@@ -164,6 +167,7 @@ runTaskKindTests();
 runTaskCreateLevelTests();
 runHandoverTaskTests();
 runTaskScheduleTests();
+runTaskDueTimingTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
 runExecutionUpdateTests();
