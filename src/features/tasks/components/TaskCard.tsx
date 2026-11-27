@@ -2,6 +2,7 @@
  * Task card component
  */
 
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Calendar, User, Flag, Target } from "lucide-react";
@@ -20,6 +21,7 @@ import type { TaskContentTranslation } from "../taskContentFields";
 import type { DueBadge } from "../types/filters";
 import { getPriorityColor } from "../utils/priorityHelpers";
 import { Button } from "@/components/ui/button";
+import { isOpenTaskStatus } from "@/features/tasks/utils/simpleTaskWorkflow";
 import { readScheduleTaskLink } from "../utils/scheduleTaskLink";
 import { readAssigneeIds, readFormId } from "../utils/shiftTaskWrite";
 import { readTaskKind } from "../utils/taskKind";
@@ -54,6 +56,7 @@ interface TaskCardProps {
   selectionHandlers: SelectionHandlers;
   translation?: TaskContentTranslation | null;
   onFillForm?: (formId: string) => void;
+  onComplete?: (taskId: string) => void;
 }
 
 export function TaskCard({
@@ -63,6 +66,7 @@ export function TaskCard({
   selectionHandlers,
   translation = null,
   onFillForm,
+  onComplete,
 }: TaskCardProps) {
   const { t } = useTranslation();
   const display = useFormContentDisplay({
@@ -209,21 +213,37 @@ export function TaskCard({
             })}
           </div>
         </div>
-        {formId ? (
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-3 min-h-11 w-full sm:w-auto"
-            data-testid={`task-fill-${task.id}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              onFillForm?.(formId);
-            }}
-            onKeyDown={(event) => event.stopPropagation()}
-          >
-            {t("tasks.fillAndSend")}
-          </Button>
-        ) : null}
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          {onComplete && isOpenTaskStatus(task.status) ? (
+            <Button
+              type="button"
+              className="min-h-11 w-full sm:w-auto"
+              data-testid={`task-complete-${task.id}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onComplete(task.id);
+              }}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              {t("tasks.markDone")}
+            </Button>
+          ) : null}
+          {formId ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 w-full sm:w-auto"
+              data-testid={`task-fill-${task.id}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onFillForm?.(formId);
+              }}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              {t("tasks.fillAndSend")}
+            </Button>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );

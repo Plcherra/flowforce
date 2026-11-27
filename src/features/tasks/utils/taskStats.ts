@@ -4,6 +4,7 @@
 
 import type { KnownTaskStatus } from "../types/filters";
 import { normalizePriority, normalizeStatus } from "./normalization";
+import { statusBucketForTabs } from "./simpleTaskWorkflow";
 
 interface Task {
   status?: string | null;
@@ -18,9 +19,12 @@ export function calculateTasksByStatus(
   return tasks.reduce<Record<KnownTaskStatus | "other", number>>(
     (acc, task) => {
       const key = normalizeStatus(task.status);
-      // Stored "completed" rows share the Done tab with "done".
-      const bucket = key === "completed" ? "done" : key;
-      acc[bucket] = (acc[bucket] ?? 0) + 1;
+      const bucket = statusBucketForTabs(key);
+      if (bucket === "other") {
+        acc.other = (acc.other ?? 0) + 1;
+      } else {
+        acc[bucket] = (acc[bucket] ?? 0) + 1;
+      }
       return acc;
     },
     {} as Record<KnownTaskStatus | "other", number>,
