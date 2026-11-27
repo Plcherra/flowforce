@@ -1,4 +1,4 @@
--- Enforce task status workflow on UPDATE (matches TASK_STATUS_TRANSITIONS in the app).
+-- Enforce simple task status workflow on UPDATE (matches taskStatusTransitions.ts).
 create or replace function public.normalize_task_status_from_transition(status text)
 returns text
 language sql
@@ -7,8 +7,9 @@ set search_path = public
 as $$
   select case
     when status is null then null
-    when status in ('todo', 'in_progress', 'review', 'blocked', 'done', 'completed', 'cancelled') then status
-    when status = 'open' then 'todo'
+    when status in ('open', 'in_progress', 'review', 'blocked') then 'todo'
+    when status in ('todo', 'completed', 'cancelled') then status
+    when status = 'done' then 'completed'
     else null
   end;
 $$;
@@ -22,8 +23,8 @@ as $$
   select case
     when status is null then null
     when status = 'done' then 'completed'
-    when status in ('todo', 'in_progress', 'review', 'blocked', 'completed', 'cancelled') then status
     when status = 'open' then 'todo'
+    when status in ('todo', 'completed', 'cancelled') then status
     else null
   end;
 $$;
@@ -51,11 +52,7 @@ begin
   end if;
 
   allowed := case from_norm
-    when 'todo' then array['in_progress', 'completed', 'cancelled']
-    when 'in_progress' then array['review', 'completed', 'blocked', 'cancelled', 'todo']
-    when 'review' then array['completed', 'todo', 'cancelled']
-    when 'blocked' then array['in_progress', 'completed', 'cancelled']
-    when 'done' then array['todo']
+    when 'todo' then array['completed', 'cancelled']
     when 'completed' then array['todo']
     when 'cancelled' then array['todo']
     else null

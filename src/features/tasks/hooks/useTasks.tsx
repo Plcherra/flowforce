@@ -31,7 +31,14 @@ import {
 
 export { TASK_STATUS_TRANSITIONS };
 
-export type TaskStatus = TaskStatusTransitionKey;
+/** Legacy workflow labels still stored on rows until a UI-only PR removes them. */
+export type TaskStatus =
+  | TaskStatusTransitionKey
+  | "in_progress"
+  | "review"
+  | "blocked"
+  | "done"
+  | "open";
 
 const STATUS_ALIASES: Record<string, TaskStatus> = {
   completed: "done",
@@ -42,7 +49,7 @@ const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow["status"]>> = {
 };
 type TaskStatusValue = TaskStatus | TaskRow["status"];
 
-const STATUS_LABELS: Record<TaskStatus, string> = {
+const STATUS_LABELS: Record<string, string> = {
   todo: "To Do",
   in_progress: "In Progress",
   review: "In Review",
@@ -63,7 +70,15 @@ export const normalizeTaskStatus = (
   status: TaskStatusValue | null | undefined,
 ): TaskStatus | null => {
   if (!status) return null;
-  if ((status as TaskStatus) in TASK_STATUS_TRANSITIONS) {
+  if (
+    status === "in_progress" ||
+    status === "review" ||
+    status === "blocked" ||
+    status === "open"
+  ) {
+    return "todo";
+  }
+  if ((status as TaskStatusTransitionKey) in TASK_STATUS_TRANSITIONS) {
     return status as TaskStatus;
   }
   const alias = STATUS_ALIASES[status];
@@ -300,7 +315,9 @@ export function useTasks() {
       return { data: null, error };
     }
 
-    if (!isAllowedTaskStatusTransition(current, nextStatus)) {
+    if (
+      !isAllowedTaskStatusTransition(task.status ?? current, nextStatus)
+    ) {
       const message = t("literals.invalidStatusTransitionFromTo", { current: current, nextStatus: nextStatus });
       logger.warn("Invalid status transition", {
         context: { current, nextStatus, taskId },

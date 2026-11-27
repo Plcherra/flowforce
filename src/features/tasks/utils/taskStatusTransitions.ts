@@ -1,18 +1,17 @@
+/**
+ * Simple task workflow enforced on the server (and mirrored client-side via useTasks).
+ * Open → completed or cancelled; completed/cancelled → todo (undo/uncancel).
+ * Legacy in_progress/review/blocked/open rows are treated as open on transition FROM.
+ */
 export const TASK_STATUS_TRANSITIONS = {
-  todo: ["in_progress", "completed", "cancelled"],
-  in_progress: ["review", "completed", "blocked", "cancelled", "todo"],
-  review: ["completed", "todo", "cancelled"],
-  blocked: ["in_progress", "completed", "cancelled"],
-  done: ["todo"],
+  todo: ["completed", "cancelled"],
   completed: ["todo"],
   cancelled: ["todo"],
 } as const;
 
 export type TaskStatusTransitionKey = keyof typeof TASK_STATUS_TRANSITIONS;
 
-const LEGACY_FROM_ALIASES: Record<string, TaskStatusTransitionKey> = {
-  open: "todo",
-};
+const LEGACY_OPEN_FROM = new Set(["open", "in_progress", "review", "blocked"]);
 
 const TARGET_ALIASES: Record<string, TaskStatusTransitionKey> = {
   done: "completed",
@@ -23,18 +22,27 @@ export function normalizeFromStatusForTransition(
   status: string | null | undefined,
 ): TaskStatusTransitionKey | null {
   if (!status) return null;
+  if (LEGACY_OPEN_FROM.has(status)) {
+    return "todo";
+  }
+  if (status === "done") {
+    return "completed";
+  }
   if (status in TASK_STATUS_TRANSITIONS) {
     return status as TaskStatusTransitionKey;
   }
-  return LEGACY_FROM_ALIASES[status] ?? null;
+  return null;
 }
 
 export function normalizeToStatusForTransition(
   status: string | null | undefined,
 ): TaskStatusTransitionKey | null {
   if (!status) return null;
-  const aliased = TARGET_ALIASES[status] ?? LEGACY_FROM_ALIASES[status];
+  const aliased = TARGET_ALIASES[status];
   if (aliased) return aliased;
+  if (LEGACY_OPEN_FROM.has(status)) {
+    return null;
+  }
   if (status in TASK_STATUS_TRANSITIONS) {
     return status as TaskStatusTransitionKey;
   }
