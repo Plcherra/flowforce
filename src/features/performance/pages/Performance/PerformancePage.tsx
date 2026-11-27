@@ -159,7 +159,11 @@ function LatestReviewsCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {reviews.slice(0, 5).map((review) => (
-          <div key={review.id} className="flex items-center gap-3">
+          <div
+            key={review.id}
+            className="flex items-center gap-3"
+            data-testid={`performance-review-row-${review.id}`}
+          >
             <Avatar className="h-10 w-10">
               <AvatarImage src={undefined} alt={review.employeeName} />
               <AvatarFallback>
@@ -222,13 +226,16 @@ export function PerformancePage() {
     ? reviews
     : reviews.filter((review) => review.employeeId === user?.id);
   const visibleGoals = canViewGoals ? goals : [];
+  const baseKpis = buildKpis({
+    employees: visibleEmployees,
+    reviews: visibleReviews,
+    recognitionsCount: recognitions.length,
+    t,
+  });
   const kpis = [
-    ...buildKpis({
-      employees: visibleEmployees,
-      reviews: visibleReviews,
-      recognitionsCount: recognitions.length,
-      t,
-    }),
+    ...(canViewGoals
+      ? baseKpis
+      : baseKpis.filter((metric) => metric.id !== "goal-progress")),
     {
       id: "task-points",
       label: t("performance.kpiTaskPoints"),

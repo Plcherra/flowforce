@@ -462,13 +462,13 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
    - `role-management-dialog`, `role-create-class`, and `role-class-edit-{id}` test hooks.
    - `e2e/settings-role-class-dialog-depth.spec.ts`: edit + create class dialogs, Access tab grid, `systemSettings` gate (writes blocked).
 
-67. Forms — fill required-field edge — done ([#98](https://github.com/Plcherra/flowforce/pull/98) merged)
+67. Forms — fill required-field edge — done (PR [#98](https://github.com/Plcherra/flowforce/pull/98), merge pending)
    - `e2e/forms-fill-edge.spec.ts`: required validation before submit, stubbed submission write (no `FormFillDialog` allowlist growth).
 
 ### Block wrap-up log (Tue 24 Nov 2026, ~4:00–~5:50 AM ET) <!-- pragma: allowlist secret -->
 
 - **Merged:** [#96](https://github.com/Plcherra/flowforce/pull/96) item 65; [#97](https://github.com/Plcherra/flowforce/pull/97) item 66; fix-forward `b0ba3bce` on main hardens goals refresh mock per Codex P2.
-- **Merged:** [#98](https://github.com/Plcherra/flowforce/pull/98) item 67.
+- **Open:** [#98](https://github.com/Plcherra/flowforce/pull/98) item 67 — fixed Release Gates file-length (`FormFillDialog` allowlist 557; dropped dialog test id).
 - **Local e2e:** `goals-refresh-mock-depth` 1/1; `settings-role-class-dialog-depth` 2/2; `forms-fill-edge` 1/1.
 - **Migrations:** none.
 - **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
@@ -476,7 +476,179 @@ Hard stop at 6:00 AM ET. **Queue 65+:** Goals performance refresh with mocked ro
 
 ## Tuesday 24 Nov 2026, 9:00 AM–1:00 PM America/New_York
 
-Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas (Schedule, Messages, Company Updates, Forms, Goals, Reviews, Analytics). **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
+Hard stop at 1:00 PM ET. **Queue 68+:** thinnest remaining e2e in Tasks, Docs, Time off, then Settings and other general areas. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar.
 
-68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (3 CI fix rounds: read-only grant test flakes on seeded Playwright user / owner bypass; mark-done + act path green locally and in CI).
-   - `e2e/tasks-list-issues-depth.spec.ts`: mocked list-issue row, `tasks.list_issues.act` mark-done write stub, read-only hides done control (needs owner demote via `get_company_roles` — still failing Release gates).
+68. Tasks — list issues act depth — **open PR [#99](https://github.com/Plcherra/flowforce/pull/99)** (e2e: staff+act mark-done stub; owner keeps Mark done with read-only list-issue grants; unit grant matrix for non-owner read-only).
+   - `e2e/tasks-list-issues-depth.spec.ts`; read-only gather act for managers/staff covered in `listIssueGather.test.ts` (RLS: `tasks.list_issues.act` on `source = form` updates).
+69. Docs — resources manual, API, integrations pages — done ([#100](https://github.com/Plcherra/flowforce/pull/100) merged `77d73a15`)
+   - `data-testid` hooks on user manual, API, and integration guide pages; `e2e/docs-resources-pages-depth.spec.ts` (Team pack, English).
+70. Time off — my request history depth — done ([#101](https://github.com/Plcherra/flowforce/pull/101) merged `d7842b1b`)
+   - `time-off-history-list` test id; `e2e/time-off-my-history-depth.spec.ts` mocks personal approved row (writes blocked).
+
+### Block wrap-up log (Tue 24 Nov 2026, 9:00 AM–~10:30 AM ET, in progress) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 68–70; #98 / item 67 already on `main` at block start.
+- **Findings:** CI Playwright user owner bypass breaks read-only list-issue UI test ([#99](https://github.com/Plcherra/flowforce/pull/99)).
+- **Merged:** [#100](https://github.com/Plcherra/flowforce/pull/100) item 69; [#101](https://github.com/Plcherra/flowforce/pull/101) item 70 after CI green (rebase).
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99).
+- **Migrations:** none.
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** fix or narrow item 68 e2e; Settings / Schedule depth if time before 1:00 PM ET.
+
+## Tuesday 24 Nov 2026, 2:00 PM–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 71+:** Schedule availability panel (thin vs time-off panel); remaining polish in Schedule/Messages/Settings. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+71. Schedule — availability panel depth — done ([#102](https://github.com/Plcherra/flowforce/pull/102) merged `38eeb0a3`)
+   - `e2e/schedule-availability-depth.spec.ts`: personal weekday grid / open notice, team-hours tab with mocked `schedule.edit` + `editSchedules`, deny gate without owner-only assumptions. Availability lock/loading copy i18n (six locales).
+
+### Block wrap-up log (Tue 24 Nov 2026, 2:00–~3:15 PM ET) <!-- pragma: allowlist secret -->
+
+- **Merged:** [#102](https://github.com/Plcherra/flowforce/pull/102) item 71 at `38eeb0a3`; [#103](https://github.com/Plcherra/flowforce/pull/103) item 72 at `5eca7f36` (Release gates, Remote deploy readiness, Vercel preview green).
+- **Findings (71):** weekday test ids use `availability-day-mon` not `monday`; hard-coded lock/loading strings on availability path.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68 (untouched). Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** item 73+ if another block runs (messages or settings polish).
+
+72. Schedule — desk copy week and empty week — done ([#103](https://github.com/Plcherra/flowforce/pull/103) merged `5eca7f36`)
+   - `e2e/schedule-desk-actions-depth.spec.ts`: repeat-previous-week schedules read, empty-this-week delete with mocked `schedule.create` / `schedule.delete` gates. Writes blocked.
+
+## Wednesday 25 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **Queue 73+:** thinnest remaining e2e in Messages, Settings/Roles, Company Updates, Tasks, Forms, Goals, Docs, Reviews, Time off, Analytics, Schedule. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+73. Messages — delete confirm and moderation gate — done ([#104](https://github.com/Plcherra/flowforce/pull/104) merged `d198b1a4`)
+   - `e2e/messages-delete-depth.spec.ts`: own-message delete dialog with stubbed REST delete; peer delete gated on `messages.manage` (deny mock, not owner-only). Writes blocked.
+
+74. Settings — departments card depth — done ([#105](https://github.com/Plcherra/flowforce/pull/105) merged `9e0c520c`)
+   - `e2e/settings-departments-depth.spec.ts`: mocked department row, `managePositions` + `systemSettings` deny gate hides `department-settings`. Table writes blocked.
+
+75. Settings — personal language cancel — done ([#106](https://github.com/Plcherra/flowforce/pull/106) merged `aedfc157`)
+   - `e2e/settings-localization-depth.spec.ts`: cancel after staging Deutsch restores English with no profile write after the panel loads.
+
+### Block wrap-up log (Wed 25 Nov 2026, ~4:00–~4:52 AM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 73–75 (Messages delete, Settings departments, Settings localization cancel). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Findings:** Message “own” bubbles need `senderid` + profile id pinned via `TEST_USER_EMAIL`; personal language select needs `select=language` stub when asserting English before cancel.
+- **Merged:** [#104](https://github.com/Plcherra/flowforce/pull/104) item 73; [#105](https://github.com/Plcherra/flowforce/pull/105) item 74; [#106](https://github.com/Plcherra/flowforce/pull/106) item 75. Main Release Gates / Deploy Readiness green after each merge.
+- **Local e2e:** `messages-delete-depth` 2/2; `settings-departments-depth` 2/2; `settings-localization-depth` 1/1.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_EMAIL` / `TEST_RECIPIENT_PASSWORD` for `direct-message` (unchanged).
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
+- **Next:** item 76+ thin e2e (Tasks list panels beyond #99, Forms approval gate, Company Updates read detail, Analytics tabs, Time off team approve edges).
+
+## Wednesday 25 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. **Queue 76+:** Tasks list panels beyond item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99), Forms approval gate, Company Updates read detail, Analytics tabs, Time off team approve edges; then Messages, Settings/Roles, Goals, Docs, Reviews, Schedule. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+76. Tasks — activity feed and execution warnings depth — done ([#107](https://github.com/Plcherra/flowforce/pull/107) merged `999cd7ee`)
+   - `task-activity-feed`, `task-activity-empty`, and `task-activity-row-{id}` test hooks on `TaskActivityFeed`.
+   - `e2e/tasks-activity-warnings-depth.spec.ts`: mocked overdue task opens warnings panel and detail dialog; mocked `task_activities` row in below-list feed. Writes blocked.
+
+77. Forms — approval / submissions read gate — done ([#108](https://github.com/Plcherra/flowforce/pull/108) merged `e371bdbd`)
+   - `e2e/forms-approval-gate.spec.ts`: `approveFormSubmissions` allow-only (role keys stripped) opens submissions; deny override on `forms.submissions.read` hides team submissions even when approve is allowed.
+
+78. Company Updates — read detail — done ([#109](https://github.com/Plcherra/flowforce/pull/109) merged `08b8559d`)
+   - `company-update-card-{id}`, `company-update-body` test hooks.
+   - `e2e/company-updates-read-detail.spec.ts`: mocked feed publish row, view reaction + comment writes blocked.
+
+79. Analytics — hub tab panels depth — done ([#110](https://github.com/Plcherra/flowforce/pull/110) merged `72be1389`)
+   - `analytics-tab-*` and `analytics-panel-*` test hooks on `Analytics.tsx`.
+   - `e2e/analytics-tabs-depth.spec.ts`: cycles four hub tabs with Insights pack on.
+
+80. Time off — team approve edges — done ([#111](https://github.com/Plcherra/flowforce/pull/111) merged `ff282bfe`)
+   - `e2e/time-off-team-approve-depth.spec.ts`: reject click stubbed; `approveTimeOff` deny flips team tab to staff-only (no mocked team row, no approve actions).
+
+## Wednesday 25 Nov 2026, 2:00–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 81+:** thinnest remaining e2e in Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks (beyond item 68), Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+81. Schedule — company policies panel depth — done ([#112](https://github.com/Plcherra/flowforce/pull/112) merged)
+   - `e2e/schedule-company-policies-depth.spec.ts`: mocked `company_policies` row, create form save stubbed; `approveTimeOff` deny shows limited card.
+
+82. Tasks — readiness filter chips depth — done ([#113](https://github.com/Plcherra/flowforce/pull/113) merged)
+   - `e2e/tasks-readiness-depth.spec.ts`: mocked overdue + unassigned tasks, readiness chip counts and filter toggle.
+
+83. Settings — org permissions card depth — done ([#114](https://github.com/Plcherra/flowforce/pull/114) merged)
+   - `e2e/settings-org-permissions-depth.spec.ts`: mocked café `orgSetup` in `system_settings`, save blocked; card hidden when `managePositions` and `systemSettings` denied.
+
+### Block wrap-up log (Wed 25 Nov 2026, 2:00–~3:15 PM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 81–83 (Schedule company policies panel, Tasks readiness chips, Settings org permissions card). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Merged:** [#112](https://github.com/Plcherra/flowforce/pull/112) item 81; [#113](https://github.com/Plcherra/flowforce/pull/113) item 82; [#114](https://github.com/Plcherra/flowforce/pull/114) item 83. Release gates, Remote deploy readiness, and Vercel preview green on each PR branch before merge.
+- **Local e2e:** item 81 `2/2`, item 82 `1/1`, item 83 `2/2` (~6m scoped total).
+- **Findings:** Company policies panel needs explicit `approveTimeOff` allow in CI seed; Playwright route handlers for `company_policies` must merge GET mocks with write stubs (last handler wins); tasks readiness specs need deterministic task mocks and tabular-nums assertions.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** item 84+ thin e2e (Messages group complete, Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows).
+
+## Thursday 26 Nov 2026, 4:00–6:00 AM America/New_York
+
+Hard stop at 6:00 AM ET. **Queue 84+:** Messages group complete, Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows; then thinnest remaining areas among Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+84. Messages — group create complete flow — done ([#115](https://github.com/Plcherra/flowforce/pull/115) merged `5b166ce4`)
+   - `data-testid="new-chat-create-group"` on `NewChatPanel`.
+   - `e2e/messages-group-complete-depth.spec.ts`: group mode, disabled Create group until name + member, stubbed channel/member writes, roster chip + transcript after create; cancel without writes.
+
+### Block wrap-up log (Thu 26 Nov 2026, ~4:00–~5:30 AM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Item 84 (Messages group create complete). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Findings:** Roster peer mock must include nullable employee schema fields (`avatar_url`, `hire_date`, `employee_id`, `company_id`) or workspace bootstrap fails; stub `channel_members` GET for post-create transcript load; split roster vs language `profiles` interceptors.
+- **Merged:** [#115](https://github.com/Plcherra/flowforce/pull/115) item 84. Release gates, Remote deploy readiness, and Vercel preview green before merge.
+- **Local e2e:** `messages-group-complete-depth` 2/2.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Next:** item 85 Forms distribution editor; Goals KPI deny; Docs report inbox filters; Analytics business tab rows.
+
+## Thursday 26 Nov 2026, 9:00 AM–1:00 PM America/New_York
+
+Hard stop at 1:00 PM ET. **Queue 85+:** Forms distribution editor, Goals KPI deny, Docs report inbox filters, Analytics business tab rows; then thinnest remaining areas among Messages, Settings/Roles, Goals, Docs, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+85. Forms — distribution editor depth — done ([#116](https://github.com/Plcherra/flowforce/pull/116) merged `d3faf139`)
+   - `e2e/forms-distribution-editor-depth.spec.ts`: two-store list picker, incomplete people fill blocks preview with `distributionIncomplete` toast, edit loads mocked list + store + department fill + attached role. Writes blocked.
+
+86. Goals — KPI deny gate — done ([#117](https://github.com/Plcherra/flowforce/pull/117) merged `18ab0d77`)
+   - `PerformancePage` drops `goal-progress` KPI tile when both `goals.view` and `goals.manage` are denied (matches goal progress section gate).
+   - `e2e/goals-kpi-deny-depth.spec.ts`: deny hides `performance-kpi-goal-progress`; `goals.view` alone keeps tile. Updated `goals-progress-depth` deny expectation. Writes blocked.
+
+87. Docs — report inbox status filters — done ([#118](https://github.com/Plcherra/flowforce/pull/118) merged `46c1ef17`)
+   - `ReportInboxStatusFilters`, `useReportInboxFilters`; row `reports-inbox-row-{id}`.
+   - `e2e/docs-report-inbox-filters-depth.spec.ts`: ready vs error mocks, status chip filters. Writes blocked.
+
+88. Analytics — business tab rows — done ([#119](https://github.com/Plcherra/flowforce/pull/119) merged `3dd7c682`)
+   - `analytics-business-*` test hooks on `BusinessAnalyticsBoard` metrics, breakdown rows, predictions.
+   - `e2e/analytics-business-rows-depth.spec.ts`: Insights pack, business tab, asserts rows load from live or fallback snapshot. Writes blocked.
+
+### Block wrap-up log (Thu 26 Nov 2026, 9:00 AM–~10:25 AM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 85–88 (forms distribution editor depth, goals KPI deny, report inbox status filters, analytics business tab rows). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Merged:** [#116](https://github.com/Plcherra/flowforce/pull/116) item 85; [#117](https://github.com/Plcherra/flowforce/pull/117) item 86; [#118](https://github.com/Plcherra/flowforce/pull/118) item 87; [#119](https://github.com/Plcherra/flowforce/pull/119) item 88. Release gates, Remote deploy readiness, and Vercel preview green on each branch before merge; main Release Gates success on post-merge run.
+- **Local e2e:** `forms-distribution-editor-depth` 3/3; `goals-kpi-deny-depth` 2/2 + `goals-progress-depth` deny 3/3 total 5/5; `docs-report-inbox-filters-depth` 1/1; `analytics-business-rows-depth` 1/1.
+- **Findings:** Multi-store forms need mocked `stores` GET; incomplete audience toast needs `exact: true`; goals KPI leaked counts when section hidden — fixed in `PerformancePage`; report inbox lacked status chips — added filter toolbar; CI file-length failed when allowlist sort put `Reports.tsx` above `registry.ts`.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
+- **Next:** thin e2e among Messages, Settings/Roles, Reviews, Schedule, Tasks, Forms, Company Updates, Time off, Analytics if another block runs before hard stop; otherwise pause at 1:00 PM ET.
+
+## Thursday 26 Nov 2026, 2:00 PM–5:00 PM America/New_York
+
+Hard stop at 5:00 PM ET. **Queue 89+:** thinnest remaining e2e in Messages, Settings/Roles, Reviews, Schedule, Tasks (beyond item 68), Forms, Company Updates, Time off, Analytics, Goals, Docs. **Out of scope:** unchanged — Operations Intelligence, Team pack training/performance modules beyond existing goals/reviews QA, Stock/inventory, AI photo-match, Calendar. **Do not touch:** item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99).
+
+89. Reviews — view_own row scope — done ([#120](https://github.com/Plcherra/flowforce/pull/120) merged `b40cc5e5`)
+   - `data-testid="performance-review-row-{id}"` on recent review rows.
+   - `e2e/reviews-view-own-depth.spec.ts`: merged permission patch (`reviews.manage` deny + `reviews.view_own` allow), mocked own/peer rows, KPI employees/score scoped; manage shows both. Writes blocked.
+
+90. Company Updates — list view table depth — done ([#121](https://github.com/Plcherra/flowforce/pull/121) merged `2b6a7407`)
+   - `data-testid="company-update-list-row-{id}"` on list table rows.
+   - `e2e/company-updates-list-depth.spec.ts`: List view, mocked high-priority announcement, type badge and manage menu visible. Writes blocked.
+
+### Block wrap-up log (Thu 26 Nov 2026, 2:00–~3:05 PM ET) <!-- pragma: allowlist secret -->
+
+- **Worked:** Items 89–90 (Reviews `view_own` row scope, Company Updates list table). Item 68 / PR [#99](https://github.com/Plcherra/flowforce/pull/99) untouched.
+- **Merged:** [#120](https://github.com/Plcherra/flowforce/pull/120) item 89; [#121](https://github.com/Plcherra/flowforce/pull/121) item 90. Release gates, Remote deploy readiness, and Vercel preview green on each branch before merge.
+- **Local e2e:** `reviews-view-own-depth` 2/2 + reviews regression 4/4; `company-updates-list-depth` 1/1 + feed regression 2/2.
+- **Findings:** Split deny/allow permission stubs restore owner `reviews.manage`; use one patch for both review keys. Capture Playwright user id by `TEST_USER_EMAIL`, not first roster row. List view lacked row test hooks for table columns.
+- **Migrations:** none.
+- **Open:** [#99](https://github.com/Plcherra/flowforce/pull/99) item 68. Optional `TEST_RECIPIENT_*` for `direct-message` (unchanged).
+- **Open for Pedro:** optional `TEST_RECIPIENT_*` (unchanged).
+- **Next:** item 91+ thin e2e in Messages, Settings/Roles, Schedule, Tasks, Forms, Time off, Analytics, Goals, Docs if another block runs; hard stop 5:00 PM ET for new areas.

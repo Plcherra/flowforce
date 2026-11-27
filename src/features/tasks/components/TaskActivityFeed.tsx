@@ -179,7 +179,7 @@ export function TaskActivityFeed() {
 
   if (loading) {
     return (
-      <Card>
+      <Card data-testid="task-activity-feed">
         <CardHeader>
           <CardTitle className="text-lg flex items-center">
             <Clock className="h-5 w-5 mr-2" />
@@ -195,7 +195,7 @@ export function TaskActivityFeed() {
   }
 
   return (
-    <Card>
+    <Card data-testid="task-activity-feed">
       <CardHeader>
         <CardTitle className="text-lg flex items-center">
           <Clock className="h-5 w-5 mr-2" />
@@ -226,7 +226,10 @@ export function TaskActivityFeed() {
               </p>
             </div>
           ) : activities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div
+              className="flex flex-col items-center justify-center py-8 text-center"
+              data-testid="task-activity-empty"
+            >
               <Clock className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
                 {t("tasks.noRecentActivity")}
@@ -242,6 +245,7 @@ export function TaskActivityFeed() {
                 return (
                   <div
                     key={activity.id}
+                    data-testid={`task-activity-row-${activity.id}`}
                     className={`p-4 border-l-2 ${getActivityColor(activity.action_type)} ${
                       index !== activities.length - 1
                         ? "border-b border-border"

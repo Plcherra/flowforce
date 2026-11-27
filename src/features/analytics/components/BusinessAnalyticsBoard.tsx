@@ -136,7 +136,7 @@ export function BusinessAnalyticsBoard({
   ]);
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn("space-y-6", className)} data-testid="analytics-business-board">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">
@@ -180,8 +180,11 @@ export function BusinessAnalyticsBoard({
 
       {!isLoading && snapshot && metrics && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
+          <div
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            data-testid="analytics-business-metrics"
+          >
+            <Card data-testid="analytics-business-metric-goal-velocity">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {t("analytics.goalVelocity")}
@@ -199,7 +202,7 @@ export function BusinessAnalyticsBoard({
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-testid="analytics-business-metric-labor-efficiency">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {t("analytics.laborEfficiencyVsRevenue")}
@@ -216,7 +219,7 @@ export function BusinessAnalyticsBoard({
               </CardContent>
             </Card>
 
-            <Card>
+            <Card data-testid="analytics-business-metric-forecast-confidence">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {t("analytics.forecastConfidence")}
@@ -288,8 +291,11 @@ export function BusinessAnalyticsBoard({
                   {t("analytics.operationalBreakdown")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 text-sm text-muted-foreground">
-                <div>
+              <CardContent
+                className="space-y-4 text-sm text-muted-foreground"
+                data-testid="analytics-business-breakdown"
+              >
+                <div data-testid="analytics-business-breakdown-scheduling">
                   <div className="font-medium text-foreground">{t("common.scheduling")}</div>
                   <div>
                     {t("analytics.coverage2")}{" "}
@@ -306,7 +312,7 @@ export function BusinessAnalyticsBoard({
                     )}
                   </div>
                 </div>
-                <div>
+                <div data-testid="analytics-business-breakdown-tasks">
                   <div className="font-medium text-foreground">{t("common.tasks")}</div>
                   <div>
                     {breakdown?.tasks.backlog ?? 0} {t("analytics.backlog")}{" "}
@@ -317,7 +323,7 @@ export function BusinessAnalyticsBoard({
                     {t("analytics.throughputVsIntake")}
                   </div>
                 </div>
-                <div>
+                <div data-testid="analytics-business-breakdown-goals">
                   <div className="font-medium text-foreground">{t("common.goals")}</div>
                   <div>
                     {breakdown?.goals.total ?? 0} {t("analytics.total")}{" "}
@@ -327,7 +333,7 @@ export function BusinessAnalyticsBoard({
                     {t("analytics.velocity")} {metrics?.goalVelocity.toFixed(1)} {t("analytics.ptsWeek")}
                   </div>
                 </div>
-                <div>
+                <div data-testid="analytics-business-breakdown-revenue">
                   <div className="font-medium text-foreground">{t("onboarding.userInfo.industries.finance")}</div>
                   <div>
                     {t("analytics.trailingRevenue")}{" "}
@@ -348,10 +354,17 @@ export function BusinessAnalyticsBoard({
                   {t("analytics.predictions")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent
+                className="space-y-4"
+                data-testid="analytics-business-predictions"
+              >
                 {snapshot.predictions.map((prediction, index) => {
                   return (
-                  <div key={index} className="border rounded-lg p-3">
+                  <div
+                    key={index}
+                    className="border rounded-lg p-3"
+                    data-testid={`analytics-business-prediction-${index}`}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="font-medium text-sm">
                         {prediction.title}

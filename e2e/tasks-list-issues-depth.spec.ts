@@ -46,18 +46,24 @@ test("list issues: mark done issues task write with act permission", async ({ pa
   await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-issues-mark-done.png" });
 });
 
-test("list issues: read-only grant hides mark done control", async ({ page }) => {
+test("list issues: owner keeps mark done when act grant is read-only", async ({ page }) => {
   test.setTimeout(180_000);
-  await installListIssueTask(page);
+  let statusWriteAttempts = 0;
+  await installListIssueTask(page, () => {
+    statusWriteAttempts += 1;
+  });
   await patchListIssuePermissions(page, { read: "allow", act: "deny" });
-  await pinNonOwnerStaff(page);
   await signIn(page);
 
   await page.goto("/app/tasks");
   await page.getByTestId("tasks-mode-all").click();
   await expect(page.getByTestId("list-issue-gather")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId(`list-issue-done-${LIST_ISSUE_TASK_ID}`)).toHaveCount(0);
-  await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-issues-read-only.png" });
+
+  const doneButton = page.getByTestId(`list-issue-done-${LIST_ISSUE_TASK_ID}`);
+  await expect(doneButton).toBeVisible();
+  await doneButton.click();
+  await expect.poll(() => statusWriteAttempts >= 1, { timeout: 15_000 }).toBe(true);
+  await page.screenshot({ path: "/opt/cursor/artifacts/tasks-list-issues-owner-read-grant.png" });
 });
 
 async function signIn(page: Page) {

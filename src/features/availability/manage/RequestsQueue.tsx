@@ -53,7 +53,7 @@ export function RequestsQueue({
       <CardContent className="space-y-4">
         {isLoading ? (
           <div className="py-8">
-            <LoadingSpinner text="Loading requests..." />
+            <LoadingSpinner text={t("availability.loadingRequests")} />
           </div>
         ) : (
           <Tabs defaultValue="pending" className="space-y-3">

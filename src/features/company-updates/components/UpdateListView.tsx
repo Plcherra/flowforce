@@ -79,7 +79,10 @@ export function UpdateListView({
                     locale: dateLocale,
                   });
               return (
-                <TableRow key={update.id}>
+                <TableRow
+                  key={update.id}
+                  data-testid={`company-update-list-row-${update.id}`}
+                >
                   <TableCell className="min-w-[12rem] font-medium">
                     <CompanyUpdateBody update={update} variant="compact" />
                     {update.status === "scheduled" ? (
