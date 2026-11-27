@@ -10,6 +10,12 @@ const importTs = jiti(import.meta.url, {
   },
 });
 
+const { runSimpleTaskWorkflowTests } = importTs(
+  "../src/features/tasks/utils/simpleTaskWorkflow.test.ts",
+);
+const { runTaskCardCompleteTests } = importTs(
+  "../src/features/tasks/components/taskCardComplete.test.ts",
+);
 const { runStatusTabLayoutTests } = importTs(
   "../src/features/tasks/utils/statusTabLayout.test.ts",
 );
@@ -149,6 +155,8 @@ const { runOpsInviteFlowTests } = importTs(
   "../src/features/employees/utils/opsInviteFlow.test.ts",
 );
 
+runSimpleTaskWorkflowTests();
+runTaskCardCompleteTests();
 runStatusTabLayoutTests();
 runStatusHintTests();
 runReadinessFilterTests();

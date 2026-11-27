@@ -21,14 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ArrowRight,
-  Calendar,
-  CheckCircle,
-  MessageSquare,
-  Send,
-  Trash2,
-} from "lucide-react";
+import { Calendar, CheckCircle, MessageSquare, Send, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import {
@@ -42,10 +35,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useCan } from "@/hooks/useCan";
 import { TaskTimeline } from "./TaskTimeline";
-import {
-  getTaskStatusBadgeClass,
-  TASK_STATUS_FLOW,
-} from "@/constants/taskStatus";
+import { getTaskStatusBadgeClass } from "@/constants/taskStatus";
+import { isOpenTaskStatus } from "@/features/tasks/utils/simpleTaskWorkflow";
 import { readFormId } from "@/features/tasks/utils/shiftTaskWrite";
 import {
   translatedKindLabel,
@@ -106,19 +97,12 @@ const getPriorityColor = (priority?: string | null) => {
 };
 
 const getActionVariant = (
-  current: WorkflowStatus,
+  _current: WorkflowStatus,
   target: WorkflowStatus,
 ): ButtonVariant => {
-  if (target === "todo") {
-    return current === "cancelled" ? "outline" : "secondary";
-  }
-  if (target === "cancelled") {
-    return "outline";
-  }
-  if (target === "blocked") {
-    return "secondary";
-  }
-  return "default";
+  if (target === "completed" || target === "done") return "default";
+  if (target === "todo") return "secondary";
+  return "outline";
 };
 
 export function TaskDetailsDialog({
@@ -162,7 +146,6 @@ export function TaskDetailsDialog({
     starts_at: "",
     ends_at: "",
     publish_state: "published" as TaskPublishState,
-    actual_hours: "",
   });
   const [savingExecution, setSavingExecution] = useState(false);
   const [deletingTask, setDeletingTask] = useState(false);
@@ -202,15 +185,8 @@ export function TaskDetailsDialog({
       starts_at: toDatetimeLocalValue(schedule.startsAt),
       ends_at: toDatetimeLocalValue(schedule.endsAt),
       publish_state: schedule.publishState,
-      actual_hours: task.actual_hours != null ? String(task.actual_hours) : "",
     });
   }, [currentTask]);
-
-  const parseHoursInput = (value: string) => {
-    if (!value.trim()) return null;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
-  };
 
   const handleSaveExecution = async () => {
     if (!currentTask) return;
@@ -247,7 +223,6 @@ export function TaskDetailsDialog({
         }),
         priority: executionForm.priority,
         due_date: dueDateFromWindowEnd(endsAt),
-        actual_hours: parseHoursInput(executionForm.actual_hours),
         links: mergeTaskSchedule(currentTask.links, {
           startsAt,
           endsAt,
@@ -459,24 +434,14 @@ export function TaskDetailsDialog({
       setCurrentTask(updatedTask);
       onTaskUpdate?.(updatedTask);
 
-      const previous = normalizeTaskStatus(currentTask.status);
       let successMessage = t("tasks.statusUpdatedTo", {
         status: translatedStatusLabel(t, targetStatus),
       });
 
-      if (targetStatus === "in_progress") {
-        successMessage = t("tasks.nowInProgress");
-      } else if (targetStatus === "done" || targetStatus === "completed") {
+      if (targetStatus === "done" || targetStatus === "completed") {
         successMessage = t("tasks.markedCompleted");
-      } else if (targetStatus === "blocked") {
-        successMessage = t("tasks.markedBlocked");
       } else if (targetStatus === "todo") {
-        successMessage =
-          previous === "cancelled" || previous === "completed" || previous === "done"
-            ? t("tasks.reopened")
-            : t("tasks.backToTodo");
-      } else if (targetStatus === "review") {
-        successMessage = t("tasks.movedToReview");
+        successMessage = t("tasks.reopened");
       } else if (targetStatus === "cancelled") {
         successMessage = t("tasks.cancelledTask");
       }
@@ -509,16 +474,8 @@ export function TaskDetailsDialog({
     }));
   }, [currentTask, t]);
 
-  const activeFlowIndex = (() => {
-    if (!currentTask) return -1;
-    const normalized = normalizeTaskStatus(currentTask.status);
-    if (!normalized) return -1;
-    return TASK_STATUS_FLOW.indexOf(
-      normalized as (typeof TASK_STATUS_FLOW)[number],
-    );
-  })();
-
   if (!currentTask) return null;
+  const taskIsOpen = isOpenTaskStatus(currentTask.status);
 
   const scheduleLink = readScheduleTaskLink(currentTask);
   const kindLabel = translatedKindLabel(t, readTaskKind(currentTask));
@@ -586,54 +543,17 @@ export function TaskDetailsDialog({
               {t("tasks.fillAndSend")}
             </Button>
           ) : null}
-          <div className="rounded-md border bg-muted/40 p-4 space-y-4">
-            <div className="flex items-center justify-between">
+          <div
+            className="rounded-md border bg-muted/40 p-4 space-y-3"
+            data-testid="task-details-actions"
+          >
+            <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t("tasks.workflow")}
+                {taskIsOpen ? t("tasks.statusTodo") : t("tasks.statusDone")}
               </p>
               <Badge variant="secondary">
                 {translatedStatusLabel(t, currentTask.status ?? "")}
               </Badge>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              {TASK_STATUS_FLOW.map((status, index) => {
-                const isActive = activeFlowIndex === index;
-                const isCompleted = activeFlowIndex > index;
-                return (
-                  <React.Fragment key={status}>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`h-3 w-3 rounded-full ${
-                          isActive
-                            ? "bg-primary"
-                            : isCompleted
-                              ? "bg-success"
-                              : "bg-muted-foreground/40"
-                        }`}
-                      />
-                      <span
-                        className={`${
-                          isActive
-                            ? "font-semibold text-foreground"
-                            : "text-muted-foreground"
-                        }`}
-                      >
-                        {translatedStatusLabel(t, status)}
-                      </span>
-                    </div>
-                    {index < TASK_STATUS_FLOW.length - 1 && (
-                      <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-              {activeFlowIndex === -1 && (
-                <span className="text-sm text-muted-foreground">
-                  {t("tasks.outsideFlow", {
-                    status: translatedStatusLabel(t, currentTask.status ?? ""),
-                  })}
-                </span>
-              )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {statusActions.length > 0 ? (
@@ -643,6 +563,13 @@ export function TaskDetailsDialog({
                     variant={action.variant}
                     size="sm"
                     className="min-h-11"
+                    data-testid={
+                      action.target === "completed"
+                        ? "task-details-complete"
+                        : action.target === "todo"
+                          ? "task-details-reopen"
+                          : undefined
+                    }
                     onClick={() => handleStatusChange(action.target)}
                     disabled={!!pendingTarget}
                   >
@@ -789,28 +716,6 @@ export function TaskDetailsDialog({
                     <SelectItem value="draft">{t("tasks.draft")}</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="task-actual-hours"
-                  className="text-xs font-semibold uppercase text-muted-foreground"
-                >
-                  {t("tasks.actualHours")}
-                </Label>
-                <Input
-                  id="task-actual-hours"
-                  type="number"
-                  min={0}
-                  step="0.25"
-                  value={executionForm.actual_hours}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      actual_hours: event.target.value,
-                    }))
-                  }
-                />
               </div>
 
               <div className="flex justify-stretch sm:col-span-2 sm:justify-end lg:col-span-4">

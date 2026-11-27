@@ -3,7 +3,8 @@
  */
 
 import type { TaskStatusFilter, TaskPriorityFilter } from "../types/filters";
-import { normalizeStatus, normalizePriority } from "./normalization";
+import { normalizePriority, normalizeStatus } from "./normalization";
+import { matchesStatusTabFilter } from "./simpleTaskWorkflow";
 import { readScheduleTaskLink } from "./scheduleTaskLink";
 import { readTaskKind, type TaskKindFilter } from "./taskKind";
 
@@ -42,9 +43,7 @@ export function filterTasks(
         ? true
         : statusFilter === "other"
           ? normalizedStatus === "other"
-          : statusFilter === "done" || statusFilter === "completed"
-            ? normalizedStatus === "done" || normalizedStatus === "completed"
-            : normalizedStatus === statusFilter;
+          : matchesStatusTabFilter(task.status, statusFilter);
 
     const matchesPriority =
       priorityFilter === "all"

@@ -32,11 +32,12 @@ const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow["status"]>> = {
   done: "completed" as TaskRow["status"],
 };
 
+/** Client graph: open → complete/cancel; closed → reopen. Matches in-flight server RPC. */
 export const TASK_STATUS_TRANSITIONS = {
-  todo: ["in_progress", "completed", "cancelled"],
-  in_progress: ["review", "completed", "blocked", "cancelled", "todo"],
-  review: ["completed", "todo", "cancelled"],
-  blocked: ["in_progress", "completed", "cancelled"],
+  todo: ["completed", "cancelled"],
+  in_progress: ["completed", "cancelled"],
+  review: ["completed", "cancelled"],
+  blocked: ["completed", "cancelled"],
   done: ["todo"],
   completed: ["todo"],
   cancelled: ["todo"],

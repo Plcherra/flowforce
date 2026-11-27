@@ -28,6 +28,7 @@ export function runListIssueGatherTests() {
   assert.equal(canActOnListIssue("act"), true);
   assert.equal(canActOnListIssue("read"), false);
   assert.equal(listIssueMarkDoneAllowed("todo"), true);
+  assert.equal(listIssueMarkDoneAllowed("in_progress"), true);
   assert.equal(listIssueMarkDoneAllowed("cancelled"), false);
   assert.equal(listIssueMarkDoneAllowed("completed"), false);
 

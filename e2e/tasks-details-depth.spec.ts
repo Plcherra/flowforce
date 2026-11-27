@@ -67,8 +67,8 @@ test("task details dialog: workflow, timeline, comments, and blocked writes", as
   const dialog = page.getByTestId("task-details-dialog");
   await expect(dialog).toBeVisible({ timeout: 20_000 });
 
-  await expect(dialog.getByText("Workflow", { exact: true })).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Start task" })).toBeVisible();
+  await expect(dialog.getByTestId("task-details-actions")).toBeVisible();
+  await expect(dialog.getByTestId("task-details-complete")).toBeVisible();
   await expect(dialog.getByText("Execution Controls", { exact: true })).toBeVisible();
   await expect(dialog.getByTestId("task-details-timeline")).toBeVisible();
   await expect(dialog.getByRole("heading", { name: "Comments" })).toBeVisible();
@@ -77,7 +77,7 @@ test("task details dialog: workflow, timeline, comments, and blocked writes", as
   await dialog.getByRole("button", { name: "Add comment" }).click();
   await expect.poll(() => writeAttempts >= 1, { timeout: 15_000 }).toBe(true);
 
-  await dialog.getByRole("button", { name: "Start task" }).click();
+  await dialog.getByTestId("task-details-complete").click();
   await expect.poll(() => writeAttempts >= 2, { timeout: 15_000 }).toBe(true);
 
   await page.screenshot({ path: "/opt/cursor/artifacts/tasks-details-dialog-depth.png" });
@@ -100,7 +100,7 @@ test("task details execution controls hidden when editTasks is denied", async ({
   await card.click();
   const dialog = page.getByTestId("task-details-dialog");
   await expect(dialog).toBeVisible({ timeout: 20_000 });
-  await expect(dialog.getByText("Workflow", { exact: true })).toBeVisible();
+  await expect(dialog.getByTestId("task-details-actions")).toBeVisible();
   await expect(dialog.getByText("Execution Controls", { exact: true })).toHaveCount(0);
   await page.screenshot({
     path: "/opt/cursor/artifacts/tasks-details-no-execution.png",
