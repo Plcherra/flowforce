@@ -23,6 +23,15 @@ import {
 } from "@/features/tasks/repositories/tasksRepository";
 import { fetchCompanyIdForUser } from "@/repositories/companyRepository";
 import { fetchTaskTimeline } from "@/features/tasks/repositories/taskActivitiesRepository";
+import {
+  isAllowedTaskStatusTransition,
+  TASK_STATUS_TRANSITIONS,
+  type TaskStatusTransitionKey,
+} from "@/features/tasks/utils/taskStatusTransitions";
+
+export { TASK_STATUS_TRANSITIONS };
+
+export type TaskStatus = TaskStatusTransitionKey;
 
 const STATUS_ALIASES: Record<string, TaskStatus> = {
   completed: "done",
@@ -31,18 +40,6 @@ const STATUS_ALIASES: Record<string, TaskStatus> = {
 const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow["status"]>> = {
   done: "completed" as TaskRow["status"],
 };
-
-export const TASK_STATUS_TRANSITIONS = {
-  todo: ["in_progress", "completed", "cancelled"],
-  in_progress: ["review", "completed", "blocked", "cancelled", "todo"],
-  review: ["completed", "todo", "cancelled"],
-  blocked: ["in_progress", "completed", "cancelled"],
-  done: ["todo"],
-  completed: ["todo"],
-  cancelled: ["todo"],
-} as const;
-
-export type TaskStatus = keyof typeof TASK_STATUS_TRANSITIONS;
 type TaskStatusValue = TaskStatus | TaskRow["status"];
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -303,10 +300,7 @@ export function useTasks() {
       return { data: null, error };
     }
 
-    const allowedTransitions = (TASK_STATUS_TRANSITIONS[current] ??
-      []) as readonly TaskStatus[];
-
-    if (!allowedTransitions.includes(nextStatus)) {
+    if (!isAllowedTaskStatusTransition(current, nextStatus)) {
       const message = t("literals.invalidStatusTransitionFromTo", { current: current, nextStatus: nextStatus });
       logger.warn("Invalid status transition", {
         context: { current, nextStatus, taskId },
