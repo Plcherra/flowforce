@@ -45,11 +45,6 @@
     "ticket": "FF-SPLIT-09"
   },
   {
-    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
-    "lines": 991,
-    "ticket": "FF-SPLIT-10"
-  },
-  {
     "path": "src/features/positions/components/PositionManagement.tsx",
     "lines": 940,
     "ticket": "FF-SPLIT-11"
@@ -63,6 +58,11 @@
     "path": "src/features/forms/components/builder/FieldEditor.tsx",
     "lines": 910,
     "ticket": "FF-SPLIT-13"
+  },
+  {
+    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
+    "lines": 896,
+    "ticket": "FF-SPLIT-10"
   },
   {
     "path": "scripts/smoke-visible-modules.mjs",
