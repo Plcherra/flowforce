@@ -52,6 +52,9 @@ const { runExecutionUpdateTests } = importTs(
 const { runTaskStatusTransitionTests } = importTs(
   "../src/features/tasks/utils/taskStatusTransitions.test.ts",
 );
+const { runUseTaskCommentsEffectDepTests } = importTs(
+  "../src/features/tasks/hooks/useTaskComments.test.ts",
+);
 const { runTaskNotificationSchemaTests } = importTs(
   "../src/features/tasks/repositories/taskNotificationsRepository.test.ts",
 );
@@ -178,6 +181,7 @@ runTomorrowShiftTests();
 runTaskCreateAccessTests();
 runExecutionUpdateTests();
 runTaskStatusTransitionTests();
+runUseTaskCommentsEffectDepTests();
 runTaskNotificationSchemaTests();
 runListIssueTests();
 runTaskPointsTotalTests();

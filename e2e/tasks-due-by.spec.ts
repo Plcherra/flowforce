@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { deleteTaskFromList } from "./helpers/taskCleanup";
 import { missingE2eEnv } from "./required-env";
 
 test.beforeEach(async ({ page }) => {
@@ -82,23 +83,5 @@ async function submitCreateDialog(page: Page) {
   const submit = dialog.locator('button[type="submit"]');
   await expect(submit).toBeEnabled();
   await submit.click();
-  await expect(dialog).toBeHidden({ timeout: 20_000 });
-}
-
-async function deleteTaskFromList(page: Page, title: string) {
-  await page.goto("/app/tasks");
-  await page.getByTestId("tasks-mode-all").click();
-  await page.locator("#tasks-search").fill(title);
-  const card = page
-    .getByTestId("tasks-list")
-    .getByRole("button", { name: title });
-  if (!(await card.isVisible().catch(() => false))) return;
-  await card.click();
-  const dialog = page.getByRole("dialog");
-  await dialog.getByRole("button", { name: /delete/i }).click();
-  const confirm = page.getByRole("alertdialog");
-  if (await confirm.isVisible().catch(() => false)) {
-    await confirm.getByRole("button", { name: /delete/i }).click();
-  }
   await expect(dialog).toBeHidden({ timeout: 20_000 });
 }

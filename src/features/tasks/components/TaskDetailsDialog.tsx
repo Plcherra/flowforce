@@ -168,8 +168,14 @@ export function TaskDetailsDialog({
     timeHm: "",
   });
   const [deletingTask, setDeletingTask] = useState(false);
-  const { comments, loadingComments, addingComment, submitComment } =
-    useTaskComments(currentTask, open);
+  const {
+    comments,
+    loadingComments,
+    commentsError,
+    addingComment,
+    submitComment,
+    refreshComments,
+  } = useTaskComments(currentTask, open);
   const commentTranslations = useTaskCommentTranslations(comments);
   const display = useFormContentDisplay({
     recordId: currentTask?.id,
@@ -763,12 +769,34 @@ export function TaskDetailsDialog({
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3" data-testid="task-details-comments">
               {loadingComments ? (
                 <CommentsSkeleton />
+              ) : commentsError ? (
+                <div
+                  className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-center text-sm"
+                  data-testid="task-details-comments-error"
+                >
+                  <p className="text-destructive">{commentsError}</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 min-h-11"
+                    data-testid="task-details-comments-retry"
+                    onClick={() => {
+                      void refreshComments();
+                    }}
+                  >
+                    {t("tasks.commentsRetry")}
+                  </Button>
+                </div>
               ) : comments.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  {t("tasks.noCommentsYetBeTheFirstToAdd")}
+                <div
+                  className="py-6 text-center text-sm text-muted-foreground"
+                  data-testid="task-details-comments-empty"
+                >
+                  {t("tasks.noCommentsYet")}
                 </div>
               ) : (
                 comments.map((comment) => (
