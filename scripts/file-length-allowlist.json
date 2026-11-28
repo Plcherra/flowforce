@@ -96,7 +96,7 @@
   },
   {
     "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
-    "lines": 804,
+    "lines": 764,
     "ticket": "FF-SPLIT-10"
   },
   {
