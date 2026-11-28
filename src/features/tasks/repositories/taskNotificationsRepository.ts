@@ -6,19 +6,22 @@ import { logger } from "@/utils/logger";
 
 type TaskNotificationRow = Tables<"task_notifications">;
 
-const notificationSchema = z
+export const taskNotificationSchema = z
   .object({
-    id: z.string(),
+    id: z.string().optional(),
     user_id: z.string(),
+    company_id: z.string().nullable().optional(),
     task_id: z.string().nullable(),
     title: z.string(),
     message: z.string(),
     type: z.string(),
-    metadata: z.unknown().nullable(), // Json type from database
-    read_at: z.string().nullable(),
-    created_at: z.string(),
+    metadata: z.unknown().nullable(),
+    read_at: z.string().nullable().optional(),
+    created_at: z.string().nullable().optional(),
   })
   .passthrough();
+
+const notificationSchema = taskNotificationSchema;
 
 const taskSummarySchema = z
   .object({
@@ -63,19 +66,56 @@ export async function fetchNotificationsForUser(
   return notificationSchema.array().parse(data ?? []);
 }
 
-export type NewNotificationInput = Omit<
-  TaskNotificationRow,
-  "id" | "created_at" | "read_at"
-> & {
+export type NewNotificationInput = {
+  user_id: string;
+  company_id?: string;
+  task_id?: string | null;
+  title: string;
+  message: string;
+  type: string;
+  metadata?: TaskNotificationRow["metadata"];
   read_at?: string | null;
 };
+
+async function resolveTaskCompanyId(taskId: string): Promise<string | null> {
+  const { data, error } = await supabase // pragma: allowlist secret
+    .from("tasks")
+    .select("company_id")
+    .eq("id", taskId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.company_id ?? null;
+}
+
+async function resolveProfileCompanyId(userId: string): Promise<string | null> {
+  const { data, error } = await supabase // pragma: allowlist secret
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.company_id ?? null;
+}
 
 export async function createTaskNotification(
   input: NewNotificationInput,
 ): Promise<TaskNotification> {
+  let companyId = input.company_id?.trim() ?? "";
+  if (!companyId && input.task_id) {
+    companyId = (await resolveTaskCompanyId(input.task_id)) ?? "";
+  }
+  if (!companyId) {
+    companyId = (await resolveProfileCompanyId(input.user_id)) ?? "";
+  }
+  if (!companyId) {
+    throw new Error("company_id is required for task notifications");
+  }
+
+  const payload = { ...input, company_id: companyId };
+
   const { data, error } = await supabase
     .from("task_notifications")
-    .insert(input)
+    .insert(payload)
     .select()
     .single();
 
