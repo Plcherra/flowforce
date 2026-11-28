@@ -40,6 +40,9 @@ const { runTaskScheduleTests } = importTs(
 const { runTaskDueTimingTests } = importTs(
   "../src/features/tasks/utils/taskDueTiming.test.ts",
 );
+const { runTaskListSortTests } = importTs(
+  "../src/features/tasks/utils/taskListSort.test.ts",
+);
 const { runTomorrowShiftTests } = importTs(
   "../src/features/scheduling/utils/tomorrowShift.test.ts",
 );
@@ -177,6 +180,7 @@ runTaskCreateLevelTests();
 runHandoverTaskTests();
 runTaskScheduleTests();
 runTaskDueTimingTests();
+runTaskListSortTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
 runExecutionUpdateTests();

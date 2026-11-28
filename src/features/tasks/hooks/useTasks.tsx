@@ -190,6 +190,9 @@ export function useTasks() {
       }
 
       await invalidateTasks();
+      if (user?.id) {
+        await queryClient.refetchQueries({ queryKey: ["tasks", user.id] });
+      }
       return { data: createdTask, error: null };
     } catch (error) {
       const errorMessage =
