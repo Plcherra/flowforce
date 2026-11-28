@@ -1,5 +1,6 @@
 import type { TFunction } from "i18next";
 import type { TaskKind } from "./taskKind";
+import { displayStatusKey } from "./simpleTaskWorkflow";
 
 const STATUS_LABEL_KEYS: Record<string, string> = {
   all: "tasks.statusAll",
@@ -58,7 +59,8 @@ export function translatedStatusLabel(
   value: string,
   fallback?: string,
 ): string {
-  const key = STATUS_LABEL_KEYS[value];
+  const displayKey = displayStatusKey(value);
+  const key = STATUS_LABEL_KEYS[displayKey] ?? STATUS_LABEL_KEYS[value];
   return key ? t(key) : (fallback ?? value);
 }
 
@@ -103,21 +105,11 @@ export function translatedReadinessHint(
 
 export function workflowActionLabel(
   t: TFunction,
-  current: string,
+  _current: string,
   target: string,
 ): string {
-  if (current === "todo" && target === "in_progress") return t("tasks.startTask");
-  if (current === "in_progress" && target === "review") return t("tasks.sendToReview");
-  if (current === "in_progress" && target === "blocked") return t("tasks.markBlocked");
-  if (current === "blocked" && target === "in_progress") return t("tasks.unblockTask");
   if (target === "cancelled") return t("tasks.cancelTask");
   if (target === "done" || target === "completed") return t("tasks.markDone");
-  if (target === "todo") {
-    if (current === "cancelled" || current === "completed" || current === "done") {
-      return t("tasks.reopenTask");
-    }
-    if (current === "review") return t("tasks.sendBackToTodo");
-    return t("tasks.moveToTodo");
-  }
+  if (target === "todo") return t("tasks.reopenTask");
   return t("tasks.moveToStatus", { status: translatedStatusLabel(t, target) });
 }

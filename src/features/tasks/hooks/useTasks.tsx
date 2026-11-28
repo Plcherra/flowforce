@@ -23,22 +23,6 @@ import {
 } from "@/features/tasks/repositories/tasksRepository";
 import { fetchCompanyIdForUser } from "@/repositories/companyRepository";
 import { fetchTaskTimeline } from "@/features/tasks/repositories/taskActivitiesRepository";
-import {
-  isAllowedTaskStatusTransition,
-  TASK_STATUS_TRANSITIONS,
-  type TaskStatusTransitionKey,
-} from "@/features/tasks/utils/taskStatusTransitions";
-
-export { TASK_STATUS_TRANSITIONS };
-
-/** Legacy workflow labels still stored on rows until a UI-only PR removes them. */
-export type TaskStatus =
-  | TaskStatusTransitionKey
-  | "in_progress"
-  | "review"
-  | "blocked"
-  | "done"
-  | "open";
 
 const STATUS_ALIASES: Record<string, TaskStatus> = {
   completed: "done",
@@ -47,9 +31,22 @@ const STATUS_ALIASES: Record<string, TaskStatus> = {
 const STATUS_WRITE_TARGET: Partial<Record<TaskStatus, TaskRow["status"]>> = {
   done: "completed" as TaskRow["status"],
 };
+
+/** Client graph: open → complete/cancel; closed → reopen. Matches in-flight server RPC. */
+export const TASK_STATUS_TRANSITIONS = {
+  todo: ["completed", "cancelled"],
+  in_progress: ["completed", "cancelled"],
+  review: ["completed", "cancelled"],
+  blocked: ["completed", "cancelled"],
+  done: ["todo"],
+  completed: ["todo"],
+  cancelled: ["todo"],
+} as const;
+
+export type TaskStatus = keyof typeof TASK_STATUS_TRANSITIONS;
 type TaskStatusValue = TaskStatus | TaskRow["status"];
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<TaskStatus, string> = {
   todo: "To Do",
   in_progress: "In Progress",
   review: "In Review",
@@ -70,15 +67,7 @@ export const normalizeTaskStatus = (
   status: TaskStatusValue | null | undefined,
 ): TaskStatus | null => {
   if (!status) return null;
-  if (
-    status === "in_progress" ||
-    status === "review" ||
-    status === "blocked" ||
-    status === "open"
-  ) {
-    return "todo";
-  }
-  if ((status as TaskStatusTransitionKey) in TASK_STATUS_TRANSITIONS) {
+  if ((status as TaskStatus) in TASK_STATUS_TRANSITIONS) {
     return status as TaskStatus;
   }
   const alias = STATUS_ALIASES[status];
@@ -315,9 +304,10 @@ export function useTasks() {
       return { data: null, error };
     }
 
-    if (
-      !isAllowedTaskStatusTransition(task.status ?? current, nextStatus)
-    ) {
+    const allowedTransitions = (TASK_STATUS_TRANSITIONS[current] ??
+      []) as readonly TaskStatus[];
+
+    if (!allowedTransitions.includes(nextStatus)) {
       const message = t("literals.invalidStatusTransitionFromTo", { current: current, nextStatus: nextStatus });
       logger.warn("Invalid status transition", {
         context: { current, nextStatus, taskId },

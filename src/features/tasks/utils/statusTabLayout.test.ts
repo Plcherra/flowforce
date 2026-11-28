@@ -45,12 +45,9 @@ export function runStatusTabLayoutTests() {
   );
 
   assert.equal(statusDefinition("all"), "Every task on this page.");
-  assert.equal(statusDefinition("todo"), "Not started yet.");
-  assert.equal(statusDefinition("in_progress"), "Someone is working on it.");
-  assert.equal(statusDefinition("review"), "Waiting to be checked.");
   assert.equal(
-    statusDefinition("blocked"),
-    "Cannot continue until something else is done.",
+    statusDefinition("todo"),
+    "Open work, including tasks that were started under the old flow.",
   );
   assert.equal(
     statusDefinition("done"),

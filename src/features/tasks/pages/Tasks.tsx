@@ -321,6 +321,9 @@ export default function Tasks() {
                   selectionHandlers={selectionHandlers}
                   translation={translations.get(task.id) ?? null}
                   onFillForm={setOpenFormId}
+                  onComplete={(taskId) => {
+                    void updateStatus(taskId, "completed");
+                  }}
                 />
               );
             })}

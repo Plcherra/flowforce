@@ -2,10 +2,16 @@
  * Utility functions for generating status tabs
  */
 
-import type { TaskStatusFilter } from "../types/filters";
-import { KNOWN_STATUSES } from "../types/filters";
+import type { KnownTaskStatus, TaskStatusFilter } from "../types/filters";
 import { STATUS_LABELS } from "../constants/labels";
 import { calculateTasksByStatus, countOtherStatusTasks } from "./taskStats";
+
+/** Legacy stored statuses roll into To Do / Done tabs. */
+const STATUS_TAB_VALUES = [
+  "todo",
+  "done",
+  "cancelled",
+] as const satisfies readonly KnownTaskStatus[];
 
 interface StatusTab {
   value: TaskStatusFilter;
@@ -25,9 +31,7 @@ export function generateStatusTabs(
 
   const tabs: StatusTab[] = [{ value: "all", label: "All", count: totalTasks }];
 
-  KNOWN_STATUSES.forEach((status) => {
-    // "completed" is the value new writes store. It is not a second tab.
-    if (status === "completed") return;
+  STATUS_TAB_VALUES.forEach((status) => {
     tabs.push({
       value: status,
       label: STATUS_LABELS[status],

@@ -11,7 +11,16 @@ import {
 
 export function runListIssueGatherTests() {
   assert.equal(listIssueGrant({ isOwner: true, read: false, act: false }), "act");
+  assert.equal(listIssueGrant({ isOwner: true, read: true, act: false }), "act");
+  assert.equal(
+    canActOnListIssue(listIssueGrant({ isOwner: true, read: true, act: false })),
+    true,
+  );
   assert.equal(listIssueGrant({ isOwner: false, read: true, act: false }), "read");
+  assert.equal(
+    canActOnListIssue(listIssueGrant({ isOwner: false, read: true, act: false })),
+    false,
+  );
   assert.equal(listIssueGrant({ isOwner: false, read: false, act: true }), "act");
   assert.equal(listIssueGrant({ isOwner: false, read: false, act: false }), "none");
   assert.equal(canSeeListIssueGather("read"), true);
@@ -19,6 +28,7 @@ export function runListIssueGatherTests() {
   assert.equal(canActOnListIssue("act"), true);
   assert.equal(canActOnListIssue("read"), false);
   assert.equal(listIssueMarkDoneAllowed("todo"), true);
+  assert.equal(listIssueMarkDoneAllowed("in_progress"), true);
   assert.equal(listIssueMarkDoneAllowed("cancelled"), false);
   assert.equal(listIssueMarkDoneAllowed("completed"), false);
 

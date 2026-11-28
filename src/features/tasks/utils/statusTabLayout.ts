@@ -8,10 +8,7 @@ export interface StatusTabItem {
 
 export const STATUS_DEFINITIONS: Record<string, string> = {
   all: "Every task on this page.",
-  todo: "Not started yet.",
-  in_progress: "Someone is working on it.",
-  review: "Waiting to be checked.",
-  blocked: "Cannot continue until something else is done.",
+  todo: "Open work, including tasks that were started under the old flow.",
   done: "Finished. Includes tasks stored as done or completed.",
   completed: "Finished. Includes tasks stored as done or completed.",
   cancelled: "Stopped, and not expected to be finished.",
