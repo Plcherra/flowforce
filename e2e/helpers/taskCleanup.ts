@@ -4,6 +4,7 @@ import { expect, type Page } from "@playwright/test";
 export const E2E_TASK_TITLE_PREFIXES = [
   "e2e-task-",
   "e2e-due-by-",
+  "e2e-p1-shift-",
   "e2e task ",
   "e2e list issue",
   "e2e missed opening",
@@ -24,9 +25,7 @@ export async function deleteTaskFromList(page: Page, title: string) {
   await page.getByTestId("tasks-mode-all").click();
   await page.locator("#tasks-search").fill(title);
 
-  const card = page
-    .getByTestId("tasks-list")
-    .getByRole("button", { name: title });
+  const card = page.getByTestId("tasks-list").getByText(title, { exact: true });
   const visible = await card
     .waitFor({ state: "visible", timeout: 10_000 })
     .then(() => true)

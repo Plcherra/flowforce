@@ -7,11 +7,7 @@ import { asArray } from "@/utils/reactQueryTypes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TaskNotifications } from "@/features/tasks/components/TaskNotifications";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  TaskPageSkeleton,
-  ActivityFeedSkeleton,
-  ReminderListSkeleton,
-} from "@/components/loading/TaskSkeletons";
+import { TaskPageSkeleton } from "@/components/loading/TaskSkeletons";
 import { useTaskFilters, useTaskSelection } from "@/features/tasks";
 import type {
   TaskStatusFilter,
@@ -32,10 +28,10 @@ import { taskCreateKeysAreSet } from "@/features/tasks/utils/taskCreateAccess";
 import { canSeeTask } from "@/features/tasks/utils/taskAudience";
 import { isTaskListedForViewer } from "@/features/tasks/utils/taskSchedule";
 import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
-import { TaskCard, TaskEmptyState } from "@/features/tasks/components";
 import { useTaskContentTranslations } from "@/features/tasks/hooks/useTaskContentTranslations";
-import { TaskExecutionReadinessPanel } from "@/features/tasks/components/TaskExecutionReadinessPanel";
-import { TaskViewSection } from "@/features/tasks/components/TaskViewSection";
+import { TasksAllTasksPanel } from "@/features/tasks/components/TasksAllTasksPanel";
+import { useTaskSort } from "@/features/tasks/hooks/useTaskSort";
+import { sortTaskList } from "@/features/tasks/utils/taskListSort";
 import { TaskCreateMenu } from "@/features/tasks/components/TaskCreateMenu";
 import { ListIssueSync } from "@/features/tasks/components/ListIssueSync";
 import { ListIssueGather } from "@/features/tasks/components/ListIssueGather";
@@ -45,7 +41,6 @@ import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
 import { useTaskAssigneeScope } from "@/features/tasks/hooks/useTaskAssigneeScope";
 import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
-import { compareTaskDue } from "@/features/tasks/utils/taskDueTiming";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -56,18 +51,6 @@ const CreateTaskDialog = lazy(() =>
 const TaskDetailsDialog = lazy(() =>
   import("@/features/tasks/components/TaskDetailsDialog").then((module) => ({
     default: module.TaskDetailsDialog,
-  })),
-);
-
-const TaskActivityFeed = lazy(() =>
-  import("@/features/tasks/components/TaskActivityFeed").then((module) => ({
-    default: module.TaskActivityFeed,
-  })),
-);
-
-const RemindersPanel = lazy(() =>
-  import("@/features/tasks/components/reminders/RemindersPanel").then((module) => ({
-    default: module.RemindersPanel,
   })),
 );
 
@@ -90,6 +73,7 @@ export default function Tasks() {
     !permissionsLoading && (can("viewTeamTasks") || can("editTasks"));
   const { user } = useAuth();
   const shopTimeZone = useShopTimeZone();
+  const { sort, setSort } = useTaskSort();
   const { tasks: tasksData, loading, error, refetchTasks, updateStatus } = useTasks();
   const tasks = useMemo(
     () => asArray(tasksData) as TaskListItem[],
@@ -171,10 +155,18 @@ export default function Tasks() {
       readinessFilter,
       shopTimeZone,
     );
-    return [...filtered].sort((left, right) =>
-      compareTaskDue(left, right, shopTimeZone),
-    );
-  }, [filteredTasks, readinessFilter, shopTimeZone]);
+    return sortTaskList(filtered, sort, shopTimeZone);
+  }, [filteredTasks, readinessFilter, shopTimeZone, sort]);
+
+  const handleTaskCreated = (task: { id: string; title?: string | null }) => {
+    setBoardMode("all");
+    if (task.title?.trim()) {
+      setSearchTerm(task.title.trim());
+    }
+    void refetchTasks().then(() => {
+      shift.refresh();
+    });
+  };
 
   const viewReadinessCounts = useMemo(
     () => readinessCounts(statusScopedTasks, shopTimeZone),
@@ -198,7 +190,7 @@ export default function Tasks() {
       data-testid="tasks-page"
       className={
         isMobile
-          ? "space-y-4 px-4 pb-6"
+          ? "max-w-full space-y-4 overflow-x-hidden px-4 pb-6"
           : "w-full space-y-6 px-6 pb-10"
       }
     >
@@ -278,80 +270,44 @@ export default function Tasks() {
         </Alert>
       )}
 
-      {boardMode === "all" ? (
-      <TaskViewSection
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        statusTabs={statusTabs}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        priorityFilter={priorityFilter}
-        onPriorityChange={setPriorityFilter}
-        priorityOptions={priorityOptions}
-        kindFilter={kindFilter}
-        onKindChange={setKindFilter}
-        filtersActive={filtersAreActive}
-        onResetFilters={handleResetFilters}
-        readinessFilter={readinessFilter}
-        onReadinessFilterChange={setReadinessFilter}
-        readinessCounts={viewReadinessCounts}
-      />
-      ) : null}
-
-      {boardMode === "all" ? (
-      <TaskExecutionReadinessPanel
-        tasks={statusScopedTasks}
-        onOpenTask={openTask}
-      />
-      ) : null}
       {showCreateMenu ? (
         <TaskCreateMenu onCreateCustom={() => setShowCreateDialog(true)} />
       ) : null}
 
       {boardMode === "all" ? (
-      <div className="space-y-4">
-        {visibleTasks.length === 0 || listedTasks.length === 0 ? (
-          <TaskEmptyState
-            hasTasks={visibleTasks.length > 0}
-            onResetFilters={handleResetFilters}
-          />
-        ) : (
-          <div data-testid="tasks-list" className="space-y-4">
-            {listedTasks.map((task) => {
-              const dueBadge = calculateDueBadge(task, shopTimeZone);
-              const selectionHandlers = getSelectionHandlers(task.id);
-
-              return (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  dueBadge={dueBadge}
-                  highlighted={highlightedTaskId === task.id}
-                  selectionHandlers={selectionHandlers}
-                  translation={translations.get(task.id) ?? null}
-                  timeZone={shopTimeZone}
-                  onFillForm={setOpenFormId}
-                  onComplete={(taskId) => {
-                    void updateStatus(taskId, "completed");
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
-
-        <div
-          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-          data-testid="tasks-below-list"
-        >
-          <Suspense fallback={<ReminderListSkeleton />}>
-            <RemindersPanel />
-          </Suspense>
-          <Suspense fallback={<ActivityFeedSkeleton />}>
-            <TaskActivityFeed />
-          </Suspense>
-        </div>
-      </div>
+        <TasksAllTasksPanel
+          isMobile={isMobile}
+          shopTimeZone={shopTimeZone}
+          visibleCount={visibleTasks.length}
+          listedTasks={listedTasks}
+          statusScopedTasks={statusScopedTasks}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          statusTabs={statusTabs}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          priorityFilter={priorityFilter}
+          onPriorityChange={setPriorityFilter}
+          priorityOptions={priorityOptions}
+          kindFilter={kindFilter}
+          onKindChange={setKindFilter}
+          filtersActive={filtersAreActive}
+          onResetFilters={handleResetFilters}
+          readinessFilter={readinessFilter}
+          onReadinessFilterChange={setReadinessFilter}
+          readinessCounts={viewReadinessCounts}
+          sort={sort}
+          onSortChange={setSort}
+          highlightedTaskId={highlightedTaskId}
+          translations={translations}
+          getSelectionHandlers={getSelectionHandlers}
+          getDueBadge={(task) => calculateDueBadge(task, shopTimeZone)}
+          onOpenTask={openTask}
+          onFillForm={setOpenFormId}
+          onComplete={(taskId) => {
+            void updateStatus(taskId, "completed");
+          }}
+        />
       ) : null}
 
       <Suspense fallback={null}>
@@ -376,6 +332,7 @@ export default function Tasks() {
             createLevel={customCreateLevel === "self" ? "self" : "others"}
             scope={assigneeScope}
             onClose={() => setShowCreateDialog(false)}
+            onCreated={handleTaskCreated}
           />
         )}
       </Suspense>

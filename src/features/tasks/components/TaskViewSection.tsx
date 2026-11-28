@@ -9,10 +9,13 @@ import type { TaskKindFilter } from "@/features/tasks/utils/taskKind";
 import type { ReadinessFilter } from "@/features/tasks/utils/readinessFilters";
 import { translatedReadinessHint } from "@/features/tasks/utils/taskCopy";
 import type { StatusTabItem } from "@/features/tasks/utils/statusTabLayout";
+import type { TaskSortKey } from "@/features/tasks/utils/taskListSort";
 import { TaskFilters } from "./TaskFilters";
 import { TaskStatusTabs } from "./TaskStatusTabs";
+import { TaskSortControl } from "./TaskSortControl";
 
 interface TaskViewSectionProps {
+  isMobile?: boolean;
   statusFilter: TaskStatusFilter;
   onStatusChange: (value: TaskStatusFilter) => void;
   statusTabs: StatusTabItem[];
@@ -28,6 +31,8 @@ interface TaskViewSectionProps {
   readinessFilter: ReadinessFilter | null;
   onReadinessFilterChange: (value: ReadinessFilter | null) => void;
   readinessCounts: Record<ReadinessFilter, number>;
+  sort: TaskSortKey;
+  onSortChange: (value: TaskSortKey) => void;
 }
 
 const readinessItems: Array<{ key: ReadinessFilter; labelKey: string }> = [
@@ -37,6 +42,7 @@ const readinessItems: Array<{ key: ReadinessFilter; labelKey: string }> = [
 ];
 
 export function TaskViewSection({
+  isMobile = false,
   statusFilter,
   onStatusChange,
   statusTabs,
@@ -52,22 +58,34 @@ export function TaskViewSection({
   readinessFilter,
   onReadinessFilterChange,
   readinessCounts,
+  sort,
+  onSortChange,
 }: TaskViewSectionProps) {
   const { t } = useTranslation();
   return (
     <section
       aria-label={t("tasks.view")}
       data-testid="tasks-view-section"
-      className={`space-y-2 rounded-xl border p-3 ${highlight.primary}`}
+      className={`space-y-2 rounded-xl border p-3 ${highlight.primary} ${isMobile ? "overflow-x-hidden" : ""}`}
     >
-      <div className="space-y-1">
-        <h2 className="text-sm font-semibold">{t("tasks.view")}</h2>
-        <p className="text-sm text-muted-foreground">
-          {t("tasks.statusSearchTypePriorityAndTheReadinessCounts")}
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-sm font-semibold">{t("tasks.view")}</h2>
+          {!isMobile ? (
+            <p className="text-sm text-muted-foreground">
+              {t("tasks.statusSearchTypePriorityAndTheReadinessCounts")}
+            </p>
+          ) : null}
+        </div>
+        <TaskSortControl
+          sort={sort}
+          onSortChange={onSortChange}
+          className={isMobile ? "w-full" : "w-48"}
+        />
       </div>
 
       <TaskStatusTabs
+        isMobile={isMobile}
         statusFilter={statusFilter}
         onStatusChange={onStatusChange}
         statusTabs={statusTabs}

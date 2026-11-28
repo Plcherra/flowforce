@@ -10,12 +10,14 @@ import type { StatusTabItem } from "../utils/statusTabLayout";
 import { translatedStatusHint, translatedStatusLabel } from "../utils/taskCopy";
 
 interface TaskStatusTabsProps {
+  isMobile?: boolean;
   statusFilter: TaskStatusFilter;
   onStatusChange: (value: TaskStatusFilter) => void;
   statusTabs: StatusTabItem[];
 }
 
 export function TaskStatusTabs({
+  isMobile = false,
   statusFilter,
   onStatusChange,
   statusTabs,
@@ -25,15 +27,21 @@ export function TaskStatusTabs({
     <Tabs
       value={statusFilter}
       onValueChange={(value) => onStatusChange(value as TaskStatusFilter)}
-      className="w-full"
+      className="w-full max-w-full overflow-hidden"
     >
-      <TabsList className="grid h-auto w-full grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1 bg-transparent p-0">
+      <TabsList
+        className={
+          isMobile
+            ? "flex h-auto max-w-full snap-x snap-mandatory gap-1.5 overflow-x-auto bg-transparent p-0 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            : "grid h-auto w-full grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1 bg-transparent p-0"
+        }
+      >
         {statusTabs.map((tab) => (
           <TabsTrigger
             key={tab.value}
             value={tab.value}
             title={translatedStatusHint(t, tab.value)}
-            className="flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-2 py-1 text-sm data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none"
+            className={`flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-2.5 py-1 text-sm data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none ${isMobile ? "shrink-0 snap-start" : ""}`}
             data-testid={`tasks-status-${tab.value}`}
           >
             <span>{translatedStatusLabel(t, tab.value, tab.label)}</span>

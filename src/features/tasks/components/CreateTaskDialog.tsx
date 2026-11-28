@@ -49,6 +49,7 @@ interface CreateTaskDialogProps {
   onClose: () => void;
   createLevel?: "self" | "others";
   scope?: TaskCreateScope | null;
+  onCreated?: (task: { id: string; title?: string | null }) => void;
 }
 
 export function CreateTaskDialog({
@@ -56,6 +57,7 @@ export function CreateTaskDialog({
   onClose,
   createLevel = "others",
   scope = null,
+  onCreated,
 }: CreateTaskDialogProps) {
   const { t } = useTranslation();
   const { createTask } = useTasks();
@@ -206,16 +208,14 @@ export function CreateTaskDialog({
           variant: "destructive",
         });
       } else {
-        toast({
-          title: t("tasks.taskCreated"),
-        });
-
-        // If user wants to create reminder, show reminder dialog
-        if (createReminder && newTask) {
-          setCreatedTaskId(newTask.id);
-          setShowReminderDialog(true);
+        toast({ title: t("tasks.taskCreated") });
+        if (newTask) {
+          onCreated?.({ id: newTask.id, title: newTask.title });
+          if (createReminder) {
+            setCreatedTaskId(newTask.id);
+            setShowReminderDialog(true);
+          }
         }
-
         handleDialogChange(false);
       }
     } catch (error) {

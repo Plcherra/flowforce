@@ -85,8 +85,7 @@ async function createTask(page: Page, title: string) {
 }
 
 async function expectTaskInList(page: Page, title: string) {
-  await page.getByTestId('tasks-mode-all').click();
-  await page.locator('#tasks-search').fill(title);
+  await expect(page.getByTestId('tasks-view-section')).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId('tasks-list').getByText(title, { exact: true })).toBeVisible({
     timeout: 20_000,
   });
