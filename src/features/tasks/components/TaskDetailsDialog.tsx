@@ -77,7 +77,6 @@ import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
 import { readTaskKind } from "@/features/tasks/utils/taskKind";
 import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
 import { useTaskCommentTranslations } from "@/features/tasks/hooks/useTaskCommentTranslations";
-import type { TaskContentTranslation } from "@/features/tasks/taskContentFields";
 import { executionContentPatch } from "@/features/tasks/utils/executionUpdate";
 
 type ButtonVariant = "default" | "secondary" | "outline";

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
 import { TaskCommentBody } from "@/features/tasks/components/TaskCommentBody";
 import type { TaskCommentWithUser } from "@/features/tasks/hooks/useTaskComments";
-import type { TaskContentTranslation } from "@/features/tasks/taskContentFields";
+import type { TaskCommentTranslation } from "@/features/tasks/taskCommentContent";
 
 type TaskDetailsCommentsPanelProps = {
   comments: TaskCommentWithUser[];
@@ -18,7 +18,7 @@ type TaskDetailsCommentsPanelProps = {
   onNewCommentChange: (value: string) => void;
   onAddComment: () => void;
   onRetry: () => void;
-  commentTranslations: Map<string, TaskContentTranslation | null>;
+  commentTranslations: Map<string, TaskCommentTranslation | null>;
 };
 
 export function TaskDetailsCommentsPanel({
