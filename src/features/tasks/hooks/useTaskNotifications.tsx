@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 import { subscribeTaskNotificationsRealtime } from "@/features/tasks/hooks/taskNotificationsRealtime";
@@ -30,6 +31,8 @@ export function useTaskNotifications() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const shopTimeZone = useShopTimeZone();
+  const { profile } = useProfile();
+  const companyId = profile?.company_id ?? profile?.companyId ?? null;
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [serviceError, setServiceError] = useState<string | null>(null);
@@ -83,7 +86,7 @@ export function useTaskNotifications() {
   }, [user?.id, toast]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !companyId) return;
 
     let isMounted = true;
 
@@ -131,9 +134,13 @@ export function useTaskNotifications() {
       clearInterval(interval);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- stable hook deps
-  }, [user?.id, shopTimeZone]);
+  }, [user?.id, companyId, shopTimeZone]);
 
   const checkDueTasks = async (userId: string) => {
+    if (!companyId) {
+      throw new Error("Company context required to check due tasks");
+    }
+
     const now = new Date();
     const lastDayIso = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
     const activeWithDue = await fetchActiveDueTasksForUser(userId);
@@ -151,6 +158,7 @@ export function useTaskNotifications() {
       if (!existing) {
         await createTaskNotification({
           user_id: userId,
+          company_id: companyId,
           task_id: task.id,
           type: "task_due_soon",
           title: t("tasks.notifyDueSoon"),
@@ -179,6 +187,7 @@ export function useTaskNotifications() {
       if (!existing) {
         await createTaskNotification({
           user_id: userId,
+          company_id: companyId,
           task_id: task.id,
           type: "task_overdue",
           title: t("tasks.notifyOverdue"),
@@ -240,8 +249,15 @@ export function useTaskNotifications() {
   };
 
   const createNotification = async (input: NewNotificationInput) => {
+    if (!companyId && !input.company_id) {
+      setServiceError(t("tasks.unableCreateNotification"));
+      return;
+    }
     try {
-      await createTaskNotification(input);
+      await createTaskNotification({
+        ...input,
+        company_id: input.company_id ?? companyId ?? undefined,
+      });
       await invalidateNotifications();
     } catch (error) {
       logger.error("Error creating notification:", { error, tags: ["error"] });

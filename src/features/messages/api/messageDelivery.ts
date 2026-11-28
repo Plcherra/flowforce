@@ -10,6 +10,18 @@ export async function notifyMessageRecipients(input: {
   senderName: string;
   content: string;
 }) {
+  const { data: channelRow, error: channelError } = await db
+    .from("message_channels")
+    .select("company_id")
+    .eq("id", input.channelId)
+    .maybeSingle();
+  if (channelError) throw channelError;
+
+  const companyId = channelRow?.company_id ?? null;
+  if (!companyId) {
+    throw new Error("Channel company is required for message notifications");
+  }
+
   const { data, error } = await db
     .from("channel_members")
     .select("user_id")
@@ -23,6 +35,7 @@ export async function notifyMessageRecipients(input: {
   const preview = input.content.trim().slice(0, PREVIEW_LIMIT);
   const { error: insertError } = await db.from("task_notifications").insert(
     recipients.map((userId) => ({
+      company_id: companyId,
       user_id: userId,
       task_id: null,
       type: "direct_message",

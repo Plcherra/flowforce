@@ -45,11 +45,6 @@
     "ticket": "FF-SPLIT-09"
   },
   {
-    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
-    "lines": 940,
-    "ticket": "FF-SPLIT-10"
-  },
-  {
     "path": "src/features/positions/components/PositionManagement.tsx",
     "lines": 940,
     "ticket": "FF-SPLIT-11"
@@ -98,6 +93,11 @@
     "path": "src/services/integrations/csvImportFramework.ts",
     "lines": 809,
     "ticket": "FF-SPLIT-20"
+  },
+  {
+    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
+    "lines": 804,
+    "ticket": "FF-SPLIT-10"
   },
   {
     "path": "src/services/analytics/businessAnalyticsService.ts",

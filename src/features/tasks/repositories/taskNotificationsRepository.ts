@@ -6,19 +6,22 @@ import { logger } from "@/utils/logger";
 
 type TaskNotificationRow = Tables<"task_notifications">;
 
-const notificationSchema = z
+export const taskNotificationSchema = z
   .object({
-    id: z.string(),
+    id: z.string().optional(),
     user_id: z.string(),
+    company_id: z.string().nullable().optional(),
     task_id: z.string().nullable(),
     title: z.string(),
     message: z.string(),
     type: z.string(),
-    metadata: z.unknown().nullable(), // Json type from database
-    read_at: z.string().nullable(),
-    created_at: z.string(),
+    metadata: z.unknown().nullable(),
+    read_at: z.string().nullable().optional(),
+    created_at: z.string().nullable().optional(),
   })
   .passthrough();
+
+const notificationSchema = taskNotificationSchema;
 
 const taskSummarySchema = z
   .object({

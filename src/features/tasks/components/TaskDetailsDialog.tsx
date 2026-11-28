@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, CheckCircle, MessageSquare, Send, Trash2 } from "lucide-react";
+import { Calendar, CheckCircle, MessageSquare, Send } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import {
@@ -53,9 +53,10 @@ import {
 } from "@/features/tasks/utils/taskAudience";
 import type { Json } from "@/integrations/supabase/public-types";
 import {
-  TaskDueByFields,
-  type TaskDueByValue,
-} from "@/features/tasks/components/TaskDueByFields";
+  TaskDetailsExecutionCard,
+  type TaskExecutionFormState,
+} from "@/features/tasks/components/TaskDetailsExecutionCard";
+import type { TaskDueByValue } from "@/features/tasks/components/TaskDueByFields";
 import { buildDuePayload } from "@/features/tasks/utils/taskDueTiming";
 import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
 import {
@@ -152,13 +153,13 @@ export function TaskDetailsDialog({
   const [editAudience, setEditAudience] = useState<TaskAudience>(parseTaskAudience(null));
   const [savingAudience, setSavingAudience] = useState(false);
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
-  const [executionForm, setExecutionForm] = useState({
+  const [executionForm, setExecutionForm] = useState<TaskExecutionFormState>({
     title: "",
     description: "",
     priority: "medium",
     starts_at: "",
     ends_at: "",
-    publish_state: "published" as TaskPublishState,
+    publish_state: "published",
   });
   const [savingExecution, setSavingExecution] = useState(false);
   const [dueBy, setDueBy] = useState<TaskDueByValue>({
@@ -204,7 +205,7 @@ export function TaskDetailsDialog({
       ends_at: toDatetimeLocalValue(schedule.endsAt),
       publish_state: schedule.publishState,
     });
-  setDueBy(readDueByFormState(task, shopTimeZone));
+    setDueBy(readDueByFormState(task, shopTimeZone));
   }, [currentTask, shopTimeZone]);
 
   const handleSaveExecution = async () => {
@@ -622,158 +623,21 @@ export function TaskDetailsDialog({
           </div>
 
           {canEdit ? (
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <CardTitle className="text-base">{t("tasks.executionControls")}</CardTitle>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="min-h-11 gap-2 text-destructive hover:text-destructive"
-                  onClick={handleDeleteTask}
-                  disabled={deletingTask}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {deletingTask ? t("tasks.deleting") : t("tasks.delete")}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="space-y-2 sm:col-span-2 lg:col-span-4">
-                <Label htmlFor="task-title">{t("tasks.taskTitle")}</Label>
-                <Input
-                  id="task-title"
-                  value={executionForm.title}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({ ...prev, title: event.target.value }))
-                  }
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2 lg:col-span-4">
-                <Label htmlFor="task-description">{t("tasks.description")}</Label>
-                <Textarea
-                  id="task-description"
-                  rows={3}
-                  value={executionForm.description}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      description: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  {t("tasks.priority")}
-                </Label>
-                <Select
-                  value={executionForm.priority}
-                  onValueChange={(value) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      priority: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("tasks.priority")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">{t("tasks.low")}</SelectItem>
-                    <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
-                    <SelectItem value="high">{t("tasks.high")}</SelectItem>
-                    <SelectItem value="urgent">{t("tasks.urgent")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="task-starts-at"
-                  className="text-xs font-semibold uppercase text-muted-foreground"
-                >
-                  {t("tasks.starts")}
-                </Label>
-                <Input
-                  id="task-starts-at"
-                  type="datetime-local"
-                  value={executionForm.starts_at}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      starts_at: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="task-ends-at"
-                  className="text-xs font-semibold uppercase text-muted-foreground"
-                >
-                  {t("tasks.ends")}
-                </Label>
-                <Input
-                  id="task-ends-at"
-                  type="datetime-local"
-                  value={executionForm.ends_at}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      ends_at: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  {t("tasks.publish")}
-                </Label>
-                <Select
-                  value={executionForm.publish_state}
-                  onValueChange={(value) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      publish_state: value as TaskPublishState,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("tasks.publish")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="published">{t("tasks.publishNow")}</SelectItem>
-                    <SelectItem value="scheduled">{t("tasks.scheduleForTheStart")}</SelectItem>
-                    <SelectItem value="draft">{t("tasks.draft")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="sm:col-span-2 lg:col-span-4">
-                <TaskDueByFields
-                  idPrefix="task-details"
-                  value={dueBy}
-                  timeZone={shopTimeZone}
-                  onChange={setDueBy}
-                />
-              </div>
-
-              <div className="flex justify-stretch sm:col-span-2 sm:justify-end lg:col-span-4">
-                <Button
-                  type="button"
-                  className="min-h-11 w-full sm:w-auto"
-                  onClick={handleSaveExecution}
-                  disabled={savingExecution}
-                >
-                  {savingExecution ? t("tasks.saving") : t("tasks.saveExecutionDetails")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            <TaskDetailsExecutionCard
+              executionForm={executionForm}
+              onExecutionFormChange={setExecutionForm}
+              dueBy={dueBy}
+              onDueByChange={setDueBy}
+              shopTimeZone={shopTimeZone}
+              onSave={() => {
+                void handleSaveExecution();
+              }}
+              savingExecution={savingExecution}
+              onDelete={() => {
+                void handleDeleteTask();
+              }}
+              deletingTask={deletingTask}
+            />
           ) : null}
 
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
