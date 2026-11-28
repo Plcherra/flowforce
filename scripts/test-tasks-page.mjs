@@ -37,6 +37,9 @@ const { runHandoverTaskTests } = importTs(
 const { runTaskScheduleTests } = importTs(
   "../src/features/tasks/utils/taskSchedule.test.ts",
 );
+const { runTaskDueTimingTests } = importTs(
+  "../src/features/tasks/utils/taskDueTiming.test.ts",
+);
 const { runTomorrowShiftTests } = importTs(
   "../src/features/scheduling/utils/tomorrowShift.test.ts",
 );
@@ -48,6 +51,9 @@ const { runExecutionUpdateTests } = importTs(
 );
 const { runTaskStatusTransitionTests } = importTs(
   "../src/features/tasks/utils/taskStatusTransitions.test.ts",
+);
+const { runUseTaskCommentsEffectDepTests } = importTs(
+  "../src/features/tasks/hooks/useTaskComments.test.ts",
 );
 const { runTaskNotificationSchemaTests } = importTs(
   "../src/features/tasks/repositories/taskNotificationsRepository.test.ts",
@@ -170,10 +176,12 @@ runTaskKindTests();
 runTaskCreateLevelTests();
 runHandoverTaskTests();
 runTaskScheduleTests();
+runTaskDueTimingTests();
 runTomorrowShiftTests();
 runTaskCreateAccessTests();
 runExecutionUpdateTests();
 runTaskStatusTransitionTests();
+runUseTaskCommentsEffectDepTests();
 runTaskNotificationSchemaTests();
 runListIssueTests();
 runTaskPointsTotalTests();

@@ -6037,6 +6037,7 @@ export type Database = {
           department_id: string | null
           description: string | null
           due_date: string | null
+          due_at: string | null
           estimated_hours: number | null
           goal_id: string | null
           id: string
@@ -6065,6 +6066,7 @@ export type Database = {
           department_id?: string | null
           description?: string | null
           due_date?: string | null
+          due_at?: string | null
           estimated_hours?: number | null
           goal_id?: string | null
           id?: string
@@ -6093,6 +6095,7 @@ export type Database = {
           department_id?: string | null
           description?: string | null
           due_date?: string | null
+          due_at?: string | null
           estimated_hours?: number | null
           goal_id?: string | null
           id?: string

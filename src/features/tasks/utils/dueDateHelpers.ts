@@ -2,54 +2,59 @@
  * Utility functions for task due dates
  */
 
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 import type { DueBadge } from "../types/filters";
 import { normalizeStatus } from "./normalization";
+import {
+  DEFAULT_SHOP_TIMEZONE,
+  isTaskOverdue,
+  resolveTaskDueInstant,
+  shopCalendarYmd,
+  type TaskDueShape,
+} from "./taskDueTiming";
 
 /**
  * Calculate due badge for a task
  */
 export function calculateDueBadge(
-  task: {
-    due_date?: string | null;
-    status?: string | null;
-  },
+  task: TaskDueShape & { status?: string | null },
+  timeZone: string = DEFAULT_SHOP_TIMEZONE,
   now: Date = new Date(),
 ): DueBadge | null {
-  if (!task?.due_date) return null;
+  if (!task?.due_date && !task?.due_at) return null;
 
-  const dueDate = new Date(task.due_date);
   const normalizedStatus = normalizeStatus(task.status);
 
-  // Treat both 'done' and 'completed' as completed states
   if (normalizedStatus === "done" || normalizedStatus === "completed") {
     return {
       label: "Completed",
-      className:
-        "bg-success-muted text-success",
+      className: "bg-success-muted text-success",
     };
   }
 
-  if (dueDate < now) {
+  if (isTaskOverdue(task, timeZone, now)) {
     return {
       label: "Overdue",
       className: "bg-destructive/10 text-destructive",
     };
   }
 
-  const daysRemaining = differenceInDays(dueDate, now);
+  const dueInstant = resolveTaskDueInstant(task, timeZone);
+  if (!dueInstant) return null;
+
+  const dueDay = new Date(`${shopCalendarYmd(dueInstant, timeZone)}T12:00:00`);
+  const today = new Date(`${shopCalendarYmd(now, timeZone)}T12:00:00`);
+  const daysRemaining = differenceInCalendarDays(dueDay, today);
 
   if (daysRemaining <= 2) {
     return {
       label: "Due Soon",
-      className:
-        "bg-warning-muted text-warning-foreground",
+      className: "bg-warning-muted text-warning-foreground",
     };
   }
 
   return {
-    label: `Due ${format(dueDate, "MMM dd")}`,
-    className:
-      "bg-muted text-muted-foreground",
+    label: `Due ${format(dueInstant, "MMM dd")}`,
+    className: "bg-muted text-muted-foreground",
   };
 }

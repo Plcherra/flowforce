@@ -44,6 +44,8 @@ import { TodayShiftMonitor } from "@/features/tasks/components/TodayShiftMonitor
 import { TasksBoardSwitch } from "@/features/tasks/components/TasksBoardSwitch";
 import { useMyShiftBoard } from "@/features/tasks/hooks/useMyShiftBoard";
 import { useTaskAssigneeScope } from "@/features/tasks/hooks/useTaskAssigneeScope";
+import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
+import { compareTaskDue } from "@/features/tasks/utils/taskDueTiming";
 
 const CreateTaskDialog = lazy(() =>
   import("@/features/tasks/components/CreateTaskDialog").then((module) => ({
@@ -87,6 +89,7 @@ export default function Tasks() {
   const canSeeTeam =
     !permissionsLoading && (can("viewTeamTasks") || can("editTasks"));
   const { user } = useAuth();
+  const shopTimeZone = useShopTimeZone();
   const { tasks: tasksData, loading, error, refetchTasks, updateStatus } = useTasks();
   const tasks = useMemo(
     () => asArray(tasksData) as TaskListItem[],
@@ -162,14 +165,20 @@ export default function Tasks() {
     [visibleTasks, statusFilter, priorityFilter, searchTerm, kindFilter],
   );
 
-  const listedTasks = useMemo(
-    () => applyReadinessFilter(filteredTasks, readinessFilter),
-    [filteredTasks, readinessFilter],
-  );
+  const listedTasks = useMemo(() => {
+    const filtered = applyReadinessFilter(
+      filteredTasks,
+      readinessFilter,
+      shopTimeZone,
+    );
+    return [...filtered].sort((left, right) =>
+      compareTaskDue(left, right, shopTimeZone),
+    );
+  }, [filteredTasks, readinessFilter, shopTimeZone]);
 
   const viewReadinessCounts = useMemo(
-    () => readinessCounts(statusScopedTasks),
-    [statusScopedTasks],
+    () => readinessCounts(statusScopedTasks, shopTimeZone),
+    [statusScopedTasks, shopTimeZone],
   );
 
   const handleResetFilters = () => {
@@ -309,7 +318,7 @@ export default function Tasks() {
         ) : (
           <div data-testid="tasks-list" className="space-y-4">
             {listedTasks.map((task) => {
-              const dueBadge = calculateDueBadge(task);
+              const dueBadge = calculateDueBadge(task, shopTimeZone);
               const selectionHandlers = getSelectionHandlers(task.id);
 
               return (
@@ -320,6 +329,7 @@ export default function Tasks() {
                   highlighted={highlightedTaskId === task.id}
                   selectionHandlers={selectionHandlers}
                   translation={translations.get(task.id) ?? null}
+                  timeZone={shopTimeZone}
                   onFillForm={setOpenFormId}
                   onComplete={(taskId) => {
                     void updateStatus(taskId, "completed");

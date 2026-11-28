@@ -10,8 +10,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, CheckCircle, MessageSquare, Send, Trash2 } from "lucide-react";
+import { Calendar, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import {
@@ -52,6 +50,18 @@ import {
   type TaskAudience,
 } from "@/features/tasks/utils/taskAudience";
 import type { Json } from "@/integrations/supabase/public-types";
+import {
+  TaskDetailsExecutionCard,
+  type TaskExecutionFormState,
+} from "@/features/tasks/components/TaskDetailsExecutionCard";
+import type { TaskDueByValue } from "@/features/tasks/components/TaskDueByFields";
+import { buildDuePayload } from "@/features/tasks/utils/taskDueTiming";
+import { useShopTimeZone } from "@/features/tasks/hooks/useShopTimeZone";
+import {
+  formatTaskDueLabel,
+  readDueByFormState,
+} from "@/features/tasks/utils/formatTaskDue";
+import { appLanguageFromTag } from "@/i18n/resolveLanguage";
 import { useTaskComments } from "@/features/tasks/hooks";
 import {
   dueDateFromWindowEnd,
@@ -61,12 +71,11 @@ import {
   toDatetimeLocalValue,
   type TaskPublishState,
 } from "@/features/tasks/utils/taskSchedule";
-import { CommentsSkeleton } from "@/components/loading/TaskSkeletons";
+import { TaskDetailsCommentsPanel } from "@/features/tasks/components/TaskDetailsCommentsPanel";
 import { logger } from "@/utils/logger";
 import { readScheduleTaskLink } from "@/features/tasks/utils/scheduleTaskLink";
 import { readTaskKind } from "@/features/tasks/utils/taskKind";
 import { useFormContentDisplay } from "@/features/forms/components/FormContentText";
-import { TaskCommentBody } from "@/features/tasks/components/TaskCommentBody";
 import { useTaskCommentTranslations } from "@/features/tasks/hooks/useTaskCommentTranslations";
 import type { TaskContentTranslation } from "@/features/tasks/taskContentFields";
 import { executionContentPatch } from "@/features/tasks/utils/executionUpdate";
@@ -113,7 +122,9 @@ export function TaskDetailsDialog({
   translation = null,
   onFillForm,
 }: TaskDetailsDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const shopTimeZone = useShopTimeZone();
+  const language = appLanguageFromTag(i18n.language);
   const { user } = useAuth();
   const { can } = useCan();
   const canEdit = can("editTasks");
@@ -139,18 +150,29 @@ export function TaskDetailsDialog({
   const [editAudience, setEditAudience] = useState<TaskAudience>(parseTaskAudience(null));
   const [savingAudience, setSavingAudience] = useState(false);
   const [updatingAssignment, setUpdatingAssignment] = useState(false);
-  const [executionForm, setExecutionForm] = useState({
+  const [executionForm, setExecutionForm] = useState<TaskExecutionFormState>({
     title: "",
     description: "",
     priority: "medium",
     starts_at: "",
     ends_at: "",
-    publish_state: "published" as TaskPublishState,
+    publish_state: "published",
   });
   const [savingExecution, setSavingExecution] = useState(false);
+  const [dueBy, setDueBy] = useState<TaskDueByValue>({
+    enabled: false,
+    dateYmd: "",
+    timeHm: "",
+  });
   const [deletingTask, setDeletingTask] = useState(false);
-  const { comments, loadingComments, addingComment, submitComment } =
-    useTaskComments(currentTask, open);
+  const {
+    comments,
+    loadingComments,
+    commentsError,
+    addingComment,
+    submitComment,
+    refreshComments,
+  } = useTaskComments(currentTask, open);
   const commentTranslations = useTaskCommentTranslations(comments);
   const display = useFormContentDisplay({
     recordId: currentTask?.id,
@@ -186,7 +208,8 @@ export function TaskDetailsDialog({
       ends_at: toDatetimeLocalValue(schedule.endsAt),
       publish_state: schedule.publishState,
     });
-  }, [currentTask]);
+    setDueBy(readDueByFormState(task, shopTimeZone));
+  }, [currentTask, shopTimeZone]);
 
   const handleSaveExecution = async () => {
     if (!currentTask) return;
@@ -214,15 +237,31 @@ export function TaskDetailsDialog({
       return;
     }
 
+    if (dueBy.enabled && (!dueBy.dateYmd.trim() || !dueBy.timeHm.trim())) {
+      toast({
+        title: t("tasks.dueByIncomplete"),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSavingExecution(true);
     try {
+      const dueFields = buildDuePayload({
+        dueByEnabled: dueBy.enabled,
+        dueByDate: dueBy.dateYmd,
+        dueByTime: dueBy.timeHm,
+        timeZone: shopTimeZone,
+        windowDueDate: dueDateFromWindowEnd(endsAt),
+      });
       const { data, error } = await updateTask(currentTask.id, {
         ...executionContentPatch(currentTask, {
           title: executionForm.title,
           description: executionForm.description,
         }),
         priority: executionForm.priority,
-        due_date: dueDateFromWindowEnd(endsAt),
+        due_date: dueFields.due_date,
+        due_at: dueFields.due_at,
         links: mergeTaskSchedule(currentTask.links, {
           startsAt,
           endsAt,
@@ -587,149 +626,21 @@ export function TaskDetailsDialog({
           </div>
 
           {canEdit ? (
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <CardTitle className="text-base">{t("tasks.executionControls")}</CardTitle>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="min-h-11 gap-2 text-destructive hover:text-destructive"
-                  onClick={handleDeleteTask}
-                  disabled={deletingTask}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {deletingTask ? t("tasks.deleting") : t("tasks.delete")}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="space-y-2 sm:col-span-2 lg:col-span-4">
-                <Label htmlFor="task-title">{t("tasks.taskTitle")}</Label>
-                <Input
-                  id="task-title"
-                  value={executionForm.title}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({ ...prev, title: event.target.value }))
-                  }
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2 lg:col-span-4">
-                <Label htmlFor="task-description">{t("tasks.description")}</Label>
-                <Textarea
-                  id="task-description"
-                  rows={3}
-                  value={executionForm.description}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      description: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  {t("tasks.priority")}
-                </Label>
-                <Select
-                  value={executionForm.priority}
-                  onValueChange={(value) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      priority: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("tasks.priority")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">{t("tasks.low")}</SelectItem>
-                    <SelectItem value="medium">{t("tasks.medium")}</SelectItem>
-                    <SelectItem value="high">{t("tasks.high")}</SelectItem>
-                    <SelectItem value="urgent">{t("tasks.urgent")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="task-starts-at"
-                  className="text-xs font-semibold uppercase text-muted-foreground"
-                >
-                  {t("tasks.starts")}
-                </Label>
-                <Input
-                  id="task-starts-at"
-                  type="datetime-local"
-                  value={executionForm.starts_at}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      starts_at: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="task-ends-at"
-                  className="text-xs font-semibold uppercase text-muted-foreground"
-                >
-                  {t("tasks.ends")}
-                </Label>
-                <Input
-                  id="task-ends-at"
-                  type="datetime-local"
-                  value={executionForm.ends_at}
-                  onChange={(event) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      ends_at: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase text-muted-foreground">
-                  {t("tasks.publish")}
-                </Label>
-                <Select
-                  value={executionForm.publish_state}
-                  onValueChange={(value) =>
-                    setExecutionForm((prev) => ({
-                      ...prev,
-                      publish_state: value as TaskPublishState,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("tasks.publish")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="published">{t("tasks.publishNow")}</SelectItem>
-                    <SelectItem value="scheduled">{t("tasks.scheduleForTheStart")}</SelectItem>
-                    <SelectItem value="draft">{t("tasks.draft")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex justify-stretch sm:col-span-2 sm:justify-end lg:col-span-4">
-                <Button
-                  type="button"
-                  className="min-h-11 w-full sm:w-auto"
-                  onClick={handleSaveExecution}
-                  disabled={savingExecution}
-                >
-                  {savingExecution ? t("tasks.saving") : t("tasks.saveExecutionDetails")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            <TaskDetailsExecutionCard
+              executionForm={executionForm}
+              onExecutionFormChange={setExecutionForm}
+              dueBy={dueBy}
+              onDueByChange={setDueBy}
+              shopTimeZone={shopTimeZone}
+              onSave={() => {
+                void handleSaveExecution();
+              }}
+              savingExecution={savingExecution}
+              onDelete={() => {
+                void handleDeleteTask();
+              }}
+              deletingTask={deletingTask}
+            />
           ) : null}
 
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
@@ -790,15 +701,15 @@ export function TaskDetailsDialog({
             </div>
 
             <div className="space-y-3">
-              {currentTask.due_date && (
+              {currentTask.due_date || currentTask.due_at ? (
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">{t("tasks.due")}</span>
                   <span>
-                    {format(new Date(currentTask.due_date), "MMM dd, yyyy")}
+                    {formatTaskDueLabel(currentTask, t, language, shopTimeZone)}
                   </span>
                 </div>
-              )}
+              ) : null}
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{t("tasks.created")}</span>
@@ -830,65 +741,21 @@ export function TaskDetailsDialog({
 
           <Separator />
 
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">{t("tasks.comments")}</h3>
-            </div>
-
-            <div className="space-y-2">
-              <Textarea
-                placeholder={t("tasks.addAComment")}
-                value={newComment}
-                onChange={(event) => setNewComment(event.target.value)}
-                rows={3}
-              />
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleAddComment}
-                  disabled={!newComment.trim() || addingComment}
-                  size="sm"
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  {addingComment ? t("tasks.adding") : t("tasks.addComment")}
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {loadingComments ? (
-                <CommentsSkeleton />
-              ) : comments.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  {t("tasks.noCommentsYetBeTheFirstToAdd")}
-                </div>
-              ) : (
-                comments.map((comment) => (
-                  <Card key={comment.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-medium">
-                          {comment.user?.first_name} {comment.user?.last_name}
-                        </CardTitle>
-                        <span className="text-xs text-muted-foreground">
-                          {format(
-                            new Date(comment.created_at),
-                            "MMM dd, yyyy HH:mm",
-                          )}
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <TaskCommentBody
-                        comment={comment.comment}
-                        translation={commentTranslations.get(comment.id) ?? null}
-                      />
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
+          <TaskDetailsCommentsPanel
+            comments={comments}
+            loadingComments={loadingComments}
+            commentsError={commentsError}
+            addingComment={addingComment}
+            newComment={newComment}
+            onNewCommentChange={setNewComment}
+            onAddComment={() => {
+              void handleAddComment();
+            }}
+            onRetry={() => {
+              void refreshComments();
+            }}
+            commentTranslations={commentTranslations}
+          />
         </div>
       </DialogContent>
     </Dialog>

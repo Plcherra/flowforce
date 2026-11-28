@@ -4,92 +4,98 @@ import {
   applyReadinessFilter,
   readinessCounts,
 } from "./readinessFilters";
+import { dueAtFromShopLocal } from "./taskDueTiming";
 
 export function runReadinessFilterTests() {
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+  const tz = "UTC";
+  const today = new Date("2026-05-10T12:00:00.000Z");
+  const dueAtPast = dueAtFromShopLocal("2026-05-10", "08:00", tz)!;
+  const dueAtLater = dueAtFromShopLocal("2026-05-10", "18:00", tz)!;
 
   const tasks = [
     {
-      id: "overdue",
+      id: "overdue-date",
       status: "todo",
-      due_date: yesterday.toISOString(),
+      due_date: "2026-05-09",
+      due_at: null,
       assigned_to: "person",
     },
     {
-      id: "due",
+      id: "overdue-time",
       status: "in_progress",
-      due_date: today.toISOString(),
+      due_date: "2026-05-10",
+      due_at: dueAtPast,
+      assigned_to: null,
+    },
+    {
+      id: "due-today",
+      status: "todo",
+      due_date: "2026-05-10",
+      due_at: dueAtLater,
       assigned_to: null,
     },
     {
       id: "done-past",
       status: "completed",
-      due_date: yesterday.toISOString(),
+      due_date: "2026-05-09",
+      due_at: null,
       assigned_to: null,
     },
     {
       id: "later",
       status: "todo",
-      due_date: tomorrow.toISOString(),
+      due_date: "2026-05-12",
+      due_at: null,
       assigned_to: "person",
     },
     {
       id: "cancelled",
       status: "cancelled",
-      due_date: today.toISOString(),
+      due_date: "2026-05-10",
+      due_at: null,
       assigned_to: null,
     },
   ];
 
-  const counts = readinessCounts(tasks);
-  assert.equal(counts.overdue, 1);
+  const counts = readinessCounts(tasks, tz, today);
+  assert.equal(counts.overdue, 2);
   assert.equal(counts.due, 1);
-  assert.equal(counts.unassigned, 3);
+  assert.equal(counts.unassigned, 4);
 
-  const overdue = applyReadinessFilter(tasks, "overdue");
+  const overdue = applyReadinessFilter(tasks, "overdue", tz, today);
   assert.deepEqual(
     overdue.map((task) => task.id),
-    ["overdue"],
+    ["overdue-date", "overdue-time"],
   );
 
-  const due = applyReadinessFilter(tasks, "due");
-  assert.deepEqual(
-    due.map((task) => task.id),
-    ["due"],
-  );
+  const due = applyReadinessFilter(tasks, "due", tz, today);
+  assert.deepEqual(due.map((task) => task.id), ["due-today"]);
 
-  assert.equal(applyReadinessFilter(tasks, null).length, tasks.length);
-  assert.equal(applyReadinessFilter(overdue, null).length, 1);
+  assert.equal(applyReadinessFilter(tasks, null, tz, today).length, tasks.length);
 
   const doneOnly = tasks.filter((task) => task.status === "completed");
-  assert.equal(readinessCounts(doneOnly).overdue, 0);
-  assert.equal(readinessCounts(doneOnly).due, 0);
-  assert.equal(readinessCounts(doneOnly).unassigned, 1);
+  assert.equal(readinessCounts(doneOnly, tz, today).overdue, 0);
+  assert.equal(readinessCounts(doneOnly, tz, today).due, 0);
+  assert.equal(readinessCounts(doneOnly, tz, today).unassigned, 1);
   assert.equal(
-    readinessCounts([
-      {
-        id: "shared",
-        status: "todo",
-        due_date: null,
-        assigned_to: null,
-        links: { assignee_ids: ["ada", "ben"] },
-      },
-    ]).unassigned,
+    readinessCounts(
+      [
+        {
+          id: "shared",
+          status: "todo",
+          due_date: null,
+          due_at: null,
+          assigned_to: null,
+          links: { assignee_ids: ["ada", "ben"] },
+        },
+      ],
+      tz,
+      today,
+    ).unassigned,
     0,
   );
 
-  assert.equal(
-    READINESS_DEFINITIONS.overdue,
-    "The due date is before today, and the task is not done or cancelled.",
-  );
+  assert.match(READINESS_DEFINITIONS.overdue, /due time/i);
   assert.equal(READINESS_DEFINITIONS.unassigned, "Nobody is assigned.");
-  assert.equal(
-    READINESS_DEFINITIONS.due,
-    "The due date is today, and the task is not done or cancelled.",
-  );
+  assert.match(READINESS_DEFINITIONS.due, /today/i);
 }

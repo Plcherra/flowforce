@@ -60,11 +60,6 @@
     "ticket": "FF-SPLIT-13"
   },
   {
-    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
-    "lines": 896,
-    "ticket": "FF-SPLIT-10"
-  },
-  {
     "path": "scripts/smoke-visible-modules.mjs",
     "lines": 894,
     "ticket": "FF-SPLIT-14"
@@ -108,6 +103,11 @@
     "path": "src/features/inventory/components/expenses/ManagerFinancialOverview.tsx",
     "lines": 767,
     "ticket": "FF-SPLIT-24"
+  },
+  {
+    "path": "src/features/tasks/components/TaskDetailsDialog.tsx",
+    "lines": 763,
+    "ticket": "FF-SPLIT-10"
   },
   {
     "path": "src/services/performance/performanceService.ts",
@@ -325,14 +325,14 @@
     "ticket": "FF-SPLIT-66"
   },
   {
-    "path": "src/features/tasks/components/CreateTaskDialog.tsx",
-    "lines": 529,
-    "ticket": "FF-SPLIT-67"
-  },
-  {
     "path": "src/features/scheduling/components/ScheduleRemindersPanel.tsx",
     "lines": 523,
     "ticket": "FF-SPLIT-68"
+  },
+  {
+    "path": "src/features/tasks/components/CreateTaskDialog.tsx",
+    "lines": 504,
+    "ticket": "FF-SPLIT-67"
   },
   {
     "path": "src/features/inventory/hooks/useInventoryCounts.tsx",

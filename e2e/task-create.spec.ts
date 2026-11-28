@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { deleteTaskFromList } from './helpers/taskCleanup';
 import { missingE2eEnv } from './required-env';
 
 /**
@@ -91,46 +92,3 @@ async function expectTaskInList(page: Page, title: string) {
   });
 }
 
-async function deleteTaskFromList(page: Page, title: string) {
-  if (!page.url().includes('/app/tasks')) {
-    await page.goto('/app/tasks');
-  }
-  await expect(page.getByTestId('tasks-page')).toBeVisible();
-  await page.getByTestId('tasks-mode-all').click();
-  await page.locator('#tasks-search').fill(title);
-
-  const card = page.getByTestId('tasks-list').getByRole('button', { name: title });
-  const visible = await card
-    .waitFor({ state: 'visible', timeout: 10_000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!visible) return;
-
-  // The details dialog is lazy-loaded. The first click in dev can spend the
-  // default expect timeout compiling that chunk, so retry the open.
-  const dialog = page.getByRole('dialog');
-  let opened = false;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    await card.click();
-    opened = await dialog
-      .waitFor({ state: 'visible', timeout: 20_000 })
-      .then(() => true)
-      .catch(() => false);
-    if (opened) break;
-  }
-  if (!opened) {
-    throw new Error('Task details dialog did not open');
-  }
-
-  const deleteButton = dialog.locator('button.text-destructive');
-  if ((await deleteButton.count()) === 0) {
-    await page.keyboard.press('Escape');
-    return;
-  }
-
-  page.once('dialog', (confirm) => {
-    void confirm.accept();
-  });
-  await deleteButton.click();
-  await expect(card).toHaveCount(0, { timeout: 20_000 });
-}
